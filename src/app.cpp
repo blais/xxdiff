@@ -135,6 +135,7 @@ enum MenuIds {
    ID_ToggleToolbar,
    ID_ToggleLineNumbers,
    ID_ToggleVerticalLine,
+   ID_ToggleHorizNullMarkers,
    ID_ToggleOverview,
    ID_ToggleShowFilenames,
    ID_Hordiff_None,
@@ -241,8 +242,9 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    QApplication( argc, argv ),
 #endif
    _isUICreated( false ),
+   _dontShow( false ),
    _returnValue( 0 ),
-   _diffErrorsMsgBox( 0 ),
+   _mainWindow( 0 ),
    _paneMergedView( 0 ),
    _popupMergedView( 0 ),
    _searchDialog( 0 ),
@@ -323,79 +325,78 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       _resources->setCommand( XxCommand(ii), cmd );
    }
 
-   // Create the interface.
-   createUI();
-
-   // Add some context help.
-   createOnContextHelp();
-
-   // Synchronize the created UI with the resources.
-   synchronizeUI();
+   bool succ = false;
 
    if ( _nbFiles != 0 ) {
 
-      // Note: perhaps this should be replaced by a simple call to onRedoDiff().
-      if ( _cmdline._unmerge == false && _cmdline._single == false ) {
-         for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-            std::auto_ptr<XxBuffer> newbuf(
-               readFile( ii,
-                         filenames[ii],
-                         displayFilenames[ii],
-                         fileInfos[ii],
-                         isTemporary[ii] )
-            );
-            _files[ii] = newbuf;
+      try {
+         // Note: perhaps this should be replaced by a simple call to
+         // onRedoDiff().
+         if ( _cmdline._unmerge == false && _cmdline._single == false ) {
+            for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+               std::auto_ptr<XxBuffer> newbuf(
+                  readFile( ii,
+                            filenames[ii],
+                            displayFilenames[ii],
+                            fileInfos[ii],
+                            isTemporary[ii] )
+               );
+               _files[ii] = newbuf;
+            }
          }
-      }
-      else if ( _cmdline._single == true ) {
+         else if ( _cmdline._single == true ) {
 
-         // Read the one single file.
-         std::auto_ptr<XxBuffer> newbuf(
-            readFile( 0,
-                      filenames[0],
-                      displayFilenames[0],
-                      fileInfos[0],
-                      isTemporary[0] )
-         );
-         _files[0] = newbuf;
+            // Read the one single file.
+            std::auto_ptr<XxBuffer> newbuf(
+               readFile( 0,
+                         filenames[0],
+                         displayFilenames[0],
+                         fileInfos[0],
+                         isTemporary[0] )
+            );
+            _files[0] = newbuf;
 
-         // Make an empty buffer.
-         std::auto_ptr<XxBuffer> emptybuf(
-            new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
-         );
-         _files[1] = emptybuf;
+            // Make an empty buffer.
+            std::auto_ptr<XxBuffer> emptybuf(
+               new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
+            );
+            _files[1] = emptybuf;
+         }
+         else {
+            std::auto_ptr<XxBuffer> newbuf(
+               readFile( 0,
+                         filenames[0],
+                         displayFilenames[0],
+                         fileInfos[0],
+                         isTemporary[0] )
+            );
+            _files[0] = newbuf;
 
-      }
-      else {
-         std::auto_ptr<XxBuffer> newbuf(
-            readFile( 0,
-                      filenames[0],
-                      displayFilenames[0],
-                      fileInfos[0],
-                      isTemporary[0] )
-         );
-         _files[0] = newbuf;
-
-         // Make a proxy for the other buffer.
-         std::auto_ptr<XxBuffer> newbuf2(
-            new XxBuffer(
-               (*_files[0]), filenames[0], displayFilenames[0], fileInfos[0]
-            )
-         );
-         _files[1] = newbuf2;
-
-         if ( _cmdline._unmergeNbFiles == 3 ) {
             // Make a proxy for the other buffer.
             std::auto_ptr<XxBuffer> newbuf2(
                new XxBuffer(
                   (*_files[0]), filenames[0], displayFilenames[0], fileInfos[0]
                )
             );
-            _files[2] = newbuf2;
+            _files[1] = newbuf2;
+
+            if ( _cmdline._unmergeNbFiles == 3 ) {
+               // Make a proxy for the other buffer.
+               std::auto_ptr<XxBuffer> newbuf2(
+                  new XxBuffer(
+                     (*_files[0]), filenames[0], 
+                     displayFilenames[0], fileInfos[0]
+                  )
+               );
+               _files[2] = newbuf2;
+            }
          }
       }
-
-      bool succ = processDiff();
+      catch ( const std::exception& ex ) {
+         throw XxIoError( XX_EXC_PARAMS, "Error opening input file." );
+      }
+      
+      succ = processDiff();
 
       // Here we just finished reading all the files and processing the diffs,
       // we're ready to run without the input files at all. Spit out a note
@@ -404,16 +405,9 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
          std::cout << "INPUT-PROCESSED" << std::endl << std::flush;
       }
 
-      // Adjust UI elements
-      // Set filename label.
-      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-         if ( _files[ii].get() != 0 ) {
-            _central->setFilename( ii, _files[ii]->getDisplayName() );
-         }
-      }
-
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
+
          if ( !_filesAreDirectories &&
               _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
             _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
@@ -421,6 +415,24 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
    }
+
+   // Create the interface.
+   createUI();
+
+   if ( succ == true ) {
+      // Set filename label.
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+         if ( _files[ii].get() != 0 ) {
+            _central->setFilename( ii, _files[ii]->getDisplayName() );
+         }
+      }
+   }
+
+   // Add some context help.
+   createOnContextHelp();
+
+   // Synchronize the created UI with the resources.
+   synchronizeUI();
 
    // Resize and show/hide line numbers.
    adjustLineNumbers();
@@ -482,11 +494,6 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
             _mainWindow->move( psize.topLeft() );
          }
       }
-   }
-
-   if ( _diffErrorsMsgBox != 0 ) {
-      _diffErrorsMsgBox->show();
-      _diffErrorsMsgBox = 0; // forget about it, it'll get sad and suicide.
    }
 
    if ( !_dontShow ) {
@@ -1587,6 +1594,11 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_TOGGLE_VERTICAL_LINE )
       );
 
+      _menuids[ ID_ToggleHorizNullMarkers ] = _displayMenu->insertItem(
+         "Horizontal Null Markers", this, SLOT(toggleHorizNullMarkers()),
+         _resources->getAccelerator( ACCEL_TOGGLE_NULL_HORIZONTAL_MARKERS )
+      );
+
    }
    else {
       _menuids[ ID_ToggleDirDiffsIgnoreFileChanges ] = _displayMenu->insertItem(
@@ -1736,6 +1748,9 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
    bool             isTemporary
 )
 {
+   static int FIXME = 0;
+   FIXME += 1;
+
    XX_ASSERT( 0 <= no && no <= 2 );
    XX_ASSERT( filename && displayFilename );
 
@@ -1743,7 +1758,8 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
    // Read in the file.
    //
    std::auto_ptr<XxBuffer> newbuf;
-   try {
+
+   {
       if ( _filesAreDirectories &&
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
@@ -1767,12 +1783,6 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
          newbuf = tmp;
       }
    }
-   catch ( const std::exception& ex ) {
-      QString str;
-      QTextOStream oss( &str );
-      oss << "Error loading in file:" << endl << ex.what() << endl;
-      outputDiffErrors( str );
-   }
 
    return newbuf;
 }
@@ -1782,9 +1792,6 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
 bool XxApp::processDiff()
 {
    _isThereAnyDifference = false;
-
-   // Important note: this method assumes the UI has been created.
-   XX_ASSERT( _isUICreated == true );
 
    // Important note: this method assumes that the nbFiles have already been
    // loaded.
@@ -2113,9 +2120,17 @@ XxResources* XxApp::buildResources() const
 //
 void XxApp::outputDiffErrors( const QString& errors )
 {
-   _diffErrorsMsgBox = new XxSuicideMessageBox(
+   // _mainWindow could be 0 here, if this is called from the constructor,
+   // that's ok.
+
+   QMessageBox* diffErrorsMsgBox = new XxSuicideMessageBox(
       _mainWindow, "Diff errors.", errors, QMessageBox::Warning
    );
+
+   diffErrorsMsgBox->show();
+
+   // Forget about it, it'll be closed and destroy itself, not a leak.
+   diffErrorsMsgBox->exec();
 }
 
 //------------------------------------------------------------------------------
@@ -2542,28 +2557,36 @@ void XxApp::openFile( const XxFno no )
       std::auto_ptr<XxBuffer> newbuf(
          readFile( no, f, f, fileInfo, false )
       );
-      _files[no] = newbuf;
+      if ( newbuf.get() != 0 ) {
+         _files[no] = newbuf;
 
-      bool succ = processDiff();
+         bool succ = processDiff();
 
-      // Adjust UI elements
-      // Set filename label.
-      if ( _files[no].get() != 0 ) {
-         _central->setFilename( no, _files[no]->getDisplayName() );
-      }
-
-      // Initialize the horizontal diffs if necessary.
-      if ( succ == true ) {
-         if ( !_filesAreDirectories &&
-              _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
-            _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+         // Adjust UI elements
+         // Set filename label.
+         if ( _files[no].get() != 0 ) {
+            _central->setFilename( no, _files[no]->getDisplayName() );
          }
-         _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
-      }
 
-      // Reset the cursor line.
-      setCursorLine( 1 );
-      updateWidgets();
+         // Initialize the horizontal diffs if necessary.
+         if ( succ == true ) {
+            if ( !_filesAreDirectories &&
+                 _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+               _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+            }
+            _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
+         }
+
+         // Reset the cursor line.
+         setCursorLine( 1 );
+         updateWidgets();
+      }
+      else {
+         QString str;
+         QTextOStream oss( &str );
+         oss << "Error: could not open file." << endl;
+         outputDiffErrors( str );
+      }
    }
 }
 
@@ -2605,71 +2628,68 @@ void XxApp::onRedoDiff()
 
       bool succ = false; // Do nothing.
 
-      // Reread the files.
-      if ( _cmdline._unmerge == false && _cmdline._single == false ) {
-         for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-            const XxBuffer& buffer = *_files[ii];
-            if ( buffer.isTemporary() == false ) {
-               // We need to get the fileinfo again here because the size might
-               // have changed.
-               QFileInfo fileInfo( buffer.getName() );
+      // Make backup in case we need to recover.
+      std::auto_ptr<XxBuffer> backup[3];
+      for ( int iii = 0; iii < 3; ++iii ) {
+         backup[iii] = _files[iii];
+      }
 
-               std::auto_ptr<XxBuffer> newbuf(
-                  readFile( ii,
-                            buffer.getName(),
-                            buffer.getDisplayName(),
-                            fileInfo,
-                            buffer.isTemporary() )
-               );
-               _files[ii] = newbuf;
+      try {
+         // Reread the files.
+         if ( _cmdline._unmerge == false && _cmdline._single == false ) {
+            for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+               const XxBuffer& buffer = *_files[ii];
+               if ( buffer.isTemporary() == false ) {
+                  // We need to get the fileinfo again here because the size
+                  // might have changed.
+                  QFileInfo fileInfo( buffer.getName() );
+
+                  std::auto_ptr<XxBuffer> newbuf(
+                     readFile( ii,
+                               buffer.getName(),
+                               buffer.getDisplayName(),
+                               fileInfo,
+                               buffer.isTemporary() )
+                  );
+                  _files[ii] = newbuf;
+               }
             }
+
+            // Do the diff.
+            succ = processDiff();
          }
+         else if ( _cmdline._single == true ) {
 
-         // Do the diff.
-         succ = processDiff();
-      }
-      else if ( _cmdline._single == true ) {
-
-         // Read the one single file.
-         std::auto_ptr<XxBuffer> newbuf(
-            readFile( 0,
-                      _files[0]->getName(),
-                      _files[0]->getDisplayName(),
-                      _files[0]->getFileInfo(),
-                      _files[0]->isTemporary() )
-         );
-         _files[0] = newbuf;
-
-         // Make an empty buffer.
-         std::auto_ptr<XxBuffer> emptybuf(
-            new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
-         );
-         _files[1] = emptybuf;
-
-      }
-      else { // unmerge
-         const XxBuffer& buffer1 = *_files[0];
-         if ( buffer1.isTemporary() == false ) {
+            // Read the one single file.
             std::auto_ptr<XxBuffer> newbuf(
                readFile( 0,
                          _files[0]->getName(),
                          _files[0]->getDisplayName(),
-                         // FIXME not sure if we should redo fileinfo here...
                          _files[0]->getFileInfo(),
                          _files[0]->isTemporary() )
             );
             _files[0] = newbuf;
 
-            // Make a proxy for the other buffer.
-            std::auto_ptr<XxBuffer> newbuf2(
-               new XxBuffer( (*_files[0]),
-                             _files[0]->getName(),
-                             _files[0]->getDisplayName(),
-                             _files[0]->getFileInfo() )
+            // Make an empty buffer.
+            std::auto_ptr<XxBuffer> emptybuf(
+               new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
             );
-            _files[1] = newbuf2;
+            _files[1] = emptybuf;
 
-            if ( _cmdline._unmergeNbFiles == 3 ) {
+         }
+         else { // unmerge
+            const XxBuffer& buffer1 = *_files[0];
+            if ( buffer1.isTemporary() == false ) {
+               std::auto_ptr<XxBuffer> newbuf(
+                  readFile( 0,
+                            _files[0]->getName(),
+                            _files[0]->getDisplayName(),
+                            // FIXME not sure if we should redo fileinfo here...
+                            _files[0]->getFileInfo(),
+                            _files[0]->isTemporary() )
+               );
+               _files[0] = newbuf;
+
                // Make a proxy for the other buffer.
                std::auto_ptr<XxBuffer> newbuf2(
                   new XxBuffer( (*_files[0]),
@@ -2677,28 +2697,50 @@ void XxApp::onRedoDiff()
                                 _files[0]->getDisplayName(),
                                 _files[0]->getFileInfo() )
                );
-               _files[2] = newbuf2;
+               _files[1] = newbuf2;
+
+               if ( _cmdline._unmergeNbFiles == 3 ) {
+                  // Make a proxy for the other buffer.
+                  std::auto_ptr<XxBuffer> newbuf2(
+                     new XxBuffer( (*_files[0]),
+                                   _files[0]->getName(),
+                                   _files[0]->getDisplayName(),
+                                   _files[0]->getFileInfo() )
+                  );
+                  _files[2] = newbuf2;
+               }
+
+               // Do the diff.
+               succ = processDiff();
             }
-
-            // Do the diff.
-            succ = processDiff();
          }
-      }
 
-      // Initialize the horizontal diffs if necessary.
-      if ( succ == true ) {
-         if ( !_filesAreDirectories &&
-              _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
-            _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+         // Initialize the horizontal diffs if necessary.
+         if ( succ == true ) {
+            if ( !_filesAreDirectories &&
+                 _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+               _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+            }
+            _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
          }
-         _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
-      }
 
-      // Try to set the same lines as it used to have before the redo.
-      // Reset the cursor line.
-      setCursorLine( cursorLine );
-      _central->setCenterLine( centerLine );
-      updateWidgets();
+         // Try to set the same lines as it used to have before the redo.
+         // Reset the cursor line.
+         setCursorLine( cursorLine );
+         _central->setCenterLine( centerLine );
+         updateWidgets();
+      }
+      catch ( const std::exception& ex ) {
+         outputDiffErrors( ex.what() );
+         
+         // Recover from backup.
+         std::auto_ptr<XxBuffer> backup[3];
+         for ( int iii = 0; iii < 3; ++iii ) {
+            _files[iii] = backup[iii];
+         }
+
+         return;
+      }
    }
 }
 
@@ -3863,6 +3905,15 @@ void XxApp::toggleVerticalLine()
 
 //------------------------------------------------------------------------------
 //
+void XxApp::toggleHorizNullMarkers()
+{
+   _resources->toggleBoolOpt( BOOL_NULL_HORIZONTAL_MARKERS );
+   updateWidgets();
+   synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxApp::toggleOverview()
 {
    _resources->toggleShowOpt( SHOW_OVERVIEW );
@@ -4163,6 +4214,10 @@ void XxApp::synchronizeUI()
          _menuids[ ID_ToggleVerticalLine ],
          _resources->getShowOpt( SHOW_VERTICAL_LINE )
       );
+      _displayMenu->setItemChecked(
+         _menuids[ ID_ToggleHorizNullMarkers ],
+         _resources->getBoolOpt( BOOL_NULL_HORIZONTAL_MARKERS )
+      );
    }
    else {
       _displayMenu->setItemChecked(
@@ -4369,6 +4424,13 @@ bool XxApp::computeAbsoluteDifference() const
       }
       return bool( ::memcmp( b1, b2, bs1 ) ) || bool( ::memcmp( b1, b3, bs1 ) );
    }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::redirectWheelEvent( QWheelEvent* event )
+{
+   _central->redirectWheelEvent( event );
 }
 
 //------------------------------------------------------------------------------

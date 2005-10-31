@@ -28,6 +28,7 @@
 
 #include <resParser.h>
 #include <exceptions.h>
+#include <util.h>
 #include <help.h>
 
 #ifndef INCL_RESPARSER_Y
@@ -1215,12 +1216,12 @@ void XxResParser::genInitFile(
    if ( res1.getClipboardHeadFormat() !=
         res2.getClipboardHeadFormat() ) {
       os << searchTokenName( STPARAM(kwdList), CLIPBOARD_HEAD_FORMAT ) << ": \""
-         << res1.getClipboardHeadFormat() << "\"" << endl;
+         << XxUtil::escapeChars( res1.getClipboardHeadFormat() ) << "\"" << endl;
    }
    if ( res1.getClipboardLineFormat() !=
         res2.getClipboardLineFormat() ) {
       os << searchTokenName( STPARAM(kwdList), CLIPBOARD_LINE_FORMAT ) << ": \""
-         << res1.getClipboardLineFormat() << "\"" << endl;
+         << XxUtil::escapeChars( res1.getClipboardLineFormat() ) << "\"" << endl;
    }
 
    if ( res1.getHordiffType() != res2.getHordiffType() ) {
@@ -1379,9 +1380,9 @@ void XxResParser::listResources( QTextStream& os )
    }
 
    os << searchTokenName( STPARAM(kwdList), CLIPBOARD_HEAD_FORMAT ) << ": \""
-      << res.getClipboardHeadFormat() << "\"" << endl;
+      << XxUtil::escapeChars( res.getClipboardHeadFormat() ) << "\"" << endl;
    os << searchTokenName( STPARAM(kwdList), CLIPBOARD_LINE_FORMAT ) << ": \""
-      << res.getClipboardLineFormat() << "\"" << endl;
+      << XxUtil::escapeChars( res.getClipboardLineFormat() ) << "\"" << endl;
 
    const char* hdtstr[3] = { "None", "Single", "Multiple" };
    os << searchTokenName( STPARAM(kwdList), HORDIFF_TYPE ) << ": "

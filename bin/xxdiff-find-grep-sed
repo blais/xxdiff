@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #******************************************************************************\
 #* $Source$
-#* $Id: xxdiff-find-grep-sed 743 2004-01-27 17:18:04Z blais $
-#* $Date: 2004-01-27 12:18:04 -0500 (Tue, 27 Jan 2004) $
+#* $Id: xxdiff-find-grep-sed 766 2004-02-25 17:37:35Z blais $
+#* $Date: 2004-02-25 12:37:35 -0500 (Wed, 25 Feb 2004) $
 #*
 #* Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>
 #*
@@ -22,7 +22,7 @@
 #*
 #*****************************************************************************/
 
-"""find-grep-sed [<options>] <regexp> <sed-cmd> [<root> ...]
+"""xxdiff-find-grep-sed [<options>] <regexp> <sed-cmd> [<root> ...]
 
 Useful script to perform global replacement of a pattern in a set of files.
 
@@ -43,8 +43,11 @@ Notes
 
 """
 
-__version__ = "$Revision: 743 $"
+__version__ = "$Revision: 766 $"
 __author__ = "Martin Blais <blais@furius.ca>"
+__depends__ = ['xxdiff', 'Python-2.3', 'findutils', 'diffutils', 'sed']
+__copyright__ = """Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>.
+This code is distributed under the terms of the GNU General Public License."""
 
 #===============================================================================
 # EXTERNAL DECLARATIONS
@@ -83,9 +86,16 @@ def backup( fn, opts ):
     if backupfn:
         print 'Backup:', backupfn
         ddn = dirname(backupfn)
-        if not exists(ddn):
+        if ddn and not exists(ddn):
             os.makedirs(ddn)
         shutil.copy2(fn, backupfn)
+
+#-------------------------------------------------------------------------------
+#
+def cc_checkout(fn):
+    print 'Checking out the file'
+    os.system('cleartool co -nc "%s"' % fn)
+    print
 
 #-------------------------------------------------------------------------------
 #
@@ -96,7 +106,6 @@ def replace( fn, sedcmd, opts ):
     print
     print 'File:    ', fn
     print 'Absolute:', abspath(fn)
-    backup(fn, opts)
     print
 
     difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
@@ -110,11 +119,6 @@ def replace( fn, sedcmd, opts ):
         s, o = commands.getstatusoutput(diffcmd)
 
     else:
-        if opts.checkout_clearcase:
-            print 'Checking out the file'
-            os.system('cleartool co -nc "%s"' % fn)
-            print
-
         if not os.access(fn, os.W_OK):
             raise SystemExit("Error: cannot write to file '%s'." % fn)
 
@@ -143,6 +147,10 @@ def replace( fn, sedcmd, opts ):
 
     if not opts.dry_run:
         if opts.no_confirm:
+            backup(fn, opts)
+            if opts.checkout_clearcase:
+                cc_checkout(fn)
+
             shutil.copyfile(tmpf.name, fn)
         else:
             tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
@@ -154,6 +162,10 @@ def replace( fn, sedcmd, opts ):
 
             print o
             if o == 'ACCEPT':
+                backup(fn, opts)
+                if opts.checkout_clearcase:
+                    cc_checkout(fn)
+
                 shutil.copyfile(tmpf.name, fn)
             elif o == 'REJECT' or o == 'NODECISION':
                 pass # do nothing
@@ -166,6 +178,10 @@ def replace( fn, sedcmd, opts ):
                 print
                 print o
                 print
+
+                backup(fn, opts)
+                if opts.checkout_clearcase:
+                    cc_checkout(fn)
 
                 shutil.copyfile(tmpf2.name, fn)
             else:
@@ -183,6 +199,15 @@ def check_replace( fn, regexp, sedcmd, opts ):
     if rv == 0:
         replace(fn, sedcmd, opts)
 
+#-------------------------------------------------------------------------------
+#
+def complete( parser ):
+    "Programmable completion support. Script should work without it."
+    try:
+        import optcomplete
+        optcomplete.autocomplete(parser)
+    except ImportError:
+        pass
 
 #===============================================================================
 # MAIN
@@ -194,7 +219,8 @@ def main():
     parser.add_option('-b', '--backup-type', action='store', type='choice',
                       choices=['parallel', 'other', 'none'], metavar="CHOICE",
                       default='other',
-                      help="selects the backup type")
+                      help="selects the backup type "
+                      "('parallel', 'other', 'none')")
     parser.add_option('--backup-dir', action='store',
                       help="specify backup directory for type 'other'")
 
@@ -218,17 +244,17 @@ def main():
     parser.add_option('-n', '--dry-run', action='store_true',
                       help="print the commands that would be executed " +
                       "but don't really run them.")
-    parser.add_option('-t', '--no-confirm', action='store_true',
+    parser.add_option('-X', '--no-confirm', action='store_true',
                       help="do not ask for confirmation with graphical "
                       "diff viewer.")
+    complete(parser)
     opts, args = parser.parse_args()
 
     if len(args) < 2:
-        raise SystemExit("Error: you must specify at least a regular "
-                         "expression and a sed command")
+        raise parser.error("Error: you must specify at least a regular "
+                           "expression and a sed command")
     regexp, sedcmd = args[0:2]
     roots = args[2:] or ['.']
-
 
     if opts.backup_type == 'other':
         if not opts.backup_dir:

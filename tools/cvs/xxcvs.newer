@@ -29,7 +29,7 @@ Usage:
 
 """
 
-__version__ = "$Revision: 745 $"
+__version__ = "$Revision: 762 $"
 __author__ = "Martin Blais"
 
 #===============================================================================
@@ -38,18 +38,12 @@ __author__ = "Martin Blais"
 
 import sys, os, shutil
 import re, string
-import getpass
 import tempfile
 
-from os.path import exists, basename, dirname, isdir, isfile
-from os.path import join as joinpath
-from string import join
+from os.path import exists, dirname, isdir, join
 
 import cvs
 import cmdqueue
-
-from pprint import pprint, pformat
-
 
 #===============================================================================
 # LOCAL DECLARATIONS
@@ -710,7 +704,7 @@ class Mani:
             options.append('--ignore-space-change')
         if self.opts.ignore_blank_lines:
             options.append('--ignore-blank-lines')
-        return string.join(options)
+        return ' '.join(options)
 
 
     def parseFilename( self, fn ):
@@ -784,11 +778,11 @@ class Mani:
             if file.tempname:
                 cmd += ['%s' % file.tempname]
             elif root:
-                cmd += ['%s' % joinpath(root, file.name)]
+                cmd += ['%s' % join(root, file.name)]
             else:
                 cmd += ['%s' % file.name]
 
-        if self.gopts.verbose: print "==> Diffing command:", string.join(cmd)
+        if self.gopts.verbose: print "==> Diffing command:", ' '.join(cmd)
 
         if not self.queue:
             if self.gopts.no_async:
@@ -1144,7 +1138,7 @@ def getRoot():
     """Returns the checkout directory root."""
     global co_root
     dir = os.getcwd()
-    while exists(joinpath(dir,'CVS')) and dir and dir != '/':
+    while exists(join(dir,'CVS')) and dir and dir != '/':
         dir = dirname(dir)
     if not dir or dir == '/':
         raise Error('Not currently in a checked out directory')

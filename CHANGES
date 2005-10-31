@@ -2,6 +2,33 @@
 CHANGES: xxdiff
 ===============
 
+Current
+-------
+
+Version 3.0.3: (minor bug fixes)
+--------------------------------
+
+* Fixed [ 571454 ] memory leak when running on /proc/$$/status files.
+* Fixed [ 566683 ] backslashes stay in resource strings.
+* Fixed leftover problem with UI not being created.
+* Add simple subversion script from saqib.rasul
+* Implemented redirect of wheel events from text widget to scrollbar.
+* Implemented rendering of horizontal insert markers (1 pixel wide). We still
+  need to add the option to the dialog box, but it is available from the display
+  menu.
+* Made a slight improvement to horizontal diffs that attempts to correct over
+  the change hunks that the dynamic programming heuristics algorithm comes up
+  with.
+* Fixed bug with uninitialized variable in overview area [ 894724 ].
+* Added bug fix from Francois L'Archeveque for horizontal diffs, bug that would
+  occur in rare cases and that would calculate a larger diff rather than less;
+* Added optcomplete support to xxdiff-* scripts.
+* Changed xxdiff-cond-replace to accept a file on stdin.
+* Creation of xxdiff-cond-replace script and documentation.
+* Improvements in xxdiff-find-grep-sed, backing up files only when needed.
+* xxdiff-find-grep-sed and xxdiff-cond-replace ClearCase checkout only when
+  absolutely needed (untested, I don't have ClearCase at the moment).
+
 Version 3.0.2: (minor bug fixes)
 --------------------------------
 
@@ -101,7 +128,7 @@ bugs.  We have implemented a few minor features and have decided to release as
 * Made new pixmaps for the diff files at cursor button.
 * Found problem with exclude option, it was so simple, why didn't I bother
   before now!  Enabled support for --exclude and --exclude-from directly from
-  xxdiff command-line.  You can now ignore those CVS and *.o files in your
+  xxdiff command-line.  You can now ignore those CVS and ``*.o`` files in your
   directrory diffs!
 * Changed documentation source from qml to docutils text file (to be converted
   manually with docutils-html tool every time). At least I don't have to write

@@ -193,6 +193,13 @@ uint XxScrollView::getHorizontalPos() const
 
 //------------------------------------------------------------------------------
 //
+void XxScrollView::redirectWheelEvent( QWheelEvent* event )
+{
+   qApp->notify( _vscroll[0], event );
+}
+
+//------------------------------------------------------------------------------
+//
 void XxScrollView::adjustScrollbars()
 {
    // Compute the maximum of the text widths here, because the text widths may

@@ -87,6 +87,10 @@ Download
 * `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
   *(source and binaries)*
 
+* A Windows build (with some minor bugs) can be found `here
+  <http://xxdiff.sourceforge.net/download/2.9/windows>`_.  No support offered
+  though.
+
 
 Tools
 -----
@@ -95,6 +99,11 @@ Tools
 creative ways.  The author has been using these for a long time now and decided
 for version 3.0 to clean them up and make them a little more generic so everyone
 can use them.
+
+- `xxdiff-conf-replace <doc/xxdiff-cond-replace.html>`_: conditional to a user's
+  acceptance (or merge decision), replace an original file by a new file
+  (typically the result of some external process). This is useful in shell
+  loops, a general purpose interactive conditional copy operation;
 
 - `xxdiff-find-grep-sed <doc/xxdiff-find-grep-sed.html>`_: walk a directory
   hierarchy, and perform a conditional sed replacement on a given pattern,
@@ -111,13 +120,18 @@ can use them.
 
      xxdiff-match srcold/*.c srcnew/*.c
 
-- `xxdiff-cvs-diff <doc/xxdiff-cvs-diff.html>`_: preview CVS changes and if
-  desired accept/reject changes to commit individually;
-
 - `xxdiff-patch <doc/xxdiff-patch-UNFINISHED.html>`_ (UNFINISHED): preview and
   accept/reject a patch to a set of files.  **This script is unfinished because
   we have not been dealing with file additions and deletions, feel free to chip
   in**;
+
+- `xxdiff-cvs-diff <doc/xxdiff-cvs-diff.html>`_: preview CVS changes and if
+  desired accept/reject changes to commit individually;
+
+.. - `xxdiff-subversion <doc/xxdiff-subversion.html>`_: wrapper for xxdiff
+..   that you can use to set the diff-cmd and diff3-cmd user configuration
+..   values for `subversion <http://subversion.tigris.org>`_.
+
 
 Working versions and help files for `scripts that support configuration
 management systems <tools>`_ can be found in the distribution under the tools/
@@ -128,10 +142,6 @@ Packages
 
 Packages are available for some specific operating systems. Here are links to
 the relevant pages.  The author does not publish binaries anymore.
-
-- `Linux / Redhat package (2)
-  <http://rhcontrib.bero.org/search.php?show=DevelopmentTools>`_ (from redhat
-  contrib)
 
 - `Linux / Debian package <http://www.sourcepole.ch/sources/software/xxdiff/>`_
   (provided by Tomas Pospisek)

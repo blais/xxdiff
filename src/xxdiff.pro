@@ -46,16 +46,6 @@ TMAKE_CLEAN += $$LEXYACC_OBJ doc.h
 # Needed for Windows compile?
 #REQUIRES=full-config
 
-#
-# win32-msvc
-#
-
-win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
-#win32-msvc:TMAKE_CFLAGS += -GX
-win32-msvc:TMAKE_CXXFLAGS += -GX
-win32-msvc:INCLUDEPATH += winfixes
-
-#win32-msvc:TMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
 
 #
 # irix-n32
@@ -85,14 +75,29 @@ irix-n32:TMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 #linux-g++:TMAKE_CXXFLAGS += -fcheck-memory-usage
 #linux-g++:TMAKE_LIBS += -lmpatrol -lbfd -liberty
 
-#
+
+#===============================================================================
 # Max OS X with XFree86 port, macx-g++
 #
 
-macx-g++:TMAKE_CXXFLAGS += -D__GNU_LIBRARY__
-macx-g++:TMAKE_CXXFLAGS -= -fno-exceptions
+# The following does not work with tmake-1.11
+
+## macx-g++:TMAKE_CXXFLAGS += -D__GNU_LIBRARY__
+## macx-g++:TMAKE_CXXFLAGS -= -fno-exceptions
 
 
+#===============================================================================
+# win32-msvc
+#
+
+win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
+#win32-msvc:TMAKE_CFLAGS += -GX
+win32-msvc:TMAKE_CXXFLAGS += -GX
+win32-msvc:INCLUDEPATH += winfixes
+
+#win32-msvc:TMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
+
+#===============================================================================
 
 
 # Add diff files to link against directly

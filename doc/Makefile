@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 #
 # $Source$
-# $Id: Makefile 729 2004-01-21 21:41:48Z blais $
+# $Id: Makefile 766 2004-02-25 17:37:35Z blais $
 #
 # Automatic generation of HTML for tools.
 
@@ -16,9 +16,11 @@ TXTDOC_HTML = $(TXTDOC:.txt=.html)
 TXTHTML_CONVERT=docutils-html-convert
 
 TOOLS=\
-	xxdiff-cvs-diff \
-	xxdiff-encrypted \
+	xxdiff-cond-replace \
 	xxdiff-find-grep-sed \
+	xxdiff-cvs-diff \
+	xxdiff-subversion \
+	xxdiff-encrypted \
 	xxdiff-match \
 	xxdiff-patch-UNFINISHED
 

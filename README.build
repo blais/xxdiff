@@ -126,6 +126,29 @@ However, I will happily include any contributions in the source tree
 that would help others make this happen.
 
 
+Yaakov Selkowitz (2004-02-10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+About xxdiff port to cygwin::
+
+  I wanted to let you know that the current version of your xxdiff program
+  has been ported to Cygwin, with Qt 3.2.3 (gcc3, from the KDE-Cygwin
+  project).  It is available at my cygwin-ports project on sf.net.
+  
+  I noted that in your README.build file is somewhat outdated in respect
+  to Cygwin.  xxdiff builds fine with gcc-3.3.1, and in general should
+  build on Cygwin 1.5.x with the current Qt3 as if on *NIX.
+  
+  For now tmake needs to be downloaded from trolltech, as I haven't
+  packaged it yet.  TMAKEPATH will need to be set, of course.
+  
+  In any case, I have used xxdiff a number of times and it has been
+  working quite well.  Thank you for your work on this program!
+  
+  Yaakov
+  cygwin-ports maintainer
+
+  
 Alexandre Feblot <alexandre.feblot at art.alcatel.fr> writes:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -231,6 +254,51 @@ The relevant part within the makefile is under macx-g++
 - Info on the OpenDarwin ports: http://opendarwin.org/projects/darwinports/
 
 
+Notes on Mac OSX from Rolf Boelens <boelens at nmr.chem.uu.nl>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+  Dear Martin,
+  
+  A few years ago you helped me out on setting up xxdiff on Mac OSX 10.2 with
+  X11/xfree.  I moved now to OSX 10.3 with a newer machine and recompiled
+  xxdiff-2.9.2 and the latest xxdiff-3.0.2.  Since I like the program a lot, I
+  wanted to have it up and running again.
+  
+  I used the latest OSX 10.3.2 and latest Developer Tools XCode 1.1 from Apple,
+  plus the Apple X11 release.
+  
+  I will summarize what I had to adapt, it is really minor:  
+
+  A. Commented out in xxdiff.pro the macx-g++ flags, since tmake does not
+     understand them and fails::
+
+       ...
+       #macx-g++:TMAKE_CXXFLAGS += -D__GNU_LIBRARY__
+       #macx-g++:TMAKE_CXXFLAGS -= -fno-exceptions
+       ...
+   
+     The needed changes in Makefile can also be made later.
+  
+  B. To make the Makefile::
+
+       % tmake xxdiff.pro -o Makefile
+  
+  C. Needed changes in Makefile, use ``CXXFLAGS = -fexceptions``::
+        ...
+        CXXFLAGS=       -fexceptions -pipe -Wall -W -O3 -DNO_DEBUG 
+        -DQT_THREAD_SUPPORT
+        ...
+
+  No other OSX specific c++ flags are needed anymore.
+  
+  I added my own notes for testing both xxdiff versions.
+  I will try to post it at the sourceforge site as well, for your releif.
+  
+  With best regards, Rolf
+
+  
 Packaging
 =========
 

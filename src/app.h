@@ -269,6 +269,7 @@ public slots:
    void toggleToolbar();
    void toggleLineNumbers();
    void toggleVerticalLine();
+   void toggleHorizNullMarkers();
    void toggleOverview();
    void hordiffTypeNone();
    void hordiffTypeSingle();
@@ -295,6 +296,9 @@ public slots:
    void cursorTop();
    void cursorBottom();
    // </group>
+
+   // Redirects the given wheel event to the main scrollbar.
+   void redirectWheelEvent( QWheelEvent* event );
 
    // Return one of accept, reject, merged.
    // <group>
@@ -434,7 +438,6 @@ private:
 
    QStyle*                 _style;
    QkMainWindow*           _mainWindow;
-   QMessageBox*            _diffErrorsMsgBox;
    QSplitter*              _splitter;
    XxMergedFrame*          _paneMergedView;
    XxMergedWindow*         _popupMergedView;

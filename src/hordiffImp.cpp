@@ -35,6 +35,11 @@
 #include <ctype.h> // isspace()
 #endif
 
+// #define XX_LOCAL_HDIFF_DEBUG
+#ifdef XX_LOCAL_HDIFF_DEBUG
+#include <iostream>
+#endif
+
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
@@ -116,6 +121,40 @@ inline void adjustWs( int* hordiff, const char* text, int len )
    //       cerr << endl;
    //    }
 }
+
+#ifdef XX_LOCAL_HDIFF_DEBUG
+void printMatches( 
+   int         c,
+   int*        hbuffer0,
+   const char* ctext0,
+   int*        hbuffer1,
+   const char* ctext1
+)
+{
+   using namespace std;
+   cerr << endl << "nb.matches " << c << endl;
+
+   cerr << "matches left ";
+   for ( int ii = c/2-1; ii >= 0; --ii ) {
+      cerr << " " << hbuffer0[ii*2] << "|";
+      for ( int ic = hbuffer0[ii*2]; ic < hbuffer0[ii*2+1]; ++ic ) {
+         cerr << ctext0[ic+1];
+      }
+      cerr << "|" << hbuffer0[ii*2+1] << " ";
+   }
+   cerr << endl;
+
+   cerr << "matches right ";
+   for ( int ii = c/2-1; ii >= 0; --ii ) {
+      cerr << " " << hbuffer1[ii*2] << "|";
+      for ( int ic = hbuffer1[ii*2]; ic < hbuffer1[ii*2+1]; ++ic ) {
+         cerr << ctext1[ic+1];
+      }
+      cerr << "|" << hbuffer1[ii*2+1] << " ";
+   }
+   cerr << endl;
+}
+#endif
 
 };
 
@@ -389,7 +428,6 @@ void XxHordiffImp::multipleHordiffs2(
    const int          righthd1
 )
 {
-//#define XX_LOCAL_HDIFF_DEBUG
 #ifdef XX_LOCAL_HDIFF_DEBUG
    using namespace std;
 #endif
@@ -487,9 +525,13 @@ void XxHordiffImp::multipleHordiffs2(
       // Print out the table for debugging.
       fprintf( stderr, "\n        " );
       for ( int ix = 1; ix < tlen0; ++ix ) {
-         fprintf( stderr, "\"%c\"", ctext0[ix] );
+         fprintf( stderr, " %c ", ctext0[ix] );
       }
-      fprintf( stderr, "\n" );
+      fprintf( stderr, "\n     " );
+      for ( int ix = 0; ix < tlen0; ++ix ) {
+         fprintf( stderr, "%2d ", ix );
+      }
+      fprintf( stderr, "\n\n" );
          
       for ( int iy = 0; iy < tlen1; ++iy ) {
          if ( iy == 0 ) 
@@ -500,6 +542,7 @@ void XxHordiffImp::multipleHordiffs2(
          for ( int ix = 0; ix < tlen0; ++ix ) {
             fprintf( stderr, " %2d", htable[ ix + iy*tlen0 ] );
          }
+         fprintf( stderr, "      %2d", iy );
          fprintf( stderr, "\n" );
       }
       fprintf( stderr, "\n" );
@@ -525,6 +568,22 @@ void XxHordiffImp::multipleHordiffs2(
             ( htable[ x + y*tlen0 ] == ( htable[ x-1 + (y-1)*tlen0 ] + 1 ) /*||
               htable[ x + y*tlen0 ] == htable[ x-1 + (y-1)*tlen0 ]*/ ) &&
             ctext0[x] == ctext1[y] 
+
+#if 0 
+            /* We don't need this anymore (2004-03-22).
+               We post-process instead. */
+            /* This next extra condition contributed to fix subtle problem,
+               reproduce with these two lines:
+               return (abcdefghijklmnopqrstuvwxyz + gosh + fiji + kill + \
+                   mono + paques + roast + suv + wax + fly + zoo);
+               return abcdefghijklmnopqrstuvwxyz;
+               See bug [ 896045 ] for details.
+            */
+            &&
+            ( htable[ x + y*tlen0 ] > htable[ x + (y-1)*tlen0 ] &&
+              htable[ x + y*tlen0 ] > htable[ (x-1) + y*tlen0 ] )
+#endif
+
          ) {
             if ( !inword ) {
                inword = true;
@@ -580,30 +639,51 @@ void XxHordiffImp::multipleHordiffs2(
          inword = false;
       }
 
-      int ii;
+
 #ifdef XX_LOCAL_HDIFF_DEBUG
-      cerr << endl << "nb.matches " << c << endl;
-
-      cerr << "matches left ";
-      for ( ii = c/2-1; ii >= 0; --ii ) {
-         cerr << " " << hbuffer0[ii*2] << "|";
-         for ( int ic = hbuffer0[ii*2]; ic < hbuffer0[ii*2+1]; ++ic ) {
-            cerr << ctext0[ic+1];
-         }
-         cerr << "|" << hbuffer0[ii*2+1] << " ";
-      }
-      cerr << endl;
-
-      cerr << "matches right ";
-      for ( ii = c/2-1; ii >= 0; --ii ) {
-         cerr << " " << hbuffer1[ii*2] << "|";
-         for ( int ic = hbuffer1[ii*2]; ic < hbuffer1[ii*2+1]; ++ic ) {
-            cerr << ctext1[ic+1];
-         }
-         cerr << "|" << hbuffer1[ii*2+1] << " ";
-      }
-      cerr << endl;
+      printMatches( c, hbuffer0, ctext0, hbuffer1, ctext1 );
 #endif
+      int ii;
+
+#if 0 // IMPORTANT NOTE: this does not work, with following case.
+
+// In file "f1":
+// ------------------------------
+// 1: ABCDEFG
+// 2: ABCDEFG
+// 3: sprintf( myString, "Number is %d, myInteger );
+// 
+// In file "f2":
+// ------------------------------
+// 1: _A_B_ABCDEFG;
+// 2: ;ABCDEFG_F_G_
+// 3: snprintf( myString, sizeof(myString), "Number is %d, myInteger );
+// 
+
+      // Attempt to elongate the end of the matches as much as possible, because
+      // the algorithm functions from the end of the matches.
+      int stop0 = tlen0;
+      int stop1 = tlen1;
+      for ( ii = c/2-1; ii >= 0; --ii ) {
+         int end0 = hbuffer0[ii*2 + 1] + 1;
+         int end1 = hbuffer1[ii*2 + 1] + 1;
+
+         while ( end0 < tlen0 && end1 < tlen1 &&
+                 ctext0[end0] == ctext1[end1] ) {
+            ++end0; ++end1;
+         }
+         hbuffer0[ii*2 + 1] = end0 - 1;
+         hbuffer1[ii*2 + 1] = end1 - 1;
+
+         stop0 = hbuffer0[ii*2];
+         stop1 = hbuffer1[ii*2];
+
+#ifdef XX_LOCAL_HDIFF_DEBUG
+      printMatches( c, hbuffer0, ctext0, hbuffer1, ctext1 );
+#endif
+      }
+#endif
+
 
       // Create horizontal diffs (allocate and copy results into output, and
       // reorder).
@@ -613,7 +693,7 @@ void XxHordiffImp::multipleHordiffs2(
       tmpdiff0[cc] = 0;
       tmpdiff1[cc] = 0;
       ++cc;
-      for ( ii = c/2-1; ii >= 0; --ii ) {
+      for ( int ii = c/2-1; ii >= 0; --ii ) {
          tmpdiff0[cc] = hbuffer0[ii*2];
          tmpdiff1[cc] = hbuffer1[ii*2];
          ++cc;

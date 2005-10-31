@@ -62,7 +62,8 @@ XxOverview::XxOverview(
 ) :
    QFrame( parent, name, WResizeNoErase ),
    _app( app ),
-   _central( central )
+   _central( central ),
+   _manipNo( -1 )
 {
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#echo $*;
+#echo $#;
+
+# this is where the head from svn will be
+# checked out so that it can be diffed with 
+# what you got
+tempDIR=$HOME/tmp/svn-HEAD
+
+# total number of arguments to this script
+i=$#;
+
+#echo "lastargs = ${!i}"
+# the filename you are diffing
+# i get this from the last argurment of what
+# diff command as given by svn
+filename=${!i};
+
+#echo "filename=$filename"
+
+# i get the URL of this file from svn
+url=`svn info $filename | grep URL | awk '{print $2}'`
+
+#echo "url=$url"
+
+# checkout the file into a temp dir
+svn cat $url > $tempDIR/$filename
+
+# and then do the diff!
+xxdiff $tempDIR/$filename $filename &
+

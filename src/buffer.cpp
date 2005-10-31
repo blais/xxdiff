@@ -268,44 +268,53 @@ void XxBuffer::loadStream( FILE* fin )
 //
 void XxBuffer::loadFile( const QFileInfo& finfo )
 {
-   // Find out the file size.
-   _bufferSize = finfo.size();
-
-   // Allocate buffer.
-   // add one for potential added newline.
-   _buffer = static_cast<char*>( malloc( (_bufferSize + 1) * sizeof(char) ) );
-
    // Read file into buffer.
    FILE* fp = fopen( _name.latin1(), "r" );
    if ( fp == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
 
-   // Use an inegality check here, because under windows the fileinfo size we
-   // get counts the CR-LF for 2 bytes, but once read they are only in for one
-   // byte.
-   uint readBufSize = fread( _buffer, 1, _bufferSize, fp );
-   if ( readBufSize > _bufferSize ) {
-      throw XxIoError( XX_EXC_PARAMS );
+   if ( finfo.size() == 0 ) {
+      // This file may be one of those special files that stats to 0 and that
+      // has contents, like in /proc (under Linux), so stream it.
+      loadStream( fp );
+   }
+   else {
+      // Find out the file size.
+      _bufferSize = finfo.size();
+
+      // Allocate buffer.
+      // add one for potential added newline.
+      _buffer = static_cast<char*>( malloc( (_bufferSize + 1) * sizeof(char) ) );
+
+      // Use an inegality check here, because under windows the fileinfo size we
+      // get counts the CR-LF for 2 bytes, but once read they are only in for one
+      // byte.
+      uint readBufSize = fread( _buffer, 1, _bufferSize, fp );
+      if ( readBufSize > _bufferSize ) {
+         throw XxIoError( XX_EXC_PARAMS );
+      }
+
+
+
+      // Add a final newline if there isn't one.  This will simplify indexing.
+      if ( _bufferSize > 0 ) { // to support empty files.
+         if ( _buffer[ _bufferSize - 1 ] != _newlineChar ) {
+            _buffer[ _bufferSize ] = _newlineChar;
+            _bufferSize++;
+         }
+      }
+
+      if ( _hiddenCR ) {
+         processCarriageReturns();
+      }
+
+      indexFile();
    }
 
    if ( fclose( fp ) != 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
-
-   // Add a final newline if there isn't one.  This will simplify indexing.
-   if ( _bufferSize > 0 ) { // to support empty files.
-      if ( _buffer[ _bufferSize - 1 ] != _newlineChar ) {
-         _buffer[ _bufferSize ] = _newlineChar;
-         _bufferSize++;
-      }
-   }
-
-   if ( _hiddenCR ) {
-      processCarriageReturns();
-   }
-
-   indexFile();
 }
 
 //------------------------------------------------------------------------------

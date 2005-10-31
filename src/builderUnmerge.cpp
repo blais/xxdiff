@@ -31,6 +31,7 @@
 
 #include <qcstring.h>
 #include <qtextstream.h>
+#include <qregexp.h>
 
 #include <stdio.h>
 #include <iostream>
@@ -185,7 +186,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    // Note: starting from qt-3, QRegExp will have group matching, so we could
    // have the tags specified using reg.exps instead of strings.
 
-   enum InConflict { OUTSIDE, IN1, IN2 };
+   enum InConflict { OUTSIDE = 0, IN1 = 1, IN2 = 2 };
    InConflict inConflict = OUTSIDE;
 
    QTextOStream errors( &_errors );
@@ -196,25 +197,42 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    XxFln f2n2 = -1;
    f1n1 = 1;
 
-   QString tagStart = resources.getTag( TAG_UNMERGE_START );
-   QString tagSep = resources.getTag( TAG_UNMERGE_SEP );
-   QString tagEnd = resources.getTag( TAG_UNMERGE_END );
+   QRegExp reStart = QRegExp( resources.getTag( TAG_UNMERGE_START ) );
+   QRegExp reSep = QRegExp( resources.getTag( TAG_UNMERGE_SEP ) );
+   QRegExp reEnd = QRegExp( resources.getTag( TAG_UNMERGE_END ) );
+   if ( !reStart.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
+   if ( !reSep.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_SEP is invalid: " << reSep.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
+   if ( !reEnd.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
 
-   XX_LOCAL_TRACE( "start tag: " << tagStart /*<< " " << nbExpStart*/ );
-   XX_LOCAL_TRACE( "sep tag: " << tagSep /*<< " " << nbExpSep*/ );
-   XX_LOCAL_TRACE( "end tag: " << tagEnd /*<< " " << nbExpEnd*/ );
-
-   QCString fileLeft;
-   QCString fileRight;
+   XX_LOCAL_TRACE( "start re: " << reStart.pattern() /*<< " " << nbExpStart*/ );
+   XX_LOCAL_TRACE( "sep re: " << reSep.pattern() /*<< " " << nbExpSep*/ );
+   XX_LOCAL_TRACE( "end re: " << reEnd.pattern() /*<< " " << nbExpEnd*/ );
 
    int nbLines = buffer.getNbLines();
    XX_LOCAL_TRACE( "nbLines " << nbLines );
    for ( XxFln l = 1; l <= nbLines; ++l ) {
       uint len;
-      const char* textline = buffer.getTextLine( l, len );
+      const char* textlineOrig = buffer.getTextLine( l, len );
+      QCString textline( textlineOrig, len+1 ); // This copy sucks...
 
       if ( inConflict == OUTSIDE ) {
-         if ( qstrncmp( textline, tagStart, tagStart.length() ) == 0 ) {
+         XX_LOCAL_TRACE( "===> " << reStart.pattern() << " " << textline );
+         if ( reStart.search( textline ) != -1 ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
             createIgnoreBlock( f1n1, f1n1, l - f1n1 );
@@ -223,10 +241,9 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            if ( len > tagStart.length() && fileLeft.isEmpty() ) {
-               fileLeft = QCString( &textline[tagStart.length()],
-                                    len - tagStart.length() + 1 );
-               fileLeft = fileLeft.stripWhiteSpace();
+            QStringList texts = reStart.capturedTexts();
+            if ( texts.size() > 0 ) {
+               outFileLeft = texts.front().stripWhiteSpace();
             }
          }
          else {
@@ -234,7 +251,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN1 ) {
-         if ( qstrncmp( textline, tagSep, tagSep.length() ) == 0 ) {
+         if ( reSep.search( textline ) != -1 ) {
             f1n2 = l;
             f2n1 = l + 1;
             inConflict = IN2;
@@ -244,7 +261,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN2 ) {
-         if ( qstrncmp( textline, tagEnd, tagEnd.length() ) == 0 ) {
+         if ( reEnd.search( textline ) != -1 ) {
             f2n2 = l;
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;
@@ -272,10 +289,9 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            if ( len > tagEnd.length() && fileRight.isEmpty() ) {
-               fileRight = QCString( &textline[tagEnd.length()],
-                                     len - tagEnd.length() + 1 );
-               fileRight = fileRight.stripWhiteSpace();
+            QStringList texts = reEnd.capturedTexts();
+            if ( texts.size() > 0 ) {
+               outFileRight = texts.front().stripWhiteSpace();
             }
          }
          else {
@@ -320,11 +336,9 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    errors << flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
-   XX_LOCAL_TRACE( "Left: " << fileLeft );
-   XX_LOCAL_TRACE( "Right: " << fileRight );
+   XX_LOCAL_TRACE( "Left: " << outFileLeft );
+   XX_LOCAL_TRACE( "Right: " << outFileRight );
 
-   outFileLeft = fileLeft;
-   outFileRight = fileRight;
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    
    return ap;
@@ -345,7 +359,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    // Note: starting from qt-3, QRegExp will have group matching, so we could
    // have the tags specified using reg.exps instead of strings.
 
-   enum InConflict { OUTSIDE, IN1, IN2, IN3 };
+   enum InConflict { OUTSIDE = 0, IN1 = 1, IN2 = 2, IN3 = 3 };
    InConflict inConflict = OUTSIDE;
 
    QTextOStream errors( &_errors );
@@ -358,30 +372,54 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    XxFln f3n2 = -1;
    f1n1 = 1;
 
-   QString tagStart = resources.getTag( TAG_UNMERGE_START );
-   QString tagSep1 = resources.getTag( TAG_UNMERGE_SEP_EXTRA );
-   QString tagSep2 = resources.getTag( TAG_UNMERGE_SEP );
-   QString tagEnd = resources.getTag( TAG_UNMERGE_END );
+   QRegExp reStart = QRegExp( resources.getTag( TAG_UNMERGE_START ) );
+   QRegExp reSep1 = QRegExp( resources.getTag( TAG_UNMERGE_SEP_EXTRA ) );
+   QRegExp reSep2 = QRegExp( resources.getTag( TAG_UNMERGE_SEP ) );
+   QRegExp reEnd = QRegExp( resources.getTag( TAG_UNMERGE_END ) );
+   if ( !reStart.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
+   if ( !reSep1.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_SEP_EXTRA is invalid: " << reSep1.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
+   if ( !reSep2.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_SEP is invalid: " << reSep2.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
+   if ( !reEnd.isValid() ) {
+      QString str;
+      QTextOStream oss( &str );
+      oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << endl;
+      throw XxError( XX_EXC_PARAMS, str );
+   }
 
-   XX_LOCAL_TRACE( "start tag: " << tagStart /*<< " " << nbExpStart*/ );
-   XX_LOCAL_TRACE( "sep1 tag: " << tagSep1 /*<< " " << nbExpSep*/ );
-   XX_LOCAL_TRACE( "sep2 tag: " << tagSep2 /*<< " " << nbExpSep*/ );
-   XX_LOCAL_TRACE( "end tag: " << tagEnd /*<< " " << nbExpEnd*/ );
+   XX_LOCAL_TRACE( "start re: " << reStart.pattern() /*<< " " << nbExpStart*/ );
+   XX_LOCAL_TRACE( "sep1 re: " << reSep1.pattern() /*<< " " << nbExpSep*/ );
+   XX_LOCAL_TRACE( "sep2 re: " << reSep2.pattern() /*<< " " << nbExpSep*/ );
+   XX_LOCAL_TRACE( "end re: " << reEnd.pattern() /*<< " " << nbExpEnd*/ );
 
-   QCString fileFirst;
-
-   QCString fileLeft;
-   QCString fileMiddle;
-   QCString fileRight;
+   QString fileFirst;
 
    int nbLines = buffer.getNbLines();
    XX_LOCAL_TRACE( "nbLines " << nbLines );
    for ( XxFln l = 1; l <= nbLines; ++l ) {
+
       uint len;
-      const char* textline = buffer.getTextLine( l, len );
+      const char* textlineOrig = buffer.getTextLine( l, len );
+      QCString textline( textlineOrig, len+1 ); // This copy sucks...
+      XX_LOCAL_TRACE( "<" << inConflict << "> " << 
+                      l << " textline = " << textline );
 
       if ( inConflict == OUTSIDE ) {
-         if ( qstrncmp( textline, tagStart, tagStart.length() ) == 0 ) {
+         if ( reStart.search( textline ) != -1 ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
             createIgnoreBlock( f1n1, f1n1, f1n1, l - f1n1 );
@@ -390,10 +428,9 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            if ( len > tagStart.length() ) {
-               fileFirst = QCString( &textline[tagStart.length()],
-                                     len - tagStart.length() + 1 );
-               fileFirst = fileFirst.stripWhiteSpace();
+            QStringList texts = reStart.capturedTexts();
+            if ( texts.size() > 0 ) {
+               fileFirst = texts.front().stripWhiteSpace();
             }
          }
          else {
@@ -401,20 +438,19 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN1 ) {
-         if ( qstrncmp( textline, tagSep1, tagSep1.length() ) == 0 ) {
+         if ( reSep1.search( textline ) != -1 ) {
             f1n2 = l;
             f2n1 = l + 1;
             inConflict = IN2;
 
             // Grab string after tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            if ( fileMiddle.isEmpty() && len > tagStart.length() ) {
-               fileMiddle = QCString( &textline[tagStart.length()],
-                                      len - tagStart.length() + 1 );
-               fileMiddle = fileMiddle.stripWhiteSpace();
+            QStringList texts = reSep1.capturedTexts();
+            if ( texts.size() > 0 ) {
+               outFileMiddle = texts.front().stripWhiteSpace();
             }
          }
-         else if ( qstrncmp( textline, tagSep2, tagSep2.length() ) == 0 ) {
+         else if ( reSep2.search( textline ) != -1 ) {
             f1n2 = l;
             f3n1 = l + 1;
             inConflict = IN3;
@@ -424,7 +460,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN2 ) {
-         if ( qstrncmp( textline, tagSep2, tagSep2.length() ) == 0 ) {
+         if ( reSep2.search( textline ) != -1 ) {
             f2n2 = l;
             f3n1 = l + 1;
             inConflict = IN3;
@@ -434,7 +470,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN3 ) {
-         if ( qstrncmp( textline, tagEnd, tagEnd.length() ) == 0 ) {
+         if ( reEnd.search( textline ) != -1 ) {
             f3n2 = l;
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;
@@ -452,8 +488,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                //
                // This was a two-region conflict.
                //
-               if ( !fileFirst.isEmpty() && fileMiddle.isEmpty() ) {
-                  fileMiddle = fileFirst;
+               if ( !fileFirst.isEmpty() && outFileMiddle.isEmpty() ) {
+                  outFileMiddle = fileFirst;
                }
 
                if ( fsize1 == 0 ) {
@@ -484,8 +520,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                //
                // This was a three-region conflict.
                //
-               if ( !fileFirst.isEmpty() && fileLeft.isEmpty() ) {
-                  fileLeft = fileFirst;
+               if ( !fileFirst.isEmpty() && outFileLeft.isEmpty() ) {
+                  outFileLeft = fileFirst;
                }
 
                if ( fsize1 > 0 && fsize2 > 0 && fsize3 > 0 ) {
@@ -535,10 +571,9 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            if ( len > tagEnd.length() && fileRight.isEmpty() ) {
-               fileRight = QCString( &textline[tagEnd.length()],
-                                     len - tagEnd.length() + 1 );
-               fileRight = fileRight.stripWhiteSpace();
+            QStringList texts = reEnd.capturedTexts();
+            if ( texts.size() > 0 ) {
+               outFileRight = texts.front().stripWhiteSpace();
             }
          }
          else {
@@ -566,13 +601,13 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    errors << flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
-   XX_LOCAL_TRACE( "Left: " << fileLeft );
-   XX_LOCAL_TRACE( "Middle: " << fileMiddle );
-   XX_LOCAL_TRACE( "Right: " << fileRight );
+   XX_LOCAL_TRACE( "Left: " << outFileLeft );
+   XX_LOCAL_TRACE( "Middle: " << outFileMiddle );
+   XX_LOCAL_TRACE( "Right: " << outFileRight );
 
-   outFileLeft = fileLeft;
-   outFileMiddle = fileMiddle;
-   outFileRight = fileRight;
+   outFileLeft = outFileLeft;
+   outFileMiddle = outFileMiddle;
+   outFileRight = outFileRight;
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }

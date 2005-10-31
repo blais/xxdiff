@@ -1,0 +1,74 @@
+=================
+Contributed Tools
+=================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2004-09-29
+:Abstract:
+
+   Contributed tools for Subversion.
+
+
+xxdiff-sub
+==========
+
+::
+
+  From: Saqib Rasul <saqib.rasul@sagadc.de>
+  Date: 2004-07-23
+  
+  Hello,
+  
+  I whipped up a very basic subversion integration script so that it uses
+  xxdiff when I do something like
+  
+  $ svn diff
+  
+  ok, here Is how I did it...
+  
+  I modified the svn diff-cmd in ~/.subversion/config
+  
+  To point to a script called xxdiff-sub which lives somewhere where the
+  PATH can pick it up.
+  
+  What the xxdiff-sub does:
+  
+  1. checkouts out the files which have been changed into a temp directory
+  (using svn cat)
+  2. uses xxdiff to diff this file with what I got in my current dir
+  
+  xxdiff-sub is attached. The file is _VERY_ simple, and only tested for
+  the svn diff [filenames] syntax
+  
+  I am no subversion and/or xxdiff expert, so I would like to contribute
+  it to the community and get the experts to review/comment on it.
+  Hopefully it's a step in the right direction to get subversion
+  integration.
+  
+  Hope it helps someome!
+  
+  Regards,
+  
+  Saqib
+  
+  ------------------------------------------------------------------------
+  SAGA D.C. GmbH			Phone : +49 (0) 6731-9428-0 
+  Berliner Strasse 73     	Fax : +49 (0) 6731-9428-26
+  D-55232 Alzey			
+  mailto:saqib.rasul@sagadc.de	http://www.sagadc.de 
+
+
+svnxxdiff.sh
+============
+
+::
+
+  From: Tomi Ollila <tomi.ollila@iki.fi>
+  Date: 2004-09-28
+
+  This might interest you (I was going to do freshmeat announcement, but...)
+  
+  This is written by me and has been quite useful.
+  License is GPL...
+  
+  Tomi

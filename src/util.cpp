@@ -1013,4 +1013,33 @@ unsigned int XxUtil::toTime_t(
 #endif
 }
 
+//------------------------------------------------------------------------------
+//
+QString XxUtil::escapeChars( const QString& format )
+{
+   QString newFormat = format;
+
+   newFormat.replace( "\n", "\\n" );
+   newFormat.replace( "\r", "\\r" );
+   newFormat.replace( "\"", "\\\"" );
+
+// FIXME remove
+   std::cerr << format << std::endl;
+   std::cerr << newFormat << std::endl;
+
+   return newFormat;
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxUtil::unescapeChars( const QString& format )
+{
+   QString newFormat = format;
+
+   newFormat.replace( "\\n", "\n" );
+   newFormat.replace( "\\r", "\r" );
+   newFormat.replace( "\\\"", "\"" );
+   return newFormat;
+}
+
 XX_NAMESPACE_END

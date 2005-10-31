@@ -1,0 +1,3 @@
+_A_B_ABCDEFG;
+;ABCDEFG_F_G_
+snprintf( myString, sizeof(myString), "Number is %d, myInteger );

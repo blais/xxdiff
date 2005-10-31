@@ -282,6 +282,7 @@ void XxResources::initializeOriginalXdiff()
    _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;
    _boolOpts[ BOOL_DIRDIFF_RECURSIVE ] = false;
    _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
+   _boolOpts[ BOOL_NULL_HORIZONTAL_MARKERS ] = true;
 
    //---------------------------------------------------------------------------
 
@@ -354,10 +355,10 @@ void XxResources::initializeOriginalXdiff()
    _tags[ TAG_CONDITIONAL_ENDIF ] = "#endif";
 
    // Defaults match CVS format.
-   _tags[ TAG_UNMERGE_START ] = "<<<<<<<";
-   _tags[ TAG_UNMERGE_SEP ] = "=======";
-   _tags[ TAG_UNMERGE_SEP_EXTRA ] = "|||||||";
-   _tags[ TAG_UNMERGE_END ] = ">>>>>>>";
+   _tags[ TAG_UNMERGE_START ] = "^<<<<<<< (.*)$";
+   _tags[ TAG_UNMERGE_SEP ] = "^=======\\s*$";
+   _tags[ TAG_UNMERGE_SEP_EXTRA ] = "^\\|\\|\\|\\|\\|\\|\\| (.*)$";
+   _tags[ TAG_UNMERGE_END ] = "^>>>>>>> (.*)$";
 
    //---------------------------------------------------------------------------
 
@@ -735,7 +736,8 @@ void XxResources::setVerticalLinePos( uint vlinePos )
 //
 void XxResources::setClipboardHeadFormat( const QString& format )
 {
-   _clipboardHeadFormat = format;
+   _clipboardHeadFormat = XxUtil::unescapeChars( format );
+
    emit changed();
 }
 
@@ -743,7 +745,7 @@ void XxResources::setClipboardHeadFormat( const QString& format )
 //
 void XxResources::setClipboardLineFormat( const QString& format )
 {
-   _clipboardLineFormat = format;
+   _clipboardLineFormat = XxUtil::unescapeChars( format );
    emit changed();
 }
 

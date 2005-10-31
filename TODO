@@ -4,8 +4,16 @@ TODO: xxdiff
 
 * remove all the if 0 in builders (and in all the code)
 
+* add the horizontal marker to the options dialog as well.
+
+
 
 .. end
+
+(Horizontal Diffs)
+
+- post-process, idea from Derrick Moser, slide to the left until a word boundary
+  is met on either side or is impossible
 
 
 Goals for 4.0 stable release:
@@ -1190,3 +1198,11 @@ Tasks: CM integration
    * Idea (plante@iro): Pour faire des diffs de fichiers binaires...
      Sers-toi d'un programme qui fait des hexdumps (sur linux il y a xxd), et
      fais le diff la-dessus. Ça marche bien.
+
+
+
+
+
+
+
+

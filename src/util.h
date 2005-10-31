@@ -171,6 +171,12 @@ public:
    // older versions of Qt.
    static unsigned int toTime_t( const QDateTime& t );
 
+   // Escape and unescape chars.
+   // <group>
+   static QString escapeChars( const QString& format );
+   static QString unescapeChars( const QString& format );
+   // </group>
+
 };
 
 

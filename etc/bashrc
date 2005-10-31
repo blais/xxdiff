@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# $Id: bashrc 760 2004-02-09 18:51:12Z blais $
+# $Source$
+#
+# Bash configuration for this project.
+#
+
+# Make bash invoke optcomplete completion for the scripts.
+#
+# This is not necessary for other users, the scripts will work without 
+# auto-generated programmable completion.
+complete -F _optcomplete xxdiff-cond-replace
+complete -F _optcomplete xxdiff-cvs-diff
+complete -F _optcomplete xxdiff-encrypted
+complete -F _optcomplete xxdiff-find-grep-sed
+complete -F _optcomplete xxdiff-match
+complete -F _optcomplete xxdiff-patch-UNFINISHED # FIXME

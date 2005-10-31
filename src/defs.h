@@ -73,7 +73,7 @@ typedef unsigned int 	uint;
 #define XX_THROW_NOTHING  __STL_NOTHROW
 #endif
 
-#elif COMPILER_MIPSPRO
+#elif defined COMPILER_MIPSPRO
 #define XX_THROW_NOTHING  throw()
 
 #elif defined COMPILER_DECCXX

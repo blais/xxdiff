@@ -54,7 +54,7 @@ static char s_env_string_LC_ALL[] = "LC_ALL=C";
 
 //------------------------------------------------------------------------------
 //
-int main( int argc, char** argv, char** envp ) 
+int main( int argc, char** argv, char** envp )
 {
    environ = envp;
 
@@ -70,17 +70,17 @@ int main( int argc, char** argv, char** envp )
       if ( run ) {
          // Initialization framework.
          XxResParser::initialize();
-         
+
          int qtargc;
          char** qtargv;
          cmdline.getQtOptions( qtargc, qtargv );
-         
+
 	 // Create application and connect.
          XxApp app( qtargc, qtargv, cmdline );
-         
-	 // Run event loop.
+
+         // Run event loop.
          app.exec();
-         
+
 	 retval = app.getReturnValue();
       }
       else {
