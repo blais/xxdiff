@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 302 2001-10-23 05:14:10Z blais $
- * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+ * $Id: diffs.cpp 358 2001-11-07 21:23:34Z blais $
+ * $Date: 2001-11-07 16:23:34 -0500 (Wed, 07 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -27,6 +27,8 @@
 #include <diffs.h>
 #include <buffer.h>
 #include <resources.h>
+
+#include <qcstring.h>
 
 #include <list>
 #include <algorithm>
@@ -678,10 +680,10 @@ bool XxDiffs::save(
 
    QString tags[4];
    if ( useConditionals == false ) {
-      for ( int ii = 0; ii < nbFiles; ++ii ) {
+      for ( int ii = 0; ii < 3; ++ii ) {
          tags[ii] = resources.getTag( TAG_CONFLICT_SEPARATOR );
       }
-      tags[nbFiles] = resources.getTag( TAG_CONFLICT_END );
+      tags[3] = resources.getTag( TAG_CONFLICT_END );
    }
    else {
       tags[0] = resources.getTag( TAG_CONDITIONAL_IF );
@@ -736,8 +738,8 @@ bool XxDiffs::save(
                   cond.sprintf( tags[state].latin1(),
                                 conditionals[f].latin1() );
 
-                  QString line;
-                  QTextOStream oss( &line );
+                  QByteArray line;
+                  QTextOStream oss( line );
                   oss << cond << endl;
 
                   int nbOutlines = 0;
@@ -760,8 +762,8 @@ bool XxDiffs::save(
                   else {
                      ++state;
                   }
-                  oss << flush;
-                  os << line;
+                  oss << '\0' << flush; // end string and flush
+                  os << static_cast<const char*>( line );
                }
             }
 

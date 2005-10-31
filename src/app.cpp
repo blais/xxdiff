@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: app.cpp 358 2001-11-07 21:23:34Z blais $
+ * $Date: 2001-11-07 16:23:34 -0500 (Wed, 07 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -2275,6 +2275,7 @@ void XxApp::saveToFile( const QString& filename, const bool ask )
       // Save to the file.
       {
          QTextStream osstream( &outfile );
+         //osstream.setEncoding( QTextStream::Locale ); not necessary
          _diffs->save( getResources(), osstream, getBuffers(),
                        useConditionals, removeEmptyConditionals,
                        conditionals );
@@ -2686,6 +2687,7 @@ void XxApp::saveSelectedOnly()
    // Save to the file.
    {
       QTextStream osstream( &outfile );
+      //osstream.setEncoding( QTextStream::Locale ); not necessary
       _diffs->saveSelectedOnly( osstream, getBuffers() );
    }
    

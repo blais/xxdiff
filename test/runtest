@@ -88,3 +88,13 @@ echo "3-way with auto merge"
 $XXDIFF --merge mine older yours
 waitexit;
 
+
+
+# todo; empty files, one, two
+
+# ^L rendering, accents
+
+
+
+# save as conflicts, 2, 3
+# save as ifdefs, 2, 3

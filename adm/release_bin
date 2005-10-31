@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_bin 348 2001-11-06 06:50:46Z blais $
+# $Id: release_bin 358 2001-11-07 21:23:34Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -30,16 +30,11 @@ ROOT=..
 mkdir $ROOT/$PDIR
 cp src/xxdiff $ROOT/$PDIR
 
-# # for some reason stripping on IRIX doesn't work as of 1.6.2
-# # we link using the stripping option -s instead.
-# if [ "$PLAT" != "mips-sgi-irix6.5" ]; then
 strip $ROOT/$PDIR/xxdiff
-# fi
-# let's try it without.  you'll find out soon.
 
 cp README $ROOT/$PDIR
 cp CHANGES $ROOT/$PDIR
 
 cd ..
-tar zcvf $PDIR.tar.gz $PDIR
+tar cvf - $PDIR | gzip > $PDIR.tar.gz
 rm -rf $PDIR

@@ -2,8 +2,19 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 352 2001-11-06 20:00:01Z blais $
+# $Id: CHANGES 358 2001-11-07 21:23:34Z blais $
 #
+
+Current version:
+
+------------------------------
+
+Version 2.0.1: (bug-fix release)
+
+   * Tested all cases under IRIX.
+   * Fixed bug with saving conflict regions, needed to use a QByteArray.
+     This was introduced following the removal of std::stream's.
+   * Fixed bug with tags when saving with conflicts.
 
 ------------------------------
 
@@ -1007,23 +1018,38 @@ Wishlist/ToDo todo TODO list:
 After 2.0:
 ------------------------------
 
-   release
 
-   * try mips build stripped and release, to see if it works now.
-     if it does, fix tools/release_bin
 
-   * announce: web site, fm, bero, qt, discreet, cervisia, wincvs, 
-     sgi freeware, ...
+
+ - review all QTextStream to files, make sure they setEncoding to Locale
+
+
+ - idanan idea: perhaps implement minimal string edit with tokens instead of
+   characters
+
+ - add a diferent color for display-ignored regions (e.g. perhunk ws)
+   defeault should be close to SAME color
+
+
+ - sourceforge project release announcement
+ - update web site
+ - freshmeat
+      - rh-contrib (bero)
+ - qt-interest
+ - cervisia ml
+      - wincvs ml
+ - sgi freeware
+      - discreet
 
    * web site: add emacs trick to start xxdiff automatically on previous file
 
    * add to google direcotry!!!
 
-   * change screenshots, add a single, complete nicer one
+   * bug: ^L's do not get rendered correctly?...
 
+   * add an option to make layout the merged view like xcleardiff, add an option to make it visible on startup as well
 
-
-
+     Show.MergedView:  False, True, Above, Below, Right
 
 
    * "xxdiff -w" should toggle the actuall command switch specified in the
@@ -1077,7 +1103,8 @@ After 2.0:
 
    - implement remerge option!  for files with CVS conflicts!
 
-   - per-hunk ignore diffs
+   - per-hunk ignore diffs, this requires an implement of the lcs algorithm 
+     (string edit problem)
 
    - implement xxcvs update !!!!!
 
@@ -1345,8 +1372,6 @@ link directly with GNU diff
  | Great ideas!  Thank you very much.
  | 
  | I'llsend you comments on the errors a little later, I gotta meeting just now.
- | 
- | 
 
 
 CM support:
@@ -1363,13 +1388,9 @@ automate CHANGES file update using CVS on xxdiff.sourceforge.net
 
 bug fixes:
 
-   * Editing doesn't work anymore.
-
    * In dir diffs, remove toolbar buttons, selection menus, open file must be
      able to select a directory, etc. IOW finish checking that all that is left 
      works.
-
-   * grab icons from other diffs
 
 new features:
 
