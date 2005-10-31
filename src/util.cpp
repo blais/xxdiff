@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: util.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: util.cpp 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@
  *============================================================================*/
 
 namespace {
+
 
 //------------------------------------------------------------------------------
 //
@@ -148,6 +149,21 @@ void XxUtil::copyToFile( FILE* fin, FILE* fout )
       fclose(fout);
       throw new XxIoError( "Error writing temporary file." );
    }
+}
+
+//------------------------------------------------------------------------------
+//
+int XxUtil::copyFile( const char* src, const char* dest )
+{
+   // std::cout << "Copying file " << src << " to " << dest << std::endl;
+   using namespace std;
+
+   string cmd = string( "cp " ) + 
+      string( src ) + string( " "  ) + string( dest );
+
+   FILE* f = popen( cmd.c_str(), "r" );
+   int r = pclose( f );
+   return r;
 }
 
 //------------------------------------------------------------------------------
@@ -385,5 +401,6 @@ int XxUtil::interruptibleSystem( const char* command )
    } while(1);
    return -1;
 }
+
 
 XX_NAMESPACE_END

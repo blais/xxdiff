@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: resources.h 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: resources.h 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,6 +122,8 @@ public:
       ACCEL_EDIT_DIFF_OPTIONS,
       ACCEL_EDIT_DISPLAY_OPTIONS,
       ACCEL_DIFF_FILES_AT_CURSOR, 
+      ACCEL_COPY_RIGHT_TO_LEFT, 
+      ACCEL_COPY_LEFT_TO_RIGHT, 
       ACCEL_NEXT_DIFFERENCE, 
       ACCEL_PREVIOUS_DIFFERENCE, 
       ACCEL_NEXT_UNSELECTED, 
@@ -364,7 +366,7 @@ public:
    // color.
    Resource getLineColorType(
       const XxLine& line,
-      const int     no,
+      const XxFno   no,
       const bool    sup = false
    ) const;
 

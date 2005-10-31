@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: text.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: text.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ XX_NAMESPACE_BEGIN
 //
 XxText::XxText( 
    XxApp*      app, 
-   const int   no, 
+   const XxFno no, 
    QWidget*    parent, 
    const char* name 
 ) :
@@ -120,7 +120,7 @@ void XxText::drawContents( QPainter* pp )
    //
    // Draw appropriate content.
    //
-   uint topLine = _app->getTopLine();
+   XxDln topLine = _app->getTopLine();
    uint horizontalPos = _app->getHorizontalPos();
    uint tabWidth = resources->getTabWidth();
 
@@ -135,9 +135,9 @@ void XxText::drawContents( QPainter* pp )
    p.setBackgroundMode( TransparentMode );
    QPen pen;
 
-   uint displayLines = _app->getNbDisplayLines();
+   XxDln displayLines = _app->getNbDisplayLines();
    uint nbLines = 
-      std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
+      std::min( displayLines, XxDln(diffs->getNbLines() - (topLine - 1)) );
 
    bool hori = 
       resources->getBoolOpt( XxResources::HORIZONTAL_DIFFS ) &&  
@@ -160,7 +160,7 @@ void XxText::drawContents( QPainter* pp )
       p.setPen( fcolor );
 
       // Render text.
-      int fline = line.getLineNo( _no );
+      XxFln fline = line.getLineNo( _no );
       if ( fline != -1 ) {
          uint length;
          const char* lineText = file->getTextLine( fline, length );
@@ -260,7 +260,7 @@ void XxText::drawContents( QPainter* pp )
    // Draw line cursor.
    if ( !resources->getBoolOpt( XxResources::DISABLE_CURSOR_DISPLAY ) ) {
 
-      uint cursorLine = _app->getCursorLine();
+      XxDln cursorLine = _app->getCursorLine();
       int relLine = cursorLine - topLine;
       
       QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
@@ -274,7 +274,7 @@ void XxText::drawContents( QPainter* pp )
 
 //------------------------------------------------------------------------------
 //
-uint XxText::computeDisplayLines() const
+XxDln XxText::computeDisplayLines() const
 {
    const QFont& font = _app->getFont();
    QFontMetrics fm( font );
@@ -295,10 +295,10 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    const QFont& font = _app->getFont();
    QFontMetrics fm( font );
-   uint dlineno = event->y() / fm.lineSpacing();
-   uint lineno = _app->getTopLine() + dlineno;
+   XxDln dlineno = event->y() / fm.lineSpacing();
+   XxDln lineno = _app->getTopLine() + dlineno;
    // Check for click out of valid region.
-   if ( lineno > diffs->getNbLines() ) {
+   if ( lineno > XxDln(diffs->getNbLines()) ) {
       return;
    }
 
@@ -310,12 +310,12 @@ void XxText::mousePressEvent( QMouseEvent* event )
          _grabDeltaLineNo = dlineno;
       }
       else {
-         QPopupMenu* popup = _app->getViewPopup();
+         const XxLine& line = diffs->getLine( lineno );
+         QPopupMenu* popup = _app->getViewPopup( line );
          popup->popup( event->globalPos() );
          return;
       }
    }
-
 
    // Perform the selection and create cut text.
    QString textCopy;
@@ -339,7 +339,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       if ( line.getType() == XxLine::SAME || 
            line.getType() == XxLine::DIRECTORIES || 
            line.getSelection() == XxLine::Selection( _no ) ) {
-         int fline = line.getLineNo( _no );
+         XxFln fline = line.getLineNo( _no );
          if ( fline != -1 ) {
             uint len;
             const char* text = file->getTextLine( fline, len );
@@ -371,11 +371,11 @@ void XxText::mousePressEvent( QMouseEvent* event )
       }
 
       // Compute region text.
-      uint start, end;
+      XxDln start, end;
       diffs->findRegion( lineno, start, end );
-      for ( uint l = start; l <= end; ++l ) {
+      for ( XxDln l = start; l <= end; ++l ) {
          const XxLine& line = diffs->getLine( l );
-         int fline = line.getLineNo( _no );
+         XxFln fline = line.getLineNo( _no );
          if ( fline != -1 ) {
             uint len;
             const char* text = file->getTextLine( fline, len );
@@ -418,7 +418,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
    if ( _grab ) {
       const QFont& font = _app->getFont();
       QFontMetrics fm( font );
-      int dlineno = event->y() / fm.lineSpacing();
+      XxDln dlineno = event->y() / fm.lineSpacing();
       _app->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
    }
 }

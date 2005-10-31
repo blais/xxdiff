@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: help.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: help.cpp 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -447,8 +447,9 @@ void XxHelp::dumpUsage( std::ostream& os )
 {
    os << 
 "Usage: \n\
-   xxdiff [OPTION] <file1> <file2>\n\
-	where <fileX> can be - for stdin\n\
+   xxdiff [OPTION] <file1> <file2> [<file3>]\n\
+	where <fileX> can be - for stdin.\n\
+        Filenames can be either 2 directories, or 3 files.\n\
 \n\
 Options: \n\
    -h, --help                  Show this help message.\n\
@@ -468,13 +469,23 @@ Options: \n\
    os << "\
        --list-resources        Lists all the supported resources and default \n\
                                values.\n\
-       --title<X>=<string>     Display <string> instead of filename in \n\
+       --resource=<str>        Pass on string <str> to resource parser.\n\
+                               Resources given in this manner on the command\n\
+                               line supersede other resource mechanisms.\n\
+                               One can specify multiple resource settings by\n\
+                               repeating this option.\n\
+       --title<X>=<str>        Display <str> instead of filename in \n\
                                filename label <X>, where <X> is 1, 2 or 3 \n\
                                for left, middle or right file.\n\
-   -N, --titlein=<string>      Display <string> instead of filename given \n\
+   -N<str>, --titlein=<str>    Display <str> instead of filename given \n\
                                in stdin.\n\
    -D, --exit-on-same          If there are no differences then exit quietly\n\
                                with exit code of 0.\n\
+   -A<str>, --args=<str>       Pass on arguments in <str> to the subordinate\n\
+                               diff program.\n\
+\n\
+   Options passed on diff program as GNU diff options:\n\
+\n\
    -i, --ignore-case           Passed on to diff(1). \n\
                                Consider upper- and lower-case to be the same.\n\
    -w, --ignore-all-space      Passed on to diff(1). \n\
@@ -482,13 +493,12 @@ Options: \n\
    -b, --ignore-space-change   Passed on to diff(1).\n\
                                Ignore changes in the amount of white space.\n\
                                when comparing the two files.\n\
+   -a, --as-text               Passed on to diff(1).\n\
+                               Treat all files as text and compare them\n\
+                               line-by-line, even if they do not seem to be\n\
+                               text.\n\
    -r, --recursive             Passed on to diff(1).\n\
                                This is only meaningful for directory diffs.\n\
-       --resource=<string>     Pass on string to resource parser.\n\
-                               Resources given in this manner on the command\n\
-                               line supersede other resource mechanisms.\n\
-                               One can specify multiple resource settings by\n\
-                               repeating this option.\n\
 \n\
 ";
 }
@@ -542,3 +552,4 @@ void XxHelp::dumpResources( std::ostream& os )
 }
 
 XX_NAMESPACE_END
+

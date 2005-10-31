@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: builderFiles3.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: builderFiles3.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,13 +63,13 @@ public:
 
    // Constructor with state.
    XxParseDiffError(
-      int lineNo, 
-      int f1n1, 
-      int f1n2, 
-      int f2n1, 
-      int f2n2,
-      int f3n1, 
-      int f3n2 
+      const int   lineNo, 
+      const XxFln f1n1, 
+      const XxFln f1n2, 
+      const XxFln f2n1, 
+      const XxFln f2n2,
+      const XxFln f3n1, 
+      const XxFln f3n2 
    );
 
    // Destructor.
@@ -102,13 +102,13 @@ XxParseDiffError::XxParseDiffError()
 //------------------------------------------------------------------------------
 //
 XxParseDiffError::XxParseDiffError(
-   int lineNo,
-   int f1n1, 
-   int f1n2, 
-   int f2n1, 
-   int f2n2,
-   int f3n1, 
-   int f3n2
+   int   lineNo,
+   XxFln f1n1, 
+   XxFln f1n2, 
+   XxFln f2n1, 
+   XxFln f2n2,
+   XxFln f3n1, 
+   XxFln f3n2
 )
 {
    std::ostringstream oss;
@@ -138,12 +138,12 @@ bool parseDiffLine(
    XxLine::Type& type,
    const char*   buf, 
    int&          sno, 
-   int&          f1n1, 
-   int&          f1n2, 
-   int&          f2n1, 
-   int&          f2n2, 
-   int&          f3n1, 
-   int&          f3n2 
+   XxFln&        f1n1, 
+   XxFln&        f1n2, 
+   XxFln&        f2n1, 
+   XxFln&        f2n2, 
+   XxFln&        f3n1, 
+   XxFln&        f3n2 
 )
 {
    //
@@ -447,14 +447,15 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    }
 
    _curHunk = 0;
-   int fline1 = 1;
-   int fline2 = 1;
-   int fline3 = 1;
+   XxFln fline1 = 1;
+   XxFln fline2 = 1;
+   XxFln fline3 = 1;
 
    bool foundDifferences = false;
    std::ostringstream errors;
    char buffer[BUFSIZ+1];
-   int sno, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
+   int sno;
+   XxFln f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
    while ( fgets( buffer, BUFSIZ, fp ) != 0 ) {
       XxLine::Type type;
       if ( parseDiffLine( type, buffer,
@@ -573,10 +574,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
 //------------------------------------------------------------------------------
 //
 void XxBuilderFiles3::createIgnoreBlock( 
-   uint fline1,
-   uint fline2,
-   uint fline3,
-   uint fsize
+   XxFln fline1,
+   XxFln fline2,
+   XxFln fline3,
+   uint  fsize
 )
 {
    for ( uint ii = 0; ii < fsize; ++ii ) {

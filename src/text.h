@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: text.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: text.h 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
 #endif
 
 #ifndef INCL_QT_QFRAME
@@ -63,7 +67,7 @@ public:
    // none).
    XxText( 
       XxApp*      app, 
-      const int   no = -1,
+      const XxFno no = -1,
       QWidget*    parent = 0,
       const char* name = 0 
    );
@@ -79,7 +83,7 @@ public:
    virtual void drawContents( QPainter* );
 
    // Returns the number of lines that can be displayed.
-   uint computeDisplayLines() const;
+   XxDln computeDisplayLines() const;
 
    // Returns the width of pixels that can display text.
    uint getDisplayWidth() const;
@@ -101,11 +105,11 @@ private:
 
    /*----- data members -----*/
 
-   XxApp*    _app;
-   const int _no;
-   bool      _grab;
-   int       _grabTopLine;
-   int       _grabDeltaLineNo;
+   XxApp*      _app;
+   const XxFno _no;
+   bool        _grab;
+   XxDln       _grabTopLine;
+   int         _grabDeltaLineNo;
 
 };
 

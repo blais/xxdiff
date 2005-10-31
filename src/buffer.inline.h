@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: buffer.inline.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: buffer.inline.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,12 +63,12 @@ inline uint XxBuffer::getNbLines() const
 //------------------------------------------------------------------------------
 //
 inline const char* XxBuffer::getTextLine( 
-   const uint	lineno, 
-   uint&	length 
+   const XxFln lineno, 
+   uint&       length 
 ) const
 {
    XX_ASSERT( lineno > 0 );
-   XX_ASSERT( lineno < _index.size() );
+   XX_ASSERT( lineno < XxFln(_index.size()) );
    length = _index[ lineno ] - _index[ lineno-1 ] - 1;
    return & _buffer[ _index[ lineno-1 ] ];
 }

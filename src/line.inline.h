@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: line.inline.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: line.inline.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ inline void XxLine::setSelection( Selection selection )
 
 //------------------------------------------------------------------------------
 //
-inline bool XxLine::getSelectedText( int& no, int& fline ) const
+inline bool XxLine::getSelectedText( XxFno& no, XxFln& fline ) const
 {
    if ( _type == SAME ) {
       fline = _lineNo[ 0 ];
@@ -78,8 +78,8 @@ inline bool XxLine::getSelectedText( int& no, int& fline ) const
       return true;
    }
    if ( _selection == SEL1 || _selection == SEL2 || _selection == SEL3 ) {
-      fline = _lineNo[ int(_selection) ];
-      no = int(_selection);
+      fline = _lineNo[ XxFno(_selection) ];
+      no = XxFno(_selection);
       return true;
    }
    if ( _selection == NEITHER ) {
@@ -95,7 +95,7 @@ inline bool XxLine::getSelectedText( int& no, int& fline ) const
 
 //------------------------------------------------------------------------------
 //
-inline int XxLine::getLineNo( const int no ) const
+inline XxFln XxLine::getLineNo( const XxFno no ) const
 {
    XX_ASSERT( no == 0 || no == 1 || no == 2 );
    return _lineNo[no];
@@ -103,7 +103,7 @@ inline int XxLine::getLineNo( const int no ) const
 
 //------------------------------------------------------------------------------
 //
-inline int XxLine::getLeftHdiffPos( const int no ) const
+inline int XxLine::getLeftHdiffPos( const XxFno no ) const
 {
    XX_CHECK( no == 0 || no == 1 || no == 2 );
    return _lefthd[ no ];
@@ -111,7 +111,7 @@ inline int XxLine::getLeftHdiffPos( const int no ) const
 
 //------------------------------------------------------------------------------
 //
-inline int XxLine::getRightHdiffPos( const int no ) const
+inline int XxLine::getRightHdiffPos( const XxFno no ) const
 {
    XX_CHECK( no == 0 || no == 1 || no == 2 );
    return _righthd[ no ];
@@ -119,7 +119,7 @@ inline int XxLine::getRightHdiffPos( const int no ) const
 
 //------------------------------------------------------------------------------
 //
-inline bool XxLine::hasHorizontalDiffs( const int no ) const
+inline bool XxLine::hasHorizontalDiffs( const XxFno no ) const
 {
    XX_CHECK( no == 0 || no == 1 || no == 2 );
    return !( _lefthd[no] == -1 && _righthd[no] == -1 );
@@ -127,14 +127,14 @@ inline bool XxLine::hasHorizontalDiffs( const int no ) const
 
 //------------------------------------------------------------------------------
 // 
-inline int XxLine::getHunkId() const
+inline XxHunk XxLine::getHunkId() const
 {
    return _hunkId;
 }
 
 //------------------------------------------------------------------------------
 //
-inline void XxLine::setHunkId( int hunkId )
+inline void XxLine::setHunkId( XxHunk hunkId )
 {
    _hunkId = hunkId;
 }

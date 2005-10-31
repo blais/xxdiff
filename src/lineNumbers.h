@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: lineNumbers.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: lineNumbers.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
 #endif
 
 #ifndef INCL_QT_QFRAME
@@ -63,7 +67,7 @@ public:
    // none).
    XxLineNumbers( 
       XxApp*      app, 
-      const int   no = -1,
+      const XxFno no = -1,
       QWidget*    parent = 0,
       const char* name = 0 
    );

@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: merged.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: merged.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,8 +135,8 @@ void XxMergedText::drawContents( QPainter* pp )
    //
    // Draw appropriate content.
    //
-   uint topLine = getTopLine();
-   uint cursorLine = _app->getCursorLine();
+   XxDln topLine = getTopLine();
+   XxDln cursorLine = _app->getCursorLine();
    uint horizontalPos = _main->getHorizontalScrollbar()->value();
    uint tabWidth = resources->getTabWidth();
 
@@ -156,15 +156,16 @@ void XxMergedText::drawContents( QPainter* pp )
    int prevy = 0;
    int y = 0;
    uint nbLines = 0;
-   uint curLine = topLine;
+   XxDln curLine = topLine;
    bool prevKnown = true;
-   int prevfline = -1;
-   while ( y <= h && curLine <= diffs->getNbLines() ) {
+   XxFln prevfline = -1;
+   while ( y <= h && curLine <= XxDln( diffs->getNbLines() ) ) {
       
       // Get line to display.
       const XxLine& line = diffs->getLine( curLine );
 
-      int no, fline;
+      int no;
+      XxFln fline;
       bool known = line.getSelectedText( no, fline );
       if ( known == true ) {
          if ( fline != -1 ) {
@@ -178,7 +179,9 @@ void XxMergedText::drawContents( QPainter* pp )
                );
             }
             else {
-               XxResources::Resource res = XxResources::COLOR_BACKGROUND; // warning
+               XxResources::Resource res = XxResources::COLOR_BACKGROUND;
+               // prevent warning
+
                switch ( no ) {
                   case 0: res = XxResources::COLOR_BACK_MERGED_DECIDED_1; break;
                   case 1: res = XxResources::COLOR_BACK_MERGED_DECIDED_2; break;
@@ -300,7 +303,7 @@ void XxMergedText::horizontalScroll( int )
 void XxMergedText::adjustVertically()
 {
    // Adjust vertical scrollbar.
-   uint topLine = getTopLine();
+   XxDln topLine = getTopLine();
 
    const XxDiffs* diffs = _app->getDiffs();
    QScrollBar* vscroll = _main->getVerticalScrollbar();
@@ -312,7 +315,7 @@ void XxMergedText::adjustVertically()
       // Leave some extra space for a screenful of alternating ignore and
       // deleted markers.
       
-      uint maxLine = diffs->moveBackwardsVisibleLines(
+      XxDln maxLine = diffs->moveBackwardsVisibleLines(
          diffs->getNbLines(), _nbDisplayLines, 1
       );
       vscroll->setRange( 0, maxLine + safetyMargin );
@@ -323,36 +326,36 @@ void XxMergedText::adjustVertically()
 
 //------------------------------------------------------------------------------
 //
-uint XxMergedText::getTopLine() const
+XxDln XxMergedText::getTopLine() const
 {
-   return _main->getVerticalScrollbar()->value() + 1;
+   return XxDln( _main->getVerticalScrollbar()->value() + 1 );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxMergedText::setTopLine( uint lineNo ) const
+void XxMergedText::setTopLine( XxDln lineNo ) const
 {
    const XxDiffs* diffs = _app->getDiffs();
 
-   uint validLine = std::max(
-      (uint)1,
-      std::min( diffs->getNbLines(), lineNo )
+   XxDln validLine = std::max(
+      XxDln(1),
+      std::min( XxDln( diffs->getNbLines() ), lineNo )
    );
    
-   uint maxLine = diffs->moveBackwardsVisibleLines(
+   XxDln maxLine = diffs->moveBackwardsVisibleLines(
       diffs->getNbLines(), _nbDisplayLines, 1
    );
-   uint displayableLine = 
-      std::min( validLine, std::max( (uint)1, maxLine ) );
+   XxDln displayableLine = 
+      std::min( validLine, std::max( XxDln(1), maxLine ) );
    _main->getVerticalScrollbar()->setValue( displayableLine - 1 );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxMergedText::setCenterLine( uint lineNo )
+void XxMergedText::setCenterLine( XxDln lineNo )
 {
    const XxDiffs* diffs = _app->getDiffs();
-   uint newTopLine = diffs->moveBackwardsVisibleLines(
+   XxDln newTopLine = diffs->moveBackwardsVisibleLines(
       lineNo, _nbDisplayLines / 2, 1
    );
    setTopLine( newTopLine );
@@ -364,7 +367,7 @@ void XxMergedText::mousePressEvent( QMouseEvent* event )
 {
    const QFont& font = _app->getFont();
    QFontMetrics fm( font );
-   uint dlineno = event->y() / fm.lineSpacing();
+   XxDln dlineno = event->y() / fm.lineSpacing();
 
    // Activate popup in third button.
    if ( event->button() == RightButton &&
@@ -385,7 +388,7 @@ void XxMergedText::mouseMoveEvent( QMouseEvent* event )
    if ( _grab ) {
       const QFont& font = _app->getFont();
       QFontMetrics fm( font );
-      int dlineno = event->y() / fm.lineSpacing();
+      XxDln dlineno = event->y() / fm.lineSpacing();
       setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
    }
 }

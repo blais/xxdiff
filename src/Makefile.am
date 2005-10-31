@@ -3,8 +3,9 @@
 
 bin_PROGRAMS = xxdiff
 
+CXXFLAGS = @CXXFLAGS@ 
 CXXFLAGS += -I$(QTDIR)/include
-LDFLAGS += -L$(QTDIR)/lib
+LDFLAGS += @LDFLAGS@ -L$(QTDIR)/lib
 
 ################################################################################
 # designer dialogs
@@ -45,6 +46,8 @@ ui_dialogs: $(UIDESIGNER_FILES)
 
 EXTRA_DIST += $(UIDESIGNER_FILES)
 
+# add dependency for version
+help.o: ../configure.in
 
 ################################################################################
 # sources
@@ -65,7 +68,6 @@ xxdiff_SOURCES = \
 	markersWidgetBase.cpp \
 	app.cpp \
 	suicideMessageBox.cpp \
-	dialogs.cpp \
 	main.cpp \
 	overview.cpp \
 	text.cpp \
@@ -100,7 +102,6 @@ noinst_HEADERS = \
 	app.h \
 	app.inline.h \
 	suicideMessageBox.h \
-	dialogs.h \
 	defs.h \
 	diffs.h \
 	diffs.inline.h \
@@ -370,4 +371,3 @@ MAINTAINERCLEANFILES = xxdiff.catman man.h \
 	$(UIDESIGNER_HEADERS) $(UIDESIGNER_SOURCES)
 
 
-MOC=$(QTDIR)/bin/moc

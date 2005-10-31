@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: exceptions.cpp 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,10 +129,11 @@ XxInternalError::XxInternalError( const char* file, int line )
        << "  line=" << line << std::endl;
    oss << std::endl;
    oss << "There has been an internal error within xxdiff." << std::endl
-       << "To report bugs, send email to blais@iro.umontreal.ca" << std::endl
-       << "with the above information above and if possible, the" << std::endl
-       << "texts that caused the error, and as much detail as you" << std::endl
-       << "can to reproduce the error." << std::endl;
+       << "To report bugs, please use the sourceforge bug tracker" << std::endl
+       << "at http://sourceforge.net/tracker/?group_id=2198" << std::endl
+       << "and log the above information above and if possible," << std::endl
+       << "the files that caused the error, and as much detail as" << std::endl
+       << "you can to reproduce the error." << std::endl;
    _msg = oss.str();
 }
 
@@ -149,6 +150,5 @@ const char* XxInternalError::what() const XX_THROW_NOTHING
    return _msg.c_str();
 }
 
-
-
 XX_NAMESPACE_END
+

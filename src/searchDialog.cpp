@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: searchDialog.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: searchDialog.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 
 #include <qlineedit.h>
 #include <qpushbutton.h>
+#include <qcombobox.h>
 
 XX_NAMESPACE_BEGIN
 
@@ -59,6 +60,9 @@ XxSearchDialog::XxSearchDialog(
             _app, SLOT( searchForward() ) );
    connect( _buttonPrevious, SIGNAL( clicked() ),
             _app, SLOT( searchBackward() ) );
+
+   connect( _buttonGotoLine, SIGNAL( clicked() ),
+            this, SLOT( onGotoLine() ) );
 }
 
 //------------------------------------------------------------------------------
@@ -70,6 +74,25 @@ void XxSearchDialog::onApply()
    if ( diffs != 0 && searchText != 0 ) {
       diffs->search( searchText, _app->getNbFiles(), _app->getFiles() );
    }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxSearchDialog::onGotoLine()
+{
+   const char* glinetext = _lineeditGotoLine->text().ascii();
+   int gline = atoi( glinetext );
+   
+   static int ind[3] = { 0, 2, 1 };
+   XX_ASSERT( _comboGotoWhichFile->currentItem() < 3 );
+   XxFno fno = ind[ _comboGotoWhichFile->currentItem() ];
+   if ( fno == 2 && _app->getNbFiles() == 2 ) {
+      fno = 1;
+   }
+
+   XxDiffs* diffs = _app->getDiffs();
+   XxDln dline = diffs->getDisplayLine( gline, fno );
+   _app->setCursorLine( dline );
 }
 
 XX_NAMESPACE_END

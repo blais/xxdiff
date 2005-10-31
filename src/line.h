@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: line.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: line.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
 #endif
 
 
@@ -105,16 +109,16 @@ public:
    // Constructor (3-way).
    // For DIFF regions who have one side blank just specify -1 for that side.
    XxLine( 
-      Type type,
-      int  fline0,
-      int  fline1,
-      int  fline2 = -1
+      Type  type,
+      XxFln fline0,
+      XxFln fline1,
+      XxFln fline2 = -1
    );
 
    // Returns the line number in the file NOT in the diffs.  If the line for
    // the requested file nb. does not correspond to any actual file text, return
    // -1.
-   int getLineNo( const int no ) const;
+   XxFln getLineNo( const XxFno no ) const;
 
    // Get the type.
    Type getType() const;
@@ -128,7 +132,7 @@ public:
    // Returns the file no and line number of the selected text.  If the selected
    // text has no content, no will be set to -1.  Returns false if the content
    // is unknown, true otherwise.
-   bool getSelectedText( int& no, int& fline ) const;
+   bool getSelectedText( XxFno& no, XxFln& fline ) const;
 
    // Compute (initialize) horizontal brackets.
    void initializeHorizontalDiff( 
@@ -142,22 +146,22 @@ public:
    );
 
    // Returns true if this line has horizontal diffs.
-   bool hasHorizontalDiffs( const int no ) const;
+   bool hasHorizontalDiffs( const XxFno no ) const;
 
    // Returns the left/right horizontal diff position (in chars) for side no.
    // <group>
-   int getLeftHdiffPos( const int no ) const;
-   int getRightHdiffPos( const int no ) const;
+   int getLeftHdiffPos( const XxFno no ) const;
+   int getRightHdiffPos( const XxFno no ) const;
    // </group>
 
    // Get/set the hunk id.
    // <group>
-   int getHunkId() const;
-   void setHunkId( int hunkId );
+   XxHunk getHunkId() const;
+   void setHunkId( XxHunk hunkId );
    // </group>
 
    // Gets the split part of a line, for a certain side.
-   XxLine getSplit( const int no ) const;
+   XxLine getSplit( const XxFno no ) const;
 
    // Builds a promoted line--that is, a line that has been promoted to a
    // different type with an empty side.  This surely seems weird, and it is
@@ -196,10 +200,10 @@ private:
 
    /*----- data members -----*/
 
-   int		_lineNo[3];
+   XxFln	_lineNo[3];
    Type		_type;
    Selection	_selection;
-   int		_hunkId; // This is used for split/swap/join.
+   XxHunk	_hunkId; // This is used for split/swap/join.
 
    // horizontal diff brackets
 

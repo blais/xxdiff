@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: diffs.inline.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: diffs.inline.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,17 +41,17 @@ inline uint XxDiffs::getNbLines() const
 
 //------------------------------------------------------------------------------
 //
-inline const XxLine& XxDiffs::getLine( const uint lineno ) const
+inline const XxLine& XxDiffs::getLine( const XxDln lineno ) const
 {
-   XX_ASSERT( lineno > 0 && lineno <= _lines.size() );
+   XX_ASSERT( lineno > 0 && lineno <= XxDln(_lines.size()) );
    return _lines[ lineno - 1 ];
 }
 
 //------------------------------------------------------------------------------
 //
-inline XxLine& XxDiffs::getLineNC( const uint lineno )
+inline XxLine& XxDiffs::getLineNC( const XxDln lineno )
 {
-   XX_ASSERT( lineno > 0 && lineno <= _lines.size() );
+   XX_ASSERT( lineno > 0 && lineno <= XxDln(_lines.size()) );
    return _lines[ lineno - 1 ];
 }
 

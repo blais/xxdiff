@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: diffs.h 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: diffs.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  *****************************************************************************/
-
 
 #ifndef INCL_XXDIFF_DIFFS
 #define INCL_XXDIFF_DIFFS
@@ -90,15 +89,15 @@ public:
       SeaResult();
 
       // Constructor.
-      SeaResult( int lineNo, int fline[3] );
+      SeaResult( const XxDln lineNo, const XxFln fline[3] );
 
       // Returns true if valid.
       bool isValid() const;
 
       /*----- data members -----*/
 
-      int _lineNo;
-      int _fline[3];
+      XxDln _lineNo;
+      XxFln _fline[3];
    };
 
    /*----- member functions -----*/
@@ -125,22 +124,25 @@ public:
    // unselected changes (undecided regions) as unselChangesLines lines each.
    // Talk about a specialized function!  This one is for the merged view
    // scrollbar resizing.  It returns the line number of the top visible line.
-   uint moveBackwardsVisibleLines(
-      uint startingLine,
-      uint nbLines,
-      uint unselChangesLines
+   XxDln moveBackwardsVisibleLines(
+      XxDln startingLine,
+      uint  nbLines,
+      uint  unselChangesLines
    ) const;
 
    // Returns a display line.  Remember that lines start counting at 1.  Note:
    // be careful with the non-const version, if you change the line's state
    // yourself, you need to call for a redraw.
-   const XxLine& getLine( const uint lineno ) const;
+   const XxLine& getLine( const XxDln lineno ) const;
+
+   // Given a file line number in a specific file, returns the display line no.
+   XxDln getDisplayLine( const XxFln fline, const XxFno fno ) const;
 
    // Applies a selection to a line.
-   void selectLine( uint lineNo, XxLine::Selection selection );
+   void selectLine( XxDln lineNo, XxLine::Selection selection );
 
    // Applies a selection to a set of lines whose type is contiguous.
-   void selectRegion( uint lineNo, XxLine::Selection selection );
+   void selectRegion( XxDln lineNo, XxLine::Selection selection );
 
    // Applies a selection globally.
    void selectGlobal( XxLine::Selection selection );
@@ -151,9 +153,9 @@ public:
    // Returns the extents and type of a region that contains a certain line no.
    // <group>
    XxLine::Type findRegion( 
-      uint  lineNo, 
-      uint& regionStart,
-      uint& regionEnd
+      XxDln  lineNo, 
+      XxDln& regionStart,
+      XxDln& regionEnd
    ) const;
    // </group>
 
@@ -161,9 +163,9 @@ public:
    // no. and that has the same selection properties.
    // <group>
    XxLine::Type findRegionWithSel( 
-      uint  lineNo, 
-      uint& regionStart,
-      uint& regionEnd
+      XxDln  lineNo, 
+      XxDln& regionStart,
+      XxDln& regionEnd
    ) const;
    // </group>
 
@@ -174,36 +176,36 @@ public:
    // neighboring region which has text only on the other side, then the regions
    // are swapped in order; and if those regions have already been swapped, they
    // are joined again.  Return true if the operation was a join.
-   bool splitSwapJoin( uint lineNo, uint nbFiles );
+   bool splitSwapJoin( XxDln lineNo, uint nbFiles );
 
    // Searches for the next/previous difference region.  Returns -1 if not
    // found.
    // <group>
-   int findNextDifference( uint lineNo ) const;
-   int findPreviousDifference( uint lineNo ) const;
+   XxDln findNextDifference( XxDln lineNo ) const;
+   XxDln findPreviousDifference( XxDln lineNo ) const;
    // </group>
 
    // Searches for the next/previous unselected region.  Returns -1 if not
    // found.
    // <group>
-   int findNextUnselected( uint lineNo ) const;
-   int findPreviousUnselected( uint lineNo ) const;
+   XxDln findNextUnselected( XxDln lineNo ) const;
+   XxDln findPreviousUnselected( XxDln lineNo ) const;
    // </group>
 
    // Returns the number of non-blank lines between start and end.
    uint getNbFileLines( 
-      uint no,
-      uint start,
-      uint end
+      XxFno no,
+      XxDln start,
+      XxDln end
    ) const;
 
    // Returns the closest (floor) file line for the given display line.  The
    // actuallyEmpty parameter is set to true if that line is actually empty for
    // that file no.
-   uint getFileLine( 
-      uint no,
-      uint lineNo,
-      bool&        actuallyEmpty
+   XxFln getFileLine( 
+      XxFno no,
+      XxDln lineNo,
+      bool& actuallyEmpty
    ) const;
 
    // Dirty bit management.  The diffs become dirty if selection changes. 
@@ -249,8 +251,8 @@ public:
 
    // Finds the next/previous search results.
    // <group>
-   SeaResult findNextSearch( uint lineNo ) const;
-   SeaResult findPreviousSearch( uint lineNo ) const;
+   SeaResult findNextSearch( XxDln lineNo ) const;
+   SeaResult findPreviousSearch( XxDln lineNo ) const;
    // </group>
 
    // Initialize horizontal diffs for lines.
@@ -264,7 +266,7 @@ public:
    void merge();
 
    // Check if all selections are of the specified no.  If so return true.
-   bool checkSelections( uint no ) const;
+   bool checkSelections( const XxLine::Selection sel ) const;
 
    // Returns true if this diffs is a directory diffs.
    bool isDirectoryDiff() const;
@@ -287,16 +289,16 @@ private:
    // This is simply a non-const version of getLine().  It barfs with MIPSpro
    // 7.3 if it overloads the public const version so the name had to be
    // changed.
-   XxLine& getLineNC( const uint lineno );
+   XxLine& getLineNC( const XxDln lineno );
 
    // Split region into a new set of lines.  Push new lines onto given vector.
    // This is a convenience method.
    void splitTwoRegions(
       std::vector<XxLine>& newLines, 
-      uint start,
-      uint end,
-      uint s1,
-      uint s2
+      XxDln                start,
+      XxDln                end,
+      XxFno                s1,
+      XxFno                s2
    ) const;
 
    // Make really sure the line numbers are sequential.  This is zealous and

@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: app.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: app.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@
 #include <optionsDialog.h>
 #include <searchDialog.h>
 #include <markersFileDialog.h>
-#include <dialogs.h>
 #include <stringResParser.h>
 #ifdef XX_USE_XRM
 #include <xrmParser.h>
@@ -82,7 +81,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <unistd.h>
 #include <stdlib.h>
 #include <libgen.h>
@@ -136,7 +135,10 @@ enum MenuIds {
    ID_ToggleQualityHighest,
    ID_TabsAtThree,
    ID_TabsAtFour,
-   ID_TabsAtEight
+   ID_TabsAtEight,
+   ID_View_DiffFilesAtCursor,
+   ID_View_CopyRightToLeft,
+   ID_View_CopyLeftToRight 
 };
 
 
@@ -172,7 +174,7 @@ private:
    XxApp* _app;
 
 };
-
+ 
 //------------------------------------------------------------------------------
 //
 XxMainWindow::XxMainWindow( 
@@ -375,7 +377,7 @@ using namespace std;
 
 /*----- static data members -----*/
 
-int              XxApp::_sockfd = -1;
+int XxApp::_sockfd = -1;
 QSocketNotifier* XxApp::_socketNotifier = 0;
 
 
@@ -474,7 +476,7 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    synchronizeUI();
 
    if ( _nbFiles != 0 ) {
-      for ( int ii = 0; ii < _nbFiles; ++ii ) {
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
          readFile(
             ii,
             filenames[ii].c_str(),
@@ -494,8 +496,15 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    // Sets the title bar.
    if ( _nbFiles == 2 ) {
       QString str = 
-         QString(_files[0]->getName()) + " <-> " + 
-         QString(_files[1]->getName());
+         QString(_files[0]->getDisplayName()) + " <-> " + 
+         QString(_files[1]->getDisplayName());
+      _mainWindow->setCaption( str );
+   }
+   else if ( _nbFiles == 3 ) {
+      QString str = 
+         QString(_files[0]->getDisplayName()) + " <-> " + 
+         QString(_files[1]->getDisplayName()) + " <-> " + 
+         QString(_files[2]->getDisplayName());
       _mainWindow->setCaption( str );
    }
    else {
@@ -564,7 +573,7 @@ uint XxApp::readFileNames(
    bool stdinUsed = false;
    uint nbPathFiles = 0;
    int filePathIndex = -1;
-   for ( int ii = 0; ii < 3; ++ii ) {
+   for ( XxFno ii = 0; ii < 3; ++ii ) {
       if ( argc > ii ) {
          if ( strcmp( argv[ii], "-" ) == 0 ) {
             if ( stdinUsed == true ) {
@@ -605,7 +614,7 @@ uint XxApp::readFileNames(
    }
 
    bool stdinCopied = false;
-   for ( int ii = 0; ii < 3; ++ii ) {
+   for ( XxFno ii = 0; ii < 3; ++ii ) {
       if ( argc > ii ) {
          XX_ASSERT( argv[ii] );
 
@@ -614,7 +623,7 @@ uint XxApp::readFileNames(
             stdinCopied = true;
             
             displayFilenames[ii] = _stdinFilename;
-            char temporaryFilename[32] = "xxdiff.XXXXXX";
+            char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
             int tfd = mkstemp( temporaryFilename );
             FILE *fout;
             if ( ( fout = fdopen( tfd, "w") ) == NULL ) {
@@ -1085,9 +1094,17 @@ void XxApp::createMenus()
    // View menu
    QPopupMenu* viewMenu = new QPopupMenu;
    if ( _filesAreDirectories == true ) {
-      viewMenu->insertItem( 
+      _menuids[ ID_View_DiffFilesAtCursor ] = viewMenu->insertItem( 
          "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
          _resources->getAccelerator( XxResources::ACCEL_DIFF_FILES_AT_CURSOR )
+      );
+      _menuids[ ID_View_CopyLeftToRight ] = viewMenu->insertItem( 
+         "Copy left file on right", this, SLOT(copyFileLeftToRight()),
+         _resources->getAccelerator( XxResources::ACCEL_COPY_LEFT_TO_RIGHT )
+      );
+      _menuids[ ID_View_CopyRightToLeft ] = viewMenu->insertItem( 
+         "Copy right file on left", this, SLOT(copyFileRightToLeft()),
+         _resources->getAccelerator( XxResources::ACCEL_COPY_RIGHT_TO_LEFT )
       );
       viewMenu->insertSeparator();
    }
@@ -1478,7 +1495,7 @@ void XxApp::createMenus()
 //------------------------------------------------------------------------------
 //
 void XxApp::readFile( 
-   const int   no, 
+   const XxFno no, 
    const char* filename,
    const char* displayFilename,
    bool        isTemporary
@@ -1534,7 +1551,7 @@ void XxApp::readFile(
 
 //------------------------------------------------------------------------------
 //
-void XxApp::reReadFile( const int no )
+void XxApp::reReadFile( const XxFno no )
 {
    XX_ASSERT( 0 <= no && no <= 2 );
 
@@ -1589,7 +1606,7 @@ bool XxApp::processDiff()
    
    // Important note: this method assumes that the nbFiles have already been
    // loaded.
-   for ( int ii = 0; ii < _nbFiles; ++ii ) {
+   for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
       XX_ASSERT( _files[ii].get() != 0 );
    }
    
@@ -1674,7 +1691,12 @@ bool XxApp::processDiff()
       }
    }
    else {
-      XX_ASSERT( _nbFiles == 2 );
+      if ( _nbFiles != 2 ) {
+         std::cerr << "Directory diffs can only be performed with two files."
+                   << std::ends;
+         throw new XxUsageError;
+      }
+
       XxBuilderDirs2 builder(
          _resources->getBoolOpt( XxResources::DIRDIFF_BUILD_FROM_OUTPUT ),
          _resources->getBoolOpt( XxResources::DIRDIFF_RECURSIVE ),
@@ -1737,7 +1759,7 @@ bool XxApp::processDiff()
       
       // Sanity check: check that the number of file lines are smaller than the
       // number of diff lines.
-      for ( int ii = 0; ii < _nbFiles; ++ii ) {
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
          if ( _files[ii]->getNbLines() > _diffs->getNbLines() ) {
             throw new XxInternalError( XX_INTERROR_PARAMS );
          }
@@ -1797,12 +1819,14 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
       { "titlein", 1, 0, 'N' }, // This is kept for xdiff compatibility only.
       { "resource", 1, 0, 'R' },
       { "recursive", 0, 0, 'r' },
+      { "as-text", 0, 0, 'a' },
+      { "args", 1, 0, 'A' },
       { 0, 0, 0, 0 }
    }; 
    
    // Do the parsing.
    while ( true ) {
-      int c = getopt_long( argc, argv, "hvDwbimrN:", longOptions,
+      int c = getopt_long( argc, argv, "hvDwbimrN:aA:", longOptions,
                            &optionIndex );
       if ( c == -1 ) {
          break;
@@ -1857,12 +1881,20 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
          case 'w':
          case 'b':
          case 'i':
+         case 'a':
             char optionString[4];
             optionString[0] = ' ';
             optionString[1] = '-';
             optionString[2] = c;
             optionString[3] = 0;
             _extraDiffArgs.append( optionString );
+            break;
+
+         case 'A':
+            if ( !optarg ) {
+               throw new XxUsageError;
+            }
+            _extraDiffArgs.append( optarg );
             break;
 
          case 'm':
@@ -1973,7 +2005,7 @@ void XxApp::outputDiffErrors( const char* errors )
 uint XxApp::computeTextWidth() const
 {
    uint textWidth = 0;
-   for ( int ii = 0; ii < _nbFiles; ++ii ) {
+   for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
       textWidth = std::max( textWidth, _files[ii]->computeTextWidth( 
          _font, _resources->getTabWidth()
       ) );
@@ -2006,8 +2038,25 @@ QRect XxApp::getMainWindowGeometry() const
 
 //------------------------------------------------------------------------------
 //
-QPopupMenu* XxApp::getViewPopup() const
+QPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
 {
+   if ( _filesAreDirectories == true ) {
+      XxDln cursorLine = getCursorLine();
+      const XxLine& line = _diffs->getLine( cursorLine );
+
+      XxFln no1 = line.getLineNo( 0 );
+      XxFln no2 = line.getLineNo( 1 );
+      // Note: can only have two files.
+      bool dirs = line.getType() == XxLine::DIRECTORIES;
+
+      _viewPopup->setItemEnabled( _menuids[ ID_View_DiffFilesAtCursor ],
+                                  ( no1 != -1 && no2 != -1 ) );
+      _viewPopup->setItemEnabled( _menuids[ ID_View_CopyRightToLeft ],
+                                  ( no2 != -1 && !dirs ) );
+      _viewPopup->setItemEnabled( _menuids[ ID_View_CopyLeftToRight ],
+                                  ( no1 != -1 && !dirs ) );
+   }
+
    return _viewPopup;
 }
 
@@ -2049,7 +2098,7 @@ void XxApp::adjustScrollbars( bool force )
    // Vertical scrollbar.
    if ( force == true || 
         _displayHeight != (uint)_text[0]->height() ) {
-      uint displayLines = _text[0]->computeDisplayLines();
+      XxDln displayLines = _text[0]->computeDisplayLines();
       if ( force == true || 
            _displayLines != displayLines ) {
          _displayLines = displayLines;
@@ -2058,7 +2107,7 @@ void XxApp::adjustScrollbars( bool force )
             _vscroll[1]->setSteps( 1, _displayLines );
          }
 
-         uint topLine = getTopLine();
+         XxDln topLine = getTopLine();
 
          if ( _diffs.get() == 0 ) {
             _vscroll[0]->setRange( 0,0 );
@@ -2067,8 +2116,8 @@ void XxApp::adjustScrollbars( bool force )
             }
          }
          else {
-            uint maxLine = 
-               std::max( 0, int( _diffs->getNbLines() - _displayLines + 1 ) );
+            XxDln maxLine = 
+               std::max( 0, XxDln( _diffs->getNbLines() - _displayLines + 1 ) );
             _vscroll[0]->setRange( 0, maxLine );
             if ( _vscroll[1] != 0 ) {
                _vscroll[1]->setRange( 0, maxLine );
@@ -2137,20 +2186,20 @@ uint XxApp::getHorizontalPos() const
 
 //------------------------------------------------------------------------------
 //
-uint XxApp::setTopLine( int lineNo )
+XxDln XxApp::setTopLine( const XxDln lineNo )
 {
    if ( _diffs.get() == 0 ) {
       return 1;
    }
 
-   uint oldLine = getTopLine();
-   uint validLine = 
-      std::max( 1, std::min( (int)_diffs->getNbLines(), lineNo ) );
-   uint displayableLine = 
+   XxDln oldLine = getTopLine();
+   XxDln validLine = 
+      std::max( XxDln(1), std::min( XxDln(_diffs->getNbLines()), lineNo ) );
+   XxDln displayableLine = 
       std::min(
          validLine, 
-         std::max( (uint)1, 
-                   _diffs->getNbLines() - (getNbDisplayLines() - 2) )
+         std::max( XxDln(1), 
+                   XxDln(_diffs->getNbLines() - (getNbDisplayLines() - 2)) )
       );
    _vscroll[0]->setValue( displayableLine - 1 );
    if ( _vscroll[1] != 0 ) {
@@ -2165,13 +2214,13 @@ uint XxApp::setTopLine( int lineNo )
 
 //------------------------------------------------------------------------------
 //
-uint XxApp::setCenterLine( int lineNo )
+XxDln XxApp::setCenterLine( const XxDln lineNo )
 {
    if ( _diffs.get() == 0 ) {
       return 1;
    }
 
-   uint oldLine = getCenterLine();
+   XxDln oldLine = getCenterLine();
 
    setTopLine( lineNo - getNbDisplayLines() / 2 );
 
@@ -2180,13 +2229,13 @@ uint XxApp::setCenterLine( int lineNo )
 
 //------------------------------------------------------------------------------
 //
-uint XxApp::setBottomLine( int lineNo )
+XxDln XxApp::setBottomLine( const XxDln lineNo )
 {
    if ( _diffs.get() == 0 ) {
       return 1;
    }
 
-   uint oldLine = getBottomLine();
+   XxDln oldLine = getBottomLine();
 
    setTopLine( lineNo - (getNbDisplayLines() - 2) );
 
@@ -2195,13 +2244,13 @@ uint XxApp::setBottomLine( int lineNo )
 
 //------------------------------------------------------------------------------
 //
-uint XxApp::setCursorLine( int lineNo )
+XxDln XxApp::setCursorLine( const XxDln lineNo )
 {
-   uint oldLine = _cursorLine;
+   XxDln oldLine = _cursorLine;
 
    // Validate and set.
-   uint validLine = 
-      std::max( 1, std::min( (int)getNbLines(), lineNo ) );
+   XxDln validLine = 
+      std::max( XxDln(1), std::min( XxDln(getNbLines()), lineNo ) );
    _cursorLine = validLine;
 
    // Scroll to display.
@@ -2222,7 +2271,7 @@ uint XxApp::setCursorLine( int lineNo )
 //
 bool XxApp::adjustCursor()
 {
-   uint oldLine = _cursorLine;
+   XxDln oldLine = _cursorLine;
    _cursorLine = 
       std::max( getTopLine(), std::min( getBottomLine(), oldLine ) );
    if ( _cursorLine != oldLine ) {
@@ -2237,10 +2286,10 @@ bool XxApp::adjustCursor()
 void XxApp::updateLineNumberLabels( int cursorLine )
 {
    if ( _diffs.get() != 0 ) {
-      for ( int ii = 0; ii < _nbFiles; ++ii ) {
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
          bool aempty;
 
-         int fline = _diffs->getFileLine( ii, cursorLine, aempty );
+         XxFln fline = _diffs->getFileLine( ii, cursorLine, aempty );
          _lineNumberLabel[ii]->setNum( fline );
       }
    }
@@ -2250,7 +2299,7 @@ void XxApp::updateLineNumberLabels( int cursorLine )
 //
 void XxApp::repaintTexts()
 {
-   for ( int ii = 0; ii < _nbFiles; ++ii ) {
+   for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
       _lineNumbers[ii]->update();
       _text[ii]->update();
    }
@@ -2282,19 +2331,31 @@ void XxApp::saveToFile( const char* filename, const bool ask )
    if ( !allSelected ) {
       
       // Bring the user to the first unselected region.
-      int nextNo = _diffs->findNextUnselected( 0 );
+      XxDln nextNo = _diffs->findNextUnselected( 0 );
       XX_ASSERT( nextNo != -1 );
       setCursorLine( nextNo );
       setCenterLine( nextNo );
    }
 
+   // Remove ClearCase extended syntax if it is there.
+   std::string ffilename( filename );
+   std::string::size_type bpos = ffilename.find( "@@" );
+   QString cleanname;
+   if ( bpos != std::string::npos ) {
+      std::string ss( ffilename, 0, bpos );
+      cleanname = ss.c_str();
+   }
+   else {
+      cleanname = filename;
+   }
+   
    QString f;
    bool useConditionals = false;
    std::string conditionalVar1, conditionalVar2;
    if ( !allSelected ) {
 
       f = XxMarkersFileDialog::getSaveFileName( 
-         QString( filename ), QString::null, _mainWindow,
+         cleanname, QString::null, _mainWindow,
          _nbFiles == 3,
          useConditionals, conditionalVar1, conditionalVar2
       );
@@ -2308,7 +2369,7 @@ void XxApp::saveToFile( const char* filename, const bool ask )
    }
    else if ( ask == true || !allSelected ) {
       f = QFileDialog::getSaveFileName( 
-         QString( filename ), QString::null, _mainWindow
+         cleanname, QString::null, _mainWindow
       );
       if ( f.isEmpty() ) {
          // The user cancelled the dialog.
@@ -2316,7 +2377,7 @@ void XxApp::saveToFile( const char* filename, const bool ask )
       }
    }
    else {
-      f = filename;
+      f = cleanname;
    }
    XX_ASSERT( !f.isEmpty() );
    
@@ -2472,13 +2533,13 @@ void XxApp::editDone()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::openFile( const int no )
+void XxApp::openFile( const XxFno no )
 {
    // Read in the file names.
    std::string filenames[3];
    std::string displayFilenames[3];
    bool isTemporary[3] = { false, false, false };
-   for ( int ii = 0; ii < _nbFiles; ++ii ) {
+   for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
       filenames[ii] = _files[ii]->getName();
       displayFilenames[ii] = _files[ii]->getDisplayName();
       isTemporary[ii] = _files[ii]->isTemporary();
@@ -2535,7 +2596,7 @@ void XxApp::selectAndNext( XxLine::Selection selection )
 {
    if ( _diffs.get() != 0 ) {
       _diffs->selectRegion( getCursorLine(), selection );
-      int nextNo = _diffs->findNextUnselected( _cursorLine );
+      XxDln nextNo = _diffs->findNextUnselected( _cursorLine );
       if ( nextNo == -1 ) {
          // Otherwise look from beginning of file.
          nextNo = _diffs->findNextUnselected( 1 );
@@ -2554,13 +2615,13 @@ void XxApp::selectAndNext( XxLine::Selection selection )
 //
 void XxApp::onRedoDiff()
 {
-   uint nbFiles = getNbFiles();
+   XxFno nbFiles = getNbFiles();
    if ( nbFiles > 0 ) {
-      uint cursorLine = getCursorLine();
-      uint centerLine = getCenterLine();
+      XxDln cursorLine = getCursorLine();
+      XxDln centerLine = getCenterLine();
 
       // Reread the files.
-      for ( uint ii = 0; ii < nbFiles; ++ii ) {
+      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
          reReadFile( ii );
       }
 
@@ -2659,7 +2720,7 @@ bool XxApp::validateNeedToSave( uint no ) const
       return false;
    }
 
-   if ( _diffs->checkSelections( no ) == true ) {
+   if ( _diffs->checkSelections( XxLine::Selection(no) ) == true ) {
       // Pop a dialog.
       using namespace std;
       ostringstream oss;
@@ -2851,11 +2912,11 @@ void XxApp::searchBackward()
 //
 void XxApp::scrollDown()
 {
-   uint diff = (getNbDisplayLines() - 3);
+   XxDln diff = (getNbDisplayLines() - 3);
    // Note: we leave 3 lines in common.
 
    // Scroll.
-   uint topLine = getTopLine();
+   XxDln topLine = getTopLine();
    setTopLine( topLine + diff );
 
    // Keep cursor in center.
@@ -2871,11 +2932,11 @@ void XxApp::scrollDown()
 //
 void XxApp::scrollUp()
 {
-   uint diff = (getNbDisplayLines() - 3);
+   XxDln diff = (getNbDisplayLines() - 3);
    // Note: we leave 3 lines in common.
 
    // Scroll.
-   uint topLine = getTopLine();
+   XxDln topLine = getTopLine();
    setTopLine( topLine - diff );
 
    // Keep cursor in center.
@@ -2962,16 +3023,17 @@ void XxApp::diffFilesAtCursor()
       return;
    }
 
-   int cursorLine = getCursorLine();
+   XxDln cursorLine = getCursorLine();
    const XxLine& line = _diffs->getLine( cursorLine );
    if ( line.getType() == XxLine::SAME ||
         line.getType() == XxLine::DIFF_ALL || 
         line.getType() == XxLine::DIRECTORIES ) {
 
+      // Get filenames.
       std::string filenames[2];
-      for ( int ii = 0; ii < 2; ++ii ) {
+      for ( XxFno ii = 0; ii < 2; ++ii ) {
          bool empty;
-         uint fline = _diffs->getFileLine( ii, cursorLine, empty );
+         XxFln fline = _diffs->getFileLine( ii, cursorLine, empty );
          XX_ASSERT( empty == false );
 
          filenames[ii] = _files[ii]->getFileAtLine( fline );
@@ -2988,10 +3050,86 @@ void XxApp::diffFilesAtCursor()
 
 //------------------------------------------------------------------------------
 //
+void XxApp::copyFileLeftToRight()
+{
+   copyFile( 0 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::copyFileRightToLeft()
+{
+   copyFile( 1 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::copyFile( XxFno nnno ) const
+{
+   XX_ASSERT( _filesAreDirectories == true );
+   if ( _nbFiles != 2 || _diffs.get() == 0 ) {
+      return;
+   }
+
+   const XxFno nosrc = nnno;
+   const XxFno nodst = ( nnno + 1 ) % 2;
+
+   // First check if the file on the right exists, both by diff contents and by
+   // stat'ing file.
+   XxDln cursorLine = getCursorLine();
+   const XxLine& line = _diffs->getLine( cursorLine );
+
+   // Get filenames.
+   XxFln fline = line.getLineNo( nosrc );
+   if ( fline == -1 ) {
+      QMessageBox* box = new XxSuicideMessageBox( 
+         _mainWindow, "Error.", "File is empty.", QMessageBox::Warning
+      );
+      box->show();
+      return;
+   }
+   std::string filesrc = _files[nosrc]->getFileAtLine( fline );
+         
+   // If the destination file is empty, the filename should be the
+   // directory name only.
+   fline = line.getLineNo( nodst );
+   std::string filedst;
+   if ( fline == -1 ) {
+      filedst = _files[nodst]->getName();
+   }
+   else {
+      filedst = _files[nodst]->getFileAtLine( fline );
+
+      struct stat buf;
+      if ( stat( filedst.c_str(), &buf ) == 0 ) {
+         int resp = QMessageBox::warning( 
+            _mainWindow, "xxdiff", "File exists, overwrite?",
+            "Ok", "Cancel", QString::null, 0, 1
+         );
+         if ( resp == 1 ) {
+            // User has canceled.
+            return;
+         }
+         // Continue anyway.
+      }
+   }
+
+   // Copy file.
+   if ( XxUtil::copyFile( filesrc.c_str(), filedst.c_str() ) != 0 ) {
+      QMessageBox* box = new XxSuicideMessageBox( 
+         _mainWindow, "Error.", "Error copying file.", QMessageBox::Warning 
+      );
+      box->show();
+      return;
+   }
+}
+
+//------------------------------------------------------------------------------
+//
 void XxApp::nextDifference()
 {
    if ( _diffs.get() != 0 ) {
-      int nextNo = _diffs->findNextDifference( _cursorLine );
+      XxDln nextNo = _diffs->findNextDifference( _cursorLine );
       if ( nextNo != -1 ) {
          setCursorLine( nextNo );
          setCenterLine( nextNo );
@@ -3008,7 +3146,7 @@ void XxApp::nextDifference()
 void XxApp::previousDifference()
 {
    if ( _diffs.get() != 0 ) {
-      int nextNo = _diffs->findPreviousDifference( _cursorLine );
+      XxDln nextNo = _diffs->findPreviousDifference( _cursorLine );
       if ( nextNo != -1 ) {
          setCursorLine( nextNo );
          setCenterLine( nextNo );
@@ -3025,7 +3163,7 @@ void XxApp::previousDifference()
 void XxApp::nextUnselected()
 {
    if ( _diffs.get() != 0 ) {
-      int nextNo = _diffs->findNextUnselected( _cursorLine );
+      XxDln nextNo = _diffs->findNextUnselected( _cursorLine );
       if ( nextNo != -1 ) {
          setCursorLine( nextNo );
          setCenterLine( nextNo );
@@ -3042,7 +3180,7 @@ void XxApp::nextUnselected()
 void XxApp::previousUnselected()
 {
    if ( _diffs.get() != 0 ) {
-      int nextNo = _diffs->findPreviousUnselected( _cursorLine );
+      XxDln nextNo = _diffs->findPreviousUnselected( _cursorLine );
       if ( nextNo != -1 ) {
          setCursorLine( nextNo );
          setCenterLine( nextNo );
@@ -3242,7 +3380,7 @@ void XxApp::regionSplitSwapJoin()
 void XxApp::selectLineLeft()
 {
    if ( _diffs.get() != 0 ) {
-      uint lineNo = getCursorLine();
+      XxDln lineNo = getCursorLine();
       _diffs->selectLine( lineNo, XxLine::SEL1 );
    }
 }
@@ -3252,7 +3390,7 @@ void XxApp::selectLineLeft()
 void XxApp::selectLineMiddle()
 {
    if ( _diffs.get() != 0 ) {
-      uint lineNo = getCursorLine();
+      XxDln lineNo = getCursorLine();
       _diffs->selectLine( lineNo, XxLine::SEL2 );
    }
 }
@@ -3262,7 +3400,7 @@ void XxApp::selectLineMiddle()
 void XxApp::selectLineRight()
 {
    if ( _diffs.get() != 0 ) {
-      uint lineNo = getCursorLine();
+      XxDln lineNo = getCursorLine();
       _diffs->selectLine( lineNo,
                           _nbFiles == 2 ? XxLine::SEL2 : XxLine::SEL3 );
    }
@@ -3273,7 +3411,7 @@ void XxApp::selectLineRight()
 void XxApp::selectLineNeither()
 {
    if ( _diffs.get() != 0 ) {
-      uint lineNo = getCursorLine();
+      XxDln lineNo = getCursorLine();
       _diffs->selectLine( lineNo, XxLine::NEITHER );
    }
 }
@@ -3283,7 +3421,7 @@ void XxApp::selectLineNeither()
 void XxApp::selectLineUnselect()
 {
    if ( _diffs.get() != 0 ) {
-      uint lineNo = getCursorLine();
+      XxDln lineNo = getCursorLine();
       _diffs->selectLine( lineNo, XxLine::UNSELECTED );
    }
 }
@@ -3483,7 +3621,7 @@ void XxApp::toggleLineNumbers()
       // Compute the maximum line numbers width.  This has to be the same for
       // all the texts, in order to have a consistent horizontal scrollbar.
       uint lnw = 0;
-      for ( int ii = 0; ii < _nbFiles; ++ii ) {
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
          lnw = std::max(
             lnw,
             _files[ii]->computeLineNumbersWidth( _font ) +
@@ -3491,13 +3629,13 @@ void XxApp::toggleLineNumbers()
               _lineNumbers[ii]->contentsRect().width() + 2 ) );
          
       }
-      for ( int ii = 0; ii < _nbFiles; ++ii ) {
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
          _lineNumbers[ii]->setFixedWidth( lnw );
          _lineNumbers[ii]->show();
       }
    }
    else {
-      for ( int ii = 0; ii < _nbTextWidgets; ++ii ) {
+      for ( XxFno ii = 0; ii < _nbTextWidgets; ++ii ) {
          _lineNumbers[ii]->hide();
       }
    }

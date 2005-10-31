@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: buffer.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: buffer.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
 #endif
 
 #ifndef INCL_STD_STRING
@@ -118,8 +122,8 @@ public:
    // note: in accordance to how diff reports line numbers, files start at line
    // 1, not line 0.  You cannot call this method for line 0.
    const char* getTextLine( 
-      const uint lineno,
-      uint& 	 length 
+      const XxFln lineno,
+      uint&       length 
    ) const;
 
    // Renders text into text width tabs expanded to spaces and returns a pointer
@@ -140,12 +144,12 @@ public:
 
    // Renders the line number.  See renderTextWithTabs.
    const char* renderLineNumber( 
-      const int   lineNumber,
+      const XxFln lineNumber,
       const char* format
    );
 
    // Searches the specified line for the specified search text.
-   bool searchLine( const uint lineno, const char* searchText ) const;
+   bool searchLine( const XxFln lineno, const char* searchText ) const;
 
    // Debug output.
    std::ostream& dump( std::ostream& ) const;
@@ -163,7 +167,7 @@ public:
    // If this is a buffer containing a directory (i.e. a list of files), return
    // the full path of the filename at line lineno.
    std::string getFileAtLine( 
-      const uint lineno
+      const XxFln lineno
    ) const;
 
 private:

@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: builderDirs2.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -596,8 +596,8 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 #endif
 
       
-   int fline1 = 1;
-   int fline2 = 1;
+   XxFln fline1 = 1;
+   XxFln fline2 = 1;
    {
       // Create regions with it. Hopefully our searches resulted in something
       // coherent w.r.t. to the quantities and pair matching of entries. Barf if
@@ -673,10 +673,10 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    // Create hunks.
    if ( _lines.size() > 0 ) {
-      int curHunk = 0;
+      XxHunk curHunk = 0;
       XxLine::Type prevType = _lines[0].getType();
       _lines[0].setHunkId( curHunk );
-      for ( uint ii = 1; ii < _lines.size(); ++ii ) {
+      for ( XxDln ii = 1; ii < XxDln(_lines.size()); ++ii ) {
          XxLine& cline = _lines[ii];
          if ( prevType != cline.getType() ) {
             ++curHunk;

@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: dialogs.h 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: types.h 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,29 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef INCL_XXDIFF_DIALOGS
-#define INCL_XXDIFF_DIALOGS
+#ifndef INCL_XXDIFF_TYPES
+#define INCL_XXDIFF_TYPES
+
+XX_NAMESPACE_BEGIN
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#ifndef INCL_XXDIFF_DEFS
-#include <defs.h>
-#endif
+// These are used throughout the code, but this file is a good location for
+// those two defines because it is most likely to have been included when using
+// those defines.
 
-#ifndef INCL_QT_QDIALOG
-#include <qdialog.h>
-#define INCL_QT_QDIALOG
-#endif
+// File line number, that is, a line number within a file.
+typedef int XxFln;
 
-/*==============================================================================
- * FORWARD DECLARATIONS
- *============================================================================*/
+// Display line number, that is, a line number for the reconciled files display.
+typedef int XxDln;
 
-XX_NAMESPACE_BEGIN
+// File no (0, 1 or 2)
+typedef int XxFno;
 
+// Hunk id.
+typedef int XxHunk;
 
 XX_NAMESPACE_END
 
 #endif
+

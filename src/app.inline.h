@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: app.inline.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: app.inline.h 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ inline uint XxApp::getNbFiles() const
 
 //------------------------------------------------------------------------------
 //
-inline XxBuffer* XxApp::getFile( const int no ) const
+inline XxBuffer* XxApp::getFile( const XxFno no ) const
 {
    if ( 0 <= no && no < _nbFiles ) {
       return _files[no].get();
@@ -76,7 +76,7 @@ inline const std::auto_ptr<XxBuffer>* XxApp::getFiles() const
 inline uint XxApp::getMaxDigits() const
 {
    uint nbDigits = 0;
-   for ( int ii = 0; ii < _nbFiles; ++ii ) {
+   for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
       nbDigits = std::max( nbDigits, _files[ii]->getNbDigits() );
    }
    return nbDigits;
@@ -91,7 +91,7 @@ inline XxDiffs* XxApp::getDiffs() const
 
 //------------------------------------------------------------------------------
 //
-inline uint XxApp::getNbLines() const
+inline XxDln XxApp::getNbLines() const
 {
    if ( _diffs.get() == 0 ) {
       return 1;
@@ -115,14 +115,14 @@ inline const QFont& XxApp::getFont() const
 
 //------------------------------------------------------------------------------
 //
-inline uint XxApp::getNbDisplayLines() const
+inline XxDln XxApp::getNbDisplayLines() const
 {
    return _displayLines;
 }
 
 //------------------------------------------------------------------------------
 //
-inline uint XxApp::getTopLine() const
+inline XxDln XxApp::getTopLine() const
 {
    if ( _diffs.get() == 0 ) {
       return 0;
@@ -132,18 +132,18 @@ inline uint XxApp::getTopLine() const
 
 //------------------------------------------------------------------------------
 //
-inline uint XxApp::getCenterLine() const
+inline XxDln XxApp::getCenterLine() const
 {
    if ( _diffs.get() == 0 ) {
       return 0;
    }
    return std::min( _vscroll[0]->value() + 1 + getNbDisplayLines() / 2, 
-                    _diffs->getNbLines() );
+                    int(_diffs->getNbLines()) );
 }
 
 //------------------------------------------------------------------------------
 //
-inline uint XxApp::getBottomLine() const
+inline XxDln XxApp::getBottomLine() const
 {
    if ( _diffs.get() == 0 ) {
       return 0;
@@ -152,13 +152,13 @@ inline uint XxApp::getBottomLine() const
       getTopLine() /* top line */
       + (getNbDisplayLines() - 1) /* to bottom line */
       - 1, /* don't allow cursor on half-displayed line */
-      _diffs->getNbLines() 
+      int(_diffs->getNbLines())
    );
 }
 
 //------------------------------------------------------------------------------
 //
-inline uint XxApp::getCursorLine() const
+inline XxDln XxApp::getCursorLine() const
 {
    if ( _diffs.get() == 0 ) {
       return 0;

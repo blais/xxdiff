@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: resources.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: resources.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -326,6 +326,14 @@ const nameDoc mapStrings[
    { XxResources::ACCEL_DIFF_FILES_AT_CURSOR,
      "accel.diffFilesAtCursor",
      "Accelerator for ``diff files at cursor'' command."
+   }, 
+   { XxResources::ACCEL_COPY_RIGHT_TO_LEFT,
+     "accel.copyFileRightToLeft",
+     "Accelerator for ``copy file right to left'' command."
+   }, 
+   { XxResources::ACCEL_COPY_LEFT_TO_RIGHT,
+     "accel.copyFileLeftToRight",
+     "Accelerator for ``copy file left to right'' command."
    }, 
    { XxResources::ACCEL_NEXT_DIFFERENCE,
      "accel.nextDifference",
@@ -1809,7 +1817,7 @@ void XxResources::setColor(
 //
 XxResources::Resource XxResources::getLineColorType(
    const XxLine& line,
-   const int     no,
+   const XxFno   no,
    const bool    sup
 ) const
 {
@@ -1818,7 +1826,7 @@ XxResources::Resource XxResources::getLineColorType(
         sel == XxLine::SEL2 ||
         sel == XxLine::SEL3 ) {
 
-      if ( int(sel) == no ) {
+      if ( XxFno(sel) == no ) {
          return ( sup == false ) ?
             COLOR_BACK_SELECTED : COLOR_BACK_SELECTED_SUP;
       }
@@ -2126,8 +2134,8 @@ void XxResources::listResources( std::ostream& os ) const
    
    std::string val;
    for ( int ii = RESOURCE_FIRST; ii < RESOURCE_LAST; ++ii ) {
-      writeDocAttrib( this, os, Resource(ii) );
       if ( query( defaults, Resource(ii), val ) ) {
+         writeDocAttrib( this, os, Resource(ii) );
          os << val << endl << endl;
       }
    }

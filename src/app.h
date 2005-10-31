@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: app.h 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: app.h 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ public:
    uint getNbFiles() const;
 
    // Returns the file for requested buffer.
-   XxBuffer* getFile( const int no ) const;
+   XxBuffer* getFile( const XxFno no ) const;
 
    // Returns an array of the file pointers.
    const std::auto_ptr<XxBuffer>* getFiles() const;
@@ -131,7 +131,7 @@ public:
    XxDiffs* getDiffs() const;
 
    // Returns the number of lines in the diffs.
-   uint getNbLines() const;
+   XxDln getNbLines() const;
 
    // Returns the font.
    const QFont& getFont() const;
@@ -148,31 +148,31 @@ public:
    // resizing or otherwise).  The actual top line that was computed is
    // returned.
    // Out-of-bounds values are permitted.
-   uint setTopLine( int lineNo );
+   XxDln setTopLine( const XxDln lineNo );
 
    // Like vertical pos, but tries to center the line instead.  The actual top
    // line that was computed is returned.
-   uint setCenterLine( int lineNo );
+   XxDln setCenterLine( const XxDln lineNo );
 
    // Like vertical pos, but tries to set the bottom line instead.  The actual
    // bottom line that was computed is returned.
-   uint setBottomLine( int lineNo );
+   XxDln setBottomLine( const XxDln lineNo );
 
    // Sets the cursor line.  Returns the old cursor line.  Value will remain
    // unchanged if an out-of-bounds value is asked for.  Note: may scroll to
    // insure that the current line is visible.
-   uint setCursorLine( int lineNo );
+   XxDln setCursorLine( const XxDln lineNo );
 
    // Returns the top/center/bottom/current display line.
    // <group>
-   uint getTopLine() const;
-   uint getCenterLine() const;
-   uint getBottomLine() const;
-   uint getCursorLine() const;
+   XxDln getTopLine() const;
+   XxDln getCenterLine() const;
+   XxDln getBottomLine() const;
+   XxDln getCursorLine() const;
    // </group>
 
    // Returns the current number of display lines.
-   uint getNbDisplayLines() const;
+   XxDln getNbDisplayLines() const;
 
    // Process a main window resize event.
    void resizeEvent();
@@ -181,7 +181,7 @@ public:
    QRect getMainWindowGeometry() const;
 
    // Returns a reference on the view popup menu.
-   QPopupMenu* getViewPopup() const;
+   QPopupMenu* getViewPopup( const XxLine& line ) const;
 
    // Returns the return value to send back to caller.
    int getReturnValue() const;
@@ -247,6 +247,8 @@ public slots:
    void editDiffOptions();
    void editDisplayOptions();
    void diffFilesAtCursor();
+   void copyFileLeftToRight();
+   void copyFileRightToLeft();
    void nextDifference();
    void previousDifference();
    void nextUnselected();
@@ -341,14 +343,14 @@ private:
 
    // Reads in a file.
    void readFile( 
-      const int   no, 
+      const XxFno no, 
       const char* filename,
       const char* displayFilename,
       bool        isTemporary = false
    );
 
    // Re-reads a file.
-   void reReadFile( const int no );
+   void reReadFile( const XxFno no );
 
    // Processes the diff command, be really careful with this.  Returns false if
    // there was an error.
@@ -384,7 +386,10 @@ private:
    void editFile( const char* filename );
 
    // Reopen file at no and rebuild diffs and update and all.
-   void openFile( const int no );
+   void openFile( const XxFno no );
+
+   // Copy file from directory diffs.
+   void copyFile( XxFno nnno ) const;
 
    // Private non-const version of resource access (for dialogs).
    XxResources* getResourcesNC();
@@ -436,8 +441,8 @@ private:
    uint                    _textWidth;
    uint                    _displayWidth;  // Last value cached. 
    uint                    _displayHeight; // Last value cached.
-   uint                    _displayLines;
-   uint                    _cursorLine;
+   XxDln                   _displayLines;
+   XxDln                   _cursorLine;
                                 	
    int                     _nbFiles;
    int                     _nbTextWidgets;

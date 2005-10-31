@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: overview.cpp 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: overview.cpp 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,9 +119,9 @@ void XxOverview::drawContents( QPainter* pp )
    // Get the files and compute lengths.
    uint nbLines = diffs->getNbLines();
    XxBuffer* files[3];
-   uint flines[3];
-   uint maxlines = 0;
-   uint ii;
+   XxFln flines[3];
+   XxFln maxlines = 0;
+   int ii;
    for ( ii = 0; ii < nbFiles; ++ii ) {
       files[ii] = _app->getFile( ii );
       XX_ASSERT( files[ii] != 0 );
@@ -176,15 +176,15 @@ void XxOverview::drawContents( QPainter* pp )
    }
 
    // Draw regions.
-   uint start;
-   uint end = 0;
+   XxDln start;
+   XxDln end = 0;
 
    // Start drawing at beginning of blocks.
    int prevy[3];
    prevy[0] = y1[0];
    prevy[1] = y1[1];
    prevy[2] = y1[2];
-   int fline[3] = { 0,0,0 };
+   XxFln fline[3] = { 0,0,0 };
    QColor back, fore;
 
    // Draw very first line connecting regions.
@@ -235,9 +235,9 @@ void XxOverview::drawContents( QPainter* pp )
    const int dyo2 = 3;
    p.setBrush( backgroundColor );
    int curppos[3];
-   int curline = _app->getCursorLine();
-   int topline = _app->getTopLine();
-   int bottomline = _app->getBottomLine();
+   XxDln curline = _app->getCursorLine();
+   XxDln topline = _app->getTopLine();
+   XxDln bottomline = _app->getBottomLine();
    const int visRegionBorder = 6;
    QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
    for ( ii = 0; ii < nbFiles; ++ii ) {
@@ -294,10 +294,10 @@ void XxOverview::drawContents( QPainter* pp )
    for ( uint is = 0; is < sresults.size(); ++is ) {
       for ( ii = 0; ii < nbFiles; ++ii ) {
 
-         float fline = sresults[is]._fline[ii];
+         XxFln fline = sresults[is]._fline[ii];
          if ( fline != -1 ) {
-            fline += 0.5f;
-            int ypos = y1[ii] + int( (dy[ii]*(fline-1.0f))/flines[ii] );
+            float ffline = fline + 0.5f;
+            int ypos = y1[ii] + int( (dy[ii]*(ffline-1.0f))/flines[ii] );
             int pts1[8] = { x[ii] + fw2 - sdx, ypos,
                             x[ii] + fw2, ypos + sdx,
                             x[ii] + fw2 + sdx, ypos,

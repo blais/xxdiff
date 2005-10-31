@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: builderFiles2.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: builderFiles2.h 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,26 +103,26 @@ private:
    // Create the individual lines for different types of blocks.
    // <group>
    void createIgnoreBlock( 
-      uint fline1,
-      uint fline2,
-      uint fsize
+      XxFln fline1,
+      XxFln fline2,
+      uint  fsize
    );
 
    void createChangeBlock( 
-      uint fline1,
-      uint fline2,
-      uint fsize1,
-      uint fsize2
+      XxFln fline1,
+      XxFln fline2,
+      uint  fsize1,
+      uint  fsize2
    );
 
    void createInsertLeftBlock( 
-      uint fline1,
-      uint fsize
+      XxFln fline1,
+      uint  fsize
    );
 
    void createInsertRightBlock( 
-      uint fline2,
-      uint fsize
+      XxFln fline2,
+      uint  fsize
    );
    // </group>
 

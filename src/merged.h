@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: merged.h 64 2001-03-11 01:06:13Z  $
- * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
+ * $Id: merged.h 140 2001-05-22 07:30:19Z blais $
+ * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
@@ -101,13 +105,13 @@ public:
 
    // Get/set the top visible line.
    // <group>
-   void setTopLine( uint lineNo ) const;
-   uint getTopLine() const;
+   void setTopLine( XxDln lineNo ) const;
+   XxDln getTopLine() const;
    // </group>
 
    // Get/set the center line.
    // <group>
-   void setCenterLine( uint lineNo );
+   void setCenterLine( XxDln lineNo );
    // </group>
 
 public slots:
@@ -141,9 +145,9 @@ private:
    XxMergedFrame* _main;
    XxApp*         _app;
    uint           _nbDisplayLines;
-   int            _topLine;
+   XxDln          _topLine;
    bool           _grab;
-   int            _grabTopLine;
+   XxDln          _grabTopLine;
    int            _grabDeltaLineNo;
 
 };

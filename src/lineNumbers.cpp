@@ -1,8 +1,8 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: lineNumbers.cpp 138 2001-05-20 18:08:45Z blais $
+ * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
  *
- * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ XX_NAMESPACE_BEGIN
 //
 XxLineNumbers::XxLineNumbers( 
    XxApp*      app, 
-   const int   no, 
+   const XxFno no, 
    QWidget*    parent, 
    const char* name 
 ) :
