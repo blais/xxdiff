@@ -1,7 +1,7 @@
 /******************************************************************************\
- * $Id: diffs.cpp 32 2000-09-21 20:39:55Z  $
+ * $Id: diffs.cpp 48 2000-10-03 04:43:36Z  $
 
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -89,10 +89,10 @@ std::string buildTag(
       ::strcpy( buf2, buf );
       if ( useConditionals ) {
          if ( nbFiles == 3 && ( number == 1 || number == 2 ) ) {
-            ::sprintf( buf, buf2, conditional2 );
+            ::sprintf( buf, buf2, conditional2.c_str() );
          }
          else {
-            ::sprintf( buf, buf2, conditional1 );
+            ::sprintf( buf, buf2, conditional1.c_str() );
          }
       }
       else {
@@ -366,6 +366,46 @@ XxLine::Type XxDiffs::findRegion(
    return type;
 }
 
+//------------------------------------------------------------------------------
+//
+XxLine::Type XxDiffs::findRegionWithSel(
+   uint  lineNo,
+   uint& regionStart,
+   uint& regionEnd
+) const
+{
+   XX_ASSERT( lineNo <= _lines.size() );
+
+   const XxLine& rline = getLine( lineNo );
+   XxLine::Type type = rline.getType();
+
+   // Move backwards (including selected line).
+   uint cur = lineNo;
+   while ( cur > 0 ) {
+      const XxLine& line = getLine( cur );
+      if ( !XxLine::isSameRegion( line.getType(), type ) ||
+           rline.getHunkId() != line.getHunkId() ||
+           rline.getSelection() != line.getSelection() ) {
+         break;
+      }
+      cur--;
+   }
+   regionStart = cur + 1;
+
+   // Move forwards.
+   cur = lineNo + 1;
+   while ( cur <= _lines.size() ) {
+      const XxLine& line = getLine( cur );
+      if ( !XxLine::isSameRegion( line.getType(), type ) ||
+           rline.getHunkId() != line.getHunkId() ||
+           rline.getSelection() != line.getSelection() ) {
+         break;
+      }
+      cur++;
+   }
+   regionEnd = cur - 1;
+   return type;
+}
 
 //------------------------------------------------------------------------------
 //

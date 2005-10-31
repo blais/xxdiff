@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: util.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -95,15 +95,18 @@ const char** splitArgs(
    }
    argv[argc++] = 0;
 
-//           std::ofstream ofs( "/tmp/diff_args" );
-//           ofs << " ARGS ------------------------------" << std::endl;
-//           const char** ppargs = argv;
-//           while ( *ppargs != 0 ) {
-//              ofs << *ppargs << std::endl;
-//  	    ++ppargs;
-//           }
-//           ofs << " -----------------------------------" << std::endl;
-//           ofs.close();
+//#define ANAL_DEBUGGING
+#ifdef ANAL_DEBUGGING
+   std::ofstream ofs( "/tmp/diff_args" );
+   ofs << " ARGS ------------------------------" << std::endl;
+   const char** ppargs = argv;
+   while ( *ppargs != 0 ) {
+      ofs << *ppargs << std::endl;
+      ++ppargs;
+   }
+   ofs << " -----------------------------------" << std::endl;
+   ofs.close();
+#endif
 
    return argv;
 }
@@ -224,9 +227,10 @@ bool XxUtil::isAsciiText( const char *filename )
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::spawnCommand( 
+bool XxUtil::spawnCommand( 
    const char* command,
-   const char* args[]
+   const char* args[],
+   void (*sigChldHandler)(int)
 )
 {
    XX_ASSERT( command != 0 );
@@ -247,10 +251,44 @@ void XxUtil::spawnCommand(
       case -1: { // fork error
          throw new XxIoError;
       }
-   }
 
+      default: {
+         if ( sigaction != 0 ) {
+            XX_TRACE( "Installing SIGCHLD handler." );
+//              sigset_t spm_o;
+//              sigprocmask( SIG_NOP, 0, &spm_o );
+//              XX_TRACE( "is SIGCHLD member=" << sigismember( &spm_o, SIGCHLD ) );
+
+//              sigemptyset( &spm_o );
+//              sigaddset( &spm_o, SIGCHLD );
+//              sigprocmask( SIG_BLOCK, &spm_o, 0 );
+// FIXME remove
+
+            //
+            // Register a SIGCHLD handler.
+            //
+            // Note: under IRIX (untested with others), SA_NOCLDWAIT will not
+            // allow a redo diff to work. I don't know why.
+
+            struct sigaction sa;
+            sa.sa_flags = SA_SIGINFO | SA_RESETHAND /*| SA_NOCLDWAIT*/;
+            sa.sa_handler = sigChldHandler;
+            sigset_t ss;
+            sigemptyset( &ss );
+            sa.sa_mask = ss;
+            //sa.sa_sigaction = 0; don't clear sa_sigaction for nothing...
+            // sa_handler and sa_sigaction may be sharing an union.
+            if ( ::sigaction( SIGCHLD, &sa, 0 ) != 0 ) {
+               // Ignore error.
+               XX_TRACE( "Error calling sigaction." );
+               return false;
+            }
+         }
+      }
+   }
+   
    // The parent. Return. Forget about it.
-   return;
+   return true;
 }
 
 //------------------------------------------------------------------------------

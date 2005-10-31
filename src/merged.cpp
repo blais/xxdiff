@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: merged.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -178,9 +178,13 @@ void XxMergedText::drawContents( QPainter* pp )
                );
             }
             else {
-               resources->getRegionColor(
-                  XxResources::COLOR_BACK_MERGED_DECIDED, bcolor, fcolor
-               );
+               XxResources::Resource res = XxResources::COLOR_BACKGROUND; // warning
+               switch ( no ) {
+                  case 0: res = XxResources::COLOR_BACK_MERGED_DECIDED_1; break;
+                  case 1: res = XxResources::COLOR_BACK_MERGED_DECIDED_2; break;
+                  case 2: res = XxResources::COLOR_BACK_MERGED_DECIDED_3; break;
+               }
+               resources->getRegionColor( res, bcolor, fcolor );
             }
             QBrush brush( bcolor );
             p.setPen( fcolor );
@@ -212,9 +216,13 @@ void XxMergedText::drawContents( QPainter* pp )
 
             QColor bcolor;
             QColor fcolor;
-            resources->getRegionColor(
-               XxResources::COLOR_BACK_MERGED_DECIDED, bcolor, fcolor
-            );
+            XxResources::Resource res = XxResources::COLOR_BACKGROUND; // warning
+            switch ( no ) {
+               case 0: res = XxResources::COLOR_BACK_MERGED_DECIDED_1; break;
+               case 1: res = XxResources::COLOR_BACK_MERGED_DECIDED_2; break;
+               case 2: res = XxResources::COLOR_BACK_MERGED_DECIDED_3; break;
+            }
+            resources->getRegionColor( res, bcolor, fcolor );
             QBrush brush( bcolor );
             p.setPen( fcolor );
 
@@ -434,8 +442,6 @@ XxMergedFrame::XxMergedFrame(
 ) :
    BaseClass( parent, name )
 {
-   const XxResources* resources = XxResources::getInstance();
-
    QVBoxLayout* vlayout = new QVBoxLayout( this );
    QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
 
@@ -538,6 +544,14 @@ XxMergedWindow::XxMergedWindow(
    _frame = new XxMergedFrame( app, this, "merged_frame" );
 
    setCentralWidget( _frame );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::update()
+{
+   BaseClass::update();
+   _frame->update();
 }
 
 XX_NAMESPACE_END

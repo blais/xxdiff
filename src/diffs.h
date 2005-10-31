@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: diffs.h 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -44,6 +44,11 @@
 #ifndef INCL_STD_VECTOR
 #include <vector>
 #define INCL_STD_VECTOR
+#endif
+
+#ifndef INCL_STD_MEMORY
+#include <memory>
+#define INCL_STD_MEMORY
 #endif
 
 #ifndef INCL_STD_IOSFWD
@@ -146,6 +151,16 @@ public:
    // Returns the extents and type of a region that contains a certain line no.
    // <group>
    XxLine::Type findRegion( 
+      uint  lineNo, 
+      uint& regionStart,
+      uint& regionEnd
+   ) const;
+   // </group>
+
+   // Returns the extents and type of a region that contains a certain line
+   // no. and that has the same selection properties.
+   // <group>
+   XxLine::Type findRegionWithSel( 
       uint  lineNo, 
       uint& regionStart,
       uint& regionEnd

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: util.h 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -36,6 +36,11 @@
 #define INCL_STD_STDIO
 #endif
 
+#ifndef INCL_STD_SIGNAL
+#include <signal.h>
+#define INCL_STD_SIGNAL
+#endif
+
 
 XX_NAMESPACE_BEGIN
 
@@ -65,10 +70,11 @@ public:
    static bool isAsciiText( const char *filename );
 
    // Run a program with command line arguments and two pathname arguments via
-   // fork/exec and forget about it.
-   static void spawnCommand( 
+   // fork/exec and forget about it. Returns true on success.
+   static bool spawnCommand( 
       const char* command,
-      const char* args[]
+      const char* args[],
+      void (*sigChldHandler)(int) = 0
    );
 
    // Run a program with command line arguments and two pathname arguments via

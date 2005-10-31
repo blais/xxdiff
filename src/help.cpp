@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: help.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -237,8 +237,12 @@ XxColorLegend::XxColorLegend(
         " Directories in directory diffs " },
       { XxResources::COLOR_BACK_MERGED_UNDECIDED,
         " Merged view undecided text " },
-      { XxResources::COLOR_BACK_MERGED_DECIDED,
-        " Merged view decided text " },
+      { XxResources::COLOR_BACK_MERGED_DECIDED_1,
+        " Merged view decided text, file 1 " },
+      { XxResources::COLOR_BACK_MERGED_DECIDED_2,
+        " Merged view decided text, file 2 " },
+      { XxResources::COLOR_BACK_MERGED_DECIDED_3,
+        " Merged view decided text, file 3 " },
 
    };
    const int nbExplanations = 28;

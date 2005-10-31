@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: app.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -86,7 +86,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <libgen.h>
-#include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -385,6 +384,7 @@ QSocketNotifier* XxApp::_socketNotifier = 0;
 XxApp::XxApp( int argc, char** argv ) :
    QApplication( argc, argv ),
    _isUICreated( false ),
+   _diffErrorsMsgBox( 0 ),
    _searchDialog( 0 ),
    _optionsDialog( 0 ),
    _mergedWindow( 0 ),
@@ -395,8 +395,7 @@ XxApp::XxApp( int argc, char** argv ) :
    _cursorLine( 0 ), // disallowed value on purpose
    _filesAreDirectories( false ),
    _returnValue( 0 ),
-   _stringResParser( 0 ),
-   _diffErrorsMsgBox( 0 )
+   _stringResParser( 0 )
 {
    _vscroll[0] = _vscroll[1] = 0;
 
@@ -2432,78 +2431,15 @@ void XxApp::editFile( const char* filename )
       );
    }
 
-   // Fork and exec.
-   switch ( fork() ) {
-      case 0: { // the child
-         
-         /* 
-          * split up args passed in into an argument vector for the execvp
-          * system call.  this works for an unlimited number of arguments,
-          * but fails to do any quote processing.  arguments with embedded
-          * spaces will break this.
-          */         
-
-         int argc = 0;
-         const int BLOCKSIZE = 10;
-         int count = BLOCKSIZE;
-         const char** argv = (const char**) malloc( sizeof(char*) * count );
-
-         // Make a copy of the args string because strtok is broken under
-         // Linux, it modifies the first argument (see BUGS section in man
-         // page of strtok).
-         char* cargs = strdup( command );
-         
-         char* ptr;
-         for ( ptr = strtok( cargs, " \t" ); 
-               ptr; 
-               ptr = strtok( 0, " \t" ) ) {
-            
-            if ( argc >= count ) {
-               count += BLOCKSIZE;
-               argv = (const char**) realloc( argv, sizeof(char*) * count );
-            }
-            
-            argv[argc++] = strdup( ptr );
-         }
-         free( cargs );
-            
-         if ( (argc + 3) >= count ) {
-            count += 3;
-            argv = (const char**) realloc( argv, sizeof(char*) * count );
-         }
-         
-         argv[argc++] = filename;
-         argv[argc] = 0;
-
-         if ( execvp( argv[0], (char**)argv ) == -1 ) {
-            exit( 1 ); // signal error.
-         }
-
-         // Unreached.
-
-      } break;
-      
-      case -1: { // fork error
-         throw new XxIoError;
-      }
-
-      default: { // the parent
-         //
-         // Register a SIGCHLD handler.
-         //
-         struct sigaction sa;
-         sa.sa_flags = SA_RESETHAND | SA_NOCLDWAIT;
-         sa.sa_handler = XxApp::handlerSIGCHLD;
-         sigset_t ss;
-         sigemptyset( &ss );
-         sa.sa_mask = ss;
-         sa.sa_sigaction = 0;
-         if ( ::sigaction( SIGCHLD, &sa, 0 ) != 0 ) {
-            // Ignore error.
-            return;
-         }
-         return;
-      }
+   const char* args[2];
+   args[0] = filename;
+   args[1] = 0;
+   if ( XxUtil::spawnCommand( command, args, handlerSIGCHLD ) == false ) {
+      QString text( "There has been an error spawning the editor." );
+      QMessageBox* box = new XxSuicideMessageBox( 
+         _mainWindow, "Error.", text, QMessageBox::Warning 
+      );
+      box->show();         
    }
 }
 
@@ -2512,8 +2448,8 @@ void XxApp::editFile( const char* filename )
 void XxApp::editDone()
 {
    // Read all the garbage from the socket.
-   char buf;
-   while ( read( _sockfd, &buf, sizeof(char) ) > 0 ) {
+   char buf[1024];
+   while ( read( _sockfd, buf, sizeof(char) ) > 0 ) {
    }
 
    delete _socketNotifier;
@@ -3838,10 +3774,11 @@ void XxApp::synchronizeUI()
 void XxApp::handlerSIGCHLD( int )
 {
    XX_ASSERT( _socketNotifier != 0 );
+   XX_TRACE( "XxApp::handlerSIGCHLD called" );
 
    // Wake up the socket notifier.
    // This should get caught by a select() call from the main event loop.
-   char buf = 'g';//arbage
+   char* buf = "garbage";
    write( _sockfd, &buf, sizeof(char) );
 }
 

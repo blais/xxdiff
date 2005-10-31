@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: resources.h 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -249,8 +249,12 @@ public:
 
       COLOR_BACK_MERGED_UNDECIDED,    // undecided text (merged view).
       COLOR_FORE_MERGED_UNDECIDED,
-      COLOR_BACK_MERGED_DECIDED,      // decided text (merged view).
-      COLOR_FORE_MERGED_DECIDED,      
+      COLOR_BACK_MERGED_DECIDED_1,    // decided text, file 1 (merged view).
+      COLOR_FORE_MERGED_DECIDED_1,      
+      COLOR_BACK_MERGED_DECIDED_2,    // decided text, file 2 (merged view).
+      COLOR_FORE_MERGED_DECIDED_2,      
+      COLOR_BACK_MERGED_DECIDED_3,    // decided text, file 3 (merged view).
+      COLOR_FORE_MERGED_DECIDED_3,      
 
       // Other colors.
       COLOR_BACKGROUND,

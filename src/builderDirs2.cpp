@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: builderDirs2.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include <algorithm>
 #include <unistd.h>
 #include <iostream>
 #include <sys/types.h>
@@ -198,8 +199,7 @@ bool parseDiffLine(
 
       int lens = ( onlyDir == 0 ? len1 : len2 );
       // Note: skip the "/" after the specified directory path
-      filename.clear();
-
+      filename = std::string(); // Note: clear() ins't implemented in libstdc++.
 
       const char* dnamePtr = bufPtr + lens;
       if ( *dnamePtr == '/' ) {

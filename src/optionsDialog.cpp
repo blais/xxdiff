@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: optionsDialog.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -607,8 +607,6 @@ void XxOptionsDialog::listboxColors( const QString& colorString )
 //
 void XxOptionsDialog::editColor()
 {
-   XX_TRACE( "FIXME FIXME you have to remember edits, and not apply!" );
-
    XxResources* resources = _app->getResourcesNC();
    XX_CHECK( resources );
 

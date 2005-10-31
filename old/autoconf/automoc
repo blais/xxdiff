@@ -153,6 +153,7 @@ sub process_automoc_makefile
 	}
        	@mocable_files = `grep -l Q_OBJECT $header_list 2> /dev/null`;
 
+
 	foreach $mocable_file (@mocable_files) {
 	  chomp $mocable_file;
 	  print STDERR "looking for header file $mocable_file\n" if $verbose;
@@ -369,7 +370,7 @@ sub process_makefile
     
     $search = `grep '[^=#]*METASOURCES.*=' $filename`;
     return if ($search eq '');
-    
+
     $search = `grep "DO_NOT_USE_AUTOMOC" $filename`;
     return if ($search);
     

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/defs.h)
-AM_INIT_AUTOMAKE(xxdiff,1.8.1)
+AM_INIT_AUTOMAKE(xxdiff,1.8.2)
 AM_PROG_LIBTOOL
 
 dnl According to doc, this is required for compiler-specific behaviour but it
@@ -142,5 +142,16 @@ AC_DEFINE(XX_USE_RUNTIME_HELP),
 AC_MSG_RESULT([xxdiff option: compiling with inline help.])
 )
 
+dnl
+dnl use STLport or libstdc++
+dnl
+AC_ARG_ENABLE(stlport,
+[  --enable-stlport	   enable compiling with STLport.],
+AC_MSG_RESULT([xxdiff option: compiling using STLport.])
+AC_DEFINE(XX_USE_STLPORT),
+AC_MSG_RESULT([xxdiff option: compiling using libstdc++.])
+)
+
+AM_CONDITIONAL(USE_STLPORT, test x$stlport = xtrue)
 
 AC_OUTPUT(Makefile src/Makefile)

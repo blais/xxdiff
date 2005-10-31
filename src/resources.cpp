@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 32 2000-09-21 20:39:55Z  $
- * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
+ * $Id: resources.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,8 +34,9 @@
 #include <qnamespace.h>
 #include <qapplication.h> // to get desktop
 
-#include <string.h>
 #include <iostream>
+#include <string.h>
+#include <stdio.h>
 
 
 /*==============================================================================
@@ -795,13 +796,29 @@ const nameDoc mapStrings[
      "color.mergedUndecided.fore",
      "Foreground color for undecided text (merged view)."
    },
-   { XxResources::COLOR_BACK_MERGED_DECIDED,
-     "color.mergedDecided.back",
-     "Background color for decided text (merged view)."
+   { XxResources::COLOR_BACK_MERGED_DECIDED_1,
+     "color.mergedDecided1.back",
+     "Background color for decided text in file 1 (merged view)."
    },
-   { XxResources::COLOR_FORE_MERGED_DECIDED,
-     "color.mergedDecided.fore",
-     "Foreground color for decided text (merged view)."
+   { XxResources::COLOR_FORE_MERGED_DECIDED_1,
+     "color.mergedDecided1.fore",
+     "Foreground color for decided text in file 1 (merged view)."
+   },
+   { XxResources::COLOR_BACK_MERGED_DECIDED_2,
+     "color.mergedDecided2.back",
+     "Background color for decided text in file 2 (merged view)."
+   },
+   { XxResources::COLOR_FORE_MERGED_DECIDED_2,
+     "color.mergedDecided2.fore",
+     "Foreground color for decided text in file 2 (merged view)."
+   },
+   { XxResources::COLOR_BACK_MERGED_DECIDED_3,
+     "color.mergedDecided3.back",
+     "Background color for decided text in file 3 (merged view)."
+   },
+   { XxResources::COLOR_FORE_MERGED_DECIDED_3,
+     "color.mergedDecided3.fore",
+     "Foreground color for decided text in file 3 (merged view)."
    },
 
    { XxResources::COLOR_BACKGROUND,
@@ -1184,8 +1201,12 @@ XxDefaultsParser::XxDefaultsParser()
                                                                       
    _map[ XxResources::COLOR_BACK_MERGED_UNDECIDED ] = "lemonchiffon3";
    _map[ XxResources::COLOR_FORE_MERGED_UNDECIDED ] = "black";
-   _map[ XxResources::COLOR_BACK_MERGED_DECIDED   ] = "grey70";
-   _map[ XxResources::COLOR_FORE_MERGED_DECIDED   ] = "black";
+   _map[ XxResources::COLOR_BACK_MERGED_DECIDED_1 ] = "grey70";
+   _map[ XxResources::COLOR_FORE_MERGED_DECIDED_1 ] = "black";
+   _map[ XxResources::COLOR_BACK_MERGED_DECIDED_2 ] = "grey70";
+   _map[ XxResources::COLOR_FORE_MERGED_DECIDED_2 ] = "black";
+   _map[ XxResources::COLOR_BACK_MERGED_DECIDED_3 ] = "grey70";
+   _map[ XxResources::COLOR_FORE_MERGED_DECIDED_3 ] = "black";
 
    _map[ XxResources::COLOR_BACKGROUND ] = "#40616a"; // FIXME find the name!
    _map[ XxResources::COLOR_CURSOR ] = "white";

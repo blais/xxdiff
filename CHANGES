@@ -635,6 +635,136 @@ Version 1.0:
 Wishlist/ToDo list:
 ------------------------------
 
+  * try to avoid loading Qt library in case of option -D specified, for faster
+    startup (hubert)
+
+  * idea: functionality that spawns a bunch of diffs for all the changed files
+    in a directory (dirdiffs only).
+
+  * gdamn editing!  edit, then kill the xxdiff, it should keep working. 
+    use vi in a shell.
+
+  * implement some editing in the merged view!!
+
+  * port to libstdc++
+
+
+ | Peter Becker wrote:
+ | > 
+ | > Martin Blais wrote:
+ | > 
+ | > > Hello Qt developers.
+ | > > (this post is slightly off-topic)
+ | > >
+ | > > I wrote a GPL'ed file comparison and merging utility using Qt, it's called
+ | > > xxdiff (an xdiff clone + lots of new features), that can be of interest to
+ | > > developers in this forum:
+ | > 
+ | > I am interested a lot but I have to use Windows NT so I can't use the binaries. I
+ | > tried to compile your program (using progen/tmake/Borland C++ Builder) but had
+ | > some problems (see below).
+ | > 
+ | > Can you help me? Since we are in beta now and I think the program is quite stable
+ | > I might have some spare time the next days but maybe you can give me some hints
+ | > before I start porting.
+ | 
+ | Kool!  AFAIK you're the first one to try porting it to Windows.  I'll look at
+ | the error messages and try to guess (see below).
+ | 
+ | 
+ | 
+ | > [...]
+ | > 
+ | > > Anyway, my question:
+ | > >
+ | > > I want to implement some support for CM systems, in particular ClearCase and
+ | > > CVS. I wish to implement this in a generic manner, in order to support
+ | > > multiple CM systems.
+ | > >
+ | > > I need your input: what CM-related features would you like to see supported in
+ | > > a file comparison program?  Here's what I'm thinking of:
+ | > >
+ | > >  - revision tree listing i.e. looking at the history
+ | > >    of revisions
+ | > >
+ | > >  - automatic version extraction i.e. being able
+ | > >    to switch which version of file xxdiff is
+ | > >    diffing with, probably by clicking in the
+ | > >    revision tree listing
+ | > >
+ | > >  - ability to checkout latest version (prior to saving
+ | > >    a merge result).
+ | > >
+ | > >  - All CM commands should be run in background in case
+ | > >    of slow access to CM server
+ | > >
+ | > > Anything else?  Please let me know, I want to know what could be useful to
+ | > > you.  Any comments appreciated.
+ | > 
+ | > Some nice but really not important feature: connecting the lines of the code with
+ | > the last changes (and their logs). This is useful if you ask yourself: what is
+ | > this code for? But maybe this feature shouldn't go into a diff tool.
+ | 
+ | Surely it could be nice to be able to extract and display the log comments for
+ | shown revisions, good idea! I'll add it in.
+ | 
+ | 
+ | 
+ | > Something we use all the time is cvs edit -- it would be useful for us if a merge
+ | > tool can handle read-only checkout and edit/unedit.
+ | 
+ | When I mentioned "checkout" above, in cvs it's called "edit", so we're talking
+ | about the same thing:
+ | 
+ | >From cvs documentation:
+ | > you are planning to edit it, use the `cvs edit' command.  Some systems
+ | > call this a "checkout", but CVS uses that term for obtaining a copy of
+ | > the sources (*note Getting the source::.), an operation which those
+ | > systems call a "get" or a "fetch".
+ | 
+ | 
+ | 
+ | 
+ | > Useful for the comparison of different versions of the program is a program that
+ | > combines directory and file comparison -- the overview shows all files and if they
+ | > are different, the files that are different can be opened in the file diff.
+ | 
+ | xxdiff already does that.  If you call it on two directories, you can select
+ | files and use the popup menu to get an xxdiff of the specific files.
+ | 
+ | xxdiff also works recursively on directories.  It makes it really easy to
+ | compare hierarchies this way (this is how I merge my configuration files, for
+ | example).
+ | 
+ | However, you just gave me another idea: one may wish to compare tagged
+ | versions, as a directory diff, e.g. compare hierarchy with 1.8 tag and 1.9
+ | tag.  I'll look into how I could do this. This would be a cool feature.  Do
+ | you get it?  for example, you could spawn a directory diff in your current
+ | directory, asking xxdiff to compare with the latest tagged versions.
+ | 
+ | 
+ | 
+ | > 
+ | > > Please note that in the same way that I don't intend to make xxdiff into a
+ | > > text editor, I don't intend to make xxdiff a general-purpose interface to CM
+ | > > systems either. I want to include only/mostly features that pertain to file
+ | > > comparison.
+ | > 
+ | > Check yourself if the features I mentioned fit -- I am not sure about this. Just
+ | > some ideas I got spontaneously.
+ | 
+ | Great ideas!  Thank you very much.
+ | 
+ | I'llsend you comments on the errors a little later, I gotta meeting just now.
+ | 
+ | 
+
+CM support:
+
+
+
+
+
 
 
    * redo diff clears selections!  can we do something about it?
@@ -659,8 +789,6 @@ bug fixes:
      works.
 
    * grab icons from other diffs
-
-   * check out += problem in Makefile.in, with CPPFLAGS
 
 new features:
 
@@ -756,7 +884,6 @@ perhaps features:
      terminology for cut-n-paste annotations)
 
 (Misc. UI)
-   * overview area doesn't show line selections.
    * add invert selection functionality
    * "spawn editor" facility
    * You just HAVE to allow cut-n-paste annotations of IGNORE text.  Use

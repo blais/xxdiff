@@ -1,3 +1,18 @@
+2000-09-29  Martin Blais  <blais@localhost.localdomain>
+
+	* Fixed bugs with sigaction handlers, editing should now work again.
+
+	* Fixed bug in merged view update().
+
+2000-09-21  Martin Blais  <blais>
+
+	* added separate colors for merge decisions, made the same by default
+
+	* overview area now shows single line selections properly.
+
+--------------------------------------------------------------------------
+Version 1.8.1:
+	
 2000-09-21  Martin Blais  <blais>
 
 	* made errors dialog pop in front of main window, not behind

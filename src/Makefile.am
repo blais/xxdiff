@@ -3,6 +3,8 @@
 
 bin_PROGRAMS = xxdiff
 
+CXXFLAGS += -I$(QTDIR)/include
+LDFLAGS += -L$(QTDIR)/lib
 
 ################################################################################
 # designer dialogs
@@ -26,7 +28,7 @@ UIDESIGNER_GENSOURCES = $(UIDESIGNER_FILES:.ui=.cpp)
 $(UIDESIGNER_GENHEADERS) : $(UIDESIGNER_FILES)
 $(UIDESIGNER_GENSOURCES) : $(UIDESIGNER_FILES)
 
-UIDESIGNER_MYHEADERS = $(UIDESIGNER_FILES_IMPL:Base.ui=.cpp)
+UIDESIGNER_MYHEADERS = $(UIDESIGNER_FILES_IMPL:Base.ui=.h)
 UIDESIGNER_MYSOURCES = $(UIDESIGNER_FILES_IMPL:Base.ui=.cpp)
 
 .ui.h:
@@ -75,11 +77,11 @@ xxdiff_SOURCES = \
 	xrmParser.cpp \
 	stringResParser.cpp \
 	rcfileParser.cpp \
-	$(UIDESIGNER_GENSOURCES) \
-	$(UIDESIGNER_MYSOURCES) \
 	markersFileDialog.cpp \
 	getopt.c \
-	getopt1.c
+	getopt1.c \
+	$(UIDESIGNER_GENSOURCES) \
+	$(UIDESIGNER_MYSOURCES) 
 
 
 # This determines which files go in the distribution.
@@ -114,10 +116,11 @@ noinst_HEADERS = \
 	lineNumbers.h \
 	util.h \
 	xrmParser.h \
-	$(UIDESIGNER_GENHEADERS) \
-	$(UIDESIGNER_MYHEADERS) \
 	markersFileDialog.h \
-	getopt.h
+	getopt.h \
+	$(UIDESIGNER_GENHEADERS) \
+	$(UIDESIGNER_MYHEADERS) 
+
 
 BUILT_SOURCES =	man.h \
 		$(UIDESIGNER_GENHEADERS) \
@@ -128,7 +131,12 @@ BUILT_SOURCES =	man.h \
 
 man_MANS = xxdiff.man
 
-EXTRA_DIST += xxdiff.man mine older yours pixmaps mydir yourdir old
+EXTRA_DIST += xxdiff.man mine older yours pixmaps old
+
+################################################################################
+# Qt moc targets
+
+xxdiff_METASOURCES = USE_AUTOMOC
 
 
 ################################################################################
@@ -140,13 +148,10 @@ EXTRA_DIST += xxdiff.man mine older yours pixmaps mydir yourdir old
 
 SUFFIXES += .y .lex
 
-rcfileParser.lex.c rcfileParser.lex.h: \
-	rcfileParser.lex \
-	rcfileParser.h \
-	rcfileParser.cpp
+rcfileParser.lex.c rcfileParser.lex.h: rcfileParser.lex
 	flex -orcfileParser.lex.c rcfileParser.lex
 
-rcfileParser.y.c: rcfileParser.y rcfileParser.h rcfileParser.cpp
+rcfileParser.y.c rcfileParser.y.h: rcfileParser.y
 	bison -d -orcfileParser.y.c rcfileParser.y
 
 rcfileParser.o: rcfileParser.y.c rcfileParser.lex.c
@@ -154,14 +159,6 @@ rcfileParser.o: rcfileParser.y.c rcfileParser.lex.c
 EXTRA_DIST += rcfileParser.lex rcfileParser.y
 
 
-
-################################################################################
-# Qt automoc targets
-
-xxdiff_METASOURCES = USE_AUTOMOC
-
-CXXFLAGS += -I$(QTDIR)/include
-LDFLAGS += -L$(QTDIR)/lib
 
 
 ################################################################################
@@ -292,6 +289,10 @@ if IS_COMPILER_GNU
 #
 COMPILER_GNU_CXXFLAGS += -Wall -DCOMPILER_GNU
 
+endif
+
+if USE_STLPORT
+
 #
 # for STLport
 #
@@ -311,18 +312,21 @@ endif
 # The problem is that g++ insists on linking with libstdc++, which I
 # would like to avoid in order to produce a more portable binary.
 #
-# ...but this barfs on IRIX.  Arg!  Source Carpentry, I implore you, get me out
+# ...but this barfs on IRIX.  Arg!  get me out
 # of this mess!  In the meantime: comment this line when building on IRIX.
 #
 # 2000-05-10 14:39:20 blais... it turns out that defining CXXLD within the ifdef
 # cancel's its definition under IRIX, which is needed, so define it in both
 # cases.
-
-if IS_COMPILER_GNU
-CXXLD=$(CC)
-else
-CXXLD=$(CXX)
-endif
+#
+# if IS_COMPILER_GNU
+# CXXLD=$(CXX)
+# else
+# CXXLD=$(CXX)
+# endif
+#
+# 2000-10-01 15:53:51 blais
+# Nix all that, we can now use libstdc++.
 
 CXXFLAGS += $(COMPILER_GNU_CXXFLAGS)
 LIBS += $(COMPILER_GNU_LIBS)

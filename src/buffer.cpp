@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: buffer.cpp 48 2000-10-03 04:43:36Z  $
+ * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,6 +34,7 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <unistd.h>
 #include <stdio.h>
 #include <math.h>

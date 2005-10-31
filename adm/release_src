@@ -4,20 +4,20 @@
 VERSION=`grep AM_INIT_AUTOMAKE configure.in | sed -e 's/[^0-9]*\([.0-9]*\).*/\1/'`
 echo "Making source distribution";
 
+# Normally this is what should be used, but this fucks up what the automoc
+# generates.
+#
+#    make dist
+#    mv xxdiff-$VERSION.tar.gz ../xxdiff-$VERSION.src.tar.gz
 
-if [ "$PLAT" != "i686-pc-linux-gnu" ]; then
-    make clean
-    make distclean
-    rm -f config.cache config.status
+make clean
+make distclean
+rm -f config.cache config.status
 
-    bn=`basename $PWD`
-    dn=`dirname $PWD`
-    tarfilename="xxdiff-$VERSION.src.tar.gz"
-    cd $dn
-    rm $tarfilename
-    tar zcvf $tarfilename $bn
-    
-else
-    make dist
-    mv xxdiff-$VERSION.tar.gz ../xxdiff-$VERSION.src.tar.gz
-fi
+bn=`basename $PWD`
+dn=`dirname $PWD`
+tarfilename="xxdiff-$VERSION.src.tar.gz"
+cd $dn
+cp $bn xxdiff-$VERSION
+rm -f $tarfilename
+tar zcvf $tarfilename xxdiff-$VERSION
