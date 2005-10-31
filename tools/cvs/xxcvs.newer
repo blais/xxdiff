@@ -1,0 +1,1165 @@
+#!/usr/bin/env python2
+#===============================================================================
+# Copyright (c) 2002 Safehouse International Limited, All Rights Reserved.
+#
+# This computer program is protected by copyright law and international
+# treaties.  Unauthorised reproduction or distribution of this computer
+# program, or any portion of it, may result in severe criminal and/or
+# civil penalties.  Safehouse International Limited reserves the rights
+# to prosecute infringements of its copyright, trade marks, trade names,
+# patents and other intellectual property rights subsisting in or used
+# in connection with the software (including all documentation and
+# manuals relating to it) to the maximum extent available under the law.
+#===============================================================================
+
+"""Script to interface between xxdiff and CVS.
+
+This script is used as a simple interface between xxdiff and CVS.
+For a more advanced interface, check out Cervisia.
+
+Usage:
+------------------------------
+  xxcvs [<options>] <filename> ...
+
+"""
+
+__version__ = "$Revision: 606 $"
+__author__ = "Martin Blais"
+
+#===============================================================================
+# EXTERNAL DECLARATIONS
+#===============================================================================
+
+import sys, os, shutil
+import re, string
+import getpass
+import tempfile
+
+from os.path import exists, basename, dirname, isdir, isfile
+from os.path import join as joinpath
+from string import join
+
+import parse_opts
+import cvs
+import cmdqueue
+
+from pprint import pprint, pformat
+
+
+#===============================================================================
+# LOCAL DECLARATIONS
+#===============================================================================
+
+error_str = "Error:"
+
+extfnre = re.compile('(.*)@@(.*)')
+
+#===============================================================================
+# CLASS Error
+#===============================================================================
+
+class Error:
+    """Exception class for module-level errors."""
+
+    def __init__(self, msg):
+        self.msg = msg
+    def __repr__(self):
+        return repr(self.msg)
+    def __str__(self):
+        return str(self.msg)
+
+
+#===============================================================================
+# CLASS PrintCheckoutInfo
+#===============================================================================
+
+class PrintCheckoutInfo:
+
+    """Print both the current module name and sticky tag if present."""
+
+    name = ['pww']
+
+    def execute( self, subargs ):
+
+        if subargs:
+            raise Error('This command takes no arguments.')
+
+        module = cvs.getModule(os.getcwd())
+        print "Module:          ", module
+        tag = cvs.getTag(os.getcwd())
+        if not tag: tag = '(none)'            
+        print "Branch:          ", tag
+
+
+#===============================================================================
+# CLASS PrintBranches
+#===============================================================================
+
+class PrintBranches:
+
+    """Prints all of a file's branches.
+
+      <args> are files for which we want to list the branches.
+      """
+
+    name = ['lsbranches', 'listbranches', 'list_branches']
+    optmap = []
+
+    def execute( self, subargs ):
+
+        if not subargs:
+            raise Error('You need to specify files.')
+
+        # launch status command
+        mstatii = cvs.MultipleStatii(subargs,
+                                     1, # self.opts.orig_stamp, # we need tags
+                                     0, # non-recursive
+                                     indir=os.getcwd())
+
+        # read the status output asynchronously
+        self.res = []
+        while 1:
+            status = mstatii.next()
+            if not status:
+                break
+
+
+            branchTags = status.branchTags()
+            branchTags.sort()
+            print status.filename
+            print '------------------------------'
+            for tag in branchTags:
+                print tag
+
+
+#===============================================================================
+# CLASS List
+#===============================================================================
+
+class List:
+
+    """Lists the files.
+
+    This command is used to get the filenames, branch or stamp tag, status,
+    revision number.
+
+    Output is restricted when using branch-only, modified-only and
+    conflicts-only options. Otherwise everything specified is output.
+
+    """
+
+    name = ['ls', 'list', 'status']
+    optmap = [
+        ('short', 's', "Output short format (default)."),
+        ('long', 'l', "Output long format."),
+        ('recursive', 'R', "List files recursively."),
+        #('orig-stamp', 'o',\
+        # "Print first stamp of revision for non-branches (long only)."),
+        ('branch-only', 'B', "Prints only files on the branch."),
+        ('modified-only', 'M', "Prints only modified files."),
+        ('conflicts-only', 'C', "Prints only conflict files."),
+        ('header', 'H', "Print a nice header at the top (default is off)."),
+        ('wide', 'w', "Widen progressive display."),
+        ('final', 'p', "Don't print results progressively (default)."),
+        # this option allows a more compact output
+        ('all', 'a', "Perform on all the files in the module.")
+        ]
+
+        #('added-only', 'A', "Prints only added files."),
+        #('removed-only', 'D', "Prints only removed files."),
+
+    # FIXME we'd like to see directories as well
+
+    # FIXME when a files has been locally added and is in a subdir, we don't see
+    # the intervening directory
+
+    def execute( self, subargs ):
+
+        if self.opts.all:
+            self.opts.recursive = 1
+            if len(subargs):
+                raise Error('Cannot use --all and filenames.')
+
+        # consolidate long and short
+        if self.opts.long and self.opts.short:
+            raise Error('Use either of --long or --short, but not both.')
+        if not self.opts.long and not self.opts.short:
+            self.opts.long = 0
+            self.opts.short = 1
+
+        # figure out if we should exclude, in general
+        self.only = self.opts.branch_only or \
+                    self.opts.modified_only or \
+                    self.opts.conflicts_only
+
+        # compute reasonable wideness factors
+        lenstamp = 20 # approx
+        if self.opts.wide:
+            self.wname = 96
+            self.wstamp = lenstamp + 20
+        else:
+            self.wname = 64
+            self.wstamp = lenstamp + 8
+
+        # no arguments, use cwd as input
+        workarea = getRoot()
+        indir = None
+        if not subargs:
+            subargs = ['.']
+            if self.opts.all:
+                indir = workarea
+
+        # validate existence
+        files = []
+        for file in subargs:
+            # We cannot do this, or locally deleted file will not show up.
+            #if not exists(file):
+            #    print >> sys.stderr, "ls: %s: No such file or directory" % file
+            #else:
+            files.append(file)
+
+        # if progressive, print header now
+        self.fmtf = "%%-%ds  %%-%ds  %%-16s (%%s)" % (self.wname, self.wstamp)
+        self.fmtd = "%%-%ds  Directory" % self.wname
+        if self.opts.header and not self.opts.final:
+            self.printHeader()
+
+        # launch status command
+        mstatii = cvs.MultipleStatii(files,
+                                     1, # self.opts.orig_stamp, # we need tags
+                                     self.opts.recursive,
+                                     indir)
+
+        # read the status output asynchronously
+        self.res = []
+        while 1:
+            status = mstatii.next()
+            if not status:
+                break
+
+            app = not self.only
+
+            branched = status.isBranched()
+
+            if self.opts.branch_only:
+                if branched:
+                    app = 1
+
+            if self.opts.modified_only:
+                if status.status() in cvs.Status.STATSET_LOCAL:
+                    app = 1
+
+            if self.opts.conflicts_only:
+                if status.status() == cvs.Status.CONFLICTS_ON_MERGE:
+                    app = 1
+
+            if app == 1:
+                if self.opts.long:
+                    status.lstag = status.stickyTag()
+                    # note: we could do something smarter here but it depends on
+                    # the way the user manages his CVS repository and release
+                    # and branch tags.
+
+                self.res.append(status)
+                if not self.opts.final:
+                    self.printEntry(status) # print right away
+
+        # write out final report
+        if self.opts.final:
+            self.printFinal( self.res )
+
+
+    def printFinal( self, res ):
+
+        # final report: find longest pathname
+        if self.opts.long:
+            longn = longt = longr = 0
+            for s in res:
+                if type(s) != type(""):
+                    longn = max(longn, len(s.filename))
+                    longt = max(longt, len(s.lstag))
+                    longr = max(longr, len(s.workingRev()))
+                else:
+                    longn = max(longn, len(s))
+
+        self.fmtf = "%%-%ds  %%-%ds  %%-%ds (%%s)" % (longn, longt, longr)
+        self.fmtd = "%%-%ds  Directory" % longn
+
+        if self.opts.header:
+            self.printHeader()
+        for s in res:
+            self.printEntry(s)
+
+
+    def resAppend( self, s ):
+        """Appends or prints the status or string, depending on it we're
+        progressive."""
+        if not self.opts.final:
+            self.printEntry(s)
+        self.res.append(s)
+
+    def printEntry( self, s ):
+        if self.opts.long:
+            if type(s) != type(""):
+                print self.fmtf % (s.filename, s.lstag, s.workingRev(), s.statusStr())
+            else:
+                print self.fmtd % s
+        else: # short
+            if type(s) != type(""):
+                #print "%s (%s)" % (s.filename, s.statusStr())
+                print "%s" % s.filename
+            else:
+                print s
+
+    def printHeader( self ):
+        l = self.fmtf % ('filename', 'stamp', 'revision', 'status')
+        print l
+        print len(l) * '-'
+
+
+#===============================================================================
+# CLASS ListBranchFiles
+#===============================================================================
+
+class ListBranchFiles(List):
+
+    """Lists the branch and modified files in a simple report format.
+
+    See 'ls' command. This is just a convenience for a format suitable for merge
+    request.
+
+    """
+
+    name = ['getmodfiles', 'get_mod_files', 'list_brfiles']
+    optmap = []
+
+    def execute( self, subargs ):
+
+        self.opts.long = 1
+        self.opts.recursive = 1
+        self.opts.branch_only = 1
+        self.opts.modified_only = 1
+        self.opts.conflicts_only = 0
+        self.opts.header = 1
+        self.opts.final = 1
+
+        if subargs:
+            self.opts.all = None
+        else:
+            self.opts.all = 1
+
+        self.opts.short = None
+        self.opts.wide = None
+        # self.opts.orig_stamp = None
+
+        List.execute(self, subargs)
+
+    #def printFinal( self, res ):
+    #    # FIXME todo, fancy it up
+
+
+
+#===============================================================================
+# CLASS RemoveBranch
+#===============================================================================
+
+class RemoveBranch:
+
+    """Removes the revisions on a branch.
+
+    This command allows you to get rid of the modifications you have done on a
+    branch for a particular file.  *ACHTUNG*! The results are irreversible and
+    the revisions are obliterated. This does not delete the branch tag, and
+    does revert the file to its last stamp version.
+
+      <args> is a list of files for which we want to remove the changes made on
+      the branch.
+    """
+
+    save_suffix = "%s.save.%d"
+
+    name = ['rmbranch', 'removebranch', 'remove_branch',
+            'deletebranch', 'delete_branch']
+    optmap = [
+        ('save', 's', "Save backup files before reverting."), #? FIXME
+        ('save-suffix', None, "Save format (default is %s)." % save_suffix )
+        ]
+
+    def execute( self, subargs ):
+
+        if not self.opts.save_suffix:
+            self.opts.save_suffix = Revert.save_suffix
+
+        if gopts.verbose: print "==> Checking that the files are on a branch"
+        statusmap = {}
+        for file in subargs:
+            status = cvs.Status(file)
+            if not status.isBranched():
+                raise Error('File %s is not on a branch.' % file)
+            statusmap[file] = status
+
+        workarea = getRoot()
+
+        for status in statusmap.values():
+            file = status.filename
+            branch = status.stickyTag()
+
+            if self.opts.save:
+                c = 0
+                savefn = self.opts.save_suffix % (file, c)
+                while exists(savefn):
+                    c += 1
+                    savefn = self.opts.save_suffix % (file, c)
+                try:
+                    if gopts.verbose: print "==> Saving safe copy into %s" % savefn
+                    shutil.copyfile(file, savefn)
+                    print "Saved copy in '%s'" % savefn
+                except OSError, e:
+                    raise Error( "Cannot copy file %s into %s: %s",
+                                 (file, savefn, repr(e)) )
+            else:
+                if not gopts.expert:
+                    if not yesOrNo("Changes on '%s' will be lost, are you sure?" \
+                                   % file):
+                        print "Ignoring file '%s'" % file
+                        continue
+
+            if gopts.verbose:
+                print "==> Deleting the repository revisions for file %s" % file
+            cmd = '%s admin -o:%s %s' % \
+                  (cvs.program, status.stickyTag(), file)
+            cvs.delegate(cmd)
+
+            if gopts.verbose:
+                print "==> Updating file %s" % file
+            cvs.delegate( "%s update -r %s %s" % (cvs.program, branch, file) )
+            #if sts[0]:
+            #    raise Error("Moving tag.")
+
+
+#===============================================================================
+# CLASS Revert
+#===============================================================================
+
+class Revert:
+
+    """Reverts to the last committed version.
+
+    This command allows you to get rid of the modifications you have done on a
+    file and revert to the last committed revision.
+
+      <args> is a list of files to revert.
+    """
+
+    save_suffix = "%s.save.%d"
+
+    name = ['revert', 'uncheckout', 'unco']
+    optmap = [
+        ('save', 's', "Save backup files before reverting."), #? FIXME
+        ('save-suffix', None, "Save format (default is %s)." % save_suffix )
+        #('all', 'a', "Perform on all the modified files in the module.")
+        ]
+
+    def execute( self, subargs ):
+        if not self.opts.save_suffix:
+            self.opts.save_suffix = Revert.save_suffix
+
+        for file in subargs:
+            if gopts.verbose: print "==> Processing file %s." % file
+
+            if isdir(file):
+                print >> sys.stderr, \
+                      "Directories not supported yet, ignoring %s." % file
+                continue
+
+            if gopts.verbose: print "==> Checking that file is modified"
+            status = cvs.Status(file)
+            if status.status() not in cvs.Status.STATSET_MODIFIED:
+                print >> sys.stderr, "File %s is not Locally Modified." % file
+                continue
+
+            if self.opts.save:
+                c = 0
+                savefn = self.opts.save_suffix % (file, c)
+                while exists(savefn):
+                    c += 1
+                    savefn = self.opts.save_suffix % (file, c)
+                try:
+                    if gopts.verbose: print "==> Saving safe copy into %s" % savefn
+                    os.rename(file, savefn)
+                    print "Saved copy in '%s'" % savefn
+                except OSError, e:
+                    raise Error( "Cannot rename file %s into %s: %s",
+                                 (file, savefn, repr(e)) )
+            else:
+                if not gopts.expert:
+                    if not yesOrNo("Changes on '%s' will be lost, are you sure?" \
+                                   % file):
+                        print "Ignoring file '%s'" % file
+                        continue
+
+            if gopts.verbose: print "==> Reverting file"
+            cvs.run( '%s update -C %s' % (cvs.program, file) )
+
+            status.lstag = status.stickyTag()
+            print "File '%s' reverted to revision %s (%s)" % \
+                  (file, status.workingRev(), status.lstag)
+
+
+#===============================================================================
+# CLASS Fetch
+#===============================================================================
+
+class Fetch:
+
+    """Fetches a revision of a file from the repository.
+
+    This command allows you to fetch any revision of any file from the
+    repository. By default the file is written out to 'filename@@rev'.
+    In practice, this is just a more convenient implementation of
+    'cvs update -p'. Files and revisions are specified as filename@@rev.
+    Revisions can be either revision numbers, stamps or branch tags.
+
+    If no revision is request, it saves to filename@@HEAD.
+
+      <args> are the names of the files to fetch.  If revision is specified
+      thru option, only one filename is allowed.
+    """
+
+    name = ['get', 'fetch', 'cat']
+    optmap = [
+        ('stdout', 'p', "Output to stdout (don't write output file)."),
+        ('module=', 'm', \
+         "Fetch files from specified module (no need for workarea)."),
+        ('revision=', 'r', "Specify which revision for filename."),
+        ]
+
+    stdout_sep1 = 79 * '='
+
+    def execute( self, subargs ):
+
+        if gopts.verbose: print "==> Parsing arguments"
+        if not subargs:
+            raise Error('No file specified.')
+
+        if self.opts.revision:
+            if len(subargs) != 1:
+                raise Error('Only one filename can be specified with --revision.')
+            # use equivalent format.
+            subargs = [ '%s@@%s' % (subargs[0], self.opts.revision) ]
+
+        for arg in subargs:
+            if gopts.verbose: print "==> Processing file %s", arg
+
+            if gopts.verbose: print "==> Parsing filename"
+            mo = extfnre.match(arg)
+            if mo:
+                (filename, rev) = mo.groups()
+            else:
+                filename = arg
+                rev = None
+
+            if gopts.verbose: print "==> Fetching file"
+            (contents, errors) = cvs.fetch(filename, rev, None, self.opts.module)
+            if contents == None:
+                print >> sys.stderr, \
+                      "Error: fetching file %s with revision %s" % \
+                      (filename, rev)
+                print >> sys.stderr, errors
+                # don't crash it, continue, there may be many files.
+                continue
+
+            if gopts.verbose: print "==> Outputting file"
+            if not rev:
+                rev = 'HEAD'
+            if self.opts.stdout:
+                if len(subargs) > 1:
+                    # print header
+                    print Fetch.stdout_sep1
+                    print "File:", filename, "  Revision:", rev
+                    print
+                print contents
+                if contents == '':
+                    print >> sys.stderr, "(Empty file)"
+            else:
+                try:
+                    outf = open(filename + '@@' + rev, 'w')
+                    outf.write(contents)
+                    outf.close()
+                except IOError, e:
+                    print >> sys.stderr, "Error: writing fetched file %s", outfn
+                    print e
+
+#===============================================================================
+# CLASS Mani
+#===============================================================================
+
+class Mani:
+
+    """Base class for classes that extract temporary files to disk."""
+    # Que viene el manisero... mani, maniiiii (slrp).
+
+    temp_sfx = '.xxcvs_tempfile'
+
+    # common diff options
+    optmap = [
+        ('ignore-all-space', 'w', 'Option given to diff(1).'),
+        ('ignore-space-change', 'b', 'Option given to diff(1).'),
+        ('ignore-case', 'i', 'Option given to diff(1).'),
+        ('ignore-blank-lines', 'l', 'Option given to diff(1).'),
+        ]
+    #===========================================================================
+    # CLASS Mani.QueueCmd
+    #===========================================================================
+
+    class QueueCmd:
+        def __init__( self, cmd, filelist ):
+            self.cmd = cmd
+            self.filelist = filelist
+            self.post_hooks = []
+
+        def preRun( self, queue ):
+            print >> sys.stderr, " ,------------------------------"
+            print >> sys.stderr, " | Running diff with:"
+            for file in self.filelist:
+                print >> sys.stderr, " |", file.print_name
+            print >> sys.stderr, " '------------------------------"
+
+        def postRun( self, queue ):
+            self.filelist = None # release filelist and tempfile
+            if self.post_hooks:
+                for hook in self.post_hooks:
+                    hook()
+
+            if queue.waitingForAll and len(queue.waiting) > 0:
+                print >> sys.stderr,\
+                      "[ %s remaining commands queued ]" % len(queue.waiting)
+
+
+    #===========================================================================
+    # CLASS Mani.File
+    #===========================================================================
+
+    class File:
+        def __init__( self, name, rev ):
+            self.name = name
+            self.rev = rev
+            self.print_rev = rev
+            self.tempname = None
+            self.status = None
+            self.print_name = name
+            self.valid = 1
+            self.empty = 0
+
+        def __del__( self ):
+            if self.tempname and os.path.exists(self.tempname):
+                os.unlink(self.tempname)
+
+        def formatName( self ):
+            self.print_name = self.doFormatName()
+
+        def doFormatName( self ):
+            if self.print_rev:
+                return '%s (%s)' % (self.name, self.print_rev)
+            elif self.print_rev:
+                return '%s (%s)' % (self.name, self.rev)
+            else:
+                return self.name
+
+    def __init__( self ):
+        self.queue = None # we cannot create the queue before we parse the options.
+
+    def __del__( self ):
+        if self.queue:
+            self.queue = None # make sure we wait for queue here.
+
+    def computeOptionsString( self ):
+        # compute diff options string
+        options = []
+        if self.opts.ignore_all_space:
+            options.append('--ignore-all-space')
+        if self.opts.ignore_space_change:
+            options.append('--ignore-space-change')
+        if self.opts.ignore_blank_lines:
+            options.append('--ignore-blank-lines')
+        return string.join(options)
+
+
+    def parseFilename( self, fn ):
+        """Parses a filename and returns a File object."""
+
+        if gopts.verbose: print "==> Parsing filename", fn
+        mo = extfnre.match(fn)
+        if mo:
+            (filename, rev) = mo.groups()
+        else:
+            filename = fn
+            rev = None
+        return Mani.File(filename, rev)
+
+    def printDiffGroup( self, group ):
+        if len(group) == 2:
+            print "  Left:  ", group[0].print_name
+            print "  Right: ", group[1].print_name
+        elif len(group) == 3:
+            print "  Left:  ", group[0].print_name
+            print "  Middle:", group[1].print_name
+            print "  Right: ", group[2].print_name
+
+    def fetchFile( self, file, workarea=None, module=None ):
+        tempname = tempfile.mktemp() + Mani.temp_sfx
+        if file.empty:
+            if gopts.verbose:
+                print "==> Creating empty file into %s" % tempname
+            contents = ''
+        else:
+            if gopts.verbose:
+                print "==> Fetching file %s into %s" % (file.name, tempname)
+
+            (contents, errors) = cvs.fetch(file.name, file.rev, workarea, module)
+            if contents == None:
+                raise Error("Fetching file %s with revision %s" % \
+                            (file.name, file.rev))
+
+        try:
+            tempf = open(tempname, 'w')
+            tempf.write(contents)
+            tempf.close()
+        except IOError, e:
+            raise Error("Writing to temp file %s" % tempname)
+        return tempname
+
+
+    def spawnDiff( self, filelist, graphical, merged_filename=None, root=None, hook=None):
+
+        options = self.options
+        if len(filelist) == 3:
+            options = ''
+        options += self.extra_options
+
+        if graphical:
+            cmd = [gopts.xxdiff] + options.split()
+            #cmd += '--exit-on-same ' # so we don't have annoying previews until stable
+            idx = 0
+            for file in filelist:
+                idx += 1
+                if file.tempname or file.print_rev:
+                    cmd += ['--title%d=%s' % (idx, file.print_name)]
+
+            if not merged_filename:
+                merged_filename = filelist[0].name + '.merge'
+            cmd += ['--merged-filename=%s' % merged_filename]
+        else:
+            cmd = [gopts.diff] + options.split()
+
+        for file in filelist:
+            if file.tempname:
+                cmd += ['%s' % file.tempname]
+            elif root:
+                cmd += ['%s' % joinpath(root, file.name)]
+            else:
+                cmd += ['%s' % file.name]
+
+        if gopts.verbose: print "==> Diffing command:", string.join(cmd)
+
+        if not self.queue:
+            if gopts.no_async:
+                self.queue = cmdqueue.SyncFakeQueue(1)
+            else:
+                self.queue = cmdqueue.CmdQueue(1)
+
+        cmdobj = Mani.QueueCmd(cmd, filelist)
+        if hook:
+            cmdobj.post_hooks.append(hook)
+
+        self.queue.queue(cmd, cmdobj)
+        # if graphical:
+        #     os.popen(cmd)
+        #     # interruptible
+        # else:
+        #     #os.popen(cmd)
+        #     os.system(cmd)
+        # # FIXME do something about interruptibility here, try/except
+        # # KeyboardInterrupt does not work, see man 3 system.
+
+
+#===============================================================================
+# CLASS Diff
+#===============================================================================
+
+class Diff(Mani):
+
+    """Shows differences between files.
+
+    This command allows you to diff any two revisions of a file, with convenient
+    functionality for diffing with branch or previous. Most likely, you will use
+    the 'preview' command rather than this one, but this one is more flexible.
+
+    This command does not aspire to replace 'cvs diff', but to give a convenient
+    way to start the graphical diff, with the few options that it supports. If
+    you want more complex diffing options, use 'cvs diff' directly.
+
+    This command has a few syntactic forms:
+
+    xxcvs diff <file[@@rev]> <file[@@rev]> ...
+      --> diff all the specified file-revisions together (3 max)
+
+    xxcvs diff --revision=<rev> <file>
+      --> diff local file copy with its specified revision
+
+    xxcvs diff [--previous | --branch] <file[@@rev]> [<file[@@rev]> ...]
+      --> diff file-revisions with their respective previous (or main branch)
+          revisions. Note that we consider the previous revision of a modified
+          file to be the last committed revision.
+
+    """
+
+    graphical_names = ['xdiff', 'xxdiff', 'graphical_diff']
+    name = ['diff', 'cmp', 'compare'] + graphical_names
+
+    optmap = [
+        ('module=', 'm', "Fetch files from specified module (no need for workarea)."),
+        ('textual', 't', "Run diff in text mode instead of graphical output." ),
+        ('revision=', 'r', "Diff local file copy with this revision." ),
+        ('previous', 'p', "Diff each file with its previous revision, or parent." ),
+        ('branch', 'B', "Diff each file with its parent branch (main)." ),
+        ('reverse', None, "Reverse order of files (order is by default reversed)."),
+        ] + Mani.optmap
+
+    #  --recursive, -r            Option passed to 2-files diff(1). This is only
+    #                             meaningful for directory diffs.
+
+    # FIXME make it possible to view the differences between two stamps without
+    # a checkout area
+
+    # FIXME if module is specified, then we should not assume anything about the
+    # files nor use the current repository at all. Otherwise, we assume that we
+    # are in a checkout.
+
+    def execute( self, subargs ):
+
+        if gopts.verbose: print "==> Validating arguments"
+        if not subargs:
+            raise Error('No files specified.')
+
+        if self.opts.previous and self.opts.branch:
+            raise Error('Cannot request both previous and branch.')
+
+        self.options = self.computeOptionsString()
+        self.extra_options = ''
+
+        workarea = getRoot()
+        indir = None
+        if self.opts.module:
+            indir = workarea
+
+        if gopts.verbose: print "==> Parsing filenames"
+        # parse all filenames to potentially figure out if we need to compute
+        # status to find previous or branch. this allows us to launch a single
+        # status command if necessary (much faster).
+        fileobjs = []
+        need_status = []
+        for arg in subargs:
+            file = self.parseFilename(arg)
+            fileobjs.append(file)
+            if self.opts.previous or self.opts.branch:
+                need_status.append(file)
+
+        if gopts.verbose: print "==> Getting status for needed filenames"
+        need_fns = map(lambda x: x.name, need_status)
+        if gopts.verbose: print "==>", need_fns
+        if self.opts.previous or self.opts.branch and need_status:
+            mstatii = cvs.MultipleStatii(need_fns, 1, 0, indir)
+            i = 0
+            while 1:
+                status = mstatii.next()
+                if not status:
+                    break
+                file = need_status[i]
+                file.status = status
+                i += 1
+
+        if gopts.verbose: print "==> Building filegroups"
+        filegroups = []
+        if self.opts.revision:
+            if len(fileobjs) != 1:
+                raise Error('Only one filename can be specified with --revision.')
+            file = fileobjs[0]
+            #if not file.rev:
+            #    file.print_rev = 'Local'
+            #    # here we don't bother with status just for the working revision
+            filer = Mani.File(file.name, self.opts.revision)
+            filegroups.append( (file, filer) )
+
+        elif self.opts.previous:
+            for file in fileobjs:
+                if file.rev:
+                    rev_pob = file.status.previousOrParent(file.rev)
+                elif file.status.status() == cvs.Status.LOCALLY_MODIFIED:
+                    file.print_rev = 'Local: %s modified' % file.status.workingRev()
+                    rev_pob = file.status.workingRev()
+                else:
+                    file.print_rev = 'Local: %s' % file.status.workingRev()
+                    rev_pob = file.status.previousOrParent( file.status.workingRev() )
+
+                if not rev_pob:
+                    print 'Warning: no previous or branch for', file.name
+                    continue
+                file_pob = Mani.File(file.name, rev_pob)
+                filegroups.append( (file_pob, file) )
+
+        elif self.opts.branch:
+            for file in fileobjs:
+                if file.rev:
+                    rev_pob = file.status.parentBranchRev(file.rev)
+                else:
+                    rev_pob = file.status.parentBranchRev( file.status.workingRev() )
+                    if file.status.status() == cvs.Status.LOCALLY_MODIFIED:
+                        file.print_rev = 'Local: %s modified' % file.status.workingRev()
+                    else:
+                        file.print_rev = 'Local: %s' % file.status.workingRev()
+
+                if not rev_pob:
+                    print 'Warning: no parent branch for', file.name
+                    continue
+                file_b = Mani.File(file.name, rev_pob)
+                filegroups.append( (file_b, file) )
+
+        else:
+            if len(fileobjs) not in [2, 3]:
+                raise Error('You need to specify 2 or 3 filenames to diff.')
+
+            files = []
+            for file in fileobjs:
+                files.append( file )
+            filegroups.append(files)
+
+        for group in filegroups:
+            for file in group:
+                if file.rev:
+                    file.tempname = self.fetchFile(file, module=self.opts.module)
+
+            assert( len(group) == 2 or len(group) == 3 )
+
+            for file in group:
+                file.formatName()
+
+            # by default, new file is on the right.
+            if self.opts.reverse:
+                group.reverse()
+
+            print "--------------------"
+            self.printDiffGroup(group)
+            self.spawnDiff(group, not self.opts.textual)
+
+#===============================================================================
+# CLASS DiffModified
+#===============================================================================
+
+class DiffModified(Mani):
+
+    """Shows differences for all modified files with last committed revision.
+
+    This command allows you to preview the differences before committing
+    changes.
+
+    xxcvs diffmodfiles [<dir>]
+      --> diff all modified files under directory with their last committed
+          revisions.  Default directory is module root.
+
+    """
+
+    name = ['diffmodfiles', 'diff_mod_files', 'moddiff']
+    optmap = [
+        ('module=', 'm', "Fetch files from specified module (no need for workarea)."),
+        ('textual', 't', "Run diff in text mode instead of graphical output." ),
+        ('no-recursive', 'N', "Don't preview directories recursively."),
+        ('silent', None, "Don't be so verbose about progress and all."),
+        ('reverse', 'r', "Reverse order of files (order is by default reversed)."),
+        ] + Mani.optmap
+
+    def execute( self, subargs ):
+
+        self.options = self.computeOptionsString()
+        self.extra_options = ''
+
+        if gopts.verbose: print "==> Validating arguments"
+
+        workarea = getRoot()
+        indir = None
+        if self.opts.module:
+            indir = workarea
+
+        # do preview on the whole repository if there were no arguments
+        if not subargs:
+            subargs = ['.']
+            indir = workarea
+
+        # validate existence
+        files = []
+        for file in subargs:
+            # We cannot do this, or locally deleted file will not show up.
+            #if not exists(file):
+            #    print >> sys.stderr, "ls: %s: No such file or directory" % file
+            #else:
+            files.append(file)
+
+        mstatii = cvs.MultipleStatii(files, 1, not self.opts.no_recursive, indir)
+        prog = 0
+        while 1:
+            status = mstatii.next()
+            if not status:
+                break
+
+            if not self.opts.silent:
+                print "(%s)" % status.filename
+            if self.queue:
+                self.queue.poll()
+
+            status.local_name = status.filename
+
+            if status.status() not in [cvs.Status.LOCALLY_MODIFIED,
+                                       cvs.Status.CONFLICTS_ON_MERGE]:
+                continue
+
+            # Note: it is important here that if there is no revision,
+            # the filename be relative to the current directory.
+            local_file = Mani.File(status.local_name, None)
+            local_file.print_rev = 'Local: %s modified' % status.workingRev()
+
+            workrev_file = Mani.File(status.filename, status.workingRev())
+
+            group = [ workrev_file, local_file ]
+
+            for file in group:
+                if file.rev:
+                    file.tempname = self.fetchFile(file, workarea, self.opts.module)
+
+            # by default, new file is on the right.
+            if self.opts.reverse:
+                group.reverse()
+
+            for file in group:
+                file.formatName()
+
+            print "--------------------"
+            self.printDiffGroup(group)
+            self.spawnDiff(group, not self.opts.textual, status.filename, root=workarea)
+            print
+
+
+#===============================================================================
+# MAIN
+#===============================================================================
+
+co_root = None
+def getRoot():
+    """Returns the checkout directory root."""
+    global co_root
+    dir = os.getcwd()
+    while exists(joinpath(dir,'CVS')) and dir and dir != '/':
+        dir = dirname(dir)
+    if not dir or dir == '/':
+        raise Error('Not currently in a checked out directory')
+    co_root = dir
+    return co_root
+
+try:
+
+    goptmap = [
+        ('verbose', 'v', "Verbose mode." ),
+        ('debug', None, "Full-on debug mode, including CVS commands." ),
+        ('expert', 'x', "Expert mode, skip confirmations, use with care." ),
+        ('dir=', 'D', "Specify workarea directory (default is cwd)." ),
+        ('cvs=', None, "Specify cvs executable." ),
+        ('diff=', None, "Specify textual diff executable." ),
+        ('xxdiff=', None, "Specify graphical diff executable." ),
+        ('no-async', None,
+         "Disable asynchronous command queuing for those commands that support it." ),
+        ]
+
+    # don't use 'd' in case we want it for cvsroot in the future.
+        #('silent', 's', "Silent mode." ),
+
+    # Declare subcommands
+    subcmds = [
+        Fetch(),
+        PrintCheckoutInfo(),
+        PrintBranches(),
+        List(),
+        ListBranchFiles(),
+        RemoveBranch(),
+        Revert(),
+        Diff(),
+        DiffModified()
+        ]
+        #Test()
+
+    # for now, remove aliases
+    #for sc in subcmds:
+    #    if type(sc.name) == type([]):
+    #        sc.name = [sc.name[0]]
+
+    version_msg = '%s -- %s\n' % (os.path.basename(sys.argv[0]), __version__[1:-1])
+    version_msg += 'Written by %s.' % __author__
+
+    (gopts, subcmd, subargs) = \
+            parse_opts.parse_options_subcmds( goptmap, subcmds, __doc__, version_msg )
+
+    if gopts.dir:
+        if not exists(gopts.dir):
+            raise Error('Specified workarea directory does not exist.')
+    else:
+        gopts.dir = os.getcwd()
+
+    #if gopts.silent and gopts.verbose:
+    #    raise Error('Can only specify one of --verbose and --silent.')
+    #if gopts.silent:
+    #    gopts.verbose = 0
+
+    if gopts.verbose:
+        cvs.trace_level = 1
+
+    if gopts.debug:
+        gopts.verbose = 1
+        cvs.trace_level = 2
+
+    gopts.verbfmt = ''
+    if gopts.verbose:
+        gopts.verbfmt = "==> %s."
+
+    if gopts.cvs:
+        cvs.program = gopts.cvs
+
+    if not gopts.xxdiff:
+        gopts.xxdiff = 'xxdiff'
+    if not gopts.diff:
+        gopts.diff = 'diff'
+
+    if not gopts.expert:
+        if os.environ.has_key('EXP_SCRIPTS_EXPERT'):
+            gopts.expert = 1
+
+    subcmd.opts = gopts
+    subcmd.execute( subargs )
+
+    # delete all references to the subcmd here for the cmdqueue.
+    subcmds = subcmd = None
+
+except Error, e:
+    print error_str, e
+    sys.exit(1)
+
+except cvs.Error, e:
+    print 'CVS Error:', e
+    if gopts.debug:
+        raise
+    sys.exit(1)
+
+except KeyboardInterrupt:
+    print "Interrupted, exiting."
+    subcmds = subcmd = None
+    if gopts.debug:
+        raise
+    sys.exit(1)
+

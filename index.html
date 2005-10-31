@@ -1,0 +1,204 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.76C-SGI [en] (X11; U; IRIX64 6.5 IP30) [Netscape]">
+   <title>xxdiff: a file comparator and merge tool </title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+
+<center>
+<h1>
+xxdiff</h1></center>
+This is the official home of <b>xxdiff</b>, a graphical file and directories
+comparator and merge tool. If you're longing the old days of SGI and xdiff,
+you've come at the right place.&nbsp; <b>xxdiff</b> implements the same
+functionality and look-and-feel as xdiff, is provided as open source and
+adds many many useful new features. It runs on many popular unices, including
+IRIX, Linux, Solaris, HP/UX, DEC Tru64.
+<h2>
+Resources</h2>
+
+<ul>
+<li>
+<a href="http://www.iro.umontreal.ca/~blais/xxdiff/CHANGES">Changes</a>
+<i>(news, history, wishlist)</i></li>
+
+<li>
+<a href="doc/">Documentation</a> <i>(user's manual, features, FAQ)</i></li>
+
+<li>
+<a href="screenshots.html">Screenshots</a></li>
+
+<li>
+<a href="http://sourceforge.net/project/showfiles.php?group_id=2198">Download</a>
+<i>(source and binaries)</i></li>
+
+<li>
+<a href="compiling.html">A note on compiling from source</a></li>
+
+<li>
+<a href="http://sourceforge.net/tracker/?group_id=2198">Reporting bugs</a>
+<i>(bugs and feature requests)</i></li>
+</ul>
+<b>Please!</b>&nbsp;use the bug tracker instead of email.&nbsp; It is very
+simple, quick and easy to use, and allows me to track bugs and features,
+as well as keep a history and dates.
+<h2>
+Links</h2>
+
+<ul>
+<li>
+<a href="http://sourceforge.net/project/?group_id=2198">SourceForge project
+page</a></li>
+
+<li>
+<a href="http://www.freshmeat.net/projects/xxdiff">Freshmeat appindex</a></li>
+
+<li>
+<a href="http://www.iro.umontreal.ca/~blais">Author's homepage</a></li>
+</ul>
+
+<h2>
+Packages</h2>
+Some people have made packages for specific operating systems. Here are
+links to those pages.
+<ul>
+<li>
+<a href="http://sourceforge.net/project/showfiles.php?group_id=2198">Redhat
+package (provided by Martin Blais)</a></li>
+
+<li>
+<a href="http://www.sourcepole.ch/sources/software/xxdiff/">Debian package
+(provided by Tomas Pospisek)</a></li>
+
+<li>
+BSD package (provided by Dan Weeks)</li>
+</ul>
+
+<h2>
+List of features</h2>
+
+<ul>
+<li>
+File comparison:</li>
+
+<ul>
+<li>
+Look-and-feel similar to Rudy Wortel's/SGI xdiff</li>
+
+<li>
+Default bindings understands emacs movement commands</li>
+
+<li>
+Uses external diff program to compute differences: works with GNU diff,
+SGI diff and ClearCase's cleardif, and any other diff whose output is similar
+to those</li>
+
+<li>
+Simple, order-independent <b>3-way</b> diffs support (i.e. diff'ing 3 files,
+typically for merging)</li>
+
+<li>
+Smart display of long filenames</li>
+
+<li>
+Horizontal diffs highlighting, with optional ignoring of horizontal whitespace</li>
+
+<li>
+Can spawn an editor session and refresh when one of the files has changed</li>
+
+<li>
+Merge policing features:</li>
+
+<ul>
+<li>
+cut-and-paste with annotations</li>
+
+<li>
+filenames to clipboard (useful for long ClearCase names)</li>
+
+<li>
+can save selected regions only</li>
+</ul>
+</ul>
+
+<li>
+Merging files:</li>
+
+<ul>
+<li>
+Easy selection of lines from both files (quick split/swap/merge feature)</li>
+
+<li>
+Automatic merge selection, leaves conflicts as unselected</li>
+
+<li>
+Can save unselected regions as conflicts with markers around them</li>
+
+<li>
+View window of merged results</li>
+
+<li>
+Global selection of unselected lines</li>
+</ul>
+
+<li>
+Directory comparison:</li>
+
+<ul>
+<li>
+Shallow and Recursive directory comparison</li>
+
+<li>
+Can launch another xxdiff of selected files or directories under cursor</li>
+
+<li>
+Optional ignore of file with changes (only file additions/removals are
+shown)</li>
+</ul>
+
+<li>
+Misc.:</li>
+
+<ul>
+<li>
+Overview area allows to see where changes occur in files</li>
+
+<li>
+Full customization of all settings and colors through resource file, or
+optional Xrm resources</li>
+
+<li>
+All resources can be specified on command line</li>
+
+<li>
+Filename titles can be specified on command line, for CM version number
+display or other purpose</li>
+
+<li>
+Desktop agnostic (i.e. will work equally well with KDE or Gnome)</li>
+</ul>
+</ul>
+xxdiff is tested daily in a merge reviewing/policing context by about 50
+engineers at my workplace (<a href="http://www.discreet.com">discreet</a>),
+and since this task is a significant part of their development process,
+many of the features are a direct result of suggestions from these people.
+<p>You will find other <a href="http://dmoz.org/Computers/Software/File_Management/File_Comparison/">file
+comparison programs at dmoz</a>. If you find a feature that is not available
+in xxdiff that you feel should be there, please let me know and I'll add
+it to the wishlist. The following major features are being actively worked
+on:
+<ul>
+<li>
+Configuration management integration (RCS, CVS, ClearCase)</li>
+
+<li>
+Internationalization</li>
+</ul>
+Keep your eye on freshmeat for updates.
+<br>&nbsp;
+<p>
+<hr WIDTH="100%"><a href="http://sourceforge.net"><img SRC="sflogo.php" BORDER=0 height=31 width=88></a>
+</body>
+</html>
