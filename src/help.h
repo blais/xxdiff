@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.h 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: help.h 291 2001-10-20 22:15:00Z blais $
+ * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -85,11 +85,6 @@ public:
    // Creates a new, self-destructive about dialog.  Just show it.
    static QDialog* getAboutDialog( QWidget* parent = 0 );
 
-   // Creates a new, self-destructive color legend.  Just show it.
-   static QDialog* getColorLegend( 
-      QWidget*     parent = 0
-   );
-
    // Creates a new, self-destructive man page dialog.  Just show it.
    static QDialog* getManPageDialog(
       QWidget*     parent = 0
@@ -103,9 +98,6 @@ public:
 
    // Print out version message.
    static void dumpVersion( QTextStream& );
-
-   // Print out the resources and associated documentation.
-   static void dumpResources( QTextStream& );
 
 };
 

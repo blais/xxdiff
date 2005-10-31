@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 256 2001-10-08 02:29:13Z blais $
- * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
+ * $Id: app.h 300 2001-10-23 03:45:33Z blais $
+ * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -39,8 +39,8 @@
 #include <resources.h>
 #endif
 
-#ifndef INCL_XXDIFF_RCFILEPARSER
-#include <rcfileParser.h>
+#ifndef INCL_XXDIFF_RESPARSER
+#include <resParser.h>
 #endif
 
 #ifndef INCL_QT_QAPPLICATION
@@ -84,7 +84,6 @@ class XxDiffs;
 class XxBuffer;
 class XxResources;
 class XxOptionsDialog;
-class XxStringResParser;
 class XxSearchDialog;
 
 /*==============================================================================
@@ -118,23 +117,22 @@ public:
    uint getNbFiles() const;
 
    // Returns the file for requested buffer.
-   // FIXME shouldn't you change this for getBuffer()?  do it everywhere too.
-   XxBuffer* getFile( const XxFno no ) const;
+   XxBuffer* getBuffer( const XxFno no ) const;
 
    // Returns an array of the file pointers.
-   const std::auto_ptr<XxBuffer>* getFiles() const;
+   const std::auto_ptr<XxBuffer>* getBuffers() const;
 
    // Returns the maximum number of digits for line numbers of all files.
    uint getMaxDigits() const;
+
+   // Returns the resources.
+   const XxResources& getResources() const;
 
    // Returns the diffs.
    XxDiffs* getDiffs() const;
 
    // Returns the number of lines in the diffs.
    XxDln getNbLines() const;
-
-   // Returns the font.
-   const QFont& getFont() const;
 
    // Adjust scrollbars after a resize.
    void adjustScrollbars( bool force = false );
@@ -175,7 +173,7 @@ public:
    XxDln getNbDisplayLines() const;
 
    // Process a main window resize event.
-   void resizeEvent();
+   void adjustComponents();
 
    // Returns the main window's size.
    QRect getMainWindowGeometry() const;
@@ -309,7 +307,6 @@ public slots:
    void ignoreFileMiddle();
    void ignoreFileRight();
    void helpManPage();
-   void helpColorLegend();
    void helpGenInitFile();
    void helpAbout();
    // </group>
@@ -340,14 +337,12 @@ private:
       bool&   directories
    ) const;
 
-   // Parse rc file and removes the recognized ones.
-   void buildResources();
+   // Creates a new resources object and parses the rcfile and cmdline
+   // resources.
+   XxResources* buildResources() const;
 
    // Parse command line options and removes the recognized ones.
    void parseCommandLine( int& argc, char**& argv );
-
-   // Parse resources specified on command line.
-   void parseCommandLineResources();
 
    // Reads in a file.
    void readFile( 
@@ -403,7 +398,7 @@ private:
    void removeFile( XxFno nnno ) const;
 
    // Private non-const version of resource access (for dialogs).
-   XxResources* getResourcesNC();
+   XxResources& getResourcesNC();
 
    // Implements apply-and-move-to-next algorithm.
    void selectAndNext( XxLine::Selection selection );
@@ -413,10 +408,10 @@ private:
    bool validateNeedToSave( uint no ) const;
 
    // Implementation of the ignoreXXX() methods.
-   void setFileDiffOptions( XxResources::Resource );
+   void setFileDiffOptions( XxCommandSwitch );
 
    // Implementation of the qualityXXX() methods.
-   void setQuality( XxResources::Quality );
+   void setQuality( XxQuality );
 
    /*----- static member functions -----*/
 
@@ -461,17 +456,19 @@ private:
    std::auto_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;
                                 	
-   // Resources.                	
+   // Resources.
    XxResources*            _resources;
 
    // Cmdline-related variables.
    int                     _returnValue;
    QString                 _userFilenames[3];
    QString                 _stdinFilename;
-   XxRcfileParser*         _stringResParser;
+
    bool                    _useRcfile;
    QString                 _extraDiffArgs;
    bool                    _sepDiff;
+   QByteArray              _cmdlineResources;
+
 
    /*----- static data members -----*/
 

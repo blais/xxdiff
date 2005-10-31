@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 251 2001-10-04 20:00:25Z blais $
- * $Date: 2001-10-04 16:00:25 -0400 (Thu, 04 Oct 2001) $
+ * $Id: diffs.cpp 302 2001-10-23 05:14:10Z blais $
+ * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,7 +31,6 @@
 #include <list>
 #include <algorithm>
 #include <iostream>
-#include <sstream>
 #include <stdio.h> // Should be cstdio but SGI doesn't support it.
 
 /*==============================================================================
@@ -43,7 +42,7 @@ namespace {
 //------------------------------------------------------------------------------
 //
 int outputLine(
-   std::ostream&                  os,
+   QTextStream&                   os,
    const std::auto_ptr<XxBuffer>* files,
    const XxLine&                  line,
    int                            no
@@ -56,8 +55,8 @@ int outputLine(
       const char* text = files[no]->getTextLine( fline, len );
       XX_ASSERT( text != 0 ); // make this one throw
 
-      os.write( text, len );
-      os.put( '\n' );
+      os.writeRawBytes( text, len );
+      os << endl;
       return 1;
    }
    return 0;
@@ -211,7 +210,10 @@ XxDln XxDiffs::moveBackwardsVisibleLines(
 //
 void XxDiffs::selectLine( XxDln lineNo, XxLine::Selection selection )
 {
-   XX_ASSERT( lineNo <= XxDln(_lines.size()) );
+   if ( lineNo > XxDln(_lines.size()) ) {
+      return;
+   }
+
    if ( _isDirectoryDiff ) {
       return;
    }
@@ -227,7 +229,10 @@ void XxDiffs::selectLine( XxDln lineNo, XxLine::Selection selection )
 //
 void XxDiffs::selectRegion( XxDln lineNo, XxLine::Selection selection )
 {
-   XX_ASSERT( lineNo <= XxDln(_lines.size()) );
+   if ( lineNo > XxDln(_lines.size()) ) {
+      return;
+   }
+
    if ( _isDirectoryDiff ) {
       return;
    }
@@ -375,7 +380,9 @@ XxLine::Type XxDiffs::findRegionWithSel(
 //
 XxDln XxDiffs::findNextDifference( XxDln lineNo ) const
 {
-   XX_ASSERT( lineNo <= XxDln(_lines.size()) );
+   if ( lineNo > XxDln(_lines.size()) ) {
+      return -1;
+   }
 
    const XxLine& line = getLine( lineNo );
    XxLine::Type type = line.getType();
@@ -411,7 +418,9 @@ XxDln XxDiffs::findNextDifference( XxDln lineNo ) const
 //
 XxDln XxDiffs::findPreviousDifference( XxDln lineNo ) const
 {
-   XX_ASSERT( lineNo <= XxDln(_lines.size()) );
+   if ( lineNo > XxDln(_lines.size()) ) {
+      return -1;
+   }
 
    const XxLine& line = getLine( lineNo );
    XxLine::Type type = line.getType();
@@ -552,7 +561,7 @@ uint XxDiffs::getNbFileLines(
 
 //------------------------------------------------------------------------------
 //
-XxFln XxDiffs::getFileLine(
+XxFln XxDiffs::getBufferLine(
    XxFno no,
    XxDln lineNo,
    bool& actuallyEmpty
@@ -654,7 +663,8 @@ bool XxDiffs::isAllSelected() const
 //------------------------------------------------------------------------------
 //
 bool XxDiffs::save( 
-   std::ostream&                  os, 
+   const XxResources&             resources,
+   QTextStream&                   os, 
    const std::auto_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
@@ -666,19 +676,18 @@ bool XxDiffs::save(
    XX_ASSERT( files[1].get() != 0 );
    int nbFiles = files[2].get() != 0 ? 3 : 2;
 
-   const XxResources* resources = XxResources::getInstance();
    QString tags[4];
    if ( useConditionals == false ) {
       for ( int ii = 0; ii < nbFiles; ++ii ) {
-         tags[ii] = resources->getTag( XxResources::TAG_CONFLICT_SEPARATOR );
+         tags[ii] = resources.getTag( TAG_CONFLICT_SEPARATOR );
       }
-      tags[nbFiles] = resources->getTag( XxResources::TAG_CONFLICT_END );
+      tags[nbFiles] = resources.getTag( TAG_CONFLICT_END );
    }
    else {
-      tags[0] = resources->getTag( XxResources::TAG_CONDITIONAL_IF );
-      tags[1] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSEIF );
-      tags[2] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSE );
-      tags[3] = resources->getTag( XxResources::TAG_CONDITIONAL_ENDIF );
+      tags[0] = resources.getTag( TAG_CONDITIONAL_IF );
+      tags[1] = resources.getTag( TAG_CONDITIONAL_ELSEIF );
+      tags[2] = resources.getTag( TAG_CONDITIONAL_ELSE );
+      tags[3] = resources.getTag( TAG_CONDITIONAL_ENDIF );
    }
 
    for ( int ii = 0; ii < nbFiles; ++ii ) {
@@ -695,9 +704,9 @@ bool XxDiffs::save(
       }
    }
 
-   for ( int ii = 0; ii < nbFiles+1; ++ii ) {
-      XX_TRACE( tags[ii].latin1() );
-   }
+   // for ( int ii = 0; ii < nbFiles+1; ++ii ) {
+   //    XX_TRACE( tags[ii].latin1() );
+   // }
 
    bool foundUnsel = false;
    bool insideUnsel = false;
@@ -727,8 +736,9 @@ bool XxDiffs::save(
                   cond.sprintf( tags[state].latin1(),
                                 conditionals[f].latin1() );
 
-                  std::ostringstream oss;
-                  oss << cond.latin1() << endl;
+                  QString line;
+                  QTextOStream oss( &line );
+                  oss << cond << endl;
 
                   int nbOutlines = 0;
                   for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
@@ -750,11 +760,12 @@ bool XxDiffs::save(
                   else {
                      ++state;
                   }
-                  os << oss.str();
+                  oss << flush;
+                  os << line;
                }
             }
 
-            os << tags[3] << std::endl;
+            os << tags[3] << endl;
 
             insideUnsel = false;
          }
@@ -787,7 +798,7 @@ bool XxDiffs::save(
       for ( uint f = 0; f < 3; ++f ) {
          if ( files[f].get() != 0 ) {
 
-            os << tags[f] << std::endl;
+            os << tags[f] << endl;
 
             for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
                const XxLine& cline = getLine( iii );
@@ -796,7 +807,7 @@ bool XxDiffs::save(
          }
       }
 
-      os << tags[nbFiles] << std::endl;
+      os << tags[nbFiles] << endl;
 
       insideUnsel = false;
    }
@@ -807,7 +818,7 @@ bool XxDiffs::save(
 //------------------------------------------------------------------------------
 //
 bool XxDiffs::saveSelectedOnly(
-   std::ostream&                os,
+   QTextStream&                   os,
    const std::auto_ptr<XxBuffer>* files
 ) const
 {
@@ -833,15 +844,15 @@ bool XxDiffs::saveSelectedOnly(
             XX_ASSERT( text != 0 ); // make this one throw
 
             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
-            os.write( text, len );
-            os << std::endl;
+            os.writeRawBytes( text, len );
+            os << endl;
 
             some = true;
             prevOut = true;
          }
       }
       else if ( prevOut == true ) {
-         os << std::endl;
+         os << endl;
          prevOut = false;
       }
    }
@@ -903,7 +914,9 @@ const std::vector<XxDiffs::SearchResult>& XxDiffs::getSearchResults() const
 //
 XxDiffs::SearchResult XxDiffs::findNextSearch( XxDln lineNo ) const
 {
-   XX_ASSERT( lineNo > 0 && lineNo <= XxDln(_lines.size()) );
+   if ( lineNo <= 0 || lineNo > XxDln(_lines.size()) ) {
+      return SearchResult();
+   }
 
    // Stupid linear search.
    for ( uint ii = 0; ii < _searchResults.size(); ++ii ) {
@@ -919,7 +932,9 @@ XxDiffs::SearchResult XxDiffs::findNextSearch( XxDln lineNo ) const
 //
 XxDiffs::SearchResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
 {
-   XX_ASSERT( lineNo > 0 && lineNo <= XxDln(_lines.size()) );
+   if ( lineNo <= 0 || lineNo > XxDln(_lines.size()) ) {
+      return SearchResult();
+   }
 
    // Stupid linear search.
    for ( int ii = _searchResults.size() - 1; ii >= 0; --ii ) {
@@ -935,6 +950,10 @@ XxDiffs::SearchResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
 //
 bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 {
+   if ( lineNo <= 0 || lineNo > XxDln(_lines.size()) ) {
+      return false;
+   }
+
    bool wasJoin = false;
 
    // Find contiguous hunks that are not SAME with same hunk id.  There should
@@ -1258,6 +1277,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 //------------------------------------------------------------------------------
 //
 void XxDiffs::initializeHorizontalDiffs(
+   const bool                     ignoreHorizontalWhitespace,
    const std::auto_ptr<XxBuffer>* files,
    const bool                     force
 )
@@ -1266,10 +1286,6 @@ void XxDiffs::initializeHorizontalDiffs(
    XX_ASSERT( files[1].get() != 0 );
 
    if ( force == true || _initializedHorizontalDiffs == false ) {
-
-      const XxResources* resources = XxResources::getInstance();
-      const bool ignoreWs =
-         resources->getBoolOpt( XxResources::IGNORE_HORIZONTAL_WS );
 
       for ( XxDln ii = 0; ii < XxDln(_lines.size()); ++ii ) {
          XxFln line0 = _lines[ii].getLineNo( 0 );
@@ -1294,7 +1310,7 @@ void XxDiffs::initializeHorizontalDiffs(
          }
 
          _lines[ii].initializeHorizontalDiff(
-            ignoreWs, text0, len0, text1, len1, text2, len2
+            ignoreHorizontalWhitespace, text0, len0, text1, len1, text2, len2
          );
       }
 

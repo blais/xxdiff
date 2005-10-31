@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.h 248 2001-10-04 05:07:08Z blais $
- * $Date: 2001-10-04 01:07:08 -0400 (Thu, 04 Oct 2001) $
+ * $Id: buffer.h 291 2001-10-20 22:15:00Z blais $
+ * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -169,7 +169,7 @@ public:
 
    // If this is a buffer containing a directory (i.e. a list of files), return
    // the full path of the filename at line lineno.
-   QString getFileAtLine( 
+   QString getBufferAtLine( 
       const XxFln lineno
    ) const;
 

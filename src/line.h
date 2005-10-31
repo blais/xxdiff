@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 244 2001-10-02 22:20:54Z blais $
- * $Date: 2001-10-02 18:20:54 -0400 (Tue, 02 Oct 2001) $
+ * $Id: line.h 274 2001-10-16 02:05:34Z blais $
+ * $Date: 2001-10-15 22:05:34 -0400 (Mon, 15 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,11 @@
 
 #ifndef INCL_XXDIFF_TYPES
 #include <types.h>
+#endif
+
+#ifndef INCL_XXDIFF_RESOURCES
+#include <resources.h>
+#define INCL_XXDIFF_RESOURCES
 #endif
 
 #ifndef INCL_QT_QSTRING
@@ -174,6 +179,15 @@ public:
    // used during merging of lines.
    XxLine getPromoted( Type promoteType ) const;
 
+   // Get display color for line text.  Returns the resource for the background
+   // color.
+   void getLineColorType(
+      const XxIgnoreFile ignoreFile,
+      const XxFno        no,
+      XxColor&           dtype,
+      XxColor&           dtypeSup
+   ) const;
+
    /*----- static member functions -----*/
 
    // Returns true if the two types are part of the same region.
@@ -202,15 +216,30 @@ public:
    // sense.
    static XxFno mapTypeToFileNo( Type type );
 
-   /*----- static data members -----*/
-
-   static Type _ignoreConvertTables[ 4 ][ NB_TYPES ];
-   
 private:
 
    /*----- member functions -----*/
 
    void init();
+
+   // Implementations of the line color type algorithms.
+   // <group>
+   bool getLineColorIfSelected(
+      const XxFno no,
+      XxColor&    dtype,
+      XxColor&    dtypeSup
+   ) const;
+   void getLineColorTypeStd(
+      const XxLine::Type newType,
+      const XxFno        no,
+      XxColor&           dtype,
+      XxColor&           dtypeSup
+   ) const;
+   // </group>
+
+   /*----- static data members -----*/
+
+   static Type _ignoreConvertTables[ 4 ][ NB_TYPES ];
 
    /*----- data members -----*/
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.h 246 2001-10-04 00:32:54Z blais $
- * $Date: 2001-10-03 20:32:54 -0400 (Wed, 03 Oct 2001) $
+ * $Id: optionsDialog.h 296 2001-10-22 05:58:27Z blais $
+ * $Date: 2001-10-22 01:58:27 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -69,11 +69,11 @@ public:
    // Constructor.
    XxOptionsDialog( XxApp* app, QWidget* parent );
 
+   // Destructor.
+   virtual ~XxOptionsDialog();
+
    // See base class.
    virtual void show();
-
-   // Asks the dialog to synchronize itself.
-   void synchronize();
 
    // Selects a particular tab. 
    // <group>
@@ -123,6 +123,9 @@ public slots:
 
    /*----- member functions -----*/
 
+   // Asks the dialog to synchronize itself.
+   void synchronize();
+
    void onApply();
    void onClose();
 
@@ -143,59 +146,62 @@ public slots:
    //---------------------------------------------------------------------------
    // Directories
 
-   void checkboxRecursive( int );
+   //     void checkboxRecursive( int );
 
    //---------------------------------------------------------------------------
    // Display
 
-   void checkboxHorizontalDiffs( int );
-   void checkboxIgnoreHorizontalWhitespace( int );
-   void checkboxHideCarriageReturns( int );
-   void spinboxTabWidth( int );
-   void checkboxIgnoreFileChanges( int );
-   void checkboxFormatClipboardText( int );
-   void checkboxDrawVerticalLine( int );
-   void comboIgnoreFile( const QString& );
+   //     void checkboxHorizontalDiffs( int );
+   //     void checkboxIgnoreHorizontalWhitespace( int );
+   //     void checkboxHideCarriageReturns( int );
+   //     void spinboxTabWidth( int );
+   //     void checkboxIgnoreFileChanges( int );
+   //     void checkboxFormatClipboardText( int );
+   //     void checkboxDrawVerticalLine( int );
+   //     void comboIgnoreFile( const QString& );
+
+   void editFontApp();
+   void editFontText();
 
    //---------------------------------------------------------------------------
    // Colors
 
    void listboxColors( const QString& );
-   void editColor();
+   void editColorFore();
+   void editColorBack();
 
 
 private:
-
-   /*----- types and enumerationse -----*/
-
-   typedef std::map< int, QColor > ColorModMap;
 
    /*----- member functions -----*/
 
    int getDiffPageIndex() const;
 
    void setFileDiffOptions(
-      XxResources::Resource cmdOptionId,
-      bool                  state
+      XxCommandSwitch cmdOptionId,
+      bool         state
    ) const;
 
    void setFileDiffQuality(
-      XxResources::Quality quality
+      XxQuality quality
    ) const;
 
    bool maybeSetCommand( 
-      XxResources::Resource commandId,
-      const QString&        commandString
+      XxCommand      commandId,
+      const QString& commandString
    );
-
 
    /*----- data members -----*/
 
-   XxApp*      _app;
-   ColorModMap _colorModMap;
+   XxApp* _app;
+
+   // Note: perhaps we should keep a whole resources object for the dialog.
+   QFont  _fontApp;
+   QFont  _fontText;
 
 };
 
 XX_NAMESPACE_END
 
 #endif
+

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 226 2001-09-25 20:40:41Z blais $
- * $Date: 2001-09-25 16:40:41 -0400 (Tue, 25 Sep 2001) $
+ * $Id: overview.cpp 291 2001-10-20 22:15:00Z blais $
+ * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -62,7 +62,7 @@ XxOverview::XxOverview( XxApp* app, QWidget * parent, const char* name ) :
    setLineWidth( 2 );
    setBackgroundMode( NoBackground );
 
-   const XxResources* resources = XxResources::getInstance();
+   const XxResources& resources = _app->getResources();
    uint nbFiles = _app->getNbFiles();
    if ( nbFiles == 0 ) {
       nbFiles = 2;
@@ -70,8 +70,8 @@ XxOverview::XxOverview( XxApp* app, QWidget * parent, const char* name ) :
 
    uint width =
       2 * lineWidth() + 
-      nbFiles * resources->getOverviewFileWidth() + 
-      (nbFiles-1) * resources->getOverviewSepWidth();
+      nbFiles * resources.getOverviewFileWidth() + 
+      (nbFiles-1) * resources.getOverviewSepWidth();
    setFixedWidth( width );
 }
 
@@ -106,11 +106,11 @@ void XxOverview::drawContents( QPainter* pp )
 
    uint nbFiles = _app->getNbFiles();
    const XxDiffs* diffs = _app->getDiffs();
-   const XxResources* resources = XxResources::getInstance();
+   const XxResources& resources = _app->getResources();
 
    // If it is empty, erase the whole widget with blank color.
    QColor backgroundColor = 
-      resources->getColor( XxResources::COLOR_BACKGROUND );
+      resources.getColor( COLOR_BACKGROUND );
    if ( nbFiles == 0 || diffs == 0 ) {
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
@@ -125,7 +125,7 @@ void XxOverview::drawContents( QPainter* pp )
    XxFln maxlines = 0;
    uint ii;
    for ( ii = 0; ii < nbFiles; ++ii ) {
-      files[ii] = _app->getFile( ii );
+      files[ii] = _app->getBuffer( ii );
       XX_ASSERT( files[ii] != 0 );
       flines[ii] = files[ii]->getNbLines();
       maxlines = std::max( maxlines, flines[ii] );
@@ -141,8 +141,8 @@ void XxOverview::drawContents( QPainter* pp )
    // Draw appropriate content.
    //
 
-   int fileWidth = resources->getOverviewFileWidth();
-   int sepWidth = resources->getOverviewSepWidth();
+   int fileWidth = resources.getOverviewFileWidth();
+   int sepWidth = resources.getOverviewSepWidth();
 
    // Draw the file boxes.
    QPen pen;
@@ -199,10 +199,14 @@ void XxOverview::drawContents( QPainter* pp )
             int ddy = yend - prevy[ii] + 1;
 
             const XxLine& line = diffs->getLine( start );
-            XxResources::Resource dtype, dtypeSup;
-            resources->getLineColorType( line, ii, dtype, dtypeSup );
+            XxColor dtype, dtypeSup;
+            line.getLineColorType(
+               resources.getIgnoreFile(),
+               ii,
+               dtype, dtypeSup
+            );
 
-            resources->getRegionColor( dtype, back, fore );
+            resources.getRegionColor( dtype, back, fore );
             brush.setColor( back );
             p.fillRect( _fileL[ii]+1, prevy[ii], fileWidth-2, ddy, brush );
 
@@ -227,13 +231,13 @@ void XxOverview::drawContents( QPainter* pp )
    XxDln curline = _app->getCursorLine();
    XxDln topline = _app->getTopLine();
    XxDln bottomline = _app->getBottomLine();
-   QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
+   QColor cursorColor = resources.getColor( COLOR_CURSOR );
    for ( ii = 0; ii < nbFiles; ++ii ) {
       bool aempty;
       XxFln cfline;
 
       // Compute and draw visible region.
-      cfline = diffs->getFileLine( ii, topline, aempty );
+      cfline = diffs->getBufferLine( ii, topline, aempty );
       if ( aempty == true ) {
          cfline += 1;
       }
@@ -241,7 +245,7 @@ void XxOverview::drawContents( QPainter* pp )
          _fileT[ii] + 
          int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
 
-      cfline = diffs->getFileLine( ii, bottomline, aempty ) + 1;
+      cfline = diffs->getBufferLine( ii, bottomline, aempty ) + 1;
       int bottompos =
          _fileT[ii] + 
          int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
@@ -252,7 +256,7 @@ void XxOverview::drawContents( QPainter* pp )
       p.setPen( Qt::black );
 
       // Compute arrow position.
-      float fcfline = diffs->getFileLine( ii, curline, aempty ) + 0.5;
+      float fcfline = diffs->getBufferLine( ii, curline, aempty ) + 0.5;
       if ( aempty == true ) {
          fcfline += 0.5;
       }
@@ -348,13 +352,13 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
    XxBuffer* files[3];
    XxFln flines[3];
    for ( uint ii = 0; ii < nbFiles; ++ii ) {
-      files[ii] = _app->getFile( ii );
+      files[ii] = _app->getBuffer( ii );
       XX_ASSERT( files[ii] != 0 );
       flines[ii] = files[ii]->getNbLines();
    }
 
    bool aempty;
-   float cfline = diffs->getFileLine( no, topline, aempty );
+   float cfline = diffs->getBufferLine( no, topline, aempty );
    if ( aempty == true ) {
       cfline += 1.0;
    }
@@ -362,7 +366,7 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
       _fileT[no] +
       int( (_fileDy[no] * (cfline-1)) / float( flines[no] ) );
 
-   cfline = diffs->getFileLine( no, bottomline, aempty ) + 1;
+   cfline = diffs->getBufferLine( no, bottomline, aempty ) + 1;
    int bottompos =
       _fileT[no] +
       int( (_fileDy[no] * (cfline-1)) / float( flines[no] ) );
@@ -392,7 +396,6 @@ void XxOverview::mouseMoveEvent( QMouseEvent* e )
          int( ( dy ) * _manipFlines / float( _fileDy[_manipNo] ) + 1 );
 
       XxFln newTopLine = _manipTopLine + dline;
-      std::cout << dline << " " << newTopLine << std::endl;
 
       _app->setTopLine( newTopLine );
    }
@@ -419,9 +422,9 @@ void XxOverview::resizeEvent( QResizeEvent* e )
    //
    // Compute left/right extents.
    //
-   const XxResources* resources = XxResources::getInstance();
-   int fileWidth = resources->getOverviewFileWidth();
-   int sepWidth = resources->getOverviewSepWidth();
+   const XxResources& resources = _app->getResources();
+   int fileWidth = resources.getOverviewFileWidth();
+   int sepWidth = resources.getOverviewSepWidth();
    
    const int visRegionBorder = int( 0.25 * fileWidth );
    int cx = 0;
@@ -445,7 +448,7 @@ void XxOverview::resizeEvent( QResizeEvent* e )
    XxFln flines[3];
    XxFln maxlines = 0;
    for ( ii = 0; ii < nbFiles; ++ii ) {
-      files[ii] = _app->getFile( ii );
+      files[ii] = _app->getBuffer( ii );
       XX_ASSERT( files[ii] != 0 );
 
       flines[ii] = files[ii]->getNbLines();

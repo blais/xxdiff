@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 257 2001-10-08 04:28:33Z blais $
- * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
+ * $Id: util.cpp 298 2001-10-23 03:18:14Z blais $
+ * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -70,7 +70,7 @@ bool installSigChldHandler(
 // Disabled crud that doesn't work (it works only the first time, the second
 // time around the handler is called immediately upon setting up the handler).
    (void)sigChldHandler;
-#if 0 
+#ifdef DISABLED_ENABLED /* always false */
    XX_ASSERT( sigChldHandler != 0 );
 
    XX_TRACE( "Installing SIGCHLD handler." );
@@ -286,18 +286,26 @@ bool XxUtil::spawnCommand(
 
 //------------------------------------------------------------------------------
 //
-FILE* XxUtil::spawnCommandWithOutput(
+void XxUtil::spawnCommandWithOutput(
    const char** argv,
+   FILE*& outf,
+   FILE*& errf,
    void (*sigChldHandler)(int)
 )
 {
    XX_ASSERT( argv );
 
+   outf = errf = 0; // initialize.
 #ifndef WINDOWS
 
    // Open the pipe.
-   int pipe_fds[2];
-   if ( pipe( pipe_fds ) == -1 ) {
+   int pipe_fds_out[2];
+   if ( pipe( pipe_fds_out ) == -1 ) {
+      throw XxIoError( XX_EXC_PARAMS );
+   }
+
+   int pipe_fds_err[2];
+   if ( pipe( pipe_fds_err ) == -1 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
 
@@ -308,17 +316,32 @@ FILE* XxUtil::spawnCommandWithOutput(
           * redirect standard output and standard error into the pipe
           */
          close( fileno( stdout ) );
-         if ( dup( pipe_fds[1] ) == -1 ) {
+         if ( dup( pipe_fds_out[1] ) == -1 ) {
             throw XxIoError( XX_EXC_PARAMS );
          }
          close( fileno( stderr ) );
-         if ( dup( pipe_fds[1] ) == -1 ) {
+         if ( dup( pipe_fds_err[1] ) == -1 ) {
             throw XxIoError( XX_EXC_PARAMS );
          }
 
-         close( pipe_fds[0] );
-
+         close( pipe_fds_out[0] );
+         close( pipe_fds_err[0] );
+         
          if ( execvp( argv[0], const_cast<char**>(argv) ) == -1 ) {
+            // Send parent some output telling it we couldn't exec.
+            QString errs;
+            {
+               QTextOStream errss( &errs );
+               errss << "Cannot exec process " << argv[0] << endl << flush;
+            }
+            fwrite( errs.latin1(), errs.length(), 1, stderr );
+            fwrite( "\n", 1, 1, stderr );
+//             fwrite( stderr, pipe_fds_err[0], errs.latin1(), errs.length() );
+//             fwrite( stderr, pipe_fds_err[0], "\n", 1 );
+            
+//             close( pipe_fds_out[0] );
+//             close( pipe_fds_err[1] );
+
             exit( 1 );
          }
 
@@ -334,7 +357,7 @@ FILE* XxUtil::spawnCommandWithOutput(
 
          if ( sigChldHandler ) {
             if ( installSigChldHandler( sigChldHandler ) == false ) {
-               return false;
+               return;
             }
          }
 
@@ -343,18 +366,23 @@ FILE* XxUtil::spawnCommandWithOutput(
           * writer end of the pipe in the child will not cause an EOF 
           * condition for the reader
           */
-         close( pipe_fds[1] );
+         close( pipe_fds_out[1] );
+         close( pipe_fds_err[1] );
 
          /* 
           * return the reader side of the pipe as a stdio stream
           */
-         return fdopen( pipe_fds[0], "r" );
+         outf = fdopen( pipe_fds_out[0], "r" );
+         errf = fdopen( pipe_fds_err[0], "r" );
+         if ( !outf || !errf ) {
+            throw XxIoError( XX_EXC_PARAMS );
+         }
       }
    }
 #endif
 
    // Not reached.
-   return 0;
+   return;
 }
 
 //------------------------------------------------------------------------------
@@ -485,19 +513,6 @@ int XxUtil::splitArgs(
    }
    free( cargs );
          
-#if 0
-// FIXME remove
-   const char** pargs = args;
-   while ( *pargs != 0 ) {
-      if ( argc >= count ) {
-         count += BLOCKSIZE;
-         argv = (const char**) realloc( argv, sizeof(char*) * count );
-      }
-
-      argv[argc++] = *pargs;
-      pargs++;
-   }
-#endif
    argv[argc] = 0;
 
 //#define ANAL_DEBUGGING

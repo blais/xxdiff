@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 256 2001-10-08 02:29:13Z blais $
- * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
+ * $Id: builderDirs2.cpp 302 2001-10-23 05:14:10Z blais $
+ * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -132,13 +132,14 @@ bool parseDiffLine(
 {
    bool error;
    const char* bufPtr = buf;
+   onlyDir = -1; /* don't take chances with chance */
    if ( ::strncmp( bufPtr, "Only in ", 8 ) == 0 ) {
       bufPtr += 8;
       const char* colonPtr = ::strstr( bufPtr, ": " );
       if ( colonPtr == 0 ) {
          throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
-
+      
       //int len = colonPtr - bufPtr;
       int cmp1 = ::strncmp( bufPtr, dir1, len1 );
       int cmp2 = ::strncmp( bufPtr, dir2, len2 );
@@ -149,13 +150,13 @@ bool parseDiffLine(
          // the directories is a subdirectory of the other, but the output is
          // ambiguous, and to really check we would have to stat. Besides GNU
          // diff leaves this ambibuity.
-         onlyDir = cmp1 > cmp2 ? 0 : 1;
+         onlyDir = (len1 > len2) ? 0 : 1;
       }
       else if ( cmp1 != 0 && cmp2 != 0 ) {
          throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
       else {
-         onlyDir = cmp1 == 0 ? 0 : 1;
+         onlyDir = (cmp1 == 0) ? 0 : 1;
       }
 
       int lens = ( onlyDir == 0 ? len1 : len2 );
@@ -177,7 +178,10 @@ bool parseDiffLine(
 
       // Note: need to remove \n
       QString bname;
-      bname.setLatin1( colonPtr + 2, ::strlen( colonPtr + 2 ) - 1 );
+      int mlen = ::strlen( colonPtr + 2 ) - 1;
+      if ( mlen > 0 ) {
+         bname.setLatin1( colonPtr + 2, mlen );
+      }
       filename += bname;
       type = ONLY_IN;
       error = false;
@@ -192,7 +196,13 @@ bool parseDiffLine(
       if ( *filenamePtr == '/' ) {
          ++filenamePtr;
       }
-      filename.setLatin1( filenamePtr, andPtr - filenamePtr );
+      int mlen = andPtr - filenamePtr;
+      if ( mlen > 0 ) {
+         filename.setLatin1( filenamePtr, mlen );
+      }
+      else {
+         filename = QString();
+      }
 
       bufPtr = andPtr + 5;
       const char* endtagPtr = ::strstr( bufPtr, " differ" );
@@ -217,7 +227,13 @@ bool parseDiffLine(
       if ( *filenamePtr == '/' ) {
          ++filenamePtr;
       }
-      filename.setLatin1( filenamePtr, andPtr - filenamePtr );
+      int mlen = andPtr - filenamePtr;
+      if ( mlen > 0 ) {
+         filename.setLatin1( filenamePtr, mlen );
+      }
+      else {
+         filename = QString();
+      }
 
       type = COMMON_SUBDIR;
       error = false;
@@ -241,10 +257,10 @@ void setType(
    int index = entries.findIndex( filename );
    if ( index == -1 ) {
 #ifdef LOCAL_TRACE
-      for ( unsigned int ii = 0; ii < entries.size(); ++ii ) {
-         std::cout << entries[ii] << std::endl;
+      for ( unsigned int ii = 0; ii < entries.count(); ++ii ) {
+         XX_TRACE( entries[ii] );
       }
-      std::cout << "filename \"" << filename.latin1() << "\"" << std::endl;
+      XX_TRACE( "filename \"" << filename.latin1() << "\"" );
 #endif
       throw XxInternalError( XX_EXC_PARAMS );
    }
@@ -305,7 +321,7 @@ void buildSolelyFromOutput(
 
       DirDiffType type;
       QString filename;
-      int onlyDir;
+      int onlyDir = -1;
       if ( parseDiffLine(
          buffer, path1, len1, path2, len2, type, filename, onlyDir
       ) == true ) {
@@ -316,10 +332,10 @@ void buildSolelyFromOutput(
       }
 
 #ifdef LOCAL_TRACE
-      std::cout << buffer;
-      std::cout << typeString[ type ] << "   " 
+      XX_TRACE( buffer 
+                << typeString[ type ] << "   " 
                 << filename.latin1() << "   "
-                << onlyDir << std::endl;
+                << onlyDir );
       if ( type == UNKNOWN ) {
          throw XxInternalError( XX_EXC_PARAMS );
       }
@@ -372,6 +388,18 @@ void buildAgainstReadDirectory(
 {
    const QStringList& entries1 = buffer1->getDirectoryEntries();
    const QStringList& entries2 = buffer2->getDirectoryEntries();
+#ifdef LOCAL_TRACE
+   {
+      for ( QStringList::ConstIterator iter = entries1.begin();
+            iter != entries1.end(); ++iter ) {
+         XX_TRACE( (*iter).latin1() );
+      }
+      for ( QStringList::ConstIterator iter = entries2.begin();
+            iter != entries2.end(); ++iter ) {
+         XX_TRACE( (*iter).latin1() );
+      }
+   }
+#endif
 
    types1.clear();
    types2.clear();
@@ -386,7 +414,7 @@ void buildAgainstReadDirectory(
 
       DirDiffType type;
       QString filename;
-      int onlyDir;
+      int onlyDir = -1;
       if ( parseDiffLine(
          buffer, path1, len1, path2, len2, type, filename, onlyDir
       ) == true ) {
@@ -397,10 +425,10 @@ void buildAgainstReadDirectory(
       }
 
 #ifdef LOCAL_TRACE
-      std::cout << buffer;
-      std::cout << typeString[ type ] << "   " 
+      XX_TRACE( buffer
+                << typeString[ type ] << "   " 
                 << filename.latin1() << "   "
-                << onlyDir << std::endl;
+                << onlyDir );
       if ( type == UNKNOWN ) {
          throw XxInternalError( XX_EXC_PARAMS );
       }
@@ -450,7 +478,7 @@ void buildAgainstReadDirectory(
       }
    }
 #ifdef LOCAL_TRACE
-   std::cout << "Done patching." << std::endl;
+   XX_TRACE( "Done patching." );
 #endif
 }
 
@@ -501,8 +529,10 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    const char** out_args;
    XxUtil::splitArgs( cmd, out_args );
 
-   FILE* fp = XxUtil::spawnCommandWithOutput( out_args );
-   if ( fp == 0 ) {
+   FILE* fout;
+   FILE* ferr;
+   XxUtil::spawnCommandWithOutput( out_args, fout, ferr );
+   if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
    XxUtil::freeArgs( out_args );
@@ -512,31 +542,38 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    QTextOStream errors( &_errors );
 
+   // Collect stderr.
+   char buffer[BUFSIZ+1];
+   while ( fgets( buffer, BUFSIZ, ferr ) != 0 ) {
+      errors << buffer << endl;
+   }
+   ::fclose( ferr );
+
    // Note: for now we don't support recursive diffs built against a directory.
    if ( _buildSolelyFromOutput || _isDiffRecursive ) {
       buildSolelyFromOutput(
-         fp, errors, path1, buffer1, path2, buffer2, types1, types2
+         fout, errors, path1, buffer1, path2, buffer2, types1, types2
       );
    }
    else {
       buildAgainstReadDirectory( 
-         fp, errors, path1, buffer1, path2, buffer2, types1, types2
+         fout, errors, path1, buffer1, path2, buffer2, types1, types2
       );
    }
+   ::fclose( fout );
 
 #ifdef LOCAL_TRACE
-   std::cout << "------------------------------" << std::endl;
+   XX_TRACE( "------------------------------" );
    for ( unsigned int ii = 0; ii < types1.size(); ++ii ) {
-      std::cout << typeString[ types1[ii] ] << std::endl;
+      XX_TRACE( typeString[ types1[ii] ] );
    }
-   std::cout << "------------------------------" << std::endl;
-   std::cout << "------------------------------" << std::endl;
+   XX_TRACE( "------------------------------" );
+   XX_TRACE( "------------------------------" );
    for ( unsigned int ii = 0; ii < types2.size(); ++ii ) {
-      std::cout << typeString[ types2[ii] ] << std::endl;
+      XX_TRACE( typeString[ types2[ii] ] );
    }
-   std::cout << "------------------------------" << std::endl;
+   XX_TRACE( "------------------------------" );
 #endif
-
       
    XxFln fline1 = 1;
    XxFln fline2 = 1;
@@ -606,7 +643,6 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
             ++it1;
             ++it2;
          }
-         // FIXME simplify the three cases above.
          else {
             XX_ASSERT( false );
          }
@@ -629,7 +665,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    }
 
    // Saved error text.
-   XX_LOCAL_TRACE( "Errors" << _errors );
+   XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {

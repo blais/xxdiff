@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: searchDialog.cpp 246 2001-10-04 00:32:54Z blais $
- * $Date: 2001-10-03 20:32:54 -0400 (Wed, 03 Oct 2001) $
+ * $Id: searchDialog.cpp 294 2001-10-21 07:27:43Z blais $
+ * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -72,7 +72,7 @@ void XxSearchDialog::onApply()
    XxDiffs* diffs = _app->getDiffs();
    const QString searchText = _lineeditSearchString->text();
    if ( diffs != 0 && !searchText.isEmpty() ) {
-      diffs->search( searchText, _app->getNbFiles(), _app->getFiles() );
+      diffs->search( searchText, _app->getNbFiles(), _app->getBuffers() );
    }
 }
 
@@ -93,6 +93,14 @@ void XxSearchDialog::onGotoLine()
    XxDiffs* diffs = _app->getDiffs();
    XxDln dline = diffs->getDisplayLine( gline, fno );
    _app->setCursorLine( dline );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxSearchDialog::show()
+{
+   _lineeditSearchString->setFocus();
+   BaseClass::show();
 }
 
 XX_NAMESPACE_END

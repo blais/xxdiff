@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: defs.h 253 2001-10-05 01:28:29Z blais $
- * $Date: 2001-10-04 21:28:29 -0400 (Thu, 04 Oct 2001) $
+ * $Id: defs.h 290 2001-10-20 00:45:36Z blais $
+ * $Date: 2001-10-19 20:45:36 -0400 (Fri, 19 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,12 +34,6 @@
 typedef unsigned int 	uint;
 
 
-//
-// Version number.
-//
-#define XX_VERSION 	VERSION
-
-
 // Note: disable the namespaces for now because the moc cannot deal with this.
 // We could circumvent the problem by including moc-generated output but then we
 // couldn't use the automoc script.
@@ -50,12 +44,14 @@ typedef unsigned int 	uint;
 #define XX_NAMESPACE_BEGIN		namespace Xxdiff {
 #define XX_NAMESPACE_END		}
 #define XX_NAMESPACE_USING		using namespace Xxdiff;
+#define XX_NAMESPACE_PREFIX		Xxdiff::
 
 #else
 
-#define XX_NAMESPACE_BEGIN		
-#define XX_NAMESPACE_END		
-#define XX_NAMESPACE_USING		
+#define XX_NAMESPACE_BEGIN
+#define XX_NAMESPACE_END
+#define XX_NAMESPACE_USING
+#define XX_NAMESPACE_PREFIX
 
 #endif
 
@@ -80,13 +76,6 @@ typedef unsigned int 	uint;
 
 
 //
-// Determines if we allow using Rcfile resources.
-//
-// Note: this is now specified with configure feature --disable-rcfile
-//#define XX_USE_RCFILE
-
-
-//
 // Debugging stuff.
 //
 
@@ -101,7 +90,7 @@ typedef unsigned int 	uint;
 #define XX_CHECK(x)	if ( !(x) ) \
   	{ throw XxInternalError( XX_EXC_PARAMS ); }
 
-#define XX_TRACE(x)		std::cout << x << std::endl;
+#define XX_TRACE(x)		std::cerr << "xx_trace " << x << std::endl;
 
 #define XX_TRACE_COMPILE(x)	x
 

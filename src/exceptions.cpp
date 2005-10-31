@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 257 2001-10-08 04:28:33Z blais $
- * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
+ * $Id: exceptions.cpp 294 2001-10-21 07:27:43Z blais $
+ * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -78,7 +78,7 @@ const QString& XxError::getMsg() const XX_THROW_NOTHING
 //
 XxUsageError::XxUsageError( 
    XX_EXC_PARAMS_DECL(file,line),
-   const QString& msg = QString::null,
+   const QString& msg,
    bool           benine,
    bool           version
 ) :
@@ -144,7 +144,15 @@ XxInternalError::XxInternalError(
        << "and log the above information above and if possible," << endl
        << "the files that caused the error, and as much detail as" << endl
        << "you can to reproduce the error.";
-   oss << endl; // for extra space
+   oss << endl << flush; // for extra space
+
+// We need this because somehow when called from an activate signal the catch
+// handler is not working properly and the app dumps core.  At least this way
+// I'll know what's going on at least when developing in debug mode.
+#ifdef XX_DEBUG
+   std::cerr << "Throwing exception:" << std::endl;
+   std::cerr << _msg.latin1() << std::endl;
+#endif
 }
 
 XX_NAMESPACE_END

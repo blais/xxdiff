@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.inline.h 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: app.inline.h 291 2001-10-20 22:15:00Z blais $
+ * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -56,7 +56,7 @@ inline uint XxApp::getNbFiles() const
 
 //------------------------------------------------------------------------------
 //
-inline XxBuffer* XxApp::getFile( const XxFno no ) const
+inline XxBuffer* XxApp::getBuffer( const XxFno no ) const
 {
    if ( 0 <= no && no < _nbFiles ) {
       return _files[no].get();
@@ -66,7 +66,7 @@ inline XxBuffer* XxApp::getFile( const XxFno no ) const
 
 //------------------------------------------------------------------------------
 //
-inline const std::auto_ptr<XxBuffer>* XxApp::getFiles() const
+inline const std::auto_ptr<XxBuffer>* XxApp::getBuffers() const
 {
    return _files;
 }
@@ -101,16 +101,16 @@ inline XxDln XxApp::getNbLines() const
 
 //------------------------------------------------------------------------------
 //
-inline XxResources* XxApp::getResourcesNC()
+inline const XxResources& XxApp::getResources() const
 {
-   return _resources;
+   return *_resources;
 }
 
 //------------------------------------------------------------------------------
 //
-inline const QFont& XxApp::getFont() const
+inline XxResources& XxApp::getResourcesNC()
 {
-   return _font;
+   return *_resources;
 }
 
 //------------------------------------------------------------------------------

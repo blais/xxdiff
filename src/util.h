@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 234 2001-09-30 19:44:09Z blais $
- * $Date: 2001-09-30 15:44:09 -0400 (Sun, 30 Sep 2001) $
+ * $Id: util.h 298 2001-10-23 03:18:14Z blais $
+ * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -100,10 +100,12 @@ public:
    );
 
    // Run a program with command line arguments and two pathname arguments via
-   // fork/exec and return a pipe file descriptor into which standard output and
+   // fork/exec and return file descriptors into which standard output and
    // standard error have been redirected.
-   static FILE* spawnCommandWithOutput( 
+   static void spawnCommandWithOutput( 
       const char** argv,
+      FILE*& outf,
+      FILE*& errf,
       void (*sigChldHandler)(int) = 0
    );
 

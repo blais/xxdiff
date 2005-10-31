@@ -1,6 +1,6 @@
 #*****************************************************************************\
-# $Id: xxdiff.pro 256 2001-10-08 02:29:13Z blais $
-# $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
+# $Id: xxdiff.pro 302 2001-10-23 05:14:10Z blais $
+# $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -24,18 +24,15 @@
 #
 
 TEMPLATE = app
-CONFIG = debug qt warn_on
+CONFIG = release qt warn_on
+
+debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
 INCLUDEPATH += .
-TMAKE_CXXFLAGS += -DPACKAGE="xxdiff" -DVERSION="1.99" -DXX_USE_RCFILE=1
 
-LEXYACC  = rcfileParser
+LEXYACC  = resParser
+TMAKE_CLEAN += $$LEXYACC.lex.c $$LEXYACC.y.c $$LEXYACC.y.h
 
-#  PARSER    = parser.cpp
-#  SOURCES   = $$PARSER    \
-#	       node.cpp    \
-#	       asmgen.cpp
-#  TARGET    = parser
 
 #
 # win32-msvc
@@ -49,7 +46,7 @@ win32-msvc:INCLUDEPATH += winfixes
 #
 
 irix-n32:TMAKE_CXXFLAGS += -woff 1375,1424,3201,1209,1110 -LANG:std
-irix-n32:TMAKE_CXXFLAGS += -DCOMPILER_MIPSPRO -DHAVE_DIRENT_H -DHAVE_VPRINTF
+irix-n32:TMAKE_CXXFLAGS += -DCOMPILER_MIPSPRO
 
 # always disable full warnings for C code.
 irix-n32:TMAKE_CFLAGS_WARN_ON =
@@ -65,7 +62,7 @@ irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,/usr/freeware/lib32
 # linux-g++
 #
 
-linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU -DHAVE_DIRENT_H -DHAVE_VPRINTF
+linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
 
 # Add diff files to link against directly
 DIFFUTILS_DIR = ../diffutils-2.7
@@ -111,9 +108,10 @@ HEADERS = \
 	main.h \
 	man.h \
 	overview.h \
-	rcfileParser.h \
+	resParser.h \
 	resources.h \
 	resources.inline.h \
+	accelUtil.h \
 	text.h \
 	merged.h \
 	lineNumbers.h \
@@ -142,7 +140,8 @@ SOURCES = \
 	line.cpp \
 	buffer.cpp \
 	resources.cpp \
-	rcfileParser.cpp \
+	accelUtil.cpp \
+	resParser.cpp \
 	markersFileDialog.cpp \
 	diffutils.cpp \
 	getopt.c \

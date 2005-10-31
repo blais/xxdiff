@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: searchDialog.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: searchDialog.h 294 2001-10-21 07:27:43Z blais $
+ * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -68,6 +68,9 @@ public:
 
    // Constructor.
    XxSearchDialog( XxApp* app, QWidget* parent );
+
+   // See base class.
+   virtual void show();
 
 public slots:
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: optionsDialog.cpp 300 2001-10-23 03:45:33Z blais $
+ * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -25,11 +25,13 @@
  *============================================================================*/
 
 #include <optionsDialog.h>
+#include <resParser.h>
 #include <resources.h>
 #include <diffs.h>
 #include <app.h>
 
 #include <qtabwidget.h>
+#include <qtextview.h>
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <qradiobutton.h>
@@ -39,11 +41,142 @@
 #include <qlistbox.h>
 #include <qcolor.h>
 #include <qcolordialog.h>
+#include <qfontdialog.h>
 #include <qlabel.h>
 #include <qcombobox.h>
 #include <qstring.h>
+#include <qpainter.h>
 
-#include <map>
+#include <stdlib.h>
+
+/*==============================================================================
+ * LOCAL DECLARATIONS
+ *============================================================================*/
+
+namespace {
+
+/*----- variables -----*/
+
+const char* pangrams[] = {
+   "Portez ce vieux whisky au juge blond qui fume.",
+   "Playing jazz vibe chords quickly excites my wife.",
+   "A very bad quack might jinx zippy fowls. ",
+   "Big july earthquakes confound zany experimental vow.",
+   "Faquir pompeux, vidangez l'abject whisky.",
+   "Five wine experts jokingly quizzed sample chablis.",
+   "Jackdaws love my big sphinx of quartz.",
+   "Six big juicy steaks sizzled in a pan as five workmen left the quarry.",
+   "The quick brown fox jumps over a lazy dog.",
+   "The five boxing wizards jump quickly.",
+   "The exodus of jazzy pigeons is craved by squeamish walkers.",
+   "Suez sailor vomits jauntily abaft while waxing parquet decks."
+};
+
+/*----- classes -----*/
+
+/*==============================================================================
+ * CLASS XxColoredItem
+ *============================================================================*/
+
+class XxColoredItem : public QListBoxText {
+
+public:
+
+   /*----- member functions -----*/
+
+   // Ctor/dtor.
+   // <group>
+   XxColoredItem( const XxResources* resources, XxColor color );
+   virtual ~XxColoredItem();
+   // </group>
+
+   XxColor getColor() const;
+
+protected:
+
+   /*----- member functions -----*/
+   
+   // Overriden height to use our own text font.
+   virtual int height( const QListBox* lb ) const;
+
+   // Overriden paint to setup the colors right.
+   virtual void paint( QPainter* painter );
+
+private:
+
+   /*----- data members -----*/
+
+   const XxResources* _resources;
+   XxColor            _color;
+
+public: // let the dialog access all of this
+
+   /*----- data members -----*/
+
+   // Current state.
+   bool               _modified;
+   QColor             _foreColor;
+   QColor             _backColor;
+
+};
+
+//------------------------------------------------------------------------------
+//
+XxColoredItem::XxColoredItem( const XxResources* resources, XxColor color ) :
+   QListBoxText( XxResParser::getColorName( color ) ),
+   _resources( resources ),
+   _color( color ),
+   _modified( false ),
+   _foreColor(),
+   _backColor()
+{
+   XX_ASSERT( _resources );
+}
+
+//------------------------------------------------------------------------------
+//
+XxColoredItem::~XxColoredItem()
+{
+}
+
+//------------------------------------------------------------------------------
+//
+inline XxColor XxColoredItem::getColor() const
+{
+   return _color;
+}
+
+//------------------------------------------------------------------------------
+//
+int XxColoredItem::height( const QListBox* /*lb*/ ) const
+{
+   const QFont& font = _resources->getFontText();
+   QFontMetrics fm( font );
+   return fm.height() + 2; // allow space for the listbox cursor.
+}
+
+//------------------------------------------------------------------------------
+//
+void XxColoredItem::paint( QPainter* pp )
+{
+   QPainter& p = *pp;
+   const int w = p.window().width();
+
+   // Font.
+   p.setFont( _resources->getFontText() );
+   QFontMetrics fm = p.fontMetrics();
+
+   // Don't draw background of chars since we'll draw first.
+   p.setBackgroundMode( Qt::TransparentMode );
+
+   QBrush brush( _backColor );
+   p.setPen( _foreColor );
+
+   p.fillRect( 0, 0, w, fm.height() + 2, brush );
+   p.drawText( 10, 1 + fm.ascent(), text() );
+}
+
+}
 
 XX_NAMESPACE_BEGIN
 
@@ -65,35 +198,37 @@ XxOptionsDialog::XxOptionsDialog(
    _app( app )
 {
    XX_CHECK( _app != 0 );
+   
+   // This disables the irrelevant tabs.
+   // Don't, let the user edit all fields.
 
-   XxDiffs* diffs = _app->getDiffs();
-   if ( diffs != 0 ) {
-      int cpage = getDiffPageIndex();
+   // XxDiffs* diffs = _app->getDiffs();
+   // if ( diffs != 0 ) {
+   //    int cpage = getDiffPageIndex();
+   // 
+   //    // Disable other modes' options.
+   //    for ( int ii = 0; ii < 3; ++ii ) {
+   //       _tabWidget->setCurrentPage( ii );
+   // 
+   //       // QWidget* widget = _tabWidget->currentPage();
+   //       // if ( ii != cpage && widget ) {
+   //       //    widget->setEnabled( false );
+   //       // }
+   //    }
+   // 
+   //    _tabWidget->setCurrentPage( cpage );
+   // }
+   // 
+   // if ( diffs->isDirectoryDiff() == true ) {
+   //    _groupboxFileDiffs->setEnabled( false );
+   // }
+   // else {
+   //    _groupboxDirectoryDiffs->setEnabled( false );
+   // }
 
-      // Disable other modes' options.
-      for ( int ii = 0; ii < 3; ++ii ) {
-#if QT_VERSION >= 220
-         _tabWidget->setCurrentPage( ii );
-#endif
-         QWidget* widget = _tabWidget->currentPage();
-         if ( ii != cpage && widget ) {
-            widget->setEnabled( false );
-         }
-      }
-
-#if QT_VERSION >= 220
-      _tabWidget->setCurrentPage( cpage );
-#endif
-   }
-
-   if ( diffs->isDirectoryDiff() == true ) {
-      _groupboxFileDiffs->setEnabled( false );
-   }
-   else {
-      _groupboxDirectoryDiffs->setEnabled( false );
-   }
-
+   //
    // Make connections.
+   //
 
    connect( _buttonApply, SIGNAL( clicked() ), this, SLOT( onApply() ) );
    connect( _buttonOk, SIGNAL( clicked() ), this, SLOT( onApply() ) );
@@ -123,51 +258,44 @@ XxOptionsDialog::XxOptionsDialog(
    //---------------------------------------------------------------------------
    // Directories
 
-   connect( _checkboxRecursive, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxRecursive(int) ) );
-
    //---------------------------------------------------------------------------
    // Display
 
-   connect( _checkboxHorizontalDiffs, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxHorizontalDiffs(int) ) );
-   connect( _checkboxIgnoreHorizontalWhitespace, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxIgnoreHorizontalWhitespace(int) ) );
-   connect( _checkboxHideCarriageReturns, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxHideCarriageReturns(int) ) );
-   connect( _spinboxTabWidth, SIGNAL( valueChanged(int) ), 
-            this, SLOT( spinboxTabWidth(int) ) );
-   connect( _checkboxDrawVerticalLine, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxDrawVerticalLine(int) ) );
-   connect( _comboIgnoreFile, SIGNAL( textChanged(const QString&) ), 
-            this, SLOT( comboIgnoreFile(const QString&) ) );
-
-   connect( _checkboxIgnoreFileChanges, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxIgnoreFileChanges(int) ) );
-
-   connect( _checkboxFormatClipboardText, SIGNAL( stateChanged(int) ),
-            this, SLOT( checkboxFormatClipboardText(int) ) );
+   connect( _editFontApp, SIGNAL( clicked() ),
+            this, SLOT( editFontApp() ) );
+   connect( _editFontText, SIGNAL( clicked() ),
+            this, SLOT( editFontText() ) );
 
    //---------------------------------------------------------------------------
    // Colors
 
    // Fill up listbox with color names.
-   for ( int ii = int(XxResources::COLOR_FIRST);
-         ii < int(XxResources::COLOR_LAST);
-         ++ii ) {
-      const char* resname = XxResources::getResourceName( 
-         XxResources::Resource(ii) 
-      );
-
-      _listboxColors->insertItem( QString( resname ) );
+   const XxResources* resourcesPtr = &(_app->getResources());
+   for ( int ii = 0; ii < int(COLOR_LAST); ++ii ) {
+      QListBoxItem* lbi = 
+         new XxColoredItem( resourcesPtr, XxColor(ii) );
+      _listboxColors->insertItem( lbi );
    }
 
    connect( _listboxColors, SIGNAL( highlighted(const QString&) ), 
             this, SLOT( listboxColors(const QString&) ) );
 
-   connect( _buttonEditColor, SIGNAL( clicked() ), 
-            this, SLOT( editColor() ) );
+   connect( _buttonEditFore, SIGNAL( clicked() ),
+            this, SLOT( editColorFore() ) );
+   connect( _buttonEditBack, SIGNAL( clicked() ),
+            this, SLOT( editColorBack() ) );
 
+   // Make this dialog an observer of the resources.
+   connect( resourcesPtr, SIGNAL( changed() ), this, SLOT( synchronize() ) );
+}
+
+//------------------------------------------------------------------------------
+//
+XxOptionsDialog::~XxOptionsDialog()
+{
+   // Remove as observer.
+   const XxResources* resourcesPtr = &(_app->getResources());
+   disconnect( resourcesPtr, SIGNAL( changed() ), this, SLOT( synchronize() ) );
 }
 
 //------------------------------------------------------------------------------
@@ -175,20 +303,23 @@ XxOptionsDialog::XxOptionsDialog(
 int XxOptionsDialog::getDiffPageIndex() const
 {
    XxDiffs* diffs = _app->getDiffs();
-   if ( diffs->isDirectoryDiff() == true ) {
-      return 2;
-   }
-   else if ( _app->getNbFiles() == 2 ) {
-      return 0;
-   }
-   // else {
-   return 1;
+   return ( diffs->isDirectoryDiff() == true ) ? 1 : 0;
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::show()
 {
+   // Set random pangram for font widgets.
+   const unsigned int max = sizeof(pangrams)/sizeof(const char*);
+   const unsigned int rn1 = 
+      static_cast<unsigned int>( rand()/float(RAND_MAX) * max );
+   _labelFontApp->setText( pangrams[rn1] );
+
+   const unsigned int rn2 = 
+      static_cast<unsigned int>( rand()/float(RAND_MAX) * max );
+   _labelFontText->setText( pangrams[rn2] );
+   
    synchronize();
    BaseClass::show();
 }
@@ -197,134 +328,162 @@ void XxOptionsDialog::show()
 //
 void XxOptionsDialog::synchronize()
 {
-   const XxResources* resources = XxResources::getInstance();
-   XX_CHECK( resources != 0 );
+   const XxResources& resources = _app->getResources();
 
    //---------------------------------------------------------------------------
    // Files 2
 
-   XxResources::Resource cmdResId = XxResources::COMMAND_DIFF_FILES_2;
+   XxCommand cmdResId = CMD_DIFF_FILES_2;
 
    _lineeditCommandFiles2->setText( 
-      QString( resources->getCommand( cmdResId ) )
+      QString( resources.getCommand( cmdResId ) )
    );
 
    _checkboxIgnoreTrailingBlanks->setChecked( 
-      resources->isCommandOption( cmdResId, 
-                                  XxResources::CMDOPT_FILES_IGNORE_TRAILING )
+      resources.isCommandSwitch( cmdResId, 
+                                  CMDSW_FILES_IGNORE_TRAILING )
    );
    _checkboxIgnoreWhitespace->setChecked( 
-      resources->isCommandOption( cmdResId, 
-                                  XxResources::CMDOPT_FILES_IGNORE_WHITESPACE )
+      resources.isCommandSwitch( cmdResId, 
+                                  CMDSW_FILES_IGNORE_WHITESPACE )
    );
    _checkboxIgnoreCase->setChecked( 
-      resources->isCommandOption( cmdResId, 
-                                  XxResources::CMDOPT_FILES_IGNORE_CASE )
+      resources.isCommandSwitch( cmdResId, 
+                                  CMDSW_FILES_IGNORE_CASE )
    );
    _checkboxIgnoreBlankLines->setChecked( 
-      resources->isCommandOption( cmdResId, 
-                                  XxResources::CMDOPT_FILES_IGNORE_BLANK_LINES )
+      resources.isCommandSwitch( cmdResId, 
+                                  CMDSW_FILES_IGNORE_BLANK_LINES )
    );
 
-   QString rcmd = resources->getCommand( cmdResId );
-   XxResources::Quality quality = resources->getQuality( rcmd );
+   QString rcmd = resources.getCommand( cmdResId );
+   XxQuality quality = resources.getQuality( rcmd );
    _radiobuttonQualityNormal->setChecked( 
-      quality == XxResources::QUALITY_NORMAL 
+      quality == QUALITY_NORMAL 
    );
    _radiobuttonQualityFastest->setChecked( 
-      quality == XxResources::QUALITY_FASTEST 
+      quality == QUALITY_FASTEST 
    );
    _radiobuttonQualityHighest->setChecked( 
-      quality == XxResources::QUALITY_HIGHEST 
+      quality == QUALITY_HIGHEST 
    );
 
    //---------------------------------------------------------------------------
    // Files 3
 
    _lineeditCommandFiles3->setText(
-      QString( resources->getCommand( XxResources::COMMAND_DIFF_FILES_3 ) )
+      QString( resources.getCommand( CMD_DIFF_FILES_3 ) )
    );
 
    //---------------------------------------------------------------------------
    // Directories
 
    _lineeditCommandDirs->setText(
-      QString( resources->getCommand( XxResources::COMMAND_DIFF_DIRECTORIES ) )
+      QString( resources.getCommand( CMD_DIFF_DIRECTORIES ) )
    );
 
    _lineeditCommandDirsRecursive->setText(
-      QString( resources->getCommand( 
-         XxResources::COMMAND_DIFF_DIRECTORIES_REC 
+      QString( resources.getCommand( 
+         CMD_DIFF_DIRECTORIES_REC 
       ) )
    );
 
    _checkboxRecursive->setChecked(
-      resources->getBoolOpt( XxResources::DIRDIFF_RECURSIVE )
+      resources.getBoolOpt( BOOL_DIRDIFF_RECURSIVE )
    );
 
    //---------------------------------------------------------------------------
    // Display
 
    _checkboxHorizontalDiffs->setChecked(
-      resources->getBoolOpt( XxResources::HORIZONTAL_DIFFS )
+      resources.getBoolOpt( BOOL_HORIZONTAL_DIFFS )
    );
    _checkboxIgnoreHorizontalWhitespace->setChecked(
-      resources->getBoolOpt( XxResources::IGNORE_HORIZONTAL_WS )
+      resources.getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS )
    );
    _checkboxHideCarriageReturns->setChecked(
-      resources->getBoolOpt( XxResources::HIDE_CR )
+      resources.getBoolOpt( BOOL_HIDE_CR )
    );
 
-   _spinboxTabWidth->setValue( resources->getTabWidth() );
+   _spinboxTabWidth->setValue( resources.getTabWidth() );
 
    _checkboxDrawVerticalLine->setChecked(
-      resources->getBoolOpt( XxResources::SHOW_VERTICAL_LINE )
+      resources.getShowOpt( SHOW_VERTICAL_LINE )
    );
 
-   _comboIgnoreFile->setCurrentItem( int( resources->getIgnoreFile() ) );
+   _comboIgnoreFile->setCurrentItem( int( resources.getIgnoreFile() ) );
 
 
    _checkboxIgnoreFileChanges->setChecked(
-      resources->getBoolOpt( XxResources::DIRDIFF_IGNORE_FILE_CHANGES )
+      resources.getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES )
    );
 
    _checkboxFormatClipboardText->setChecked(
-      resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
+      resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
    );
 
-   _lineeditClipboardTextFormat->setText(
-      resources->getClipboardTextFormat()
+   _lineeditClipboardFormat->setText(
+      resources.getClipboardFormat()
    );
+
+   _fontApp = resources.getFontApp();
+   _labelFontApp->setFont( _fontApp );
+   _labelFontAppName->setText( _fontApp.rawName() );
+
+   _fontText = resources.getFontText();
+   _labelFontText->setFont( _fontText );
+   _labelFontTextName->setText( _fontText.rawName() );
 
    //---------------------------------------------------------------------------
    // Colors
 
+   for ( int ii = 0; ii < int(COLOR_LAST); ++ii ) {
+      XxColoredItem* coli =
+         static_cast<XxColoredItem*>( _listboxColors->item( ii ) );
+      XX_ASSERT( coli );
+      coli->_foreColor = resources.getColor( XxColor(ii), true );
+      coli->_backColor = resources.getColor( XxColor(ii), false );
+      coli->_modified = false;
+   }        
+
+   {
+      int idx = _listboxColors->currentItem();
+      if ( idx != -1 ) {
+         XxColoredItem* coli = 
+            static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
+         XX_ASSERT( coli );
+         _labelEditFore->setBackgroundColor( coli->_foreColor );
+         _labelEditBack->setBackgroundColor( coli->_backColor );
+         _labelEditFore->update();
+         _labelEditBack->update();
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::selectDiffOptions()
 {
-#if QT_VERSION >= 220
    _tabWidget->setCurrentPage( getDiffPageIndex() );
-#endif
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::selectDisplayOptions()
 {
-#if QT_VERSION >= 220
-   _tabWidget->setCurrentPage( 3 );
-#endif
+   _tabWidget->setCurrentPage( 2 );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::onApply()
 {
-   XxResources* resources = _app->getResourcesNC();
-   XX_CHECK( resources );
+   // Remove temporarily as observer, while we're setting the resources.
+   const XxResources* resourcesPtr = &(_app->getResources());
+   disconnect( resourcesPtr, SIGNAL( changed() ), this, SLOT( synchronize() ) );
+
+
+   XxResources& resources = _app->getResourcesNC();
 
    bool redoDiff = false;
 
@@ -333,7 +492,7 @@ void XxOptionsDialog::onApply()
 
    // First set resources, then redodiff.
    redoDiff |= maybeSetCommand( 
-      XxResources::COMMAND_DIFF_FILES_2,
+      CMD_DIFF_FILES_2,
       _lineeditCommandFiles2->text() 
    );
 
@@ -341,7 +500,7 @@ void XxOptionsDialog::onApply()
    // Files 3
 
    redoDiff |= maybeSetCommand( 
-      XxResources::COMMAND_DIFF_FILES_3,
+      CMD_DIFF_FILES_3,
       _lineeditCommandFiles3->text()
    );
 
@@ -349,76 +508,88 @@ void XxOptionsDialog::onApply()
    // Directories
 
    redoDiff |= maybeSetCommand( 
-      XxResources::COMMAND_DIFF_DIRECTORIES,
+      CMD_DIFF_DIRECTORIES,
       _lineeditCommandDirs->text()
    );
    redoDiff |= maybeSetCommand( 
-      XxResources::COMMAND_DIFF_DIRECTORIES_REC,
+      CMD_DIFF_DIRECTORIES_REC,
       _lineeditCommandDirsRecursive->text()
    );
 
-   resources->setBoolOpt( XxResources::DIRDIFF_RECURSIVE, 
+   resources.setBoolOpt( BOOL_DIRDIFF_RECURSIVE, 
                           _checkboxRecursive->isChecked() );
                           
    //---------------------------------------------------------------------------
    // Display
 
    bool reinitHorizontalDiffs = false;
-   if ( resources->getBoolOpt( XxResources::HORIZONTAL_DIFFS ) !=
+   if ( resources.getBoolOpt( BOOL_HORIZONTAL_DIFFS ) !=
         _checkboxHorizontalDiffs->isChecked() ) {
-      resources->setBoolOpt( XxResources::HORIZONTAL_DIFFS, 
+      resources.setBoolOpt( BOOL_HORIZONTAL_DIFFS, 
                              _checkboxHorizontalDiffs->isChecked() );
       reinitHorizontalDiffs = true;
    }
 
-   if ( resources->getBoolOpt( XxResources::IGNORE_HORIZONTAL_WS ) !=
+   if ( resources.getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ) !=
         _checkboxIgnoreHorizontalWhitespace->isChecked() ) {
-      resources->setBoolOpt( XxResources::IGNORE_HORIZONTAL_WS, 
+      resources.setBoolOpt( BOOL_IGNORE_HORIZONTAL_WS, 
                              _checkboxIgnoreHorizontalWhitespace->isChecked() );
       reinitHorizontalDiffs = true;
    }
 
-   resources->setBoolOpt( XxResources::HIDE_CR, 
-                          _checkboxHideCarriageReturns->isChecked() );
+   resources.setBoolOpt( BOOL_HIDE_CR, 
+                         _checkboxHideCarriageReturns->isChecked() );
 
-   resources->setTabWidth( _spinboxTabWidth->value() );
+   resources.setTabWidth( _spinboxTabWidth->value() );
 
-   resources->setBoolOpt( XxResources::SHOW_VERTICAL_LINE, 
-                          _checkboxDrawVerticalLine->isChecked() );
+   resources.setShowOpt( SHOW_VERTICAL_LINE, 
+                         _checkboxDrawVerticalLine->isChecked() );
 
-   resources->setVerticalLinePos( _spinboxVlinePos->value() );
+   resources.setVerticalLinePos( _spinboxVlinePos->value() );
 
-   resources->setIgnoreFile(
-      XxResources::IgnoreFile(_comboIgnoreFile->currentItem())
+   resources.setIgnoreFile(
+      XxIgnoreFile(_comboIgnoreFile->currentItem())
    );
 
-   resources->setBoolOpt( XxResources::DIRDIFF_IGNORE_FILE_CHANGES, 
+   resources.setBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES, 
                           _checkboxIgnoreFileChanges->isChecked() );
    if ( _checkboxIgnoreFileChanges->isChecked() == true ) {
       redoDiff = true;
    }
 
-   resources->setBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT, 
-                          _checkboxFormatClipboardText->isChecked() );
+   resources.setBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT, 
+                         _checkboxFormatClipboardText->isChecked() );
 
-   QString oldClipboardFormat = resources->getClipboardTextFormat();
-   QString newClipboardFormat = _lineeditClipboardTextFormat->text();
+   QString oldClipboardFormat = resources.getClipboardFormat();
+   QString newClipboardFormat = _lineeditClipboardFormat->text();
    if ( newClipboardFormat != oldClipboardFormat ) {
-      resources->setClipboardTextFormat( newClipboardFormat );
+      resources.setClipboardFormat( newClipboardFormat );
+   }
+
+   if ( !XxResParser::compareFonts( _fontApp,
+                                         resources.getFontApp() ) ) {
+      resources.setFontApp( _fontApp );
+      _app->setFont( _fontApp, true );
+   }
+   if ( !XxResParser::compareFonts( _fontText,
+                                         resources.getFontText() ) ) {
+      resources.setFontText( _fontText );
+      _app->adjustLineNumbers();
    }
 
    //---------------------------------------------------------------------------
    // Colors
 
-   
-   for ( ColorModMap::const_iterator iter = _colorModMap.begin();
-         iter != _colorModMap.end();
-         ++iter ) {
-      resources->setColor( XxResources::Resource( (*iter).first ),
-                           (*iter).second );
-   }
-   _colorModMap.clear();
-
+   for ( int ii = 0; ii < int(COLOR_LAST); ++ii ) {
+      XxColoredItem* coli =
+         static_cast<XxColoredItem*>( _listboxColors->item( ii ) );
+      XX_ASSERT( coli );
+      if ( coli->_modified ) {
+         resources.setColor( XxColor(ii), true, coli->_foreColor );
+         resources.setColor( XxColor(ii), false, coli->_backColor );
+         coli->_modified = false;
+      }
+   }        
 
    //---------------------------------------------------------------------------
 
@@ -426,7 +597,11 @@ void XxOptionsDialog::onApply()
    
    if ( reinitHorizontalDiffs == true ) {
       XxDiffs* diffs = _app->getDiffs();
-      diffs->initializeHorizontalDiffs( _app->getFiles(), true );
+      diffs->initializeHorizontalDiffs(
+         resources.getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ),
+         _app->getBuffers(),
+         true
+      );
    }
 
    if ( redoDiff == true ) {
@@ -435,6 +610,9 @@ void XxOptionsDialog::onApply()
    else {
       _app->repaintTexts();
    }
+
+   // Reconnect.
+   connect( resourcesPtr, SIGNAL( changed() ), this, SLOT( synchronize() ) );
 }
 
 //------------------------------------------------------------------------------
@@ -448,7 +626,7 @@ void XxOptionsDialog::onClose()
 //
 void XxOptionsDialog::checkboxIgnoreTrailingBlanks( int state )
 {
-   setFileDiffOptions( XxResources::CMDOPT_FILES_IGNORE_TRAILING, 
+   setFileDiffOptions( CMDSW_FILES_IGNORE_TRAILING, 
                        state != 0 );
 }
 
@@ -456,7 +634,7 @@ void XxOptionsDialog::checkboxIgnoreTrailingBlanks( int state )
 //
 void XxOptionsDialog::checkboxIgnoreWhitespace( int state )
 {
-   setFileDiffOptions( XxResources::CMDOPT_FILES_IGNORE_WHITESPACE, 
+   setFileDiffOptions( CMDSW_FILES_IGNORE_WHITESPACE, 
                        state != 0 );
 }
 
@@ -464,7 +642,7 @@ void XxOptionsDialog::checkboxIgnoreWhitespace( int state )
 //
 void XxOptionsDialog::checkboxIgnoreCase( int state )
 {
-   setFileDiffOptions( XxResources::CMDOPT_FILES_IGNORE_CASE, 
+   setFileDiffOptions( CMDSW_FILES_IGNORE_CASE, 
                        state != 0 );
 }
 
@@ -472,19 +650,18 @@ void XxOptionsDialog::checkboxIgnoreCase( int state )
 //
 void XxOptionsDialog::checkboxIgnoreBlankLines( int state )
 {
-   setFileDiffOptions( XxResources::CMDOPT_FILES_IGNORE_BLANK_LINES, 
+   setFileDiffOptions( CMDSW_FILES_IGNORE_BLANK_LINES, 
                        state != 0 );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::setFileDiffOptions(
-   XxResources::Resource cmdOptionId,
-   bool                  state
+   XxCommandSwitch cmdOptionId,
+   bool         state
 ) const
 {
-   XxResources* resources = _app->getResourcesNC();
-   XX_CHECK( resources );
+   const XxResources& resources = _app->getResources();
 
    QLineEdit* le = 0;
    if ( _app->getNbFiles() == 2 ) {
@@ -495,7 +672,7 @@ void XxOptionsDialog::setFileDiffOptions(
    }
    QString cmd = le->text();
    
-   const QString opt = resources->getCommandOption( cmdOptionId );
+   const QString opt = resources.getCommandSwitch( cmdOptionId );
 
    if ( state == true ) {
       XxOptionsDialog::addToCommand( cmd, opt );
@@ -512,7 +689,7 @@ void XxOptionsDialog::setFileDiffOptions(
 void XxOptionsDialog::radiobuttonQualityNormal( int state )
 {
    if ( state != 0 ) {
-      setFileDiffQuality( XxResources::QUALITY_NORMAL );
+      setFileDiffQuality( QUALITY_NORMAL );
    }
 }
 
@@ -521,7 +698,7 @@ void XxOptionsDialog::radiobuttonQualityNormal( int state )
 void XxOptionsDialog::radiobuttonQualityFastest( int state )
 {
    if ( state != 0 ) {
-      setFileDiffQuality( XxResources::QUALITY_FASTEST );
+      setFileDiffQuality( QUALITY_FASTEST );
    }
 }
 
@@ -530,18 +707,17 @@ void XxOptionsDialog::radiobuttonQualityFastest( int state )
 void XxOptionsDialog::radiobuttonQualityHighest( int state )
 {
    if ( state != 0 ) {
-      setFileDiffQuality( XxResources::QUALITY_HIGHEST );
+      setFileDiffQuality( QUALITY_HIGHEST );
    }
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::setFileDiffQuality(
-   XxResources::Quality quality
+   XxQuality quality
 ) const
 {
-   XxResources* resources = _app->getResourcesNC();
-   XX_CHECK( resources );
+   XxResources& resources = _app->getResourcesNC();
 
    QLineEdit* le = 0;
    if ( _app->getNbFiles() == 2 ) {
@@ -552,117 +728,118 @@ void XxOptionsDialog::setFileDiffQuality(
    }
    QString cmd = le->text();
    
-   resources->setQuality( cmd, quality );
+   resources.setQuality( cmd, quality );
 
    le->setText( cmd );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxRecursive( int /*state*/ )
+void XxOptionsDialog::listboxColors( const QString& )
 {
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::checkboxHorizontalDiffs( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::checkboxIgnoreHorizontalWhitespace( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::checkboxHideCarriageReturns( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::spinboxTabWidth( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::checkboxIgnoreFileChanges( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::checkboxFormatClipboardText( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::checkboxDrawVerticalLine( int /*state*/ )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::comboIgnoreFile( const QString& )
-{
-   // nop.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::listboxColors( const QString& colorString )
-{
-   XxResources* resources = _app->getResourcesNC();
-   XX_CHECK( resources );
-
-   XxResources::Resource colorId = 
-      XxResources::getResourceId( colorString );
-   
-   QColor color = resources->getColor( colorId );
-   _labelColor->setBackgroundColor( color );
-
-   const char* doc = XxResources::getResourceDoc( colorId );
-   _labelDescription->setText( QString( doc ) );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxOptionsDialog::editColor()
-{
-   XxResources* resources = _app->getResourcesNC();
-   XX_CHECK( resources );
-
-   QString colorString = _listboxColors->currentText();
-   XxResources::Resource colorId = 
-      XxResources::getResourceId( colorString );
-
-   QColor curColor;
-   ColorModMap::const_iterator iter = _colorModMap.find( colorId );
-   if ( iter != _colorModMap.end() ) {
-      curColor = (*iter).second;
+   int idx = _listboxColors->currentItem();
+   if ( idx == -1 ) {
+      return;
    }
-   else {
-      curColor = resources->getColor( colorId );
-   }
-
-   QColor newColor = QColorDialog::getColor( curColor, this, "color_dialog" );
+   XxColoredItem* coli = 
+      static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
+   XX_ASSERT( coli );
    
-   if ( newColor != curColor ) {
-      _colorModMap[ colorId ] = newColor;
+   // Set the buttons backgrounds to the given color.
+   _labelEditFore->setBackgroundColor( coli->_foreColor );
+   _labelEditBack->setBackgroundColor( coli->_backColor );
+   _labelEditFore->update();
+   _labelEditBack->update();
 
-      _labelColor->setBackgroundColor( newColor );
+   QString desc = XxResParser::getColorDescription( XxColor(idx) );
+   _labelDescription->setText( desc );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOptionsDialog::editFontApp()
+{
+   const XxResources& resources = _app->getResources();
+
+   bool ok;
+   QFont newFont =
+      QFontDialog::getFont( &ok, resources.getFontApp(), this, "font_dialog" );
+   if ( ok ) {
+      if ( 
+         !XxResParser::compareFonts( newFont, resources.getFontApp() )
+      ) {
+         _fontApp = newFont;
+         _labelFontApp->setFont( _fontApp );
+         _labelFontAppName->setText( _fontApp.rawName() );
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOptionsDialog::editFontText()
+{
+   const XxResources& resources = _app->getResources();
+
+   bool ok;
+   QFont newFont =
+      QFontDialog::getFont( &ok, resources.getFontText(), this, "font_dialog" );
+   if ( ok ) {
+      if ( 
+         !XxResParser::compareFonts( newFont, resources.getFontText() )
+      ) {
+         _fontText = newFont;
+         _labelFontText->setFont( _fontText );
+         _labelFontTextName->setText( _fontText.rawName() );
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOptionsDialog::editColorFore()
+{
+   int idx = _listboxColors->currentItem();
+   if ( idx == -1 ) {
+      return;
+   }
+   XxColoredItem* coli = 
+      static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
+   XX_ASSERT( coli );
+
+   QColor newColor =
+      QColorDialog::getColor( coli->_foreColor, this, "color_dialog" );
+   
+   if ( newColor != coli->_foreColor ) {
+      coli->_foreColor = newColor;
+      coli->_modified = true;
+      _listboxColors->update();
+      _labelEditFore->setBackgroundColor( coli->_foreColor );
+      _labelEditFore->update();
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOptionsDialog::editColorBack()
+{
+   int idx = _listboxColors->currentItem();
+   if ( idx == -1 ) {
+      return;
+   }
+   XxColoredItem* coli = 
+      static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
+   XX_ASSERT( coli );
+
+   QColor newColor =
+      QColorDialog::getColor( coli->_backColor, this, "color_dialog" );
+   
+   if ( newColor != coli->_backColor ) {
+      coli->_backColor = newColor;
+      coli->_modified = true;
+      _listboxColors->update();
+      _labelEditBack->setBackgroundColor( coli->_backColor );
+      _labelEditBack->update();
    }
 }
 
@@ -778,15 +955,14 @@ void XxOptionsDialog::setOneOfInCommand(
 //------------------------------------------------------------------------------
 //
 bool XxOptionsDialog::maybeSetCommand( 
-   XxResources::Resource commandId,
-   const QString&        commandString
+   XxCommand      commandId,
+   const QString& commandString
 )
 {
-   XxResources* resources = _app->getResourcesNC();
-   XX_CHECK( resources );
+   XxResources& resources = _app->getResourcesNC();
 
-   if ( resources->getCommand( commandId ) == commandString ) {
-      resources->setCommand( commandId, commandString );
+   if ( resources.getCommand( commandId ) != commandString ) {
+      resources.setCommand( commandId, commandString );
       return true;
    }
    return false;

@@ -10,22 +10,27 @@
 ####### Lex/yacc programs and options
 
 LEX = flex
+#LEXDEBUG = -d
+
 YACC = #$ $text = "bison -d";
+#YACCDEBUG = -t --verbose
 
 ####### Lex/yacc files
 
-LEXIN   =     #$ $text = Expand("LEXYACC") . ".lex";
-LEXOUT  =     #$ $text = Expand("LEXYACC") . ".lex.c";
-YACCIN  =     #$ $text = Expand("LEXYACC") . ".y";
-YACCOUT =     #$ $text = Expand("LEXYACC") . ".y.c";
-PARSOBJ =     #$ $text = Expand("LEXYACC") . ".o";
+LEXIN = #$ $text = Expand("LEXYACC") . ".lex";
+LEXOUT = #$ $text = Expand("LEXYACC") . ".lex.c";
+YACCIN = #$ $text = Expand("LEXYACC") . ".y";
+YACCOUTC = #$ $text = Expand("LEXYACC") . ".y.c";
+YACCOUTH = #$ $text = Expand("LEXYACC") . ".y.h";
+PARSOBJ = #$ $text = Expand("LEXYACC") . ".o";
 
 ####### Process lex/yacc files
 
 $(LEXOUT): $(LEXIN)
-	$(LEX) -o$(LEXOUT) $(LEXIN)
+	$(LEX) $(LEXDEBUG) -o$(LEXOUT) $(LEXIN)
 
-$(YACCOUT): $(YACCIN) $(LEXOUT)
-	$(YACC) -o$(YACCOUT) $(YACCIN)
+$(YACCOUTC) $(YACCOUTH): $(YACCIN) $(LEXOUT)
+	$(YACC) $(YACCDEBUG) -o$(YACCOUTC) $(YACCIN)
 
-$(PARSOBJ): $(YACCOUT) $(LEXOUT)
+$(PARSOBJ): $(YACCOUTC) $(LEXOUT)
+

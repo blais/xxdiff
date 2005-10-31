@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.h 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: accelUtil.h 282 2001-10-18 06:22:26Z blais $
+ * $Date: 2001-10-18 02:22:26 -0400 (Thu, 18 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef INCL_XXDIFF_LINENUMBERS
-#define INCL_XXDIFF_LINENUMBERS
+#ifndef INCL_XXDIFF_ACCELUTIL
+#define INCL_XXDIFF_ACCELUTIL
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -31,64 +31,48 @@
 #include <defs.h>
 #endif
 
-#ifndef INCL_XXDIFF_TYPES
-#include <types.h>
+#ifndef INCL_QT_QSTRING
+#include <qstring.h>
+#define INCL_QT_QSTRING
 #endif
-
-#ifndef INCL_QT_QFRAME
-#include <qframe.h>
-#define INCL_QT_QFRAME
-#endif
-
 
 XX_NAMESPACE_BEGIN
 
-
 /*==============================================================================
- * FORWARD DECLARATIONS
+ * CLASS XxAccelUtil
  *============================================================================*/
 
-class XxApp;
+// <summary> utiilty for translating accelerators </summary>
 
+// Note: we hope that this shouldn't be a necessity when we move to Qt-3.0.
+//
+// This is implemented because Qt-2.x's QAccel::stringToKey() dumps core and
+// doesn't do an appropriate job.
 
-/*==============================================================================
- * CLASS XxLineNumbers
- *============================================================================*/
-
-// <summary> a widget that can display line numbers </summary>
-
-class XxLineNumbers : public QFrame {
+class XxAccelUtil {
 
 public:
 
-   /*----- member functions -----*/
+   /*----- static member functions -----*/
 
-   // Constructor.  no is which file this widget is supposed to display (-1 for
-   // none).
-   XxLineNumbers( 
-      XxApp*      app, 
-      const XxFno no = -1,
-      QWidget*    parent = 0,
-      const char* name = 0 
-   );
+   // Reads in a value.  Returns true if successful, false if the resource was
+   // not the specified type and left untouched.
 
-   // Destructor.
-   virtual ~XxLineNumbers();
+   // I wish I could use QAccel::stringToKey, but it's broken.  The Qt docs say:
+   //
+   // "Note that this function currently only supports character accelerators
+   // (unlike keyToString() which can produce Ctrl+Backspace, etc. from the
+   // appropriate key codes)."
+   //
+   // So we do this by hand.  This should really just be provided by Qt.
+   static bool read( const QString& val, int& accel );
 
-   // See base class.
-   virtual void drawContents( QPainter* );
-
-
-private:
-
-   /*----- data members -----*/
-
-   XxApp*	_app;
-   const int	_no;
+   // Utility to write to a stream.
+   static void write( std::ostream& os, int accel );
 
 };
-
 
 XX_NAMESPACE_END
 
 #endif
+

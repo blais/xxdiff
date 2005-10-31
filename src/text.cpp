@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 247 2001-10-04 01:01:13Z blais $
- * $Date: 2001-10-03 21:01:13 -0400 (Wed, 03 Oct 2001) $
+ * $Id: text.cpp 298 2001-10-23 03:18:14Z blais $
+ * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,6 +31,7 @@
 #include <buffer.h>
 
 #include <qpainter.h>
+#include <qnamespace.h>
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
@@ -104,17 +105,16 @@ void XxText::drawContents( QPainter* pp )
    p.setViewport( rect );
    rect.moveBy( -rect.x(), -rect.y() );
    p.setWindow( rect );
-   int w = rect.width();
-   int h = rect.height();
+   const int w = rect.width();
+   const int h = rect.height();
 
-   XxBuffer* file = _app->getFile( _no );
+   XxBuffer* file = _app->getBuffer( _no );
    const XxDiffs* diffs = _app->getDiffs();
-   const XxResources* resources = XxResources::getInstance();
+   const XxResources& resources = _app->getResources();
 
    // If it is empty, erase the whole widget with blank color.
    if ( file == 0 || diffs == 0 ) {
-      QColor backgroundColor = 
-         resources->getColor( XxResources::COLOR_BACKGROUND );
+      QColor backgroundColor = resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
@@ -127,17 +127,17 @@ void XxText::drawContents( QPainter* pp )
    //
    XxDln topLine = _app->getTopLine();
    uint horizontalPos = _app->getHorizontalPos();
-   uint tabWidth = resources->getTabWidth();
+   uint tabWidth = resources.getTabWidth();
 
 
    // Should we set the clip region?
 
    // Font.
-   p.setFont( _app->getFont() );
+   p.setFont( resources.getFontText() );
    QFontMetrics fm = p.fontMetrics();
 
    // Don't draw background of chars since we'll draw first.
-   p.setBackgroundMode( TransparentMode );
+   p.setBackgroundMode( Qt::TransparentMode );
    QPen pen;
 
    XxDln displayLines = _app->getNbDisplayLines();
@@ -145,7 +145,7 @@ void XxText::drawContents( QPainter* pp )
       std::min( displayLines, XxDln(diffs->getNbLines() - (topLine - 1)) );
 
    bool hori = 
-      resources->getBoolOpt( XxResources::HORIZONTAL_DIFFS ) &&  
+      resources.getBoolOpt( BOOL_HORIZONTAL_DIFFS ) &&  
       ! diffs->isDirectoryDiff();
 
    const int x = 0 - horizontalPos;
@@ -156,12 +156,16 @@ void XxText::drawContents( QPainter* pp )
       const XxLine& line = diffs->getLine( topLine + ii );
 
       // Set background and foreground colors.
-      XxResources::Resource idtype, idtypeSup;
-      resources->getLineColorType( line, _no, idtype, idtypeSup );
+      XxColor idtype, idtypeSup;
+      line.getLineColorType( 
+         resources.getIgnoreFile(),
+         _no,
+         idtype, idtypeSup 
+      );
       
       QColor bcolor;
       QColor fcolor;
-      resources->getRegionColor( idtype, bcolor, fcolor );
+      resources.getRegionColor( idtype, bcolor, fcolor );
       QBrush brush( bcolor );
       p.setPen( fcolor );
 
@@ -195,7 +199,7 @@ void XxText::drawContents( QPainter* pp )
             //
             QColor bcolorSup;
             QColor fcolorSup;
-            resources->getRegionColor( idtypeSup, bcolorSup, fcolorSup );
+            resources.getRegionColor( idtypeSup, bcolorSup, fcolorSup );
             QBrush brushSup( bcolorSup );
 
             // Pre-part.
@@ -205,7 +209,9 @@ void XxText::drawContents( QPainter* pp )
             XX_CHECK( prelen >= 0 );
             if ( prelen > 0 ) {
                QString prestr;
-               prestr.setLatin1( renderedText, prelen );
+               if ( prelen > 0 ) {
+                  prestr.setLatin1( renderedText, prelen );
+               }
                int prewidth = fm.width( prestr, prelen );
                p.fillRect( lx, y, prewidth, fm.lineSpacing(), brushSup );
                p.drawText( lx, y + fm.ascent(), prestr, lhd );
@@ -218,7 +224,9 @@ void XxText::drawContents( QPainter* pp )
             XX_CHECK( prelen >= 0 );
             if ( midlen > 0 ) {
                QString midstr;
-               midstr.setLatin1( renderedText + lhd, midlen );
+               if ( midlen > 0 ) {
+                  midstr.setLatin1( renderedText + lhd, midlen );
+               }
                int midwidth = fm.width( midstr, midlen );
                p.fillRect( lx, y, midwidth, fm.lineSpacing(), brush );
                p.drawText( lx, y + fm.ascent(), midstr, midlen );
@@ -231,7 +239,9 @@ void XxText::drawContents( QPainter* pp )
             XX_CHECK( prelen >= 0 );
             if ( postlen > 0 ) {
                QString poststr;
-               poststr.setLatin1( renderedText + rhd + 1, postlen );
+               if ( postlen > 0 ) {
+                  poststr.setLatin1( renderedText + rhd + 1, postlen );
+               }
                int postwidth = fm.width( poststr, postlen );
                p.fillRect( lx, y, postwidth, fm.lineSpacing(), brushSup );
                p.drawText( lx, y + fm.ascent(), poststr, postlen );
@@ -248,7 +258,7 @@ void XxText::drawContents( QPainter* pp )
             //            
             QString str( renderedText );
 
-            p.fillRect( 0, y, w, fm.lineSpacing(), brush );            
+            p.fillRect( 0, y, w, fm.lineSpacing(), brush );
             p.drawText( x, y + fm.ascent(), str );
          }
       }
@@ -261,31 +271,31 @@ void XxText::drawContents( QPainter* pp )
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
       QColor backgroundColor = 
-         resources->getColor( XxResources::COLOR_BACKGROUND );
+         resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( 0, y, w, h - y, brush );
    }
 
    // Draw line cursor.
-   if ( !resources->getBoolOpt( XxResources::DISABLE_CURSOR_DISPLAY ) ) {
+   if ( !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
 
       XxDln cursorLine = _app->getCursorLine();
       int relLine = cursorLine - topLine;
       
-      QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
+      QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
       y = relLine * fm.lineSpacing() - 1;
       p.drawRect( 0, y, w, fm.lineSpacing() + 2 );
    }
 
    // Draw vertical line.
-   if ( resources->getBoolOpt( XxResources::SHOW_VERTICAL_LINE ) ) {
+   if ( resources.getShowOpt( SHOW_VERTICAL_LINE ) ) {
 
-      uint cpos = resources->getVerticalLinePos();
+      uint cpos = resources.getVerticalLinePos();
       int posx = cpos * fm.maxWidth() - horizontalPos;
 
       QColor vlineColor =
-         resources->getColor( XxResources::COLOR_VERTICAL_LINE );
+         resources.getColor( COLOR_VERTICAL_LINE );
       p.setPen( vlineColor );
       p.drawLine( posx, 0, posx, h );
    }
@@ -297,7 +307,7 @@ void XxText::drawContents( QPainter* pp )
 //
 XxDln XxText::computeDisplayLines() const
 {
-   const QFont& font = _app->getFont();
+   const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
    return contentsRect().height() / fm.lineSpacing() + 1;
 }
@@ -308,16 +318,16 @@ void XxText::mousePressEvent( QMouseEvent* event )
 {
    // Find the line.
    XxDiffs* diffs = _app->getDiffs();
-   XxBuffer* buffer = _app->getFile( _no );
-   const XxResources* resources = XxResources::getInstance();
-   if ( diffs == 0 || buffer == 0 || resources == 0 ) {
+   XxBuffer* buffer = _app->getBuffer( _no );
+   const XxResources& resources = _app->getResources();
+   if ( diffs == 0 || buffer == 0 ) {
       return;
    }
 
-   QString clipboardFormat = resources->getClipboardTextFormat();
+   QString clipboardFormat = resources.getClipboardFormat();
    QString filename = buffer->getDisplayName();
 
-   const QFont& font = _app->getFont();
+   const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
    XxDln dlineno = event->y() / fm.lineSpacing();
    XxDln lineno = _app->getTopLine() + dlineno;
@@ -369,8 +379,10 @@ void XxText::mousePressEvent( QMouseEvent* event )
             const char* text = buffer->getTextLine( fline, len );
             if ( text != 0 ) {
                QString adt;
-               adt.setLatin1( text, len );
-               if ( resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
+               if ( len > 0 ) {
+                  adt.setLatin1( text, len );
+               }
+               if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                     == true ) {
                   QString forline = formatClipboardLine( 
                      clipboardFormat, _no, fline, filename, adt
@@ -411,8 +423,10 @@ void XxText::mousePressEvent( QMouseEvent* event )
             const char* text = buffer->getTextLine( fline, len );
             if ( text != 0 ) {
                QString adt;
-               adt.setLatin1( text, len );
-               if ( resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
+               if ( len > 0 ) {
+                  adt.setLatin1( text, len );
+               }
+               if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                     == true ) {
                   QString forline = formatClipboardLine( 
                      clipboardFormat, _no, fline, filename, adt
@@ -442,7 +456,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
 void XxText::mouseMoveEvent( QMouseEvent* event )
 {
    if ( _grab ) {
-      const QFont& font = _app->getFont();
+      const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
       XxDln dlineno = event->y() / fm.lineSpacing();
       _app->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
@@ -464,7 +478,7 @@ void XxText::resizeEvent( QResizeEvent* )
    // We postpone the resizing of the parent until when one of the texts has
    // been resized in order to be able to compute the number of lines properly.
    if ( _no == 0 ) {
-      _app->resizeEvent();
+      _app->adjustComponents();
    }
 }
 

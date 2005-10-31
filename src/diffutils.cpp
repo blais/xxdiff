@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffutils.cpp 240 2001-10-01 19:26:49Z blais $
- * $Date: 2001-10-01 15:26:49 -0400 (Mon, 01 Oct 2001) $
+ * $Id: diffutils.cpp 296 2001-10-22 05:58:27Z blais $
+ * $Date: 2001-10-22 01:58:27 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -29,10 +29,14 @@
 #include <diffutils.h>
 
 #include <iostream>
-#include <sstream>
 
 #include <stdio.h>
 #include <setjmp.h>
+
+// I haven't tested on any platform that doesn't have vsnprintf yet.
+// I just enable this for now.
+// Please log a bug if this causes problems for your compilation.
+#define HAVE_VPRINTF
 
 #ifdef HAVE_VPRINTF
 
@@ -70,9 +74,8 @@ extern FILE* outfile;
 
 namespace {
 
-// Current stream.
-std::ostream* streamStdout = 0;
-std::ostream* streamStderr = 0;
+QTextStream* streamStdout = 0;
+QTextStream* streamStderr = 0;
 
 // For non-local exit.
 jmp_buf exit_env;
@@ -150,11 +153,15 @@ size_t xxdiff_diff_fwrite(
 {
    if ( stream == outfile ) {
       XX_ASSERT( streamStdout );
-      streamStdout->write( static_cast<const char*>(ptr), size * nmemb );
+      streamStdout->writeRawBytes( 
+         static_cast<const char*>(ptr), size * nmemb
+      );
    }
    else {
       XX_ASSERT( streamStderr );
-      streamStderr->write( static_cast<const char*>(ptr), size * nmemb );
+      streamStderr->writeRawBytes(
+         static_cast<const char*>(ptr), size * nmemb
+      );
    }
    return size * nmemb;
 }
@@ -169,11 +176,11 @@ ssize_t xxdiff_diff_write(
 {
    if ( fd == 1 ) {
       XX_ASSERT( streamStdout );
-      streamStdout->write( static_cast<const char*>(buf), count );
+      streamStdout->writeRawBytes( static_cast<const char*>(buf), count );
    }
    else {
       XX_ASSERT( streamStderr );
-      streamStderr->write( static_cast<const char*>(buf), count );
+      streamStderr->writeRawBytes( static_cast<const char*>(buf), count );
    }
    return count;
 }
@@ -226,8 +233,10 @@ void XxDiffutils::diff_fun(
    int(*main_fun)(int, char**) 
 )
 {
-   std::ostringstream oss_cout;
-   std::ostringstream oss_cerr;
+   QByteArray qs_cout;
+   QTextStream oss_cout( qs_cout, IO_WriteOnly );
+   QByteArray qs_cerr;
+   QTextStream oss_cerr( qs_cerr, IO_WriteOnly );
 
    streamStdout = & oss_cout;
    streamStderr = & oss_cerr;
@@ -238,10 +247,10 @@ void XxDiffutils::diff_fun(
       main_fun( argc, out_args );
    }
 
-   oss_cout << std::flush;
-   oss_cerr << std::flush;
-   _output = QString(oss_cout.str().c_str()) + QString(oss_cerr.str().c_str());
-   _istream = new QTextIStream( &_output );
+   oss_cout << flush;
+   oss_cerr << flush;
+   _outputB = qs_cout /*+ qs_cerr*/;
+   _istream = new QTextIStream( _outputB );
 }
 
 //------------------------------------------------------------------------------

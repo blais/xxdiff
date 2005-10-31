@@ -19,6 +19,7 @@ cd xxdiff/diffutils
 make -k
 
 
+
 #
 # (2) compile xxdiff itself
 #

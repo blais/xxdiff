@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 242 2001-10-01 21:11:40Z blais $
- * $Date: 2001-10-01 17:11:40 -0400 (Mon, 01 Oct 2001) $
+ * $Id: resources.inline.h 295 2001-10-21 18:39:14Z blais $
+ * $Date: 2001-10-21 14:39:14 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,81 +41,95 @@ inline const QRect& XxResources::getPreferredGeometry() const
 
 //------------------------------------------------------------------------------
 //
-inline int XxResources::getAccelerator( Resource resource ) const
+inline bool XxResources::getMaximize() const
 {
-   int iaccel = int( resource ) - int( ACCEL_FIRST );
-   XX_CHECK( iaccel < int(ACCEL_LAST) - int(ACCEL_FIRST) );
-   return _accelerators[ iaccel ];
+   return _maximize;
 }
 
 //------------------------------------------------------------------------------
 //
-inline const QFont& XxResources::getAppFont() const
+inline int XxResources::getAccelerator( XxAccel accel ) const
+{
+   return _accelerators[ int(accel) ];
+}
+
+//------------------------------------------------------------------------------
+//
+inline const QFont& XxResources::getFontApp() const
 {
    return _fontApp;
 }
 
 //------------------------------------------------------------------------------
 //
-inline const QFont& XxResources::getTextFont() const
+inline const QFont& XxResources::getFontText() const
 {
    return _fontText;
 }
 
 //------------------------------------------------------------------------------
 //
-inline void XxResources::getRegionColor(
-   Resource type,
-   QColor&  background,
-   QColor&  foreground
+inline const QString& XxResources::getCommand( XxCommand cmdId ) const
+{
+   return _commands[ int(cmdId) ];
+}
+
+//------------------------------------------------------------------------------
+//
+inline const QString& XxResources::getCommandSwitch(
+   XxCommandSwitch cmdId
 ) const
 {
-   int i = int(type) - int(COLOR_FIRST);
-   XX_CHECK( i < int(COLOR_LAST) - int(COLOR_FIRST) );
-   XX_CHECK( i < int(COLOR_BACKGROUND) );
-   // XX_CHECK( ( i - int(COLOR_FIRST) ) % 2 == 0 );
-   background = _colors[ i ];
-   foreground = _colors[ i + 1 ];
+   return _commandSwitch[ int(cmdId) ];
 }
 
 //------------------------------------------------------------------------------
 //
-inline const QColor& XxResources::getColor( const Resource resource ) const
+inline const QString& XxResources::getTag( XxTag tagId ) const
 {
-   int i = int(resource) - int(COLOR_FIRST);
-   XX_CHECK( i < int(COLOR_LAST) - int(COLOR_FIRST) );
-   return _colors[ i ];
+   return _tags[ int(tagId) ];
 }
 
 //------------------------------------------------------------------------------
 //
-inline bool XxResources::getBoolOpt( const Resource resource ) const
+inline void XxResources::getRegionColor(
+   const XxColor colorType,
+   QColor&       background,
+   QColor&       foreground
+) const
 {
-   int ibool = int( resource ) - int( BOOL_FIRST );
-   XX_CHECK( ibool < int(BOOL_LAST) - int(BOOL_FIRST) );
-   return _boolOpts[ ibool ];
+   int i = int(colorType);
+   background = _backColors[ i ];
+   foreground = _foreColors[ i ];
 }
 
 //------------------------------------------------------------------------------
 //
-inline void XxResources::setBoolOpt(
-   const Resource resource,
-   const bool option
-)
+inline const QColor& XxResources::getColor(
+   const XxColor colorType,
+   const bool    fore
+) const
 {
-   int ibool = int( resource ) - int( BOOL_FIRST );
-   XX_CHECK( ibool < int(BOOL_LAST) - int(BOOL_FIRST) );
-   _boolOpts[ ibool ] = option;
+   if ( fore ) {
+      return _foreColors[ int(colorType) ];
+   }
+   else {
+      return _backColors[ int(colorType) ];
+   }
 }
 
 //------------------------------------------------------------------------------
 //
-inline bool XxResources::toggleBoolOpt( const Resource resource )
+inline bool XxResources::getBoolOpt( const XxBoolOpt opt ) const
 {
-   int ibool = int( resource ) - int( BOOL_FIRST );
-   XX_CHECK( ibool < int(BOOL_LAST) - int(BOOL_FIRST) );
-   _boolOpts[ ibool ] = ! _boolOpts[ ibool ];
-   return _boolOpts[ ibool ];
+   return _boolOpts[ int(opt) ];
+}
+
+//------------------------------------------------------------------------------
+//
+inline bool XxResources::getShowOpt( const XxShowOpt opt ) const
+{
+   return _showOpts[ int(opt) ];
 }
 
 //------------------------------------------------------------------------------
@@ -127,24 +141,11 @@ inline uint XxResources::getTabWidth() const
 
 //------------------------------------------------------------------------------
 //
-inline void XxResources::setTabWidth( uint tabWidth )
-{
-   _tabWidth = tabWidth;
-}
-
-//------------------------------------------------------------------------------
-//
-inline void XxResources::setVerticalLinePos( uint vlinePos )
-{
-   _verticalLinePos = vlinePos;
-}
-
-//------------------------------------------------------------------------------
-//
 inline uint XxResources::getOverviewFileWidth() const
 {
    return _overviewFileWidth;
 }
+
 
 //------------------------------------------------------------------------------
 //
@@ -162,30 +163,31 @@ inline uint XxResources::getVerticalLinePos() const
 
 //------------------------------------------------------------------------------
 //
-inline const QString& XxResources::getClipboardTextFormat() const
+inline const QString& XxResources::getClipboardFormat() const
 {
-   return _clipboardTextFormat;
+   return _clipboardFormat;
 }
 
 //------------------------------------------------------------------------------
 //
-inline void XxResources::setClipboardTextFormat( const QString& format )
-{
-   _clipboardTextFormat = format;
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxResources::IgnoreFile XxResources::getIgnoreFile() const
+inline XxIgnoreFile XxResources::getIgnoreFile() const
 {
    return _ignoreFile;
 }
 
 //------------------------------------------------------------------------------
 //
-inline void XxResources::setIgnoreFile( IgnoreFile ignoreFile )
+inline void XxResources::setFbColors(
+   XxColor     color,
+   const char* backstr,
+   const char* forestr
+)
 {
-   _ignoreFile = ignoreFile;
+   _backColors[ color ].setNamedColor( backstr );
+   _foreColors[ color ].setNamedColor( forestr );
+   // Note: no need to emit changed(), this is a convenience method for the
+   // inside.
 }
 
 XX_NAMESPACE_END
+

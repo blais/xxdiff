@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 234 2001-09-30 19:44:09Z blais $
- * $Date: 2001-09-30 15:44:09 -0400 (Sun, 30 Sep 2001) $
+ * $Id: lineNumbers.cpp 298 2001-10-23 03:18:14Z blais $
+ * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -68,19 +68,16 @@ XxLineNumbers::XxLineNumbers(
    // of text.
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
+
+   setSizePolicy(
+      QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding )
+   );
 }
 
 //------------------------------------------------------------------------------
 //
 XxLineNumbers::~XxLineNumbers()
 {
-}
-
-//------------------------------------------------------------------------------
-//
-QSizePolicy XxLineNumbers::sizePolicy() const
-{
-   return QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Expanding );
 }
 
 //------------------------------------------------------------------------------
@@ -98,10 +95,17 @@ void XxLineNumbers::drawContents( QPainter* pp )
    p.setViewport( rect );
    rect.moveBy( -rect.x(), -rect.y() );
    p.setWindow( rect );
+//#define BACK_COLORING
+#ifdef BACK_COLORING
+   const int w = rect.width();
+#endif
+   const XxResources& resources = _app->getResources();
 
-   XxBuffer* file = _app->getFile( _no );
+   XxBuffer* file = _app->getBuffer( _no );
    const XxDiffs* diffs = _app->getDiffs();
-   const XxResources* resources = XxResources::getInstance();
+   if ( diffs == 0 ) {
+      return;
+   }
 
    //
    // Draw appropriate content.
@@ -109,7 +113,7 @@ void XxLineNumbers::drawContents( QPainter* pp )
    uint topLine = _app->getTopLine();
 
    // Font.
-   p.setFont( _app->getFont() );
+   p.setFont( resources.getFontText() );
    QFontMetrics fm = p.fontMetrics();
 
    QPen pen;
@@ -128,13 +132,22 @@ void XxLineNumbers::drawContents( QPainter* pp )
       // Get line to display.
       const XxLine& line = diffs->getLine( topLine + ii );
 
+      // This is ugly.  I prefer line numbers without back coloring, it makes it
+      // less confusing for actual file text. Keep for reference only.
+#ifdef BACK_COLORING
       // Set background and foreground colors.
       QColor bcolor;
       QColor fcolor;
-      XxResources::Resource dtype, dtypeSup;
-      resources->getLineColorType( line, _no, dtype, dtypeSup );
-      resources->getRegionColor( dtype, bcolor, fcolor );
+      XxColor dtype, dtypeSup;
+      line.getLineColorType( 
+         resources.getIgnoreFile(),
+         _no,
+         dtype, dtypeSup
+      );
+      resources.getRegionColor( dtype, bcolor, fcolor );
       QBrush brush( bcolor );
+      p.fillRect( x, y, w, fm.lineSpacing(), brush );
+#endif
 
       // Render text.
       int fline = line.getLineNo( _no );
@@ -142,6 +155,7 @@ void XxLineNumbers::drawContents( QPainter* pp )
 
          const QString& renderedNums =
             file->renderLineNumber( fline, lnFormat );
+
          p.drawText( x, y + fm.ascent(), renderedNums );
       }
    }

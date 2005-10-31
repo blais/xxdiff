@@ -1,0 +1,61 @@
+#
+# Sample .xxdiffrc file.
+#
+
+
+#
+# Full screen xxdiff:
+#
+#Geometry : Maximize
+Geometry : 1200x900
+#Geometry : 1200x900+0+0
+
+#
+# Keyboard customizations
+#
+Accel.Exit: 		"Alt+Q"
+
+#
+# Colors
+#
+#Color.Same.Back:   "#ffff00"
+
+
+#
+# Commands
+#
+Command.DiffFiles3: "/usr/bin/diff3"
+#Command.DiffFiles2: "diff -b -w"
+#Command.DiffDirectories: "diff -b -w"
+
+Command.Edit : "xterm -exec vi"
+
+
+#
+# Displayed stuff:
+#
+Show.LineNumbers : 	true
+Show.Filenames:  	true
+Show.Toolbar:		false
+Show.VerticalLine:	true
+VerticalLinePosition: 80
+
+
+#
+# Fonts
+#
+FontApp: "-*-screen-bold-i-normal--*-100-*-*-*-*-iso8859-1"
+
+
+#
+# Other options
+#
+
+HorizontalDiffs:	true
+FormatClipboardText:	false
+ClipboardFormat:	"%L> %s"
+ExitOnSame:		false
+
+
+
+DirDiffBuildSolelyFromOutput: false

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 256 2001-10-08 02:29:13Z blais $
- * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
+ * $Id: builderFiles2.cpp 298 2001-10-23 03:18:14Z blais $
+ * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,7 +41,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define LOCAL_TRACE
+//#define LOCAL_TRACE
 #ifdef LOCAL_TRACE
 #define XX_LOCAL_TRACE(x) XX_TRACE(x)
 #else
@@ -124,7 +124,7 @@ bool parseDiffLine(
    return error;
 }
 
-#if 0 // Not needed for now.
+#ifndef NO_PARSE_DIFF_ERROR // Not needed for now.
 
 /*==============================================================================
  * CLASS XxParseDiffError
@@ -206,18 +206,23 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    const uint     nbLines2
 )
 {
+/*#define INTERNAL*/
+
    QString cmd = command;
    cmd += QString(" ") + path1;
    cmd += QString(" ") + path2;
    const char** out_args;
+#ifndef INTERNAL
+   XxUtil::splitArgs( cmd, out_args );
+#else
    int argc = XxUtil::splitArgs( cmd, out_args );
-
-//#define INTERNAL
+#endif
 
 #ifndef INTERNAL
-   (void)argc;
-   FILE* fp = XxUtil::spawnCommandWithOutput( out_args );
-   if ( fp == 0 ) {
+   FILE* fout;
+   FILE* ferr;
+   XxUtil::spawnCommandWithOutput( out_args, fout, ferr );
+   if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
 #else
@@ -236,7 +241,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
    while ( true ) {
 #ifndef INTERNAL
-      if ( fgets( buffer, BUFSIZ, fp ) == 0 ) {
+      if ( fgets( buffer, BUFSIZ, fout ) == 0 ) {
          break;
       }
 #else
@@ -350,8 +355,13 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
       }
    }
 
+   // Collect stderr.
+   while ( fgets( buffer, BUFSIZ, ferr ) != 0 ) {
+      errors << buffer << endl;
+   }
+
    // Saved error text.
-   XX_LOCAL_TRACE( "Errors" << _errors );
+   XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
@@ -387,9 +397,8 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 #endif
 
 #ifndef INTERNAL
-   if ( fp ) {
-      ::fclose( fp );
-   }
+   ::fclose( fout );
+   ::fclose( ferr );
 #else
    std::auto_ptr<XxDiffutils> null( 0 );
    diffutils = null;

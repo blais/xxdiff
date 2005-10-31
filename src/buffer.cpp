@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: buffer.cpp 302 2001-10-23 05:14:10Z blais $
+ * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -30,6 +30,7 @@
 #include <qfontmetrics.h>
 #include <qfont.h>
 #include <qrect.h>
+#include <qdir.h>
 
 #include <iostream>
 #include <string.h>
@@ -38,23 +39,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <errno.h>
-
-#if HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else    
-# define dirent direct
-# define NAMLEN(dirent) ((dirent)->d_namlen)
-# if HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# if HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# if HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -78,9 +62,7 @@ const char* strnchr( const char* s, int c, const char* end )
 
 }
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -208,49 +190,24 @@ void XxBuffer::loadFile( struct stat& ss )
 //
 void XxBuffer::loadDirectory( struct stat& /*ss*/ )
 {
-   register struct dirent* next;
+   QDir dir( _name );
+   dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::System );
+// Dirs - List directories only 
+// Files - List files only 
+// Drives - List disk drives (does nothing under unix) 
+// NoSymLinks - Do not list symbolic links (where they exist) 
+// Readable - List files for which the application has read access. 
+// Writable - List files for which the application has write access. 
+// Executable - List files for which the application has execute access 
+// Modified - Only list files that have been modified (does nothing under unix) 
+// Hidden - List hidden files (on unix, files starting with a .) 
+// System - List system files (does nothing under unix) 
 
-   QStringList directoryEntries;
-
-   /* Open the directory and check for errors.  */
-   register DIR* reading = opendir( _name.latin1() );
-   if ( !reading ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-   
-   /* Read the directory entries, and insert the subfiles
-      into the `data' table.  */
-   while ( ( errno = 0, ( next = readdir( reading ) ) != 0 ) ) {
-      char *d_name = next->d_name;
-      size_t d_size = NAMLEN(next) + 1;
-         
-      /* Ignore the files `.' and `..' */
-      if ( d_name[0] == '.'
-           && (d_name[1] == 0 || (d_name[1] == '.' && d_name[2] == 0))) {
-         continue;
-      }
-         
-      QString newString;
-      newString.setLatin1( d_name, d_size );
-
-      XX_CHECK( d_name != 0 && d_size > 0 );
-      directoryEntries.append( newString );
-   }
-   if ( errno ) {
-      int e = errno;
-      closedir( reading );
-      errno = e;
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-#if CLOSEDIR_VOID
-   closedir( reading );
-#else
-   if ( closedir( reading ) != 0 ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-#endif
-
-   directoryEntries.sort();
+   dir.setSorting( QDir::Unsorted );
+   XX_CHECK( dir.exists() );
+   QStringList directoryEntries = dir.entryList();
+   directoryEntries.remove( "." );
+   directoryEntries.remove( ".." );
    setDirectoryEntries( directoryEntries );
 }
 
@@ -493,7 +450,7 @@ const QString& XxBuffer::renderLineNumber(
 //
 bool XxBuffer::searchLine( const XxFln lineno, const QString& searchText ) const
 {
-   // FIXME this is not thread-safe because we're modifying the text buffer
+   // Note: this is not thread-safe because we're modifying the text buffer
    // temporarily.  Implement your own strnstr without copying.
    bool found = false;
    uint len;
@@ -523,7 +480,7 @@ const QStringList& XxBuffer::getDirectoryEntries() const
 
 //------------------------------------------------------------------------------
 //
-QString XxBuffer::getFileAtLine( 
+QString XxBuffer::getBufferAtLine( 
    const XxFln lineno
 ) const
 {

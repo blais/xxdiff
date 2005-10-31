@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 244 2001-10-02 22:20:54Z blais $
- * $Date: 2001-10-02 18:20:54 -0400 (Tue, 02 Oct 2001) $
+ * $Id: line.cpp 291 2001-10-20 22:15:00Z blais $
+ * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -243,7 +243,7 @@ std::ostream& operator << (
 bool XxLine::isSameRegion( Type type1, Type type2 )
 {
    return type1 == type2;
-   // FIXME should we make SAME == DIRECTORIES?
+   // Note: prehaps we should also make SAME == DIRECTORIES?
 }
 
 //------------------------------------------------------------------------------
@@ -726,6 +726,219 @@ QString XxLine::mapToString( Type type )
 QString XxLine::mapToString( Selection sel )
 {
    return QString( selectionString[ sel ] );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxLine::getLineColorType(
+   const XxIgnoreFile ignoreFile,
+   const XxFno        no,
+   XxColor&           dtype,
+   XxColor&           dtypeSup
+) const
+{
+   if ( ignoreFile == IGNORE_NONE ) {
+      getLineColorTypeStd( getType(), no, dtype, dtypeSup );
+   }
+   else {
+      if ( no == (ignoreFile - 1) ) {
+         dtype = dtypeSup = COLOR_IGNORED;
+      }
+      else {
+         XxLine::Type newType = 
+            _ignoreConvertTables[ int(ignoreFile) ][ getType() ];
+         getLineColorTypeStd( newType, no, dtype, dtypeSup );
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxLine::getLineColorIfSelected(
+   const XxFno no,
+   XxColor&    dtype,
+   XxColor&    dtypeSup
+) const
+{
+   XxLine::Selection sel = getSelection();
+   if ( sel == XxLine::SEL1 ||
+        sel == XxLine::SEL2 ||
+        sel == XxLine::SEL3 ) {
+
+      if ( XxFno(sel) == no ) {
+         dtype = COLOR_SELECTED;
+         dtypeSup = COLOR_SELECTED_SUP;
+         return true;
+      }
+      else if ( 
+         ( ( getType() == XxLine::DELETE_1 || 
+             getType() == XxLine::DIFF_1 ||
+             getType() == XxLine::INSERT_1 ) && 
+           no != 0 && int(sel) != XxLine::SEL1 ) ||
+
+         ( ( getType() == XxLine::DELETE_2 || 
+             getType() == XxLine::DIFF_2 || 
+             getType() == XxLine::INSERT_2 ) &&
+           no != 1 && int(sel) != XxLine::SEL2 ) ||
+
+         ( ( getType() == XxLine::DELETE_3 || 
+             getType() == XxLine::DIFF_3 ||
+             getType() == XxLine::INSERT_3 ) && 
+           no != 2 && int(sel) != XxLine::SEL3 ) 
+      ) {
+         // For regions that are not selected but whose text is the same as the
+         // ones that are selected, color as selected as well.
+         dtype = COLOR_SELECTED;
+         dtypeSup = COLOR_SELECTED_SUP;
+         return true;
+      }
+      else {
+         dtype = COLOR_DELETED;
+         dtypeSup = COLOR_DELETED_SUP;
+         return true;
+      }
+   }
+   else if ( sel == XxLine::NEITHER ) {
+      dtype = COLOR_DELETED;
+      dtypeSup = COLOR_DELETED_SUP;
+      return true;
+   }
+   // else
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxLine::getLineColorTypeStd(
+   const XxLine::Type newType,
+   const XxFno        no,
+   XxColor&           dtype,
+   XxColor&           dtypeSup
+) const
+{
+   if ( getLineColorIfSelected( no, dtype, dtypeSup ) ) {
+      return;
+   }
+   // else
+
+   int lno = mapTypeToFileNo( newType );
+
+   switch ( newType ) {
+
+      case XxLine::SAME: {
+         dtype = dtypeSup = COLOR_SAME;
+         return;
+      }
+
+      case XxLine::DIFF_1: 
+      case XxLine::DIFF_2: 
+      case XxLine::DIFF_3: {
+         if ( no == lno ) {
+            if ( getLineNo(no) == -1 ) {
+               dtype = dtypeSup = COLOR_DIFF_ONE_NONLY;
+               return;
+            }
+            else if ( getLineNo((no+1)%3) == -1 ) {
+               dtype = dtypeSup = COLOR_DIFF_ONE_ONLY;
+               return;
+            }
+            else {
+               dtype = COLOR_DIFF_ONE;
+               dtypeSup = COLOR_DIFF_ONE_SUP;
+               return;
+            }
+         }
+         else {
+            if ( getLineNo(no) == -1 ) {
+               dtype = dtypeSup = COLOR_DIFF_TWO_NONLY;
+               return;
+            }
+            else if ( getLineNo((no+1)%3) == -1 ) {
+               dtype = dtypeSup = COLOR_DIFF_TWO_ONLY;
+               return;
+            }
+            else {
+               dtype = COLOR_DIFF_TWO;
+               dtypeSup = COLOR_DIFF_TWO_SUP;
+               return;
+            }
+         }
+      }
+
+      case XxLine::DELETE_1: 
+      case XxLine::DELETE_2:
+      case XxLine::DELETE_3: {
+         if ( no == lno ) {
+            dtype = dtypeSup = COLOR_DELETE_BLANK;
+            return;
+         }
+         else {
+            dtype = dtypeSup = COLOR_DELETE;
+            return;
+         }
+      }
+
+      case XxLine::INSERT_1:
+      case XxLine::INSERT_2:
+      case XxLine::INSERT_3: {
+         if ( no == lno ) {
+            dtype = dtypeSup = COLOR_INSERT;
+            return;
+         }
+         else {
+            dtype = dtypeSup = COLOR_INSERT_BLANK;
+            return;
+         }
+      }
+
+      case XxLine::DIFF_ALL: {
+         if ( getLineNo(no) == -1 ) {
+            dtype = dtypeSup = COLOR_DIFF_ALL_NONLY;
+            return;
+         }
+         else if ( getLineNo((no+1)%3) == -1 &&
+                   getLineNo((no+2)%3) == -1 ) {
+            dtype = dtypeSup = COLOR_DIFF_ALL_ONLY;
+            return;
+         }
+         else {
+            dtype = COLOR_DIFF_ALL;
+            dtypeSup = COLOR_DIFF_ALL_SUP;
+            return;
+         }
+      }
+
+      case XxLine::DIFFDEL_1:
+      case XxLine::DIFFDEL_2:
+      case XxLine::DIFFDEL_3: {
+         if ( no == lno ) {
+            dtype = dtypeSup = COLOR_DIFFDEL_BLANK;
+            return;
+         }
+         // else
+         if ( getLineNo(no) == -1 ) {
+            dtype = dtypeSup = COLOR_DIFFDEL_NONLY;
+            return;
+         }
+         else if ( getLineNo((no+1)%3) == -1 &&
+                   getLineNo((no+2)%3) == -1 ) {
+            dtype = dtypeSup = COLOR_DIFFDEL_ONLY;
+            return;
+         }
+         else {
+            dtype = COLOR_DIFFDEL;
+            dtypeSup = COLOR_DIFFDEL_SUP;
+            return;
+         }
+      }
+
+      case XxLine::DIRECTORIES: {
+         dtype = dtypeSup = COLOR_DIRECTORIES;
+         return;
+      }
+   }
+
+   dtype = dtypeSup = COLOR_SAME; // unreached.
 }
 
 XX_NAMESPACE_END

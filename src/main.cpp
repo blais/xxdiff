@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: main.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: main.cpp 290 2001-10-20 00:45:36Z blais $
+ * $Date: 2001-10-19 20:45:36 -0400 (Fri, 19 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -74,6 +74,8 @@ int main( int argc, char** argv, char** envp )
 #ifndef XX_DEBUG
    // Shut up!
    qInstallMsgHandler( silentMsgHandler );
+#else
+   (void)silentMsgHandler;
 #endif
 
    int retval = 2; // errors.

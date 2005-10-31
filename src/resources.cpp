@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: resources.cpp 295 2001-10-21 18:39:14Z blais $
+ * $Date: 2001-10-21 14:39:14 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -25,6 +25,7 @@
  *============================================================================*/
 
 #include <app.h> // just for getting the size of the main window
+#include <accelUtil.h>
 #include <resources.h>
 #include <optionsDialog.h>
 
@@ -38,1508 +39,6 @@
 #include <string.h> // ::strcmp
 #include <stdio.h>
 
-
-/*==============================================================================
- * LOCAL DECLARATIONS
- *============================================================================*/
-
-namespace {
-XX_NAMESPACE_USING
-
-/*----- variables -----*/
-
-struct KeyPair {
-   QString _name;
-   int     _code;
-};
-
-// Important note: those key definitions which are substring of other have to be
-// declared in the following order: the enclosing key name must appear before
-// the enclosed one.  That is simply due to our stupid search algorithm.
-//
-// For some reason the optimizer is wasting heaps of time on this.
-KeyPair keycodes[] = {
-   { "escape", Qt::Key_Escape },
-   { "esc", Qt::Key_Escape },
-   { "tab", Qt::Key_Tab },
-   { "backtab", Qt::Key_BackTab },
-   { "backspace", Qt::Key_BackSpace },
-   { "return", Qt::Key_Return },
-   { "enter", Qt::Key_Enter },
-   { "insert", Qt::Key_Insert },
-   { "delete", Qt::Key_Delete },
-   { "pause", Qt::Key_Pause },
-   { "print", Qt::Key_Print },
-   { "sysreq", Qt::Key_SysReq },
-   { "home", Qt::Key_Home },
-   { "end", Qt::Key_End },
-   { "left", Qt::Key_Left },
-   { "up", Qt::Key_Up },
-   { "right", Qt::Key_Right },
-   { "down", Qt::Key_Down },
-   { "prior", Qt::Key_Prior },
-   { "pageup", Qt::Key_PageUp },
-   { "next", Qt::Key_Next },
-   { "pagedown", Qt::Key_PageDown },
-   { "f10", Qt::Key_F10 },
-   { "f11", Qt::Key_F11 },
-   { "f12", Qt::Key_F12 },
-   { "f13", Qt::Key_F13 },
-   { "f14", Qt::Key_F14 },
-   { "f15", Qt::Key_F15 },
-   { "f16", Qt::Key_F16 },
-   { "f17", Qt::Key_F17 },
-   { "f18", Qt::Key_F18 },
-   { "f19", Qt::Key_F19 },
-   { "f20", Qt::Key_F20 },
-   { "f21", Qt::Key_F21 },
-   { "f22", Qt::Key_F22 },
-   { "f23", Qt::Key_F23 },
-   { "f24", Qt::Key_F24 },
-   { "f25", Qt::Key_F25 },
-   { "f26", Qt::Key_F26 },
-   { "f27", Qt::Key_F27 },
-   { "f28", Qt::Key_F28 },
-   { "f29", Qt::Key_F29 },
-   { "f30", Qt::Key_F30 },
-   { "f31", Qt::Key_F31 },
-   { "f32", Qt::Key_F32 },
-   { "f33", Qt::Key_F33 },
-   { "f34", Qt::Key_F34 },
-   { "f35", Qt::Key_F35 },
-   { "f1", Qt::Key_F1 },
-   { "f2", Qt::Key_F2 },
-   { "f3", Qt::Key_F3 },
-   { "f4", Qt::Key_F4 },
-   { "f5", Qt::Key_F5 },
-   { "f6", Qt::Key_F6 },
-   { "f7", Qt::Key_F7 },
-   { "f8", Qt::Key_F8 },
-   { "f9", Qt::Key_F9 },
-   { "menu", Qt::Key_Menu },
-   { "space", Qt::Key_Space },
-   { "any", Qt::Key_Any },
-   { "exclam", Qt::Key_Exclam },
-   { "quotedbl", Qt::Key_QuoteDbl },
-   { "numbersign", Qt::Key_NumberSign },
-   { "dollar", Qt::Key_Dollar },
-   { "percent", Qt::Key_Percent },
-   { "ampersand", Qt::Key_Ampersand },
-   { "apostrophe", Qt::Key_Apostrophe },
-   { "parenleft", Qt::Key_ParenLeft },
-   { "(", Qt::Key_ParenLeft },
-   { "parenright", Qt::Key_ParenRight },
-   { ")", Qt::Key_ParenRight },
-   { "asterisk", Qt::Key_Asterisk },
-   { "*", Qt::Key_Asterisk },
-   { "plus", Qt::Key_Plus },
-   { "comma", Qt::Key_Comma },
-   { ",", Qt::Key_Comma },
-   { "minus", Qt::Key_Minus },
-   { "period", Qt::Key_Period },
-   { ".", Qt::Key_Period },
-   { "slash", Qt::Key_Slash },
-   { "/", Qt::Key_Slash },
-   { "0", Qt::Key_0 },
-   { "1", Qt::Key_1 },
-   { "2", Qt::Key_2 },
-   { "3", Qt::Key_3 },
-   { "4", Qt::Key_4 },
-   { "5", Qt::Key_5 },
-   { "6", Qt::Key_6 },
-   { "7", Qt::Key_7 },
-   { "8", Qt::Key_8 },
-   { "9", Qt::Key_9 },
-   { "colon", Qt::Key_Colon },
-   { ":", Qt::Key_Colon },
-   { "semicolon", Qt::Key_Semicolon },
-   { ";", Qt::Key_Semicolon },
-   { "less", Qt::Key_Less },
-   { "<", Qt::Key_Less },
-   { "equal", Qt::Key_Equal },
-   { "=", Qt::Key_Equal },
-   { "greater", Qt::Key_Greater },
-   { ">", Qt::Key_Greater },
-   { "question", Qt::Key_Question },
-   { "?", Qt::Key_Question },
-   { "at", Qt::Key_At },
-   { "@", Qt::Key_At },
-   { "bracketleft", Qt::Key_BracketLeft },
-   { "[", Qt::Key_BracketLeft },
-   { "backslash", Qt::Key_Backslash },
-   { "\\", Qt::Key_Backslash },
-   { "bracketright", Qt::Key_BracketRight },
-   { "]", Qt::Key_BracketRight },
-   { "asciicircum", Qt::Key_AsciiCircum },
-   { "underscore", Qt::Key_Underscore },
-   { "_", Qt::Key_Underscore },
-   { "quoteleft", Qt::Key_QuoteLeft },
-   { "`", Qt::Key_QuoteLeft },
-   { "braceleft", Qt::Key_BraceLeft },
-   { "{", Qt::Key_BraceLeft },
-   { "bar", Qt::Key_Bar },
-   { "|", Qt::Key_Bar },
-   { "braceright", Qt::Key_BraceRight },
-   { "]", Qt::Key_BraceRight },
-   { "asciitilde", Qt::Key_AsciiTilde },
-   { "~", Qt::Key_AsciiTilde },
-   { "a", Qt::Key_A },
-   { "b", Qt::Key_B },
-   { "c", Qt::Key_C },
-   { "d", Qt::Key_D },
-   { "e", Qt::Key_E },
-   { "f", Qt::Key_F },
-   { "g", Qt::Key_G },
-   { "h", Qt::Key_H },
-   { "i", Qt::Key_I },
-   { "j", Qt::Key_J },
-   { "k", Qt::Key_K },
-   { "l", Qt::Key_L },
-   { "m", Qt::Key_M },
-   { "n", Qt::Key_N },
-   { "o", Qt::Key_O },
-   { "p", Qt::Key_P },
-   { "q", Qt::Key_Q },
-   { "r", Qt::Key_R },
-   { "s", Qt::Key_S },
-   { "t", Qt::Key_T },
-   { "u", Qt::Key_U },
-   { "v", Qt::Key_V },
-   { "w", Qt::Key_W },
-   { "x", Qt::Key_X },
-   { "y", Qt::Key_Y },
-   { "z", Qt::Key_Z },
-};
-
-struct nameDoc {
-   XxResources::Resource _res;
-   const char*           _name;
-   const char*           _doc;
-};
-
-const nameDoc mapStrings[ 
-   XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST
-] = {
-   { XxResources::RESOURCE_FIRST, "", "" },
-
-   { XxResources::PREFERRED_GEOMETRY, 
-     "geometry",
-     "Preferred geometry on startup.  Same format as Xt."
-   },
-
-   { XxResources::ACCEL_EXIT,
-     "accel.exit",
-     "Accelerator for ``exit'' command."
-   },
-   { XxResources::ACCEL_OPEN_LEFT,
-     "accel.openLeft",
-     "Accelerator for ``open left'' command."
-   }, 
-   { XxResources::ACCEL_OPEN_MIDDLE,
-    "accel.openMiddle",
-     "Accelerator for ``open middle'' command."
-   },
-   { XxResources::ACCEL_OPEN_RIGHT,
-     "accel.openRight",
-     "Accelerator for ``open right'' command."
-   },
-   { XxResources::ACCEL_SAVE_AS_LEFT,
-     "accel.saveAsLeft",
-     "Accelerator for ``save as left'' command."
-   },
-   { XxResources::ACCEL_SAVE_AS_MIDDLE,
-     "accel.saveAsMiddle",
-     "Accelerator for ``save as middle'' command."
-   },
-   { XxResources::ACCEL_SAVE_AS_RIGHT,
-     "accel.saveAsRight",
-     "Accelerator for ``save as right'' command."
-   }, 
-   { XxResources::ACCEL_SAVE_AS,
-     "accel.saveAs",
-     "Accelerator for ``save as'' command."
-   },
-   { XxResources::ACCEL_SAVE_SELECTED_ONLY,
-     "accel.saveSelectedOnly",
-     "Accelerator for ``save selected only'' command."
-   },
-   { XxResources::ACCEL_EDIT_LEFT,
-     "accel.editLeft",
-     "Accelerator for ``edit left'' command."
-   }, 
-   { XxResources::ACCEL_EDIT_MIDDLE,
-     "accel.editMiddle",
-     "Accelerator for ``edit middle'' command."
-   },
-   { XxResources::ACCEL_EDIT_RIGHT,
-     "accel.editRight",
-     "Accelerator for ``edit right'' command."
-   },
-   { XxResources::ACCEL_SEARCH,
-     "accel.search",
-     "Accelerator for ``search'' command."
-   },
-   { XxResources::ACCEL_SEARCH_FORWARD,
-     "accel.searchForward",
-     "Accelerator for ``search forward'' command."
-   },
-   { XxResources::ACCEL_SEARCH_BACKWARD,
-     "accel.searchBackward",
-     "Accelerator for ``search backward'' command."
-   },
-   { XxResources::ACCEL_SCROLL_DOWN,
-     "accel.scrollDown",
-     "Accelerator for ``scroll down'' command."
-   },
-   { XxResources::ACCEL_SCROLL_UP,
-     "accel.scrollUp",
-     "Accelerator for ``scroll up'' command."
-   },
-   { XxResources::ACCEL_CURSOR_DOWN,
-     "accel.cursorDown",
-     "Accelerator for ``cursor down'' command."
-   },
-   { XxResources::ACCEL_CURSOR_UP,
-     "accel.cursorUp",
-     "Accelerator for ``cursor up'' command."
-   },
-   { XxResources::ACCEL_CURSOR_TOP,
-     "accel.cursorTop",
-     "Accelerator for ``cursor at top'' command."
-   },
-   { XxResources::ACCEL_CURSOR_BOTTOM,
-     "accel.cursorBottom",
-     "Accelerator for ``cursor at bottom'' command."
-   },
-   { XxResources::ACCEL_REDO_DIFF,
-     "accel.redoDiff",
-     "Accelerator for ``redo diff'' command."
-   },
-   { XxResources::ACCEL_EDIT_DIFF_OPTIONS,
-     "accel.editDiffOptions",
-     "Accelerator for ``edit diff options'' command."
-   }, 
-   { XxResources::ACCEL_EDIT_DISPLAY_OPTIONS,
-     "accel.editDisplayOptions",
-     "Accelerator for ``edit display options'' command."
-   },
-   { XxResources::ACCEL_DIFF_FILES_AT_CURSOR,
-     "accel.diffFilesAtCursor",
-     "Accelerator for ``diff files at cursor'' command."
-   }, 
-   { XxResources::ACCEL_COPY_RIGHT_TO_LEFT,
-     "accel.copyFileRightToLeft",
-     "Accelerator for ``copy file right to left'' command."
-   }, 
-   { XxResources::ACCEL_COPY_LEFT_TO_RIGHT,
-     "accel.copyFileLeftToRight",
-     "Accelerator for ``copy file left to right'' command."
-   }, 
-   { XxResources::ACCEL_REMOVE_LEFT,
-     "accel.removeFileLeft",
-     "Accelerator for ``remove left file'' command."
-   }, 
-   { XxResources::ACCEL_REMOVE_RIGHT,
-     "accel.removeFileRight",
-     "Accelerator for ``remove right file'' command."
-   }, 
-   { XxResources::ACCEL_NEXT_DIFFERENCE,
-     "accel.nextDifference",
-     "Accelerator for ``next difference'' command."
-   }, 
-   { XxResources::ACCEL_PREVIOUS_DIFFERENCE,
-     "accel.previousDifference",
-     "Accelerator for ``previous difference'' command."
-   }, 
-   { XxResources::ACCEL_NEXT_UNSELECTED,
-     "accel.nextUnselected",
-     "Accelerator for ``next unselected'' command."
-   }, 
-   { XxResources::ACCEL_PREVIOUS_UNSELECTED,
-     "accel.previousUnselected",
-     "Accelerator for ``previous unselected'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_LEFT,
-     "accel.selectGlobalLeft",
-     "Accelerator for ``select global left'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_MIDDLE,
-     "accel.selectGlobalMiddle",
-     "Accelerator for ``select global middle'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_RIGHT,
-     "accel.selectGlobalRight",
-     "Accelerator for ``select global right'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_NEITHER,
-     "accel.selectGlobalNeither",
-     "Accelerator for ``select global neither'' command."
-   },
-   { XxResources::ACCEL_SELECT_GLOBAL_UNSELECT,
-     "accel.selectGlobalUnselect",
-     "Accelerator for ``unselect global'' command."
-   },
-   { XxResources::ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT,
-     "accel.selectGlobalUnselectedLeft",
-     "Accelerator for ``select global unselected left'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE,
-     "accel.selectGlobalUnselectedMiddle",
-     "Accelerator for ``select global unselected middle'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT,
-     "accel.selectGlobalUnselectedRight",
-     "Accelerator for ``select global unselected right'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER,
-     "accel.selectGlobalUnselectedNeither",
-     "Accelerator for ``select global unselected neither'' command."
-   },
-   { XxResources::ACCEL_SELECT_GLOBAL_MERGE,
-     "accel.selectGlobalMerge",
-     "Accelerator for ``merge'' command."
-   },
-   { XxResources::ACCEL_SELECT_REGION_LEFT,
-     "accel.selectRegionLeft",
-     "Accelerator for ``select region left'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_REGION_MIDDLE,
-     "accel.selectRegionMiddle",
-     "Accelerator for ``select region middle'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_REGION_RIGHT,
-     "accel.selectRegionRight",
-     "Accelerator for ``select region right'' command."
-   },   
-   { XxResources::ACCEL_SELECT_REGION_NEITHER,
-     "accel.selectRegionNeither",
-     "Accelerator for ``select region neither'' command."
-   },
-   { XxResources::ACCEL_SELECT_REGION_UNSELECT,
-     "accel.selectRegionUnselect",
-     "Accelerator for ``unselect region'' command."
-   },
-   { XxResources::ACCEL_SELECT_REGION_LEFT_AND_NEXT,
-     "accel.selectRegionLeftAndNext",
-     "Accelerator for ``select region left and move to next unselected or "
-     "save'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_REGION_MIDDLE_AND_NEXT,
-     "accel.selectRegionMiddleAndNext",
-     "Accelerator for ``select region middle and move to next unselected or "
-     "save'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_REGION_RIGHT_AND_NEXT,
-     "accel.selectRegionRightAndNext",
-     "Accelerator for ``select region right and move to next unselected or "
-     "save'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_REGION_NEITHER_AND_NEXT,
-     "accel.selectRegionNeitherAndNext",
-     "Accelerator for ``select region neither and move to next unselected or "
-     "save'' command."
-   },
-   { XxResources::ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN,
-     "accel.selectRegionSplitSwapMerge",
-     "Accelerator for ``split, swap or join'' command."
-   },
-   { XxResources::ACCEL_SELECT_LINE_LEFT,
-     "accel.selectLineLeft",
-     "Accelerator for ``select line left'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_LINE_MIDDLE,
-     "accel.selectLineMiddle",
-     "Accelerator for ``select line middle'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_LINE_RIGHT,
-     "accel.selectLineRight",
-     "Accelerator for ``select line right'' command."
-   }, 
-   { XxResources::ACCEL_SELECT_LINE_NEITHER,
-     "accel.selectLineNeither",
-     "Accelerator for ``select line neither'' command."
-   },
-   { XxResources::ACCEL_SELECT_LINE_UNSELECT,
-     "accel.selectLineUnselect",
-     "Accelerator for ``unselect line'' command."
-   },
-   { XxResources::ACCEL_TABS_AT_3,
-     "accel.tabsAt3",
-     "Accelerator for ``set tabs at 3'' command."
-   },
-   { XxResources::ACCEL_TABS_AT_4,
-     "accel.tabsAt4",
-     "Accelerator for ``set tabs at 4'' command."
-   },
-   { XxResources::ACCEL_TABS_AT_8,
-     "accel.tabsAt8",
-     "Accelerator for ``set tabs at 8'' command."
-   },
-   { XxResources::ACCEL_IGNORE_TRAILING,
-     "accel.ignoreTrailing",
-     "Accelerator for ``toggle ignore trailing blanks'' command."
-   },
-   { XxResources::ACCEL_IGNORE_WHITESPACE,
-     "accel.ignoreWhitespace",
-     "Accelerator for ``toggle ignore whitespace'' command."
-   },
-   { XxResources::ACCEL_IGNORE_CASE,
-     "accel.ignoreCase",
-     "Accelerator for ``toggle ignore case'' command."
-   },
-   { XxResources::ACCEL_IGNORE_BLANK_LINES,
-     "accel.ignoreBlankLines",
-     "Accelerator for ``toggle ignore blank lines'' command."
-   },
-   { XxResources::ACCEL_HIDE_CR,
-     "accel.hideCarriageReturns",
-     "Accelerator for ``toggle hide carriage returns'' command."
-   },
-   { XxResources::ACCEL_DIRDIFF_IGNORE_FILE_CHANGES,
-     "accel.dirDiffIgnoreFileChanges",
-     "Accelerator for ``toggle ignore file changes'' command."
-   },
-   { XxResources::ACCEL_DIRDIFF_RECURSIVE,
-     "accel.dirDiffRecursive",
-     "Accelerator for ``toggle recursive directory diffs'' command."
-   },
-   { XxResources::ACCEL_USE_INTERNAL_DIFF,
-     "accel.useInternalDiff",
-     "Accelerator for ``toggle use internal diff'' command."
-   },
-   { XxResources::ACCEL_QUALITY_NORMAL,
-     "accel.qualityNormal",
-     "Accelerator for ``set normal quality'' command."
-   },
-   { XxResources::ACCEL_QUALITY_FASTEST,
-     "accel.qualityFastest",
-     "Accelerator for ``set fastest quality'' command."
-   },
-   { XxResources::ACCEL_QUALITY_HIGHEST,
-     "accel.qualityHighest",
-     "Accelerator for ``set highest quality'' command."
-   },
-   { XxResources::ACCEL_MERGED_VIEW,
-     "accel.mergedView",
-     "Accelerator for ``toggle merged view'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_TOOLBAR,
-     "accel.toggleToolbar",
-     "Accelerator for ``toggle toolbar'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_LINE_NUMBERS,
-     "accel.toggleLineNumbers",
-     "Accelerator for ``toggle line numbers'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_MARKERS,
-     "accel.toggleMarkers",
-     "Accelerator for ``toggle markers'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_VERTICAL_LINE,
-     "accel.toggleVerticalLine",
-     "Accelerator for ``toggle vertical line'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_OVERVIEW,
-     "accel.toggleOverview",
-     "Accelerator for ``toggle overview'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_SHOW_FILENAMES,
-     "accel.toggleShowFilenames",
-     "Accelerator for ``toggle show filenames'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_HORIZONTAL_DIFFS,
-     "accel.toggleHorizontalDiffs",
-     "Accelerator for ``toggle horizontal diffs'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS,
-     "accel.toggleIgnoreHorizontalWhitespace",
-     "Accelerator for ``toggle ignore horizontal whitespace'' command."
-   },
-   { XxResources::ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT,
-     "accel.toggleFormatClipboardText",
-     "Accelerator for ``toggle format clipboard text'' command."
-   },
-   { XxResources::ACCEL_IGNORE_FILE_NONE,
-     "accel.ignoreFileNone",
-     "Accelerator for ``ignore no files'' command."
-   },
-   { XxResources::ACCEL_IGNORE_FILE_LEFT,
-     "accel.ignoreFileLeft",
-     "Accelerator for ``ignore left file'' command."
-   },
-   { XxResources::ACCEL_IGNORE_FILE_MIDDLE,
-     "accel.ignoreFileMiddle",
-     "Accelerator for ``ignore middle file'' command."
-   },
-   { XxResources::ACCEL_IGNORE_FILE_RIGHT,
-     "accel.ignoreFileRight",
-     "Accelerator for ``ignore right file'' command."
-   },
-   { XxResources::ACCEL_HELP_MAN_PAGE,
-     "accel.helpManPage",
-     "Accelerator for ``show man page'' command."
-   },
-   { XxResources::ACCEL_HELP_COLOR_LEGEND,
-     "accel.helpColorLegend",
-     "Accelerator for ``show color legend'' command."
-   },
-   { XxResources::ACCEL_HELP_ON_CONTEXT,
-     "accel.helpOnContext",
-     "Accelerator for ``help on context'' command."
-   },
-   { XxResources::ACCEL_HELP_GEN_INIT_FILE,
-     "accel.helpGenInitFile",
-     "Accelerator for ``generate init file'' command."
-   },
-   { XxResources::ACCEL_HELP_ABOUT,
-     "accel.helpAbout",
-     "Accelerator for ``show about box'' command."
-   },
-   { XxResources::ACCEL_MERGED_CLOSE,
-     "accel.mergedClose",
-     "Accelerator for ``close merged view'' command."
-   },
-   { XxResources::ACCEL_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-   { XxResources::COLOR_BACK_SAME,
-     "color.same.back",
-     "Background color for A in an AA (2-way) or AAA (3-way) hunk."
-   },
-   { XxResources::COLOR_FORE_SAME,
-     "color.same.fore",
-     "Foreground color for A in AAA block."
-   },
-   { XxResources::COLOR_BACK_DIFF_ONE,
-     "color.diffOne.back",
-     "Background color for B in BAA, ABA, AAB blocks."
-   },
-   { XxResources::COLOR_FORE_DIFF_ONE,
-     "color.diffOne.fore",
-     "Foreground color for B in BAA, ABA, AAB blocks."
-   },
-   { XxResources::COLOR_BACK_DIFF_ONE_SUP,
-     "color.diffOneSup.back",
-     "Background color for B in BAA, ABA, AAB blocks (shadowed)."
-   },
-   { XxResources::COLOR_FORE_DIFF_ONE_SUP,
-     "color.diffOneSup.fore",
-     "Foreground color for B in BAA, ABA, AAB blocks (shadowed)."
-   },
-   { XxResources::COLOR_BACK_DIFF_ONE_ONLY,
-     "color.diffOneOnly.back",
-     "Background color for B in BAA, ABA, AAB blocks (when other is blank)."
-   },
-   { XxResources::COLOR_FORE_DIFF_ONE_ONLY,
-     "color.diffOneOnly.fore",
-     "Foreground color for B in BAA, ABA, AAB blocks (when other is blank)."
-   },
-   { XxResources::COLOR_BACK_DIFF_ONE_NONLY,
-     "color.diffOneNonly.back",
-     "Background color for B in BAA, ABA, AAB blocks (when blank)."
-   },
-   { XxResources::COLOR_FORE_DIFF_ONE_NONLY,
-     "color.diffOneNonly.fore",
-     "Foreground color for B in BAA, ABA, AAB blocks (when blank)."
-   },
-   { XxResources::COLOR_BACK_DIFF_TWO,
-     "color.diffTwo.back",
-     "Background color for A in BAA, ABA, AAB blocks."
-   },
-   { XxResources::COLOR_FORE_DIFF_TWO,
-     "color.diffTwo.fore",
-     "Foreground color for A in BAA, ABA, AAB blocks."
-   },
-   { XxResources::COLOR_BACK_DIFF_TWO_SUP,
-     "color.diffTwoSup.back",
-     "Background color for A in BAA, ABA, AAB blocks (shadowed)."
-   },
-   { XxResources::COLOR_FORE_DIFF_TWO_SUP,
-     "color.diffTwoSup.fore",
-     "Foreground color for A in BAA, ABA, AAB blocks (shadowed)."
-   },
-   { XxResources::COLOR_BACK_DIFF_TWO_ONLY,
-     "color.diffTwoOnly.back",
-     "Background color for A in BAA, ABA, AAB blocks (when other is blank)."
-   },
-   { XxResources::COLOR_FORE_DIFF_TWO_ONLY,
-     "color.diffTwoOnly.fore",
-     "Foreground color for A in BAA, ABA, AAB blocks (when other is blank)."
-   },
-   { XxResources::COLOR_BACK_DIFF_TWO_NONLY,
-     "color.diffTwoNonly.back",
-     "Background color for A in BAA, ABA, AAB blocks (when blank)."
-   },
-   { XxResources::COLOR_FORE_DIFF_TWO_NONLY,
-     "color.diffTwoNonly.fore",
-     "Foreground color for A in BAA, ABA, AAB blocks (when blank)."
-   },
-   
-   { XxResources::COLOR_BACK_DELETE,
-     "color.delete.back",
-     "Background color for A in -AA, A-A, AA- blocks."
-   },
-   { XxResources::COLOR_FORE_DELETE,
-     "color.delete.fore",
-     "Foreground color for A in -AA, A-A, AA- blocks."
-   },
-   { XxResources::COLOR_BACK_DELETE_BLANK,
-     "color.deleteBlank.back",
-     "Background color for - in -AA, A-A, AA- blocks."
-   },
-   { XxResources::COLOR_FORE_DELETE_BLANK,
-     "color.deleteBlank.fore",
-     "Foreground color for - in -AA, A-A, AA- blocks."
-   },
-                                      
-   { XxResources::COLOR_BACK_INSERT,
-     "color.insert.back",
-     "Background color for A in A-, -A, A--, -A-, --A blocks."
-   },
-   { XxResources::COLOR_FORE_INSERT,
-     "color.insert.fore",
-     "Foreground color for A in A-, -A, A--, -A-, --A blocks."
-   },
-   { XxResources::COLOR_BACK_INSERT_BLANK,
-     "color.insertBlank.back",
-     "Background color for - in A-, -A, A--, -A-, --A blocks."
-   },
-   { XxResources::COLOR_FORE_INSERT_BLANK,
-     "color.insertBlank.fore",
-     "Foreground color for - in A-, -A, A--, -A-, --A blocks."
-   },
-                                      
-   { XxResources::COLOR_BACK_DIFF_ALL,
-     "color.diffAll.back",
-     "Background color for A,B or C in AB or ABC blocks."
-   },
-   { XxResources::COLOR_FORE_DIFF_ALL,
-     "color.diffAll.fore",
-     "Foreground color for A,B or C in AB or ABC blocks."
-   },
-   { XxResources::COLOR_BACK_DIFF_ALL_SUP,
-     "color.diffAllSup.back",
-     "Background color for A,B or C in AB or ABC blocks (shadowed)."
-   },
-   { XxResources::COLOR_FORE_DIFF_ALL_SUP,
-     "color.diffAllSup.fore",
-     "Foreground color for A,B or C in AB or ABC blocks (shadowed)."
-   },
-   { XxResources::COLOR_BACK_DIFF_ALL_ONLY,
-     "color.diffAllOnly.back",
-     "Background color for A,B or C in AB or ABC blocks (when other is blank)."
-   },
-   { XxResources::COLOR_FORE_DIFF_ALL_ONLY,
-     "color.diffAllOnly.fore",
-     "Foreground color for A,B or C in AB or ABC blocks (when other is blank)."
-   },
-   { XxResources::COLOR_BACK_DIFF_ALL_NONLY,
-     "color.diffAllNonly.back",
-     "Background color for A,B or C in AB or ABC blocks (when blank)."
-   },
-   { XxResources::COLOR_FORE_DIFF_ALL_NONLY,
-     "color.diffAllNonly.fore",
-     "Foreground color for A,B or C in AB or ABC blocks (when blank)."
-   },
-                                      
-   { XxResources::COLOR_BACK_DIFFDEL,
-     "color.diffDel.back",
-     "Background color for A and B in -AB, A-B, AB- blocks."
-   },
-   { XxResources::COLOR_FORE_DIFFDEL,
-     "color.diffDel.fore",
-     "Foreground color for A and B in -AB, A-B, AB- blocks."
-   },
-   { XxResources::COLOR_BACK_DIFFDEL_SUP,
-     "color.diffDelSup.back",
-     "Background color for A and B in -AB, A-B, AB- blocks (shadowed)."
-   },
-   { XxResources::COLOR_FORE_DIFFDEL_SUP,
-     "color.diffDelSup.fore",
-     "Foreground color for A and B in -AB, A-B, AB- blocks (shadowed)."
-   },
-   { XxResources::COLOR_BACK_DIFFDEL_ONLY,
-     "color.diffDelOnly.back",
-     "Background color for A and B in -AB, A-B, AB- blocks "
-     "(when other is blank)."
-   },
-   { XxResources::COLOR_FORE_DIFFDEL_ONLY,
-     "color.diffDelOnly.fore",
-     "Foreground color for A and B in -AB, A-B, AB- blocks "
-     "(when other is blank)."
-   },
-   { XxResources::COLOR_BACK_DIFFDEL_NONLY,
-     "color.diffDelNonly.back",
-     "Background color for A and B in -AB, A-B, AB- blocks (when blank)."
-   },
-   { XxResources::COLOR_FORE_DIFFDEL_NONLY,
-     "color.diffDelNonly.fore",
-     "Foreground color for A and B in -AB, A-B, AB- blocks (when blank)."
-   },
-   { XxResources::COLOR_BACK_DIFFDEL_BLANK,
-     "color.diffDelBlank.back",
-     "Background color for - in -AB, A-B, AB- blocks."
-   },
-   { XxResources::COLOR_FORE_DIFFDEL_BLANK,
-     "color.diffDelBlank.fore",
-     "Foreground color for - in -AB, A-B, AB- blocks."
-   },
-                                      
-   { XxResources::COLOR_BACK_SELECTED,
-     "color.selected.back",
-     "Background color for selected text."
-   },
-   { XxResources::COLOR_FORE_SELECTED,
-     "color.selected.fore",
-     "Foreground color for selected text."
-   },
-   { XxResources::COLOR_BACK_SELECTED_SUP,
-     "color.selectedSup.back",
-     "Background color for selected text (shadowed)."
-   },
-   { XxResources::COLOR_FORE_SELECTED_SUP,
-     "color.selectedSup.fore",
-     "Foreground color for selected text (shadowed)."
-   },
-                                      
-   { XxResources::COLOR_BACK_DELETED,
-     "color.deleted.back",
-     "Background color for deleted text."
-   },
-   { XxResources::COLOR_FORE_DELETED,
-     "color.deleted.fore",
-     "Foreground color for deleted text."
-   },
-   { XxResources::COLOR_BACK_DELETED_SUP,
-     "color.deletedSup.back",
-     "Background color for deleted text (shadowed)."
-   },
-   { XxResources::COLOR_FORE_DELETED_SUP,
-     "color.deletedSup.fore",
-     "Foreground color for deleted text (shadowed)."
-   },
-   { XxResources::COLOR_BACK_IGNORED,
-     "color.ignored.back",
-     "Background color for ignored text."
-   },
-   { XxResources::COLOR_FORE_IGNORED,
-     "color.ignored.fore",
-     "Foreground color for ignored text."
-   },
-
-   { XxResources::COLOR_BACK_DIRECTORIES,
-     "color.directories.back",
-     "Background color for directories in directory diffs."
-   },
-   { XxResources::COLOR_FORE_DIRECTORIES,
-     "color.directories.fore",
-     "Foreground color for directories in directory diffs."
-   },
-                                      
-   { XxResources::COLOR_BACK_MERGED_UNDECIDED,
-     "color.mergedUndecided.back",
-     "Background color for undecided text (merged view)."
-   },
-   { XxResources::COLOR_FORE_MERGED_UNDECIDED,
-     "color.mergedUndecided.fore",
-     "Foreground color for undecided text (merged view)."
-   },
-   { XxResources::COLOR_BACK_MERGED_DECIDED_1,
-     "color.mergedDecided1.back",
-     "Background color for decided text in file 1 (merged view)."
-   },
-   { XxResources::COLOR_FORE_MERGED_DECIDED_1,
-     "color.mergedDecided1.fore",
-     "Foreground color for decided text in file 1 (merged view)."
-   },
-   { XxResources::COLOR_BACK_MERGED_DECIDED_2,
-     "color.mergedDecided2.back",
-     "Background color for decided text in file 2 (merged view)."
-   },
-   { XxResources::COLOR_FORE_MERGED_DECIDED_2,
-     "color.mergedDecided2.fore",
-     "Foreground color for decided text in file 2 (merged view)."
-   },
-   { XxResources::COLOR_BACK_MERGED_DECIDED_3,
-     "color.mergedDecided3.back",
-     "Background color for decided text in file 3 (merged view)."
-   },
-   { XxResources::COLOR_FORE_MERGED_DECIDED_3,
-     "color.mergedDecided3.fore",
-     "Foreground color for decided text in file 3 (merged view)."
-   },
-
-   { XxResources::COLOR_BACKGROUND,
-     "color.background",
-     "Background color for remaining backgrounds."
-   },
-   { XxResources::COLOR_CURSOR,
-     "color.cursor",
-     "Cursor color."
-   },
-   { XxResources::COLOR_VERTICAL_LINE,
-     "color.verticalLine",
-     "Color of alignment vertical line."
-   },
-   { XxResources::COLOR_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-   { XxResources::FONT_APP,
-     "font.app",
-     "Application font, used for UI elements only."
-     "This resource is ignored for versions 1.7 and above."
-   },
-   { XxResources::FONT_TEXT,
-     "font.text",
-     "Text font, used for diffed files only."
-   },
-   { XxResources::FONT_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-   { XxResources::EXIT_ON_SAME,
-     "exitOnSame",
-     "If this resource is true, if there are no diffs the program simply exits."
-   },
-   { XxResources::SHOW_TOOLBAR,
-     "windows.showToolbar",
-     "If this resource is true, show the toolbar."
-   },
-   { XxResources::SHOW_LINE_NUMBERS,
-     "windows.showLineNumbers",
-     "If this resource is true, show the line numbers."
-   },
-   { XxResources::SHOW_MARKERS,
-     "windows.showMarkers",
-     "If this resource is true, show markers (currently not implemented)."
-   },
-   { XxResources::SHOW_VERTICAL_LINE,
-     "windows.showVerticalLine",
-     "If this resource is true, show vertical line."
-   },
-   { XxResources::SHOW_OVERVIEW,
-     "windows.showOverview",
-     "If this resource is true, show the overview area on startup."
-   },
-   { XxResources::SHOW_FILENAMES,
-     "windows.showFilenames",
-     "If this resource is true, show the filenames on startup."
-   },
-
-   { XxResources::HORIZONTAL_DIFFS,
-     "horizontalDiffs",
-     "If this resource is true, show the horizontal diffs on startup."
-   },
-   { XxResources::IGNORE_HORIZONTAL_WS,
-     "ignoreHorizontalWhitespace",
-     "If this resource is true, the horizontal diffs ignore whitespace."
-   },
-   { XxResources::FORMAT_CLIPBOARD_TEXT,
-     "formatClipboardText",
-     "If this resource is true, format text before placing it in the clipboard."
-   },
-   { XxResources::IGNORE_ERRORS,
-     "ignoreErrors",
-     "If this resource is true, ignore errors from diff subprocess."
-   },
-   { XxResources::WARN_ABOUT_UNSAVED,
-     "warnAboutUnsaved",
-     "If this resource is true, warn about unsaved selections when quitting."
-   },
-   { XxResources::DISABLE_CURSOR_DISPLAY,
-     "disableCursorDisplay",
-     "Disables the cursor display"
-   },
-   { XxResources::HIDE_CR,
-     "hideCarriageReturns",
-     "Hides the ugly ^M characters in DOS files."
-   },
-   { XxResources::DIRDIFF_IGNORE_FILE_CHANGES,
-     "dirDiff.ignoreFileChanges",
-     "Ignore the changes between files when displaying directory diffs."
-   },
-   { XxResources::DIRDIFF_BUILD_FROM_OUTPUT,
-     "dirDiff.buildSolelyFromOutput",
-     "Determines whether directory diffs buffer contents are built solely"
-     "from the output of the directory diff command. If false, buffer"
-     "contents are created by reading the directory contents directory."
-     "This is used mainly for debugging, and should be set to true if "
-     "GNU diff output is what you're using."
-     "Note that this option only affects shallow directory diffs. Recursive"
-     "directory diffs always build solely from output."
-   },
-   { XxResources::DIRDIFF_RECURSIVE,
-     "dirDiff.recursive",
-     "Determines whether directory diffs are recursive or not."
-   },
-   { XxResources::USE_INTERNAL_DIFF,
-     "dirDiff.useInternalDiff",
-     "Determines whether we use the internal GNU diff code or"
-     "an external diff program."
-   },
-   { XxResources::BOOL_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-
-   { XxResources::COMMAND_DIFF_FILES_2,
-     "command.diffFiles2",
-     "Command for diffing two files."
-   },
-   { XxResources::COMMAND_DIFF_FILES_3,
-     "command.diffFiles3",
-     "Command for diffing three files."
-   },
-   { XxResources::COMMAND_DIFF_DIRECTORIES,
-     "command.diffDirectories",
-     "Command for diffing two directories."
-   },
-   { XxResources::COMMAND_DIFF_DIRECTORIES_REC,
-     "command.diffDirectoriesRec",
-     "Command for diffing two directories, recursively."
-   },
-   { XxResources::COMMAND_MANUAL,
-     "command.manual",
-     "Set command for dynamic manual (this resource is unused if compile with "
-     "inline help."
-   },
-   { XxResources::COMMAND_EDIT,
-     "command.edit",
-     "Command for editing a diff buffer."
-   },
-   { XxResources::COMMAND_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-
-   { XxResources::CMDOPT_FILES_IGNORE_TRAILING,
-     "commandOption.ignoreTrailingBlanks",
-     "File diff command option for ignoring trailing blanks."
-   },
-   { XxResources::CMDOPT_FILES_IGNORE_WHITESPACE,
-     "commandOption.ignoreWhitespace",
-     "File diff command option for ignoring whitespace."
-   },
-   { XxResources::CMDOPT_FILES_IGNORE_CASE,
-     "commandOption.ignoreCase",
-     "File diff command option for ignoring case when diffing."
-   },
-   { XxResources::CMDOPT_FILES_IGNORE_BLANK_LINES,
-     "commandOption.ignoreBlankLines",
-     "File diff command option for ignoring blank lines when diffing."
-   },
-   { XxResources::CMDOPT_FILES_QUALITY_NORMAL,
-     "commandOption.qualityNormal",
-     "File diff command option for normal quality."
-   },
-   { XxResources::CMDOPT_FILES_QUALITY_FASTEST,
-     "commandOption.qualityFastest",
-     "File diff command option for fastest quality."
-   },
-   { XxResources::CMDOPT_FILES_QUALITY_HIGHEST,
-     "commandOption.qualityHighest",
-     "File diff command option for highest quality."
-   },
-   { XxResources::CMDOPT_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-
-   { XxResources::TAG_CONFLICT_SEPARATOR,
-     "tag.conflict.separator",
-     "Text stub to prepend to conflict hunks when saving unselected regions."
-   },
-   { XxResources::TAG_CONFLICT_END,
-     "tag.conflict.end",
-     "Text stub to append to conflict hunks when saving unselected regions."
-   },
-   { XxResources::TAG_CONDITIONAL_IF,
-     "tag.conditional.ifdef",
-     "Text stub for ifdef conditional marker when saving unselected regions."
-   },
-   { XxResources::TAG_CONDITIONAL_ELSEIF,
-     "tag.conditional.elseif",
-     "Text stub for elseif conditional marker when saving unselected regions."
-     "This will be used for 3-way diffs only."
-   },
-   { XxResources::TAG_CONDITIONAL_ELSE,
-     "tag.conditional.else",
-     "Text stub for else conditional marker when saving unselected regions."
-   },
-   { XxResources::TAG_CONDITIONAL_ENDIF,
-     "tag.conditional.endif",
-     "Text stub for endif conditional marker when saving unselected regions."
-   },
-   { XxResources::TAG_LAST, "", "" },
-
-   //---------------------------------------------------------------------------
-
-   { XxResources::TAB_WIDTH,
-     "tabWidth",
-     "Width (in characters) of tabs."
-   },
-   { XxResources::OVERVIEW_FILE_WIDTH,
-     "overviewFileWidth",
-     "Width (in pixels) of a file in the overview area."
-   },
-   { XxResources::OVERVIEW_SEP_WIDTH,
-     "overviewSepWidth",
-     "Width (in pixels) of separation between files in the overview area."
-   },
-   { XxResources::VERTICAL_LINE_POS,
-     "verticalLinePosition",
-     "Horizontal position of vertical line (in characters)."
-   },
-   { XxResources::CLIPBOARD_TEXT_FORMAT,
-     "clipboardTextFormat",
-     "Format string for formatted text that goes in the clipboard."
-   }
-
-};
-
-/*==============================================================================
- * LOCAL CLASS XxDefaultsParser
- *============================================================================*/
-
-// <summary> a parser for default values </summary>
-
-class XxDefaultsParser : public XxResourcesParser {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxDefaultsParser();
-
-   // Destructor.
-   virtual ~XxDefaultsParser();
-
-   // Query the database for the named resource.  Returns false is not present.
-   // Otherwise return true and fills in the value string.
-   virtual bool query( 
-      XxResources::Resource res,
-      const QString&        name,
-      QString&              value
-   );
-
-private:
-
-   /*----- data members -----*/
-
-   const char* _map[ XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST ];
-
-};
-
-//------------------------------------------------------------------------------
-//
-XxDefaultsParser::XxDefaultsParser()
-{
-   int nbres = XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST;
-   for ( int ii = 0; ii < nbres; ++ii ) {
-      _map[ ii ] = 0;
-   }
-   
-   _map[ XxResources::PREFERRED_GEOMETRY ] = "1200x600";
-
-   _map[ XxResources::ACCEL_EXIT ] = "Ctrl+Q";
-
-   _map[ XxResources::ACCEL_SEARCH ] = "Ctrl+S";
-   _map[ XxResources::ACCEL_SEARCH_FORWARD ] = "Ctrl+F";
-   _map[ XxResources::ACCEL_SEARCH_BACKWARD ] = "Ctrl+B"; 
-   _map[ XxResources::ACCEL_SCROLL_DOWN ] = "Ctrl+V";
-   _map[ XxResources::ACCEL_SCROLL_UP ] = "Alt+V";
-   _map[ XxResources::ACCEL_CURSOR_DOWN ] = "Ctrl+N";
-   _map[ XxResources::ACCEL_CURSOR_UP ] = "Ctrl+P";
-   _map[ XxResources::ACCEL_CURSOR_TOP ] = "Home"; // FIXME doesn't work
-   _map[ XxResources::ACCEL_CURSOR_BOTTOM ] = "End"; // FIXME doesn't work
-   _map[ XxResources::ACCEL_REDO_DIFF ] = "Ctrl+R";
-   _map[ XxResources::ACCEL_NEXT_DIFFERENCE ] = "N";
-   _map[ XxResources::ACCEL_PREVIOUS_DIFFERENCE ] = "P";
-   _map[ XxResources::ACCEL_NEXT_UNSELECTED ] = "B";
-   _map[ XxResources::ACCEL_PREVIOUS_UNSELECTED ] = "O";
-   _map[ XxResources::ACCEL_SELECT_GLOBAL_LEFT ] = "Ctrl+Alt+H"; 
-   _map[ XxResources::ACCEL_SELECT_GLOBAL_MIDDLE ] = "Ctrl+Alt+J"; 
-   _map[ XxResources::ACCEL_SELECT_GLOBAL_RIGHT ] = "Ctrl+Alt+K"; 
-   _map[ XxResources::ACCEL_SELECT_GLOBAL_NEITHER ] = "Ctrl+Alt+Y";
-   _map[ XxResources::ACCEL_SELECT_GLOBAL_UNSELECT ] = "Ctrl+Alt+U";
-   _map[ XxResources::ACCEL_SELECT_GLOBAL_MERGE ] = "Ctrl+Alt+M";
-   _map[ XxResources::ACCEL_SELECT_REGION_LEFT ] = "H"; 
-   _map[ XxResources::ACCEL_SELECT_REGION_MIDDLE ] = "J"; 
-   _map[ XxResources::ACCEL_SELECT_REGION_RIGHT ] = "K";
-   _map[ XxResources::ACCEL_SELECT_REGION_NEITHER ] = "Y";
-   _map[ XxResources::ACCEL_SELECT_REGION_UNSELECT ] = "U";
-   _map[ XxResources::ACCEL_SELECT_REGION_LEFT_AND_NEXT ] = "Ctrl+H";
-   _map[ XxResources::ACCEL_SELECT_REGION_MIDDLE_AND_NEXT ] = "Ctrl+J";
-   _map[ XxResources::ACCEL_SELECT_REGION_RIGHT_AND_NEXT ] = "Ctrl+K";
-   _map[ XxResources::ACCEL_SELECT_REGION_NEITHER_AND_NEXT ] = "Ctrl+Y";
-   _map[ XxResources::ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN ] = "S";
-   _map[ XxResources::ACCEL_SELECT_LINE_LEFT ] = "Shift+H"; 
-   _map[ XxResources::ACCEL_SELECT_LINE_MIDDLE ] = "Shift+J"; 
-   _map[ XxResources::ACCEL_SELECT_LINE_RIGHT ] = "Shift+K"; 
-   _map[ XxResources::ACCEL_SELECT_LINE_NEITHER ] = "Shift+Y";
-   _map[ XxResources::ACCEL_SELECT_LINE_UNSELECT ] = "Shift+U";
-   _map[ XxResources::ACCEL_TABS_AT_3 ] = "3";
-   _map[ XxResources::ACCEL_TABS_AT_4 ] = "4";
-   _map[ XxResources::ACCEL_TABS_AT_8 ] = "8";
-   _map[ XxResources::ACCEL_MERGED_VIEW ] = "Alt+Y";
-   _map[ XxResources::ACCEL_TOGGLE_LINE_NUMBERS ] = "Alt+L";
-   _map[ XxResources::ACCEL_TOGGLE_MARKERS ] = "Alt+M";
-   _map[ XxResources::ACCEL_TOGGLE_OVERVIEW ] = "Alt+O";
-   _map[ XxResources::ACCEL_TOGGLE_SHOW_FILENAMES ] = "Alt+S";
-   _map[ XxResources::ACCEL_TOGGLE_HORIZONTAL_DIFFS ] = "Alt+W";
-   _map[ XxResources::ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT ] = "Alt+A";
-   _map[ XxResources::ACCEL_HELP_ON_CONTEXT ] = "Shift+F1";
-
-   _map[ XxResources::ACCEL_MERGED_CLOSE ] = "Alt+W";
-
-
-   // FIXME there is currently a bug with the Qt raw fonts.  It breaks the
-   // QTextView.  Put this back when done.
-   //     _map[ XxResources::FONT_APP ] = 
-   //        "-*-helvetica-bold-o-narrow-*-17-*-*-*-*-*-iso8859-1-";
-
-   _map[ XxResources::FONT_TEXT ] = 
-      "*-clean-medium-r-normal-*-14-*";
-   // FIXME need to remove the stupid warning!
-   //     _font.setRawName( 
-   //        "-*-clean-medium-r-normal-140-14-*-*-*-*-*-iso8859-1-"
-   //     );
-
-   //---------------------------------------------------------------------------
-
-   _map[ XxResources::COLOR_BACK_SAME             ] = "grey";
-   _map[ XxResources::COLOR_FORE_SAME             ] = "black";
-
-   _map[ XxResources::COLOR_BACK_DIFF_ONE         ] = "palegoldenrod";
-   _map[ XxResources::COLOR_FORE_DIFF_ONE         ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_ONE_SUP     ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_DIFF_ONE_SUP     ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_ONE_ONLY    ] = "palegoldenrod";
-   _map[ XxResources::COLOR_FORE_DIFF_ONE_ONLY    ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_ONE_NONLY   ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_DIFF_ONE_NONLY   ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_TWO         ] = "lightblue2";
-   _map[ XxResources::COLOR_FORE_DIFF_TWO         ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_TWO_SUP     ] = "lightblue3";
-   _map[ XxResources::COLOR_FORE_DIFF_TWO_SUP     ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_TWO_ONLY    ] = "lightblue2";
-   _map[ XxResources::COLOR_FORE_DIFF_TWO_ONLY    ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_TWO_NONLY   ] = "lightblue3";
-   _map[ XxResources::COLOR_FORE_DIFF_TWO_NONLY   ] = "black";
-
-   _map[ XxResources::COLOR_BACK_DELETE           ] = "lightblue2";
-   _map[ XxResources::COLOR_FORE_DELETE           ] = "black";
-   _map[ XxResources::COLOR_BACK_DELETE_BLANK     ] = "grey64";
-   _map[ XxResources::COLOR_FORE_DELETE_BLANK     ] = "black";
-
-   _map[ XxResources::COLOR_BACK_INSERT           ] = "darkseagreen2";
-   _map[ XxResources::COLOR_FORE_INSERT           ] = "black";
-   _map[ XxResources::COLOR_BACK_INSERT_BLANK     ] = "grey64";
-   _map[ XxResources::COLOR_FORE_INSERT_BLANK     ] = "black";
-
-   _map[ XxResources::COLOR_BACK_DIFF_ALL         ] = "palegoldenrod";
-   _map[ XxResources::COLOR_FORE_DIFF_ALL         ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_ALL_SUP     ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_DIFF_ALL_SUP     ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_ALL_ONLY    ] = "palegoldenrod";
-   _map[ XxResources::COLOR_FORE_DIFF_ALL_ONLY    ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFF_ALL_NONLY   ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_DIFF_ALL_NONLY   ] = "black";
-
-   _map[ XxResources::COLOR_BACK_DIFFDEL          ] = "palegoldenrod";
-   _map[ XxResources::COLOR_FORE_DIFFDEL          ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFFDEL_SUP      ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_DIFFDEL_SUP      ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFFDEL_ONLY     ] = "palegoldenrod";
-   _map[ XxResources::COLOR_FORE_DIFFDEL_ONLY     ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFFDEL_NONLY    ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_DIFFDEL_NONLY    ] = "black";
-   _map[ XxResources::COLOR_BACK_DIFFDEL_BLANK    ] = "grey64";
-   _map[ XxResources::COLOR_FORE_DIFFDEL_BLANK    ] = "black";
-
-   _map[ XxResources::COLOR_BACK_SELECTED         ] = "plum";
-   _map[ XxResources::COLOR_FORE_SELECTED         ] = "black";
-   _map[ XxResources::COLOR_BACK_SELECTED_SUP     ] = "thistle";
-   _map[ XxResources::COLOR_FORE_SELECTED_SUP     ] = "black";
-
-   _map[ XxResources::COLOR_BACK_DELETED          ] = "lightslategrey";
-   _map[ XxResources::COLOR_FORE_DELETED          ] = "black";
-   _map[ XxResources::COLOR_BACK_DELETED_SUP      ] = "slategrey";
-   _map[ XxResources::COLOR_FORE_DELETED_SUP      ] = "black";
-
-   _map[ XxResources::COLOR_BACK_IGNORED          ] = "grey70";
-   _map[ XxResources::COLOR_FORE_IGNORED          ] = "grey30";
-
-   _map[ XxResources::COLOR_BACK_DIRECTORIES      ] = "mediumturquoise";
-   _map[ XxResources::COLOR_FORE_DIRECTORIES      ] = "black";
-                                                                      
-   _map[ XxResources::COLOR_BACK_MERGED_UNDECIDED ] = "lemonchiffon3";
-   _map[ XxResources::COLOR_FORE_MERGED_UNDECIDED ] = "black";
-   _map[ XxResources::COLOR_BACK_MERGED_DECIDED_1 ] = "grey70";
-   _map[ XxResources::COLOR_FORE_MERGED_DECIDED_1 ] = "black";
-   _map[ XxResources::COLOR_BACK_MERGED_DECIDED_2 ] = "grey70";
-   _map[ XxResources::COLOR_FORE_MERGED_DECIDED_2 ] = "black";
-   _map[ XxResources::COLOR_BACK_MERGED_DECIDED_3 ] = "grey70";
-   _map[ XxResources::COLOR_FORE_MERGED_DECIDED_3 ] = "black";
-
-   _map[ XxResources::COLOR_BACKGROUND ] = "#40616a"; // FIXME find the name!
-   _map[ XxResources::COLOR_CURSOR ] = "white";
-   _map[ XxResources::COLOR_VERTICAL_LINE ] = "red";
-
-   //---------------------------------------------------------------------------
-
-   _map[ XxResources::EXIT_ON_SAME ] = "false";
-   _map[ XxResources::SHOW_TOOLBAR ] = "false";
-   _map[ XxResources::SHOW_LINE_NUMBERS ] = "false";
-   _map[ XxResources::SHOW_OVERVIEW ] = "true";
-   _map[ XxResources::SHOW_FILENAMES ] = "false";
-   _map[ XxResources::HORIZONTAL_DIFFS ] = "false";
-   _map[ XxResources::IGNORE_HORIZONTAL_WS ] = "true";
-   _map[ XxResources::FORMAT_CLIPBOARD_TEXT ] = "false";
-   _map[ XxResources::IGNORE_ERRORS ] = "false";
-   _map[ XxResources::WARN_ABOUT_UNSAVED ] = "false";
-   _map[ XxResources::DISABLE_CURSOR_DISPLAY ] = "false";
-   _map[ XxResources::HIDE_CR ] = "false";
-   _map[ XxResources::DIRDIFF_IGNORE_FILE_CHANGES ] = "false";
-   _map[ XxResources::DIRDIFF_BUILD_FROM_OUTPUT ] = "true";
-   _map[ XxResources::DIRDIFF_RECURSIVE ] = "false";
-   _map[ XxResources::USE_INTERNAL_DIFF ] = "true";
-   _map[ XxResources::TAB_WIDTH ] = "8";
-
-   _map[ XxResources::COMMAND_DIFF_FILES_2 ] = "diff";
-   _map[ XxResources::COMMAND_DIFF_FILES_3 ] = "diff3";
-   _map[ XxResources::COMMAND_DIFF_DIRECTORIES ] = "diff -q -s";
-   _map[ XxResources::COMMAND_DIFF_DIRECTORIES_REC ] = "diff -q -s -r";
-   _map[ XxResources::COMMAND_MANUAL ] = "(man xxdiff | col -b) 2>&1";
-   // "cmp -s" barfs on directories.
-   const char* editor = getenv( "EDITOR" );
-   if ( editor != 0 ) {
-      _map[ XxResources::COMMAND_EDIT ] = editor;
-   }
-   else {
-      _map[ XxResources::COMMAND_EDIT ] = "vi";
-   }
-
-   _map[ XxResources::CMDOPT_FILES_IGNORE_TRAILING ] = "-b";
-   _map[ XxResources::CMDOPT_FILES_IGNORE_WHITESPACE ] = "-w";
-   _map[ XxResources::CMDOPT_FILES_IGNORE_CASE ] = "-i";
-   _map[ XxResources::CMDOPT_FILES_IGNORE_BLANK_LINES ] = "-B";
-   _map[ XxResources::CMDOPT_FILES_QUALITY_NORMAL ] = "";
-   _map[ XxResources::CMDOPT_FILES_QUALITY_FASTEST ] = "-d";
-   _map[ XxResources::CMDOPT_FILES_QUALITY_HIGHEST ] = "-H";
-
-   _map[ XxResources::TAG_CONFLICT_SEPARATOR ] = ">>>>>>>>>>>>>>>>>>>> File %d";
-   _map[ XxResources::TAG_CONFLICT_END ] = "<<<<<<<<<<<<<<<<<<<<";
-   _map[ XxResources::TAG_CONDITIONAL_IF ] = "#if defined( %s )";
-   _map[ XxResources::TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
-   _map[ XxResources::TAG_CONDITIONAL_ELSE ] = "#else";
-   _map[ XxResources::TAG_CONDITIONAL_ENDIF ] = "#endif";
-
-   _map[ XxResources::OVERVIEW_FILE_WIDTH ] = "20";
-   _map[ XxResources::OVERVIEW_SEP_WIDTH ] = "14";
-   _map[ XxResources::VERTICAL_LINE_POS ] = "80";
-   _map[ XxResources::CLIPBOARD_TEXT_FORMAT ] = "%L: %s";
-
-}
-
-//------------------------------------------------------------------------------
-//
-XxDefaultsParser::~XxDefaultsParser()
-{}
-
-//------------------------------------------------------------------------------
-//
-bool XxDefaultsParser::query( 
-   XxResources::Resource res,
-   const QString&        /*name*/,
-   QString&              value
-)
-{
-   const char* cres = _map[ int(res) ];
-   if ( cres == 0 ) {
-      return false;
-   }
-   value.setLatin1( cres );
-   return true;
-}
-
-
-/*==============================================================================
- * LOCAL FUNCTIONS
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-bool readGeometry( const QString& val, QRect& geometry )
-{
-   QWidget* desktop = QApplication::desktop();
-   XX_ASSERT( desktop != 0 );
-   QSize dsize = desktop->size();
-
-   // Reads in a value.  Returns true if successful, false if the resource was
-   // not the specified type and left untouched.
-
-   int l = -1;
-   int t = -1;
-   int w = -1;
-   int h = -1;
-   const char* vchar = val.latin1();
-   if ( sscanf( vchar, "%dx%d+%d+%d", &w, &h, &l, &t ) == 4 ) {
-      geometry = QRect( l, t, w, h );
-      return true;
-   }
-   if ( sscanf( vchar, "%dx%d-%d+%d", &w, &h, &l, &t ) == 4 ) {
-      geometry = QRect( dsize.width()-l-w, t, w, h );
-      return true;
-   }
-   if ( sscanf( vchar, "%dx%d+%d-%d", &w, &h, &l, &t ) == 4 ) {
-      geometry = QRect( l, dsize.height()-t-h, w, h );
-      return true;
-   }
-   if ( sscanf( vchar, "%dx%d-%d-%d", &w, &h, &l, &t ) == 4 ) {
-      geometry = QRect( dsize.width()-l-w, dsize.height()-t-h, w, h );
-      return true;
-   }
-   else if ( sscanf( vchar, "%dx%d", &w, &h ) == 2 ) {
-      geometry = QRect( -1, -1, w, h );
-      return true;
-   }
-   return false;
-}
-
-//------------------------------------------------------------------------------
-//
-void writeGeometry( std::ostream& os, const QRect& geometry )
-{
-   os << geometry.width() << "x" << geometry.height()
-      << "+" << geometry.top() << "+" << geometry.left();
-}
-
-//------------------------------------------------------------------------------
-//
-bool readBoolean( const QString& val, bool& mybool )
-{
-   // Reads in a value.  Returns true if successful, false if the resource was
-   // not the specified type and left untouched.
-
-   if ( val == "True" || val == "true" ) {
-      mybool = true;
-      return true;
-   }
-   else if ( val == "False" || val == "false" ) {
-      mybool = false;
-      return true;
-   }
-   return false;
-}
-
-//------------------------------------------------------------------------------
-//
-void writeBoolean( std::ostream& os, const bool mybool )
-{
-   os << ( mybool ? "True" : "False" );
-}
-
-//------------------------------------------------------------------------------
-//
-bool readAccelerator( const QString& val, int& accel )
-{
-   // Reads in a value.  Returns true if successful, false if the resource was
-   // not the specified type and left untouched.
-
-   // I wish I could use QAccel::stringToKey, but it's broken.  The Qt docs say:
-   //
-   // "Note that this function currently only supports character accelerators
-   // (unlike keyToString() which can produce Ctrl+Backspace, etc. from the
-   // appropriate key codes)."
-   //
-   // So we do this by hand.  This should really just be provided by Qt.
-   
-   if ( val.isEmpty() ) {
-      return 0;
-   }
-
-   // Remove whitespace.
-   QString cval = val.stripWhiteSpace().lower();
-
-   // Read modifier, if present.
-   const int notfound = -1;
-   int modifier = 0;
-   if ( cval.find( "alt" ) != notfound || 
-        cval.find( "meta" ) != notfound ) {
-      modifier |= Qt::ALT;
-   }
-   if ( cval.find( "ctrl" ) != notfound || 
-        cval.find( "control" ) != notfound ) {
-      modifier |= Qt::CTRL;
-   }
-   if ( cval.find( "shift" ) != notfound ) {
-      modifier |= Qt::SHIFT;
-   }
-
-   // Read non-modifier.
-   int fomin = cval.findRev( '-' );
-   int foplus = cval.findRev( '+' );
-   int xpos = (fomin > foplus) ? fomin : foplus;
-   if ( xpos == notfound ) {
-      xpos = 0;
-   }
-
-   int key = 0;
-   for ( uint ii = 0; ii < sizeof(keycodes); ++ii ) {
-      if ( cval.find( keycodes[ii]._name, xpos ) != notfound ) {
-         key = keycodes[ii]._code;
-         break;
-      }
-   }
-
-   accel = modifier | key;
-   return true;
-}
-
-//------------------------------------------------------------------------------
-//
-void writeAccelerator( std::ostream& os, int accel )
-{
-   QString str = QAccel::keyToString( accel );
-   os << str;
-}
-
-//------------------------------------------------------------------------------
-//
-bool readColor( const QString& val, QColor& color )
-{
-   // Reads in a value.  Returns true if successful, false if the resource was
-   // not the specified type and left untouched.
-
-   color.setNamedColor( val.stripWhiteSpace() );
-   return true;
-}
-
-//------------------------------------------------------------------------------
-//
-void writeColor( std::ostream& os, const QColor& color )
-{
-   os << "#" 
-      << std::hex << color.red() 
-      << std::hex << color.green()
-      << std::hex << color.blue();
-}
-
-//------------------------------------------------------------------------------
-//
-void writeDocAttrib(
-   const XxResources*    /*resources*/,
-   std::ostream&         os,
-   XxResources::Resource res
-)
-{
-   const char* name = XxResources::getResourceName( res );
-   const char* doc = XxResources::getResourceDoc( res );
-   os << std::endl;
-   os << "# " << doc << std::endl;
-   os << name << " : ";
-}
-
-}
-
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
@@ -1550,92 +49,219 @@ XX_NAMESPACE_BEGIN
  * CLASS XxResources
  *============================================================================*/
 
-XxResources* XxResources::_instance = 0;
-
-//------------------------------------------------------------------------------
-//
-XxResources* XxResources::getInstance()
-{
-   if ( _instance == 0 ) {
-      _instance = new XxResources;
-   }
-   return _instance;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxResources::releaseInstance()
-{
-   delete _instance;
-}
-
 //------------------------------------------------------------------------------
 //
 XxResources::XxResources()
 {
+   initialize();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::initialize()
+{
+   // Just like xdiff.
+   _preferredGeometry = QRect( -1, -1, 1200, 600 );
+   _maximize = false;
+
+   //---------------------------------------------------------------------------
+
    // Initialize because this is more handy than specifying empty defaults for
    // all accelerators.
-   for ( int ii = 0; ii < ACCEL_LAST - ACCEL_FIRST; ++ii ) {
+   for ( int ii = 0; ii < ACCEL_LAST; ++ii ) {
       _accelerators[ ii ] = 0;
    }
+   
+   _accelerators[ ACCEL_EXIT ] = Qt::CTRL | Qt::Key_Q;
+                  
+   _accelerators[ ACCEL_SEARCH ] = Qt::CTRL | Qt::Key_S;
+   _accelerators[ ACCEL_SEARCH_FORWARD ] = Qt::CTRL | Qt::Key_F;
+   _accelerators[ ACCEL_SEARCH_BACKWARD ] = Qt::CTRL | Qt::Key_B; 
+   _accelerators[ ACCEL_SCROLL_DOWN ] = Qt::CTRL | Qt::Key_V;
+   _accelerators[ ACCEL_SCROLL_UP ] = Qt::ALT | Qt::Key_V;
+   _accelerators[ ACCEL_CURSOR_DOWN ] = Qt::CTRL | Qt::Key_N;
+   _accelerators[ ACCEL_CURSOR_UP ] = Qt::CTRL | Qt::Key_P;
+   _accelerators[ ACCEL_CURSOR_TOP ] = Qt::Key_Home;
+   _accelerators[ ACCEL_CURSOR_BOTTOM ] = Qt::Key_End;
+   _accelerators[ ACCEL_REDO_DIFF ] = Qt::CTRL | Qt::Key_R;
+   _accelerators[ ACCEL_NEXT_DIFFERENCE ] = Qt::Key_N;
+   _accelerators[ ACCEL_PREVIOUS_DIFFERENCE ] = Qt::Key_P;
+   _accelerators[ ACCEL_NEXT_UNSELECTED ] = Qt::Key_B;
+   _accelerators[ ACCEL_PREVIOUS_UNSELECTED ] = Qt::Key_O;
+   _accelerators[ ACCEL_SELECT_GLOBAL_LEFT ] = Qt::CTRL|Qt::ALT | Qt::Key_H; 
+   _accelerators[ ACCEL_SELECT_GLOBAL_MIDDLE ] = Qt::CTRL|Qt::ALT | Qt::Key_J; 
+   _accelerators[ ACCEL_SELECT_GLOBAL_RIGHT ] = Qt::CTRL|Qt::ALT | Qt::Key_K; 
+   _accelerators[ ACCEL_SELECT_GLOBAL_NEITHER ] = Qt::CTRL|Qt::ALT | Qt::Key_Y;
+   _accelerators[ ACCEL_SELECT_GLOBAL_UNSELECT ] = Qt::CTRL|Qt::ALT | Qt::Key_U;
+   _accelerators[ ACCEL_SELECT_GLOBAL_MERGE ] = Qt::CTRL|Qt::ALT | Qt::Key_M;
+   _accelerators[ ACCEL_SELECT_REGION_LEFT ] = Qt::Key_H; 
+   _accelerators[ ACCEL_SELECT_REGION_MIDDLE ] = Qt::Key_J; 
+   _accelerators[ ACCEL_SELECT_REGION_RIGHT ] = Qt::Key_K;
+   _accelerators[ ACCEL_SELECT_REGION_NEITHER ] = Qt::Key_Y;
+   _accelerators[ ACCEL_SELECT_REGION_UNSELECT ] = Qt::Key_U;
+   _accelerators[ ACCEL_SELECT_REGION_LEFT_AND_NEXT ] = Qt::CTRL | Qt::Key_H;
+   _accelerators[ ACCEL_SELECT_REGION_MIDDLE_AND_NEXT ] = Qt::CTRL | Qt::Key_J;
+   _accelerators[ ACCEL_SELECT_REGION_RIGHT_AND_NEXT ] = Qt::CTRL | Qt::Key_K;
+   _accelerators[ ACCEL_SELECT_REGION_NEITHER_AND_NEXT ] = Qt::CTRL | Qt::Key_Y;
+   _accelerators[ ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN ] = Qt::Key_S;
+   _accelerators[ ACCEL_SELECT_LINE_LEFT ] = Qt::SHIFT | Qt::Key_H; 
+   _accelerators[ ACCEL_SELECT_LINE_MIDDLE ] = Qt::SHIFT | Qt::Key_J; 
+   _accelerators[ ACCEL_SELECT_LINE_RIGHT ] = Qt::SHIFT | Qt::Key_K; 
+   _accelerators[ ACCEL_SELECT_LINE_NEITHER ] = Qt::SHIFT | Qt::Key_Y;
+   _accelerators[ ACCEL_SELECT_LINE_UNSELECT ] = Qt::SHIFT | Qt::Key_U;
+   _accelerators[ ACCEL_TABS_AT_3 ] = Qt::Key_3;
+   _accelerators[ ACCEL_TABS_AT_4 ] = Qt::Key_4;
+   _accelerators[ ACCEL_TABS_AT_8 ] = Qt::Key_8;
+   _accelerators[ ACCEL_MERGED_VIEW ] = Qt::ALT | Qt::Key_Y;
+   _accelerators[ ACCEL_TOGGLE_LINE_NUMBERS ] = Qt::ALT | Qt::Key_L;
+   _accelerators[ ACCEL_TOGGLE_MARKERS ] = Qt::ALT | Qt::Key_M;
+   _accelerators[ ACCEL_TOGGLE_OVERVIEW ] = Qt::ALT | Qt::Key_O;
+   _accelerators[ ACCEL_TOGGLE_SHOW_FILENAMES ] = Qt::ALT | Qt::Key_S;
+   _accelerators[ ACCEL_TOGGLE_HORIZONTAL_DIFFS ] = Qt::ALT | Qt::Key_W;
+   _accelerators[ ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT ] = Qt::ALT | Qt::Key_A;
+   _accelerators[ ACCEL_HELP_ON_CONTEXT ] = Qt::SHIFT | Qt::Key_F1;
+                  
+   _accelerators[ ACCEL_MERGED_CLOSE ] = Qt::ALT | Qt::Key_W;
 
-   // Use a default font that looks like the one from the default SGI scheme.
-   _fontApp.setFamily( "Helvetica" );
-   _fontApp.setItalic( true ); 
-   _fontApp.setBold( true );
+   //---------------------------------------------------------------------------
 
-   // FIXME should all be initialized like this.
+   // // Use a default font that looks like the one from the default SGI scheme.
+   // _fontApp.setFamily( "Helvetica" );
+   // _fontApp.setItalic( true ); 
+   // _fontApp.setBold( true );
+
+   // Note: using "-*-screen-bold-i-normal--*-100-*-*-*-*-iso8859-1"
+   // seems to yield the corresponding font to the SGI font under Linux.
+
+   // Try to set the default font to be as close as possible as that under the
+   // original xdiff under SGI.
+   //_fontText.setRawName( "*-clean-medium-r-normal-*-14-*" ); // XLFD warning
+   _fontText.setRawName( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
+
+   //---------------------------------------------------------------------------
+
+   setFbColors( COLOR_SAME             , "grey", "black" );
+   setFbColors( COLOR_DIFF_ONE         , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ONE_SUP     , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_ONE_ONLY    , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ONE_NONLY   , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_TWO         , "lightblue2", "black" );
+   setFbColors( COLOR_DIFF_TWO_SUP     , "lightblue3", "black" );
+   setFbColors( COLOR_DIFF_TWO_ONLY    , "lightblue2",  "black" );
+   setFbColors( COLOR_DIFF_TWO_NONLY   , "lightblue3", "black" );
+             
+   setFbColors( COLOR_DELETE           , "lightblue2", "black" );
+   setFbColors( COLOR_DELETE_BLANK     , "grey64", "black" );
+             
+   setFbColors( COLOR_INSERT           , "darkseagreen2", "black" );
+   setFbColors( COLOR_INSERT_BLANK     , "grey64", "black" );
+             
+   setFbColors( COLOR_DIFF_ALL         , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ALL_SUP     , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_ALL_ONLY    , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ALL_NONLY   , "lemonchiffon3", "black" );
+             
+   setFbColors( COLOR_DIFFDEL          , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFFDEL_SUP      , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFFDEL_ONLY     , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFFDEL_NONLY    , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFFDEL_BLANK    , "grey64", "black" );
+             
+   setFbColors( COLOR_SELECTED         , "plum", "black" );
+   setFbColors( COLOR_SELECTED_SUP     , "thistle", "black" );
+             
+   setFbColors( COLOR_DELETED          , "lightslategrey", "black" );
+   setFbColors( COLOR_DELETED_SUP      , "slategrey", "black" );
+             
+   setFbColors( COLOR_IGNORED          , "grey70", "grey30" );
+             
+   setFbColors( COLOR_DIRECTORIES      , "mediumturquoise", "black" );
+                                                         
+   setFbColors( COLOR_MERGED_UNDECIDED , "lemonchiffon3", "black" );
+   setFbColors( COLOR_MERGED_DECIDED_1 , "grey70", "black" );
+   setFbColors( COLOR_MERGED_DECIDED_2 , "grey70", "black" );
+   setFbColors( COLOR_MERGED_DECIDED_3 , "grey70", "black" );
+             
+   _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
+   _backColors[ COLOR_CURSOR ].setNamedColor( "white" );
+   _backColors[ COLOR_VERTICAL_LINE ].setNamedColor( "red" );
+   // Note: we don't use the fore colors for these guys.
+
+   //---------------------------------------------------------------------------
+
+   _boolOpts[ BOOL_EXIT_ON_SAME ] = false;
+   _boolOpts[ BOOL_HORIZONTAL_DIFFS ] = false;
+   _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = true;
+   _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = false;
+   _boolOpts[ BOOL_IGNORE_ERRORS ] = false;
+   _boolOpts[ BOOL_WARN_ABOUT_UNSAVED ] = false;
+   _boolOpts[ BOOL_DISABLE_CURSOR_DISPLAY ] = false;
+   _boolOpts[ BOOL_HIDE_CR ] = false;
+   _boolOpts[ BOOL_DIRDIFF_IGNORE_FILE_CHANGES ] = false;
+   _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;
+   _boolOpts[ BOOL_DIRDIFF_RECURSIVE ] = false;
+   _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
+
+   //---------------------------------------------------------------------------
+
+   // Defaults just like xdiff, pretty plain.
+   _showOpts[ SHOW_TOOLBAR ] = false;
+   _showOpts[ SHOW_LINE_NUMBERS ] = false;
+   _showOpts[ SHOW_MARKERS ] = false;
+   _showOpts[ SHOW_VERTICAL_LINE ] = false;
+   _showOpts[ SHOW_OVERVIEW ] = true;
+   _showOpts[ SHOW_FILENAMES ] = false;
+
+   //---------------------------------------------------------------------------
+
+   _tabWidth = 8;
+
+   //---------------------------------------------------------------------------
+
+   _commands[ CMD_DIFF_FILES_2 ] = "diff";
+   _commands[ CMD_DIFF_FILES_3 ] = "diff3";
+   _commands[ CMD_DIFF_DIRECTORIES ] = "diff -q -s";
+   _commands[ CMD_DIFF_DIRECTORIES_REC ] = "diff -q -s -r";
+
+   // "cmp -s" barfs on directories.
+   const char* editor = getenv( "EDITOR" );
+   if ( editor != 0 ) {
+      _commands[ CMD_EDIT ].setLatin1( editor );
+   }
+   else {
+      _commands[ CMD_EDIT ] = "vi";
+   }
+
+   //---------------------------------------------------------------------------
+
+   _commandSwitch[ CMDSW_FILES_IGNORE_TRAILING ] = "-b";
+   _commandSwitch[ CMDSW_FILES_IGNORE_WHITESPACE ] = "-w";
+   _commandSwitch[ CMDSW_FILES_IGNORE_CASE ] = "-i";
+   _commandSwitch[ CMDSW_FILES_IGNORE_BLANK_LINES ] = "-B";
+   _commandSwitch[ CMDSW_FILES_QUALITY_NORMAL ] = "";
+   _commandSwitch[ CMDSW_FILES_QUALITY_FASTEST ] = "-d";
+   _commandSwitch[ CMDSW_FILES_QUALITY_HIGHEST ] = "-H";
+         
+   //---------------------------------------------------------------------------
+
+   _overviewFileWidth = 20;
+   _overviewSepWidth = 14;
+   _verticalLinePos = 80;
+   
+   //---------------------------------------------------------------------------
+
+   _tags[ TAG_CONFLICT_SEPARATOR ] = ">>>>>>>>>>>>>>>>>>>> File %d";
+   _tags[ TAG_CONFLICT_END ] = "<<<<<<<<<<<<<<<<<<<<";
+   _tags[ TAG_CONDITIONAL_IF ] = "#if defined( %s )";
+   _tags[ TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
+   _tags[ TAG_CONDITIONAL_ELSE ] = "#else";
+   _tags[ TAG_CONDITIONAL_ENDIF ] = "#endif";
+
+   //---------------------------------------------------------------------------
+
+   _clipboardFormat = QString("%L: %s");
+
    _ignoreFile = IGNORE_NONE;
-
-   // Initialize to defaults.
-   XxDefaultsParser defaultsParser;
-   parse( defaultsParser );
-}
-
-//------------------------------------------------------------------------------
-//
-const char* XxResources::getResourceName( Resource res )
-{
-   XX_CHECK( int( RESOURCE_FIRST ) <= res && res <= int( RESOURCE_LAST ) );
-   return mapStrings[ int( res ) ]._name;
-}
-
-//------------------------------------------------------------------------------
-//
-const char* XxResources::getResourceDoc( Resource res )
-{
-   XX_CHECK( int( RESOURCE_FIRST ) <= res && res <= int( RESOURCE_LAST ) );
-   return mapStrings[ int( res ) ]._doc;
-}
-
-//------------------------------------------------------------------------------
-//
-XxResources::Resource XxResources::getResourceId( const char* resname )
-{
-   int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
-   for ( int ii = 0; ii < nbres; ++ii ) {
-      if ( ::strcmp( mapStrings[ XxResources::Resource( ii ) ]._name, 
-                     resname ) == 0 ) {
-         return XxResources::Resource( XxResources::RESOURCE_FIRST + ii );
-      }
-   }
-   return RESOURCE_LAST;
-}
-
-//------------------------------------------------------------------------------
-//
-bool XxResources::checkResourcesDoc() const
-{
-   std::ostream& os = std::cerr;
-   bool err = false;
-   int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
-   for ( int ii = 0; ii < nbres; ++ii ) {
-      if ( mapStrings[ XxResources::Resource( ii ) ]._res != ii ) {
-         os << "Error in resource " << ii << " : " 
-            << mapStrings[ XxResources::Resource( ii ) ]._name << std::endl;
-      }
-   }
-   return err;
 }
 
 //------------------------------------------------------------------------------
@@ -1645,123 +271,150 @@ XxResources::~XxResources()
 
 //------------------------------------------------------------------------------
 //
-bool XxResources::query( 
-   XxResourcesParser&    parser,   
-   XxResources::Resource resource,
-   QString&              value
+void XxResources::setPreferredGeometry( const QRect& geometry )
+{
+   _preferredGeometry = geometry;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setMaximize( bool fs )
+{
+   _maximize = fs;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::setAccelerator( XxAccel accel, const QString& val )
+{
+   int accelval;
+   if ( XxAccelUtil::read( val, accelval ) ) {
+      _accelerators[ int(accel) ] = accelval;
+      emit changed();
+      return true;
+   }
+   return false; // Parse error for accelerator string.
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::setFontApp( const QString& val )
+{
+   _fontApp.setRawName( val );
+   emit changed();
+   return true; // never generates error.
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::setFontApp( const QFont& font )
+{
+   _fontApp = font;
+   emit changed();
+   return true; // never generates error.
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::setFontText( const QString& val )
+{
+   _fontText.setRawName( val );
+   emit changed();
+   return true; // never generates error.
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::setFontText( const QFont& font )
+{
+   _fontText = font;
+   emit changed();
+   return true; // never generates error.
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setCommand( XxCommand cmdId, const QString& t ) 
+{
+   _commands[ int(cmdId) ] = t;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setCommandSwitch(
+   XxCommandSwitch   cmdId,
+   const QString& val
+)
+{
+   _commandSwitch[ int(cmdId) ] = val;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::isCommandSwitch(
+   XxCommand       cmdId,
+   XxCommandSwitch optId
 ) const
 {
-   return parser.query( resource, mapStrings[ resource ]._name, value );
+   QString cmd = getCommand( cmdId );
+   QString opt = getCommandSwitch( optId );
+   return XxOptionsDialog::isInCommand( cmd, opt );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxResources::parse( XxResourcesParser& parser )
+void XxResources::setCommandSwitch( 
+   XxCommand       cmdId,
+   XxCommandSwitch optId,
+   bool            setit
+)
 {
-   QString val;
+   QString cmd = getCommand( cmdId );
+   QString opt = getCommandSwitch( optId );
 
-   if ( query( parser, PREFERRED_GEOMETRY, val ) ) {
-      readGeometry( val, _preferredGeometry );
+   if ( setit == true ) {
+      XxOptionsDialog::addToCommand( cmd, opt );
    }
-
-   for ( int ii = 0; ii < ACCEL_LAST - ACCEL_FIRST; ++ii ) {
-      if ( query( parser, Resource(ii + ACCEL_FIRST), val ) ) {
-         readAccelerator( val, _accelerators[ ii ] );
-      }
+   else {
+      XxOptionsDialog::removeFromCommand( cmd, opt );
    }
 
-   for ( int ii = 0; ii < COLOR_LAST - COLOR_FIRST; ++ii ) {
-      if ( query( parser, Resource(ii + COLOR_FIRST), val ) ) {
-         readColor( val, _colors[ ii ] );
-      }
-   }
-
-   if ( query( parser, FONT_APP, val ) ) {
-      _fontApp.setRawName( val );
-   }
-   if ( query( parser, FONT_TEXT, val ) ) {
-      _fontText.setRawName( val );
-   }
-
-   for ( int ii = 0; ii < BOOL_LAST - BOOL_FIRST; ++ii ) {
-      if ( query( parser, Resource(ii + BOOL_FIRST), val ) ) {
-         readBoolean( val, _boolOpts[ ii ] );
-      }
-   }
-
-   if ( query( parser, TAB_WIDTH, val ) ) {
-      _tabWidth = atoi( val );
-   }
-
-   for ( int ii = 0; ii < COMMAND_LAST - COMMAND_FIRST; ++ii ) {
-      if ( query( parser, Resource(ii + COMMAND_FIRST), val ) ) {
-         _commands[ ii ] = val;
-      }
-   }
-
-   for ( int ii = 0; ii < CMDOPT_LAST - CMDOPT_FIRST; ++ii ) {
-      if ( query( parser, Resource(ii + CMDOPT_FIRST), val ) ) {
-         _commandOptions[ ii ] = val;
-      }
-   }
-
-   for ( int ii = 0; ii < TAG_LAST - TAG_FIRST; ++ii ) {
-      if ( query( parser, Resource(ii + TAG_FIRST), val ) ) {
-         _tags[ ii ] = val;
-      }
-   }
-
-   if ( query( parser, OVERVIEW_FILE_WIDTH, val ) ) {
-      _overviewFileWidth = atoi( val );
-   }
-   if ( query( parser, OVERVIEW_SEP_WIDTH, val ) ) {
-      _overviewSepWidth = atoi( val );
-   }
-   if ( query( parser, VERTICAL_LINE_POS, val ) ) {
-      _verticalLinePos = atoi( val );
-   }
-   if ( query( parser, CLIPBOARD_TEXT_FORMAT, val ) ) {
-      _clipboardTextFormat = val;
-   }
-   
-}   
-
-//------------------------------------------------------------------------------
-//
-const QString& XxResources::getCommand( Resource cmdId ) const
-{
-   int id = int( cmdId ) - int( COMMAND_FIRST );
-   XX_CHECK( id < int(COMMAND_LAST) - int(COMMAND_FIRST) );
-   return _commands[ id ];
+   setCommand( cmdId, cmd );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setCommand( Resource cmdId, const QString& t ) 
+void XxResources::toggleCommandSwitch( 
+   XxCommand       cmdId,
+   XxCommandSwitch optId
+)
 {
-   int id = int( cmdId ) - int( COMMAND_FIRST );
-   XX_CHECK( id < int(COMMAND_LAST) - int(COMMAND_FIRST) );
-   _commands[ id ] = t;
+   QString cmd = getCommand( cmdId );
+   QString opt = getCommandSwitch( optId );
+
+   if ( ! XxOptionsDialog::isInCommand( cmd, opt ) ) {
+      XxOptionsDialog::addToCommand( cmd, opt );
+   }
+   else {
+      XxOptionsDialog::removeFromCommand( cmd, opt );
+   }
+
+   setCommand( cmdId, cmd );
 }
 
 //------------------------------------------------------------------------------
 //
-const QString& XxResources::getCommandOption( Resource cmdId ) const
-{
-   int id = int( cmdId ) - int( CMDOPT_FIRST );
-   XX_CHECK( id < int(CMDOPT_LAST) - int(CMDOPT_FIRST) );
-   return _commandOptions[ id ];
-}
-
-//------------------------------------------------------------------------------
-//
-XxResources::Quality XxResources::getQuality( const QString& command ) const
+XxQuality XxResources::getQuality( const QString& command ) const
 {
    switch ( XxOptionsDialog::isInCommand( 
       command,
-      getCommandOption( CMDOPT_FILES_QUALITY_NORMAL ),
-      getCommandOption( CMDOPT_FILES_QUALITY_FASTEST ),
-      getCommandOption( CMDOPT_FILES_QUALITY_HIGHEST )
+      getCommandSwitch( CMDSW_FILES_QUALITY_NORMAL ),
+      getCommandSwitch( CMDSW_FILES_QUALITY_FASTEST ),
+      getCommandSwitch( CMDSW_FILES_QUALITY_HIGHEST )
    ) ) {
       case 1: return QUALITY_NORMAL;
       case 2: return QUALITY_FASTEST;
@@ -1775,11 +428,11 @@ XxResources::Quality XxResources::getQuality( const QString& command ) const
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setQuality( QString& command, Quality quality ) const
+void XxResources::setQuality( QString& command, XxQuality quality ) const
 {
-   QString opt1 = getCommandOption( CMDOPT_FILES_QUALITY_NORMAL );
-   QString opt2 = getCommandOption( CMDOPT_FILES_QUALITY_FASTEST );
-   QString opt3 = getCommandOption( CMDOPT_FILES_QUALITY_HIGHEST );
+   QString opt1 = getCommandSwitch( CMDSW_FILES_QUALITY_NORMAL );
+   QString opt2 = getCommandSwitch( CMDSW_FILES_QUALITY_FASTEST );
+   QString opt3 = getCommandSwitch( CMDSW_FILES_QUALITY_HIGHEST );
 
    switch ( quality ) {
       case QUALITY_NORMAL: {
@@ -1796,476 +449,130 @@ void XxResources::setQuality( QString& command, Quality quality ) const
 
 //------------------------------------------------------------------------------
 //
-bool XxResources::isCommandOption( Resource cmdId, Resource cmdOptionId ) const
+void XxResources::setTag( XxTag tagId, const QString& tag )
 {
-   QString cmd = getCommand( cmdId );
-   QString opt = getCommandOption( cmdOptionId );
-
-   return XxOptionsDialog::isInCommand( cmd, opt );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxResources::setCommandOption( 
-   Resource cmdId,
-   Resource cmdOptionId,
-   bool     setit
-)
-{
-   QString cmd = getCommand( cmdId );
-   QString opt = getCommandOption( cmdOptionId );
-
-   if ( setit == true ) {
-      XxOptionsDialog::addToCommand( cmd, opt );
-   }
-   else {
-      XxOptionsDialog::removeFromCommand( cmd, opt );
-   }
-
-   setCommand( cmdId, cmd );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxResources::toggleCommandOption( 
-   Resource cmdId,
-   Resource cmdOptionId
-)
-{
-   QString cmd = getCommand( cmdId );
-   QString opt = getCommandOption( cmdOptionId );
-
-   if ( ! XxOptionsDialog::isInCommand( cmd, opt ) ) {
-      XxOptionsDialog::addToCommand( cmd, opt );
-   }
-   else {
-      XxOptionsDialog::removeFromCommand( cmd, opt );
-   }
-
-   setCommand( cmdId, cmd );
-}
-
-//------------------------------------------------------------------------------
-//
-const QString& XxResources::getTag( Resource cmdId ) const
-{
-   int id = int( cmdId ) - int( TAG_FIRST );
-   XX_CHECK( id < int(TAG_LAST) - int(TAG_FIRST) );
-   return _tags[ id ];
+   _tags[ int(tagId) ] = tag;
+   emit changed();
 }
 
 //------------------------------------------------------------------------------
 //
 void XxResources::setColor(
-   const Resource resource,
-   const QColor&  color
+   const XxColor  colorType,
+   const bool     fore,
+   const QString& colorstr
 )
 {
-   int i = int(resource) - int(COLOR_FIRST);
-   XX_CHECK( i < int(COLOR_LAST) - int(COLOR_FIRST) );
-   _colors[ i ] = color;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxResources::getLineColorType(
-   const XxLine& line,
-   const XxFno   no,
-   Resource&     dtype,
-   Resource&     dtypeSup
-) const
-{
-   if ( _ignoreFile == IGNORE_NONE ) {
-      getLineColorTypeStd( line, line.getType(), no, dtype, dtypeSup );
+   if ( fore ) {
+      _foreColors[ int(colorType) ].setNamedColor( colorstr );
    }
    else {
-      if ( no == (_ignoreFile - 1) ) {
-         dtype = dtypeSup = COLOR_BACK_IGNORED;
-      }
-      else {
-         XxLine::Type newType = 
-            XxLine::_ignoreConvertTables[ int(_ignoreFile) ][ line.getType() ];
-         getLineColorTypeStd( line, newType, no, dtype, dtypeSup );
-      }
+      _backColors[ int(colorType) ].setNamedColor( colorstr );
    }
+   emit changed();
 }
 
 //------------------------------------------------------------------------------
 //
-bool XxResources::getLineColorIfSelected(
-   const XxLine& line,
-   const XxFno   no,
-   Resource&     dtype,
-   Resource&     dtypeSup
-) const
+void XxResources::setColor(
+   const XxColor colorType,
+   const bool    fore,
+   const QColor& color
+)
 {
-   XxLine::Selection sel = line.getSelection();
-   if ( sel == XxLine::SEL1 ||
-        sel == XxLine::SEL2 ||
-        sel == XxLine::SEL3 ) {
-
-      if ( XxFno(sel) == no ) {
-         dtype = COLOR_BACK_SELECTED;
-         dtypeSup = COLOR_BACK_SELECTED_SUP;
-         return true;
-      }
-      else if ( 
-         ( ( line.getType() == XxLine::DELETE_1 || 
-             line.getType() == XxLine::DIFF_1 ||
-             line.getType() == XxLine::INSERT_1 ) && 
-           no != 0 && int(sel) != XxLine::SEL1 ) ||
-
-         ( ( line.getType() == XxLine::DELETE_2 || 
-             line.getType() == XxLine::DIFF_2 || 
-             line.getType() == XxLine::INSERT_2 ) &&
-           no != 1 && int(sel) != XxLine::SEL2 ) ||
-
-         ( ( line.getType() == XxLine::DELETE_3 || 
-             line.getType() == XxLine::DIFF_3 ||
-             line.getType() == XxLine::INSERT_3 ) && 
-           no != 2 && int(sel) != XxLine::SEL3 ) 
-      ) {
-         // For regions that are not selected but whose text is the same as the
-         // ones that are selected, color as selected as well.
-         dtype = COLOR_BACK_SELECTED;
-         dtypeSup = COLOR_BACK_SELECTED_SUP;
-         return true;
-      }
-      else {
-         dtype = COLOR_BACK_DELETED;
-         dtypeSup = COLOR_BACK_DELETED_SUP;
-         return true;
-      }
+   if ( fore ) {
+      _foreColors[ int(colorType) ] = color;
    }
-   else if ( sel == XxLine::NEITHER ) {
-      dtype = COLOR_BACK_DELETED;
-      dtypeSup = COLOR_BACK_DELETED_SUP;
-      return true;
+   else {
+      _backColors[ int(colorType) ] = color;
    }
-   // else
-   return false;
+   emit changed();
 }
 
 //------------------------------------------------------------------------------
 //
-void XxResources::getLineColorTypeStd(
-   const XxLine&      line,
-   const XxLine::Type newType,
-   const XxFno        no,
-   Resource&          dtype,
-   Resource&          dtypeSup
-) const
+void XxResources::setBoolOpt( const XxBoolOpt opt, const bool value )
 {
-   if ( getLineColorIfSelected( line, no, dtype, dtypeSup ) ) {
-      return;
-   }
-   // else
+   XX_ASSERT( 0 <= opt && opt < BOOL_LAST );
+   _boolOpts[ int(opt) ] = value;
 
-   int lno = line.mapTypeToFileNo( newType );
-
-   switch ( newType ) {
-
-      case XxLine::SAME: {
-         dtype = dtypeSup = COLOR_BACK_SAME;
-         return;
-      }
-
-      case XxLine::DIFF_1: 
-      case XxLine::DIFF_2: 
-      case XxLine::DIFF_3: {
-         if ( no == lno ) {
-            if ( line.getLineNo(no) == -1 ) {
-               dtype = dtypeSup = COLOR_BACK_DIFF_ONE_NONLY;
-               return;
-            }
-            else if ( line.getLineNo((no+1)%3) == -1 ) {
-               dtype = dtypeSup = COLOR_BACK_DIFF_ONE_ONLY;
-               return;
-            }
-            else {
-               dtype = COLOR_BACK_DIFF_ONE;
-               dtypeSup = COLOR_BACK_DIFF_ONE_SUP;
-               return;
-            }
-         }
-         else {
-            if ( line.getLineNo(no) == -1 ) {
-               dtype = dtypeSup = COLOR_BACK_DIFF_TWO_NONLY;
-               return;
-            }
-            else if ( line.getLineNo((no+1)%3) == -1 ) {
-               dtype = dtypeSup = COLOR_BACK_DIFF_TWO_ONLY;
-               return;
-            }
-            else {
-               dtype = COLOR_BACK_DIFF_TWO;
-               dtypeSup = COLOR_BACK_DIFF_TWO_SUP;
-               return;
-            }
-         }
-      }
-
-      case XxLine::DELETE_1: 
-      case XxLine::DELETE_2:
-      case XxLine::DELETE_3: {
-         if ( no == lno ) {
-            dtype = dtypeSup = COLOR_BACK_DELETE_BLANK;
-            return;
-         }
-         else {
-            dtype = dtypeSup = COLOR_BACK_DELETE;
-            return;
-         }
-      }
-
-      case XxLine::INSERT_1:
-      case XxLine::INSERT_2:
-      case XxLine::INSERT_3: {
-         if ( no == lno ) {
-            dtype = dtypeSup = COLOR_BACK_INSERT;
-            return;
-         }
-         else {
-            dtype = dtypeSup = COLOR_BACK_INSERT_BLANK;
-            return;
-         }
-      }
-
-      case XxLine::DIFF_ALL: {
-         if ( line.getLineNo(no) == -1 ) {
-            dtype = dtypeSup = COLOR_BACK_DIFF_ALL_NONLY;
-            return;
-         }
-         else if ( line.getLineNo((no+1)%3) == -1 &&
-                   line.getLineNo((no+2)%3) == -1 ) {
-            dtype = dtypeSup = COLOR_BACK_DIFF_ALL_ONLY;
-            return;
-         }
-         else {
-            dtype = COLOR_BACK_DIFF_ALL;
-            dtypeSup = COLOR_BACK_DIFF_ALL_SUP;
-            return;
-         }
-      }
-
-      case XxLine::DIFFDEL_1:
-      case XxLine::DIFFDEL_2:
-      case XxLine::DIFFDEL_3: {
-         if ( no == lno ) {
-            dtype = dtypeSup = COLOR_BACK_DIFFDEL_BLANK;
-            return;
-         }
-         // else
-         if ( line.getLineNo(no) == -1 ) {
-            dtype = dtypeSup = COLOR_BACK_DIFFDEL_NONLY;
-            return;
-         }
-         else if ( line.getLineNo((no+1)%3) == -1 &&
-                   line.getLineNo((no+2)%3) == -1 ) {
-            dtype = dtypeSup = COLOR_BACK_DIFFDEL_ONLY;
-            return;
-         }
-         else {
-            dtype = COLOR_BACK_DIFFDEL;
-            dtypeSup = COLOR_BACK_DIFFDEL_SUP;
-            return;
-         }
-      }
-
-      case XxLine::DIRECTORIES: {
-         dtype = dtypeSup = COLOR_BACK_DIRECTORIES;
-         return;
-      }
-   }
-
-   dtype = dtypeSup = COLOR_BACK_SAME; // unreached.
+   emit changed();
 }
 
 //------------------------------------------------------------------------------
 //
-void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
+bool XxResources::toggleBoolOpt( const XxBoolOpt opt )
 {
-   QString val;
-   XxDefaultsParser defaults;
-
-   QRect curGeometry = app->getMainWindowGeometry();
-   QRect defGeometry;
-   if ( query( defaults, PREFERRED_GEOMETRY, val ) ) {
-      readGeometry( val, defGeometry );
-   }
-   if ( curGeometry != defGeometry ) {
-      writeDocAttrib( this, os, PREFERRED_GEOMETRY );
-      writeGeometry( os, curGeometry );
-      os << std::endl << std::endl;
-   }
-
-   for ( int ii = 0; ii < ACCEL_LAST - ACCEL_FIRST; ++ii ) {
-      int accel = 0;
-      if ( query( defaults, Resource(ii + ACCEL_FIRST), val ) ) {
-         readAccelerator( val, accel );
-      }
-      if ( accel != _accelerators[ ii ] ) { 
-         writeDocAttrib( this, os, Resource(ii + ACCEL_FIRST) );
-         writeAccelerator( os, _accelerators[ ii ] );
-         os << std::endl << std::endl;
-      }
-   }
-
-   for ( int ii = 0; ii < COLOR_LAST - COLOR_FIRST; ++ii ) {
-      QColor color;
-      if ( query( defaults, Resource(ii + COLOR_FIRST), val ) ) {
-         readColor( val, color );
-      }
-      if ( color != _colors[ ii ] ) {
-         writeDocAttrib( this, os, Resource(ii + COLOR_FIRST) );
-         writeColor( os, _colors[ ii ] );
-         os << std::endl << std::endl;
-      }
-   }
-
-   {
-      QFont dfont;
-      if ( query( defaults, FONT_APP, val ) ) {
-         dfont.setRawName( val );
-      }
-      if ( dfont != _fontApp ) {
-         writeDocAttrib( this, os, FONT_APP );
-         os << _fontApp.rawName();
-      }
-   }
-
-   {
-      QFont dfont;
-      if ( query( defaults, FONT_TEXT, val ) ) {
-         dfont.setRawName( val );
-      }
-      if ( dfont != _fontText ) {
-         writeDocAttrib( this, os, FONT_TEXT );
-         os << _fontText.rawName();
-         os << std::endl << std::endl;
-      }
-   }
-
-   for ( int ii = 0; ii < BOOL_LAST - BOOL_FIRST; ++ii ) {
-      bool dbool;
-      if ( query( defaults, Resource(ii + BOOL_FIRST), val ) ) {
-         readBoolean( val, dbool );
-      }
-      if ( dbool != _boolOpts[ ii ] ) {
-         writeDocAttrib( this, os, Resource(ii + BOOL_FIRST) );
-         writeBoolean( os, _boolOpts[ ii ] );
-         os << std::endl << std::endl;
-      }
-   }
-
-   uint dtw = 8;
-   if ( query( defaults, TAB_WIDTH, val ) ) {
-      dtw = atoi( val );
-   }
-
-   if ( dtw != _tabWidth ) {
-      writeDocAttrib( this, os, TAB_WIDTH );
-      os << _tabWidth;
-      os << std::endl << std::endl;
-   }
-
-   for ( int ii = 0; ii < COMMAND_LAST - COMMAND_FIRST; ++ii ) {
-      query( defaults, Resource(ii + COMMAND_FIRST), val );
-      if ( val != _commands[ ii ] ) {
-         writeDocAttrib( this, os, Resource(ii + COMMAND_FIRST) );
-         os << _commands[ ii ];
-         os << std::endl << std::endl;
-      }
-   }
-
-   for ( int ii = 0; ii < CMDOPT_LAST - CMDOPT_FIRST; ++ii ) {
-      query( defaults, Resource(ii + CMDOPT_FIRST), val );
-      if ( val != _commandOptions[ ii ] ) {
-         writeDocAttrib( this, os, Resource(ii + CMDOPT_FIRST) );
-         os << _commandOptions[ ii ];
-         os << std::endl << std::endl;
-      }
-   }
-
-   for ( int ii = 0; ii < TAG_LAST - TAG_FIRST; ++ii ) {
-      query( defaults, Resource(ii + TAG_FIRST), val );
-      if ( val != _tags[ ii ] ) {
-         writeDocAttrib( this, os, Resource(ii + TAG_FIRST) );
-         os << _tags[ ii ];
-         os << std::endl << std::endl;
-      }
-   }
-
-   {
-      uint ofw = 0;
-      if ( query( defaults, OVERVIEW_FILE_WIDTH, val ) ) {
-         ofw = atoi( val );
-      }
-      if ( ofw != _overviewFileWidth ) {
-         writeDocAttrib( this, os, OVERVIEW_FILE_WIDTH );
-         os << _overviewFileWidth;
-         os << std::endl << std::endl;
-      }
-   }
-
-   {
-      uint ofw = 0;
-      if ( query( defaults, OVERVIEW_SEP_WIDTH, val ) ) {
-         ofw = atoi( val );
-      }
-      if ( ofw != _overviewSepWidth ) {
-         writeDocAttrib( this, os, OVERVIEW_SEP_WIDTH );
-         os << _overviewSepWidth;
-         os << std::endl << std::endl;
-      }
-   }
-
-   {
-      uint ofw = 0;
-      if ( query( defaults, VERTICAL_LINE_POS, val ) ) {
-         ofw = atoi( val );
-      }
-      if ( ofw != _overviewSepWidth ) {
-         writeDocAttrib( this, os, VERTICAL_LINE_POS );
-         os << _overviewSepWidth;
-         os << std::endl << std::endl;
-      }
-   }
-
-   {
-      query( defaults, CLIPBOARD_TEXT_FORMAT, val );
-      if ( val != _clipboardTextFormat ) {
-         writeDocAttrib( this, os, CLIPBOARD_TEXT_FORMAT );
-         os << _clipboardTextFormat;
-         os << std::endl << std::endl;
-      }
-   }
-
-}   
+   int ibool = int(opt);
+   _boolOpts[ ibool ] = ! _boolOpts[ ibool ];
+   emit changed();
+   return _boolOpts[ ibool ];
+}
 
 //------------------------------------------------------------------------------
 //
-void XxResources::listResources( std::ostream& os ) const
+void XxResources::setShowOpt( const XxShowOpt opt, const bool value )
 {
-   XxDefaultsParser defaults;
-   
-   QString val;
-   for ( int ii = RESOURCE_FIRST; ii < RESOURCE_LAST; ++ii ) {
-      if ( query( defaults, Resource(ii), val ) ) {
-         writeDocAttrib( this, os, Resource(ii) );
-         os << val.latin1() << std::endl << std::endl;
-      }
-   }
-}   
-
-/*==============================================================================
- * CLASS XxResourcesParser
- *============================================================================*/
+   _showOpts[ int(opt) ] = value;
+   emit changed();
+}
 
 //------------------------------------------------------------------------------
 //
-XxResourcesParser::~XxResourcesParser()
+bool XxResources::toggleShowOpt( const XxShowOpt opt )
 {
+   int ibool = int(opt);
+   _showOpts[ ibool ] = ! _showOpts[ ibool ];
+   emit changed();
+   return _showOpts[ ibool ];
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setTabWidth( uint tabWidth )
+{
+   _tabWidth = tabWidth;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setOverviewFileWidth( uint w )
+{
+   _overviewFileWidth = w;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setOverviewSepWidth( uint w )
+{
+   _overviewSepWidth = w;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setVerticalLinePos( uint vlinePos )
+{
+   _verticalLinePos = vlinePos;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setClipboardFormat( const QString& format )
+{
+   _clipboardFormat = format;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setIgnoreFile( XxIgnoreFile ignoreFile )
+{
+   _ignoreFile = ignoreFile;
+   emit changed();
 }
 
 XX_NAMESPACE_END

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 245 2001-10-03 19:45:40Z blais $
- * $Date: 2001-10-03 15:45:40 -0400 (Wed, 03 Oct 2001) $
+ * $Id: diffs.h 294 2001-10-21 07:27:43Z blais $
+ * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -202,7 +202,7 @@ public:
    // Returns the closest (floor) file line for the given display line.  The
    // actuallyEmpty parameter is set to true if that line is actually empty for
    // that file no.
-   XxFln getFileLine( 
+   XxFln getBufferLine( 
       XxFno no,
       XxDln lineNo,
       bool& actuallyEmpty
@@ -223,7 +223,8 @@ public:
    // Save merged with selected regions.  If there are still some unselected
    // regions it will return false but save anyway.
    bool save( 
-      std::ostream&                  os, 
+      const XxResources&             resources,
+      QTextStream&                   os, 
       const std::auto_ptr<XxBuffer>* files,
       const bool                     useConditionals,
       const bool                     removeEmptyConditionals,
@@ -233,7 +234,7 @@ public:
    // Save selected lines with an appropriate prefix.  Returns true if there
    // were some regions saved (false thus means an empty file).
    bool saveSelectedOnly( 
-      std::ostream& os, 
+      QTextStream&                   os, 
       const std::auto_ptr<XxBuffer>* files
    ) const;
 
@@ -257,8 +258,9 @@ public:
 
    // Initialize horizontal diffs for lines.
    void initializeHorizontalDiffs(
+      const bool                     ignoreHorizontalWhitespace,
       const std::auto_ptr<XxBuffer>* files,
-      const bool                   force = false
+      const bool                     force = false
    );
 
    // Automatically merge by performing selections on file1, assuming order

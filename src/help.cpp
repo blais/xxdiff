@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: help.cpp 291 2001-10-20 22:15:00Z blais $
+ * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -24,16 +24,12 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
+#include <version.h>
 #include <help.h>
 #include <line.h>
 #include <resources.h>
 
-/* always disable... this was useless and is now obsolete */
-#undef XX_USE_RUNTIME_HELP
-
-#ifndef XX_USE_RUNTIME_HELP
 #include <man.h>
-#endif
 
 #include <qdialog.h>
 #include <qmessagebox.h>
@@ -47,6 +43,8 @@
 #include <iostream>
 #include <stdio.h>
 
+// Pixmaps.
+#include "pixmaps/xxdiff.xpm"
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -119,171 +117,15 @@ XxAboutDialog::XxAboutDialog( QWidget* parent, QString& text ) :
       "About xxdiff.", text, QMessageBox::Information, 
       1, 0, 0, parent, 0, false 
    )
-{}
+{
+   QPixmap pm_xxdiff_logo( const_cast<const char**>( xxdiff_xpm ) );
+   setIconPixmap( pm_xxdiff_logo );
+}
 
 //------------------------------------------------------------------------------
 //
 void XxAboutDialog::done( int )
 {
-   delete this;
-}
-
-
-/*==============================================================================
- * LOCAL CLASS XxColorLegend
- *============================================================================*/
-
-// <summary> the color legend dialog </summary>
-
-class XxColorLegend : public QDialog {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxColorLegend( QWidget* parent );
-
-   // See base class.
-   virtual void accept();
-   
-private:
-
-   /*----- member functions -----*/
-
-   // Creates a label.
-   QLabel* createLabel( 
-      const QString& text, 
-      QColor&        fore,
-      QColor&        back,
-      const QFont&   font
-   );
-
-};
-
-//------------------------------------------------------------------------------
-//
-XxColorLegend::XxColorLegend( 
-   QWidget* parent
-) :
-   QDialog( parent )
-{
-   QVBoxLayout* toplay = new QVBoxLayout( this );
-   QLabel* l = new QLabel( "Color legend:", this );
-   l->adjustSize();
-   l->setMinimumHeight( l->height() + 10 );
-   toplay->addWidget( l );
-
-   const XxResources* resources = XxResources::getInstance();
-   const QFont& font = resources->getTextFont();
-   QColor fore, back;
-
-   const struct Expl {
-      XxResources::Resource _type;
-      const char*           _expl;
-   } explanations[] = {
-      { XxResources::COLOR_BACK_SAME,
-        " Identical text " },
-      { XxResources::COLOR_BACK_DIFF_ONE,
-        " Different in one file " },
-      { XxResources::COLOR_BACK_DIFF_ONE_SUP,
-        " Different in one file (shadowed) " },
-      { XxResources::COLOR_BACK_DIFF_ONE_ONLY,
-        " Different in one file (only text on lines) " },
-      { XxResources::COLOR_BACK_DIFF_ONE_NONLY,
-        " Different in one file (blank side)" },
-      { XxResources::COLOR_BACK_DIFF_TWO,
-        " Common text in two files only " },
-      { XxResources::COLOR_BACK_DIFF_TWO_SUP,
-        " Common text in two files only (shadowed) " },
-      { XxResources::COLOR_BACK_DIFF_TWO_ONLY,
-        " Common text in two files only (only text on lines) " },
-      { XxResources::COLOR_BACK_DIFF_TWO_NONLY,
-        " Common text in two files only (blank side) " },
-      { XxResources::COLOR_BACK_DELETE,
-        " Delete text (side with text) " },
-      { XxResources::COLOR_BACK_DELETE_BLANK,
-        " Delete text (blank side) " },
-      { XxResources::COLOR_BACK_INSERT,
-        " Insert text (side with text) " },
-      { XxResources::COLOR_BACK_INSERT_BLANK,
-        " Insert text (blank side) " },
-      { XxResources::COLOR_BACK_DIFF_ALL,
-        " Different in all files " },
-      { XxResources::COLOR_BACK_DIFF_ALL_SUP,
-        " Different in all files (shadowed) " },
-      { XxResources::COLOR_BACK_DIFF_ALL_ONLY,
-        " Different in all files (only text on lines) " },
-      { XxResources::COLOR_BACK_DIFF_ALL_NONLY,
-        " Different in all files (blank side) " },
-      { XxResources::COLOR_BACK_DIFFDEL,
-        " Different and delete text " },
-      { XxResources::COLOR_BACK_DIFFDEL_SUP,
-        " Different and delete text (shadowed) " },
-      { XxResources::COLOR_BACK_DIFFDEL_ONLY,
-        " Different and delete text (only text on lines) " },
-      { XxResources::COLOR_BACK_DIFFDEL_NONLY,
-        " Different and delete text (blank side) " },
-      { XxResources::COLOR_BACK_DIFFDEL_BLANK,
-        " Different and delete text (empty side) " },
-      { XxResources::COLOR_BACK_SELECTED,
-        " Selected text " },
-      { XxResources::COLOR_BACK_SELECTED_SUP,
-        " Selected text (shadowed) " },
-      { XxResources::COLOR_BACK_DELETED,
-        " Deleted text " },
-      { XxResources::COLOR_BACK_DELETED_SUP,
-        " Deleted text (shadowed) " },
-      { XxResources::COLOR_BACK_DIRECTORIES,         
-        " Directories in directory diffs " },
-      { XxResources::COLOR_BACK_MERGED_UNDECIDED,
-        " Merged view undecided text " },
-      { XxResources::COLOR_BACK_MERGED_DECIDED_1,
-        " Merged view decided text, file 1 " },
-      { XxResources::COLOR_BACK_MERGED_DECIDED_2,
-        " Merged view decided text, file 2 " },
-      { XxResources::COLOR_BACK_MERGED_DECIDED_3,
-        " Merged view decided text, file 3 " },
-
-   };
-   const int nbExplanations = 28;
-   for ( int ii = 0; ii < nbExplanations; ++ii ) {
-      resources->getRegionColor( explanations[ii]._type, back, fore );
-      l = createLabel( explanations[ii]._expl, fore, back, font );
-      toplay->addWidget( l );
-   }
-
-   QPushButton* b1 = new QPushButton( "Close", this );
-   toplay->addWidget( b1 );
-   connect( b1, SIGNAL(clicked()), this, SLOT(accept()) );
-}
-
-//------------------------------------------------------------------------------
-//
-QLabel* XxColorLegend::createLabel( 
-   const QString& text, 
-   QColor&        fore,
-   QColor&        back,
-   const QFont&   font
-) 
-{
-   QLabel* l = new QLabel( text, this );
-   QColorGroup g;
-   g.setColor( QColorGroup::Foreground, fore );
-   g.setColor( QColorGroup::Background, back );
-   QPalette p( g, g, g );
-   l->setPalette( p );
-   l->setFont( font );
-   l->adjustSize();
-   l->setMinimumHeight( l->height() + 4 );
-   return l;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxColorLegend::accept()
-{
-   QDialog::accept();
    delete this;
 }
 
@@ -307,7 +149,7 @@ public:
 
    // Returns a newly allocated block of text containing the manual page text.
    // Ownership is passed to the caller (you must delete).
-   static QString getManualText( const QString& command );
+   static QString getManualText( const QString& command = QString::null );
 
 };
 
@@ -341,44 +183,10 @@ void XxManPageDialog::accept()
 
 //------------------------------------------------------------------------------
 //
-#ifndef XX_USE_RUNTIME_HELP
 QString XxManPageDialog::getManualText( const QString& /*command*/ )
 {
    return QString(manText);
 }
-#else
-QString XxManPageDialog::getManualText( const QString& command )
-{
-   XX_ASSERT( !command.isEmpty() );
-
-   // This code fetched from mgdiff.
-   FILE* f;
-   char* retval;
-   int size, bytes;
-   char buffer[BUFSIZ];
-   
-   if ( ( f = popen( command.latin1(), "r" ) ) == 0 ) {
-      return 0;
-   }
-   
-   for ( size = 0, retval = 0; !feof (f); ) {
-      if ( ( bytes = fread( (void*)buffer, 1, BUFSIZ, f ) ) != 0 ) {
-         if ( size ) {
-            retval = (char *) realloc ((void *) retval, size + bytes + 1);
-         }
-         else {
-            retval = (char *) malloc (bytes + 1);
-         }
-         memcpy( (void*)&retval[size], (void*)buffer, bytes );
-         retval[size + bytes] = '\0';
-         size += bytes;
-      }
-   }
-   
-   pclose( f );
-   return retval;
-}
-#endif
 
 }
 
@@ -411,19 +219,9 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
 
 //------------------------------------------------------------------------------
 //
-QDialog* XxHelp::getColorLegend( QWidget* parent )
-{
-   QDialog* box = new XxColorLegend( parent );
-   return box;
-}
-
-//------------------------------------------------------------------------------
-//
 QDialog* XxHelp::getManPageDialog( QWidget* parent )
 {
-   const XxResources* resources = XxResources::getInstance();
-   const QString command = resources->getCommand( XxResources::COMMAND_MANUAL );
-   QString manualText = XxManPageDialog::getManualText( command );
+   QString manualText = XxManPageDialog::getManualText();
    if ( !manualText.isEmpty() ) {
       QDialog* box = new XxManPageDialog( parent, manualText );
       return box;
@@ -453,11 +251,9 @@ Options: \n\
    -v, --version               Show the program version and compilation \n\
                                options.\n\
 ";
-#ifdef XX_USE_RCFILE
    os << "\
        --no-rcfile             Don't query rcfile resources (.xxdiffrc).\n\
 ";
-#endif
    os << "\
        --list-resources        Lists all the supported resources and default \n\
                                values.\n\
@@ -507,35 +303,8 @@ void XxHelp::dumpVersion( QTextStream& os )
 #ifdef XX_LINKSTATIC
    os << " linkstatic";
 #endif
-#ifdef XX_USE_RCFILE
    os << " rcfile";
-#endif
-#ifdef XX_USE_NAMESPACE
-   os << " namespace";
-#endif
-#ifdef XX_USE_RUNTIME_HELP
-   os << " runtime_help";
-#endif
-#if QT_VERSION < 220
-   os << " old-qt";
-#endif
    os << "." << endl;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxHelp::dumpResources( QTextStream& os )
-{
-   int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
-   for ( int ii = 0; ii < nbres; ++ii ) {
-      const QString doc =
-         XxResources::getResourceDoc( XxResources::Resource( ii ) );
-      if ( doc == "()" ) {
-         os << doc << endl;
-         os << XxResources::getResourceName( XxResources::Resource( ii ) );
-         os << endl << endl;
-      }
-   }   
 }
 
 XX_NAMESPACE_END

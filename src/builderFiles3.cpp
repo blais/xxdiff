@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles3.cpp 256 2001-10-08 02:29:13Z blais $
- * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
+ * $Id: builderFiles3.cpp 299 2001-10-23 03:28:01Z blais $
+ * $Date: 2001-10-22 23:28:01 -0400 (Mon, 22 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -410,8 +410,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    const char** out_args;
    XxUtil::splitArgs( cmd, out_args );
 
-   FILE* fp = XxUtil::spawnCommandWithOutput( out_args );
-   if ( fp == 0 ) {
+   FILE* fout;
+   FILE* ferr;
+   XxUtil::spawnCommandWithOutput( out_args, fout, ferr );
+   if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
    XxUtil::freeArgs( out_args );
@@ -426,7 +428,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    char buffer[BUFSIZ+1];
    int sno;
    XxFln f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
-   while ( fgets( buffer, BUFSIZ, fp ) != 0 ) {
+   while ( fgets( buffer, BUFSIZ, fout ) != 0 ) {
       XxLine::Type type;
       if ( parseDiffLine( type, buffer,
                           sno, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2 ) == true ) {
@@ -501,8 +503,13 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       }
    }
    
+   // Collect stderr.
+   while ( fgets( buffer, BUFSIZ, ferr ) != 0 ) {
+      errors << buffer << endl;
+   }
+
    // Saved error text.
-   XX_LOCAL_TRACE( "Errors" << _errors );
+   XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && ( fline3 == 1 ) &&
@@ -535,6 +542,9 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    if ( _status == 0 && foundDifferences == true ) {
       _status = 1;
    }
+
+   ::fclose( fout );
+   ::fclose( ferr );
 
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;

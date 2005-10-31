@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 243 2001-10-02 06:44:22Z blais $
- * $Date: 2001-10-02 02:44:22 -0400 (Tue, 02 Oct 2001) $
+ * $Id: merged.cpp 295 2001-10-21 18:39:14Z blais $
+ * $Date: 2001-10-21 14:39:14 -0400 (Sun, 21 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -114,15 +114,15 @@ void XxMergedText::drawContents( QPainter* pp )
 
    XxBuffer* file[3];
    for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
-      file[ii] = _app->getFile( ii );
+      file[ii] = _app->getBuffer( ii );
    }
    const XxDiffs* diffs = _app->getDiffs();
-   const XxResources* resources = XxResources::getInstance();
+   const XxResources& resources = _app->getResources();
 
    // If it is empty, erase the whole widget with blank color.
    if ( diffs == 0 ) {
       QColor backgroundColor = 
-         resources->getColor( XxResources::COLOR_BACKGROUND );
+         resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
@@ -136,12 +136,12 @@ void XxMergedText::drawContents( QPainter* pp )
    XxDln topLine = getTopLine();
    XxDln cursorLine = _app->getCursorLine();
    uint horizontalPos = _main->getHorizontalScrollbar()->value();
-   uint tabWidth = resources->getTabWidth();
+   uint tabWidth = resources.getTabWidth();
 
    // Should we set the clip region?
 
    // Font.
-   p.setFont( _app->getFont() );
+   p.setFont( resources.getFontText() );
    QFontMetrics fm = p.fontMetrics();
 
    // Don't draw background of chars since we'll draw first.
@@ -172,20 +172,18 @@ void XxMergedText::drawContents( QPainter* pp )
             QColor bcolor;
             QColor fcolor;
             if ( line.getType() == XxLine::SAME ) {
-               resources->getRegionColor(
-                  XxResources::COLOR_BACK_SAME, bcolor, fcolor
-               );
+               resources.getRegionColor( COLOR_SAME, bcolor, fcolor );
             }
             else {
-               XxResources::Resource res = XxResources::COLOR_BACKGROUND;
+               XxColor res = COLOR_BACKGROUND;
                // prevent warning
 
                switch ( no ) {
-                  case 0: res = XxResources::COLOR_BACK_MERGED_DECIDED_1; break;
-                  case 1: res = XxResources::COLOR_BACK_MERGED_DECIDED_2; break;
-                  case 2: res = XxResources::COLOR_BACK_MERGED_DECIDED_3; break;
+                  case 0: res = COLOR_MERGED_DECIDED_1; break;
+                  case 1: res = COLOR_MERGED_DECIDED_2; break;
+                  case 2: res = COLOR_MERGED_DECIDED_3; break;
                }
-               resources->getRegionColor( res, bcolor, fcolor );
+               resources.getRegionColor( res, bcolor, fcolor );
             }
             QBrush brush( bcolor );
             p.setPen( fcolor );
@@ -217,15 +215,15 @@ void XxMergedText::drawContents( QPainter* pp )
 
             QColor bcolor;
             QColor fcolor;
-            XxResources::Resource res = XxResources::COLOR_BACKGROUND;
+            XxColor res = COLOR_BACKGROUND;
             // warning
 
             switch ( no ) {
-               case 0: res = XxResources::COLOR_BACK_MERGED_DECIDED_1; break;
-               case 1: res = XxResources::COLOR_BACK_MERGED_DECIDED_2; break;
-               case 2: res = XxResources::COLOR_BACK_MERGED_DECIDED_3; break;
+               case 0: res = COLOR_MERGED_DECIDED_1; break;
+               case 1: res = COLOR_MERGED_DECIDED_2; break;
+               case 2: res = COLOR_MERGED_DECIDED_3; break;
             }
-            resources->getRegionColor( res, bcolor, fcolor );
+            resources.getRegionColor( res, bcolor, fcolor );
             QBrush brush( bcolor );
             p.setPen( fcolor );
 
@@ -242,9 +240,7 @@ void XxMergedText::drawContents( QPainter* pp )
          
          QColor bcolor;
          QColor fcolor;
-         resources->getRegionColor(
-            XxResources::COLOR_BACK_MERGED_UNDECIDED, bcolor, fcolor
-         );
+         resources.getRegionColor( COLOR_MERGED_UNDECIDED, bcolor, fcolor );
          QBrush brush( bcolor );
          p.setPen( fcolor );
 
@@ -264,7 +260,7 @@ void XxMergedText::drawContents( QPainter* pp )
       // Draw line cursor.
       if ( curLine == cursorLine ) {
          QColor cursorColor = 
-            resources->getColor( XxResources::COLOR_CURSOR );
+            resources.getColor( COLOR_CURSOR );
          p.setPen( cursorColor );
          p.drawRect( 0, prevy, w, y - prevy );
       }
@@ -275,7 +271,7 @@ void XxMergedText::drawContents( QPainter* pp )
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
       QColor backgroundColor = 
-         resources->getColor( XxResources::COLOR_BACKGROUND );
+         resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( x, y, w, h - y, brush );
    }
@@ -365,7 +361,7 @@ void XxMergedText::setCenterLine( XxDln lineNo )
 //
 void XxMergedText::mousePressEvent( QMouseEvent* event )
 {
-   const QFont& font = _app->getFont();
+   const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
    XxDln dlineno = event->y() / fm.lineSpacing();
 
@@ -386,7 +382,7 @@ void XxMergedText::mousePressEvent( QMouseEvent* event )
 void XxMergedText::mouseMoveEvent( QMouseEvent* event )
 {
    if ( _grab ) {
-      const QFont& font = _app->getFont();
+      const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
       XxDln dlineno = event->y() / fm.lineSpacing();
       setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
@@ -406,7 +402,7 @@ void XxMergedText::mouseReleaseEvent( QMouseEvent* /*event*/ )
 void XxMergedText::resizeEvent( QResizeEvent* /*ev*/ )
 {
    // Compute nb. display lines.
-   const QFont& font = _app->getFont();
+   const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
    _nbDisplayLines = contentsRect().height() / fm.lineSpacing() + 1;
 
@@ -532,12 +528,12 @@ XxMergedWindow::XxMergedWindow(
 ) :
    BaseClass( parent, name )
 {
-   const XxResources* resources = XxResources::getInstance();
+   const XxResources& resources = app->getResources();
 
    QPopupMenu* menu = new QPopupMenu;
    menu->insertItem( 
       "Close", this, SLOT(hide()),
-      resources->getAccelerator( XxResources::ACCEL_MERGED_CLOSE )
+      resources.getAccelerator( ACCEL_MERGED_CLOSE )
    );
 
    QMenuBar* m = menuBar();

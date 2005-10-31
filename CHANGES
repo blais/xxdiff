@@ -2,27 +2,148 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 256 2001-10-08 02:29:13Z blais $
+# $Id: CHANGES 302 2001-10-23 05:14:10Z blais $
 #
 
+ADVICE TO THE NORMAL CUSTOMER:  we are currently doing major renovations,
+please come back later, or stick with the latest stable release--1.13.
+--$Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+  
+
+
+Features remaining todo for 2.0 release:
+------------------------------
+
+   - make sure the pangrams are different
+
+   - put help for clipboard text format strings  on label tooltip
+
+   - make sure we don't require X connection to parse resources or cmdline args.
+
+   - change permissions checking to use QFileInfo instead of access and friends.
+     S_IF and access()
+    Example: 
+    QFileInfo fi( "/tmp/tonsils" );
+    if ( fi.permission( QFileInfo::WriteUser | QFileInfo::ReadGroup ) )
+        qWarning( "Tonsils can be changed by me, and the group can read them.");
+    if ( fi.permission( QFileInfo::WriteGroup | QFileInfo::WriteOther ) )
+        qWarning( "Danger! Tonsils can be changed by the group or others!" );
+
+   - XxResources::initializeXdiff() or initialize()
+     with cmdline switch to support original xdiff look, e.g. --xdiff
+     by default should have all the xxdiff goodies
+
+   - diff one perhaps should be renamed... sure enough, more documentation 
+     should be given for these, diffall is what is used normally...
+
+   - apply display box resets horizontal diffs...
+     options dialog has to update on resources changes...
+     ... figure out something with a second copy of the resources object.
+
+   - finish nice bitmaps for 2.0 release!!!
+
+   - review contents of app.h and resources.h and recategorize app.h stuff.
+
+   - use rich text for help, write single help file source in richetxt (html)
+
+   - fix rpm packaging for tmake, fix distribution script
+
+   - resources doc: a file, that is made into a string, can be output
+     for usage (--list-resources) and is in online documentation, etc.
+
+   - don't open X connection for parsing resources and command line.
+
+   - indicator for unselected regions remaining (above in overview area)
+
+   - document resources
+
+   - accumulate parser errors to a stream, then print it out, potentially.
+
+   - add more documentation to specific colors.
+
+   - for options dialog, on synchronize() we should really only update the
+     controls which haven't been changed.  how do we do that?  perhaps have it
+     work on a different resources object?
+
+
+
+
 Current development version:
+------------------------------
 
-  Current tasks:
-    - port to windoze using mingw32 and publish executable
-    - rename XxRcfileParser to XxResourceParser
-    - rewrite resource parser all with lex/yacc
-    - resource defaults are just another instance of the resources
-    - fix 'r' and 'D' options back
-    - remove _stringResParser from XxApp
+Version 1.15: (development snapshot)
 
-
-   * Removed the XxStringResParser
+   * Fixed bug under IRIX with endl output in --list-resources.
+   * Fixed bug with hidden files and recursive dirdiffs.
+   * Moved resourceParser to resParser.
+   * Fixed bugs with subprocess not being able to start, now getting error msg.
+   * Fixed line number resizing on text font change.
+   * Fixed [467697] bug with clipboard.
+   * Verified [463722] is fixed with the new parser.
+   * Ported directory reading to use QDir, which will port easily under Windows.
+   * Fixed bug [447051] with directory diffs.
+   * Added pangrams.
+   * Reorganized display dialog.
+   * Implemented font selection in display dialog.
+   * Insure that focus is on lineedit in search dialog [446125]
+   * Made sure that --list-resource redirected to file will be parsable [446109]
+   * Added FullScreen as a valid value for PrefGeometry resource [442547]
+   * fixed bug with dbg messages left in overview scrollbars code [456979]
+   * addressed issues: [442465], [441199], [441195], [462234]
+   * fixed bug with SHOW_TOOLBAR not being implemented [446123]
+   * fixed bug with setting the commands from options dialog.
+   * reviewed all FIXME comments, address all of the current changes
+   * reviewed all #if 0 blocks, address all 
+   * fix for parser which could not  be restarted it seems
+   * removed app font override.  let them users use that old font if they 
+     want sgi looks.
+   * removed XLFD warning by changing to a different XLFD but that generates 
+     the same font.
+   * Re-implemented the generated init file functionality.
+   * remove singleton b.s. from resources.
+   * remove all the autoconf b.s. files in the root,
+     change INSTALL file to my own install instructions, perhaps remove and
+     point to README file.
+   * remove ifdefs for version 220, xxdiff now requires 2.3.x
+     (sorry, it shouldn't be that hard to upgrade)
+   * added cheesy gif logo for about box for 2.0 rewrite
+   * fixed update bug with the options dialog.
+   * replaced accelUtil search with a sort + binary search op for speed.
+     We still cannot use QAccel::stringToKey, it crashes, but it looks from the
+     docs that Qt-3.0 will fix the problem.
+   * Finished new editing of colors and color legend.
+   * fixed color dialog choosing colors
+   * Lots of cleanup.
+   * New and improved color legend and editing: the legend is gone, and
+     the user interface to set the colors now displays with the text font,
+     as well as with the appropriate colors.
+   * fully removed dynamic 'manual'.  Manual will get compiled in.
+   * version is now in version.h
+   * removed old crap in resources.cpp
+   * worked on parser memory cleanliness
+   * move preferred_geometry to initgeometry or prefgeom
+   * removed all old autoconf-related files
+   * removed rcfileparser files.
+   * renamed XxRcfileParser to XxResourceParser
+   * Started moving to the new resources system.
+   * Finished full parser.
+   * Worked on parser, lots.
+   * Separated accelerator parsing into it's own compilation unit.
+   * Created new resource parser files.
+   * Removed unused line number background coloring code.
+   * Moved line color algorithm... in line class, where it belongs.
+   * Moved internal diff parser to Qt streams.
+   * Removed the XxStringResParser.
    * Cleaned up some of the privately declared exceptions.
+   * eradicated std::string and standardized on QString, except for converting
+     from an ostringstream.  we want only one type of string, and we can't
+     really eradicate QString because we use Qt.  besides it's not that bad and
+     all those string conversions are probably costing something.
 
 
 ------------------------------
 
-Version 1.14:
+Version 1.14: (development snapshot)
 
    * We're pretty much (almost) std::string-free at this point.
      I haven't addressed the many bug requests yet.
@@ -816,113 +937,33 @@ Version 1.0:
 Wishlist/ToDo todo TODO list:
 ------------------------------
 
+After 2.0:
+------------------------------
+
+  todo: perhaps send bug for the trolls:
+  - QString.setLatin1( txt, 0 ); doesn't initialize to a null string.
+
+   - enable internal GNU diff as a runtime option
+
+   - implement reading process output with QProcess
+     this will go for 3.0 port.
+
+ - port to Windows using the Qt Non-commercial license 3.0
+
+   - hysteresis for horizontal diffs
+
+   - implement tper-hunk ignore whitespace
+
+   - internal diff: must set status with correct values as external diff
+     this currently does not work with files being the same
+
+   - port to windoze using mingw32 and publish executable
+
+  -  show vertical line: advertise to toxik group after 2.0 comes out
 
 
 
 
-
-
-Martin,
-
-I would like to contribute a small patch that warns the user during a 'copy
-to' or 'save as' operation if the destination file is read-only (owner
-doesn't have write permission).
-I have been bitten by this several times as I use xxdiff to merge changes
-into a file that has been 'chmod -w' by CVS.   When I would select all my
-differences from each file and then do a 'Save as (left/right)', I wouldn't
-see any error popup telling me that the save could not be performed.
-Also, I was confused by the wording of the menu for copying files from left
-to/from right.  So I changed one word "on" to the word "to".
-
-In thinking about this for a few more minutes, I can imagine that my patch
-is not totally robust.  For example, what if the owner doesn't have write
-permission, but the group/world does have write permission and you are in
-the proper group...  Maybe you can think of a better way to check for the
-user's ability to write to a file.  Anyway, here is my patch for your
-consideration:
-
-# diff -u xxdiff-1.13/src/app.cpp xxdiff-1.13.wsg/src/app.cpp
---- xxdiff-1.13/src/app.cpp   Sat Jul  7 15:41:03 2001
-+++ xxdiff-1.13.wsg/src/app.cpp    Thu Aug 23 09:56:46 2001
-@@ -1116,11 +1116,11 @@
-          _resources->getAccelerator(
-XxResources::ACCEL_DIFF_FILES_AT_CURSOR )
-       );
-       _menuids[ ID_View_CopyLeftToRight ] = viewMenu->insertItem(
--         "Copy left file on right", this, SLOT(copyFileLeftToRight()),
-+         "Copy left file to right", this, SLOT(copyFileLeftToRight()),
-          _resources->getAccelerator( XxResources::ACCEL_COPY_LEFT_TO_RIGHT
-)
-       );
-       _menuids[ ID_View_CopyRightToLeft ] = viewMenu->insertItem(
--         "Copy right file on left", this, SLOT(copyFileRightToLeft()),
-+         "Copy right file to left", this, SLOT(copyFileRightToLeft()),
-          _resources->getAccelerator( XxResources::ACCEL_COPY_RIGHT_TO_LEFT
-)
-       );
-       _menuids[ ID_View_RemoveLeft ] = viewMenu->insertItem(
-@@ -2448,6 +2448,14 @@
-    // Check for file existence.
-    QFileInfo finfo( f );
-    if ( finfo.exists() ) {
-+      struct stat buf;
-+      if ( stat( filename, &buf ) == 0  && (buf.st_mode & S_IWUSR) == 0 )
-{
-+         QMessageBox* box = new XxSuicideMessageBox(
-+            _mainWindow, "Error.", "Error -- You don't have write
-permission to target file.", QMessageBox::Warning
-+         );
-+         box->show();
-+         return;
-+      }
-       int resp = QMessageBox::warning(
-          _mainWindow, "xxdiff", "File exists, overwrite?",
-          "Ok", "Cancel", QString::null, 0, 1
-@@ -3167,6 +3175,13 @@
-
-       struct stat buf;
-       if ( stat( filedst.c_str(), &buf ) == 0 ) {
-+         if ( (buf.st_mode & S_IWUSR) == 0 ) {
-+            QMessageBox* box = new XxSuicideMessageBox(
-+               _mainWindow, "Error.", "Error -- You don't have write
-permission to target file.", QMessageBox::Warning
-+            );
-+            box->show();
-+            return;
-+         }
-          int resp = QMessageBox::warning(
-             _mainWindow, "xxdiff", "File exists, overwrite?",
-             "Ok", "Cancel", QString::null, 0, 1
-
-
-
-PS> I have had some trouble in the past getting e-mail to go through to
-your iro.umontreal.ca account.  So I am shotgunning with all the possible
-addresses that I could find for you this time around. :)
-
--------------------------------------------
-W. Scott Gaskins
-(919) 543-9863
-sgaskins@us.ibm.com
-IBM Bldg062/C215
-P.O. Box 12195 - YM6A/062
-3039 Cornwallis Rd
-RTP, NC 27709
-
-
-
-
-
-
-
-
-
-
-
- - port to Windows using the Qt Non-commercial license
-
- - autoconf: rename configure.in to configure.ac when autoconf-2.50 becomes
-   ubiquitous; 
 
 
  - ignore horizontal whitespace is buggy, it doesn't ignore two separate
@@ -932,39 +973,13 @@ RTP, NC 27709
    chars are all the same... this should allow filtering out most code
    re-indentation and such)
 
-
  - builder for patches
+
  - drag sb overview
+
  - indicator for unselected hunks
 
-great blue overhaul:
- - replace all std::string to QString so we have just one type of strings.
- - optimize resource loading using more involved lex/yacc parsing
- - resource initialization should not be done through strings
- - implement clearer doc/view model, where app is view/ui, and resources is data
- - view should contains display data though, separate between display data and
-   other data
-
-
-
-
- - resources must be able to:
-    - i like to have an enum list of all resources
-    - list themselves
-    - know which ones have changed since a snapshot
-    - be fast to load (don't query for all of them)
-    - parse better
-    - be easy to add a new one, all stuff in one place if possible
-    - have simple documentation for them
-    - support parsing from a file and a string or a list of strings
-
-
  - pengeastegg
-
- - eradicate std::string and standardize on QString, except for converting from
-   an ostringstream.  we want only one type of string, and we can't really
-   eradicate QString because we use Qt.  besides it's not that bad and all those
-   string conversions are probably costing something.
 
  - implement indicator for "remaining unselected regions"
 
@@ -993,8 +1008,6 @@ great blue overhaul:
       with ifdefs
 
    2) build it in xxcvs
-
- - hide one file's diffs using color table in 3-way diffs
 
  - merged view: should have the option of seeing both files' hunks
 
@@ -1273,26 +1286,20 @@ perhaps features:
 
    * look at ClearCase's merge, see which ones they identify.
 
-   * urgent bugs: ignore whitespace crashes, any two files (mcguffm)
-     ==> can't reproduce.
-
    * merged view: add different colors for different selected sides
 
    * merged view: display both regions in merged view when unselected 
      (as an option)
 
-   * conflicts... add possibility to save as ifdefs
-
    * make scripts for automatic release under linux: build tarballs and rpms
      automatically for both static and dynamically linked versions.
-
-   * add sgml doc and install it with rpms
 
    * Oh, you just made me think of a new feature: invoking xxdiff with the auto
      merge feature, and if there are no conflicts it would save silently and not
      show up.... could be interesting.  I'll put that up on the wishlist.
 
-   * allow region selection for the purpose of cut-n-paste (blouin)
+   * allow REGION SELECTION for the purpose of cut-n-paste (blouin)
+
 
 (horizontal diffs)
    * horizontal diffs with hysteresis
