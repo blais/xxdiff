@@ -569,7 +569,7 @@ void XxHordiffImp::multipleHordiffs2(
               htable[ x + y*tlen0 ] == htable[ x-1 + (y-1)*tlen0 ]*/ ) &&
             ctext0[x] == ctext1[y] 
 
-#if 0 
+#if KEPT_FOR_HISTORY
             /* We don't need this anymore (2004-03-22).
                We post-process instead. */
             /* This next extra condition contributed to fix subtle problem,
@@ -645,7 +645,7 @@ void XxHordiffImp::multipleHordiffs2(
 #endif
       int ii;
 
-#if 0 // IMPORTANT NOTE: this does not work, with following case.
+#if KEPT_FOR_HISTORY // IMPORTANT NOTE: this does not work, with following case.
 
 // In file "f1":
 // ------------------------------

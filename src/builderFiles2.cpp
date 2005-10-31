@@ -282,6 +282,9 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
    while ( true ) {
 #ifndef XX_INTERNAL_DIFFS
+      // FIXME here we should change the code so that reading a line includes
+      // the carriage return characters within the line.  This results in
+      // harmless but nonetheless annoying empty diff error messages.
       QString line = outputs.readLine();
       if ( line.isNull() ) {
          break;

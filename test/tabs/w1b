@@ -1,0 +1,10 @@
+COMMONARCH   = MSVC_ix86
+COMMONOSNAME = WinNT
+
+ifndef S2M_PLATFORM_SDK_ROOT_DIR
+S2M_PLATFORM_SDK_ROOT_DIR := C:/Program\ Files/Microsoft\ SDK
+endif
+
+C++INCS = \
+   -I. \
+   -I$(COMMONSRC)

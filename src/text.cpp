@@ -90,7 +90,7 @@ enum SkipType { SK_NOSKIP = 0, SK_UNSEL = 1, SK_NEITHER = 2, SK_EMPTY = 3 };
 
 bool flag = 0;
 
-#ifdef XX_DEBUG
+#ifdef XX_DEBUG_TEXT
 //------------------------------------------------------------------------------
 //
 void traceFontMetrics( const QFontMetrics& fm )
@@ -160,7 +160,7 @@ inline void rentxt(
          &brect
       );
 
-#ifdef XX_DEBUG
+#ifdef XX_DEBUG_TEXT
       // For debug only, could be removed.
       if ( flag ) {
          QPen pushPen = p.pen();
@@ -303,6 +303,7 @@ void XxText::drawContents( QPainter* pp )
    XxDln cursorLine = _app->getCursorLine();
    uint horizontalPos = _sv->getHorizontalPos();
    uint tabWidth = resources.getTabWidth();
+   bool hideCR = resources.getBoolOpt( BOOL_HIDE_CR );
 
    int selRegY1 = -1;
    int selRegY2 = -1;
@@ -390,9 +391,13 @@ void XxText::drawContents( QPainter* pp )
                                             bcolor, fcolor );
 
                   p.setBackgroundColor( bcolor );
-                  QBrush brush( fcolor );
-                  brush.setStyle( QBrush::BDiagPattern );
+                  QBrush brush( bcolor );
 
+                  p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
+                              brush );
+
+                  brush.setColor( fcolor );
+                  brush.setStyle( QBrush::BDiagPattern );
                   p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
                               brush );
 
@@ -499,7 +504,7 @@ void XxText::drawContents( QPainter* pp )
             hbuffer0[c] = -1;
 
             renderedText = files[renNo]->renderTextWithTabs(
-               lineText, length, tabWidth, ehd, hbuffer0
+               lineText, length, tabWidth, hideCR, ehd, hbuffer0
             );
 
             // Append ehd and end array with -1.  We make sure there was enough
@@ -510,7 +515,7 @@ void XxText::drawContents( QPainter* pp )
          }
          else {
             renderedText = files[renNo]->renderTextWithTabs(
-               lineText, length, tabWidth, ehd, 0
+               lineText, length, tabWidth, hideCR, ehd, 0
             );
          }
 
@@ -787,7 +792,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
 
    // Interactive toggling of debug drawing structures.
-#ifdef XX_DEBUG
+#ifdef XX_DEBUG_TEXT
    if ( event->button() == MidButton ) {
       if ( event->state() & ControlButton ) {
          flag = !flag;
@@ -1036,9 +1041,9 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxText::wheelEvent( QWheelEvent* event )
+void XxText::wheelEvent( QWheelEvent* e )
 {
-   _app->redirectWheelEvent( event );
+   QApplication::sendEvent( _sv, e );
 }
 
 //------------------------------------------------------------------------------
@@ -1077,65 +1082,6 @@ uint XxText::computeMergedLines() const
    XxLine::Type prevtype;
    XxLine::Type type = XxLine::SAME;
    for ( XxDln icurline = 1; icurline <= diffs->getNbLines(); ++icurline ) {
-// #if 0
-
-//       prevtype = type;
-//       const XxLine& line = diffs->getLine( icurline++ );
-//       type = line.getType();
-
-//       XxFno renNo = _no;
-//       if ( isMerged() ) {
-
-//          if ( type != XxLine::SAME &&
-//               type != XxLine::DIRECTORIES ) {
-
-//             XxLine::Selection sel = line.getSelection();
-//             if ( sel == XxLine::UNSELECTED ) {
-//                if ( skip != SK_UNSEL ) {
-//                   skip = SK_UNSEL;
-//                   y += HEIGHT_UNSEL_REGION;
-//                }
-//                continue;
-//             }
-//             else if ( sel == XxLine::NEITHER ) {
-//                if ( skip != SK_NEITHER ) {
-//                   skip = SK_NEITHER;
-//                   y += HEIGHT_NEITHER_REGION;
-//                }
-//                continue;
-//             }
-//             else {
-//                // Render selected side.
-//                renNo = int(sel);
-//                skip = SK_NOSKIP;
-//             }
-//          }
-//          else {
-//             renNo = 0; // Any side would be fine for SAME regions.
-//             skip = SK_NOSKIP;
-//          }
-//       }
-
-//       // Render text.
-//       XxFln fline = line.getLineNo( renNo );
-//       if ( fline != -1 ) {
-//          y += fm.lineSpacing();
-//       }
-//       else {
-
-//          if ( !isMerged() ) {
-//             y += fm.lineSpacing();
-//          }
-//          else {
-//             // For merged view, render the first empty line as thin.
-//             if ( skip != SK_EMPTY && type != prevtype ) {
-//                skip = SK_EMPTY;
-//                y += HEIGHT_EMPTY_REGION;
-//             }
-//          }
-//       }
-//    }
-// #endif
 
       // Get line to display.
       prevtype = type;

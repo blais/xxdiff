@@ -52,10 +52,11 @@ public:
    enum OptType {
       OPT_GENERIC = 0,
       OPT_XXDIFF = 1,
-      OPT_DIFF = 2,
-      OPT_QT = 3,
-      OPT_DEFAULT = ( 1<<0 | 1<<1 | 1<<2 ),
-      OPT_ALL = ( 1<<0 | 1<<1 | 1<<2 | 1<<3 )
+      OPT_DISPLAY = 2,
+      OPT_DIFF = 3,
+      OPT_QT = 4,
+      OPT_DEFAULT = ( 1<<0 | 1<<1 | 1<<2 | 1<<3 ),
+      OPT_ALL = ( 1<<0 | 1<<1 | 1<<2 | 1<<3 | 1<<4 )
    };
 
    struct Option {
@@ -137,15 +138,15 @@ private:
    int           _unmergeNbFiles;
 
    bool          _forceDecision;
-
    bool          _macNewlines;
-
    bool          _indicateInputProcessed;
+   bool          _useTemporaryFiles;
 
    /*----- static data members -----*/
 
    static Option _optionsGeneric[];
    static Option _optionsXxdiff[];
+   static Option _optionsDisplay[];
    static Option _optionsDiff[];
    static Option _optionsQt[];
 

@@ -8,6 +8,33 @@ TODO: xxdiff
 
 
 
+*  xxdiff test/tabs/w2a test/tabs/w2b::
+
+        while ( true ) {
+     #ifndef XX_INTERNAL_DIFFS
+           // FIXME here we should change the code so that reading a line
+           includes // the carriage return characters within the line.  This
+           results in // harmless but nonetheless annoying empty diff error
+           messages.
+           QString line = outputs.readLine();
+     
+
+* Known problem:
+  
+  - set tab width to 0
+  - diff files which have tabs and spaces but other characters the same
+  - set hordiff threshold low enough
+  
+  We get minimum hordiff width to 1 with this combination.
+  I think we would need to recompute the diffs.
+
+
+
+
+
+
+
+
 .. end
 
 (Horizontal Diffs)

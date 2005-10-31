@@ -807,6 +807,17 @@ void XxApp::createUI()
       this, SLOT(pageUp())
    );
 
+   //
+   // Interactive font resize.
+   //
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_FONT_RESIZE_BIGGER ) ),
+      this, SLOT(fontSizeIncrease())
+   );
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_FONT_RESIZE_SMALLER ) ),
+      this, SLOT(fontSizeDecrease())
+   );
 
    // Make some connections.
    connect( this, SIGNAL(cursorChanged(int)),
@@ -1220,6 +1231,11 @@ void XxApp::createMenus()
    ids[5] = fileMenu->insertItem(
       "Edit right file", this, SLOT(editRight()),
       _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+   );
+
+   fileMenu->insertItem(
+      "Save Options...", this, SLOT(saveOptions()),
+      _resources->getAccelerator( ACCEL_SAVE_OPTIONS )
    );
 
    if ( _cmdline._unmerge == true || _cmdline._single == true ) {
@@ -1710,10 +1726,6 @@ void XxApp::createMenus()
       "On context", _mainWindow, SLOT(whatsThis()),
       _resources->getAccelerator( ACCEL_HELP_ON_CONTEXT )
    );
-   helpMenu->insertItem(
-      "Generate init file...", this, SLOT(helpGenInitFile()),
-      _resources->getAccelerator( ACCEL_HELP_GEN_INIT_FILE )
-   );
    helpMenu->insertSeparator();
    helpMenu->insertItem(
       "About...", this, SLOT(helpAbout()),
@@ -1748,9 +1760,6 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
    bool             isTemporary
 )
 {
-   static int FIXME = 0;
-   FIXME += 1;
-
    XX_ASSERT( 0 <= no && no <= 2 );
    XX_ASSERT( filename && displayFilename );
 
@@ -1775,11 +1784,17 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
                filename,
                displayFilename,
                fileInfo,
-               _resources->getBoolOpt( BOOL_HIDE_CR ),
                isTemporary,
                _newlineChar
             )
          );
+
+         if ( _cmdline._useTemporaryFiles ) {
+            // Copy the file contents to a temporary file and use that as our
+            // buffer.
+            tmp->makeTemporary();
+         }
+
          newbuf = tmp;
       }
    }
@@ -2139,9 +2154,13 @@ uint XxApp::computeTextWidth() const
 {
    uint textWidth = 0;
    for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-      textWidth = std::max( textWidth, _files[ii]->computeTextWidth(
-         _resources->getFontText(), _resources->getTabWidth()
-      ) );
+      textWidth = 
+         std::max( textWidth,
+                   _files[ii]->computeTextWidth(
+                      _resources->getFontText(),
+                      _resources->getTabWidth(),
+                      _resources->getBoolOpt( BOOL_HIDE_CR )
+                   ) );
    }
    return textWidth;
 }
@@ -2453,7 +2472,7 @@ void XxApp::editFile( const QString& filename )
       /* Give the socket a name.  */
       struct sockaddr_in name;
       name.sin_family = AF_INET;
-      name.sin_port = htons( 12793 ); // How can I get a unique port?
+      name.sin_port = 0; // unique port, otherwise: htons( port );
       name.sin_addr.s_addr = htonl( INADDR_ANY );
       if ( ::bind( _sockfd, (struct sockaddr*)&name, sizeof(name) ) < 0 ) {
          throw XxIoError( XX_EXC_PARAMS );
@@ -2977,6 +2996,70 @@ void XxApp::editRight()
    XxBuffer* file = getBuffer( _nbFiles == 2 ? 1 : 2 );
    if ( file != 0 ) {
       editFile( file->getName() );
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::saveOptions()
+{
+   // Generate it into a string to check if there are some contents.
+   QString outstr;
+   {
+      // Save to the stream the differences with the default resources.
+      QTextStream outs( &outstr, IO_WriteOnly );
+      std::auto_ptr<XxResources> defres(
+         new XxResources( _cmdline._originalXdiff )
+      );
+      XxResParser::genInitFile( *_resources, *defres, outs );
+   }
+   if ( outstr.isEmpty() ) {
+      QMessageBox::warning(
+         _mainWindow, "xxdiff",
+         "There is nothing to write as init file\n(nothing has been changed).",
+         "Ok"
+      );
+      return;
+   }
+   // Ok, there is something to write, get filename and save to file.
+
+   QString f;
+   f = QkFileDialog::getSaveFileName(
+      getenv("HOME") + QString( "/.xxdiffrc" ), QString::null, _mainWindow
+   );
+   if ( f.isEmpty() ) {
+      // The user cancelled the dialog.
+      return;
+   }
+   XX_ASSERT( !f.isEmpty() );
+
+   if ( ! askOverwrite( f ) ) {
+      return;
+   }
+
+   // Open a file.
+   try {
+      QFile outfile( f );
+      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
+      if ( !succ ) {
+         throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
+      }
+
+      // Save to the file.
+      {
+         QTextStream osstream( &outfile );
+         osstream << outstr;
+      }
+
+      outfile.close();
+      if ( outfile.status() != IO_Ok ) {
+         throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
+      }
+   }
+   catch ( const XxIoError& ioerr ) {
+      QMessageBox::critical(
+         _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
+      );
    }
 }
 
@@ -3749,7 +3832,7 @@ void XxApp::hideCarriageReturns()
 {
    _resources->toggleBoolOpt( BOOL_HIDE_CR );
    synchronizeUI();
-   onRedoDiff();
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -4042,70 +4125,6 @@ void XxApp::helpManPage()
    QDialog* manPage = XxHelp::getManPageDialog( _mainWindow );
    if ( manPage != 0 ) {
       manPage->show();
-   }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::helpGenInitFile()
-{
-   // Generate it into a string to check if there are some contents.
-   QString outstr;
-   {
-      // Save to the stream the differences with the default resources.
-      QTextStream outs( &outstr, IO_WriteOnly );
-      std::auto_ptr<XxResources> defres(
-         new XxResources( _cmdline._originalXdiff )
-      );
-      XxResParser::genInitFile( *_resources, *defres, outs );
-   }
-   if ( outstr.isEmpty() ) {
-      QMessageBox::warning(
-         _mainWindow, "xxdiff",
-         "There is nothing to write as init file\n(nothing has been changed).",
-         "Ok"
-      );
-      return;
-   }
-   // Ok, there is something to write, get filename and save to file.
-
-   QString f;
-   f = QkFileDialog::getSaveFileName(
-      QString( "xxdiffrc" ), QString::null, _mainWindow
-   );
-   if ( f.isEmpty() ) {
-      // The user cancelled the dialog.
-      return;
-   }
-   XX_ASSERT( !f.isEmpty() );
-
-   if ( ! askOverwrite( f ) ) {
-      return;
-   }
-
-   // Open a file.
-   try {
-      QFile outfile( f );
-      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
-      if ( !succ ) {
-         throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
-      }
-
-      // Save to the file.
-      {
-         QTextStream osstream( &outfile );
-         osstream << outstr;
-      }
-
-      outfile.close();
-      if ( outfile.status() != IO_Ok ) {
-         throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
-      }
-   }
-   catch ( const XxIoError& ioerr ) {
-      QMessageBox::critical(
-         _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
-      );
    }
 }
 
@@ -4427,13 +4446,6 @@ bool XxApp::computeAbsoluteDifference() const
 
 //------------------------------------------------------------------------------
 //
-void XxApp::redirectWheelEvent( QWheelEvent* event )
-{
-   _central->redirectWheelEvent( event );
-}
-
-//------------------------------------------------------------------------------
-//
 void XxApp::quitAccept()
 {
    exit( _returnValue, "ACCEPT" );
@@ -4467,6 +4479,53 @@ void XxApp::quitMerged()
    }
 
    exit( _returnValue, "MERGED" );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::fontSizeIncrease()
+{
+   fontSizeChange( +1 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::fontSizeDecrease()
+{
+   fontSizeChange( -1 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::fontSizeChange( int increment )
+{
+   //
+   // Interactive font resize feature with mouse wheel.
+   //
+
+   QFont font = _resources->getFontText();
+   QFontInfo finfo( font );
+
+   // Search for a font with a different pixelsize than our currently used
+   // font.
+   int pixels = finfo.pixelSize();
+   while ( true ) {
+      pixels += increment;
+      if ( pixels <= 0 || pixels > 512 ) {
+         return;
+      }
+
+      font.setPixelSize( pixels );
+      QFontInfo finfoNew( font );
+      if ( finfoNew.pixelSize() != finfo.pixelSize() ) {
+         break;
+      }
+   }
+
+   _resources->setFontText( font );
+   invalidateTextWidth(); // FIXME is this needed?
+   updateWidgets();
+
 }
 
 XX_NAMESPACE_END

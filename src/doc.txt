@@ -527,6 +527,9 @@ invocations of this command will cause swapping the regions, looping through all
 the different ordering possibilities, and finally joining the regions again
 (preserving selections where it is possible).
 
+If you want to select individual lines, use the second button of the mouse on
+the lines that you want to select.
+
 
 Saving the resulting file
 +++++++++++++++++++++++++

@@ -210,7 +210,7 @@ XxLine::XxLine(
 #ifdef XX_DEBUG
    switch ( _type ) {
       case SAME:
-#if 0  // FIXME remove, this could not be with -B
+#if KEPT_FOR_HISTORY  // FIXME remove, this could not be with -B
          XX_ASSERT( fline0 != -1 && fline1 != -1 /*&& fline2 != -1*/ );
 #endif
          break;

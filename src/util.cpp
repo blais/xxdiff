@@ -736,7 +736,7 @@ void XxUtil::spawnCommand(
    }
    errorf = stderr;
 
-#if 0
+#if KEPT_FOR_HISTORY
    /*
     * Read pipe until end of file. End of file indicates that outputf closed its
     * standard out (probably meaning it terminated).
@@ -1022,10 +1022,6 @@ QString XxUtil::escapeChars( const QString& format )
    newFormat.replace( "\n", "\\n" );
    newFormat.replace( "\r", "\\r" );
    newFormat.replace( "\"", "\\\"" );
-
-// FIXME remove
-   std::cerr << format << std::endl;
-   std::cerr << newFormat << std::endl;
 
    return newFormat;
 }

@@ -460,6 +460,13 @@ void XxOverview::resizeEvent( QResizeEvent* e )
 
 //------------------------------------------------------------------------------
 //
+void XxOverview::wheelEvent( QWheelEvent *e )
+{
+   QApplication::sendEvent( _central, e );
+}
+
+//------------------------------------------------------------------------------
+//
 void XxOverview::update()
 {
    updateVerticalExtents();

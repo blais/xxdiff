@@ -24,8 +24,6 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <iostream> // FIXME remove
-
 XX_NAMESPACE_BEGIN
 
 

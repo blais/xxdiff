@@ -26,6 +26,7 @@
 
 #include <buffer.h>
 #include <exceptions.h>
+#include <util.h>
 
 #include <qfontmetrics.h>
 #include <qfont.h>
@@ -40,6 +41,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <errno.h>
+
+#include <algorithm>
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -80,6 +83,10 @@ const char* strnstr( const char* haystack, const uint n, const char* needle )
    return 0;
 }
 
+/*----- constants -----*/
+
+const int renderBufferIncrement = 128;
+
 }
 
 XX_NAMESPACE_BEGIN
@@ -105,6 +112,7 @@ XxBuffer::XxBuffer(
    _displayName( displayFilename ),
    _hiddenCR( false ),
    _temporary( false ),
+   _deleteFile( false ),
    _proxy( false ),
    _buffer( 0 )
 {
@@ -119,16 +127,16 @@ XxBuffer::XxBuffer(
    const QString&   filename,
    const QString&   displayFilename,
    const QFileInfo& fileInfo,
-   const bool       hideCR,
-   const bool       deleteFile,
+   const bool       temporary,
    const char       newlineChar
 ) :
    _newlineChar( newlineChar ),
    _name( filename ),
    _displayName( displayFilename ),
    _fileInfo( fileInfo ),
-   _hiddenCR( hideCR ),
-   _temporary( deleteFile ),
+   _hiddenCR( false ), // used to be parameter here.
+   _temporary( temporary ),
+   _deleteFile( false ),
    _proxy( false ),
    _buffer( 0 )
 {
@@ -169,6 +177,7 @@ XxBuffer::XxBuffer(
    _fileInfo( fileInfo ),
    _hiddenCR( orig._hiddenCR ),
    _temporary( false ),
+   _deleteFile( false ),
    _proxy( true ),
    _buffer( orig._buffer ), // Here is the "sharing the buffer" part.
    _bufferSize( orig._bufferSize ),
@@ -186,8 +195,8 @@ XxBuffer::XxBuffer(
 //
 void XxBuffer::init()
 {
-   _renderBufferSize = 256;
-   _renderBuffer = (char*)malloc( _renderBufferSize );
+   _renderBufferSize = 0; // FIXME
+   _renderBuffer = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -201,6 +210,10 @@ XxBuffer::~XxBuffer()
 
    if ( _renderBuffer != 0 ) {
       free( _renderBuffer );
+   }
+
+   if ( _deleteFile == true ) {
+      XxUtil::removeFile( _name.latin1() );
    }
 }
 
@@ -295,8 +308,6 @@ void XxBuffer::loadFile( const QFileInfo& finfo )
          throw XxIoError( XX_EXC_PARAMS );
       }
 
-
-
       // Add a final newline if there isn't one.  This will simplify indexing.
       if ( _bufferSize > 0 ) { // to support empty files.
          if ( _buffer[ _bufferSize - 1 ] != _newlineChar ) {
@@ -386,8 +397,7 @@ void XxBuffer::processCarriageReturns()
    char* endPtr = _buffer + _bufferSize;
 
    // First scan for first occurence of CR. For files without CRs this fast loop
-   // will simply zoom through the file, instead of us having to check that
-   // destPtr < srcPtr.
+   // will simply zoom through the file until the first CR character.
    while ( srcPtr < endPtr && *srcPtr != '\015' ) {
       ++srcPtr;
    }
@@ -494,7 +504,11 @@ std::ostream& XxBuffer::dump( std::ostream& os ) const
 
 //------------------------------------------------------------------------------
 //
-uint XxBuffer::computeTextWidth( const QFont& font, const uint tabWidth )
+uint XxBuffer::computeTextWidth(
+   const QFont& font,
+   const uint   tabWidth,
+   const bool   hideCR
+)
 {
    QFontMetrics fm( font );
 
@@ -506,7 +520,7 @@ uint XxBuffer::computeTextWidth( const QFont& font, const uint tabWidth )
 
       int rlength;
       const char* renderedText = 
-         renderTextWithTabs( lineText, length, tabWidth, rlength, 0 );
+         renderTextWithTabs( lineText, length, tabWidth, hideCR, rlength, 0 );
       QString str( renderedText );
 
       QRect rect = fm.boundingRect( str );
@@ -545,81 +559,139 @@ const char* XxBuffer::renderTextWithTabs(
    const char* lineText,
    const uint  length,
    const uint  tabWidth,
+   const uint  hideCR,
    int&        rlength,
    int*        hordiffs
 )
 {
-   const int increment = 256;
+//#define LOCAL_TRACE
+#ifdef LOCAL_TRACE
+#define XX_LOCAL_TRACE(x) XX_TRACE(x)
+#else
+#define XX_LOCAL_TRACE(x)
+#endif
 
-   char* pd = _renderBuffer;
+   const char* ps = lineText; // Source pointer.
+   const char* endstr = ps + length; // End of string.
 
-   uint col = 0;
-   const char* ps = lineText;
-   const char* endstr = ps + length;
-   const char* nexttab = 0;
+   char* pd = _renderBuffer; // Destination pointer.
 
-   // Offset rightmost char to render tabs correctly.
-   while ( ( nexttab = strnchr( ps, '\t', endstr ) ) != 0 ) {
+   // Compute the maximum number of characters added a time.
+   const uint maxIncrement = std::max( (uint)2, tabWidth );
 
-      // Check for size requirements and reallocate if necessary.
-      int requiredSize = (pd - _renderBuffer) + (nexttab - ps) + tabWidth;
+   --ps;
+   while ( ++ps < endstr ) {
+
+      XX_LOCAL_TRACE( "source char: " << *ps );
+
+      const int curcol = pd - _renderBuffer;
+      uint horoffset = 0;
+
+      // Expand render buffer if necessary.  We use a conservative measure here,
+      // that will accomodate all possible cases below.
+      const int requiredSize = curcol + maxIncrement;
       if ( _renderBufferSize <= requiredSize ) {
-         _renderBufferSize = ( (requiredSize / increment) + 1 ) * increment;
-         _renderBuffer = (char*)realloc( _renderBuffer, _renderBufferSize );
-         pd = _renderBuffer + col;
+         _renderBufferSize = 
+            ( (requiredSize / renderBufferIncrement) + 1 ) *
+            renderBufferIncrement;
+         _renderBuffer = (char*)realloc( _renderBuffer,
+                                         _renderBufferSize );
+         pd = _renderBuffer + curcol;
       }
 
-      // Copy chunk before tab.
-      while ( ps < nexttab ) {
-         *pd++ = *ps++;
+      if ( *ps == '\t' ) {
+         XX_LOCAL_TRACE( "  tab" );
+
+         //
+         // We detected a tab character.
+         //
+         if ( tabWidth != 0 ) {
+            
+            // Compute amount of chars to insert.
+            int bcol = pd - _renderBuffer; 
+            uint nspaces = tabWidth - (bcol % tabWidth);
+
+            // Output equivalent spaces for tab in the destination.
+            for ( uint t = 0; t < nspaces; ++t ) {
+               *pd++ = ' ';
+               XX_CHECK( pd - _renderBuffer < _renderBufferSize );
+            }
+
+            horoffset = nspaces - 1;
+         }
+         else {
+            continue;
+         }
+      }
+      else if ( *ps == '\r' ) {
+         if ( ! hideCR ) {
+            XX_LOCAL_TRACE( "  cr" );
+            *pd++ = '^';
+            *pd++ = 'M';
+            XX_CHECK( pd - _renderBuffer < _renderBufferSize );
+
+            horoffset = 1;
+         }
+         else {
+            continue;
+         }
+      }
+      else { 
+         XX_LOCAL_TRACE( "  output:" << *ps );
+         *pd++ = *ps;
          XX_CHECK( pd - _renderBuffer < _renderBufferSize );
-      }
-      ps++; // skip tab
-
-      // Compute amount of spaces to insert.
-      uint nspaces = 0;
-      if ( tabWidth != 0 ) {
-         nspaces = tabWidth - ((pd - _renderBuffer) % tabWidth);
+         continue; // No need to offset the horizontal diffs.
       }
 
       // Shift horizontal diffs if necessary.
       if ( hordiffs ) {
-
          for ( int* phd = hordiffs; *phd != -1; ++phd ) {
-            if ( *phd > (pd - _renderBuffer) ) {
-               *phd += nspaces - 1;
-               // -1 because we the hordiffs were calculated with a string
-               // -containing tab characters in them, and the tab chars take 1
-               // -char space in the string.
+            if ( *phd > curcol ) {
+               *phd += horoffset;
             }
          }
       }
+   }
 
-      // Output tab.
-      for ( uint t = 0; t < nspaces; ++t ) {
-         *pd++ = ' ';
-         XX_CHECK( pd - _renderBuffer < _renderBufferSize );
+   const int curcol = pd - _renderBuffer;
+
+   //
+   // Invalidate horizontal diffs that are at the end if necessary.  This is
+   // necessary since we can potentially be removing characters (due to hideCR)
+   // and we do not want to return with some hordiffs beyond the end of the
+   // rendered line (the rendering code itself does not handle this, it assumes
+   // the hordiffs within the rendered line).
+   //
+   if ( hordiffs ) {
+      for ( int* phd = hordiffs; *phd != -1; ++phd ) {
+         if ( *phd > curcol ) {
+            *phd = curcol;
+         }
       }
    }
 
-   // Copy last chunk.
 
-   // Check for size requirements and reallocate if necessary.
-   int requiredSize = (pd - _renderBuffer) + (length) + 1;
+   //
+   // Add terminator character.
+   //
+
+   // Expand render buffer if necessary.
+   const int requiredSize = curcol + 1;
    if ( _renderBufferSize <= requiredSize ) {
-      _renderBufferSize = ( (requiredSize / increment) + 1 ) * increment;
+      _renderBufferSize = 
+         ( (requiredSize / renderBufferIncrement) + 1 ) *
+         renderBufferIncrement;
       _renderBuffer = (char*)realloc( _renderBuffer, _renderBufferSize );
-      pd = _renderBuffer + col;
-   }
-   while ( ps < endstr ) {
-      *pd++ = *ps++;
-      XX_CHECK( pd - _renderBuffer < _renderBufferSize );
+      pd = _renderBuffer + curcol;
    }
 
-   // End string.
+   // Add terminator to render buffer.
    *pd = '\0';
 
+   // Return the buffer.
    rlength = pd - _renderBuffer;
+   XX_LOCAL_TRACE( "--- length = " << rlength );
+   XX_LOCAL_TRACE( "--- renderbuffer = " << _renderBuffer );
 
    return _renderBuffer;
 }
@@ -683,6 +755,49 @@ QString XxBuffer::getBufferAtLine( const XxFln lineno ) const
    // Note: QStringList O(n) lookup.
    filename.append( _directoryEntries[ lineno - 1 ] );
    return filename;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxBuffer::makeTemporary()
+{
+   //
+   // Write contents of the buffer into the temporary file.
+   //
+
+   char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
+
+   // Open the temporary file.
+   FILE *fout;
+#ifndef WINDOWS
+   int tfd = mkstemp( temporaryFilename );
+   if ( ( fout = ::fdopen( tfd, "w" ) ) == NULL ) {
+#else
+   mktemp( temporaryFilename );
+   if ( ( fout = ::fopen( temporaryFilename, "w" ) ) == NULL ) {
+#endif
+      throw XxIoError( XX_EXC_PARAMS, 
+                       "Error opening temporary file." );
+   }
+   
+   // Write contents.
+   uint size;
+   const char* buffer = getBuffer( size );
+   
+   if ( ::fwrite( buffer, 1, size, fout ) != size ) {
+      throw XxIoError( XX_EXC_PARAMS, 
+                       "Error writing to temporary file." );
+   }
+
+   // Close the temporary file.
+   if ( ::fclose( fout ) != 0 ) {
+      throw XxIoError( XX_EXC_PARAMS, 
+                       "Error closing temporary file." );
+   }
+   
+   // Make this buffer a temporary to be deleted.
+   _name = QString(temporaryFilename);
+   _deleteFile = true;
 }
 
 XX_NAMESPACE_END

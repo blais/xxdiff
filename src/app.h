@@ -208,6 +208,7 @@ public slots:
    void editLeft();
    void editMiddle();
    void editRight();
+   void saveOptions();
    void quit();
    void search();
    void searchForward();
@@ -283,7 +284,6 @@ public slots:
    void ignoreFileMiddle();
    void ignoreFileRight();
    void helpManPage();
-   void helpGenInitFile();
    void helpAbout();
    // </group>
 
@@ -297,9 +297,6 @@ public slots:
    void cursorBottom();
    // </group>
 
-   // Redirects the given wheel event to the main scrollbar.
-   void redirectWheelEvent( QWheelEvent* event );
-
    // Return one of accept, reject, merged.
    // <group>
    void quitAccept();
@@ -307,6 +304,12 @@ public slots:
    void quitMerged();
    // </group>
 
+   // Increase or decrease the font size.
+   // <group>
+   void fontSizeIncrease();
+   void fontSizeDecrease();
+   // </group>
+   
 signals:
 
    // Signal emitted when the cursor changes line.
@@ -407,6 +410,9 @@ private:
    // Check if the file exists, and ask the user about overwriting a file if so,
    // return true if overwrite accepted.
    bool askOverwrite( const QString& filename ) const;
+
+   // Change the text's font size.
+   void fontSizeChange( int increment );
 
    /*----- static member functions -----*/
 

@@ -399,6 +399,13 @@ QString XxHelp::getUsage( int helpMask, bool plain )
          oss << formatOptionsPlain( options, nbOptions );
       }
 
+      if ( helpMask & (1 << XxCmdline::OPT_DISPLAY) ) {
+         oss << "Display Options:" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_DISPLAY, nbOptions );
+         oss << formatOptionsPlain( options, nbOptions );
+      }
+
       oss << "Any one specified file can be `-' for stdin." << endl
           << "Filenames can be either 2 directories, 2 files or 3 files."
           << endl;
@@ -431,6 +438,13 @@ QString XxHelp::getUsage( int helpMask, bool plain )
          oss << "<h4>Options</h4>" << endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_XXDIFF, nbOptions );
+         oss << formatOptionsQml( options, nbOptions );
+      }
+
+      if ( helpMask & (1 << XxCmdline::OPT_DISPLAY) ) {
+         oss << "<h4>Display Options</h4>" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_DISPLAY, nbOptions );
          oss << formatOptionsQml( options, nbOptions );
       }
 

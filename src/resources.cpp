@@ -169,6 +169,9 @@ void XxResources::initializeOriginalXdiff()
                   
    _accelerators[ ACCEL_MERGED_CLOSE ] = Qt::ALT | Qt::Key_W;
 
+   _accelerators[ ACCEL_FONT_RESIZE_BIGGER ] = Qt::CTRL | Qt::Key_Plus;
+   _accelerators[ ACCEL_FONT_RESIZE_SMALLER ] = Qt::CTRL | Qt::Key_Minus;
+
    //---------------------------------------------------------------------------
 
 #ifdef XX_KDE

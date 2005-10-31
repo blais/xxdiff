@@ -97,6 +97,7 @@ protected:
    virtual void mouseMoveEvent( QMouseEvent* );
    virtual void mouseReleaseEvent( QMouseEvent* );
    virtual void resizeEvent( QResizeEvent* );
+   virtual void wheelEvent( QWheelEvent * );
    // </group>
 
 private:

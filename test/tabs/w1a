@@ -1,0 +1,6 @@
+COMMONARCH   = MSVC_ix86
+COMMONOSNAME = WinNT
+
+C++INCS = \
+   -I. \
+   -I$(COMMONSRC)

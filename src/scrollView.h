@@ -125,9 +125,6 @@ public:
    // Returns the horizontal position of the horizontal scrollbar in pixels.
    virtual uint getHorizontalPos() const;
 
-   // Redirect a wheel event from somewhere else to our scrollbar.
-   void redirectWheelEvent( QWheelEvent* event );
-
 public slots:
 
    // Adjusts the scrollbars for a change in either widget size or text size.
@@ -153,6 +150,9 @@ protected:
    virtual void adjustHorizontalScrollbars( const QSize& displaySize );
    virtual void adjustVerticalScrollbars( const QSize& displaySize );
    // </group>
+
+   // See base class.
+   virtual void wheelEvent( QWheelEvent * );
 
    /*----- data members -----*/
 

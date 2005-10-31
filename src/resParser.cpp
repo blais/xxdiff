@@ -280,6 +280,7 @@ StringToken accelList[] = {
    { "EditLeft", ACCEL_EDIT_LEFT, 0 },
    { "EditMiddle", ACCEL_EDIT_MIDDLE, 0 },
    { "EditRight", ACCEL_EDIT_RIGHT, 0 },
+   { "SaveOptions", ACCEL_SAVE_OPTIONS, 0 },
    { "Search", ACCEL_SEARCH, 0 },
    { "SearchForward", ACCEL_SEARCH_FORWARD, 0 },
    { "SearchBackward", ACCEL_SEARCH_BACKWARD, 0 },
@@ -362,9 +363,10 @@ StringToken accelList[] = {
    { "IgnoreFileRight", ACCEL_IGNORE_FILE_RIGHT, 0 },
    { "HelpManPage", ACCEL_HELP_MAN_PAGE, 0 },
    { "HelpOnContext", ACCEL_HELP_ON_CONTEXT, 0 },
-   { "HelpGenInitFile", ACCEL_HELP_GEN_INIT_FILE, 0 },
    { "HelpAbout", ACCEL_HELP_ABOUT, 0 },
-   { "MergedClose", ACCEL_MERGED_CLOSE, 0 }
+   { "MergedClose", ACCEL_MERGED_CLOSE, 0 },
+   { "FontResizeBigger", ACCEL_FONT_RESIZE_BIGGER, 0 },
+   { "FontResizeSmaller", ACCEL_FONT_RESIZE_SMALLER, 0 },
 };
 
 StringToken colorList[] = {
@@ -1822,6 +1824,15 @@ QString XxResParser::getKwdName( int kwd )
    const char* stoken = searchTokenName( STPARAM(kwdList), int(kwd) );
    XX_CHECK( stoken );
    return QString( stoken );
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxResParser::getShowOptName( XxShowOpt bo )
+{
+   const char* stoken =
+      searchTokenName( STPARAM(showList), int(bo) );
+   return getKwdName( SHOW ) + "." + QString( stoken );
 }
 
 //------------------------------------------------------------------------------

@@ -65,6 +65,11 @@
 #define INCL_QT_QFILEINFO
 #endif
 
+#ifndef INCL_STD_MEMORY
+#include <memory>
+#define INCL_STD_MEMORY
+#endif
+
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
@@ -101,8 +106,7 @@ public:
       const QString&   filename, 
       const QString&   displayFilename,
       const QFileInfo& fileInfo,
-      const bool       hideCR = true,
-      const bool       deleteFile = false,
+      const bool       temporary = false,
       const char       newlineChar = '\n'
    );
 
@@ -138,7 +142,11 @@ public:
 
    // Computes the width of the longest line when rendered with specified font,
    // in pixels.
-   uint computeTextWidth( const QFont&, const uint tabWidth );
+   uint computeTextWidth(
+      const QFont& font,
+      const uint   tabWidth,
+      const bool   hideCR
+   );
 
    // Computes the width of the longest numbers when rendered with specified
    // font, in pixels.
@@ -152,20 +160,25 @@ public:
       uint&       length 
    ) const;
 
-   // Renders text into text width tabs expanded to spaces and returns a pointer
-   // to a buffer that belongs to the file object (don't fool around with it).
+   // Renders text into modified text ready for display and returns a pointer to
+   // a buffer that belongs to the file object (don't fool around with it).
    // rlength will contain the length of the rendered string.
    //
-   // This function will offset the horizontal diffs it is given if necessary.
+   // These functions will offset the horizontal diffs it is given if necessary.
    // If the hordiffs is not null, it is expecting an array ende by a -1
    // element.  This array will be modified in place.
+   // <group>
+   
+   // Realizes tab expansion into spaces, as well as carriage returns.
    const char* renderTextWithTabs( 
       const char* lineText,
       const uint  length, 
       const uint  tabWidth, 
+      const uint  hideCR,
       int&        rlength,
       int*        hordiffs
    );
+   // </group>
 
    // Returns the number of digits required for this file.
    uint getNbDigits() const;
@@ -207,6 +220,10 @@ public:
    // Returns the buffer and buffersize.
    const char* getBuffer( uint& size ) const;
 
+   // Copy the given buffer contents into a temporary file and make this buffer
+   // represent this temporary file, which will be automatically deleted.
+   void makeTemporary();
+
 private:
 
    /*----- member functions -----*/
@@ -237,6 +254,7 @@ private:
    QFileInfo          _fileInfo;
    bool               _hiddenCR;
    bool               _temporary;
+   bool               _deleteFile;
    bool               _proxy;
    char*              _buffer;
    uint               _bufferSize;

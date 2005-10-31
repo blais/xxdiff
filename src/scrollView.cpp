@@ -29,6 +29,8 @@
 
 #include <qscrollbar.h>
 #include <qsize.h>
+#include <qfont.h>
+#include <qfontmetrics.h>
 
 XX_NAMESPACE_BEGIN
 
@@ -193,13 +195,6 @@ uint XxScrollView::getHorizontalPos() const
 
 //------------------------------------------------------------------------------
 //
-void XxScrollView::redirectWheelEvent( QWheelEvent* event )
-{
-   qApp->notify( _vscroll[0], event );
-}
-
-//------------------------------------------------------------------------------
-//
 void XxScrollView::adjustScrollbars()
 {
    // Compute the maximum of the text widths here, because the text widths may
@@ -309,6 +304,24 @@ void XxScrollView::verticalScroll2( int value )
 {
    _vscroll[0]->setValue( value );
    verticalScroll( value );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxScrollView::wheelEvent( QWheelEvent* e )
+{
+   if ( e->state() & Qt::ControlButton ) {
+      // Interactive font resize feature with mouse wheel.
+      if ( e->delta() > 0 ) {
+         _app->fontSizeDecrease();
+      }
+      else {
+         _app->fontSizeIncrease();
+      }
+   }
+   else {
+      QApplication::sendEvent( _vscroll[0], e );
+   }
 }
 
 XX_NAMESPACE_END

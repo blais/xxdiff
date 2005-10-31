@@ -94,6 +94,7 @@ public:
    // Special tags for cmdline resources.
    // <group>
    static QString getKwdName( int kwd );
+   static QString getShowOptName( XxShowOpt bo );
    static QString getBoolOptName( XxBoolOpt bo );
    // </group>
 

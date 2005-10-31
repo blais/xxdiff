@@ -97,7 +97,7 @@ int initOptions(
 
 /*----- static data members -----*/
 
-// Free simple switch characters: 'c', 'j', 'k', 'p', 'q', 't', 'x', 'y'
+// Free simple switch characters: 'k', 'p', 'q', 'x', 'y'
 
 //
 // Generic options.
@@ -171,30 +171,11 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "show-all option, splitting the conflicts into three files for display. "
      "If this is specified, only a single file can then be given as argument."
    }, 
-   { "title1", 0, true, '1', 
-     "Display 'str' instead of filename in filename label 1 (left)."
-   }, 
-   { "title2", 0, true, '2', 
-     "Display 'str' instead of filename in filename label 2 (middle)."
-   }, 
-   { "title3", 0, true, '3',
-     "Display 'str' instead of filename in filename label 3 (right)."
-   }, 
-   { "titlein", 'N', true, 'N', // This is kept for xdiff compatibility only.
-     "Display 'str' for filename in given in stdin."
-   }, 
    { "resource", 'R', true, 'R',
      "Pass on string 'str' to resource parser.  Resources given in this manner "
      "on the command line supersede other resource mechanisms.  One can "
      "specify multiple resource settings by repeating this option."
    }, 
-   { "args", 'A', true, 'A',
-     "Pass on argument to the subordinate diff program."
-   }, 
-   { "orig-xdiff", 0, false, 'o',
-     "Use settings as close as possible to original xdiff "
-     "(for the romantics longing the old days of SGI... snif snif)."
-   },
    { "merged-filename", 'M', true, 'M',
      "Specifies the filename of the merged file for output."
    },
@@ -222,6 +203,35 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "soon as possible. This can be used by scripts which create temporary "
      "files to delete those as soon as xxdiff has finished reading them. "
      "This only works from startup."
+   },
+   { "use-temporary-files", 't', false, 't',
+     "Copies the input streams/files into temporary files to perform diffing. "
+     "This is useful if you want to diff FIFOs."
+   },
+};
+
+//
+// Display options
+//
+XxCmdline::Option XxCmdline::_optionsDisplay[] = {
+   { "title1", 0, true, '1', 
+     "Display 'str' instead of filename in filename label 1 (left)."
+   }, 
+   { "title2", 0, true, '2', 
+     "Display 'str' instead of filename in filename label 2 (middle)."
+   }, 
+   { "title3", 0, true, '3',
+     "Display 'str' instead of filename in filename label 3 (right)."
+   }, 
+   { "titlein", 'N', true, 'N', // This is kept for xdiff compatibility only.
+     "Display 'str' for filename in given in stdin."
+   }, 
+   { "orig-xdiff", 0, false, 'o',
+     "Use settings as close as possible to original xdiff "
+     "(for the romantics longing the old days of SGI... snif snif)."
+   },
+   { "show-merged-pane", 0, false, 'c',
+     "Display the merged pane on startup."
    },
 };
 
@@ -262,6 +272,9 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "When comparing directories, ignore files and subdirectories whose "
      "basenames match any pattern contained in file."
    },
+   { "args", 'A', true, 'A',
+     "Pass on argument to the subordinate diff program."
+   }, 
 
 };
 
@@ -335,6 +348,7 @@ XxCmdline::XxCmdline() :
    _forceDecision( false ),
    _macNewlines( false ),
    _indicateInputProcessed( false ),
+   _useTemporaryFiles( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -376,6 +390,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    const int nbTotalOptions = 
       ( sizeof(_optionsGeneric) + 
         sizeof(_optionsXxdiff) + 
+        sizeof(_optionsDisplay) + 
         sizeof(_optionsDiff) + 
         sizeof(_optionsQt) ) / sizeof(XxCmdline::Option);
    struct option longOptions[ nbTotalOptions + 1 ];
@@ -390,6 +405,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    nbopt += initOptions(
       _optionsXxdiff,
       sizeof(_optionsXxdiff) / sizeof(XxCmdline::Option),
+      &( longOptions[nbopt] ),
+      shortOptions
+   );
+   nbopt += initOptions(
+      _optionsDisplay,
+      sizeof(_optionsDisplay) / sizeof(XxCmdline::Option),
       &( longOptions[nbopt] ),
       shortOptions
    );
@@ -541,6 +562,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _originalXdiff = true;
          } break;
 
+         case 'c': {
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << XxResParser::getShowOptName( SHOW_PANE_MERGED_VIEW ) 
+                << ": true" << endl;
+         } break;
+
          case 'M': {
             if ( !optarg ) {
                throw XxUsageError( XX_EXC_PARAMS,
@@ -661,6 +688,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 
          case 'j': {
             _indicateInputProcessed = true;
+         } break;
+
+         case 't': {
+            _useTemporaryFiles = true;
          } break;
 
          case 0:
@@ -812,6 +843,10 @@ XxCmdline::Option* XxCmdline::getOptionList( OptType otype, int& nbOptions )
       case OPT_XXDIFF: {
          nbOptions = sizeof(_optionsXxdiff);
          options = _optionsXxdiff;
+      } break;
+      case OPT_DISPLAY: {
+         nbOptions = sizeof(_optionsDisplay);
+         options = _optionsDisplay;
       } break;
       case OPT_DIFF: {
          nbOptions = sizeof(_optionsDiff);

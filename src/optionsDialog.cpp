@@ -436,11 +436,11 @@ void XxOptionsDialog::synchronize()
 
    _fontApp = resources.getFontApp();
    _labelFontApp->setFont( _fontApp );
-   _labelFontAppName->setText( getFontDisplayText(_fontApp) );
+   _editFontAppName->setText( getFontDisplayText(_fontApp) );
 
    _fontText = resources.getFontText();
    _labelFontText->setFont( _fontText );
-   _labelFontTextName->setText( getFontDisplayText(_fontText) );
+   _editFontTextName->setText( getFontDisplayText(_fontText) );
 
    //---------------------------------------------------------------------------
    // Colors
@@ -792,7 +792,7 @@ void XxOptionsDialog::editFontApp()
       ) {
          _fontApp = newFont;
          _labelFontApp->setFont( _fontApp );
-         _labelFontAppName->setText( getFontDisplayText( _fontApp ) );
+         _editFontAppName->setText( getFontDisplayText( _fontApp ) );
       }
    }
 }
@@ -820,7 +820,7 @@ void XxOptionsDialog::editFontText()
       ) {
          _fontText = newFont;
          _labelFontText->setFont( _fontText );
-         _labelFontTextName->setText( getFontDisplayText( _fontText ) );
+         _editFontTextName->setText( getFontDisplayText( _fontText ) );
       }
    }
 }
@@ -1016,9 +1016,16 @@ QString XxOptionsDialog::getFontDisplayText(
       const QFont& font
 ) const
 {
-   QFontInfo fontInfo( font );
    QString displayText;
-   
+#if (QT_VERSION >= 0x030000)
+   displayText = font.toString();
+#else
+   displayText = font.rawName();
+#endif
+
+#if KEPT_FOR_HISTORY
+   QFontInfo fontInfo( font );
+
    displayText = "Font: ";
    displayText += fontInfo.family();
    displayText += "  Size: ";
@@ -1045,6 +1052,7 @@ QString XxOptionsDialog::getFontDisplayText(
    {
       displayText += "(unknown)";
    }
+#endif
    
    return displayText;
 }

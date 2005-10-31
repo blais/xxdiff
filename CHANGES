@@ -2,8 +2,29 @@
 CHANGES: xxdiff
 ===============
 
-Current
--------
+Version 3.1: (minor feature enhancements)
+-----------------------------------------
+
+* Implemented feature to save to temporary files before running subordinate
+  diff.  This is useful if you want to support reading from FIFOs. [ 538340 ]
+* Made font widget string correspond to qt3's conversion system.
+* Changed default gen init file to $HOME/.xxdiffrc and moved this to Save
+  Options under File Menu (everyone was puzzled by the UNIX way of doing things,
+  so I give in).
+* Removed unused code.
+* Rewrote code to render text to render carriage returns explicitly.
+* Removed debug drawing in text widget that was showing up only in debug mode.
+* Added documentation on selecting individual lines [ 649285 ].
+* Added --show-merged-pane option (ericveum suggestion) [ 867395 ].
+* Changed the options help a little bit and added display options.
+* Removed forgotten cerr output in util.cpp.
+* Implemented interactive font resizing [ 964629 ].
+* Simplified wheel redirect code.
+* Updated documentation ([ 1011009 ] Tomas Pospisek)
+* Added wheel support in overview area ([ 1022392 ]) 
+  Thanks to Brett Levin for the patch.
+* Fixed xxdiff-cond-replace with zero arguments.
+
 
 Version 3.0.3: (minor bug fixes)
 --------------------------------
