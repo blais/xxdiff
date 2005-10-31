@@ -1,0 +1,80 @@
+2000-09-29  Martin Blais  <blais@localhost.localdomain>
+
+	* Fixed bugs with sigaction handlers, editing should now work again.
+
+	* Fixed bug in merged view update().
+
+2000-09-21  Martin Blais  <blais>
+
+	* added separate colors for merge decisions, made the same by default
+
+	* overview area now shows single line selections properly.
+
+--------------------------------------------------------------------------
+Version 1.8.1:
+	
+2000-09-21  Martin Blais  <blais>
+
+	* made errors dialog pop in front of main window, not behind
+
+	* separated suicide message box
+
+2000-09-20  Martin Blais  <blais>
+
+	* removed tabwidth dialog
+
+	* finished display options dialog.
+
+2000-09-19  Martin Blais  <blais>
+
+	* added display options in options dialog, and made switch
+	automatically from menu invocation to correct tab
+
+	* fiddled with secondary merge window a bit. using qsplitter
+	  doesn't work well, so nix it.
+
+	* Horizontal scrollbar now hides when not necessary.
+
+2000-09-21    <blais@localhost.localdomain>
+
+	* made color selection dialog work.
+
+2000-09-18  Martin Blais  <blais>
+
+	* Separate merged view classes.
+
+2000-09-17    <blais@localhost.localdomain>
+
+	* Fixed usage message output of exception caught.
+
+2000-09-15  Martin Blais  <blais>
+
+	* implemented simple ifdef markers output. still have to become
+	selective on this output (i.e. don't output empty regions).
+
+	* added new resources for text tags.
+
+	* Small changes in markers file dialog.
+
+2000-09-15    <blais@localhost.localdomain>
+
+	* src/app.cpp (saveToFile): removed warning about unselected
+	regions when saving, use markers dialog instead.
+
+	* src/markersFileDialog.h: implemented file dialog with markers
+	selection for unselected regions.
+
+	* src/searchDialog.h: brand new search dialog, muchos better than
+	the last one.
+
+2000-09-14    <blais@localhost.localdomain>
+
+	* src/Makefile.am (LIBS): renamed _GCC to _GNU.
+
+	* configure.in (LDFLAGS): changed the way the GNU compiler is
+	recognized.
+
+	* resources.h: static methods to get res names.
+
+	* app.cpp (parseCommandLine): removed hardcoded resource names.
+

@@ -1,0 +1,130 @@
+00 =============================================================================
+AAA
+00 =============================================================================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+01 =============================================================================
+BAA
+01 =============================================================================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+                 Free ParaHOOPS 3D Part Viewer Enables
+               Advanced Viewing of Parasolid Part Files
+              and Translation Between Parasolid Versions
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+                 Free ParaHOOPS 3D Part Viewer Enables
+               Advanced Viewing of Parasolid Part Files
+              and Translation Between Parasolid Versions
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+02 =============================================================================
+ABA
+02 =============================================================================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+03 =============================================================================
+AAB
+03 =============================================================================
+
+  xxdiff is a file csomparator and merge tool. It is an open-source
+  replacement for sRudy Wortel's xdiff which comes with SGI machines.
+  xxdiff sis a graphical browser for viewing the differences between two
+  fisles and can be used to produce a merged version.
+
+04 =============================================================================
+-AA
+04 =============================================================================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+05 =============================================================================
+A-A
+05 =============================================================================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+06 =============================================================================
+AA-
+06 =============================================================================
+
+
+07 =============================================================================
+A--
+07 =============================================================================
+
+
+08 =============================================================================
+-A-
+08 =============================================================================
+
+
+09 =============================================================================
+--A
+09 =============================================================================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+10 =============================================================================
+ABC
+10 =============================================================================
+
+  xxdiff is a file comparator and merge tozxol. It is an open-source
+  replacement for Rudy Wortel's xdxziff which comes with SGI machines.
+  xxdiff is a graphical browser forz viewing the differences between two
+  files and can bezx used to produce a merged version.
+
+11 =============================================================================
+AB-
+11 =============================================================================
+
+
+12 =============================================================================
+A-B
+12 =============================================================================
+
+  xxdiff is fda file comparator and merge tool. It is an open-source
+  replacement ford Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing thfde differences between two
+  files and can be used to produce a merged vfdersion.
+
+13 =============================================================================
+-AB
+13 =============================================================================
+
+  xxdiff is adsds file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdsasiff which comes with SGI machines.
+  xxdiff is a graphical dsdsbrowser for viewing the differences between two
+  files and can be used to proasaduce a merged version.
+
+14 =============================================================================
+14 =============================================================================

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Package for source release for nightly transfer.
+VERSION=`tools/get_version`
+echo "Making source distribution";
+
+# Normally this is what should be used, but this fucks up what the automoc
+# generates.
+#
+#    make dist
+#    mv xxdiff-$VERSION.tar.gz ../xxdiff-$VERSION.src.tar.gz
+
+make clean
+make distclean
+rm -f config.cache config.status
+
+bn=`basename $PWD`
+dn=`dirname $PWD`
+tarfilename="xxdiff-$VERSION.src.tar.gz"
+cd $dn
+cp -R $bn xxdiff-$VERSION
+rm -f $tarfilename
+tar zcvf $tarfilename xxdiff-$VERSION

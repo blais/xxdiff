@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: overview.cpp 150 2001-05-24 06:18:40Z blais $
+ * $Date: 2001-05-24 02:18:40 -0400 (Thu, 24 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -117,11 +117,11 @@ void XxOverview::drawContents( QPainter* pp )
    }
 
    // Get the files and compute lengths.
-   uint nbLines = diffs->getNbLines();
+   XxDln nbLines = diffs->getNbLines();
    XxBuffer* files[3];
    XxFln flines[3];
    XxFln maxlines = 0;
-   int ii;
+   uint ii;
    for ( ii = 0; ii < nbFiles; ++ii ) {
       files[ii] = _app->getFile( ii );
       XX_ASSERT( files[ii] != 0 );

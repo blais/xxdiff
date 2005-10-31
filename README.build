@@ -1,0 +1,38 @@
+xxdiff README
+------------------------------
+
+Home page: http://xxdiff.sourceforge.net
+Author: Martin Blais <blais@iro.umontreal.ca>
+
+To build from source:
+------------------------------
+
+# Run automoc
+perl ./automoc
+
+# Configure for platform
+./configure
+
+# Compile
+make
+
+# Install
+su - 
+cp src/xxdiff /usr/X11R6/bin
+
+
+
+To build from redhat srpm:
+------------------------------
+
+# Standard procedure: cp pristine sources and run automated build.
+cp xxdiff-<version>.tar.gz /usr/src/redhat/SOURCES
+rpm -ba xxdiff/spec/xxdiff-<version>.spec
+
+
+
+
+To distribute source I use:
+------------------------------
+
+make dist

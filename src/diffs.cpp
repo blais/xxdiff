@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: diffs.cpp 142 2001-05-22 07:48:13Z blais $
+ * $Date: 2001-05-22 03:48:13 -0400 (Tue, 22 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1516,9 +1516,14 @@ bool XxDiffs::checkSelections( const XxLine::Selection sel ) const
 //
 XxDln XxDiffs::getDisplayLine( const XxFln fline, const XxFno fno ) const
 {
-   // FIXME todo
-   XX_ASSERT( 0 );
-   return 42;
+   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+      const XxLine& line = getLine( ii );
+
+      if ( line.getLineNo( fno ) == fline ) {
+         return ii;
+      }
+   }
+   return 0;
 }
 
 XX_NAMESPACE_END

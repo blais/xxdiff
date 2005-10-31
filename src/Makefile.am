@@ -45,6 +45,8 @@ xxdiff_DEPENDENCIES += $(UIDESIGNER_GENHEADERS) $(UIDESIGNER_GENSOURCES)
 ui_dialogs: $(UIDESIGNER_FILES)
 
 EXTRA_DIST += $(UIDESIGNER_FILES)
+#	$(UIDESIGNER_GENHEADERS)
+#	$(UIDESIGNER_GENSOURCES)
 
 # add dependency for version
 help.o: ../configure.in
@@ -103,6 +105,7 @@ noinst_HEADERS = \
 	app.inline.h \
 	suicideMessageBox.h \
 	defs.h \
+	types.h \
 	diffs.h \
 	diffs.inline.h \
 	builder.h \
@@ -141,7 +144,7 @@ noinst_HEADERS = \
 
 man_MANS = xxdiff.1
 
-EXTRA_DIST += xxdiff.1 mine older yours pixmaps old
+EXTRA_DIST += xxdiff.1 mine older yours pixmaps old old-qt
 
 ################################################################################
 # Qt moc targets

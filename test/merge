@@ -1,0 +1,99 @@
+Digested diff3 docs:
+
+There are two types of reported hunks by the merge feature:
+
+  `conflict': where only OLDER differs.
+  `overlaps': where all three files differ.
+
+In all cases, where we don't select a change, we select MINE (SEL1).
+diff3 options, those must be used along with the -m (--merge) option:
+  -e : `selects' conflicts and overlaps
+  -3 : `selects' conflicts only
+  -x : `selects' overlaps only
+  -A : `selects' conflict, overlaps and merged changes
+
+  -E and -X : versions of -e and -x that produce less output when not
+              using the -m option.
+
+So our algorithm is simple, two choices:
+
+ 1) first select SEL1 globally, then spawn diff3 -m, with the appropriate
+option, find all the edits and unselect the reported edits.  Upside: we don't
+perform _any_ algorithmic work.  Downside: we need to write a new parser because
+the output of diff3 -m is an ed script.
+
+ 2) do it by hand and work through all the lines, selecting lines as below:
+
+AAA (SAME	)	 UNSELECTED
+BAA (DIFF_1	)	 SEL1
+ABA (DIFF_2	)	 SEL1 (3)
+AAB (DIFF_3	)	 conflict
+-AA (DELETE_1	)	 SEL1
+A-A (DELETE_2	)	 SEL1 (3)
+AA- (DELETE_3	)	 conflict
+A-- (INSERT_1	)	 SEL1
+-A- (INSERT_2	)	 SEL1 (3)
+--A (INSERT_3	)	 conflict
+ABC (DIFF_ALL	)	 overlap
+AB- (DIFFDEL_1	)	 overlap
+A-B (DIFFDEL_2	)	 overlap
+-AB (DIFFDEL_3	)	 overlap
+
+This is way simpler to implement and more efficient.
+
+
+--------------------------------------------------------------------------------
+From the docs:
+
+   When two people have made changes to copies of the same file,
+`diff3' can produce a merged output that contains both sets of changes
+together with warnings about conflicts.
+
+   One might imagine programs with names like `diff4' and `diff5' to
+compare more than three files simultaneously, but in practice the need
+rarely arises.  You can use `diff3' to merge three or more sets of
+changes to a file by merging two change sets at a time.
+
+   `diff3' can incorporate changes from two modified versions into a
+common preceding version.  This lets you merge the sets of changes
+represented by the two newer files.  Specify the common ancestor version
+as the second argument and the two newer versions as the first and third
+arguments, like this:
+
+     diff3 MINE OLDER YOURS
+
+You can remember the order of the arguments by noting that they are in
+alphabetical order.
+
+   You can think of this as subtracting OLDER from YOURS and adding the
+result to MINE, or as merging into MINE the changes that would turn
+OLDER into YOURS.  This merging is well-defined as long as MINE and
+OLDER match in the neighborhood of each such change.  This fails to be
+true when all three input files differ or when only OLDER differs; we
+call this a "conflict".  When all three input files differ, we call the
+conflict an "overlap".
+
+   `diff3' gives you several ways to handle overlaps and conflicts.
+You can omit overlaps or conflicts, or select only overlaps, or mark
+conflicts with special `<<<<<<<' and `>>>>>>>' lines.
+
+   `diff3' can output the merge results as an `ed' script that that can
+be applied to the first file to yield the merged output.  However, it
+is usually better to have `diff3' generate the merged output directly;
+this bypasses some problems with `ed'.
+
+
+
+   You can select all unmerged changes from OLDER to YOURS for merging
+into MINE with the `-e' or `--ed' option.  You can select only the
+nonoverlapping unmerged changes with `-3' or `--easy-only', and you can
+select only the overlapping changes with `-x' or `--overlap-only'.
+
+   The `-e', `-3' and `-x' options select only "unmerged changes", i.e.
+changes where MINE and YOURS differ; they ignore changes from OLDER to
+YOURS where MINE and YOURS are identical, because they assume that such
+changes have already been merged.  If this assumption is not a safe
+one, you can use the `-A' or `--show-all' option (*note Marking
+Conflicts::.).
+
+--------------------------------------------------------------------------------

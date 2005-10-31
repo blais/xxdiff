@@ -1,0 +1,11 @@
+Makefile
+Makefile.in
+config.*
+configure
+aclocal.m4
+ltmain.sh
+ltconfig
+libtool
+config.sub
+config.guess
+xxdiff-*.tar.gz

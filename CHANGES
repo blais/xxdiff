@@ -1,0 +1,1159 @@
+# -*- mode: text -*-
+#
+# CHANGES for xxdiff
+#
+# $Id: CHANGES 144 2001-05-24 04:21:42Z blais $
+#
+
+------------------------------
+
+Version 1.10:
+
+   * Release.
+
+Version 1.9.3:
+
+   * Types cleanup (XxFln and XxDln and more).
+   * Implemented goto-line feature in search dialog.
+   * Implemented @@.* removal in "Save As" because ClearCase takes forever to 
+     come up with a directory that we don't care about anyway.  Save As when
+     using ClearCase extended syntax should be fast now (untested).
+   * Started implementing goto-line feature (unfinished).
+   * Finished implementing copyFile feature.
+   * Bug fix in --list-resources.
+
+Version 1.9.2:
+
+   * added "-a" option for direct support when diff thinks of binary files
+   * added "--args" option to specify arbitrary arguments to diffs
+   * sets titlebar for 3 files
+   * now returns a nice error message when dir diff invoked with 3 files.
+   * added file copy feature for directory diffs (idea from 
+     Guillaume Kerrien, gkerrien@free.fr)
+   * enable state on view popup now makes sense
+   * started working on file copy idea, FIXME not done
+   * verified that when ignoring CR/LF, and then saving, it does not introduce
+     lines? not a bug.
+
+Version 1.9.1:
+
+   * Fixed bug in --list-resources option, now prints all resources, regardless
+     if they have a value or not.
+   * Fixes for OpenBSD and Debian ports.
+
+------------------------------
+
+Version 1.9:
+
+   * Release.
+     Recursive directory diffs and fix for broken 3-way diffs in 1.7.
+
+Version 1.8.3:
+
+   * Disable opening with no files.
+   * add URL to web page in about box.
+   * Changed Makefile not to use buggy automatic filenames (broken with automoc)
+   * Starting xxdiff without filenames is not possible anymore.
+   * Fixed -w and -b cmdline switches
+   * Fixed toggle options bug from menus
+   * Fixed options dialog bug.
+
+Version 1.8.2:
+
+   * release and ?
+
+Version 1.8.1:
+
+   * Started using CVS and ChangeLog actively, so releases now should contain
+     more stuff in them.
+   * made errors dialog pop in front of main window, not behind
+   * separated suicide message box
+   * removed tabwidth dialog
+   * finished display options dialog.
+   * added display options in options dialog, and made switch
+     automatically from menu invocation to correct tab
+   * fiddled with secondary merge window a bit. using qsplitter
+     doesn't work well, so nix it.
+   * Horizontal scrollbar now hides when not necessary.
+   * made color selection dialog work.
+   * Separate merged view classes.
+   * Fixed usage message output of exception caught.
+   * implemented simple ifdef markers output. still have to become selective on
+     this output (i.e. don't output empty regions).
+   * added new resources for text tags.
+   * Small changes in markers file dialog.
+   * removed warning about unselected regions when saving, use markers dialog
+     instead.
+   * implemented file dialog with markers selection for unselected regions.
+   * brand new search dialog, muchos better than the last one.
+   * renamed _GCC to _GNU.
+   * changed the way the GNU compiler is recognized.
+   * resources.h: static methods to get res names.
+   * app.cpp: removed hardcoded resource names.
+
+------------------------------
+
+Version 1.8:
+
+   * Release.
+     Recursive directory diffs and fix for broken 3-way diffs in 1.7.
+
+Version 1.7.6:
+
+   * Fixed 3-way diffs that were broken between 1.6.9 and 1.6.12.
+     (Will have to release again because of that.)
+   * Fixed bugs in new space-tidying function.
+   * Remove undef calls, so that XX_TRACE() works everywhere, replaced by
+     uniform XX_LOCAL_TRACE() trick.
+   * Factored options dialog into three tabs, disabled 2-way options in 3-way 
+     mode.
+   * Removed old diff options dialog.
+   * Creating errors in editing options should display errors in dialog, 
+     cleaned up cerr output, now goes into dialog.
+
+Version 1.7.5:
+
+   * Bug fixes.
+   * More work on options dialog.
+   * Fixed recursive diff and build solely from output combination.
+   * Major review of resource names.
+   * United colors.
+   * Resource improvements, lots of important changes, user-visible 
+     consequences (resource names have changed).
+   * Added resources for GNU diff options (-r) (-i) etc
+
+Version 1.7.4:
+
+   * Some unfinished work on changing command lines.
+
+Version 1.7.3:
+
+   * Sped up resources compilation with a simple const.
+   * Completed UI menus changes.
+   * Fixed bug in dir diffs parsing.
+   * Added designer dialog for diff options, unfinished implementing.
+   * Added direcotry color in color legend.
+   * Removed forced italic font, we can just use the SGI style now.
+
+Version 1.7.2:
+
+   * Add recursive option to diff options menu.
+   * Hide files goes in dir diff options menu.
+   * Separate options that influence the diff command line and those that
+     are only about display. ("diff options" menu vs. "display" menu)
+   * Move "redo diff" and "diff args" into new "options" menu.
+   * Move "hide CR" menu in new "display" menu.
+
+Version 1.7.1:
+
+   * In overview, coverage line is covering region properly now (it used to
+     cover to the center of lines).
+   * Parsing of directory diffs is now done using solely the diff output, and
+     not reading the directories themselves anymore.
+   * Fixes for recursive directory diffs. Recursive now works!!
+   * Added resources for supporting recursive and non-recursive dir diff.
+
+------------------------------
+
+Version 1.7:
+
+   * Release.
+     Directory diffs introduction warrants major number release but I'll
+     release 2.0 when recursive directory diffs work. For work we'll let
+     some people bang on it before 2.0.
+
+Version 1.6.17:
+
+   * Fixed compilation with g++ under Linux.
+
+Version 1.6.16:
+
+   * Added forgotten "common subdirectories" parsing to dir diffs parser.
+   * Fixed hunks in dir diffs.
+   * Fixed color documentation bug.
+   * Added "directories" line type and resources (colors).
+   * Fixed bug: running xxdiff with two empty files crashed it.
+   * In directory diffs, a lot of UI has been disabled (e.g. selection).
+   * Removed builderDirs2Sep from compilation.
+   * Changed the toolbar buttons for directory diffs.
+   * Add a toolbar button in dir diffs mode to diff files at cursor
+   * Added an option to hide changed files in directory diffs.
+
+Version 1.6.15:
+
+   * Finished first implementation of directory diffs using dir diff parser.
+
+Version 1.6.14:
+
+   * Added support for hiding carriage returns in diffs.
+
+Version 1.6.13:
+
+   * Finished directory diffs parser implementation.
+
+Version 1.6.12:
+
+   * Removed instantiation of std::vector<string> for size.
+   * More of implementing the directory diffs builder.
+
+Version 1.6.11:
+
+   * Factored some generic functionailty in XxUtil.
+   * Started parser directory diffs builder.
+
+Version 1.6.10:
+
+   * Factored some of the builders simple code into a base class.
+   * Started parser directory diffs builder using output of diff -q -s.
+   * Changed default configure options to compile rcfile resources by default.
+
+Version 1.6.9:
+
+   * Compiled with qt-2.2.
+   * Changed style to use new available SGI style in qt-2.2.
+     It now has exactly the SGI looks!
+   * Incorporated changes by Bob Bell <bobbell@zk3.dec.com> for Tru64 port.
+
+Version 1.6.8:
+
+   * Cleanup of preliminary parser for directory diffs.
+   * Noticed that directory diffs are dead slow, tried to optimize using
+     fork()/execve().  Had to provide envp from main().
+   * Implemented faulty mouse-drag on merged view.
+   * Added diffutils-2.7 source code to package in preparation to link with it
+     directly. I think that this will make directory diffs faster.
+
+Version 1.6.7:
+
+   * diff3: When selecting a region whose text is the same as another,
+     e.g. DELETE_1 selecting 2 or 3, show both of these as selected (even though
+     the selection is allowed to vary between 2 or 3, we don't care).
+   * Renamed XxFile to XxBuffer in preparation for dir.diffs.
+   * Fixed bug with tooltip. Tooltip now works ok with truncation and resize.
+   * Implemented mouse-drag like in emacs on Ctrl+Button3.
+   * Fixed bug with copy label.
+   * Implemented preliminary directory diffs parsing.
+
+Version 1.6.6:
+
+   * Dist target was broken, put pixmaps back in and getopt.h
+
+Version 1.6.5:
+
+   * Fixed label resizing restriction.
+   * Implemented truncation [...] of pathname in filename label.a
+
+Version 1.6.4:
+
+   * Misc. UI changes.
+   * Removed forgotten tracing from diff3 builder.
+   * Ordered CHANGES file in reversed (makes more sense).
+
+Version 1.6.3:
+
+   * Fixed exit-on-same feature that was broken in 1.6.2 (hubert)
+   * Re-introduced support for xdiff's -N feature.
+
+Version 1.6.2:
+
+   * Modified to use GNU getopt_long().
+   * Removed -N option and implemented --titleX options instead.
+   * Implemented resource specification on cmdline (belley and J.Slade)
+   * New menu: windows.
+   * Implemented the toolbar and added lame pixmaps.
+   * Fixed "socket already in use" bug.
+
+Version 1.6.1:
+
+   * Fixed man page version and bug.
+   * Filename labels now show the full filenames as a tooltip if it doesn't fit
+     in the label.
+
+------------------------------
+
+Version 1.6:
+
+   * Release. Has been tested by many eng. at DL, quite stable.
+
+Version 1.5.9:
+
+   * Converted signal() to sigaction() for portability (caught by fjaubert).
+   * Fiddled makefiles to work under Solaris2.8.
+
+Version 1.5.8:
+
+   * Fixed bug in 3-way diff when diff at the very first line (thanks to 
+     Damjan Lango for reporting it).
+
+Version 1.5.7:
+
+   * Fixed Makefile problem with IRIX.
+   * Fixed doc distribution makefile problem.
+   * Fixed save as bug in 3-way (thanks to hubert for reporting it).
+
+Version 1.5.6:
+
+   * Added documentation which had mysteriously disappeared.
+
+Version 1.5.5:
+
+   * (don't remember what)
+
+Version 1.5.4:
+
+   * Added feature: ask user to save if the selections wouldn't save anything
+     different (ask because it could be the case that the file has changed
+     from some other program).
+   * Fixed majorly important issue: pressing Escape on a dialog did NOT cancel
+     before (I can't believe I survived thru this since I always dismiss them
+     like that).  Well, now it works as expected.
+
+Version 1.5.3:
+
+   * Fixed cursor centering bug (jaubert).
+
+Version 1.5.2:
+
+   * Wrote SGML documentation!
+
+Version 1.5.1:
+
+   * File renaming in preview of directory diff implementation.
+   * Noticed that ``ignore whitespace'' will not work with cleartool diff'',
+     fixed that with special case.
+   * Wrote tools/diffToClearCase wrapper script.
+   * Merged 1.4.6 -> 1.4.7 changes and this.
+
+------------------------------
+
+Version 1.5:
+
+   * Release (lots of bug fixes).
+
+Version 1.4.7:
+
+   * Added horizontal-diffs-ignore-whitespace, which ignores whitespace
+     differences when doing diffs horizontally (a separate process than
+     the usual line-per-line diffs).  This feature is a little bit tricky:
+     you cannot just skip the whitespace, to begin skipping, all the sides 
+     have to start with some whitespace.
+   * Fixed bug with horizontal diff: rendering tabs wasn't done correctly.
+   * Added resource to disable display of cursor (for mcguffm, jfr?).
+   * Fixed geometry parsing bug (ptrembla), result is still not perfect, need to
+     communicate with winmgr to do it properly.  Qt doesn't offer support there?
+   * Fixed makefile linker for libstdc++ rt dependency.
+   * Fixed tabs rendering bug.
+
+Version 1.4.6:
+
+   * Fixed nasty bug in diff3 parser (due to funky clearcase reporting).
+     Caught by belley, thank you!
+
+Version 1.4.5:
+
+   * Split/swap/merge renamed split/swap/join to avoid confusion with 
+     upcomin merge feature.
+   * Added merge feature.
+
+Version 1.4.4:
+
+   * Fixed bug on IRIX: \n doesn't show in --help output.
+   * Fixed ``return value of 1'' mistake introduced in 1.4.3.
+   * Better handling of errors.
+   * Added edit left/middle/right feature, accel resources + edit command
+     resource.  Works with a signal handler waking up the event queue thru a
+     socket.
+   * Now warns about ignore resource in rcfile.
+
+Version 1.4.3:
+
+   * rpm_build fix.
+   * urgent bugs: problem xxdiffrc (belley).  Specification of command
+     resource is now more robust.  Merged command and command-args resources
+     (simpler and nicer).
+   * changed resource: ignoreErrors is now false by default.
+
+Version 1.4.2:
+
+   * Geometry now includes position, Xt-style (i.e. WxH+L+T), for belley
+     (this allows you to specify a full-screen xxdiff).  Caveat: there is
+     some flickering on startup, because of Qt limitations: a resize first
+     occurs, and then a move.
+   * Smaller font for filename labels.
+
+Version 1.4.1:
+
+   * Bug fix: find next unselected and prev unselected were broken.
+   * Bug fix: select global unselected wasn't working for first line.
+   * Added warn-about-unsaved option/resource for gijsbert.
+
+------------------------------
+
+Version 1.4:
+
+   * Release (stable three-way diffs support).
+
+Version 1.3.13:
+
+   * CHANGES update.
+   * Added --list-resources option to list the supported resources and docs.
+   * Adding samples.xxdiffrc to bin release becomes unnecessary.
+   * Finished gen.init.file feature.  Not sure if I like it too much.
+   * Fixing split/swap/join for 3-way structures.
+   * Split/swap/join now gets rid of empty lines.
+
+Version 1.3.12:
+
+   * More work on gen.init.file.
+
+Version 1.3.11:
+
+   * Static documentation and correct checking.
+   * Expanded cursor 1 pixel up and down for jfr.
+
+Version 1.3.10:
+
+   * Added resource documentation generating capabilities.
+
+Version 1.3.9:
+
+   * Added default bindings Ctrl+R -> Redo Diff for giasson.
+   * Fixed buffer allocation bug for string rendering which broke on long lines.
+   * Bug fix: horizontal scrollbar is not correct because of varying widths of 
+     text widgets due to linenumbers.  adjustScrollbars() cannot deal with it
+     correctly since it gets called to adjust on the first widget's resize and
+     the other ones haven't been resized yet (at that point).  We need to make
+     the line numbers widget all the same size, but for that the lineNumbers
+     format string has to be the same for all.
+     (fixed).
+   * Fixed bottom filling region drawing minor bug.
+
+Version 1.3.8:
+
+   * New ideas in CHANGES.
+   * Fixed bug with empty files (for belley).
+
+Version 1.3.7:
+
+   * Fixed Linux compilation.
+   * Added "middle" commands.
+   * Fixed bug with file open and horizontal diffs.
+
+Version 1.3.6:
+
+   * Fixed IRIX compilation, lexer bug to parse "/".
+   * Two scrollbars for 3-way diff.
+   * Fixed "next difference" bug.
+
+Version 1.3.5:
+
+   * Three-way diffs now work!
+
+Version 1.3.4:
+
+   * Lots of work towards 3-way, almost there.
+
+Version 1.3.3:
+
+   * More unfinished work on 3-way diffs.
+
+Version 1.3.2:
+
+   * Figured out 3-way diff minimum set.
+
+Version 1.3.1:
+
+   * New ideas in CHANGES file.
+   * Started working on diff3 support.
+   * (this unstable version will not compile)
+
+------------------------------
+
+Version 1.3:
+
+   * Release.
+
+Version 1.2.15:
+
+   * Fixed 1.2.14-introduced bug with redo diff on empty xxdiff.
+   * Made sure foreground color works: fixed bug, it wasn't working.
+   * Simplified getting files to other objects.
+
+Version 1.2.14:
+
+   * Updated README.
+   * Stripped down man page.
+   * Documentation web page: explain use patterns: merging, leaving regions
+     unselected for further editing, short-lived diff (an assumption), 
+     emacs bindings.
+   * Bug fix: crashes when specifying only one file!
+   * Finished saving unselected anyway with tagging.
+   * Fixed global selection bug.
+   * Added all new colors to color legend, improved code a bit.
+   * Made the resources object a singleton everywhere in the code.
+   * Bug fix: isAsciiText doesn't deal with C-l's (which occurs often in text), 
+     make it work as ascii.  Now we're only checking the very first line of
+     text.
+   * Added diff option toggles and resources and qualities.
+   * Bug fix: redo diff twice doesn't reappear (bug under IRIX only)
+
+Version 1.2.13:
+
+   * Fixed Linux compilation.
+   * Misc. changes.
+   * Wrote web documentation.
+
+Version 1.2.12:
+
+   * Finished merged view (pretty much).  Added cursor drawing, scroll
+     tracking and proper resizing.
+
+Version 1.2.11:
+
+   * Comments.
+
+Version 1.2.10:
+
+   * Added a color for unmerged hunk text in merged view.
+
+Version 1.2.9:
+
+   * Made line numbers same width for single hor.scrollbar.
+   * Even more fiddling with the merged widget, almost done
+     (still have to fix the vscroll)
+
+Version 1.2.8:
+
+   * More fiddling with the merged widget.
+
+Version 1.2.7:
+
+   * Added menu accelerators.
+   * Fixed toggle button bug.
+   * Added "select X and go to next unselected, wrap around if at the end of
+     the file and save if no more unselected" (more simply called "select X and 
+     next").  This feature for rapid merging (request by Peter Maly and
+     jdilelle).
+   * Started sketching out merged view.
+
+Version 1.2.6:
+
+   * Line numbers in their own widget.
+   * Bug fix: tabs weren't shifted correctly when showing line numbers
+     (-> implement widget)
+   * Added a resource for preferred default geometry (for George Zamba)
+   * Cleaned up boolean resource access.
+   * Added a resource and UI for toggling markers (but no functionality)
+   * Bug fix: tabs and horizontal diffs weren't rendered synchronously.
+  
+Version 1.2.5:
+
+   * Fixed bug in reading accelerators, made nicer.
+   * Added some more inline help.
+   * If a file is non-existent, now writes which file on stderr (for gijsbert).
+
+Version 1.2.4:
+
+   * Added comments to CHANGES.
+   * Wrote proper accelerator reading routine, home/end and func keys now work
+     (fixes bug: Shift+F1 help doesn't work on on context menu).
+   * Clicking on the filename label puts the filename in the clipboard (this is
+     a cool feature for making merge review comments with long ClearCase 
+     filenames).
+
+Version 1.2.3:
+
+   * Added reported bug to this file, reorganized this file.
+
+Version 1.2.2:
+
+   * Bug fix: when file is not writable, (e.g. clearcase not checked out) error
+     was not reported (reported by gdh).
+   * Bug fix: redo diff was broken.  Change one of the files, then redo diff, 
+     it crapped out (reported by belley).
+   * Moved dialogs in their own compilation unit.
+   * Provided simple command to perform redo diff without asking for options 
+     (requested by belley)
+   * Started sketching out on-context help.
+
+Version 1.2.1:
+
+   * Fixed bug with lots of tabs in long lines.
+
+------------------------------
+
+Version 1.2:
+
+   * Release.
+
+Version 1.1.7:
+
+   * comments added to CHANGES file.
+
+Version 1.1.6:
+
+   * important bug fixed: core dumps on options with whitespace in them.
+   * added exitOnSame option thru resource.
+
+Version 1.1.5:
+
+   * Fixed minimum size limitation on filenames.  ClearCase pnames tended to 
+     present a limitation on the horizontal size.
+
+Version 1.1.4:
+
+   * Fixed IRIX compilation.
+
+Version 1.1.3:
+
+   * Finished rc file support.
+   * Fixed horrible horizontal scrolling bug introduced in 1.1.
+   * Added accelerators for horizontal scrollbar.
+   * Fixed bug drawing horizontal cursor with hor.scroll bar to the right.
+   * Added simple dialog for setting tabs at arbitrary values.
+   * Moved compile options into configure script interfaces:
+      - optimized vs. debug
+      - dynamic vs. static linking for STLport and Qt
+   * Better autoconf/automake support.
+
+Version 1.1.2:
+
+   * Unfinished rc file support (~/.xxdiffrc or XXDIFFRC env var).
+   * Fixed bug with opening with no files.
+
+Version 1.1.1:
+
+   * Fixed bug: initially setting horizontal diff thru resource wasn't working.
+   * Added lighter colors for selected and deleted (looks much nicer in 
+     horizontal diffs more).
+   * Added "paste with line numbers" option, which add the name of the file as 
+     well as line numbers, this will be great for making review comments.
+
+
+------------------------------
+
+Version 1.1:
+
+   * Release.
+
+Version 1.0.7:
+
+   * Horizontal diffs are calculated and displayed.  It rocks!
+   * Toggle menus are now displayed/updated correctly.
+
+Version 1.0.6:
+
+   * Now supports any length of line.
+   * Cleaner way to do search (no visible changes)
+   * Faster tabs rendering, correct computation of line length with tabs which
+     affected horizontal scrollbar.
+   * Silenced the raw font warning in optimized mode.
+
+Version 1.0.5:
+
+   * Ported to STLport.
+   * Static linkage for better Linux distribution.
+   * Fixed a bug when vertical maximizing the overview: didn't redraw 
+     visible regions correctly.
+
+Version 1.0.4:
+
+   * Man page is now generated and compiled inline by default.
+   * I'm so sloppy, tabs other than 8 were still broken.
+     Hopefully this is finally fixed.
+   * Fixed a bug in the search feature.
+
+Version 1.0.3:
+
+   * Parsing command line for three-way and directory diffs has been done.
+   * Fixed important tabs bug (1.0.2 fix was botched).
+   * Supports empty files.
+   * Updated man page.
+   * Redo diff is now a dialog that allows to change the command.
+
+Version 1.0.2:
+
+   * Fixed important tabs bug.
+   * Added display of visible region in overview area.
+   * Removed senseless "global unselected unselect" command.
+   * Moved strstream's to stringstream's.
+   * Added new color for changed regions which have text.
+
+Version 1.0.1:
+
+   * Removed no background X11 hack.
+   * Some fixes to get compiling under MIPSpro 7.3.1.1m compiler.
+
+
+------------------------------
+
+Version 1.0:
+
+   * First public release, features match xdiff 1.0.
+
+--------------------------------------------------------------------------------
+
+Wishlist/ToDo list:
+------------------------------
+
+ - cvs unmerge:
+   1) build the two diffs using a single file, and a single file storage, to
+      save memory
+   2) build it in xxcvs
+
+ - also add 'remove' to copy file menu, when appropriate, to make it
+   symmetrical.
+
+ - !!! - save with ifdefs shouldn't put #else on empty regions.
+
+ - link with GNU diff, script to modify the source code
+
+ - hide one file's diffs using color table in 3-way diffs
+
+ - merged view: should have the option of seeing both files' hunks
+
+ - highlight search results (added over, markers)
+
+gijsbert dinner:
+
+ - can we get two pipes to read from, stdin and another?
+   how can you redirect this in a shell cmd?
+
+ - unlink the temporary files right away
+
+tmp files:
+ - catch signal to delete tmp files?
+ - can I use a named pipe instead?  would that be better?
+   does it just delete itself once it's done?
+ - hey, I can delete the tmp files right after I called GNU diff!
+   what am I doing right now?
+
+
+ - advertise xxcvs on freshmeat
+
+
+
+linking with GNU diff:
+ - dup() to bind fd, then set it back
+
+
+bugs:
+ - does xxdiff try to cleanup tmp file on startup? if so that is a bug, 
+   because one can run multiple xxdiff's on the host.
+
+
+mark "options" clearly as GNU diff options, so that there is no confusion.
+
+cool idea: add a command to be run to automatically load the said file in emacs,
+e.g. click on title bar and send an emacsclient command.
+
+I want mouse-drag with third button.
+
+Also, in 3-way diff, it would be nice to be able to ignore one file and to diff
+only the two other ones without restarting, with keeping the three files. You
+could do this with just changing the colors, and the next/previous methods.
+
+links directly with GNU diff
+
+
+
+
+
+
+
+
+ - cut and paste of a single filename should not include the \n
+   (but only when the hunk is not multiline)
+
+ - launching xxdiff dirs with two same directories results in an empty
+   buffer thingy, because diff itself just silently returns.
+
+ - have a progress meter thingy for long processes (e.g. conf conf-dl)
+
+ - ignore horiztonal whitespace option is buggy:
+   two different lines who are different at their beginning, but the end
+   is the same except for some whitespace.
+
+ - toolbar buttons brokne under octane
+ - edit color dialog broken under octane2
+
+
+
+
+  * try to avoid loading Qt library in case of option -D specified, for faster
+    startup (hubert)
+
+  * idea: functionality that spawns a bunch of diffs for all the changed files
+    in a directory (dirdiffs only).
+
+  * gdamn editing!  edit, then kill the xxdiff, it should keep working. 
+    use vi in a shell.
+
+  * implement some editing in the merged view!!
+
+
+ | Peter Becker wrote:
+ | > 
+ | > Martin Blais wrote:
+ | > 
+ | > > Hello Qt developers.
+ | > > (this post is slightly off-topic)
+ | > >
+ | > > I wrote a GPL'ed file comparison and merging utility using Qt, it's called
+ | > > xxdiff (an xdiff clone + lots of new features), that can be of interest to
+ | > > developers in this forum:
+ | > 
+ | > I am interested a lot but I have to use Windows NT so I can't use the binaries. I
+ | > tried to compile your program (using progen/tmake/Borland C++ Builder) but had
+ | > some problems (see below).
+ | > 
+ | > Can you help me? Since we are in beta now and I think the program is quite stable
+ | > I might have some spare time the next days but maybe you can give me some hints
+ | > before I start porting.
+ | 
+ | Kool!  AFAIK you're the first one to try porting it to Windows.  I'll look at
+ | the error messages and try to guess (see below).
+ | 
+ | 
+ | 
+ | > [...]
+ | > 
+ | > > Anyway, my question:
+ | > >
+ | > > I want to implement some support for CM systems, in particular ClearCase and
+ | > > CVS. I wish to implement this in a generic manner, in order to support
+ | > > multiple CM systems.
+ | > >
+ | > > I need your input: what CM-related features would you like to see supported in
+ | > > a file comparison program?  Here's what I'm thinking of:
+ | > >
+ | > >  - revision tree listing i.e. looking at the history
+ | > >    of revisions
+ | > >
+ | > >  - automatic version extraction i.e. being able
+ | > >    to switch which version of file xxdiff is
+ | > >    diffing with, probably by clicking in the
+ | > >    revision tree listing
+ | > >
+ | > >  - ability to checkout latest version (prior to saving
+ | > >    a merge result).
+ | > >
+ | > >  - All CM commands should be run in background in case
+ | > >    of slow access to CM server
+ | > >
+ | > > Anything else?  Please let me know, I want to know what could be useful to
+ | > > you.  Any comments appreciated.
+ | > 
+ | > Some nice but really not important feature: connecting the lines of the code with
+ | > the last changes (and their logs). This is useful if you ask yourself: what is
+ | > this code for? But maybe this feature shouldn't go into a diff tool.
+ | 
+ | Surely it could be nice to be able to extract and display the log comments for
+ | shown revisions, good idea! I'll add it in.
+ | 
+ | 
+ | 
+ | > Something we use all the time is cvs edit -- it would be useful for us if a merge
+ | > tool can handle read-only checkout and edit/unedit.
+ | 
+ | When I mentioned "checkout" above, in cvs it's called "edit", so we're talking
+ | about the same thing:
+ | 
+ | >From cvs documentation:
+ | > you are planning to edit it, use the `cvs edit' command.  Some systems
+ | > call this a "checkout", but CVS uses that term for obtaining a copy of
+ | > the sources (*note Getting the source::.), an operation which those
+ | > systems call a "get" or a "fetch".
+ | 
+ | 
+ | 
+ | 
+ | > Useful for the comparison of different versions of the program is a program that
+ | > combines directory and file comparison -- the overview shows all files and if they
+ | > are different, the files that are different can be opened in the file diff.
+ | 
+ | xxdiff already does that.  If you call it on two directories, you can select
+ | files and use the popup menu to get an xxdiff of the specific files.
+ | 
+ | xxdiff also works recursively on directories.  It makes it really easy to
+ | compare hierarchies this way (this is how I merge my configuration files, for
+ | example).
+ | 
+ | However, you just gave me another idea: one may wish to compare tagged
+ | versions, as a directory diff, e.g. compare hierarchy with 1.8 tag and 1.9
+ | tag.  I'll look into how I could do this. This would be a cool feature.  Do
+ | you get it?  for example, you could spawn a directory diff in your current
+ | directory, asking xxdiff to compare with the latest tagged versions.
+ | 
+ | 
+ | 
+ | > 
+ | > > Please note that in the same way that I don't intend to make xxdiff into a
+ | > > text editor, I don't intend to make xxdiff a general-purpose interface to CM
+ | > > systems either. I want to include only/mostly features that pertain to file
+ | > > comparison.
+ | > 
+ | > Check yourself if the features I mentioned fit -- I am not sure about this. Just
+ | > some ideas I got spontaneously.
+ | 
+ | Great ideas!  Thank you very much.
+ | 
+ | I'llsend you comments on the errors a little later, I gotta meeting just now.
+ | 
+ | 
+
+CM support:
+
+
+   * redo diff clears selections!  can we do something about it?
+
+
+automate CHANGES file update using CVS on xxdiff.sourceforge.net
+
+
+   * add dialog that does "guided" "select next and get the hell out".
+     or just make that really clear in the toolbar buttons.
+
+qt email list: question about CM
+
+   * perhaps the "save selected only" option should be in the markers dialog?
+
+bug fixes:
+
+   * Editing doesn't work anymore.
+
+   * In dir diffs, remove toolbar buttons, selection menus, open file must be
+     able to select a directory, etc. IOW finish checking that all that is left 
+     works.
+
+   * grab icons from other diffs
+
+new features:
+
+   * add "show merged view on startup" resource
+
+   * search using regexp
+
+   * Allow selection of text, as in an editor, just for cut-n-paste purpose.
+   * dirdiff full path name cut-n-paste option
+   * Add display options dialog with colors, remove color legend, remove tab 
+     width dialog, one big dialog with all display options
+
+   * Remove useless dialogs in dialog.h
+
+   * Provide some lame editing feature, people want it anyway.
+   * low-hanging fruit: saving with ifdefs.
+   * option: instead of saving merged file, save as a patch to be applied
+     (save the two files in temps and run a diff on them).
+
+   * Show symlinks, date and size of files in directory diffs
+   * Add an icon somewhere to show if a directory diff or a simple file diff
+
+   * We need to link to GNU diff directly for the following reason: to avoid
+     the temporary files, when capturing stdin, 
+     We just gotta do it!  But keep supporting the fork() version.
+     see dup2() for how to do this without modifying GNU diff code, and
+     call main() myself.
+
+   * drag sb in overview should scroll
+
+   * Think about generic solution with scripts for CM management
+     - what features do we want to implement?
+
+		document idea about generic CM support!
+		XxConfMgtInterface
+		XxScriptConfMgtInterface
+		script xxdiff.cvs
+		script xxdiff.clearcase
+
+
+perhaps features:
+
+   * Highlight search results.
+
+   * Perhaps change parser to read options as "category.blabla: value"
+   * Add exclude option to diff options
+   * Cleanup similar callbacks in XxApp.
+
+   * Merged view cannot mouse-drag properly.  Implement a more viable solution
+     that will allow to to the inverse drag as well, perhaps setting up a
+     publicly-available indirection table in the XxDiffs object.
+
+   * Improve color types documentation.
+
+   * -w doesn't work on startup when cleardiff is the program we're using.
+     Add resources for those arguments.
+
+   * look at ClearCase's merge, see which ones they identify.
+
+   * urgent bugs: ignore whitespace crashes, any two files (mcguffm)
+     ==> can't reproduce.
+
+   * merged view: add different colors for different selected sides
+
+   * merged view: display both regions in merged view when unselected 
+     (as an option)
+
+   * conflicts... add possibility to save as ifdefs
+
+   * make scripts for automatic release under linux: build tarballs and rpms
+     automatically for both static and dynamically linked versions.
+
+   * add sgml doc and install it with rpms
+
+   * Oh, you just made me think of a new feature: invoking xxdiff with the auto
+     merge feature, and if there are no conflicts it would save silently and not
+     show up.... could be interesting.  I'll put that up on the wishlist.
+
+   * allow region selection for the purpose of cut-n-paste (blouin)
+
+(horizontal diffs)
+   * horizontal diffs with hysteresis
+   * horizontal diffs per word only (option)
+   * horizontal diffs, case sensitive?  dunno (option)
+
+(merged view)
+   * Merged view: the motion commands should work from the merged view.
+   * selection commands should work too
+   * scrolling the merged view should scroll the other view as well.
+
+(line numbers in own widget)
+   * add + and | markers (don't call them annotations, this term is already used
+     terminology for cut-n-paste annotations)
+
+(Misc. UI)
+   * add invert selection functionality
+   * "spawn editor" facility
+   * You just HAVE to allow cut-n-paste annotations of IGNORE text.  Use
+     extended selection!
+   * what's this on a file widget should babble about the specific region
+     which was clicked on.
+   * xxdiff --version tries to open the display, we don't want that.
+   * finish in context help
+   * Allow dragging like a scrollbar in the overview area (like in mgdiff);
+   * it would be nice to be able to select both sides of a hunk for making 
+     merge comments... but thru which UI do we do this?
+   * Separate XxLine::DisplayType of resources... it does not make sense anymore
+   * Implement motion bindings in the merged view too.
+
+(resources)
+   * generate sample.xxdiffrc file at runtime with an help option,
+     default resources should be commented, added ones uncommented.
+
+   * add a cmdline option to select which xxdiffrc to use, I guess it is 
+     already possible by running XXDIFFRC=... xxdiff ...
+
+(make, compile, release process)
+   * fix release_src script for IRIX specifics
+   * when not compiling xrm or rcfile resources, don't compile the files at all
+     (in makefile)
+     ... problem with endif syntax... how can you add a GNU make conditional?
+   * fix dist target under IRIX
+   * link and distribute more easily with STLport under Irix.
+   * Change the include files into the new ANSI ones e.g. #include <cstdio>, 
+     will most likely be done when gcc-3.0 comes around;
+   * Check GNU license wording, is that my choice in there ("at your option")?
+   * License quirk?
+> Dan Veditz: I find it one-sided. His suggestions
+> make it possible for GPL'd projects to use
+> mozilla, but do nothing to share reciprocally so
+> that mozilla.org could make use of GPL'd code.  I
+> also find his comments on how to deal with the Qt
+> license interesting since it has the same
+> compatibility problems. For that license he notes
+> since the QPL is incompatible with the GNU GPL,
+> you cannot take a GPL-covered program and Qt and
+> link them together, no matter how.
+> 
+> However, if you have written a program that uses
+> Qt, and you want to release your program under
+> the GNU GPL, you can easily do that.  You can
+> resolve the conflict for your program by adding a
+> notice like this to it: "As a special exception,
+> you have permission to link this program with the
+> Qt library and distribute executables, as long as
+> you follow the requirements of the GNU GPL in
+> regard to all of the software in the executable
+> aside from Qt."
+
+
+(parsing)
+   * exlpain how CRLF vs LF works in documentation
+   * brightnessHistogramTestWinNTdbg.expect core dumps! check it out.
+   * Detect unified diffs and throw on it, the user might specify such an 
+     erroneous command;
+   * allow diff using a patch file, even containing a patch for many files
+     (easy: let patch patch the file on stdout, grab the output and perform 
+      normal diff)
+   * parse "merge" output and pre-select regions automatically.  this is
+     especially important when using the "and next" commands.
+   * look at all "diff" options and see if any other would be useful with the
+     GUI (e.g. ifdef's saving).
+
+(new features)
+   * add case sensitivity to search feature
+   * rename "regions" to "hunks" and use GNU diff terminology from texinfo
+   * open left/right on an empty xxdiff should allow to open! 
+     supporting one file only.  (on startup AND on an open diff) this can be
+     done easily by specifying the "other" file as an empty file and running
+     the current diff parser.
+   * extended selection (on mouse release normal click except when straddling 
+     lines) allow larger selection (smarter key down/up processing)
+   * Drag-select for selecting multiple lines on button 2;
+   * add option for confirmation when some regions are selected (for gijsbert)
+   * add an option for splitting all CHANGE regions automatically (buh?)
+   * add an option to display context format diffs into its own widget, like 
+     for the line numbers.
+   * allow insertion of marker lines
+   * Add save options for save selected only file dialog;
+   * Keep the cursor line in region after swap->merge transition;
+   * Find named color for default SGI scheme background color (greenish);
+   * feature: show only hunks, collapse ignore regions...
+   * feature: ignore diffs from "this" to "that" (-I option) should we have a
+     different color for ignored diffs?  say e.g. case insensitivity done at the
+     xxdiff level (for that the ``ignore'' algorithm must be done by xxdiff 
+     itself)
+
+(misc. bugs)
+   * make sure non fixed-width fonts work
+   * IgnoreBlankLines is a fundamental misfeature with xxdiff... how to deal
+     with it?  figure it out later.
+
+(one-pane view)
+   * Support one-pane view;
+
+(desktop integration)
+   * add KDE/Gnome preferences (as optional);
+
+(CM integration)
+   * ClearCase/CVS should be integrated on the filename label and in a flexible
+     way.
+
+(documentation)
+   * Integration DocBook documentation into runtime program/man page.  There
+     should only be a single source of documentation (the SGML document), with
+     a minimalist web page.
+
+(Just ideas)
+   * (Internal:) We could change all \n in the file for \0 so that returning a 
+     line would not require the length, and also this way we wouldn't need
+     print in a buffer in order to convert into a QString;
+   * How about listening on a socket for an open command? This could be
+     interesting if the GUI ever becomes too slow to start up, which is not
+     the case now (at least not on my PII-350 nor my Octane);
+   * Display of blank regions should be small, and scrolling should only occur 
+     when there is text (complex to explain: text display will look like
+     the overview area, with appropriate scrolling).  Prototype.
+   * First click on a region selects, second deletes both, third unselects;
+   * Popup menu should implement selection instead of motion commands, maybe 
+   * depending on if clicked on an IGNORE region or not;
+   * Reorganizing text in changed areas... drag-n-drop  la netscape toolbar?;
+   * If arbitrary moving of regions is allowed, add a "reorder" command. Easy 
+     to do, because we keep the original line nos even if we move stuff around;
+   * editing facilities as in ediff (belley)?
+
+KNOWN BUGS
+------------------------------
+
+   * Using diff option "-B" with xxdiff doesn't work for now.
+
