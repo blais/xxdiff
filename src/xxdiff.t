@@ -48,7 +48,7 @@ $(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
 .SUFFIXES: .html .txt
 
 .txt.html:
-	docutils-html --output-encoding=iso-8859-1 $< $@
+	rst2html.py --output-encoding=iso-8859-1 $< $@
 
 .html.h: 
 	sed -e 's/\"/\\\"/g;s/$$/\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
