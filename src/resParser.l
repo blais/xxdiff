@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.l 300 2001-10-23 03:45:33Z blais $
- * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
+ * $Id: resParser.l 399 2001-11-22 06:19:13Z blais $
+ * $Date: 2001-11-22 01:19:13 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -48,9 +48,12 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 %s COLOR_SC COLORBF_SC
 %s COMMAND_SC
 %s COMMANDSW_SC
+%s INITSW_SC
+%s INITSWSTATE_SC
 %s TAG_SC
 %s SHOW_SC
 %s BOOL_SC
+%s HORDIFF_SC
 
 %%
 ":"		{ return COLON; }
@@ -122,6 +125,16 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    );
 }
 
+<INITSW_SC>{id}	{ 
+   int ret = parseFromKeywordList(
+      commandSwitchList, sizeof(commandSwitchList)/sizeof(StringToken),
+      INITSWNAME, "init command switch",
+      yytext, yylval->num
+   );
+   BEGIN(INITSWSTATE_SC);
+   return ret;
+}
+
 <TAG_SC>{iddot}		{
    return parseFromKeywordList(
       tagList, sizeof(tagList)/sizeof(StringToken),
@@ -140,14 +153,21 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    return ret;
 }
 
-<BOOL_SC>{
+<INITSWSTATE_SC>{ 
+([Tt](rue|RUE))|1    { yylval->num = 1; BEGIN(INITIAL); return INITSWSTATE; }
+([Ff](alse|ALSE))|0  { yylval->num = 0; BEGIN(INITIAL); return INITSWSTATE; }
+([Nn](oo?p))|-1      { yylval->num = -1; BEGIN(INITIAL); return INITSWSTATE; }
+}
 
-([Tt](rue|RUE))|1 		{ yylval->num = 1; 
-                                  BEGIN(INITIAL); 
-                                  return BOOLEAN; }
-([Ff](alse|ALSE))|0 		{ yylval->num = 0; 
-                                  BEGIN(INITIAL); 
-				  return BOOLEAN; }
+<BOOL_SC>{
+([Tt](rue|RUE))|1    { yylval->num = true; BEGIN(INITIAL); return BOOLEAN; }
+([Ff](alse|ALSE))|0  { yylval->num = false; BEGIN(INITIAL); return BOOLEAN; }
+}
+
+<HORDIFF_SC>{
+([Nn]one)|0       { yylval->num = HD_NONE; BEGIN(INITIAL); return HORDIFF; }
+([Ss]ingle)|1     { yylval->num = HD_SINGLE; BEGIN(INITIAL); return HORDIFF; }
+([Mm]ultiple)|2   { yylval->num = HD_MULTIPLE; BEGIN(INITIAL); return HORDIFF; }
 }
 
 {id}	{
@@ -174,8 +194,10 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
       case COLOR: BEGIN(COLOR_SC); break;
       case COMMAND: BEGIN(COMMAND_SC); break;
       case COMMANDSW: BEGIN(COMMANDSW_SC); break;
+      case INITSW: BEGIN(INITSW_SC); break;
       case TAG: BEGIN(TAG_SC); break;
       case SHOW: BEGIN(SHOW_SC); break;
+      case HORDIFF_TYPE: BEGIN(HORDIFF_SC); break;
    }
    return yylval->num;
 }

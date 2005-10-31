@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 305 2001-10-24 00:53:14Z blais $
- * $Date: 2001-10-23 20:53:14 -0400 (Tue, 23 Oct 2001) $
+ * $Id: resources.inline.h 390 2001-11-19 17:24:09Z blais $
+ * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -24,9 +24,7 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * CLASS XxResources
@@ -69,6 +67,13 @@ inline const QFont& XxResources::getFontText() const
 
 //------------------------------------------------------------------------------
 //
+inline XxIgnoreFile XxResources::getIgnoreFile() const
+{
+   return _ignoreFile;
+}
+
+//------------------------------------------------------------------------------
+//
 inline const QString& XxResources::getCommand( XxCommand cmdId ) const
 {
    return _commands[ int(cmdId) ];
@@ -81,6 +86,15 @@ inline const QString& XxResources::getCommandSwitch(
 ) const
 {
    return _commandSwitch[ int(cmdId) ];
+}
+
+//------------------------------------------------------------------------------
+//
+inline int XxResources::getInitSwitch(
+   XxCommandSwitch cmdId
+) const
+{
+   return _initSwitch[ int(cmdId) ];
 }
 
 //------------------------------------------------------------------------------
@@ -171,9 +185,23 @@ inline const QString& XxResources::getClipboardFormat() const
 
 //------------------------------------------------------------------------------
 //
-inline XxIgnoreFile XxResources::getIgnoreFile() const
+inline XxHordiff XxResources::getHordiffType() const
 {
-   return _ignoreFile;
+   return _hordiffType;
+}
+
+//------------------------------------------------------------------------------
+//
+inline uint XxResources::getHordiffMax() const
+{
+   return _hordiffMax;
+}
+
+//------------------------------------------------------------------------------
+//
+inline uint XxResources::getHordiffContext() const
+{
+   return _hordiffContext;
 }
 
 //------------------------------------------------------------------------------
@@ -188,6 +216,46 @@ inline void XxResources::setFbColors(
    _foreColors[ color ].setNamedColor( forestr );
    // Note: no need to emit changed(), this is a convenience method for the
    // inside.
+}
+
+//------------------------------------------------------------------------------
+//
+inline int* XxResources::getDynProgTable( const uint htx, const uint hty ) const
+{
+   if ( ( htx * hty ) > _hdTableSize ) {
+      // We won't start messing with large diffs, allow a maximum table size
+      // larger than a constant number.
+      if ( (htx * hty) > _hordiffMax ) {
+         return 0;
+      }
+      _hdTableSize = htx * hty;
+      _hdTable = (int*) realloc( _hdTable, _hdTableSize * sizeof(int) );
+   }
+   return _hdTable;
+}
+
+//------------------------------------------------------------------------------
+//
+inline uint XxResources::getHordiffBuffers(
+   int*&  hbuffer0, 
+   int*&  hbuffer1
+) const
+{
+   hbuffer0 = _hdBuffer0;
+   hbuffer1 = _hdBuffer1;
+   return _hdBufferSize;
+}
+
+//------------------------------------------------------------------------------
+//
+inline uint XxResources::getHordiffLineBuffers(
+   char*&  hdlinebuf0, 
+   char*&  hdlinebuf1
+) const
+{
+   hdlinebuf0 = _hdLineBuf0;
+   hdlinebuf1 = _hdLineBuf1;
+   return _hdLineBufSize;
 }
 
 XX_NAMESPACE_END

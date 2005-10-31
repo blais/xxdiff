@@ -2,51 +2,148 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 479 2002-02-07 06:38:35Z  $
+# $Id: CHANGES 401 2001-11-22 07:00:27Z blais $
 #
 
-Version 2.0.4: (bug-fix release)
+Current version/current tasks:
 ------------------------------
 
-We want the 2.0 branch to be absolutely stable, and not being able to parse
-rarely occuring incomplete lines is unacceptable, so this bug fix alone warrants
-this release.
-
-(Bug Fixes)
-
-   * Included bug fix for not parsing incomplete lines. The incomplete line
-     marker line inserted by diff had been overlooked in the parser and would
-     cause an error dialog and no diffs display. Incomplete lines don't occur
-     often, but this is nevertheless an important bug.
-
-Version 2.0.3: (portability release)
+Version 2.1: (major feature release)
 ------------------------------
 
-This release includes very minor changes for backwards portability to
-Redhat-6.2, as well as a minor enhancement to allow the Debian package to have
-its documentation automatically generated (--html-help doesn't require a display
-connection anymore).
+Implemented multiple horizontal diffs feature.  Rewrote ignore horizontal
+whitespace feature to ignore changes.  Added support for command-line Qt options
+and formatted like KDE programs.
 
 *** Change Log ***
 
-(Better automated packaging)
+(Multiple horizontal diffs)
 
-   * --html-help now does not require a display connection, so that the
-       packaging scripts can generate the documentation from the executable on a
-       machine without display connection access (suggestion of Tomas Pospisek).
+   * Cleaned up code for multiple horizontall diffs.
 
-(Redhat-6.2 Portability)
+   * Made sure that the hordiffs don't get copied when the third file is empty.
+   
+   * Optimized computation of horizontal 3-way diffs, when we know two sides are
+     equal, don't compute bounds with the three files. Compute with two and copy
+     other the third one, like we do for multiple diffs with blue regions.
+     For DIFFDEL regions.  I rewrote the code that's driving this.
 
-   * Make sure we can now compile under rh-6.2 (thx to Fabrice Crestois).
-   * Removed std::auto_ptr<>::reset().
-   * Small iterator change in diffs.cpp for rh-6.2 compilation.
+   * Split hordiff code into its own file.
+
+   * Changed MinContext to Context.  This makes sense, there is a direct
+     analogy.
+
+   * Fixed bug in insertion of ws inside a word, with more than 1 ws.
+
+   * Make the ignore horizontal whitespace treat all contiguous chunks of
+     whitespace as a single whitespace (tdemarge idea).
+     Implemented ignore horizontal whitespace as ws compression 
+     (this is a big difference and should be mentioned in the change log).
+
+   * Realized there is a problem with the implementation of the ignore
+     whitespace approach that I used for horizontal diffs... whitespace cannot
+     really be ignore when computing the diffs themselves, otherwise it can
+     result in funny diffs, e.g. "word other" an "wordo other" will result in
+     the second o being computed as a diff.  In this case there are many
+     potential solutions, and it is not obvious which one we should follow.
+
+     Another possibility would be to non-whitespace bracket the normally
+     resulting diffs (taking into account ws), but then do we keep diffing
+     recursively?
+
+     We have the same problem with the single bracketing technique!
+     This will require some thinking.
+
+     (This was fixed above.)
+
+   * Implemented using permutations in line bracketing algorithm.
+   * Fixed nasty bug in multiple diffs horizontal table.
+   * Renamed hysteresis to min.context, because there is a direct analogy for
+     horizontal diffs minimum common region to context lines in context
+     (vertical) diffs.
+   
+   * Implemented ignore whitespace support for multiple horizontal diffs
+     (a simple bug remains
+   * Tested for when the maximum table size is exceeded... it works.
+   * Added resource parsing.
+   * Tested menu
+   * When changing the horizontal diff parameters in the resources, we have to
+     invalidate and perhaps recompute the horizontal diffs.
+   * Implemented in 3-way, with blue regions, and diffdel as well.
+   * Compute and implement upper bound for hordiffs buffer, use in text and
+     line.
+   * Much progress in multiple horizontal diffs implementation.
+   * Time was being wasted in horizontal diffs computatino for SAME lines, now
+     removed that!
+   * Finished implementation of per-line computation of horizontal diffs with
+     hysteresis.
+   * Implement string edit dyn.prog. solution for lcs for multiple horizontal
+     diffs, per-character and per-token
+   * Implemented line and text area support for multiple horizontal diffs
+   * Added resources for horizontal diffs.
+   * Finished implementation of multiple horizontal diffs drawing.
+   * Prepared XxLine for multiple horizontal diffs.
+
+(CVS unmerge conflicts)
+
+   * Started implementing cmdline parsing of conflict mode.
+   * Added builderConflicts files.
+
+(Qt Options)
+
+   * Add --textfont cmdline option enable setting the text font as well.
+   * Remove usage message for errors.  Usage should only be printed out
+     from --help or when no file has been specified on the cmdline.
+   * On --help, print out long options first, so all is aligned.
+   * Implemented options KDE-like.
+   * Looked at all the qt options that the KDE code exposes, and perhaps export
+     the same set.  Look at how it's implemented under as well.
+   * Changed filename labels to use current app font, not resources font, in
+     case of an override.
+   * Removed forcing the font is there's a qt -fn or -font option on cmdline.
+   * Added forceFont detection for cmdline.
+   * Tested --qt, perhaps rename to --qt-visual, etc.
+   * Within the qt options, you'd have to test for the presence of -style or
+     -geometry as well.
+   * Fixed bug in new --qt cmdline arg.
+   * Changed semantics of XxCmdline._forceStyle.
+   * Made Qt options supported through explicit parsing of the GNU form of
+     options.  This should fix the bug whereby the Qt options are not available
+     anymore.
+
+(Init switch)
+
+   * Implemented flawed initswitch for quality.
+   * Added Nop parsing to initswitch, so that reading from resoruce list is
+     possible.
+   * Finished implementing initswitch feature.
+     Of course, this is not super useful, but someone requested it.
+   * Added InitSwitch resource parsing (for belley) but not implemented
+     initialiazation yet.
 
 (Misc)
 
+   * Cleaned up and organized TODO file.
+   * Changed error when getopt fails, now returns the short error msg.
+   * Version should be the compiling date, and the file that contains the
+     version number should always be recompiled, each time we link.  Figure out
+     something. The current scheme doesn't quite work too well, unless version.o
+     is from a make clean.
+
+   * Fixed bug with table width in documentation.
+   * Fixed minor bug with 3-way diffs options
+     (imho does not warrant a 2.0.3 release).
+   * Removed libgen, now using Qt's framework for basename.
+   * Did some stuff to the versioning, added version.c.
+   * Checked that a .inline.h change doesn't seem causes recompiling.
+     There is a small delay probably due to NFS on different OS+hosts.
    * Removed circular dependendy in resParser.lex.c, this was due to the fact
      that by default make considers a lex file to have .l suffix and not .lex.
      We could patch it with a simple rule, but instead we rename the file to 
      use the standard suffix.
+   * Removed basename dependency (now using QFileInfo).
+   * Fixed UMRs in app.cpp menu items, Purified completely.
+
 
 Version 2.0.2: (bug-fix release)
 ------------------------------
@@ -1065,805 +1162,20 @@ Version 1.0:
 
 --------------------------------------------------------------------------------
 
-Wishlist/ToDo todo TODO list:
-------------------------------
-
-Tasks
-------------------------------
-
-
-finish cleaning up CHANGES file at the end, grouping in task
-
-change builders to use QCString internally.
-
-finish init switchh
-
-
-
-
-
-Misc
-
-   * Don't show vertical line on directory diffs!
-
-   * Add a file viewer command for dirdiff to spawn on inserts and deletes in
-     dirdiff mode!  That would be great!
-
-   * Add --textfont cmdline option enable setting the font.
-
-   * Optimize parsing the diff outputs, this big series of if-else is
-     inefficient, diff2 and diff3 both for files
-
-   * Check out if we can make use of the QApplication useGUI parameter instead
-     of not creating the QApplication at all... does it try to open the display
-     when set to false?
-
-   * Bug: cmdline parsing doesn't accept Qt options anymore.
-
-   * Put all the resources text as what's this in the options dialog
-
-   * Bug: for certain fonts, the horizontal is not drawn completely without the
-     fillrect
-
-   * bug: ^L's do not get rendered correctly?...
-
-
-
-Init switch feature for belley
-
-   * Add init switch feature
-
-   * Document that the switches are for a particular diff program
-
-   * "xxdiff -w" should toggle the actual command switch specified in the
-     resources for ignore whitespace, do belley's request at the same time
-
-
-Horizontal diffs rewrite
-
-   * Implement line and text area support for multiple horizontal diffs
-
-   * Implement string edit dyn.prog. solution for lcs for multiple horizontal
-     diffs, per-character and per-token
-
-Token diffs
-
-   * Token horizontal diffs computation option (idea from idanan)
-
-
-New display-ignore line type
-
-   * Add colors and line type for display-ignored type, defaults should be close
-     to SAME color
-
-   * Ignore horizontal whitespace option should make simple SAME lines almost
-     'SAME' color.  (i.e. if there are only whitespace differences, almost
-     ignore it!)
-
-   * Implement "per-line display-ignore whitespace" (easy, check bounds of
-     result from horizontal diffs)
-
-   * Implement "per-hunk display-ignore whitespace"
-
-
-
-Ignore regexp/pattern 
-
-   * Use display-ignore feature to ignore certain regexp
-
-   * Use display-ignore feature to ignore change from regexp A to regexp B
-     (gijsbert)
-
-   * Add a line at the bottom for interactive search widget and ignore pattern
-     widgets (line edits)
-
-
-Highlight search results
-
-   * Make each line able to contain multiple search results instances (a list)
-
-   * Draw brackets around search results, over text area
-
-
-CVS unmerge conflicts
-
-   * Implement remerge option!  for files with CVS conflicts!
-
-
-Patch input support
-
-   * Make it able to read in a patch and apply it, without the second file
-
-Patch output support
-
-   * Make it able to output a patch
-
-
-
-
-Web site
-
-   * add emacs trick to start xxdiff automatically on previous file
-
-   * add to google direcotry!!!
-
-
-Merged view
-
-   * Add an option to make layout the merged view like xcleardiff, add an option
-     to make it visible on startup as well
-
-     Show.MergedView:  False, True, Above, Below, Right
-
-   * Show.PopupMergedView: for in-window view
-
-   * Merged view option to draw all hunk texts instead of men-at-work pattern
-
-
-Release
-
-   * rh-contrib (bero)
-   * sourceforge project release announcement
-   * update web site
-   * freshmeat
-   * qt-interest
-   * cervisia ml
-   * sgi freeware
-   * discreet
-
-CVS revisions browsing
-
-   * Write independent app running in a different process to dnd CVS revisions
-
-   * Make the text area a drop site for files, so files from the other guy or
-     from some file manager could be dropped right into it and be diffed
-     automatically.  This will require some non-trivial temporary file diddling.
-
-
-Improve options dialog synchronization
-
-   * sync options dialog
-
-     * for options dialog, on synchronize() we should really only update the
-       controls which haven't been changed.  how do we do that?  perhaps have it
-       work on a different resources object?
-
-     * apply display box resets horizontal diffs...
-       options dialog has to update on resources changes...
-       ... figure out something with a second copy of the resources object.
-
-
-GUI additions
-
-   * implement indicator for unselected regions remaining
-     (above the overview area)
-
-
-Make list of URLs to other diff tools
-
-   * Add directories
-   * From freshmeat, "run query" link
-   * Links from Perfore web site
-
-
-Internal diffs
-
-   * Enable internal GNU diff as a runtime option
-
-   * Implement the 3-way and dir. version of this (not done yet)
-
-
-Port to Qt-3.0
-
-   * Implement reading process output with QProcess
-
-   * Port to Windows using the Qt Non-commercial license 3.0, or mingw32
-
-
---------------------------------------------------------------------------------
-
-   - add 'B' option in cmdline.cpp
-
-   - implement xxcvs update !!!!!
-
-   - while selecting the colors, implement a color picker so you could select a
-     color in the text view
-
-
-
-   - implement tper-hunk ignore whitespace
-
-   - internal diff: must set status with correct values as external diff
-     this currently does not work with files being the same
-
-
- - ignore horizontal whitespace is buggy, it doesn't ignore two separate
-   whitespace changes
-
- - per-hunk ignore whitespace (ignores whitespace if a hunk's non-whitespace
-   chars are all the same... this should allow filtering out most code
-   re-indentation and such)
-
- - builder for patches
-
- - add support for wheel events
-
- - drag sb overview
-
-
-
-> Allen Barnett wrote:
-> > 
-> > On Thursday 08 November 2001 12:25 pm, you wrote:
-> > > Allen Barnett wrote:
-> > > > One feature which would be helpful to me would be the presence of a
-> > > > 'numerical fuzz' option in the horizontal difference display. If  a line
-> > > > contains a floating point number, but whose numerical difference is below
-> > > > a certain tolerance, it would not be marked as a file difference. For
-> > > > example:
-> > > >
-> > > > 1.2345678E-01  |  1.2345679E-01
-> > > >
-> > > > would not be flagged if the fuzz value is "<10^-6". (Can you tell I do a
-> > > > lot of FORTRAN programming?)
-> > >
-> > > what if this was only implemented for the beginning of the horizontal
-> > > difference?  would that be good enough?
-> > 
-> > Typically, my output looks like line after line of:
-> > 
-> > 0.182827585 0.140213637 0.113408089 0.140213637 0.106706702 0.0859152186
-> > 
-> > One or more of these numbers on a line may differ between runs of the code.
-> > Further reflection on my part suggests that you'd have to parse the line to
-> > find the numbers. Perhaps this isn't really a practical idea after all?
-> 
-> I was discussing ideas over lunch with colleagues: soon i'll implement the
-> string edit lcs algorithm for computing multiple horizontal diffs.  one idea
-> that came out is that I could carry this out on a per-token instead of a
-> per-character basis.  The token splitting I'll implement is arbitrary, but I
-> will implement it based on words (where capital letters inside a word splits
-> it).  The whitespace you show above would split your numbers into different
-> tokens.
-> 
-> This means that if I apply a "numerical ignore" on the respective horizontal
-> diff hunks of a line it would do exactly what you want, assuming that the words
-> (i.e. numbers) are separated by whitespace.  The numerical comparison will be an
-> option that you can configure in your resources.
-> 
-> Cheers,
-> 
-> 
-> --
-> M.
-
-
-
-> 
-> 2. Running "xxdiff dir1/*.c dir2/*.c caused seg. fault.
->     "dirdiff", available at freshmeat.net, runs with no problem.
-
-
-> 
-> 3. There is a message popped up every time I invoke xxdiff:
->     Xlib: extension "RENDER" missing on display "linuxdev:0.0"
->     I am using XiGraphics Xserver btw.
-> 
-> Thanh
-
-> 
-> 
-> Thanh Ma wrote:
-> > 
-> > Hi,
-> > 
-> > 2. Running "xxdiff dir1/*.c dir2/*.c caused seg. fault.
-> >     "dirdiff", available at freshmeat.net, runs with no problem.
-> > 
-> 
-> I found the bug for this one.  THis is a simple cmdline parsing bug I had never found. Thanks again for reporting it.
-> 
-> In any case, this should not work:  your shell expands the list of files, so in effect your program get the whole list... how is it supposed to know which list is on which side?  I guess it looks at the directory prefixes.
-> 
-> I wonder if it handles dirdiff dir1/*.c dir2/*.c dir3/some.c
-> 
-> In any case, an ignore pattern will be implemented eventually to do the same as what you're asking.  When I get that done I'll probably extend the cmdline interface to do like diff does.  GNU diff doesn't handle this cmdline interface:
-> 
-> 
-> taiwan:/DLlocal/.../xxdiff/test$ diff -q -r d1/*.c d2/*.c
-> diff: extra operand
-> diff: Try `diff --help' for more information.
-> 
-> 
-
-
-
-
- - pengeastegg
-
- - implement indicator for "remaining unselected regions"
-
- - cvs and clearcase: write interface/protocol scripts
-   - implement annotations query on top of that!!!
-
- - optimize resource loading, perhaps put directly in grammar
-   - do timings to find out if it is a problem right now
-   - use custom lex/yacc with tags and all.
-
- - mv xxct to xxcleartool and implement using distutils
- - separate cvs stuff from xxcvs into cvslib, use distutils
-
- - figure out why when a char isn't read by lex/yacc it is printed on stdout,
-   and fix that, it's annoying and stupid
-
- - accept a patch file / make a patch file instead of just "save"
-
- - configure.in: QTDIR/lib path.  Try compiling from root user under linux box
-   without a QTDIR set.
-
- - cvs unmerge:
-
-   1) build the two diffs using a single file, and a single file storage, to
-      save memory (and avoid having to build two files), also be able to do it
-      with ifdefs
-
-   2) build it in xxcvs
-
- - merged view: should have the option of seeing both files' hunks
-
- - highlight search results (added over, markers)
-
- - show two or three sides in merged view, as an option
-
- - link with GNU diff, perhaps a write script to modify the source code for
-   gathering output if that's necessary
-
-
-gijsbert dinner:
-
- - can we get two pipes to read from, stdin and another?
-   how can you redirect this in a shell cmd?
-
- - unlink the temporary files right away
-
-
-tmp files:
-
- - catch signal to delete tmp files?
-
- - can I use a named pipe instead?  would that be better?
-   does it just delete itself once it's done?
-
- - hey, I can delete the tmp files right after I called GNU diff!
-   what am I doing right now?
-
- - advertise xxcvs on freshmeat
-
-
-linking with GNU diff:
- - dup() to bind fd, then set it back
-
-
-bugs:
- - does xxdiff try to cleanup tmp file on startup? if so that is a bug, 
-   because one can run multiple xxdiff's on the host.
-
-
-mark "options" clearly as GNU diff options, so that there is no confusion.
-
-cool idea: add a command to be run to automatically load the said file in emacs,
-e.g. click on title bar and send an emacsclient command.
-
-Also, in 3-way diff, it would be nice to be able to ignore one file and to diff
-only the two other ones without restarting, with keeping the three files. You
-could do this with just changing the colors, and the next/previous methods.
-
-link directly with GNU diff
-
-
-
-
-
-
-
-
- - cut and paste of a single filename should not include the \n
-   (but only when the hunk is not multiline)
-
- - launching xxdiff dirs with two same directories results in an empty
-   buffer thingy, because diff itself just silently returns.
-
- - have a progress meter thingy for long processes (e.g. conf conf-dl)
-
- - ignore horiztonal whitespace option is buggy:
-   two different lines who are different at their beginning, but the end
-   is the same except for some whitespace.
-
- - toolbar buttons broken under octane
-
- - edit color dialog broken under octane2
-
-
-  * try to avoid loading Qt library in case of option -D specified, for faster
-    startup (hubert)
-
-  * idea: functionality that spawns a bunch of diffs for all the changed files
-    in a directory (dirdiffs only).
-
-  * gdamn editing!  edit, then kill the xxdiff, it should keep working. 
-    use vi in a shell.
-
-  * implement some editing in the merged view!!
-
-
- | Peter Becker wrote:
- | > 
- | > Martin Blais wrote:
- | > 
- | > > Hello Qt developers.
- | > > (this post is slightly off-topic)
- | > >
- | > > I wrote a GPL'ed file comparison and merging utility using Qt, it's called
- | > > xxdiff (an xdiff clone + lots of new features), that can be of interest to
- | > > developers in this forum:
- | > 
- | > I am interested a lot but I have to use Windows NT so I can't use the binaries. I
- | > tried to compile your program (using progen/tmake/Borland C++ Builder) but had
- | > some problems (see below).
- | > 
- | > Can you help me? Since we are in beta now and I think the program is quite stable
- | > I might have some spare time the next days but maybe you can give me some hints
- | > before I start porting.
- | 
- | Kool!  AFAIK you're the first one to try porting it to Windows.  I'll look at
- | the error messages and try to guess (see below).
- | 
- | 
- | 
- | > [...]
- | > 
- | > > Anyway, my question:
- | > >
- | > > I want to implement some support for CM systems, in particular ClearCase and
- | > > CVS. I wish to implement this in a generic manner, in order to support
- | > > multiple CM systems.
- | > >
- | > > I need your input: what CM-related features would you like to see supported in
- | > > a file comparison program?  Here's what I'm thinking of:
- | > >
- | > >  - revision tree listing i.e. looking at the history
- | > >    of revisions
- | > >
- | > >  - automatic version extraction i.e. being able
- | > >    to switch which version of file xxdiff is
- | > >    diffing with, probably by clicking in the
- | > >    revision tree listing
- | > >
- | > >  - ability to checkout latest version (prior to saving
- | > >    a merge result).
- | > >
- | > >  - All CM commands should be run in background in case
- | > >    of slow access to CM server
- | > >
- | > > Anything else?  Please let me know, I want to know what could be useful to
- | > > you.  Any comments appreciated.
- | > 
- | > Some nice but really not important feature: connecting the lines of the code with
- | > the last changes (and their logs). This is useful if you ask yourself: what is
- | > this code for? But maybe this feature shouldn't go into a diff tool.
- | 
- | Surely it could be nice to be able to extract and display the log comments for
- | shown revisions, good idea! I'll add it in.
- | 
- | 
- | 
- | > Something we use all the time is cvs edit -- it would be useful for us if a merge
- | > tool can handle read-only checkout and edit/unedit.
- | 
- | When I mentioned "checkout" above, in cvs it's called "edit", so we're talking
- | about the same thing:
- | 
- | >From cvs documentation:
- | > you are planning to edit it, use the `cvs edit' command.  Some systems
- | > call this a "checkout", but CVS uses that term for obtaining a copy of
- | > the sources (*note Getting the source::.), an operation which those
- | > systems call a "get" or a "fetch".
- | 
- | 
- | 
- | 
- | > Useful for the comparison of different versions of the program is a program that
- | > combines directory and file comparison -- the overview shows all files and if they
- | > are different, the files that are different can be opened in the file diff.
- | 
- | xxdiff already does that.  If you call it on two directories, you can select
- | files and use the popup menu to get an xxdiff of the specific files.
- | 
- | xxdiff also works recursively on directories.  It makes it really easy to
- | compare hierarchies this way (this is how I merge my configuration files, for
- | example).
- | 
- | However, you just gave me another idea: one may wish to compare tagged
- | versions, as a directory diff, e.g. compare hierarchy with 1.8 tag and 1.9
- | tag.  I'll look into how I could do this. This would be a cool feature.  Do
- | you get it?  for example, you could spawn a directory diff in your current
- | directory, asking xxdiff to compare with the latest tagged versions.
- | 
- | 
- | 
- | > 
- | > > Please note that in the same way that I don't intend to make xxdiff into a
- | > > text editor, I don't intend to make xxdiff a general-purpose interface to CM
- | > > systems either. I want to include only/mostly features that pertain to file
- | > > comparison.
- | > 
- | > Check yourself if the features I mentioned fit -- I am not sure about this. Just
- | > some ideas I got spontaneously.
- | 
- | Great ideas!  Thank you very much.
- | 
- | I'llsend you comments on the errors a little later, I gotta meeting just now.
-
-
-CM support:
-
-
-   * redo diff clears selections!  can we do something about it?
-
-
-automate CHANGES file update using CVS on xxdiff.sourceforge.net
-
-
-   * add dialog that does "guided" "select next and get the hell out".
-     or just make that really clear in the toolbar buttons.
-
-bug fixes:
-
-   * In dir diffs, remove toolbar buttons, selection menus, open file must be
-     able to select a directory, etc. IOW finish checking that all that is left 
-     works.
-
-new features:
-
-   * add "show merged view on startup" resource
-
-   * search using regexp
-
-   * Allow selection of text, as in an editor, just for cut-n-paste purpose.
-   * dirdiff full path name cut-n-paste option
-   * Add display options dialog with colors, remove color legend, remove tab 
-     width dialog, one big dialog with all display options
-
-   * Remove useless dialogs in dialog.h
-
-   * Provide some lame editing feature, people want it anyway.
-   * option: instead of saving merged file, save as a patch to be applied
-     (save the two files in temps and run a diff on them).
-
-   * Show symlinks, date and size of files in directory diffs
-   * Add an icon somewhere to show if a directory diff or a simple file diff
-
-   * We need to link to GNU diff directly for the following reason: to avoid
-     the temporary files, when capturing stdin, 
-     We just gotta do it!  But keep supporting the fork() version.
-     see dup2() for how to do this without modifying GNU diff code, and
-     call main() myself.
-
-   * Think about generic solution with scripts for CM management
-     - what features do we want to implement?
-
-		document idea about generic CM support!
-		XxConfMgtInterface
-		XxScriptConfMgtInterface
-		script xxdiff.cvs
-		script xxdiff.clearcase
-
-
-perhaps features:
-
-   * Add exclude option to diff options
-
-   * Cleanup similar callbacks in XxApp.
-
-   * Merged view cannot mouse-drag properly.  Implement a more viable solution
-     that will allow to to the inverse drag as well, perhaps setting up a
-     publicly-available indirection table in the XxDiffs object.
-
-   * Improve color types documentation.
-
-   * -w doesn't work on startup when cleardiff is the program we're using.
-     Add resources for those arguments.
-
-   * look at ClearCase's merge, see which ones they identify.
-
-   * merged view: add different colors for different selected sides
-
-   * merged view: display both regions in merged view when unselected 
-     (as an option)
-
-   * make scripts for automatic release under linux: build tarballs and rpms
-     automatically for both static and dynamically linked versions.
-
-   * Oh, you just made me think of a new feature: invoking xxdiff with the auto
-     merge feature, and if there are no conflicts it would save silently and not
-     show up.... could be interesting.  I'll put that up on the wishlist.
-
-   * allow REGION SELECTION for the purpose of cut-n-paste (blouin)
-
-
-(horizontal diffs)
-   * horizontal diffs with hysteresis
-   * horizontal diffs per word only (option)
-   * horizontal diffs, case sensitive?  dunno (option)
-
-(merged view)
-   * Merged view: the motion commands should work from the merged view.
-   * selection commands should work too
-   * scrolling the merged view should scroll the other view as well.
-
-(line numbers in own widget)
-   * add + and | markers (don't call them annotations, this term is already used
-     terminology for cut-n-paste annotations)
-
-(Misc. UI)
-   * add invert selection functionality
-   * "spawn editor" facility
-   * You just HAVE to allow cut-n-paste annotations of IGNORE text.  Use
-     extended selection!
-   * what's this on a file widget should babble about the specific region
-     which was clicked on.
-   * xxdiff --version tries to open the display, we don't want that.
-   * finish in context help
-   * Allow dragging like a scrollbar in the overview area (like in mgdiff);
-   * it would be nice to be able to select both sides of a hunk for making 
-     merge comments... but thru which UI do we do this?
-   * Separate XxLine::DisplayType of resources... it does not make sense anymore
-   * Implement motion bindings in the merged view too.
-
-(resources)
-   * generate sample.xxdiffrc file at runtime with an help option,
-     default resources should be commented, added ones uncommented.
-
-   * add a cmdline option to select which xxdiffrc to use, I guess it is 
-     already possible by running XXDIFFRC=... xxdiff ...
-
-(make, compile, release process)
-   * fix release_src script for IRIX specifics
-   * when not compiling xrm or rcfile resources, don't compile the files at all
-     (in makefile)
-     ... problem with endif syntax... how can you add a GNU make conditional?
-   * fix dist target under IRIX
-   * link and distribute more easily with STLport under Irix.
-   * Change the include files into the new ANSI ones e.g. #include <cstdio>, 
-     will most likely be done when gcc-3.0 comes around;
-   * Check GNU license wording, is that my choice in there ("at your option")?
-   * License quirk?
-> Dan Veditz: I find it one-sided. His suggestions
-> make it possible for GPL'd projects to use
-> mozilla, but do nothing to share reciprocally so
-> that mozilla.org could make use of GPL'd code.  I
-> also find his comments on how to deal with the Qt
-> license interesting since it has the same
-> compatibility problems. For that license he notes
-> since the QPL is incompatible with the GNU GPL,
-> you cannot take a GPL-covered program and Qt and
-> link them together, no matter how.
-> 
-> However, if you have written a program that uses
-> Qt, and you want to release your program under
-> the GNU GPL, you can easily do that.  You can
-> resolve the conflict for your program by adding a
-> notice like this to it: "As a special exception,
-> you have permission to link this program with the
-> Qt library and distribute executables, as long as
-> you follow the requirements of the GNU GPL in
-> regard to all of the software in the executable
-> aside from Qt."
-
-
-(parsing)
-   * brightnessHistogramTestWinNTdbg.expect core dumps! check it out.
-   * Detect unified diffs and throw on it, the user might specify such an 
-     erroneous command;
-   * allow diff using a patch file, even containing a patch for many files
-     (easy: let patch patch the file on stdout, grab the output and perform 
-      normal diff)
-   * parse "merge" output and pre-select regions automatically.  this is
-     especially important when using the "and next" commands.
-   * look at all "diff" options and see if any other would be useful with the
-     GUI (e.g. ifdef's saving).
-
-(new features)
-   * add case sensitivity to search feature
-   * rename "regions" to "hunks" and use GNU diff terminology from texinfo
-   * open left/right on an empty xxdiff should allow to open! 
-     supporting one file only.  (on startup AND on an open diff) this can be
-     done easily by specifying the "other" file as an empty file and running
-     the current diff parser.
-   * extended selection (on mouse release normal click except when straddling 
-     lines) allow larger selection (smarter key down/up processing)
-   * Drag-select for selecting multiple lines on button 2;
-   * add option for confirmation when some regions are selected (for gijsbert)
-   * add an option for splitting all CHANGE regions automatically (buh?)
-   * add an option to display context format diffs into its own widget, like 
-     for the line numbers.
-   * allow insertion of marker lines
-   * Add save options for save selected only file dialog;
-   * Keep the cursor line in region after swap->merge transition;
-   * Find named color for default SGI scheme background color (greenish);
-   * feature: show only hunks, collapse ignore regions...
-   * feature: ignore diffs from "this" to "that" (-I option) should we have a
-     different color for ignored diffs?  say e.g. case insensitivity done at the
-     xxdiff level (for that the ``ignore'' algorithm must be done by xxdiff 
-     itself)
-
-(misc. bugs)
-   * make sure non fixed-width fonts work
-   * IgnoreBlankLines is a fundamental misfeature with xxdiff... how to deal
-     with it?  figure it out later.
-
-(one-pane view)
-   * Support one-pane view;
-
-(desktop integration)
-   * add KDE/Gnome preferences (as optional);
-
-(CM integration)
-   * ClearCase/CVS should be integrated on the filename label and in a flexible
-     way.
-
-(documentation)
-   * Integration DocBook documentation into runtime program/man page.  There
-     should only be a single source of documentation (the SGML document), with
-     a minimalist web page.
-
-(Just ideas)
-   * (Internal:) We could change all \n in the file for \0 so that returning a 
-     line would not require the length, and also this way we wouldn't need
-     print in a buffer in order to convert into a QString;
-   * How about listening on a socket for an open command? This could be
-     interesting if the GUI ever becomes too slow to start up, which is not
-     the case now (at least not on my PII-350 nor my Octane);
-   * Display of blank regions should be small, and scrolling should only occur 
-     when there is text (complex to explain: text display will look like
-     the overview area, with appropriate scrolling).  Prototype.
-   * First click on a region selects, second deletes both, third unselects;
-   * Popup menu should implement selection instead of motion commands, maybe 
-   * depending on if clicked on an IGNORE region or not;
-   * Reorganizing text in changed areas... drag-n-drop  la netscape toolbar?;
-   * If arbitrary moving of regions is allowed, add a "reorder" command. Easy 
-     to do, because we keep the original line nos even if we move stuff around;
-   * editing facilities as in ediff (belley)?
-
-
-   Documentation:
-       1) invocation options
-       2) user's manual
-       3) resource reference
-
-     (1) must be printable without html
-     ... could be a <pre> block
-
-     We need:
-       a) output of (1) in plain text for usage printout
-       b1) output of (1), (2) and (3) in qml
-       b2) output of (1), (2) and (3) in html
-       c) ref strings for (3)
-       d) (1) and a little more for man page output
-
-     Solutions:
-       * We don't produce a man page (d), nix that, there's web documentation.
-       * (1) is stored as a constant string in code. It can be used to produce
-         (a).
-       * (2) is stored as a constant string in code, so it can be used within
-         the program to produce (b1).  There is also an option to produce (b2)
-         from the running program, so that will be our documentation with the
-         resource documentation embedded in it.
-
-
-
 KNOWN BUGS
 ------------------------------
 
    * Using diff option "-B" with xxdiff doesn't work for now.
+
+RELEASE PROCEDURE
+------------------------------
+
+   * RH-Contrib (bero)
+   * Sourceforge project release announcement
+   * Update web site
+   * Freshmeat
+   * Qt-interest
+   * Cervisia ml
+   * SGI freeware
+   * discreet
 

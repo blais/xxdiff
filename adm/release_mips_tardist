@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_mips_tardist 352 2001-11-06 20:00:01Z blais $
+# $Id: release_mips_tardist 375 2001-11-12 22:57:03Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -10,7 +10,7 @@ fi
 
 VERSION=`tools/get_version`
 
-SBASE=$HOME/xxdiff
+SBASE=.
 COMPONENTS="xxdiff xxdiff.idb xxdiff.sw xxdiff.man"
 DEST=$PWD/../xxdiff-$VERSION.mips.tardist
 

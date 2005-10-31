@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 479 2002-02-07 06:38:35Z  $
- * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
+ * $Id: diffs.cpp 390 2001-11-19 17:24:09Z blais $
+ * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -114,14 +114,16 @@ bool XxDiffs::SearchResult::isValid() const
 //------------------------------------------------------------------------------
 //
 XxDiffs::XxDiffs() :
-   _initializedHorizontalDiffs( false ),
+   _lastInitializedDiffType( HD_NONE ),
+   _lastInitializedContext( 0 ),
    _dirty( false )
 {}
 
 //------------------------------------------------------------------------------
 //
 XxDiffs::XxDiffs( std::vector<XxLine>& lines, bool isDirectoryDiff ) :
-   _initializedHorizontalDiffs( false ),
+   _lastInitializedDiffType( HD_NONE ),
+   _lastInitializedContext( 0 ),
    _isDirectoryDiff( isDirectoryDiff ),
    _dirty( false )
 {
@@ -1259,11 +1261,8 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    }
 
    // Erase old lines.
-   std::vector<XxLine>::iterator istart = _lines.begin();
-   istart += lstart.front() - 1;
-   std::vector<XxLine>::iterator iend = _lines.begin();
-   iend += lend.back() - 1;
-
+   std::vector<XxLine>::iterator istart = & getLineNC( lstart.front() );
+   std::vector<XxLine>::iterator iend = & getLineNC( lend.back() );
    _lines.erase( istart, iend + 1 );
    _lines.insert( istart, newLines.begin(), newLines.end() );
 
@@ -1273,7 +1272,8 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    // No need to clear search results, the overview looks the same.
 
    // Mark for redoing the horizontal diffs.
-   _initializedHorizontalDiffs = false;
+   _lastInitializedDiffType = HD_NONE;
+   _lastInitializedContext = 0;
 
    return wasJoin;
 }
@@ -1282,7 +1282,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 //------------------------------------------------------------------------------
 //
 void XxDiffs::initializeHorizontalDiffs(
-   const bool                     ignoreHorizontalWhitespace,
+   const XxResources&             resources,
    const std::auto_ptr<XxBuffer>* files,
    const bool                     force
 )
@@ -1290,36 +1290,30 @@ void XxDiffs::initializeHorizontalDiffs(
    XX_ASSERT( files[0].get() != 0 );
    XX_ASSERT( files[1].get() != 0 );
 
-   if ( force == true || _initializedHorizontalDiffs == false ) {
+   if ( force == true ||
+        _lastInitializedDiffType != resources.getHordiffType() || 
+        _lastInitializedContext != resources.getHordiffContext()
+   ) {
 
       for ( XxDln ii = 0; ii < XxDln(_lines.size()); ++ii ) {
-         XxFln line0 = _lines[ii].getLineNo( 0 );
-         const char* text0 = 0;
-         uint len0 = 0;
-         if ( line0 != -1 ) {
-            text0 = files[0]->getTextLine( line0, len0 );
+         const char* text[3];
+         uint len[3];
+         for ( int iif = 0; iif < 3; ++iif ) {
+            XxFln line = _lines[ii].getLineNo( XxFln(iif) );
+            if ( line != -1 ) {
+               text[iif] = files[iif]->getTextLine( line, len[iif] );
+            }
+            else {
+               text[iif] = 0;
+               len[iif] = 0;
+            }
          }
 
-         XxFln line1 = _lines[ii].getLineNo( 1 );
-         const char* text1 = 0;
-         uint len1 = 0;
-         if ( line1 != -1 ) {
-            text1 = files[1]->getTextLine( line1, len1 );
-         }
-
-         XxFln line2 = _lines[ii].getLineNo( 2 );
-         const char* text2 = 0;
-         uint len2 = 0;
-         if ( line2 != -1 ) {
-            text2 = files[2]->getTextLine( line2, len2 );
-         }
-
-         _lines[ii].initializeHorizontalDiff(
-            ignoreHorizontalWhitespace, text0, len0, text1, len1, text2, len2
-         );
+         _lines[ii].initializeHorizontalDiff( resources, text, len );
       }
 
-      _initializedHorizontalDiffs = true;
+      _lastInitializedDiffType = resources.getHordiffType();
+      _lastInitializedContext = resources.getHordiffContext();
    }
 }
 

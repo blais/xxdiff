@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.h 345 2001-11-06 02:20:49Z blais $
- * $Date: 2001-11-05 21:20:49 -0500 (Mon, 05 Nov 2001) $
+ * $Id: resParser.h 398 2001-11-22 05:46:18Z blais $
+ * $Date: 2001-11-22 00:46:18 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
-p *****************************************************************************/
+ *****************************************************************************/
 
 #ifndef INCL_XXDIFF_RESPARSER
 #define INCL_XXDIFF_RESPARSER
@@ -92,7 +92,10 @@ public:
    static QString getResourceRef();
 
    // Special tags for cmdline resources.
-   static QString getBoolOptName( XxBoolOpt bo  );
+   // <group>
+   static QString getKwdName( int kwd );
+   static QString getBoolOptName( XxBoolOpt bo );
+   // </group>
 
    /*----- member functions -----*/
 

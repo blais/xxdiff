@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: buffer.cpp 375 2001-11-12 22:57:03Z blais $
+ * $Date: 2001-11-12 17:57:03 -0500 (Mon, 12 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -337,10 +337,8 @@ uint XxBuffer::computeTextWidth( const QFont& font, const uint tabWidth )
       const char* lineText = getTextLine( ii, length );
 
       int rlength;
-      int lhd = 0;
-      int rhd = 0;
       const char* renderedText = 
-         renderTextWithTabs( lineText, length, tabWidth, rlength, lhd, rhd );
+         renderTextWithTabs( lineText, length, tabWidth, rlength, 0 );
       QString str( renderedText );
 
       QRect rect = fm.boundingRect( str );
@@ -379,8 +377,7 @@ const char* XxBuffer::renderTextWithTabs(
    const uint  length,
    const uint  tabWidth,
    int&        rlength,
-   int&        lhd,
-   int&        rhd
+   int*        hordiffs
 )
 {
    const int increment = 256;
@@ -393,7 +390,6 @@ const char* XxBuffer::renderTextWithTabs(
    const char* nexttab = 0;
 
    // Offset rightmost char to render tabs correctly.
-   int hrhd = rhd + 1;
    while ( ( nexttab = strnchr( ps, '\t', endstr ) ) != 0 ) {
 
       // Check for size requirements and reallocate if necessary.
@@ -411,21 +407,31 @@ const char* XxBuffer::renderTextWithTabs(
       }
       ps++; // skip tab
 
-      // Output tab.
+      // Compute amount of spaces to insert.
       uint nspaces = 0;
       if ( tabWidth != 0 ) {
          nspaces = tabWidth - ((pd - _renderBuffer) % tabWidth);
       }
 
-      lhd += ( lhd > (pd - _renderBuffer) ) ? nspaces - 1 : 0;
-      hrhd += ( hrhd > (pd - _renderBuffer) ) ? nspaces - 1 : 0;
+      // Shift horizontal diffs if necessary.
+      if ( hordiffs ) {
 
+         for ( int* phd = hordiffs; *phd != -1; ++phd ) {
+            if ( *phd > (pd - _renderBuffer) ) {
+               *phd += nspaces - 1;
+               // -1 because we the hordiffs were calculated with a string
+               // -containing tab characters in them, and the tab chars take 1
+               // -char space in the string.
+            }
+         }
+      }
+
+      // Output tab.
       for ( uint t = 0; t < nspaces; ++t ) {
          *pd++ = ' ';
          XX_CHECK( pd - _renderBuffer < _renderBufferSize );
       }
    }
-   rhd = hrhd - 1;
 
    // Copy last chunk.
 

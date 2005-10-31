@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 291 2001-10-20 22:15:00Z blais $
- * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
+ * $Id: line.cpp 404 2001-11-22 07:39:59Z blais $
+ * $Date: 2001-11-22 02:39:59 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -25,6 +25,7 @@
  *============================================================================*/
 
 #include <line.h>
+#include <hordiffImp.h>
 
 #include <iostream>
 #include <ctype.h>
@@ -62,6 +63,47 @@ const char* selectionString[ 5 ] = {
    "NEITHER"
 };
 
+//------------------------------------------------------------------------------
+//
+inline const int* allocBounds( int lefthd, int righthd )
+{
+   if ( lefthd != -1 && righthd != -1 ) {
+      // Leave only brackets.
+      int* ll = new int[3];
+      ll[0] = lefthd;
+      ll[1] = righthd;
+      ll[2] = -1; // end list
+      return ll;
+   }
+   return 0;
+}
+
+//------------------------------------------------------------------------------
+//
+inline const int* copyHordiffs( const int* src )
+{
+   //
+   // Copy horizontal diffs. Returns newly allocated copy.
+   //
+   if ( src == 0 ) {
+      return 0;
+   }
+
+   // Compute size of array.
+   const int* pp = src;
+   int cc = 0;
+   while ( pp[cc] != -1 ) { ++cc; }
+   int* ll = new int[cc+1];
+   
+   cc = 0;
+   while ( pp[cc] != -1 ) {
+      ll[cc] = pp[cc];
+      ++cc;
+   }
+   ll[cc] = -1;
+   return ll;
+}
+
 }
 
 XX_NAMESPACE_BEGIN
@@ -77,77 +119,74 @@ XX_NAMESPACE_BEGIN
 
 XxLine::Type XxLine::_ignoreConvertTables[4][ XxLine::NB_TYPES ] = {
    // No ignore.
-   {  XxLine::SAME,
-      XxLine::DIFF_1,
-      XxLine::DIFF_2,
-      XxLine::DIFF_3,
-      XxLine::DELETE_1,
-      XxLine::DELETE_2,
-      XxLine::DELETE_3,
-      XxLine::INSERT_1,
-      XxLine::INSERT_2,
-      XxLine::INSERT_3,
-      XxLine::DIFF_ALL,
-      XxLine::DIFFDEL_1,
-      XxLine::DIFFDEL_2,
-      XxLine::DIFFDEL_3,
-      XxLine::DIRECTORIES
+   {                 XxLine::SAME,
+                     XxLine::DIFF_1,
+                     XxLine::DIFF_2,
+                     XxLine::DIFF_3,
+                     XxLine::DELETE_1,
+                     XxLine::DELETE_2,
+                     XxLine::DELETE_3,
+                     XxLine::INSERT_1,
+                     XxLine::INSERT_2,
+                     XxLine::INSERT_3,
+                     XxLine::DIFF_ALL,
+                     XxLine::DIFFDEL_1,
+                     XxLine::DIFFDEL_2,
+                     XxLine::DIFFDEL_3,
+                     XxLine::DIRECTORIES
    },
    // Ignoring file 0.
-   { /*SAME*/ XxLine::SAME,
-     /*DIFF_1*/ XxLine::SAME,
-     /*DIFF_2*/ XxLine::DIFF_ALL,
-     /*DIFF_3*/ XxLine::DIFF_ALL,
-     /*DELETE_1*/ XxLine::SAME,
-     /*DELETE_2*/ XxLine::INSERT_3,
-     /*DELETE_3*/ XxLine::INSERT_2,
-     /*INSERT_1*/ XxLine::INSERT_1,
-     /*INSERT_2*/ XxLine::INSERT_2,
-     /*INSERT_3*/ XxLine::INSERT_3,
-     /*DIFF_ALL*/ XxLine::DIFF_ALL,
-     /*DIFFDEL_1*/ XxLine::DIFF_ALL,
-     /*DIFFDEL_2*/ XxLine::INSERT_3,
-     /*DIFFDEL_3*/ XxLine::INSERT_2,
+   { /*SAME*/        XxLine::SAME,
+     /*DIFF_1*/      XxLine::SAME,
+     /*DIFF_2*/      XxLine::DIFF_ALL,
+     /*DIFF_3*/      XxLine::DIFF_ALL,
+     /*DELETE_1*/    XxLine::SAME,
+     /*DELETE_2*/    XxLine::INSERT_3,
+     /*DELETE_3*/    XxLine::INSERT_2,
+     /*INSERT_1*/    XxLine::INSERT_1,
+     /*INSERT_2*/    XxLine::INSERT_2,
+     /*INSERT_3*/    XxLine::INSERT_3,
+     /*DIFF_ALL*/    XxLine::DIFF_ALL,
+     /*DIFFDEL_1*/   XxLine::DIFF_ALL,
+     /*DIFFDEL_2*/   XxLine::INSERT_3,
+     /*DIFFDEL_3*/   XxLine::INSERT_2,
      /*DIRECTORIES*/ XxLine::DIRECTORIES
    },
    // Ignoring file 1.
-   { /*SAME*/ XxLine::SAME,
-     /*DIFF_1*/ XxLine::DIFF_ALL,
-     /*DIFF_2*/ XxLine::SAME,
-     /*DIFF_3*/ XxLine::DIFF_ALL,
-     /*DELETE_1*/ XxLine::INSERT_3,
-     /*DELETE_2*/ XxLine::SAME,
-     /*DELETE_3*/ XxLine::INSERT_1,
-     /*INSERT_1*/ XxLine::INSERT_1,
-     /*INSERT_2*/ XxLine::INSERT_2,
-     /*INSERT_3*/ XxLine::INSERT_3,
-     /*DIFF_ALL*/ XxLine::DIFF_ALL,
-     /*DIFFDEL_1*/ XxLine::INSERT_3,
-     /*DIFFDEL_2*/ XxLine::DIFF_ALL,
-     /*DIFFDEL_3*/ XxLine::INSERT_1,
+   { /*SAME*/        XxLine::SAME,
+     /*DIFF_1*/      XxLine::DIFF_ALL,
+     /*DIFF_2*/      XxLine::SAME,
+     /*DIFF_3*/      XxLine::DIFF_ALL,
+     /*DELETE_1*/    XxLine::INSERT_3,
+     /*DELETE_2*/    XxLine::SAME,
+     /*DELETE_3*/    XxLine::INSERT_1,
+     /*INSERT_1*/    XxLine::INSERT_1,
+     /*INSERT_2*/    XxLine::INSERT_2,
+     /*INSERT_3*/    XxLine::INSERT_3,
+     /*DIFF_ALL*/    XxLine::DIFF_ALL,
+     /*DIFFDEL_1*/   XxLine::INSERT_3,
+     /*DIFFDEL_2*/   XxLine::DIFF_ALL,
+     /*DIFFDEL_3*/   XxLine::INSERT_1,
      /*DIRECTORIES*/ XxLine::DIRECTORIES
    },
    // Ignoring file 2.
-   { /*SAME*/ XxLine::SAME,
-     /*DIFF_1*/ XxLine::DIFF_ALL,
-     /*DIFF_2*/ XxLine::DIFF_ALL,
-     /*DIFF_3*/ XxLine::SAME,
-     /*DELETE_1*/ XxLine::INSERT_2,
-     /*DELETE_2*/ XxLine::INSERT_1,
-     /*DELETE_3*/ XxLine::SAME,
-     /*INSERT_1*/ XxLine::INSERT_1,
-     /*INSERT_2*/ XxLine::INSERT_2,
-     /*INSERT_3*/ XxLine::INSERT_3,
-     /*DIFF_ALL*/ XxLine::DIFF_ALL,
-     /*DIFFDEL_1*/ XxLine::INSERT_2,
-     /*DIFFDEL_2*/ XxLine::INSERT_1,
-     /*DIFFDEL_3*/ XxLine::DIFF_ALL,
+   { /*SAME*/        XxLine::SAME,
+     /*DIFF_1*/      XxLine::DIFF_ALL,
+     /*DIFF_2*/      XxLine::DIFF_ALL,
+     /*DIFF_3*/      XxLine::SAME,
+     /*DELETE_1*/    XxLine::INSERT_2,
+     /*DELETE_2*/    XxLine::INSERT_1,
+     /*DELETE_3*/    XxLine::SAME,
+     /*INSERT_1*/    XxLine::INSERT_1,
+     /*INSERT_2*/    XxLine::INSERT_2,
+     /*INSERT_3*/    XxLine::INSERT_3,
+     /*DIFF_ALL*/    XxLine::DIFF_ALL,
+     /*DIFFDEL_1*/   XxLine::INSERT_2,
+     /*DIFFDEL_2*/   XxLine::INSERT_1,
+     /*DIFFDEL_3*/   XxLine::DIFF_ALL,
      /*DIRECTORIES*/ XxLine::DIRECTORIES
    }
 };
-
-
-
 
 //------------------------------------------------------------------------------
 //
@@ -249,215 +288,185 @@ bool XxLine::isSameRegion( Type type1, Type type2 )
 //------------------------------------------------------------------------------
 //
 void XxLine::initializeHorizontalDiff( 
-   const bool  ignoreWs,
-   const char* text0,
-   const uint  len0,
-   const char* text1,
-   const uint  len1,
-   const char* text2,
-   const uint  len2
+   const XxResources& resources,
+   const char*        text[3],
+   const uint         len[3]
 )
 {
-   // Count nb. of empty files and do something appropriate.
-   int nbEmpty = 0;
-   nbEmpty += ( text0 == 0 ) ? 1 : 0;
-   nbEmpty += ( text1 == 0 ) ? 1 : 0;
-   nbEmpty += ( text2 == 0 ) ? 1 : 0;
+   //
+   // HD_NONE: remove horizontal diffs and return.
+   //
+   if ( resources.getHordiffType() == HD_NONE ) {
+      return;
+   }
 
-   if ( nbEmpty == 0 ) {
+   // Don't waste time in here.
+   if ( _type == SAME || 
+        _type == DELETE_1 || _type == DELETE_2 || _type == DELETE_3 ||
+        _type == INSERT_1 || _type == INSERT_2 || _type == INSERT_3 ||
+        _type == DIRECTORIES ) {
+      return;
+   }
 
-      // Left brackets.
-      const char* pl0 = text0;
-      const char* pl1 = text1;
-      const char* pl2 = text2;
+   //
+   // What this code is supposed to do:
+   //
+   //   * compute the number of potentially different non-empty sides of text.
+   //   note that this is independent of the type of line this is, since one
+   //   side can have text or can be empty, even if it is marked otherwise (but
+   //   never the opposite, i.e. two sides that are marked to be the same will
+   //   always be the same, and we don't even bother checking that).
+   //
+   //   * if there is only one non-empty side
+   //      - nothing to do.  return.
+   //
+   //   * if there are two potentially different non-empty sides (understand
+   //   that this could mean three non-empty sides, only two of which *
+   //   potentially differ).
+   //      - compute bounds between the two
+   //      - if multiple horizontal diffs are enabled, compute them
+   //      - if needed, copy one of the hordiff results
+   //
+   //   * if there are three potentially different non-empty sides (this will
+   //   * only and always happen on a DIFF_ALL in three-way diffs mode)
+   //      - compute bounds between the three
+   //      - if needed, copy one of the hordiff results
+   //
+   //      (we do not know at this point how to compute multiple horizontal
+   //      diffs between three potentially different lines).
+   //
 
-      const char* end0 = text0 + len0;
-      const char* end1 = text1 + len1;
-      const char* end2 = text2 + len2;
+   // Remove current horizontal diffs.
+   for ( int ii = 0; ii < 3; ++ii ) {
+      delete[] _hordiffs[ii];
+      _hordiffs[ii] = 0;
+   }
 
-      bool allbegin = true;
-      while ( true ) {
+   // Count nb. of potentially different non-empty files.
+   int idiff[3] = { -1, -1, -1 };
+   int icopyfrom = -1;
+   int icopyto = -1;
+   switch ( _type ) {
+      case DIFF_1:    { 
+         idiff[0] = 0; idiff[1] = 1;
+         icopyfrom = 1; icopyto = 2;
+      } break;
 
-         if ( ignoreWs && 
-              ( allbegin || 
-                ( isspace( *pl0 ) || isspace( *pl1 ) || isspace( *pl2 ) ) ) ) {
-            while ( isspace( *pl0 ) && pl0 < end0 ) { pl0++; }
-            while ( isspace( *pl1 ) && pl1 < end1 ) { pl1++; }
-            while ( isspace( *pl2 ) && pl2 < end2 ) { pl2++; }
+      case DIFF_2:    { 
+         idiff[0] = 1; idiff[1] = 0;
+         icopyfrom = 0; icopyto = 2;
+      } break;
+
+      case DIFF_3:    { 
+         idiff[0] = 2; idiff[1] = 0;
+         icopyfrom = 0; icopyto = 1;
+      } break;
+
+      case DIFFDEL_1: { 
+         idiff[0] = 1; idiff[1] = 2;
+      } break;
+
+      case DIFFDEL_2: { 
+         idiff[0] = 0; idiff[1] = 2;
+      } break;
+
+      case DIFFDEL_3: { 
+         idiff[0] = 0; idiff[1] = 1;
+      } break;
+      
+      case DIFF_ALL: {
+         idiff[0] = 0; idiff[1] = 1; idiff[2] = 2;
+      } break;
+      
+      case SAME:
+      case DELETE_1:
+      case DELETE_2:
+      case DELETE_3:
+      case INSERT_1:
+      case INSERT_2:
+      case INSERT_3:
+      case DIRECTORIES:
+         XX_ABORT();
+   }
+
+   // Gather the non-null requested diffs.
+   int nndiff[3];
+   int nn = 0;
+   for ( int ii = 0; ii < 3; ++ii ) {
+      if ( idiff[ii] != -1 && text[ idiff[ii] ] != 0 ) {
+         nndiff[nn++] = idiff[ii];
+      }
+   }
+
+   if ( nn < 2 ) {
+      return; // nothing to do.
+   }
+
+   // 3-way hordiff, only compute bounds.
+   else if ( nn == 3 ) {
+      XX_CHECK( _type == DIFF_ALL );
+      int lefthd[3];
+      int righthd[3];
+      XxHordiffImp::boundsHordiff3( resources, text, len, lefthd, righthd );
+
+      for ( int ii = 0; ii < 3; ++ii ) {
+         _hordiffs[ii] = allocBounds( lefthd[ii], righthd[ii] );
+      }
+      return;
+   }
+
+   // 2-way hordiff, potentially with multiple diffs.
+   else {
+      XX_CHECK( nn == 2 );
+
+      const char* ttext[2];
+      uint tlen[2];
+      for ( int ii = 0; ii < 2; ++ii ) {
+         ttext[ii] = text[ nndiff[ii] ];
+         tlen[ii] = len[ nndiff[ii] ];
+      }
+      int lefthd[2];
+      int righthd[2];
+      XxHordiffImp::boundsHordiff2( resources, ttext, tlen, lefthd, righthd );
+
+      if ( resources.getHordiffType() == HD_SINGLE ) {
+         //
+         // HD_SINGLE: simply use the horizontal diff bounds.
+         //
+         for ( int ii = 0; ii < 2; ++ii ) {
+            _hordiffs[ nndiff[ii] ] = allocBounds( lefthd[ii], righthd[ii] );
+         }
+      }
+      else {
+         //
+         // HD_MULTIPLE: compute and create lcs for diff region.
+         //
+         int blen[2];
+         for ( int ii = 0; ii < 2; ++ii ) {
+            blen[ii] = righthd[ii] - lefthd[ii];
          }
 
-         if ( !( *pl0 == *pl1 &&
-                 *pl1 == *pl2 &&
-                 pl0 < end0 &&
-                 pl1 < end1 &&
-                 pl2 < end2 ) ) {
-            break;
+         const int hordiffthr = resources.getHordiffContext();
+         if ( blen[0] >= hordiffthr && blen[1] >= hordiffthr ) {
+            XxHordiffImp::multipleHordiffs2(
+               resources,
+               _hordiffs[ nndiff[0] ], ttext[0], lefthd[0], righthd[0],
+               _hordiffs[ nndiff[1] ], ttext[1], lefthd[1], righthd[1]
+            );
          }
-         pl0++;
-         pl1++;
-         pl2++;
-
-         allbegin = false;
+         else {
+            // The region is not long enough for multiple hordiffs, just use
+            // brackets.
+            for ( int ii = 0; ii < 2; ++ii ) {
+               _hordiffs[ nndiff[ii] ] = allocBounds( lefthd[ii], righthd[ii] );
+            }
+         }
       }
       
-      _lefthd[0] = pl0 - text0;
-      _lefthd[1] = pl1 - text1;
-      _lefthd[2] = pl2 - text2;
-
-      // Right brackets.
-      const char* pr0 = end0 - 1;
-      const char* pr1 = end1 - 1;
-      const char* pr2 = end2 - 1;
-
-      bool allend = true;
-
-      while ( true ) {
-
-         if ( ignoreWs &&
-              ( allend ||
-                ( isspace( *pr0 ) || isspace( *pr1 ) || isspace( *pr2 ) ) ) ) {
-            while ( isspace( *pr0 ) && pr0 >= pl0 && pr0 >= text0 ) { pr0--; }
-            while ( isspace( *pr1 ) && pr1 >= pl1 && pr1 >= text1 ) { pr1--; }
-            while ( isspace( *pr2 ) && pr2 >= pl2 && pr2 >= text2 ) { pr2--; }
-         }
-
-         if ( !( *pr0 == *pr1 && 
-                 *pr1 == *pr2 && 
-                 pr0 >= pl0 &&
-                 pr1 >= pl1 &&
-                 pr2 >= pl2 &&
-                 pr0 >= text0 &&
-                 pr1 >= text1 &&
-                 pr2 >= text2 ) ) {
-            break;
-         }
-         pr0--;
-         pr1--;
-         pr2--;
-
-         allend = false;
+      // Copy to third region if requested.
+      if ( icopyfrom != -1 ) {
+         _hordiffs[ icopyto ] = copyHordiffs( _hordiffs[ icopyfrom ] );
       }
-
-      _righthd[0] = pr0 - text0;
-      _righthd[1] = pr1 - text1;
-      _righthd[2] = pr2 - text2;
-
-      XX_CHECK( pr0+1 >= pl0 );
-      XX_CHECK( pr1+1 >= pl1 );
-      XX_CHECK( pr2+1 >= pl2 );
-   }
-   else if ( nbEmpty == 1 ) {
-
-      const char* begin0 = 0;
-      const char* begin1 = 0;
-      const char* end0 = 0;
-      const char* end1 = 0;
-      int* lhd[3];
-      int* rhd[3];
-      if ( text0 == 0 ) {
-         begin0 = text1;
-         begin1 = text2;
-         end0 = begin0 + len1;
-         end1 = begin1 + len2;
-         lhd[0] = & _lefthd[1];
-         lhd[1] = & _lefthd[2];
-         lhd[2] = & _lefthd[0];
-         rhd[0] = & _righthd[1];
-         rhd[1] = & _righthd[2];
-         rhd[2] = & _righthd[0];
-      }
-      else if ( text1 == 0 ) {
-         begin0 = text0;
-         begin1 = text2;
-         end0 = begin0 + len0;
-         end1 = begin1 + len2;
-         lhd[0] = & _lefthd[0];
-         lhd[1] = & _lefthd[2];
-         lhd[2] = & _lefthd[1];
-         rhd[0] = & _righthd[0];
-         rhd[1] = & _righthd[2];
-         rhd[2] = & _righthd[1];
-      }
-      else if ( text2 == 0 ) {
-         begin0 = text0;
-         begin1 = text1;
-         end0 = begin0 + len0;
-         end1 = begin1 + len1;
-         lhd[0] = & _lefthd[0];
-         lhd[1] = & _lefthd[1];
-         lhd[2] = & _lefthd[2];
-         rhd[0] = & _righthd[0];
-         rhd[1] = & _righthd[1];
-         rhd[2] = & _righthd[2];
-      }
-
-      // Left brackets.
-      const char* pl0 = begin0;
-      const char* pl1 = begin1;
-      bool allbegin = true;
-
-      while ( true ) {
-
-         if ( ignoreWs &&
-              ( allbegin ||
-                ( isspace( *pl0 ) || isspace( *pl1 ) ) ) ) {
-            while ( isspace( *pl0 ) && pl0 < end0 ) { pl0++; }
-            while ( isspace( *pl1 ) && pl1 < end1 ) { pl1++; }
-         }
-
-         if ( !( *pl0 == *pl1 &&
-                 pl0 < end0 &&
-                 pl1 < end1 ) ) {
-            break;
-         }
-         pl0++;
-         pl1++;
-
-         allbegin = false;
-      }
-
-      *(lhd[0]) = pl0 - begin0;
-      *(lhd[1]) = pl1 - begin1;
-      *(lhd[2]) = -1;
-
-      // Right brackets.
-      const char* pr0 = end0 - 1;
-      const char* pr1 = end1 - 1;
-      bool allend = true;
-
-      while ( true ) {
-
-         if ( ignoreWs &&
-              ( allend ||
-                ( isspace( *pr0 ) || isspace( *pr1 ) ) ) ) {
-            while ( isspace( *pr0 ) && pr0 >= pl0 && pr0 >= text0 ) { pr0--; }
-            while ( isspace( *pr1 ) && pr1 >= pl1 && pr1 >= text1 ) { pr1--; }
-         }
-         
-         if ( !( *pr0 == *pr1 && 
-                 pr0 >= pl0 &&
-                 pr1 >= pl1 &&
-                 pr0 >= begin0 &&
-                 pr1 >= begin1 ) ) {
-            break;
-         }
-         pr0--;
-         pr1--;
-
-         allend = false;
-      }
-      *(rhd[0]) = pr0 - begin0; 
-      *(rhd[1]) = pr1 - begin1;
-      *(rhd[2]) = -1;
-
-      XX_CHECK( pr0+1 >= pl0 );
-      XX_CHECK( pr1+1 >= pl1 );
-   }
-   else {
-      // nbEmpty > 1
-      _lefthd[0] = _lefthd[1] = _lefthd[2] = -1;
-      _righthd[0] = _righthd[1] = _righthd[2] = -1;
-      return;
    }
 }
 

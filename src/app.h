@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 322 2001-10-31 00:28:50Z blais $
- * $Date: 2001-10-30 19:28:50 -0500 (Tue, 30 Oct 2001) $
+ * $Id: app.h 375 2001-11-12 22:57:03Z blais $
+ * $Date: 2001-11-12 17:57:03 -0500 (Mon, 12 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -106,7 +106,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxApp( int argc, char** argv, const XxCmdline& );
+   XxApp( int& argc, char** argv, const XxCmdline& );
 
    // Destructor.
    virtual ~XxApp();
@@ -301,7 +301,10 @@ public slots:
    void toggleVerticalLine();
    void toggleOverview();
    void toggleShowFilenames();
-   void toggleHorizontalDiffs();
+   void hordiffTypeNone();
+   void hordiffTypeSingle();
+   void hordiffTypeMultiple();
+   void hordiffTypeUpdate();
    void toggleIgnoreHorizontalWs();
    void toggleFormatClipboardText();
    void ignoreFileNone();
@@ -433,6 +436,7 @@ private:
    QPopupMenu*             _viewPopup;
    QPopupMenu*             _optionsMenu;
    QPopupMenu*             _displayMenu;
+   QPopupMenu*             _hordiffMenu;
    QPopupMenu*             _windowsMenu;
    int                     _menuids[ MAX_MENUIDS ];
    XxOverview*             _overview;
@@ -469,9 +473,9 @@ private:
 
 };
 
-
 XX_NAMESPACE_END
 
 #include <app.inline.h>
 
 #endif
+

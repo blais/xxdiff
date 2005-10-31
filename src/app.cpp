@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 479 2002-02-07 06:38:35Z  $
- * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
+ * $Id: app.cpp 398 2001-11-22 05:46:18Z blais $
+ * $Date: 2001-11-22 00:46:18 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -115,7 +115,9 @@ enum MenuIds {
    ID_ToggleVerticalLine,
    ID_ToggleOverview,
    ID_ToggleShowFilenames,
-   ID_ToggleHorizontalDiffs,
+   ID_Hordiff_None,
+   ID_Hordiff_Single,
+   ID_Hordiff_Multiple,
    ID_ToggleIgnoreHorizontalWs,
    ID_ToggleFormatClipboardText,
    ID_ToggleIgnoreTrailing,
@@ -383,7 +385,7 @@ QSocketNotifier* XxApp::_socketNotifier = 0;
 
 //------------------------------------------------------------------------------
 //
-XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
+XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    QApplication( argc, argv ),
    _isUICreated( false ),
    _returnValue( 0 ),
@@ -402,7 +404,8 @@ XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
 {
    _vscroll[0] = _vscroll[1] = 0;
 
-   if ( _cmdline._forceStyle == true ) {
+   // By default, if not specified, force SGI style.
+   if ( _cmdline._forceStyle == false ) {
       _style = new QSGIStyle;
       setStyle( _style );
    }
@@ -410,7 +413,9 @@ XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
    // Read in the resources and create resources object.
    _resources = buildResources();
 
-   setFont( _resources->getFontApp(), true );
+   if ( _cmdline._forceFont == false ) {
+      setFont( _resources->getFontApp(), true );
+   }
    
    // Read in the file names.
    QString filenames[3];
@@ -420,13 +425,15 @@ XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
       _cmdline, filenames, displayFilenames, isTemporary, _filesAreDirectories
    );
    _nbTextWidgets = _nbFiles;
-   if ( _nbFiles == 0 ) {
-      throw XxUsageError( XX_EXC_PARAMS );
-   }
 
+   // Note: this is already pretty much validated in XxCmdline.
+   // Old code here stays anyway.
+   if ( _nbFiles == 0 ) {
+      throw XxUsageError( XX_EXC_PARAMS, "No files specified." );
+   }
    // Check for odd number of files.
-   if ( _nbFiles != 0 && _nbFiles != 2 && _nbFiles != 3 ) {
-      throw XxUsageError( XX_EXC_PARAMS );
+   if ( _nbFiles < 1 || _nbFiles > 3 ) {
+      throw XxUsageError( XX_EXC_PARAMS, "Wrong number of files specified." );
    }
 
    // Add extra diff arguments.
@@ -466,11 +473,8 @@ XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
       bool succ = processDiff();
 
       // Initialize the horizontal diffs if necessary.
-      if ( succ == true &&
-           _resources->getBoolOpt( BOOL_HORIZONTAL_DIFFS ) == true ) {
-         _diffs->initializeHorizontalDiffs( 
-            _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ), getBuffers()
-         );
+      if ( succ == true ) {
+         _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
    }
 
@@ -495,27 +499,27 @@ XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
       _mainWindow->setCaption( "xxdiff" );
    }
 
-   // Resize the main window before showing.
-   const QRect& psize = _resources->getPreferredGeometry();
-   if ( !_resources->getMaximize() ) {
-      _mainWindow->resize( psize.size() );
-   }
-
-   // Call post creation actions.
+   // Call post creation actions before showing.
    if ( _cmdline._mergeRequested ) {
       selectGlobalMerge();
    }
 
-   // Show the main window.
-   if ( _resources->getMaximize() ) {
+   // Resize the main window before showing it.
+   const QRect& psize = _resources->getPreferredGeometry();
+   if ( _cmdline._forceGeometry == true ) {
+      _mainWindow->show();
+   }
+   else if ( _resources->getMaximize() ) {
       _mainWindow->showMaximized();
       // Don't make fullscreen, rather maximized.
    }
    else {
+      _mainWindow->resize( psize.size() );
       _mainWindow->show();
 
       // Note: positioning has to be done after show().  This results in some
-      // flickering, but there's nothing we can do about it.
+      // flickering, but there's nothing we can do about it, this is a Qt
+      // limitation.
       if ( psize.topLeft() != QPoint( -1, -1 ) ) {
          _mainWindow->move( psize.topLeft() );
       }
@@ -567,8 +571,9 @@ uint XxApp::processFileNames(
    for ( XxFno ii = 0; ii < cmdline._nbFilenames; ++ii ) {
       if ( cmdline._filenames[ii] == "-" ) {
          if ( stdinUsed == true ) {
-            // Cannot have two filenames from stdin.
-            throw XxUsageError( XX_EXC_PARAMS );
+            throw XxUsageError( 
+               XX_EXC_PARAMS, "Cannot accept more than one file from stdin."
+            );
          }
          stdinUsed = true;
          isDirectory[ii] = false;
@@ -585,13 +590,15 @@ uint XxApp::processFileNames(
    }
 
    if ( stdinUsed == true && nbPathFiles == 0 ) {
-      // stdin was specified and all other paths are directories.
-      throw XxUsageError( XX_EXC_PARAMS );
+      throw XxUsageError(
+         XX_EXC_PARAMS, "Cannot use stdin as only file with all directories."
+      );
    }
 
    if ( nbPathFiles > 1 && nbFiles > ( nbPathFiles + (stdinUsed ? 1 : 0) ) ) {
-      // There are more than one named file AND one of the files is a directory.
-      throw XxUsageError( XX_EXC_PARAMS );
+      throw XxUsageError( XX_EXC_PARAMS,
+                          "There are more than one named file AND "
+                          "one of the files is a directory." );
    }
 
    filesAreDirectories = ( nbFiles > 0 && nbPathFiles == 0 );
@@ -600,7 +607,8 @@ uint XxApp::processFileNames(
    QString bn;
    if ( !filesAreDirectories && nbPathFiles < nbFiles ) {
       XX_ASSERT( filePathIndex != -1 );
-      bn = XxUtil::baseName( cmdline._filenames[ filePathIndex ] );
+      QFileInfo finfo( cmdline._filenames[ filePathIndex ] );
+      bn = finfo.fileName();
    }
 
    bool stdinCopied = false;
@@ -672,7 +680,7 @@ void XxApp::createUI( uint nbTextWidgets )
    QVBoxLayout* textAndSbLayout = new QVBoxLayout( topLayout );
    QHBoxLayout* textLayout = new QHBoxLayout( textAndSbLayout );
 
-   QFont smaller = _resources->getFontApp();
+   QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
 
    for ( uint ii = 0; ii < nbTextWidgets; ++ii ) { 
@@ -1357,13 +1365,26 @@ void XxApp::createMenus()
    );
    _displayMenu->insertSeparator();
 
+   _hordiffMenu = 0;
    if ( _filesAreDirectories == false ) {
-      _menuids[ ID_ToggleHorizontalDiffs ] = _displayMenu->insertItem( 
-         "Horizontal diffs", this, SLOT(toggleHorizontalDiffs()),
-         _resources->getAccelerator( 
-            ACCEL_TOGGLE_HORIZONTAL_DIFFS 
-         )
-      );
+
+      {
+         _hordiffMenu = new QPopupMenu;
+      
+         _menuids[ ID_Hordiff_None ] = _hordiffMenu->insertItem( 
+            "None", this, SLOT(hordiffTypeNone()),
+            _resources->getAccelerator( ACCEL_HORDIFF_NONE )
+         );
+         _menuids[ ID_Hordiff_Single ] = _hordiffMenu->insertItem( 
+            "Single", this, SLOT(hordiffTypeSingle()),
+            _resources->getAccelerator( ACCEL_HORDIFF_SINGLE )
+         );
+         _menuids[ ID_Hordiff_Multiple ] = _hordiffMenu->insertItem( 
+            "Multiple", this, SLOT(hordiffTypeMultiple()),
+            _resources->getAccelerator( ACCEL_HORDIFF_MULTIPLE )
+         );
+      }
+      _displayMenu->insertItem( "Horizontal diffs", _hordiffMenu );
       
       _menuids[ ID_ToggleIgnoreHorizontalWs ] = _displayMenu->insertItem( 
          "Ignore horizontal whitespace", this, SLOT(toggleIgnoreHorizontalWs()),
@@ -1381,6 +1402,7 @@ void XxApp::createMenus()
          "Draw vertical line", this, SLOT(toggleVerticalLine()),
          _resources->getAccelerator( ACCEL_TOGGLE_VERTICAL_LINE )
       );
+
    }
    else {
       _menuids[ ID_ToggleDirDiffsIgnoreFileChanges ] = _displayMenu->insertItem(
@@ -1537,11 +1559,10 @@ void XxApp::readFile(
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         std::auto_ptr<XxBuffer> tmp( new XxBuffer( false, filename, displayFilename ) );
-	 _files[no] = tmp;
+         _files[no].reset( new XxBuffer( false, filename, displayFilename ) );
       }
       else {
-         std::auto_ptr<XxBuffer> tmp( 
+         _files[no].reset( 
             new XxBuffer( 
                filename, 
                displayFilename, 
@@ -1549,7 +1570,6 @@ void XxApp::readFile(
                isTemporary 
             )
          );
-         _files[no] = tmp;
       }
    }
    catch ( const std::exception& ex ) {
@@ -1591,15 +1611,14 @@ void XxApp::reReadFile( const XxFno no )
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         std::auto_ptr<XxBuffer> tmp( new XxBuffer( 
+         _files[no].reset( new XxBuffer( 
             false,
             oldfile->getName(),
             oldfile->getDisplayName()
          ) );
-         _files[no] = tmp;
       }
       else {
-         std::auto_ptr<XxBuffer> tmp(
+         _files[no].reset( 
             new XxBuffer( 
                oldfile->getName(),
                oldfile->getDisplayName(),
@@ -1607,7 +1626,6 @@ void XxApp::reReadFile( const XxFno no )
                oldfile->isTemporary()
             )
          );
-         _files[no] = tmp;
       }
    }
    catch ( const std::exception& ex ) {
@@ -2461,11 +2479,8 @@ void XxApp::openFile( const XxFno no )
       bool succ = processDiff();
       
       // Initialize the horizontal diffs if necessary.
-      if ( succ == true &&
-           _resources->getBoolOpt( BOOL_HORIZONTAL_DIFFS ) == true ) {
-         _diffs->initializeHorizontalDiffs( 
-            _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ), getBuffers()
-         );
+      if ( succ == true ) {
+         _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
 
       // Reset the cursor line.
@@ -2520,11 +2535,8 @@ void XxApp::onRedoDiff()
       bool succ = processDiff();
 
       // Initialize the horizontal diffs if necessary.
-      if ( succ == true &&
-           _resources->getBoolOpt( BOOL_HORIZONTAL_DIFFS ) == true ) {
-         _diffs->initializeHorizontalDiffs(
-            _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ), getBuffers()
-         );
+      if ( succ == true ) {
+         _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
 
       // Try to set the same lines as it used to have before the redo.
@@ -3355,11 +3367,7 @@ void XxApp::regionSplitSwapJoin()
       // Redo the horizontal diffs if required.
       // Note: you could optimize and do only the required lines.
       if ( joined == true ) {
-         if ( _resources->getBoolOpt( BOOL_HORIZONTAL_DIFFS ) ) {
-            _diffs->initializeHorizontalDiffs(
-               _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ), getBuffers()
-            );
-         }
+         _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
    }
 }
@@ -3689,14 +3697,34 @@ void XxApp::toggleShowFilenames()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::toggleHorizontalDiffs()
+void XxApp::hordiffTypeNone()
 {
-   _resources->toggleBoolOpt( BOOL_HORIZONTAL_DIFFS );
+   _resources->setHordiffType( HD_NONE );
+   hordiffTypeUpdate();
+}
 
+//------------------------------------------------------------------------------
+//
+void XxApp::hordiffTypeSingle()
+{
+   _resources->setHordiffType( HD_SINGLE );
+   hordiffTypeUpdate();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::hordiffTypeMultiple()
+{
+   _resources->setHordiffType( HD_MULTIPLE );
+   hordiffTypeUpdate();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::hordiffTypeUpdate()
+{
    if ( _diffs.get() != 0 ) {
-      _diffs->initializeHorizontalDiffs(
-         _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ), getBuffers()
-      );
+      _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       repaintTexts();
    }
    synchronizeUI();
@@ -3709,11 +3737,7 @@ void XxApp::toggleIgnoreHorizontalWs()
    _resources->toggleBoolOpt( BOOL_IGNORE_HORIZONTAL_WS );
 
    if ( _diffs.get() != 0 ) {
-      _diffs->initializeHorizontalDiffs(
-         _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ),  
-         getBuffers(),
-         true
-      );
+      _diffs->initializeHorizontalDiffs( *_resources, getBuffers(), true );
       repaintTexts();
    }
    synchronizeUI();
@@ -3860,53 +3884,56 @@ void XxApp::helpAbout()
 void XxApp::synchronizeUI()
 {
    if ( _filesAreDirectories == false ) {
-      XxCommand cmdResId =
-         (_nbFiles == 2) ? CMD_DIFF_FILES_2 : CMD_DIFF_FILES_3;
-      
-      _optionsMenu->setItemChecked( 
-         _menuids[ ID_ToggleIgnoreTrailing ],
-         _resources->isCommandSwitch( 
-            cmdResId, 
-            CMDSW_FILES_IGNORE_TRAILING
-         )
-      );
-      _optionsMenu->setItemChecked( 
-         _menuids[ ID_ToggleIgnoreWhitespace ],
-         _resources->isCommandSwitch( 
-            cmdResId, 
-            CMDSW_FILES_IGNORE_WHITESPACE
-         )
-      );
-      _optionsMenu->setItemChecked( 
-         _menuids[ ID_ToggleIgnoreCase ],
-         _resources->isCommandSwitch( 
-            cmdResId, 
-            CMDSW_FILES_IGNORE_CASE
-         )
-      );
-      _optionsMenu->setItemChecked( 
-         _menuids[ ID_ToggleIgnoreBlankLines ],
-         _resources->isCommandSwitch( 
-            cmdResId, 
-            CMDSW_FILES_IGNORE_BLANK_LINES
-         )
-      );
+      if ( _nbFiles == 2 ) {
+         XxCommand cmdResId =
+            (_nbFiles == 2) ? CMD_DIFF_FILES_2 : CMD_DIFF_FILES_3;
+         // Note: useless, this is only valid for two-way file diffs.
 
-      QString cmd = _resources->getCommand( cmdResId );
-      XxQuality quality = _resources->getQuality( cmd );
+         _optionsMenu->setItemChecked( 
+            _menuids[ ID_ToggleIgnoreTrailing ],
+            _resources->isCommandSwitch( 
+               cmdResId, 
+               CMDSW_FILES_IGNORE_TRAILING
+            )
+         );
+         _optionsMenu->setItemChecked( 
+            _menuids[ ID_ToggleIgnoreWhitespace ],
+            _resources->isCommandSwitch( 
+               cmdResId, 
+               CMDSW_FILES_IGNORE_WHITESPACE
+            )
+         );
+         _optionsMenu->setItemChecked( 
+            _menuids[ ID_ToggleIgnoreCase ],
+            _resources->isCommandSwitch( 
+               cmdResId, 
+               CMDSW_FILES_IGNORE_CASE
+            )
+         );
+         _optionsMenu->setItemChecked( 
+            _menuids[ ID_ToggleIgnoreBlankLines ],
+            _resources->isCommandSwitch( 
+               cmdResId, 
+               CMDSW_FILES_IGNORE_BLANK_LINES
+            )
+         );
 
-      _optionsMenu->setItemChecked(
-         _menuids[ ID_ToggleQualityNormal ],
-         quality == QUALITY_NORMAL
-      );
-      _optionsMenu->setItemChecked(
-         _menuids[ ID_ToggleQualityFastest ],
-         quality == QUALITY_FASTEST
-      );
-      _optionsMenu->setItemChecked(
-         _menuids[ ID_ToggleQualityHighest ],
-         quality == QUALITY_HIGHEST
-      );
+         QString cmd = _resources->getCommand( cmdResId );
+         XxQuality quality = _resources->getQuality( cmd );
+
+         _optionsMenu->setItemChecked(
+            _menuids[ ID_ToggleQualityNormal ],
+            quality == QUALITY_NORMAL
+         );
+         _optionsMenu->setItemChecked(
+            _menuids[ ID_ToggleQualityFastest ],
+            quality == QUALITY_FASTEST
+         );
+         _optionsMenu->setItemChecked(
+            _menuids[ ID_ToggleQualityHighest ],
+            quality == QUALITY_HIGHEST
+         );
+      }
    }
    else {
       _optionsMenu->setItemChecked( 
@@ -3918,10 +3945,20 @@ void XxApp::synchronizeUI()
    //---------------------------------------------------------------------------
 
    if ( _filesAreDirectories == false ) {
-      _displayMenu->setItemChecked( 
-         _menuids[ ID_ToggleHorizontalDiffs ],
-         _resources->getBoolOpt( BOOL_HORIZONTAL_DIFFS )
-      );
+      {
+         _hordiffMenu->setItemChecked(
+            _menuids[ ID_Hordiff_None ],
+            _resources->getHordiffType() == HD_NONE
+         );
+         _hordiffMenu->setItemChecked(
+            _menuids[ ID_Hordiff_Single ],
+            _resources->getHordiffType() == HD_SINGLE
+         );
+         _hordiffMenu->setItemChecked(
+            _menuids[ ID_Hordiff_Multiple ],
+            _resources->getHordiffType() == HD_MULTIPLE
+         );
+      }
       _displayMenu->setItemChecked( 
          _menuids[ ID_ToggleIgnoreHorizontalWs ],
          _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS )

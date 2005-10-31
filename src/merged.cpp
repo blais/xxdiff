@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 295 2001-10-21 18:39:14Z blais $
- * $Date: 2001-10-21 14:39:14 -0400 (Sun, 21 Oct 2001) $
+ * $Id: merged.cpp 374 2001-11-11 07:58:01Z blais $
+ * $Date: 2001-11-11 02:58:01 -0500 (Sun, 11 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -190,13 +190,10 @@ void XxMergedText::drawContents( QPainter* pp )
             
             uint length;
             const char* lineText = file[no]->getTextLine( fline, length );
-            
-            int lhd = line.getLeftHdiffPos( no ); // useless
-            int rhd = line.getRightHdiffPos( no ); // useless
-            
+
             int rlength;
             const char* renderedText = file[no]->renderTextWithTabs( 
-               lineText, length, tabWidth, rlength, lhd, rhd
+               lineText, length, tabWidth, rlength, 0
             );
             
             //

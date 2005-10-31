@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: util.h 372 2001-11-11 07:47:47Z blais $
+ * $Date: 2001-11-11 02:47:47 -0500 (Sun, 11 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -116,8 +116,6 @@ public:
 
    // Print time value to stream.
    static void printTime( std::ostream& os, long time );
-
-   static QString baseName( const QString& str );
 
    // Note: you have to free() out_args when you're done.
    static int splitArgs( 

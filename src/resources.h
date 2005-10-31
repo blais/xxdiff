@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 314 2001-10-29 00:06:19Z blais $
- * $Date: 2001-10-28 19:06:19 -0500 (Sun, 28 Oct 2001) $
+ * $Id: resources.h 390 2001-11-19 17:24:09Z blais $
+ * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -72,7 +72,6 @@ class XxApp;
 // Boolean options.
 enum XxBoolOpt {
    BOOL_EXIT_ON_SAME,
-   BOOL_HORIZONTAL_DIFFS,
    BOOL_IGNORE_HORIZONTAL_WS,
    BOOL_FORMAT_CLIPBOARD_TEXT,
    BOOL_IGNORE_ERRORS,
@@ -177,7 +176,9 @@ enum XxAccel {
    ACCEL_TOGGLE_VERTICAL_LINE,
    ACCEL_TOGGLE_OVERVIEW,
    ACCEL_TOGGLE_SHOW_FILENAMES,
-   ACCEL_TOGGLE_HORIZONTAL_DIFFS,
+   ACCEL_HORDIFF_NONE,
+   ACCEL_HORDIFF_SINGLE, 
+   ACCEL_HORDIFF_MULTIPLE,
    ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS,
    ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT,
    ACCEL_IGNORE_FILE_NONE,
@@ -295,6 +296,12 @@ enum XxQuality {
    QUALITY_HIGHEST
 };
 
+// Types of horizontal diffs.
+enum XxHordiff {
+   HD_NONE,
+   HD_SINGLE,
+   HD_MULTIPLE
+};
 
 /*==============================================================================
  * CLASS XxResources
@@ -401,6 +408,7 @@ public:
    void setTabWidth( uint );
    // </group>
 
+
    // Get/set a command.
    // <group>
    const QString& getCommand( XxCommand cmdId ) const;
@@ -413,16 +421,31 @@ public:
    void setCommandSwitch( XxCommandSwitch cmdId, const QString& );
    // </group>
 
+   // Get/set a command option's initial state.
+   // <group>
+   int getInitSwitch( XxCommandSwitch cmdId ) const;
+   void setInitSwitch( XxCommandSwitch cmdId, const int );
+   // </group>
+
    // Convenience methods for getting/setting an option into a specific command.
    // <group>
    bool isCommandSwitch( XxCommand cmdId, XxCommandSwitch cmdOptionId ) const;
    void setCommandSwitch(
-      XxCommand    cmdId,
+      XxCommand       cmdId,
       XxCommandSwitch cmdOptionId,
-      bool         setit
+      bool            setit
    );
    void toggleCommandSwitch( XxCommand cmdId, XxCommandSwitch cmdOptionId );
    // </group>
+
+   // Convenience methods for setting the quality options in the commands. Note
+   // that these methods don't change the commands in the resources, they modify
+   // the one that is given.
+   // <group>
+   XxQuality getQuality( const QString& command ) const;
+   void setQuality( QString& command, XxQuality quality ) const;
+   // </group>
+
 
    // Width in pixels of file representation in overview.
    // <group>
@@ -448,20 +471,46 @@ public:
    void setTag( XxTag, const QString& );
    // </group>
 
-   // Convenience methods for setting the quality options in the commands. Note
-   // that these methods don't change the commands in the resources, they modify
-   // the one that is given.
-   // <group>
-   XxQuality getQuality( const QString& command ) const;
-   void setQuality( QString& command, XxQuality quality ) const;
-   // </group>
-
-
    // Get/set clipboard format string.
    // <group>
    const QString& getClipboardFormat() const;
    void setClipboardFormat( const QString& format );
    // </group>
+
+   // Get/set type of horizontal diffs.
+   // <group>
+   XxHordiff getHordiffType() const;
+   void setHordiffType( XxHordiff hordiffType );
+   // </group>
+
+   // Get/set the horizontal diffs maximum table size.
+   // <group>
+   uint getHordiffMax() const;
+   void setHordiffMax( uint );
+   // </group>
+
+   // Get/set the horizontal diffs minimum common region.
+   // <group>
+   uint getHordiffContext() const;
+   void setHordiffContext( uint );
+   // </group>
+
+   // Return a table for the dynamic programming algorithm, if the maximum size
+   // of the table allows it.  If not, then return 0.
+   int* getDynProgTable( const uint htx, const uint hty ) const;
+
+   // Returns a buffer that will always be big enough for storing a list of
+   // horizontal diffs, whatever the size may be.  This should never return 0.
+   // Returns the size of the buffers.
+   uint getHordiffBuffers( int*&  hbuffer0, int*&  hbuffer1 ) const;
+
+   // Returns a character line buffer that will always be big enough for the
+   // maximum line size for computing multiple horizontal diffs.
+   uint getHordiffLineBuffers( char*& hdlinebuf0, char*& hdlinebuf1 ) const;
+
+   // Apply the init switch resources to the current commands.
+   // This should be carried out after parsing.
+   void applyInitSwitch();
 
    /*----- static member functions -----*/
 
@@ -491,6 +540,9 @@ private:
    // Initialization with default values like the original xdiff.
    void initializeOriginalXdiff();
 
+   // Update horizontal diffs buffer size.
+   void updateHordiffBuffers();
+
    /*----- data members -----*/
 
    QRect        _preferredGeometry;
@@ -505,12 +557,28 @@ private:
    uint         _tabWidth;
    QString      _commands[ CMD_LAST ];
    QString      _commandSwitch[ CMDSW_LAST ];
+   int          _initSwitch[ CMDSW_LAST ];
    uint         _overviewFileWidth;
    uint         _overviewSepWidth;
    uint         _verticalLinePos;
    QString      _tags[ TAG_LAST ];
    QString      _clipboardFormat;
    XxIgnoreFile _ignoreFile;
+   XxHordiff    _hordiffType;
+   uint         _hordiffMax;
+   uint         _hordiffContext;
+
+   // Dynamic programming table used for horizontal diffs computation.
+   // <group>
+   mutable uint _hdTableSize;
+   mutable int* _hdTable;
+   uint         _hdBufferSize;
+   int*         _hdBuffer0;
+   int*         _hdBuffer1;
+   uint         _hdLineBufSize;
+   char*        _hdLineBuf0;
+   char*        _hdLineBuf1;
+   // </group>
 
 };
 

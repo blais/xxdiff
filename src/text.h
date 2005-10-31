@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.h 340 2001-11-05 07:34:53Z blais $
- * $Date: 2001-11-05 02:34:53 -0500 (Mon, 05 Nov 2001) $
+ * $Id: text.h 376 2001-11-13 05:13:06Z blais $
+ * $Date: 2001-11-13 00:13:06 -0500 (Tue, 13 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -127,3 +127,4 @@ private:
 XX_NAMESPACE_END
 
 #endif
+

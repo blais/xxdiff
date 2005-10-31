@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 479 2002-02-07 06:38:35Z  $
-# $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
+# $Id: xxdiff.pro 405 2001-11-22 17:51:48Z blais $
+# $Date: 2001-11-22 12:51:48 -0500 (Thu, 22 Nov 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -29,10 +29,16 @@ CONFIG = release qt warn_on
 
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
+XX_VERSION=2.1
+
+TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION-devel ($(COMPILE_DATE))\""
+TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
+
 INCLUDEPATH += .
 
 LEXYACC  = resParser
-TMAKE_CLEAN += $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
+LEXYACC_OBJ  = $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
+TMAKE_CLEAN += $$LEXYACC_OBJ
 
 
 #
@@ -56,7 +62,7 @@ irix-n32:TMAKE_CFLAGS = $$TMAKE_CXXFLAGS
 
 irix-n32:TMAKE_MOC = ${QTDIR}/bin/moc
 
-irix-n32:TMAKE_LIBS += -lC -lCio -lgen -lm
+irix-n32:TMAKE_LIBS += -lC -lCio -lm
 irix-n32:TMAKE_LIBDIR_QT = $(QTDIR)/lib32
 irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib32
 
@@ -116,14 +122,15 @@ HEADERS = \
 	builderFiles2.h \
 	builderFiles3.h \
 	builderDirs2.h \
+	builderConflicts.h \
 	exceptions.h \
 	buffer.h \
 	buffer.inline.h \
 	help.h \
+	hordiffImp.h \
 	line.h \
 	line.inline.h \
 	main.h \
-	man.h \
 	overview.h \
 	resParser.h \
 	resources.h \
@@ -136,7 +143,9 @@ HEADERS = \
 	markersFileDialog.h \
 	getopt.h \
 	diffutils.h \
-	diffutils_hack.h
+	diffutils_hack.h \
+	doc.qml \
+	version.h
 
 SOURCES = \
 	optionsDialog.cpp \
@@ -156,7 +165,9 @@ SOURCES = \
 	builderFiles2.cpp \
 	builderFiles3.cpp \
 	builderDirs2.cpp \
+	builderConflicts.cpp \
 	diffs.cpp \
+	hordiffImp.cpp \
 	line.cpp \
 	buffer.cpp \
 	resources.cpp \
@@ -164,7 +175,8 @@ SOURCES = \
 	resParser.cpp \
 	markersFileDialog.cpp \
 	getopt.c \
-	getopt1.c
+	getopt1.c \
+	version.c
 
 #	diffutils.cpp \
 

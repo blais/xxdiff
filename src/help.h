@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.h 341 2001-11-05 08:40:28Z blais $
- * $Date: 2001-11-05 03:40:28 -0500 (Mon, 05 Nov 2001) $
+ * $Id: help.h 393 2001-11-20 07:54:25Z blais $
+ * $Date: 2001-11-20 02:54:25 -0500 (Tue, 20 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -92,22 +92,10 @@ public:
    static QString getVersion();
 
    // Returns usage text. If `plain' is set to true, filter out formatting tags.
-   static QString getUsage( bool plain = false );
+   static QString getUsage( int helpMask, bool plain = false );
 
    // Returns user's manual, formatted in qml.
    static QString getManual();
-
-   // </group>
-
-
-   // Prints out info.
-   // <group>
-
-   // Print out version information.
-   static void dumpVersion( QTextStream& os );
-
-   // Print out usage information.
-   static void dumpUsage( QTextStream& os );
 
    // </group>
 

@@ -103,7 +103,7 @@ xxdiff doesn't do three-way directory diffs.
 
 <!-- ---------------------------------------- -->
 <a name="options">
-<h3>Options</h3>
+<h3>Command-line Options</h3>
 
 <invocation>
 
@@ -183,11 +183,23 @@ diffs is enabled, for each line, xxdiff find the smallest differing part of the
 line that differs and displays that in a different, highlighted color.  This
 allows the user to more quickly visualize exactly what has changed between the
 two lines of text.  No need to mention, this is highly addictive and is now
-enabled by default.
+enabled by default.  This is the "single horizontal diffs" mode.
 </p>
 
 <p>
-When computing horizontal diffs, whitespace can be optionally ignored.
+When there are no more than two pieces of text on a single line, if the
+differing parts of the lines are not too long (e.g. less than 100 chars), the
+horizontal diffs can isolate the differences within the line.  This is the
+"multiple horizontal diffs" mode.  In this mode, we require that between
+horizontal changes, inserts or deletes, there be a minimal number of common
+context characters, so that the eye can make out what has change between the
+lines.  This value is configurable (see resources section).
+</p>
+
+<p>
+When computing horizontal diffs, <b>changes</b> in whitespace can be optionally
+ignored.  However, if whitespace has been added in the middle of a word, it will
+still be highlighted.
 </p>
 
 <h4>Navigation</h4>
@@ -736,7 +748,7 @@ has the DOS characters in it.
 
 <p>
 By default, the filenames window display the filename.  From the command-line,
-howver, you can set it to display an arbitrary string, which could include your
+however, you can set it to display an arbitrary string, which could include your
 current revision number.
 </p>
 

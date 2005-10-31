@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 343 2001-11-06 00:43:50Z blais $
- * $Date: 2001-11-05 19:43:50 -0500 (Mon, 05 Nov 2001) $
+ * $Id: line.h 397 2001-11-22 03:36:14Z blais $
+ * $Date: 2001-11-21 22:36:14 -0500 (Wed, 21 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -129,6 +129,10 @@ public:
       XxFln fline2 = -1
    );
 
+   // Destructor, non-virtual on purpose (gotta keep things small, this goes
+   // into a vector).
+   ~XxLine();
+
    // Returns the line number in the file NOT in the diffs.  If the line for
    // the requested file nb. does not correspond to any actual file text, return
    // -1.
@@ -150,22 +154,19 @@ public:
 
    // Compute (initialize) horizontal brackets.
    void initializeHorizontalDiff( 
-      const bool  ignoreWs,
-      const char* text0,
-      const uint  len0,
-      const char* text1,
-      const uint  len1,
-      const char* text2 = 0,
-      const uint  len2 = 0
+      const XxResources& resources,
+      const char*        text[3],
+      const uint         len[3]
    );
 
    // Returns true if this line has horizontal diffs.
    bool hasHorizontalDiffs( const XxFno no ) const;
 
-   // Returns the left/right horizontal diff position (in chars) for side no.
+   // Returns the left/right horizontal diff list for a particular file.  Format
+   // is a list of ints, and could be possibly null, ends with -1 element if not
+   // null, and there is always an even number of valid brackets.
    // <group>
-   int getLeftHdiffPos( const XxFno no ) const;
-   int getRightHdiffPos( const XxFno no ) const;
+   const int* getHorDiffs( const XxFno no ) const;
    // </group>
 
    // Get/set the hunk id.
@@ -246,20 +247,13 @@ private:
 
    /*----- data members -----*/
 
-   XxFln	_lineNo[3];
-   Type		_type;
-   Selection	_selection;
-   XxHunk	_hunkId; // This is used for split/swap/join.
+   XxFln       _lineNo[3];
+   Type        _type;
+   Selection   _selection;
+   XxHunk      _hunkId; // This is used for split/swap/join.
 
-   // horizontal diff brackets
-
-   // This is the first different character (may be length)
-   int		_lefthd[3];
-   // This is the last different character (may be -1)
-   int		_righthd[3];
-
-   // This means that a line without horizontal differences will have
-   // (righthd-1) == lefthd.
+   // Horizontal diff brackets.
+   const int*  _hordiffs[3];
 
 };
 

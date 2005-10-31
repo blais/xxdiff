@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 294 2001-10-21 07:27:43Z blais $
- * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
+ * $Id: diffs.h 390 2001-11-19 17:24:09Z blais $
+ * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,10 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_RESOURCES
+#include <resources.h>
 #endif
 
 #ifndef INCL_QT_QOBJECT
@@ -258,7 +262,7 @@ public:
 
    // Initialize horizontal diffs for lines.
    void initializeHorizontalDiffs(
-      const bool                     ignoreHorizontalWhitespace,
+      const XxResources&             resources,
       const std::auto_ptr<XxBuffer>* files,
       const bool                     force = false
    );
@@ -314,7 +318,8 @@ private:
 
    std::vector< SearchResult > _searchResults;
 
-   bool                        _initializedHorizontalDiffs;
+   XxHordiff                   _lastInitializedDiffType;
+   uint                        _lastInitializedContext;
    bool                        _isDirectoryDiff;
    bool                        _dirty;
 

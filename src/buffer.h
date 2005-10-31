@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.h 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: buffer.h 374 2001-11-11 07:58:01Z blais $
+ * $Date: 2001-11-11 02:58:01 -0500 (Sun, 11 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -127,15 +127,17 @@ public:
 
    // Renders text into text width tabs expanded to spaces and returns a pointer
    // to a buffer that belongs to the file object (don't fool around with it).
-   // rlength will contain the length of the rendered string.  lhd and rhd will
-   // get readjusted according to the right amount of spaces that will be added.
+   // rlength will contain the length of the rendered string.
+   //
+   // This function will offset the horizontal diffs it is given if necessary.
+   // If the hordiffs is not null, it is expecting an array ende by a -1
+   // element.  This array will be modified in place.
    const char* renderTextWithTabs( 
       const char* lineText,
       const uint  length, 
       const uint  tabWidth, 
-      int&	  rlength,
-      int&	  lhd,
-      int&	  rhd
+      int&        rlength,
+      int*        hordiffs
    );
 
    // Returns the number of digits required for this file.

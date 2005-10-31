@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: util.cpp 372 2001-11-11 07:47:47Z blais $
+ * $Date: 2001-11-11 02:47:47 -0500 (Sun, 11 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -40,7 +40,6 @@
 #  include <sys/wait.h>
 #  include <sys/time.h>
 #  include <unistd.h>
-#  include <libgen.h>
 #else
 #  include <io.h>
 #  include <time.h>
@@ -404,33 +403,6 @@ void XxUtil::printTime( std::ostream& os, long time )
    long tv_sec = long( time / 1e6 );
    long tv_usec = time - long( tv_sec * 1e6 );
    os << "sec.usec=" << tv_sec << "." << tv_usec << std::endl;
-}
-
-//------------------------------------------------------------------------------
-//
-QString XxUtil::baseName( const QString& str )
-{
-#ifndef WINDOWS
-   QString bn( ::basename( const_cast<char*>( str.latin1() ) ) );
-   return bn;
-#else
-   const DWORD BUFFER_LEN = 1024;
-   char  buffer[BUFFER_LEN];
-   char* name;
-   
-   if ( ::GetFullPathName( str.latin1(),
-                           BUFFER_LEN,
-                           buffer,
-                           &name ) == 0 ) {
-      throw XxInternalError( XX_EXC_PARAMS );
-   }
-
-   if ( name == 0 ) {
-      return QString();
-   }
-
-   return QString( name );
-#endif
 }
 
 //------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.inline.h 343 2001-11-06 00:43:50Z blais $
- * $Date: 2001-11-05 19:43:50 -0500 (Mon, 05 Nov 2001) $
+ * $Id: line.inline.h 374 2001-11-11 07:58:01Z blais $
+ * $Date: 2001-11-11 02:58:01 -0500 (Sun, 11 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -46,8 +46,16 @@ inline XxLine::XxLine() :
    // This is just initialization to remove UMRs in Purify.
    for ( int ii = 0; ii < 3; ++ii ) {
       _lineNo[ii] = -1;
-      _lefthd[ii] = 0;
-      _righthd[ii] = 0;
+      _hordiffs[ii] = 0;
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+inline XxLine::~XxLine()
+{
+   for ( int ii = 0; ii < 3; ++ii ) {
+      delete[] _hordiffs[ii];
    }
 }
 
@@ -55,8 +63,7 @@ inline XxLine::XxLine() :
 //
 inline void XxLine::init()
 {
-   _lefthd[0] = _lefthd[1] = _lefthd[2] = -1;
-   _righthd[0] = _righthd[1] = _righthd[2] = -1;
+   _hordiffs[0] = _hordiffs[1] = _hordiffs[2] = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -118,18 +125,10 @@ inline XxFln XxLine::getLineNo( const XxFno no ) const
 
 //------------------------------------------------------------------------------
 //
-inline int XxLine::getLeftHdiffPos( const XxFno no ) const
+inline const int* XxLine::getHorDiffs( const XxFno no ) const
 {
    XX_CHECK( no == 0 || no == 1 || no == 2 );
-   return _lefthd[ no ];
-}
-
-//------------------------------------------------------------------------------
-//
-inline int XxLine::getRightHdiffPos( const XxFno no ) const
-{
-   XX_CHECK( no == 0 || no == 1 || no == 2 );
-   return _righthd[ no ];
+   return _hordiffs[ no ];
 }
 
 //------------------------------------------------------------------------------
@@ -137,7 +136,7 @@ inline int XxLine::getRightHdiffPos( const XxFno no ) const
 inline bool XxLine::hasHorizontalDiffs( const XxFno no ) const
 {
    XX_CHECK( no == 0 || no == 1 || no == 2 );
-   return !( _lefthd[no] == -1 && _righthd[no] == -1 );
+   return _hordiffs[no] != 0;
 }
 
 //------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 479 2002-02-07 06:38:35Z  $
- * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
+ * $Id: resParser.cpp 400 2001-11-22 06:40:53Z blais $
+ * $Date: 2001-11-22 01:40:53 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -94,11 +94,26 @@ startup." },
      "Commands to use to generate diffs.  xxdiff is only an interface to \
 display diff results, it doesn't actually compute diffs itself, unless you use \
 the internal commands options, where it uses the same arguments as specified \
-here.  Most likely these are the GNU diff commands and options." },
+here.  Most likely these are the GNU diff commands and options.  Note that you \
+can specify command switches here and the user interface will be automatically \
+updated accordingly (e.g. if you set a command with the -w switch, and \
+UI understands that the ignore whitespace feature has been turned on)." },
 
    { "CommandSwitch", COMMANDSW,
      "Definitions of cmdline switches that should be used to toggle diff \
-options. The defaults are the GNU diff switches (see diff(1))." },
+options. These resources allow you to specify what switch corresponds to what \
+feature.  The defaults are the GNU diff switches (see diff(1)).  These are \
+only valid for two-file diff for now.  See also the InitSwitch resources." },
+
+   { "InitSwitch", INITSW,
+     "Initialization of a particular switch after the resources have been read \
+in. This is used to modify the command using the switch definitions. \
+In other words, you could either set the switch within the command \
+specification, or use a plain command and enable/disable the switch using this \
+resource. This resource is only provided for completeness and convenience, as \
+setting the appropriate switch in the command itself amounts to the same. \
+See also the CommandSwitch resources.  For the quality options, you should \
+just set a single one to 'true'." },
 
    { "Tag", TAG, 
      "Tags used for conditionals used for unselected regions, when that option \
@@ -117,16 +132,36 @@ is used to save files." },
      "Initial column to draw vertical alignment line." },
 
    { "ClipboardFormat", CLIPBOARD_FORMAT, 
-     "Format of formatted clipboard text." }
+     "Format of formatted clipboard text." },
+
+   { "HorizontalDiffType", HORDIFF_TYPE,
+     "Type of horizontal diffs display.  Can be one of \
+None, Single, Multiple.  None: doesn't compute nor display horizontal diff; \
+Single: just bracket the changes from line beginnings and ends; \
+Multiple: compute multiple horizontal diff (if the sizes fit in the maximum \
+size (see HorizontalDiffMax resource)." },
+
+   { "HorizontalDiffMax", HORDIFF_MAX,
+     "Maximum table size for dynamic-programming table used for computing \
+the horizontal diff for change lines.  If the size of one horizontal hunk \
+times the size of the other horizontal hunk is over that size, there are no \
+multiple horizontal diffs computed for that line, and the algorithm behaves \
+like the Single algorithm.  You most likely don't want to touch that value." },
+
+   { "HorizontalDiffContext", HORDIFF_CONTEXT,
+     "Minimum amount of characters or token that need to be common to both \
+lines between multiple horizontal diff hunks.  If there are not that amount of \
+common characters, skip the horizontal hunk and display it as a changed \
+region.  This resource is very useful to remove the cases where few \
+characters align, resulting in many small horizontal hunks, which can be \
+quite confusing.  Usually a value of 5 gives enough horizontal context for \
+the eye to figure out what happenened." }
 
 };
 
 StringToken boolkwdList[] = {
    { "ExitOnSame", EXIT_ON_SAME,
      "If true, exit if both files have no differences." },
-
-   { "HorizontalDiffs", HORIZONTAL_DIFFS, 
-     "Enable horizontal diffs display." },
 
    { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS, 
      "Ignore horizontal whitespace in horizontal diffs." },
@@ -169,7 +204,6 @@ diff program." }
 /* Be careful: order must be the same as for token declaration. */
 XxBoolOpt boolMap[] = {
    BOOL_EXIT_ON_SAME,
-   BOOL_HORIZONTAL_DIFFS,
    BOOL_IGNORE_HORIZONTAL_WS,
    BOOL_FORMAT_CLIPBOARD_TEXT,
    BOOL_IGNORE_ERRORS,
@@ -263,7 +297,9 @@ StringToken accelList[] = {
    { "ToggleVerticalLine", ACCEL_TOGGLE_VERTICAL_LINE, 0 },
    { "ToggleOverview", ACCEL_TOGGLE_OVERVIEW, 0 },
    { "ToggleShowFilenames", ACCEL_TOGGLE_SHOW_FILENAMES, 0 },
-   { "ToggleHorizontalDiffs", ACCEL_TOGGLE_HORIZONTAL_DIFFS, 0 },
+   { "HorizontalDiffNone", ACCEL_HORDIFF_NONE, 0 },
+   { "HorizontalDiffSingle", ACCEL_HORDIFF_SINGLE, 0 },
+   { "HorizontalDiffMultiple", ACCEL_HORDIFF_MULTIPLE, 0 },
    { "ToggleIgnoreHorizontalWhitespace", ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS, 0 },
    { "ToggleFormatClipboardText", ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT, 0 },
    { "IgnoreFileNone", ACCEL_IGNORE_FILE_NONE, 0 },
@@ -828,6 +864,9 @@ void XxResParser::parse( QTextStream& input, XxResources& resources )
       // Rethrow on error.
       throw;
    }
+
+   // Apply the init switch resources after they have been parsed.
+   resources.applyInitSwitch();
 }
 
 //------------------------------------------------------------------------------
@@ -983,6 +1022,18 @@ void XxResParser::genInitFile(
       }
    }
 
+   const char* initSwitchStr = searchTokenName( STPARAM(kwdList), INITSW );
+   for ( ii = 0; ii < nbcommandSwitch; ++ii ) {
+      XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
+      int b1 = res1.getInitSwitch( bo );
+      XX_CHECK( -1 <= b1 && b1 <= 1 );
+      char* bmap[3] = { "Nop", "False", "True" };
+      if ( b1 != res2.getInitSwitch( bo ) ) {
+         os << initSwitchStr << "." << commandSwitchList[ii]._name << ": "
+            << bmap[b1+1] << endl;
+      }
+   }
+
    if ( res1.getOverviewFileWidth() != res2.getOverviewFileWidth() ) {
       os << searchTokenName( STPARAM(kwdList), OVERVIEW_FILE_WIDTH ) << ": "
          << res1.getOverviewFileWidth() << endl;
@@ -1014,8 +1065,23 @@ void XxResParser::genInitFile(
          << res1.getClipboardFormat() << "\"" << endl;
    }
 
-   // Ignore file not saved (cannot be read).
+   if ( res1.getHordiffType() != res2.getHordiffType() ) {
+      const char* hdtstr[3] = { "None", "Single", "Multiple" };
+      os << searchTokenName( STPARAM(kwdList), HORDIFF_TYPE ) << ": "
+         << hdtstr[ int(res1.getHordiffType()) ] << endl;
+   }
 
+   if ( res1.getHordiffMax() != res2.getHordiffMax() ) {
+      os << searchTokenName( STPARAM(kwdList), HORDIFF_MAX ) << ": "
+         << res1.getHordiffMax() << endl;
+   }
+
+   if ( res1.getHordiffContext() != res2.getHordiffContext() ) {
+      os << searchTokenName( STPARAM(kwdList), HORDIFF_CONTEXT ) << ": "
+         << res1.getHordiffContext() << endl;
+   }
+
+   // Ignore file not saved (cannot be read).
 }
 
 //------------------------------------------------------------------------------
@@ -1101,6 +1167,16 @@ void XxResParser::listResources( QTextStream& os )
          << b1.latin1() << "\"" << endl;
    }
 
+   const char* initSwitchStr = searchTokenName( STPARAM(kwdList), INITSW );
+   for ( ii = 0; ii < nbcommandSwitch; ++ii ) {
+      XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
+      int b1 = res.getInitSwitch( bo );
+      XX_CHECK( -1 <= b1 && b1 <= 1 );
+      char* bmap[3] = { "Nop", "False", "True" };
+      os << initSwitchStr << "." << commandSwitchList[ii]._name << ": "
+         << bmap[b1+1] << endl;
+   }
+
    os << searchTokenName( STPARAM(kwdList), OVERVIEW_FILE_WIDTH ) << ": "
       << res.getOverviewFileWidth() << endl;
 
@@ -1122,6 +1198,16 @@ void XxResParser::listResources( QTextStream& os )
    os << searchTokenName( STPARAM(kwdList), CLIPBOARD_FORMAT ) << ": \""
       << res.getClipboardFormat() << "\"" << endl;
 
+   const char* hdtstr[3] = { "None", "Single", "Multiple" };
+   os << searchTokenName( STPARAM(kwdList), HORDIFF_TYPE ) << ": "
+      << hdtstr[ int(res.getHordiffType()) ] << endl;
+   
+   os << searchTokenName( STPARAM(kwdList), HORDIFF_MAX ) << ": "
+      << res.getHordiffMax() << endl;
+
+   os << searchTokenName( STPARAM(kwdList), HORDIFF_CONTEXT ) << ": "
+      << res.getHordiffContext() << endl;
+   
    // Ignore file not saved (cannot be read).
 }   
 
@@ -1129,13 +1215,6 @@ void XxResParser::listResources( QTextStream& os )
 //
 QString XxResParser::getResourceRef()
 {
-   // Important note: we cannot require a display connection here, so we cannot
-   // print the correct font names and named colors.  This is fine, however,
-   // since this output only goes towards printing the HTML help, and we don't
-   // mind if the default values for fonts and colors are not included in the
-   // documentation.  In fact, since they might vary between X servers, we'd
-   // rather have a constant documentation output than a varying one.
-
    QString resref;
    QTextOStream os( &resref );
 
@@ -1169,14 +1248,9 @@ QString XxResParser::getResourceRef()
          XxAccel accel = XxAccel( accelList[ii]._token );
          int aval = res.getAccelerator( accel );
          QString astr("");
-            if ( qApp != 0 ) {
-               if ( aval != 0 ) {
-                  astr = QAccel::keyToString( aval );
-               }
-            }
-            else {
-               astr = "&lt;key&gt;";
-            }
+         if ( aval != 0 ) {
+            astr = QAccel::keyToString( aval );
+         }
          os << tok->_name << "." << accelList[ii]._name << ": \""
             << XxHelp::xmlize( astr ) << "\"" << endl;
       }
@@ -1188,14 +1262,8 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( STPARAM(kwdList), FONT_APP );
       const QFont& fontApp = res.getFontApp();
-      os << tok->_name << ": \"";
-      if ( qApp != 0 ) {
-         os << XxHelp::xmlize( fontApp.rawName() );
-      }
-      else {
-         os << "&lt;xfld-font-spec&gt;";
-      }
-      os << "\"" << endl;
+      os << tok->_name << ": \""
+         << XxHelp::xmlize( fontApp.rawName() ) << "\"" << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;
@@ -1206,15 +1274,8 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( STPARAM(kwdList), FONT_TEXT );
       const QFont& fontText = res.getFontText();
-      os << tok->_name << ": \"";
-      if ( qApp != 0 ) {
-         os << XxHelp::xmlize( fontText.rawName() );
-      }
-      else {
-         os << "&lt;xfld-font-spec&gt;";
-      }
-      os << "\"" << endl;
-
+      os << tok->_name << ": \""
+         << XxHelp::xmlize( fontText.rawName() ) << "\"" << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;
@@ -1236,24 +1297,11 @@ QString XxResParser::getResourceRef()
          XxColor color = XxColor( tokc->_token );
 
          drbegin( os );
+         os << tok->_name << "." << tokc->_name << ".Fore" << ": \""
+            << res.getColor( color, true ).name() << "\"" << endl;
 
-         os << tok->_name << "." << tokc->_name << ".Fore" << ": \"";
-         if ( qApp != 0 ) {
-            os << res.getColor( color, true ).name();
-         }
-         else { 
-            os << "&lt;color&gt;";
-         }
-         os << "\"" << endl;
-
-         os << tok->_name << "." << tokc->_name << ".Back" << ": \"";
-         if ( qApp != 0 ) {
-            os << res.getColor( color, false ).name();
-         }
-         else { 
-            os << "&lt;color&gt;";
-         }
-         os << "\"" << endl;
+         os << tok->_name << "." << tokc->_name << ".Back" << ": \""
+            << res.getColor( color, false ).name() << "\"" << endl;
 
          drend( os );
          ddbegin( os );
@@ -1358,6 +1406,24 @@ QString XxResParser::getResourceRef()
 
    {
       drbegin( os );
+      int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), INITSW );
+      for ( ii = 0; ii < nbcommandSwitch; ++ii ) {
+         XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
+         int b1 = res.getInitSwitch( bo );
+         XX_CHECK( -1 <= b1 && b1 <= 1 );
+         char* bmap[3] = { "Nop", "False", "True" };
+         os << tok->_name << "." << commandSwitchList[ii]._name << ": "
+            << bmap[b1+1] << "" << endl;
+      }
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
       const StringToken* tok =
          searchToken( STPARAM(kwdList), OVERVIEW_FILE_WIDTH );
       os << tok->_name << ": " << res.getOverviewFileWidth() << endl;
@@ -1426,11 +1492,52 @@ QString XxResParser::getResourceRef()
       ddend( os );
    }
 
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), HORDIFF_TYPE );
+      const char* hdtstr[3] = { "None", "Single", "Multiple" };
+      os << tok->_name << ": " << hdtstr[ int(res.getHordiffType()) ] << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), HORDIFF_MAX );
+      os << tok->_name << ": " << res.getHordiffMax() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList),
+                                            HORDIFF_CONTEXT );
+      os << tok->_name << ": " << res.getHordiffContext() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
    // Ignore file not saved (cannot be read).
 
    os << flush;
    return resref;
 }   
+
+//------------------------------------------------------------------------------
+//
+QString XxResParser::getKwdName( int kwd )
+{
+   const char* stoken = searchTokenName( STPARAM(kwdList), int(kwd) );
+   XX_CHECK( stoken );
+   return QString( stoken );
+}
 
 //------------------------------------------------------------------------------
 //

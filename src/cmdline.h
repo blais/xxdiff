@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.h 331 2001-11-01 07:16:19Z blais $
- * $Date: 2001-11-01 02:16:19 -0500 (Thu, 01 Nov 2001) $
+ * $Id: cmdline.h 393 2001-11-20 07:54:25Z blais $
+ * $Date: 2001-11-20 02:54:25 -0500 (Tue, 20 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -49,6 +49,15 @@ public:
 
    /*----- types and enumerations -----*/
 
+   enum OptType {
+      OPT_GENERIC = 0,
+      OPT_XXDIFF = 1,
+      OPT_DIFF = 2,
+      OPT_QT = 3,
+      OPT_DEFAULT = ( 1<<0 | 1<<1 | 1<<2 ),
+      OPT_ALL = ( 1<<0 | 1<<1 | 1<<2 | 1<<3 )
+   };
+
    struct Option {
       const char* _longname;
       char        _shortname;
@@ -62,19 +71,20 @@ public:
    // Constructor, makes a cmdline object with default values.
    XxCmdline();
 
-   // Parse command line options and removes the recognized ones.  fileidx will
-   // contain the beginning of the filenames on the command line.
-   // This may throw.
-   // If this returns false, don't run the app.
-   bool parseCommandLine( int& argc, char**& argv );
+   // Parse command line options. This may throw.  If this returns false, don't
+   // run the app after parsing the command-line.
+   bool parseCommandLine( const int argc, char* const* argv );
 
+   // Returns options suitable for QApplication consumption.
+   void getQtOptions( int& argc, char**& argv );
+   
    // Destructor.
    virtual ~XxCmdline();
 
    /*----- static member functions -----*/
 
    // Returns access to the list of options.
-   static Option* getOptionList( int& nbOptions );
+   static Option* getOptionList( OptType otype, int& nbOptions );
 
 private:
 
@@ -86,6 +96,16 @@ private:
    // Prints out HTML help on stdout.
    static void printHtmlHelp();
 
+   // Prints out version info stdout.
+   static void printVersion();
+
+   // Search for an option by code character.  Returns -1 if not found.
+   int searchForOption( 
+      const XxCmdline::Option* options,
+      const int                nbOptions,
+      const int                c
+   );
+
    /*----- friends -----*/
 
    friend class XxApp;
@@ -93,21 +113,34 @@ private:
    /*----- data members -----*/
 
    // Cmdline-related variables.
-   bool       _forceStyle;
-   bool       _originalXdiff;
-   QString    _userFilenames[3];
-   QString    _stdinFilename;
-   bool       _useRcfile;
-   QString    _extraDiffArgs;
-   QByteArray _cmdlineResources;
-   bool       _mergeRequested;
+   bool          _forceStyle;
+   bool          _forceGeometry;
+   bool          _forceFont;
 
-   int        _nbFilenames;
-   QString    _filenames[3];
+   bool          _originalXdiff;
+   QString       _userFilenames[3];
+   QString       _stdinFilename;
+   bool          _useRcfile;
+   QString       _extraDiffArgs;
+   QByteArray    _cmdlineResources;
+   bool          _mergeRequested;
+
+   int           _nbFilenames;
+   QString       _filenames[3];
+
+   bool          _conflict;
+
 
    /*----- static data members -----*/
 
-   static Option _options[];
+   static Option _optionsGeneric[];
+   static Option _optionsXxdiff[];
+   static Option _optionsDiff[];
+   static Option _optionsQt[];
+
+   int           _nbQtOptions;
+   char*         _qtOptions[64]; // 64 Qt options! Way beyond you'll ever need!
+   char*         _qtOptionsCopy[64];
 
 };
 

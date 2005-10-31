@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.h 257 2001-10-08 04:28:33Z blais $
- * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
+ * $Id: exceptions.h 393 2001-11-20 07:54:25Z blais $
+ * $Date: 2001-11-20 02:54:25 -0500 (Tue, 20 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -104,23 +104,12 @@ public:
    /*----- member functions -----*/
 
    // Constructor.  Benine indicates if this exception should return a nice
-   // error code.  Version indicates if this exception should spew out the
-   // version messages instead of the usage.
+   // error code.
    XxUsageError( 
       XX_EXC_PARAMS_DECL(file,line),
       const QString& msg = QString::null,
-      bool           benine = false,
-      bool           version = false 
+      int            helpMask = 0
    );
-
-   // Returns true if this is a benine exception.
-   bool isBenine() const;
-
-private:
-
-   /*----- data members -----*/
-
-   bool    _benine;
 
 };
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: get_version 348 2001-11-06 06:50:46Z blais $
+# $Id: get_version 404 2001-11-22 07:39:59Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -8,5 +8,5 @@ if [ ! -d "tools" ]; then
      exit 1;
 fi
 
-grep XX_VERSION src/version.h | egrep -v debug | sed -e 's/[^"]*"//;s/".*//'
+egrep "^XX_VERSION" src/xxdiff.pro | sed -e 's/^.*=//;'
 

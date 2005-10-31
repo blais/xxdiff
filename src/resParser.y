@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.y 306 2001-10-24 03:00:43Z blais $
- * $Date: 2001-10-23 23:00:43 -0400 (Tue, 23 Oct 2001) $
+ * $Id: resParser.y 399 2001-11-22 06:19:13Z blais $
+ * $Date: 2001-11-22 01:19:13 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -42,7 +42,7 @@
 
 /* generic */
 %token <num> COLON DOT ERROR_TOKEN
-%token <num> BOOLEAN NUMBER
+%token <num> BOOLEAN NUMBER INITSWSTATE
 %token <str> STRING
 
 
@@ -59,17 +59,16 @@
 
 /* see BOOLKWD_BASE above */
 %token <num> EXIT_ON_SAME                 1000
-%token <num> HORIZONTAL_DIFFS             1001
-%token <num> IGNORE_HORIZONTAL_WS         1002
-%token <num> FORMAT_CLIPBOARD_TEXT        1003
-%token <num> IGNORE_ERRORS                1004
-%token <num> WARN_ABOUT_UNSAVED           1005
-%token <num> DISABLE_CURSOR_DISPLAY       1006
-%token <num> HIDE_CR                      1007
-%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1008
-%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1009
-%token <num> DIRDIFF_RECURSIVE            1010
-%token <num> USE_INTERNAL_DIFF            1011
+%token <num> IGNORE_HORIZONTAL_WS         1001
+%token <num> FORMAT_CLIPBOARD_TEXT        1002
+%token <num> IGNORE_ERRORS                1003
+%token <num> WARN_ABOUT_UNSAVED           1004
+%token <num> DISABLE_CURSOR_DISPLAY       1005
+%token <num> HIDE_CR                      1006
+%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1007
+%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1008
+%token <num> DIRDIFF_RECURSIVE            1009
+%token <num> USE_INTERNAL_DIFF            1010
 /* Note: check that we do not exceed maximum in resParser.cpp */
 
 %token       FONT_APP
@@ -80,6 +79,9 @@
 
 %token       COMMANDSW
 %token <num>   COMMANDSWNAME
+
+%token       INITSW
+%token <num>   INITSWNAME
 
 %token       TAG
 %token <num>   TAGNAME
@@ -97,6 +99,10 @@
 
 %token <num> CLIPBOARD_FORMAT
 
+%token <num> HORDIFF_TYPE
+%token <num>   HORDIFF
+%token <num> HORDIFF_MAX
+%token <num> HORDIFF_CONTEXT
 
 /* typed rules */
 %type <num> colorbf
@@ -120,6 +126,7 @@ stmt		: error '\n'
 		| boolopt
 		| command
 		| commandsw
+		| initsw
 		| font
 		| tag
 		| show
@@ -128,6 +135,9 @@ stmt		: error '\n'
 		| overview_sep_width
 		| vertical_line_pos
 		| clipboard_format
+		| hordiff_type
+		| hordiff_max
+		| hordiff_context
 		;
 
 prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
@@ -192,7 +202,6 @@ boolopt		: boolkwd COLON BOOLEAN
 		;
 
 boolkwd		: EXIT_ON_SAME
-		| HORIZONTAL_DIFFS
 		| IGNORE_HORIZONTAL_WS
 		| FORMAT_CLIPBOARD_TEXT
 		| IGNORE_ERRORS
@@ -214,8 +223,15 @@ command		: COMMAND DOT COMMANDNAME COLON STRING
 
 commandsw	: COMMANDSW DOT COMMANDSWNAME COLON STRING
 		{
-                   /*printf( "==> command opt %d: %s\n", $3, $5 );*/
+                   /*printf( "==> commandsw %d: %s\n", $3, $5 );*/
                    RESOURCES->setCommandSwitch( XxCommandSwitch($3), $5 );
+                }
+		;
+
+initsw		: INITSW DOT INITSWNAME COLON INITSWSTATE
+		{
+                   /*printf( "==> initsw opt %d: %s\n", $3, $5 );*/
+                   RESOURCES->setInitSwitch( XxCommandSwitch($3), $5 );
                 }
 		;
 
@@ -277,6 +293,28 @@ clipboard_format : CLIPBOARD_FORMAT COLON STRING
 		{
                    /*printf( "==> clipboard format: %s\n", $3 );*/
                    RESOURCES->setClipboardFormat( $3 );
+                }
+		;
+
+
+hordiff_type	: HORDIFF_TYPE COLON HORDIFF
+		{
+                   /*printf( "==> hordiff type: %s\n", $3 );*/
+                   RESOURCES->setHordiffType( XxHordiff($3) );
+                }
+		;
+
+hordiff_max	: HORDIFF_MAX COLON NUMBER
+		{
+                   /*printf( "==> hordiff max: %d\n", $3 );*/
+                   RESOURCES->setHordiffMax( $3 );
+                }
+		;
+
+hordiff_context : HORDIFF_CONTEXT COLON NUMBER
+		{
+                   /*printf( "==> hordiff context: %d\n", $3 );*/
+                   RESOURCES->setHordiffContext( $3 );
                 }
 		;
 

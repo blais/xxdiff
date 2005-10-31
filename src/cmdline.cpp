@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.cpp 479 2002-02-07 06:38:35Z  $
- * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
+ * $Id: cmdline.cpp 401 2001-11-22 07:00:27Z blais $
+ * $Date: 2001-11-22 02:00:27 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -29,10 +29,17 @@
 #include <resParser.h>
 #include <help.h>
 
+#ifndef INCL_RESPARSER_Y
+#include <resParser.y.h> // For FONT_TEXT
+#define INCL_RESPARSER_Y
+#endif
+
 #include <qapplication.h>
+#include <qcstring.h>
 
 /*#define getopt xxdiff_getopt*/
 #include <getopt.h>
+#include <stdlib.h>
 
 XX_NAMESPACE_BEGIN
 
@@ -44,7 +51,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 //
-void initOptions(
+int initOptions(
    const XxCmdline::Option* options,
    const int                nbOptions,
    struct option*           go_longopts,
@@ -52,7 +59,6 @@ void initOptions(
 )
 {
    // Note: no bounds checking is done.
-   go_shortopts = "";
    int ii;
    for ( ii = 0; ii < nbOptions; ++ii ) {
       go_longopts[ii].name = const_cast<char*>( options[ii]._longname );
@@ -72,6 +78,8 @@ void initOptions(
    go_longopts[ii].has_arg = 0;
    go_longopts[ii].flag = 0;
    go_longopts[ii].val = 0;
+
+   return nbOptions;
 }
 
 };
@@ -86,17 +94,42 @@ void initOptions(
 
 /*----- static data members -----*/
 
-XxCmdline::Option XxCmdline::_options[] = {
-   { "help", 'h', false, 'h',
-     "Show help message."
+//
+// Generic options.
+//
+XxCmdline::Option XxCmdline::_optionsGeneric[] = {
+   { "help", 0, false, 'h',
+     "Show help about options."
+   }, 
+   { "help-qt", 0, false, 'Z',
+     "Show Qt specific options."
+   }, 
+   { "help-all", 0, false, 'Y',
+     "Show all options."
    }, 
    { "help-html", 0, false, 'H',
-     "Output documentation in HTML (this is mainly used by the author to "
-     "generate up-to-date web documentation)."
+     "Output documentation in HTML."
    }, 
+//#define XX_KDE_CMDLINE
+#ifdef XX_KDE_CMDLINE
+   { "author", 0, false, 'X', 
+     "Show author information."
+   }, 
+#endif
    { "version", 'v', false, 'v', 
-     "Show the program version and compilation options."
+     "Show version information."
    }, 
+#ifdef XX_KDE_CMDLINE
+   { "license", 0, false, 'W', 
+     "Show license information."
+   }, 
+#endif
+};
+
+//
+// Xxdiff options
+//
+XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
    { "no-rcfile", 0, false, 'n', 
      "Don't query rcfile resources (.xxdiffrc)."
    }, 
@@ -110,6 +143,13 @@ XxCmdline::Option XxCmdline::_options[] = {
      "Automatically select regions that would end up being selected by "
      "an automatic merge."
    }, 
+#if 0 // FIXME do this soon.
+   { "conflict", 'C', false, 'C', 
+     "Invoke on a single file with CVS merge conflicts, splitting the "
+     "conflicts into two files for display.  If this is specified, only a "
+     "single file can then be given as argument."
+   }, 
+#endif
    { "title1", 0, true, '1', 
      "Display 'str' instead of filename in filename label 1 (left)."
    }, 
@@ -134,49 +174,111 @@ XxCmdline::Option XxCmdline::_options[] = {
      "Used settings as close as possible to original xdiff "
      "(for the romantics longing the old days of SGI... snif snif)."
    },
+};
 
-   //
-   // GNU diff options.
-   //
+//
+// GNU diff options.
+//
+XxCmdline::Option XxCmdline::_optionsDiff[] = {
    { "ignore-all-space", 'w', false, 'w',
-     "Option passed to diff(1). "
+     "Option passed to 2-files diff(1). "
      "Ignore white space when comparing lines."
    }, 
    { "ignore-space-change", 'b', false, 'b', 
-     "Option passed to diff(1). "
+     "Option passed to 2-files diff(1). "
      "Ignore changes in amount of white space."
    }, 
    { "ignore-case", 'i', false, 'i', 
-     "Option passed to diff(1). "
+     "Option passed to 2-files diff(1). "
      "Ignore changes in case; consider upper- and lower-case to be the same."
    }, 
-// FIXME add this eventually.
-#if 0 
+
+#ifdef FIXME // Ignore blank lines... make this work eventually (see TODO file).
    { "ignore-blank-lines", 'B', false, 'B', 
-     "Option passed to diff(1). "
+     "Option passed to 2-files diff(1). "
      "Ignore changes that just insert or delete blank lines."
    }, 
 #endif
    { "recursive", 'r', false, 'r',
-     "Option passed to diff(1). "
+     "Option passed to 2-files diff(1). "
      "This is only meaningful for directory diffs."
    }, 
    { "text", 'a', false, 'a',
-     "Option passed to diff(1). "
+     "Option passed to 2-files diff(1). "
      "Treat all files as text and compare them "
      "line-by-line, even if they do not appear to be text."
    }, 
 
+};
+
+//
+// Qt options.
+//
+XxCmdline::Option XxCmdline::_optionsQt[] = {
+   { "qt", 'Q', true, 'Q',
+     "Set options to be given to Qt application options parser. "
+     "See Qt manual, class QApplication for a list of supported options."
+   }, 
+   { "display", 0, true, 'd',
+     "Sets the X display (default is $DISPLAY)."
+   }, 
+   { "style", 0, true, 's',
+     "Sets the application GUI style. Possible values are motif, windows, "
+     "and platinum. "
+   }, 
+   { "geometry", 0, true, 'g',
+     "Sets the client geometry of the main widget."
+   }, 
+   { "font", 0, true, 'M',
+     "Defines the application font (for widgets)."
+   }, 
+   { "textfont", 0, true, 'J',
+     "Defines the text font (for diff text)."
+   }, 
+   { "name", 0, false, 'L',
+     "Sets the application name."
+   }, 
+   { "visual", 0, true, 'V',
+     "Forces the application to use a particular visual on an 8-bit display "
+     "(e.g. TrueColor)."
+   },
+   { "ncols", 0, true, 'O',
+     "Limits the number of colors allocated in the color cube on a 8-bit "
+     "display."
+     // ", if the application is using the QApplication::ManyColor color "
+     // "specification. If count is 216 then a 6x6x6 color cube is used (ie. 6 "
+     // "levels of red, 6 of green, and 6 of blue); for other values, a cube "
+     // "approximately proportional to a 2x3x1 cube is used."
+   },
+   { "cmap", 0, false, 'P',
+     "Causes the application to install a private color map on an 8-bit "
+     "display."
+   }, 
+   { "nograb", 0, false, 'S',
+     "Tells Qt to never grab the mouse or the keyboard."
+   }, 
+   { "dograb", 0, false, 'T',
+     "Running under a debugger can cause an implicit -nograb, use -dograb "
+     "to override."
+   }, 
+   { "sync", 0, false, 'U',
+     "Switches to synchronous mode for debugging."
+   }, 
 }; 
 
 //------------------------------------------------------------------------------
 //
 XxCmdline::XxCmdline() :
    _forceStyle( false ),
+   _forceGeometry( false ),
+   _forceFont( false ),
    _originalXdiff( false ),
    _useRcfile( true ), 
    _extraDiffArgs( "" ),
-   _mergeRequested( false )
+   _mergeRequested( false ),
+   _conflict( false ),
+   _nbQtOptions( 0 ),
+   _qtOptions()
 {
    _userFilenames[0] = "";
    _userFilenames[1] = "";
@@ -188,21 +290,18 @@ XxCmdline::XxCmdline() :
 //
 XxCmdline::~XxCmdline()
 {
+   for ( int ii = 0; ii < _nbQtOptions; ++ii ) {
+      XX_ASSERT( _qtOptions[ii] != 0 );
+      delete[] _qtOptions[ii];
+   }
 }
 
 //------------------------------------------------------------------------------
 //
-bool XxCmdline::parseCommandLine( int& argc, char**& argv )
+bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 {
-   // Search original arguments to see if the style has been explicitly
-   // forced.
-   int aa;
-   for ( aa = 0; aa < argc; ++aa ) {
-      if ( ::strncmp( argv[aa], "-style", 6 ) == 0 ) {
-         break;
-      }
-   }
-   _forceStyle = (aa == argc);
+   XX_ASSERT( argc > 0 );
+   _qtOptions[ _nbQtOptions++ ] = qstrdup( argv[0] );
 
    // The command-line parsing has to be carried out before the resource
    // building because some of the command-line options affect the way resources
@@ -211,12 +310,36 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
    // are stored in the _cmdlineResources.
 
    int optionIndex = 0;
-   struct option longOptions[ sizeof(_options)/sizeof(Option) + 1 ];
-   QString shortOptions;
-   initOptions(
-      _options,
-      sizeof(_options)/sizeof(XxCmdline::Option),
-      longOptions,
+   const int nbTotalOptions = 
+      ( sizeof(_optionsGeneric) + 
+        sizeof(_optionsXxdiff) + 
+        sizeof(_optionsDiff) + 
+        sizeof(_optionsQt) ) / sizeof(XxCmdline::Option);
+   struct option longOptions[ nbTotalOptions + 1 ];
+   QString shortOptions = "";
+   int nbopt = 0;
+   nbopt += initOptions(
+      _optionsGeneric,
+      sizeof(_optionsGeneric) / sizeof(XxCmdline::Option),
+      &( longOptions[nbopt] ),
+      shortOptions
+   );
+   nbopt += initOptions(
+      _optionsXxdiff,
+      sizeof(_optionsXxdiff) / sizeof(XxCmdline::Option),
+      &( longOptions[nbopt] ),
+      shortOptions
+   );
+   nbopt += initOptions(
+      _optionsDiff,
+      sizeof(_optionsDiff) / sizeof(XxCmdline::Option),
+      &( longOptions[nbopt] ),
+      shortOptions
+   );
+   nbopt += initOptions(
+      _optionsQt,
+      sizeof(_optionsQt) / sizeof(XxCmdline::Option),
+      &( longOptions[nbopt] ),
       shortOptions
    );
    
@@ -232,17 +355,33 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
       }
               
       switch ( c ) {
+         //
+         // Generic options.
+         //
          case 'h':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, true );
+            throw XxUsageError( XX_EXC_PARAMS, QString::null, OPT_DEFAULT );
+
+         case 'Z':
+            throw XxUsageError( XX_EXC_PARAMS,
+                                QString::null, 
+                                1 << OPT_GENERIC | 1 << OPT_QT );
+
+         case 'Y':
+            throw XxUsageError( XX_EXC_PARAMS, QString::null, OPT_ALL );
 
          case 'H': {
             printHtmlHelp();
             return false;
          } break;
-            
-         case 'v':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, true, true );
 
+         case 'v': {
+            printVersion();
+            return false;
+         } break;
+
+         //
+         // Xxdiff options.
+         //
          case 'n':
             _useRcfile = false;
             break;
@@ -258,12 +397,66 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
                 << ": true" << endl;
          } break;
 
-         case 'r': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
-            oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
-                << ": true" << endl;
+         case 'm': {
+            _mergeRequested = true;
          } break;
 
+         case 'C': {
+            _conflict = true;
+         } break;
+
+         case '1':
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Missing argument for title option." );
+            }
+            _userFilenames[0] = optarg;
+            break;
+
+         case '2':
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS, 
+                                   "Missing argument for title option." );
+            }
+            _userFilenames[1] = optarg;
+            break;
+
+         case '3':
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS, 
+                                   "Missing argument for title option." );
+            }
+            _userFilenames[2] = optarg;
+            break;
+
+         case 'N':
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Missing argument for title option." );
+            }
+            _stdinFilename = optarg;
+            break;
+
+         case 'R': {
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << optarg << endl << flush;
+         } break;
+
+         case 'A': {
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Missing argument for sub. diff program." );
+            }
+            _extraDiffArgs.append( optarg );
+         } break;
+         
+         case 'o': {
+            _originalXdiff = true;
+         } break;
+
+         //
+         // GNU diff options.
+         //
          case 'w':
          case 'b':
          case 'i':
@@ -276,61 +469,90 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
             _extraDiffArgs.append( optionString );
             break;
 
-         case 'A':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _extraDiffArgs.append( optarg );
-            break;
-            
-         case 'm':
-            _mergeRequested = true;
-            break;
-
-         case '1':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _userFilenames[0] = optarg;
-            break;
-
-         case '2':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _userFilenames[1] = optarg;
-            break;
-
-         case '3':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _userFilenames[2] = optarg;
-            break;
-
-         case 'N':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _stdinFilename = optarg;
-            break;
-
-         case 'R': {
+         case 'r': {
             QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
-            oss << optarg << endl << flush;
+            oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
+                << ": true" << endl;
          } break;
-         
-         case 'o': {
-            _originalXdiff = true;
+
+         //
+         // Qt options.
+         //
+         case 'Q': {
+            // Split string to spaces and add as individual options.
+            QCString qtopts( optarg );
+            qtopts.simplifyWhiteSpace();
+            int previdx = 0;
+            int idx = -1;
+            while ( ( idx = qtopts.find( ' ', idx+1 ) ) != -1 ) {
+               QCString qtopt = qtopts.mid( previdx, idx - previdx );
+               _qtOptions[ _nbQtOptions++ ] = 
+                  qstrdup( static_cast<const char*>( qtopt ) );
+               XX_ASSERT( _nbQtOptions < 64 ); // just check
+               previdx = idx+1;
+            }
+            QCString qtopt = qtopts.mid( previdx );
+            _qtOptions[ _nbQtOptions++ ] = 
+               qstrdup( static_cast<const char*>( qtopt ) );
+            XX_ASSERT( _nbQtOptions < (64-1) ); // just check
+         } break;
+
+         case 'd':
+         case 's':
+         case 'g':
+         case 'M':
+         case 'L':
+         case 'V':
+         case 'O':
+         case 'P':
+         case 'S':
+         case 'T':
+         case 'U': {
+            int oidx = searchForOption( 
+               _optionsQt, sizeof(_optionsQt)/sizeof(Option), c
+            );
+            XX_ASSERT( oidx != -1 );
+
+            QCString qtopt( "-" );
+            qtopt += _optionsQt[ oidx ]._longname;
+
+            // Add argument too.
+
+            if ( _optionsQt[ oidx ]._has_arg == true ) {
+               _qtOptions[ _nbQtOptions++ ] =
+                  qstrdup( static_cast<const char*>( qtopt ) );
+               XX_ASSERT( _nbQtOptions < (64-1) ); // just check
+               
+               _qtOptions[ _nbQtOptions++ ] = qstrdup( optarg );
+               XX_ASSERT( _nbQtOptions < (64-1) ); // just check
+            }
+            else {
+               _qtOptions[ _nbQtOptions++ ] =
+                  qstrdup( static_cast<const char*>( qtopt ) );
+               XX_ASSERT( _nbQtOptions < (64-1) ); // just check
+            }
+
+         } break;
+
+         case 'J': {
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Missing argument for text font." );
+            }
+
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << XxResParser::getKwdName( FONT_TEXT )
+                << ": \"" << optarg << "\"" << endl;
          } break;
 
          case 0:
             throw XxInternalError( XX_EXC_PARAMS );
 
          case ':':
-         case '?':
-            throw XxUsageError( XX_EXC_PARAMS );
-            
+         case '?': {
+            throw XxUsageError( XX_EXC_PARAMS, "Argument error." );
+         } break;
+
          default:
             throw XxUsageError( XX_EXC_PARAMS );
       }
@@ -338,20 +560,47 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
 
    // Count number of filenames specified on the cmdline.
    _nbFilenames = argc - optind;
-
+      
+   // End qt options with a marker.
+   _qtOptions[ _nbQtOptions ] = 0;
 
    // Check if there are too many.
-   if ( _nbFilenames > 3 ) {
+   if ( _conflict && _nbFilenames != 1 ) {
+      throw XxUsageError(
+         XX_EXC_PARAMS, 
+         "You need to specify a single filename in conflict mode."
+      );
+   }
+
+   int minfn = _conflict ? 1 : 2;
+   int maxfn = _conflict ? 1 : 3;
+
+   if ( _nbFilenames < minfn ) {
       QString msg;
       {
          QTextOStream oss( &msg );
-         oss << "extra arguments: \"";
-         for ( int ii = 3; ii < _nbFilenames; ++ii ) {
-            oss << " " << argv[ optind + ii ];
-         }
-         oss << "\"" << endl;
+         oss << "You must specify at least " << minfn << " filenames.";
       }
       throw XxUsageError( XX_EXC_PARAMS, msg );
+   }
+
+   if ( _nbFilenames > maxfn ) {
+      QString msg;
+      {
+         QTextOStream oss( &msg );
+         oss << "You can specify at most " << maxfn << " filenames." << endl;
+         oss << "Extra arguments: \"";
+         for ( int ii = maxfn; ii < _nbFilenames; ++ii ) {
+            oss << " " << argv[ optind + ii ];
+         }
+         oss << "\"";
+      }
+      throw XxUsageError( XX_EXC_PARAMS, msg );
+   }
+
+   // Disable conflict until implemented.
+   if ( _conflict ) {
+      throw XxUsageError( XX_EXC_PARAMS, "Not yet implemented." );
    }
 
    // Read filenames.
@@ -360,8 +609,35 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
       _filenames[ ii ].setLatin1( argv[ optind + ii ] );
       _filenames[ ii ] = _filenames[ ii ].stripWhiteSpace();
    }
+   
+   // Detect qt options.
+   for ( ii = 0; ii < _nbQtOptions; ++ii ) {
+      if ( strncmp( _qtOptions[ ii ], "-style", 6 ) == 0 ) {
+         _forceStyle = true;
+      }
+      else if ( strncmp( _qtOptions[ ii ], "-geometry", 9 ) == 0 ) {
+         _forceGeometry = true;
+      }
+      else if ( strncmp( _qtOptions[ ii ], "-fn", 3 ) == 0 ||
+                strncmp( _qtOptions[ ii ], "-font", 5 ) == 0 ) {
+         _forceFont = true;
+      }
+   }
 
    return true;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCmdline::getQtOptions( int& argc, char**& argv )
+{
+   // We make a copy because Qt likes to remove the options it parses.
+   for ( int ii = 0; ii < _nbQtOptions; ++ii ) {
+      _qtOptionsCopy[ii] = _qtOptions[ii];
+   }
+
+   argc = _nbQtOptions;
+   argv = _qtOptionsCopy;
 }
 
 //------------------------------------------------------------------------------
@@ -383,7 +659,10 @@ void XxCmdline::listResources()
 //
 void XxCmdline::printHtmlHelp()
 {
-   // Note: we do not require a display connection here.
+   // We need a QApplication object to be able to list the resources
+   // documentation.  Perhaps we could revise this.
+   int argc = 0;
+   QApplication app( argc, 0 );
 
    {
       QTextStream os( stdout, IO_WriteOnly );
@@ -400,10 +679,61 @@ void XxCmdline::printHtmlHelp()
 
 //------------------------------------------------------------------------------
 //
-XxCmdline::Option* XxCmdline::getOptionList( int& nbOptions )
+void XxCmdline::printVersion()
 {
-   nbOptions = sizeof(_options)/sizeof(XxCmdline::Option);
-   return _options;
+   QTextStream oss_cout( stdout, IO_WriteOnly );
+   oss_cout << "xxdiff " << XxHelp::getVersion()
+#ifdef XX_DEBUG
+            << " [debug]"
+#endif
+            << endl;
+   oss_cout << QString("  (Qt: %1)").arg( qVersion() ) << endl;
+   oss_cout << "  Written by Martin Blais <blais@iro.umontreal.ca>" << endl
+            << flush;
+}
+
+//------------------------------------------------------------------------------
+//
+XxCmdline::Option* XxCmdline::getOptionList( OptType otype, int& nbOptions )
+{
+   XxCmdline::Option* options = 0;
+   switch ( otype ) {
+      case OPT_GENERIC: {
+         nbOptions = sizeof(_optionsGeneric);
+         options = _optionsGeneric;
+      } break;
+      case OPT_XXDIFF: {
+         nbOptions = sizeof(_optionsXxdiff);
+         options = _optionsXxdiff;
+      } break;
+      case OPT_DIFF: {
+         nbOptions = sizeof(_optionsDiff);
+         options = _optionsDiff;
+      } break;
+      case OPT_QT: {
+         nbOptions = sizeof(_optionsQt);
+         options = _optionsQt;
+      } break;
+      default: XX_ABORT();
+   }
+   nbOptions /= sizeof(XxCmdline::Option);
+   return options;
+}
+
+//------------------------------------------------------------------------------
+//
+int XxCmdline::searchForOption( 
+   const XxCmdline::Option* options,
+   const int                nbOptions,
+   const int                c
+)
+{
+   for ( int ii = 0; ii < nbOptions; ++ii ) {
+      if ( options[ii]._val == c ) {
+         return ii;
+      }
+   }
+   return -1;
 }
 
 XX_NAMESPACE_END

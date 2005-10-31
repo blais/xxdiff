@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_src 350 2001-11-06 08:22:24Z blais $
+# $Id: release_src 404 2001-11-22 07:39:59Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -12,7 +12,8 @@ fi
 echo "Getting version"
 VERSION=`tools/get_version`
 UVERSION=`echo $VERSION | sed -e 's/\./_/g'`
-echo "Version $VERSION, Release tag $UVERSION"
+RTAG=xxdiff_$UVERSION
+echo "Version $VERSION, Release tag $RTAG"
 
 echo "Creating temporary space to extract source"
 TMP=xxdiff-tmp
@@ -22,7 +23,7 @@ cd .. && mkdir $TMP && cd $TMP
 echo "Exporting source from CVS"
 CVS_RSH=ssh
 cvs -z3 -d:ext:bor.iro.umontreal.ca:/u/blais/cvsroot \
-   export -d xxdiff-$VERSION -r xxdiff_$UVERSION xxdiff
+   export -d xxdiff-$VERSION -r $RTAG xxdiff
 
 if [ $? = 0 ]; then 
     echo "Compressing source into archive"

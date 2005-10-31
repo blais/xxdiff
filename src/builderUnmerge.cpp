@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: builderUnmerge.cpp 372 2001-11-11 07:47:47Z blais $
+ * $Date: 2001-11-11 02:47:47 -0500 (Sun, 11 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -24,7 +24,7 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <builderFiles2.h>
+#include <builderConflicts.h>
 #include <exceptions.h>
 #include <diffs.h>
 #include <util.h>
@@ -183,24 +183,24 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 /*==============================================================================
- * CLASS XxBuilderFiles2
+ * CLASS XxBuilderConflicts
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxBuilderFiles2::XxBuilderFiles2( bool useInternalDiff ) :
+XxBuilderConflicts::XxBuilderConflicts( bool useInternalDiff ) :
    XxBuilder(),
    _useInternalDiff( useInternalDiff )
 {}
 
 //------------------------------------------------------------------------------
 //
-XxBuilderFiles2::~XxBuilderFiles2()
+XxBuilderConflicts::~XxBuilderConflicts()
 {}
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles2::process( 
+std::auto_ptr<XxDiffs> XxBuilderConflicts::process( 
    const QString& command,
    const QString& path1,
    const uint     nbLines1,
@@ -425,7 +425,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createIgnoreBlock( 
+void XxBuilderConflicts::createIgnoreBlock( 
    XxFln fline1,
    XxFln fline2,
    uint  fsize
@@ -441,7 +441,7 @@ void XxBuilderFiles2::createIgnoreBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createChangeBlock( 
+void XxBuilderConflicts::createChangeBlock( 
    XxFln fline1,
    XxFln fline2,
    uint  fsize1,
@@ -478,7 +478,7 @@ void XxBuilderFiles2::createChangeBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createInsertLeftBlock( 
+void XxBuilderConflicts::createInsertLeftBlock( 
    XxFln fline1,
    uint  fsize
 )
@@ -493,7 +493,7 @@ void XxBuilderFiles2::createInsertLeftBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createInsertRightBlock( 
+void XxBuilderConflicts::createInsertRightBlock( 
    XxFln fline2,
    uint  fsize
 )
@@ -509,7 +509,7 @@ void XxBuilderFiles2::createInsertRightBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::addLine( const XxLine& line )
+void XxBuilderConflicts::addLine( const XxLine& line )
 {
    XX_LOCAL_TRACE( "AddLine: " << line );
    _lines.push_back( line );

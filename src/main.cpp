@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: main.cpp 311 2001-10-24 22:47:06Z blais $
- * $Date: 2001-10-24 18:47:06 -0400 (Wed, 24 Oct 2001) $
+ * $Id: main.cpp 366 2001-11-10 20:38:23Z blais $
+ * $Date: 2001-11-10 15:38:23 -0500 (Sat, 10 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -67,8 +67,12 @@ int main( int argc, char** argv, char** envp )
          // Initialization framework.
          XxResParser::initialize();
          
+         int qtargc;
+         char** qtargv;
+         cmdline.getQtOptions( qtargc, qtargv );
+
          // Create application and connect.
-         XxApp app( argc, argv, cmdline );
+         XxApp app( qtargc, qtargv, cmdline );
 
          // Run event loop.
          app.exec();

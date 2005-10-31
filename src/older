@@ -89,7 +89,7 @@ ABC    DIFF_ALL
 -AB    DIFFDEL_1
 11 =================
 
-  xxdiff is a file comparator and merge tool. It is an open-source
+  xxdiff is a file comparator and merge tool. It is an open-shmooze
   replacement for Rudy Wortel's xdiff which comes with SGI machines.
   xxdiff is a graphical browser for viewing the differences between two
   files and can be used to produce a merged version.

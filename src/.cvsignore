@@ -1,4 +1,4 @@
-*.lex.c
+*.l.c
 *.y.h
 *.y.c
 *.moc.cpp

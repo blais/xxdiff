@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 338 2001-11-05 05:37:35Z blais $
- * $Date: 2001-11-05 00:37:35 -0500 (Mon, 05 Nov 2001) $
+ * $Id: optionsDialog.cpp 393 2001-11-20 07:54:25Z blais $
+ * $Date: 2001-11-20 02:54:25 -0500 (Tue, 20 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -401,9 +401,9 @@ void XxOptionsDialog::synchronize()
    //---------------------------------------------------------------------------
    // Display
 
-   _checkboxHorizontalDiffs->setChecked(
-      resources.getBoolOpt( BOOL_HORIZONTAL_DIFFS )
-   );
+   _comboHordiffType->setCurrentItem( int( resources.getHordiffType() ) );
+   _spinboxHordiffContext->setValue( resources.getHordiffContext() );
+
    _checkboxIgnoreHorizontalWhitespace->setChecked(
       resources.getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS )
    );
@@ -533,10 +533,15 @@ void XxOptionsDialog::onApply()
    // Display
 
    bool reinitHorizontalDiffs = false;
-   if ( resources.getBoolOpt( BOOL_HORIZONTAL_DIFFS ) !=
-        _checkboxHorizontalDiffs->isChecked() ) {
-      resources.setBoolOpt( BOOL_HORIZONTAL_DIFFS, 
-                             _checkboxHorizontalDiffs->isChecked() );
+   XxHordiff newhdtype = XxHordiff( _comboHordiffType->currentItem() );
+   if ( resources.getHordiffType() != newhdtype ) {
+      resources.setHordiffType( newhdtype );
+      reinitHorizontalDiffs = true;
+   }
+
+   if ( resources.getHordiffContext() !=
+        uint( _spinboxHordiffContext->value() ) ) {
+      resources.setHordiffContext( _spinboxHordiffContext->value() );
       reinitHorizontalDiffs = true;
    }
 
@@ -610,11 +615,7 @@ void XxOptionsDialog::onApply()
    
    if ( reinitHorizontalDiffs == true ) {
       XxDiffs* diffs = _app->getDiffs();
-      diffs->initializeHorizontalDiffs(
-         resources.getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS ),
-         _app->getBuffers(),
-         true
-      );
+      diffs->initializeHorizontalDiffs( resources, _app->getBuffers(), true );
    }
 
    if ( redoDiff == true ) {
@@ -671,18 +672,12 @@ void XxOptionsDialog::checkboxIgnoreBlankLines( int state )
 //
 void XxOptionsDialog::setFileDiffOptions(
    XxCommandSwitch cmdOptionId,
-   bool         state
+   bool            state
 ) const
 {
    const XxResources& resources = _app->getResources();
 
-   QLineEdit* le = 0;
-   if ( _app->getNbFiles() == 2 ) {
-      le = _lineeditCommandFiles2;
-   }
-   else {
-      le = _lineeditCommandFiles3;
-   }
+   QLineEdit* le = _lineeditCommandFiles2; // 2-way diffs only.
    QString cmd = le->text();
    
    const QString opt = resources.getCommandSwitch( cmdOptionId );

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 352 2001-11-06 20:00:01Z blais $
- * $Date: 2001-11-06 15:00:01 -0500 (Tue, 06 Nov 2001) $
+ * $Id: exceptions.cpp 398 2001-11-22 05:46:18Z blais $
+ * $Date: 2001-11-22 00:46:18 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -25,6 +25,7 @@
  *============================================================================*/
 
 #include <exceptions.h>
+#include <cmdline.h>
 #include <help.h>
 
 #include <iostream>
@@ -52,7 +53,7 @@ XxError::XxError(
 )
 {
    QTextOStream oss( &_msg );
-   oss << "Xxdiff error (" << file << ":" << line << "): ";
+   oss << "xxdiff (" << file << ":" << line << "): " << endl;
    if ( !msg.isEmpty() ) {
       oss << msg;
    }
@@ -79,36 +80,30 @@ const QString& XxError::getMsg() const XX_THROW_NOTHING
 XxUsageError::XxUsageError( 
    XX_EXC_PARAMS_DECL(file,line),
    const QString& msg,
-   bool           benine,
-   bool           version
+   int            helpMask
 ) :
    XxError( file, line, msg ),
-   std::domain_error( "Usage error." ),
-   _benine( benine )
+   std::domain_error( "Usage error." )
 {
-   if ( version == true ) {
-      // Overwrite base class msg.
-      QTextStream oss( &_msg, IO_WriteOnly | IO_Truncate );
-      XxHelp::dumpVersion( oss );
+   // Set to default.
+   if ( helpMask == 0 ) {
+      helpMask = XxCmdline::OPT_DEFAULT;
    }
-   else if ( msg.isEmpty() ) {
+
+   if ( msg.isEmpty() ) {
       // Overwrite base class msg.
       QTextStream oss( &_msg, IO_WriteOnly | IO_Truncate );
-      XxHelp::dumpUsage( oss );
+      oss << XxHelp::getUsage( helpMask, true );
    }
    else {
       // Don't base class msg.
       QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
       oss << endl;
-      XxHelp::dumpUsage( oss );
-   }
-}
 
-//------------------------------------------------------------------------------
-//
-bool XxUsageError::isBenine() const
-{
-   return _benine;
+      // Don't output usage in case of an explicit error.
+      oss << "Use 'xxdiff --help' for more information.";
+      //oss << XxHelp::getUsage( helpMask, true );
+   }
 }
 
 /*==============================================================================
@@ -126,7 +121,7 @@ XxIoError::XxIoError(
 {
    QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
    oss << endl;
-   oss << "IO error... " << strerror( errno );
+   oss << "IO error: " << strerror( errno );
 }
 
 /*==============================================================================

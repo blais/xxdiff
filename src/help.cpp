@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: help.cpp 393 2001-11-20 07:54:25Z blais $
+ * $Date: 2001-11-20 02:54:25 -0500 (Tue, 20 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -99,6 +99,7 @@ const QString whatsThisStrings[] = {
 QString formatOptionsPlain(
    const XxCmdline::Option* options,
    const int                nbOptions,
+   const unsigned int       mincol = 29,
    const unsigned int       width = 80
 )
 {
@@ -106,35 +107,36 @@ QString formatOptionsPlain(
    QTextOStream oss( &outs );
 
    // Compute maximum width of long-option.
-   int maxw = 0;
+   unsigned int maxw = 0;
    int ii;
    for ( ii = 0; ii < nbOptions; ++ii ) {
-      int len = 2;
-      if ( options[ii]._shortname != 0 ) {
-         len += 4; // "-o, "
-      }
+      unsigned int len = 2;
       len += 2 + ::strlen( options[ii]._longname ); // "--opt"
+      if ( options[ii]._shortname != 0 ) {
+         len += 4; // ", -o"
+      }
       if ( options[ii]._has_arg ) {
          len += 6; // " <arg>"
       }
+
       if ( len > maxw ) {
          maxw = len;
       }
    }
 
-   unsigned int startw = maxw + 2;
+   unsigned int startw = ( mincol >= maxw + 2 ) ? mincol : maxw + 2;
    XX_CHECK( startw < width );
 
    for ( ii = 0; ii < nbOptions; ++ii ) {
       // Output option name.
       int len = 2;
       oss << "  ";
+      oss << "--" << options[ii]._longname;
+      len += 2 + ::strlen( options[ii]._longname );
       if ( options[ii]._shortname != 0 ) {
-         oss << "-" << options[ii]._shortname << ", ";
+         oss << ", -" << options[ii]._shortname;
          len += 4;
       }
-      len += 2 + ::strlen( options[ii]._longname );
-      oss << "--" << options[ii]._longname;
       if ( options[ii]._has_arg ) {
          oss << " <arg>";
          len += 6;
@@ -162,8 +164,9 @@ QString formatOptionsPlain(
             cch += word.length() + 1;
          }
       }
-      oss << endl << endl;
+      oss << endl;
    }
+   oss << endl;
    return outs;
 }
 
@@ -178,16 +181,16 @@ QString formatOptionsQml(
    QString outs;
    QTextOStream oss( &outs );
 
-   oss << "<table cellpadding=5>" << endl << endl;
+   oss << "<table cellpadding=5 width=100%>" << endl << endl;
    for ( int ii = 0; ii < nbOptions; ++ii ) {
-      oss << "<tr width=20%>" << endl;
+      oss << "<tr>" << endl;
 
       // Output option name.
-      oss << "<td><tt>";
-      if ( options[ii]._shortname != 0 ) {
-         oss << "-" << options[ii]._shortname << ", ";
-      }
+      oss << "<td width=30%><tt>";
       oss << "--" << options[ii]._longname;
+      if ( options[ii]._shortname != 0 ) {
+         oss << ", -" << options[ii]._shortname;
+      }
       if ( options[ii]._has_arg ) {
          oss << " &lt;arg&gt;";
       }
@@ -195,7 +198,7 @@ QString formatOptionsQml(
 
 
       // Output formatted help.
-      oss << "<td>" << endl;
+      oss << "<td align=left>" << endl;
       oss << options[ii]._help << endl;
       oss << "</td>" << endl;
 
@@ -318,34 +321,89 @@ const QString& XxHelp::getWhatsThisText( WhatsThisTextType type )
 //
 QString XxHelp::getVersion()
 {
-   return QString( XX_VERSION );
+   return QString( xx_version );
 }
 
 //------------------------------------------------------------------------------
 //
-QString XxHelp::getUsage( bool plain )
+QString XxHelp::getUsage( int helpMask, bool plain )
 {
    int nbOptions;
-   XxCmdline::Option* options = XxCmdline::getOptionList( nbOptions );
+   XxCmdline::Option* options;
 
    QString usage;
    if ( plain ) {
-      {
-         QTextOStream oss( &usage );
-         oss << "Usage:" << endl
-             << "  xxdiff [OPTIONS] file1 file2 [file3]" << endl
-             << endl
-             << "  where any specified file can be `-' for stdin." << endl
-             << "  Filenames can be either 2 directories, or 3 files." << endl
-             << endl
-             << "Options:" << endl
-             << endl;
+      QTextStream oss( &usage, IO_WriteOnly | IO_Append );
+      oss << "Usage: "
+          << "xxdiff [OPTIONS] file1 file2 [file3]" << endl
+          << endl
+          << "A graphical file and directories comparison and merge tool."
+          << endl << endl;
+
+      if ( helpMask & (1 << XxCmdline::OPT_GENERIC) ) {
+         oss << "Generic options:" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_GENERIC, nbOptions );
+         oss << formatOptionsPlain( options, nbOptions );
       }
 
-      usage += formatOptionsPlain( options, nbOptions );
+      if ( helpMask & (1 << XxCmdline::OPT_QT) ) {
+         oss << "Qt options:" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_QT, nbOptions );
+         oss << formatOptionsPlain( options, nbOptions );
+      }
+
+      if ( helpMask & (1 << XxCmdline::OPT_DIFF) ) {
+         oss << "GNU diff options (2-files only):" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_DIFF, nbOptions );
+         oss << formatOptionsPlain( options, nbOptions );
+         oss << endl;
+      }
+
+      if ( helpMask & (1 << XxCmdline::OPT_XXDIFF) ) {
+         oss << "Options:" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_XXDIFF, nbOptions );
+         oss << formatOptionsPlain( options, nbOptions );
+      }
+
+      oss << "Any one specified file can be `-' for stdin." << endl
+          << "Filenames can be either 2 directories, 2 files or 3 files."
+          << endl;
    }
    else {
-      usage += formatOptionsQml( options, nbOptions );
+      QTextStream oss( &usage, IO_WriteOnly | IO_Append );
+      if ( helpMask & (1 << XxCmdline::OPT_GENERIC) ) {
+         oss << "<h4>Generic options</h4>" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_GENERIC, nbOptions );
+         oss << formatOptionsQml( options, nbOptions );
+      }
+
+      if ( helpMask & (1 << XxCmdline::OPT_QT) ) {
+         oss << "<h4>Qt options</h4>" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_QT, nbOptions );
+         oss << formatOptionsQml( options, nbOptions );
+      }
+
+      if ( helpMask & (1 << XxCmdline::OPT_DIFF) ) {
+         oss << "<h4>GNU diff options (2-files only)</h4>" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_DIFF, nbOptions );
+         oss << formatOptionsQml( options, nbOptions );
+         oss << endl;
+      }
+
+      if ( helpMask & (1 << XxCmdline::OPT_XXDIFF) ) {
+         oss << "<h4>Options</h4>" << endl;
+         options =
+            XxCmdline::getOptionList( XxCmdline::OPT_XXDIFF, nbOptions );
+         oss << formatOptionsQml( options, nbOptions );
+      }
+
    }
    return usage;
 }
@@ -372,7 +430,7 @@ QString XxHelp::getManual()
    int idxinv = srcManual.find( invtag, idx );
    if ( idxinv != -1 ) {
       manual += srcManual.mid( idx, idxinv - idx );
-      manual += getUsage( false );
+      manual += getUsage( XxCmdline::OPT_ALL, false );
       idx = idxinv + invtag.length();
    }
 
@@ -389,23 +447,6 @@ QString XxHelp::getManual()
    manual += srcManual.mid( idx );
 
    return manual;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxHelp::dumpVersion( QTextStream& os )
-{
-   os << "xxdiff --- version " << getVersion();
-#ifdef XX_DEBUG
-   os << " (debug)";
-#endif
-}
-
-//------------------------------------------------------------------------------
-//
-void XxHelp::dumpUsage( QTextStream& os )
-{
-   os << getUsage( true );
 }
 
 //------------------------------------------------------------------------------

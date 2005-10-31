@@ -1,7 +1,26 @@
 #!/bin/sh
+#
+# $Source$
+# $Id: runtest 408 2001-11-22 18:03:53Z  $
+#
+# Copyright (c) 2001, Martin Blais. All rights reserved.
+#
+# This script is my regression tests.  Although every single time I run it i
+# feel I'm doing it for nothing, almost every single time I'll find something
+# that is buggy about xxdiff.  This isn't much as far as testing, but it is much
+# better than nothing, and it really does help.
+#
+
+function testhdr() { 
+    clear
+    echo "====================================================================="
+    echo $1
+    echo "====================================================================="
+}
 
 function waitread() { 
-    echo "   <press enter>" && read
+    #echo "   <press enter>" && read
+    read
 }
 
 function waitexit() { 
@@ -10,91 +29,205 @@ function waitexit() {
 
 XXDIFF=../src/xxdiff
 
-echo "========================================================================="
-echo "Print out version"
+#-------------------------------------------------------------------------------
+testhdr "Print version"
 
 $XXDIFF --version
 waitread;
 
-echo "========================================================================="
-echo "print out help"
+#-------------------------------------------------------------------------------
+testhdr "Print help"
 
 $XXDIFF --help
 waitread;
 
-echo "========================================================================="
-echo "print HTML documentation"
+#-------------------------------------------------------------------------------
+testhdr "Print help for Qt options"
+
+$XXDIFF --help-qt
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Print help for all options"
+
+$XXDIFF --help-all
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Print HTML documentation"
 
 $XXDIFF --help-html | tee /tmp/out.html
 
 echo "=============================="
-echo "open and check file:/tmp/doc.html in your browser"
+echo "Open and check file:/tmp/doc.html in your browser"
 waitread;
 rm -f /tmp/out.html
 
-echo "========================================================================="
-echo "listing resources"
+#-------------------------------------------------------------------------------
+testhdr "Testing cmdline: no files. Should print something."
+
+$XXDIFF
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Testing cmdline: one file only. Should fail."
+
+$XXDIFF mine
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Testing cmdline: four files. Should fail."
+
+$XXDIFF mine older yours empty
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Testing cmdline: one directory. Should fail."
+
+$XXDIFF dir1
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Testing cmdline: three directories. Should fail."
+
+$XXDIFF dir1 dir2 dir3
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Testing cmdline: two files and one directory. Should fail."
+
+$XXDIFF dir1 dir2 dir3
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Stat test: file that does not exist. Should fail."
+
+$XXDIFF mine filedoesnotexist
+waitread;
+
+#-------------------------------------------------------------------------------
+testhdr "Stat test: directory that does not exist. Should fail."
+
+$XXDIFF dir1 dirdoesnotexist
+waitread;
+
+
+#-------------------------------------------------------------------------------
+testhdr "Listing resources"
 
 $XXDIFF --list-resources | tee /tmp/xxdiffrc
 waitread;
 
-echo "========================================================================="
-echo "opening xxdiff with output resources"
-echo "there should be no warnings here."
+#-------------------------------------------------------------------------------
+testhdr "Opening xxdiff with output resources. There should be no warnings here."
 
 XXDIFFRC=/tmp/xxdiffrc $XXDIFF mine mine
 waitexit;
 rm -f /tmp/xxdiffrc
 
-echo "========================================================================="
-echo "testing --no-rcfile"
+#-------------------------------------------------------------------------------
+testhdr "Testing --no-rcfile"
 
 $XXDIFF --no-rcfile mine mine
 waitexit;
 
-echo "========================================================================="
-echo "testing --orig-xdiff"
+#-------------------------------------------------------------------------------
+testhdr "Testing --orig-xdiff"
 
-$XXDIFF --no-rcfile --orig-xdiff mine mine
+$XXDIFF --no-rcfile --orig-xdiff mine older
 waitexit;
 
-echo "========================================================================="
-echo "normal 2-way diff"
+#-------------------------------------------------------------------------------
+testhdr "Normal 2-way diff"
 
 $XXDIFF mine older
 waitexit;
 
-echo "========================================================================="
-echo "normal 3-way diff"
+#-------------------------------------------------------------------------------
+testhdr "Normal 3-way diff"
 
 $XXDIFF mine older yours
 waitexit;
 
-echo "========================================================================="
-echo "normal 2-way dir. diff"
+#-------------------------------------------------------------------------------
+testhdr "Normal 2-way dir. diff"
 
 $XXDIFF dir1 dir3
 waitexit;
 
-echo "========================================================================="
-echo "normal 2-way recursive dir. diff"
+#-------------------------------------------------------------------------------
+testhdr "Normal 2-way recursive dir. diff"
 
 $XXDIFF -r dir1 dir3
 waitexit;
 
-echo "========================================================================="
-echo "3-way with auto merge"
+#-------------------------------------------------------------------------------
+testhdr "3-way with auto merge"
 
 $XXDIFF --merge mine older yours
 waitexit;
 
 
+#-------------------------------------------------------------------------------
+testhdr "Empty files: 2-way with one empty file"
 
-# todo; empty files, one, two
+$XXDIFF empty yours
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Empty files: 2-way with two empty files"
+
+$XXDIFF empty empty
+waitexit;
+
+
+#-------------------------------------------------------------------------------
+testhdr "Empty files: 3-way with one empty file"
+
+$XXDIFF mine empty yours
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Empty files: 3-way with two empty files"
+
+$XXDIFF mine empty empty
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Empty files: 3-way with three empty files"
+
+$XXDIFF empty empty empty
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Qt options (misc)"
+
+echo "Simple cmap option"
+$XXDIFF --cmap mine yours
+waitexit;
+
+echo "Simple visual option"
+$XXDIFF --visual TrueColor mine yours
+
+echo "Style option"
+$XXDIFF --style=platinum mine yours
+waitexit;
+
+echo "Qt options (geometry), this should show up 400x400"
+$XXDIFF --geometry 400x400 mine yours
+waitexit;
+
+
+#-------------------------------------------------------------------------------
+#
+# TODO
+#
 
 # ^L rendering, accents
 
-
-
 # save as conflicts, 2, 3
+
 # save as ifdefs, 2, 3
+
+# test return values
+

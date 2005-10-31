@@ -1,5 +1,5 @@
 /******************************************************************************\
- * $Id: proginfo.h 381 2001-11-16 00:55:15Z blais $
+ * $Id: proginfo.c 381 2001-11-16 00:55:15Z blais $
  * $Date: 2001-11-15 19:55:15 -0500 (Thu, 15 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
@@ -20,24 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef INCL_XXDIFF_VERSION
-#define INCL_XXDIFF_VERSION
+/*==============================================================================
+ * EXTERNAL DECLARATIONS
+ *============================================================================*/
+
+#include <version.h>
 
 /*==============================================================================
  * PUBLIC DECLARATIONS
  *============================================================================*/
 
-/*
- * Version number. Compiled in version.c everytime we link.
- */
-#ifdef	__cplusplus
-extern "C" {
-#endif
+char const xx_version[] = XX_VERSION;
 
-extern char const xx_version[];
-
-#ifdef	__cplusplus
-}
-#endif
-
-#endif

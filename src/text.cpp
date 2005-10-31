@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 340 2001-11-05 07:34:53Z blais $
- * $Date: 2001-11-05 02:34:53 -0500 (Mon, 05 Nov 2001) $
+ * $Id: text.cpp 405 2001-11-22 17:51:48Z blais $
+ * $Date: 2001-11-22 12:51:48 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -81,7 +81,7 @@ inline void rentxt(
    int&                xch,
    const int           xend,
    int&                xpx,
-   const int           width,
+   const int           wwidth,
    const int           y,
    const QFontMetrics& fm
 )
@@ -94,20 +94,21 @@ inline void rentxt(
       }
       
       QString str;
+      XX_CHECK( rlen > 0 ); // always true, because xch < xend
       str.setLatin1( renderedText + xch, rlen );
       int nw = fm.width( str, rlen );
 
       p.drawText(
-         XX_RED_RECT( xpx, y, width - xpx, fm.lineSpacing() ),
+         XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() ),
          Qt::AlignLeft | Qt::AlignTop, 
          str, rlen,
          &brect
       );
-
+      
       xpx += nw; // XX_RED_WIDTH( brect.width() );
       xch += rlen;
       
-      if ( xpx > width ) {
+      if ( xpx > wwidth ) {
          break;
       }
    }
@@ -214,14 +215,21 @@ void XxText::drawContents( QPainter* pp )
    uint nbLines = 
       std::min( displayLines, XxDln(diffs->getNbLines() - (topLine - 1)) );
 
-   bool hori = 
-      resources.getBoolOpt( BOOL_HORIZONTAL_DIFFS ) &&  
-      ! diffs->isDirectoryDiff();
+   bool hori =
+      ( resources.getHordiffType() != HD_NONE ) && !diffs->isDirectoryDiff();
 
    const int x = 0 - horizontalPos;
 
    int y = 0;
    p.setBackgroundMode( OpaqueMode );
+
+   int* hbuffer0;
+   int* hbuffer1;
+#ifdef XX_DEBUG
+   int hbufferSize = 
+#endif
+      resources.getHordiffBuffers( hbuffer0, hbuffer1 );
+   XX_ASSERT( hbuffer0 && hbuffer1 );
 
    for ( uint ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
 
@@ -247,14 +255,38 @@ void XxText::drawContents( QPainter* pp )
          const char* lineText = file->getTextLine( fline, length );
          
          const int bhd = 0;
-         int lhd = line.getLeftHdiffPos( _no );
-         int rhd = line.getRightHdiffPos( _no ); // unfixed rhd
          int ehd;
-         const char* renderedText = file->renderTextWithTabs( 
-            lineText, length, tabWidth, ehd, lhd, rhd
-         );
-         rhd += 1; // fix up rhd
+         const char* renderedText;
 
+         // Copy array of hordiffs.
+         const int* hordiffs = line.getHorDiffs( _no );
+
+         if ( hordiffs ) {
+            int c = 0;
+            const int* s;
+            for ( s = hordiffs; *s != -1; ++s, ++c ) {
+               XX_CHECK( c < hbufferSize );
+               hbuffer0[c] = *s;
+            }
+            XX_CHECK( c < hbufferSize );
+            hbuffer0[c] = -1;
+
+            renderedText = file->renderTextWithTabs( 
+               lineText, length, tabWidth, ehd, hbuffer0
+            );
+
+            // Append ehd and end array with -1.  We make sure there was enough
+            // space in the preceding realloc above.
+            hbuffer0[c++] = ehd;
+            hbuffer0[c] = -1;
+            XX_CHECK( c < hbufferSize );
+         }
+         else {
+            renderedText = file->renderTextWithTabs( 
+               lineText, length, tabWidth, ehd, 0
+            );
+         }
+         
          // Loop to find an character reasonably close before the beginning of
          // the visible window in x.
          QString chunk;
@@ -267,6 +299,7 @@ void XxText::drawContents( QPainter* pp )
                rlen = xend - xch;
             }
 
+            XX_CHECK( rlen > 0 ); // always true, because xch < xend
             chunk.setLatin1( renderedText + xch, rlen );
             QRect brect = fm.boundingRect( 
                -128, -128, 8192, 2048, 
@@ -300,46 +333,37 @@ void XxText::drawContents( QPainter* pp )
             QColor fcolorSup;
             resources.getRegionColor( idtypeSup, bcolorSup, fcolorSup );
 
-            // Pre-part.
-            p.setPen( fcolorSup );
-            p.setBackgroundColor( bcolorSup );
-            rentxt(
-               p, renderedText,
-               xch, lhd,
-               xpx,
-               w, y, fm
-            );
-            if ( xpx > w ) {
-               continue;
+            // We start out with the sup color, then just switch.  We made sure
+            // that the end of the line was included in the list of hordiffs.
+
+            int c = 0;
+            while ( hbuffer0[c] != -1 ) {
+
+               if ( (c % 2) == 0 ) {
+                  p.setPen( fcolorSup );
+                  p.setBackgroundColor( bcolorSup );
+               }
+               else {
+                  p.setPen( fcolor );
+                  p.setBackgroundColor( bcolor );
+               }
+
+               rentxt(
+                  p, renderedText,
+                  xch, hbuffer0[c],
+                  xpx,
+                  w, y, fm
+               );
+               if ( xpx > w ) {
+                  break;
+               }
+
+               ++c;
             }
 
-            // Mid-part.
-            p.setPen( fcolor );
-            p.setBackgroundColor( bcolor );
-            rentxt(
-               p, renderedText,
-               xch, rhd,
-               xpx,
-               w, y, fm
-            );
-            if ( xpx > w ) {
-               continue;
+            if ( xpx < w ) {
+               fillerBrush.setColor( bcolorSup );
             }
-
-            // Post-part.
-            p.setPen( fcolorSup );
-            p.setBackgroundColor( bcolorSup );
-            rentxt(
-               p, renderedText,
-               xch, ehd,
-               xpx,
-               w, y, fm
-            );
-            if ( xpx > w ) {
-               continue;
-            }
-
-            fillerBrush.setColor( bcolorSup );
          }
          else {
 

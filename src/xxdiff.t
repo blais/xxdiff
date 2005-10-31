@@ -6,6 +6,11 @@
 #$ IncludeTemplate("app.t");
 
 #
+# Compute current date/time.
+#
+COMPILE_DATE=#$ Now()
+
+#
 # Lex/Yacc
 #
 ####### Lex/yacc programs and options
@@ -33,9 +38,7 @@ $(LEXOUT): $(LEXIN)
 $(YACCOUTC) $(YACCOUTH): $(YACCIN) $(LEXOUT)
 	$(YACC) $(YACCDEBUG) -o$(YACCOUTC) $(YACCIN)
 
-$(PARSOBJ): $(YACCOUTC) $(LEXOUT)
-
-
+$(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
 
 #-------------------------------------------------------------------------------
 # support for documentation transformation
@@ -46,3 +49,15 @@ $(PARSOBJ): $(YACCOUTC) $(LEXOUT)
 	sed -e 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
 
 help.o: doc.h
+
+# Make the version number dependent on everything, so that we always recompile
+# this file whenever we link, thus updating that number.
+version.o: $(HEADERS) $(SOURCES) $(INTERFACES)
+
+
+#
+# Additional dependencies.
+# Note: this is lame, find a better way to do this.  The problem is that tmake
+# does note include dependencies for files it cannot find in the include path.
+#
+cmdline.o: $(YACCOUTH)

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 479 2002-02-07 06:38:35Z  $
- * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
+ * $Id: resources.cpp 400 2001-11-22 06:40:53Z blais $
+ * $Date: 2001-11-22 01:40:53 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -51,7 +51,15 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-XxResources::XxResources( bool original )
+XxResources::XxResources( bool original ) :
+   _hdTableSize( 0 ),
+   _hdTable( 0 ),
+   _hdBufferSize( 0 ),
+   _hdBuffer0( 0 ),
+   _hdBuffer1( 0 ),
+   _hdLineBufSize( 0 ),
+   _hdLineBuf0( 0 ),
+   _hdLineBuf1( 0 )
 {
    if ( !original ) {
       initialize();
@@ -67,12 +75,13 @@ void XxResources::initialize()
 {
    initializeOriginalXdiff();
 
-   _boolOpts[ BOOL_HORIZONTAL_DIFFS ] = true;
    _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = false;
    _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = true;
 
    _showOpts[ SHOW_OVERVIEW ] = true;
    _showOpts[ SHOW_FILENAMES ] = true;
+
+   _hordiffType = HD_MULTIPLE;
 }
 
 //------------------------------------------------------------------------------
@@ -136,7 +145,9 @@ void XxResources::initializeOriginalXdiff()
    _accelerators[ ACCEL_TOGGLE_MARKERS ] = Qt::ALT | Qt::Key_M;
    _accelerators[ ACCEL_TOGGLE_OVERVIEW ] = Qt::ALT | Qt::Key_O;
    _accelerators[ ACCEL_TOGGLE_SHOW_FILENAMES ] = Qt::ALT | Qt::Key_S;
-   _accelerators[ ACCEL_TOGGLE_HORIZONTAL_DIFFS ] = Qt::ALT | Qt::Key_W;
+   _accelerators[ ACCEL_HORDIFF_NONE ] = Qt::ALT | Qt::Key_W;
+   _accelerators[ ACCEL_HORDIFF_SINGLE ] = Qt::ALT | Qt::Key_E;
+   _accelerators[ ACCEL_HORDIFF_MULTIPLE ] = Qt::ALT | Qt::Key_R;
    _accelerators[ ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT ] = Qt::ALT | Qt::Key_A;
    _accelerators[ ACCEL_HELP_ON_CONTEXT ] = Qt::SHIFT | Qt::Key_F1;
                   
@@ -159,61 +170,56 @@ void XxResources::initializeOriginalXdiff()
 
    //---------------------------------------------------------------------------
 
-   if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
-      setFbColors( COLOR_SAME             , "grey", "black" );
-      setFbColors( COLOR_DIFF_ONE         , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_SUP     , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_ONE_ONLY    , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_NONLY   , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_TWO         , "lightblue2", "black" );
-      setFbColors( COLOR_DIFF_TWO_SUP     , "lightblue3", "black" );
-      setFbColors( COLOR_DIFF_TWO_ONLY    , "lightblue2",  "black" );
-      setFbColors( COLOR_DIFF_TWO_NONLY   , "lightblue3", "black" );
+   setFbColors( COLOR_SAME             , "grey", "black" );
+   setFbColors( COLOR_DIFF_ONE         , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ONE_SUP     , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_ONE_ONLY    , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ONE_NONLY   , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_TWO         , "lightblue2", "black" );
+   setFbColors( COLOR_DIFF_TWO_SUP     , "lightblue3", "black" );
+   setFbColors( COLOR_DIFF_TWO_ONLY    , "lightblue2",  "black" );
+   setFbColors( COLOR_DIFF_TWO_NONLY   , "lightblue3", "black" );
              
-      setFbColors( COLOR_DELETE           , "lightblue2", "black" );
-      setFbColors( COLOR_DELETE_BLANK     , "grey64", "black" );
+   setFbColors( COLOR_DELETE           , "lightblue2", "black" );
+   setFbColors( COLOR_DELETE_BLANK     , "grey64", "black" );
              
-      setFbColors( COLOR_INSERT           , "darkseagreen2", "black" );
-      setFbColors( COLOR_INSERT_BLANK     , "grey64", "black" );
+   setFbColors( COLOR_INSERT           , "darkseagreen2", "black" );
+   setFbColors( COLOR_INSERT_BLANK     , "grey64", "black" );
              
-      setFbColors( COLOR_DIFF_ALL         , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_SUP     , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_ALL_ONLY    , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_NONLY   , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_ALL         , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ALL_SUP     , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFF_ALL_ONLY    , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFF_ALL_NONLY   , "lemonchiffon3", "black" );
              
-      setFbColors( COLOR_DIFFDEL          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_SUP      , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFFDEL_ONLY     , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_NONLY    , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFFDEL_BLANK    , "grey64", "black" );
+   setFbColors( COLOR_DIFFDEL          , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFFDEL_SUP      , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFFDEL_ONLY     , "palegoldenrod", "black" );
+   setFbColors( COLOR_DIFFDEL_NONLY    , "lemonchiffon3", "black" );
+   setFbColors( COLOR_DIFFDEL_BLANK    , "grey64", "black" );
              
-      setFbColors( COLOR_SELECTED         , "plum", "black" );
-      setFbColors( COLOR_SELECTED_SUP     , "thistle", "black" );
+   setFbColors( COLOR_SELECTED         , "plum", "black" );
+   setFbColors( COLOR_SELECTED_SUP     , "thistle", "black" );
              
-      setFbColors( COLOR_DELETED          , "lightslategrey", "black" );
-      setFbColors( COLOR_DELETED_SUP      , "slategrey", "black" );
+   setFbColors( COLOR_DELETED          , "lightslategrey", "black" );
+   setFbColors( COLOR_DELETED_SUP      , "slategrey", "black" );
              
-      setFbColors( COLOR_IGNORED          , "grey70", "grey30" );
+   setFbColors( COLOR_IGNORED          , "grey70", "grey30" );
              
-      setFbColors( COLOR_DIRECTORIES      , "mediumturquoise", "black" );
+   setFbColors( COLOR_DIRECTORIES      , "mediumturquoise", "black" );
                                                          
-      setFbColors( COLOR_MERGED_UNDECIDED , "lemonchiffon3", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1 , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2 , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3 , "grey70", "black" );
-   }   
+   setFbColors( COLOR_MERGED_UNDECIDED , "lemonchiffon3", "black" );
+   setFbColors( COLOR_MERGED_DECIDED_1 , "grey70", "black" );
+   setFbColors( COLOR_MERGED_DECIDED_2 , "grey70", "black" );
+   setFbColors( COLOR_MERGED_DECIDED_3 , "grey70", "black" );
              
    _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
-   _backColors[ COLOR_CURSOR ] =
-      QColor( 0xff, 0xff, 0xff, QColor::Rgb ); // white
-   _backColors[ COLOR_VERTICAL_LINE ] = 
-      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
+   _backColors[ COLOR_CURSOR ].setNamedColor( "white" );
+   _backColors[ COLOR_VERTICAL_LINE ].setNamedColor( "red" );
    // Note: we don't use the fore colors for these guys.
 
    //---------------------------------------------------------------------------
 
    _boolOpts[ BOOL_EXIT_ON_SAME ] = false;
-   _boolOpts[ BOOL_HORIZONTAL_DIFFS ] = false;
    _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = true;
    _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = false;
    _boolOpts[ BOOL_IGNORE_ERRORS ] = false;
@@ -263,6 +269,16 @@ void XxResources::initializeOriginalXdiff()
    _commandSwitch[ CMDSW_FILES_QUALITY_NORMAL ] = "";
    _commandSwitch[ CMDSW_FILES_QUALITY_FASTEST ] = "-d";
    _commandSwitch[ CMDSW_FILES_QUALITY_HIGHEST ] = "-H";
+
+   //---------------------------------------------------------------------------
+
+   _initSwitch[ CMDSW_FILES_IGNORE_TRAILING ] = -1;
+   _initSwitch[ CMDSW_FILES_IGNORE_WHITESPACE ] = -1;
+   _initSwitch[ CMDSW_FILES_IGNORE_CASE ] = -1;
+   _initSwitch[ CMDSW_FILES_IGNORE_BLANK_LINES ] = -1;
+   _initSwitch[ CMDSW_FILES_QUALITY_NORMAL ] = -1;
+   _initSwitch[ CMDSW_FILES_QUALITY_FASTEST ] = -1;
+   _initSwitch[ CMDSW_FILES_QUALITY_HIGHEST ] = -1;
          
    //---------------------------------------------------------------------------
 
@@ -284,12 +300,28 @@ void XxResources::initializeOriginalXdiff()
    _clipboardFormat = QString("%L: %s");
 
    _ignoreFile = IGNORE_NONE;
+
+   //---------------------------------------------------------------------------
+
+   _hordiffType = HD_NONE;
+   _hordiffMax = 10000;
+   _hordiffContext = 5;
+   updateHordiffBuffers();
+
 }
 
 //------------------------------------------------------------------------------
 //
 XxResources::~XxResources()
-{}
+{
+   if ( _hdTable != 0 ) {
+      free( _hdTable );
+   }
+   delete[] _hdBuffer0;
+   delete[] _hdBuffer1;
+   delete[] _hdLineBuf0;
+   delete[] _hdLineBuf1;
+}
 
 //------------------------------------------------------------------------------
 //
@@ -360,6 +392,14 @@ bool XxResources::setFontText( const QFont& font )
 
 //------------------------------------------------------------------------------
 //
+void XxResources::setIgnoreFile( XxIgnoreFile ignoreFile )
+{
+   _ignoreFile = ignoreFile;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxResources::setCommand( XxCommand cmdId, const QString& t ) 
 {
    _commands[ int(cmdId) ] = t;
@@ -369,11 +409,22 @@ void XxResources::setCommand( XxCommand cmdId, const QString& t )
 //------------------------------------------------------------------------------
 //
 void XxResources::setCommandSwitch(
-   XxCommandSwitch   cmdId,
-   const QString& val
+   XxCommandSwitch cmdId,
+   const QString&  val
 )
 {
    _commandSwitch[ int(cmdId) ] = val;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setInitSwitch(
+   XxCommandSwitch cmdId,
+   const int       val
+)
+{
+   _initSwitch[ int(cmdId) ] = val;
    emit changed();
 }
 
@@ -487,13 +538,11 @@ void XxResources::setColor(
    const QString& colorstr
 )
 {
-   if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
-      if ( fore ) {
-         _foreColors[ int(colorType) ].setNamedColor( colorstr );
-      }
-      else {
-         _backColors[ int(colorType) ].setNamedColor( colorstr );
-      }
+   if ( fore ) {
+      _foreColors[ int(colorType) ].setNamedColor( colorstr );
+   }
+   else {
+      _backColors[ int(colorType) ].setNamedColor( colorstr );
    }
    emit changed();
 }
@@ -595,9 +644,27 @@ void XxResources::setClipboardFormat( const QString& format )
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setIgnoreFile( XxIgnoreFile ignoreFile )
+void XxResources::setHordiffType( XxHordiff hordiffType )
 {
-   _ignoreFile = ignoreFile;
+   _hordiffType = hordiffType;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setHordiffMax( uint hordiffMax )
+{
+   _hordiffMax = hordiffMax;
+   updateHordiffBuffers();
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setHordiffContext( uint hordiffContext )
+{
+   _hordiffContext = hordiffContext;
+   updateHordiffBuffers();
    emit changed();
 }
 
@@ -609,6 +676,81 @@ bool XxResources::compareFonts( const QFont& f1, const QFont& f2 )
       return f1.rawName() == f2.rawName();
    }
    return f1 == f2;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::applyInitSwitch()
+{
+   // Note that these are only valid for 2-way diff command.
+   const XxCommand cmdId = CMD_DIFF_FILES_2;
+
+   for ( int ii = int(CMDSW_FILES_IGNORE_TRAILING);
+         ii <= int(CMDSW_FILES_IGNORE_BLANK_LINES);
+         ++ii ) {
+      QString swstr = getCommandSwitch( XxCommandSwitch(ii) );
+      if ( _initSwitch[ ii ] != -1 && !swstr.isEmpty() ) {
+         setCommandSwitch( cmdId,
+                           XxCommandSwitch(ii),
+                           bool( _initSwitch[ ii ] ) );
+      }
+   }
+
+   // If the user set many of those resource enabled, just set it all, it's his
+   // problem, really, and this won't really hurt anyway.
+   // Perhaps we should remove the switch if there is none though.
+   QString cmd = getCommand( cmdId );
+   for ( int ii = int(CMDSW_FILES_QUALITY_NORMAL);
+         ii <= int(CMDSW_FILES_QUALITY_HIGHEST);
+         ++ii ) {
+
+      if ( _initSwitch[ ii ] == 1 ) {
+         switch ( ii ) {
+            case CMDSW_FILES_QUALITY_NORMAL: 
+               setQuality( cmd, QUALITY_NORMAL );
+               break;
+            case CMDSW_FILES_QUALITY_FASTEST: 
+               setQuality( cmd, QUALITY_FASTEST );
+               break;
+            case CMDSW_FILES_QUALITY_HIGHEST: 
+               setQuality( cmd, QUALITY_HIGHEST );
+               break;
+         }
+      }
+   }
+   setCommand( cmdId, cmd );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::updateHordiffBuffers()
+{
+   if ( _hdBuffer0 != 0 ) {
+      delete[] _hdBuffer0;
+      delete[] _hdBuffer1;
+      delete[] _hdLineBuf0;
+      delete[] _hdLineBuf1;
+      _hdBuffer0 = 0;
+      _hdBuffer1 = 0;
+      _hdLineBuf0 = 0;
+      _hdLineBuf1 = 0;
+   }
+
+   // An upper bound in the number of horizontal diff hunks is determined by he
+   // size of the context.  Each horizontal common region is at least the
+   // size of the context (that's the whole point of it).
+
+   int maxLineLen = _hordiffMax / _hordiffContext;
+   int maxNbHunks = ( maxLineLen / _hordiffContext + 1 );
+   _hdBufferSize = maxNbHunks * 2 + 4/*beg, end hunks*/ + 1 /*-1*/;
+   _hdBuffer0 = new int[ _hdBufferSize ];
+   _hdBuffer1 = new int[ _hdBufferSize ];
+
+   _hdLineBufSize = maxLineLen + 2; // leave 1 more for the extra table size and
+                                    // 1 more if we ever decide to 0-terminate
+                                    // the string.
+   _hdLineBuf0 = new char[ _hdLineBufSize ];
+   _hdLineBuf1 = new char[ _hdLineBufSize ];
 }
 
 XX_NAMESPACE_END
