@@ -2,13 +2,25 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 621 2002-09-18 23:55:06Z blais $
+# $Id: CHANGES 624 2002-09-20 18:36:23Z blais $
 #
 
 Current development release
 ------------------------------
 
+Version 2.9.1: (minor bug fixes)
+------------------------------
 
+   * It hadn't occurred to me that most people use the Alt key as their window
+     manager key in sawfish or the kde winmgr (I use the Super key bound in the
+     lower left control to free my Alt key). Thus my choice of Alt+Button1 for
+     the variable text selection will not work with most people's default
+     configurations.
+
+     So I have decided to change it, nasty me, to Control+Button1. I moved the
+     NEITHER selection that was bound there to Shift+Button3.
+
+     
 Version 2.9: (minor features)
 ------------------------------
 

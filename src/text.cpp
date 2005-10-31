@@ -749,35 +749,38 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   // Activate popup in third button.
-   if ( event->button() == RightButton && event->state() & ControlButton ) {
-
-      _grabMode = MOUSE_DRAG;
-      _grabTopLine = _sv->getTopLine();
-      _grabDeltaLineNo = dlineno;
-      return;
-   }
-   else if ( event->button() == LeftButton && event->state() & AltButton ) {
-
-      _grabMode = REGION_SELECT;
-      _grabTopLine = _sv->getTopLine();
-      _grabDeltaLineNo = dlineno;
-
-      QClipboard* cb = QkApplication::clipboard();
-      cb->clear();
-
-      _regionSelect[0] = _grabTopLine + dlineno;
-      _regionSelect[1] = -1;
-      update();
-      return;
-   }
-   else if ( event->button() == RightButton ) {
+   if ( event->button() == RightButton && event->state() == 0 ) {
+      // Activate popup in third button.
 
       // Popup.
       const XxLine& line = diffs->getLine( lineno );
       QkPopupMenu* popup = _app->getViewPopup( line );
       popup->popup( event->globalPos() );
       return;
+   }
+
+   if ( event->state() & ControlButton ) {
+      if ( event->button() == RightButton ) {
+
+         _grabMode = MOUSE_DRAG;
+         _grabTopLine = _sv->getTopLine();
+         _grabDeltaLineNo = dlineno;
+         return;
+      }
+      else if ( event->button() == LeftButton ) {
+
+         _grabMode = REGION_SELECT;
+         _grabTopLine = _sv->getTopLine();
+         _grabDeltaLineNo = dlineno;
+         
+         QClipboard* cb = QkApplication::clipboard();
+         cb->clear();
+         
+         _regionSelect[0] = _grabTopLine + dlineno;
+         _regionSelect[1] = -1;
+         update();
+         return;
+      }
    }
 
    // Interactive toggling of debug drawing structures.
@@ -848,18 +851,20 @@ void XxText::mousePressEvent( QMouseEvent* event )
          }
       }
    }
-   else if ( event->button() == LeftButton ) {
+   else {
       // Region event.
       if ( event->state() & ShiftButton ) {
-         // Unselect region.
-         diffs->selectRegion( lineno, XxLine::UNSELECTED );
+         if ( event->button() == LeftButton ) {
+            // Unselect region.
+            diffs->selectRegion( lineno, XxLine::UNSELECTED );
+         }
+         else if ( event->button() == RightButton ) {
+            // Unselect region.
+            diffs->selectRegion( lineno, XxLine::NEITHER );
+         }
       }
-      else if ( event->state() & ControlButton ) {
-         // Delete region.
-         diffs->selectRegion( lineno, XxLine::NEITHER );
-      }
-      else { 
-         // Select appropriate side.
+      else /*if ( event->state() == 0 )*/ {
+         // Simply select appropriate side.
          diffs->selectRegion( lineno, XxLine::Selection( _no ) );
       }
 

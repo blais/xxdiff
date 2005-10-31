@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 620 2002-09-18 18:44:18Z blais $
+# $Id: TODO 624 2002-09-20 18:36:23Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -35,6 +35,33 @@ Goals for 4.0 stable release:
 
 --------------------------------------------------------------------------------
 Tasks: current tasks
+
+  * change key binding for variable text selection
+
+
+
+  * check out bug from (wesleysmith)
+
+If I select the line from the first column and then 
+run "Save as left", I get a dialog that says "The 
+selections are all on this file. Save anyway?". If I 
+choose either the middle or right column and run "Save 
+as left", then I don't see this message. I also see this 
+message if I select the middle column and then 
+run "Save as middle". It seems to me that this 
+message doesn't really apply to the unmerge3 case, 
+and should be disabled. 
+
+Also, in the File menu, "Save as left" and "Save as 
+middle" are activated, but "Save as right" is grayed out. 
+That's odd because all three columns are the same file. 
+Seems like they should all be available, or maybe only 
+one, with the name changed to "Save". 
+
+A similar problem is seen with the "Edit ..." menu items 
+on the File menu. 
+
+
 
 2 prorities for review:
 
