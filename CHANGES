@@ -2,6 +2,13 @@
 CHANGES: xxdiff
 ===============
 
+Current
+-------
+
+* Created ports subdirectory, added files for MAC OSX from Alexandre Feblot.
+* Added patch from Robin Humble for building x86_64 rpm.
+
+
 Version 3.1: (minor feature enhancements)
 -----------------------------------------
 
@@ -24,6 +31,12 @@ Version 3.1: (minor feature enhancements)
 * Added wheel support in overview area ([ 1022392 ]) 
   Thanks to Brett Levin for the patch.
 * Fixed xxdiff-cond-replace with zero arguments.
+
+
+Version 3.0.4: (minor bug fixes)
+--------------------------------
+
+* Fixed crash for redo diff [ 1061364 ].
 
 
 Version 3.0.3: (minor bug fixes)

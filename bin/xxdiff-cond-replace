@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #******************************************************************************\
 #* $Source$
-#* $Id: xxdiff-cond-replace 798 2004-11-03 22:53:39Z blais $
-#* $Date: 2004-11-03 17:53:39 -0500 (Wed, 03 Nov 2004) $
+#* $Id: xxdiff-cond-replace 857 2005-10-22 18:32:00Z blais $
+#* $Date: 2005-10-22 14:32:00 -0400 (Sat, 22 Oct 2005) $
 #*
 #* Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>
 #*
@@ -60,7 +60,7 @@ Notes
 
 """
 
-__version__ = "$Revision: 798 $"
+__version__ = "$Revision: 857 $"
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.3']
 __copyright__ = """Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>.
@@ -83,7 +83,9 @@ tmpprefix = '%s.' % basename(sys.argv[0])
 #-------------------------------------------------------------------------------
 #
 def backup( fn, opts ):
-    """Compute backup filename and copy backup file."""
+    """
+    Compute backup filename and copy backup file.
+    """
 
     if opts.backup_type == 'parallel':
         fmt = '%s.bak.%d'
@@ -111,6 +113,9 @@ def backup( fn, opts ):
 #-------------------------------------------------------------------------------
 #
 def cc_checkout(fn, opts):
+    """
+    Checkout the file from ClearCase.
+    """
     if not opts.silent:
         print 'Checking out the file'
     os.system('cleartool co -nc "%s"' % fn)
@@ -118,8 +123,9 @@ def cc_checkout(fn, opts):
 #-------------------------------------------------------------------------------
 #
 def cond_replace( origfile, modfile, opts ):
-
-    """Spawn xxdiff and perform the replacement if confirmed."""
+    """
+    Spawn xxdiff and perform the replacement if confirmed.
+    """
 
     if opts.diff:
         print '=' * 80

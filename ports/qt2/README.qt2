@@ -1,0 +1,29 @@
+============================
+  Build xxdiff with qt-2.x
+============================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2005-06-03
+:Abstract:
+
+   Notes on how to build xxdiff with old versions of qt.
+
+
+Building against qt-2.x (e.g. RedHat Advanced Server)
+-----------------------------------------------------
+
+As of version 3.0, xxdiff was back ported to compile with qt2 for RedHat AS (and
+I supposed for all people with old version of qt).  A very small amount of minor
+features has been disabled for that to work.  The affected features are:
+
+- qt style (look and feel provided by qt)
+- font name conversions
+- printing the time in the filename title format string
+
+To build it, first copy the files under .../src/qt2 into .../src like this::
+
+   cd xxdiff/src ; cp qt2/* .
+
+Then go about compiling xxdiff the normal way (described above, basically,
+tmake, make).
+

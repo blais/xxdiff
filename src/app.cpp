@@ -3284,6 +3284,9 @@ void XxApp::diffFilesAtCursor()
 
       if ( filenames.count() == 1 ) {
          command += QString(" --single ");
+         // FIXME: it would be nice here to be able to say that the file should
+         // display on the right side if this is an insert hunk in a directory
+         // diff.
       }
 
       const char** args;

@@ -27,7 +27,11 @@ if [ -z "$QTDIR" ]; then
 fi
 
 cd src
+%ifarch x86_64
+tmake xxdiff.pro | sed s+X11R6/lib+X11R6/lib64+ > Makefile
+%else
 tmake xxdiff.pro > Makefile
+%endif
 
 # Copy files for qt2 if necessary.
 if ! grep -q 'define.*QT_VERSION.*0x03' ${QTDIR}/include/qglobal.h ; then 

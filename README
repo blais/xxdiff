@@ -1,6 +1,6 @@
-================================================================
-xxdiff: Graphical File And Directories Comparator And Merge Tool
-================================================================
+====================================================================
+  xxdiff: Graphical File And Directories Comparator And Merge Tool
+====================================================================
 
 .. contents:: Table of Contents
 
@@ -100,7 +100,7 @@ creative ways.  The author has been using these for a long time now and decided
 for version 3.0 to clean them up and make them a little more generic so everyone
 can use them.
 
-- `xxdiff-conf-replace <doc/xxdiff-cond-replace.html>`_: conditional to a user's
+- `xxdiff-cond-replace <doc/xxdiff-cond-replace.html>`_: conditional to a user's
   acceptance (or merge decision), replace an original file by a new file
   (typically the result of some external process). This is useful in shell
   loops, a general purpose interactive conditional copy operation;
@@ -128,9 +128,9 @@ can use them.
 - `xxdiff-cvs-diff <doc/xxdiff-cvs-diff.html>`_: preview CVS changes and if
   desired accept/reject changes to commit individually;
 
-.. - `xxdiff-subversion <doc/xxdiff-subversion.html>`_: wrapper for xxdiff
-..   that you can use to set the diff-cmd and diff3-cmd user configuration
-..   values for `subversion <http://subversion.tigris.org>`_.
+- `xxdiff-subversion <doc/xxdiff-subversion.html>`_: wrapper for xxdiff that you
+  can use to set the diff-cmd and diff3-cmd user configuration values for
+  `subversion <http://subversion.tigris.org>`_.
 
 
 Working versions and help files for `scripts that support configuration
@@ -146,8 +146,11 @@ the relevant pages.  The author does not publish binaries anymore.
 - `Linux / Debian package <http://www.sourcepole.ch/sources/software/xxdiff/>`_
   (provided by Tomas Pospisek)
 
-- `Linux / Mandrake package <http://www.geek.co.il/RPMS/xxdiff>`_ (maintained by
-  Oded Arbel)
+- `Linux / Mandrake package (1) <http://www.geek.co.il/RPMS/xxdiff>`_
+  (maintained by Oded Arbel)
+
+- `Linux / Mandrake package (2) <http://www.roberto.foglietta.name/pub/xxdiff>`_
+  (maintained by Roberto A. Foglietta)
 
 - `Linux / Gentoo port <http://www.gentoo.org/dyn/pkgs/dev-util/xxdiff.xml>`_
   (in the dev-utils category)
@@ -201,7 +204,7 @@ External Links
 
 - `SourceForge Project Page <http://sourceforge.net/projects/xxdiff>`_
 
-- `Freshmeat Application Index <http://www.freshmeat.net/projects/xxdiff>`_
+- `Freshmeat Application Index <http://freshmeat.net/projects/xxdiff>`_
 
 - `Open Source Directory (OSDir) application index
   <http://www.osdir.com/Downloads-req-viewdownloaddetails-lid-402-ttitle-xxdiff.html>`_

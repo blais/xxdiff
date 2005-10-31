@@ -1,0 +1,165 @@
+============================
+  Build xxdiff for Windows
+============================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2005-06-03
+:Abstract:
+
+   Notes on how to build xxdiff for Windows.
+
+Note
+----
+
+There is a buggy but mostly working build available from the download area.
+
+
+Building under Windows
+----------------------
+
+This has been done with success by one of my users (suamor at
+sourceforge.net).
+
+Here is what I was advising before his contribution:
+
+- install Cygwin
+- install qt non-commercial version
+- use nmake.exe
+- you'll have to hack the makefile produced by tmake, it's not working.
+- you'll have to add DEFINES += QT_DLL to the compilation options
+
+I think this is how he compiled it:
+
+- try using contrib/xxdiff.pro.windows, and run qmake on it
+- tweak until it works.
+
+Please refrain from asking Windows-related questions to me, it's and
+endless, complicated task, and frankly, unless you've already figured
+out the problems I'm not really interested. I don't even have a
+Windows box to test it on and I probably won't have one for a good
+while (hopefully I'll never have to have one). If you want to compile
+under Windows, you've got to be somewhat of a hacker, and then I'm
+sure you don't need me for that. You're on your own. Besides, I
+wouldn't have the answer anyway. I have already wasted countless hours
+trying to make this work under Windows, and although I was pretty damn
+close, I never quite finished it. Maybe the tools will mature and it
+will be easier one day.
+
+However, I will happily include any contributions in the source tree
+that would help others make this happen.
+
+
+Yaakov Selkowitz (2004-02-10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+About xxdiff port to cygwin::
+
+  I wanted to let you know that the current version of your xxdiff program
+  has been ported to Cygwin, with Qt 3.2.3 (gcc3, from the KDE-Cygwin
+  project).  It is available at my cygwin-ports project on sf.net.
+
+  I noted that in your README.build file is somewhat outdated in respect
+  to Cygwin.  xxdiff builds fine with gcc-3.3.1, and in general should
+  build on Cygwin 1.5.x with the current Qt3 as if on *NIX.
+
+  For now tmake needs to be downloaded from trolltech, as I haven't
+  packaged it yet.  TMAKEPATH will need to be set, of course.
+
+  In any case, I have used xxdiff a number of times and it has been
+  working quite well.  Thank you for your work on this program!
+
+  Yaakov
+  cygwin-ports maintainer
+
+
+Alexandre Feblot writes:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hi, I enjoy (means can't deal without) xxdiff, since I don't work
+anymore on SGI were I loved xdiff.  This week end, I compiled it under
+win XP / Cygwin. This is the way I did it, if you want to add this in
+your README.
+
+Cheers.
+
+Alexandre F.
+
+
+Needs:
+- binary, gcc2 compiled qt-3.0.4 (qt_304_b1.tar.bz2)
+  from http://sourceforge.net/projects/kde-cygwin
+- tmake > 1.7 (www.trolltech.com)
+- gcc-2 (v2.95.3 for me): anyway, xxdiff doesn't compile with gcc 3.3.1
+
+
+Do this:
+- setenv TMAKEPATH /home/alex/tmake-1.11/lib/cygwin-g++
+- setenv QTDIR /home/alex/qt3
+
+- The Qt lib seems to have been compiled without large file option,
+  leading to undefined symbols. -> patch the standard includes just
+  for the compilation time:
+
+  - /usr/include/cygwin/config.h  Put into comment::
+
+      #define __LARGE64_FILES 1
+      #define __CYGWIN_USE_BIG_TYPES__ 1
+
+  - /usr/include/sys/config.h  Put into comment::
+
+      #define __LARGE64_FILES 1
+
+- cd xxdiff-2.9.2/src
+
+- xxdiff.pro patch to be used with tmake 1.11.
+  Put into comment::
+
+      linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+      osf1-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+      (these lines caused tmake syntax errors for me)
+
+- /home/alex/tmake-1.11/bin/tmake xxdiff.pro > Makefile
+
+- Correct the generated makefile:
+
+  - replace gcc2 with gcc-2  in CC definition
+    doesn't compile with gcc 3.3.1)
+  - remove -DQT_THREAD_SUPPORT in CFLAGS and CXXFLAGS definition
+  - replace -lqt-mt with -lqt, and remove -lpthread in LIBS definition
+    (qt_304_b1.tar.bz2 doesn't contain the multithread version of Qt lib)
+
+- make
+
+- add qt-3.dll in the path::
+
+     setenv PATH "$PATH":$QTDIR/bin
+
+* enjoy.
+  and remember to get back the standard includes to their original state.
+
+Note:  xxdiff.pro.windows used with qmake just creates a mess which
+doesn't compile:
+
+ - missing include paths -> undefined functions
+ - no flex and bison compilation handling
+ - ...
+
+
+
+Building under .NET
+-------------------
+
+Adam Zell (zellster) writes:
+
+To build xxdiff with Microsoft Visual Studio .NET, the following
+changes are needed:
+
+1) Copy win32-msvc rules and rename them win32-msvc.net.
+2) Add -EHsc to compiler flags.
+3) Uncomment out /NODEFAULTLIBS ...
+4) Comment out the min, max, and getenv definitions in winfixes/winfixes.h.
+
+The resulting executable will link, but will fail at run-time inside
+of Qt.  If you can make it work, please contact me and I will include
+the necessary fixes.
+

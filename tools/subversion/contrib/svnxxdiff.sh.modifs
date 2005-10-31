@@ -1,0 +1,45 @@
+Date: Fri, 9 Sep 2005 12:07:08 +0100
+From: Jim Lawton <jim.lawton@gmail.com>
+Reply-To: jim.lawton@gmail.com
+To: blais@furius.ca
+Subject: svnxxdiff
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
+
+Hi Martin,
+
+Firstly, I must say thank you for xxdiff which I've been using for years, 
+it is an excellent tool!
+
+Secondly, thanks for  the svnxxdiff script. I've attached a slightly updated 
+version of this that puts more descriptive titles into the left and right panes.
+I suppose one could do somthing similar with title3 in the case of a merge
+operation, but I haven't got around to trying that out yet. 
+
+/regards/jim
+
+#!/bin/sh
+
+if [ x$SVN_XXDIFF = x ]
+then
+        case "$0" in */*) cmd="$0";; *) cmd="./$0";; esac
+
+        SVN_XXDIFF=1; export SVN_XXDIFF
+        exec svn diff --diff-cmd "$cmd" "$@"
+        exit 1
+fi
+
+fail () { echo $0: "$@" >&2; sleep 2; }
+
+[ x"$7" = x ] && fail Required file argument"(s)" missing.
+[ -f "$7"  ] || fail $7: Not a file.
+
+echo "***" Executing xxdiff "$6" "$7"
+echo "***" Press Ctrl-C in this window to break all following diffs.
+echo "***" Note, you can edit the file you are diffing and then rediff
+echo "***" it with the original by pressing Ctrl-R on xxdiff window.
+
+exec xxdiff --title1 "$3" --title2 "$5" "$6" "$7"
+
