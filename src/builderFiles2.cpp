@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: builderFiles2.cpp 479 2002-02-07 06:38:35Z  $
+ * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -122,7 +122,11 @@ bool parseDiffLine(
       type = XxLine::INSERT_2;
       error = false;
    }
-   // else
+   else if ( strncmp( buf, "\\ No newline at end of file", 27 ) == 0 ) {
+      type = XxLine::DIRECTORIES; /* Ignore this line. */
+      error = false;
+   }
+
    return error;
 }
 
@@ -345,6 +349,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
             XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
          } break;
 
+         /* Used to ignore a line */
+         case XxLine::DIRECTORIES: {
+         } break;
+
          case XxLine::DIFF_1:
          case XxLine::DIFF_2:
          case XxLine::DIFF_3:
@@ -354,10 +362,12 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          case XxLine::INSERT_3:
          case XxLine::DIFFDEL_1:
          case XxLine::DIFFDEL_2:
-         case XxLine::DIFFDEL_3:
-         case XxLine::DIRECTORIES: {
+         case XxLine::DIFFDEL_3: {
          }
 
+         case XxLine::NB_TYPES: {
+            XX_ABORT();
+         }
       }
    }
    qfout.close();

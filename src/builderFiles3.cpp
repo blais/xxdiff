@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles3.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: builderFiles3.cpp 479 2002-02-07 06:38:35Z  $
+ * $Date: 2002-02-07 01:38:35 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -283,6 +283,10 @@ bool parseDiffLine(
          } break;
       }
       checkForCompletion = true;
+      error = false;
+   }
+   else if ( strncmp( buf, "\\ No newline at end of file", 27 ) == 0 ) {
+      XX_LOCAL_TRACE( "recognized incomplete line marker" );
       error = false;
    }
    else {

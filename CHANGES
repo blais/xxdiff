@@ -2,8 +2,22 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 431 2001-11-30 02:24:05Z  $
+# $Id: CHANGES 479 2002-02-07 06:38:35Z  $
 #
+
+Version 2.0.4: (bug-fix release)
+------------------------------
+
+We want the 2.0 branch to be absolutely stable, and not being able to parse
+rarely occuring incomplete lines is unacceptable, so this bug fix alone warrants
+this release.
+
+(Bug Fixes)
+
+   * Included bug fix for not parsing incomplete lines. The incomplete line
+     marker line inserted by diff had been overlooked in the parser and would
+     cause an error dialog and no diffs display. Incomplete lines don't occur
+     often, but this is nevertheless an important bug.
 
 Version 2.0.3: (portability release)
 ------------------------------
