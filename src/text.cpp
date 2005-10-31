@@ -333,6 +333,8 @@ void XxText::drawContents( QPainter* pp )
       resources.getHordiffBuffers( hbuffer0, hbuffer1 );
    XX_ASSERT( hbuffer0 && hbuffer1 );
 
+   const bool perHunkWsEnabled = resources.getBoolOpt( BOOL_IGNORE_PERHUNK_WS );
+
    uint irenline = 0;
    XxDln icurline = topLine;
 
@@ -444,7 +446,11 @@ void XxText::drawContents( QPainter* pp )
       else {
          // Set background and foreground colors.
          line.getLineColorType(
-            resources.getIgnoreFile(), renNo, idtype, idtypeSup
+            resources.getIgnoreFile(),
+            renNo,
+            idtype,
+            idtypeSup,
+            perHunkWsEnabled
          );
       }
 
@@ -612,6 +618,15 @@ void XxText::drawContents( QPainter* pp )
                XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
                backBrush
             );
+
+            if ( resources.getBoolOpt( BOOL_DRAW_PATTERN_IN_FILLER_LINES ) ) {
+               QBrush patBrush( bcolor.dark( 120 ), Qt::DiagCrossPattern );
+               p.fillRect(
+                  XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
+                  patBrush
+               );
+            }
+
             y += fm.lineSpacing();
          }
          else { 

@@ -64,6 +64,62 @@ int outputLine(
    return 0;
 }
 
+//------------------------------------------------------------------------------
+//
+inline int fillBufWithChars(
+   const XxDiffs& diffs,
+   const XxFno    fno,
+   XxDln&         l1,
+   uint&          c1,
+   const char*&   t1,
+   uint&          len1,
+   char*          buf1,
+   bool&          done1,
+   XxBuffer&      buffer,
+   XxLine::Type   ctype
+)
+{
+#define COMPBUFSIZE 40
+
+   int nbc1 = 0;
+   while ( 1 ) {
+
+      while ( c1 < len1 && nbc1 < COMPBUFSIZE ) {
+         const char c = t1[c1++];
+         if ( !isspace( c ) ) {
+            buf1[nbc1++] = c;
+         }
+      }
+
+      if ( nbc1 == COMPBUFSIZE ) {
+         break;
+      }
+
+      // Change line.
+      ++l1;
+      if ( l1 > diffs.getNbLines() ) {
+         buf1[nbc1] = 0; // finished.
+         c1 = len1 = 0;
+         done1 = true;
+         break;
+      }
+
+      const XxLine& cline = diffs.getLine( l1 );
+      XxFln fl1 = cline.getLineNo( fno );
+      if ( diffs.getLine( l1 ).getType() != ctype || fl1 == -1 ) {
+         buf1[nbc1] = 0; // finished.
+         c1 = len1 = 0;
+         done1 = true;
+         break;
+      }
+
+      t1 = buffer.getTextLine( fl1, len1 );
+      c1 = 0;
+   }
+
+   return nbc1;
+}
+
 }
 
 XX_NAMESPACE_BEGIN
@@ -1366,7 +1422,6 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    return wasJoin;
 }
 
-
 //------------------------------------------------------------------------------
 //
 void XxDiffs::initializeHorizontalDiffs(
@@ -1680,76 +1735,161 @@ void XxDiffs::reindex(
    }
 }
 
-
 //------------------------------------------------------------------------------
 //
-void XxDiffs::applyPerHunkDisplayIgnore( const int /*nbFiles*/ )
+void XxDiffs::computeIgnoreDisplay(
+   const int                      nbFiles,
+   const std::auto_ptr<XxBuffer>* files
+)
 {
-#if 0 
-   if ( nbFiles == 2 ) {
+   XxDln lineNo = 1;
+   while ( 1 ) {
+      lineNo = findNextDifference( lineNo );
+      if ( lineNo == -1 ) {
+         break;
+      }
 
-      // Seek to next difference.
-      XxDln lineNo = 1;
+      const XxLine& cline = getLine( lineNo );
+      const XxLine::Type ctype = cline.getType();
+      if ( nbFiles == 2 ) {
+         if ( ctype != XxLine::DIFF_ALL ) {
+            continue;
+         }
+      }
+      else { 
+         XX_ASSERT( nbFiles == 3 );
+         
+         if ( ctype != XxLine::DIFF_ALL && 
+              ctype != XxLine::DIFF_1 &&
+              ctype != XxLine::DIFF_2 &&
+              ctype != XxLine::DIFF_3 && 
+              ctype != XxLine::DIFFDEL_1 &&
+              ctype != XxLine::DIFFDEL_2 &&
+              ctype != XxLine::DIFFDEL_3 ) {
+            continue;
+         }
+      }
 
-      while ( lineNo <= getNbLines() ) {
+      //
+      // Check just this hunk for ignore-display.
+      //
+      // We use temporary, fixed-size buffers for performing the text
+      // comparisons without whitespace because if requires much many less
+      // branches, which should be more efficient.
+      //
 
+      char buf1[ COMPBUFSIZE ];
+      char buf2[ COMPBUFSIZE ];
+
+      XxDln l1 = lineNo;
+      XxFln fl1 = cline.getLineNo( 0 );
+      uint c1 = 0;
+      uint len1;
+      const char* t1 = files[0]->getTextLine( fl1, len1 );
+
+      XxDln l2 = lineNo;
+      XxFln fl2 = cline.getLineNo( 1 );
+      uint c2 = 0;
+      uint len2;
+      const char* t2 = files[1]->getTextLine( fl2, len2 );
+
+      bool different = false;
+      bool done1 = false;
+      bool done2 = false;
+
+      if ( nbFiles == 2 ) {
+
+         while ( !different && !done1 && !done2 ) {
+
+            //
+            // Fill up the non-ws comparison buffers.
+            //
+            int nbc1 = fillBufWithChars(
+               *this, 0, l1, c1, t1, len1, buf1, done1, *(files[0]), ctype
+            );
+
+            int nbc2 = fillBufWithChars(
+               *this, 1, l2, c2, t2, len2, buf2, done2, *(files[1]), ctype
+            );
+
+            //
+            // Here our two buffers should be full or null-terminated.
+            // Perform the comparison of the buffers.
+            //
+            if ( nbc1 != nbc2 ) {
+               different = true;
+            }
+            else { 
+               for ( int ii = 0; ii < nbc1; ++ii ) {
+                  if ( buf1[ii] != buf2[ii] ) {
+                     different = true;
+                     break;
+                  }
+               }
+            }
+         }
+
+      }
+      else {
+         XX_CHECK( nbFiles == 3 );
+
+         char buf3[ COMPBUFSIZE ];
+
+         XxDln l3 = lineNo;
+         XxFln fl3 = cline.getLineNo( 2 );
+         uint c3 = 0;
+         uint len3;
+         const char* t3 = files[2]->getTextLine( fl3, len3 );
+
+         bool done3 = false;
+
+         while ( !different && !done1 && !done2 ) {
+
+            //
+            // Fill up the non-ws comparison buffers.
+            //
+            int nbc1 = fillBufWithChars(
+               *this, 0, l1, c1, t1, len1, buf1, done1, *(files[0]), ctype
+            );
+
+            int nbc2 = fillBufWithChars(
+               *this, 1, l2, c2, t2, len2, buf2, done2, *(files[1]), ctype
+            );
+
+            int nbc3 = fillBufWithChars(
+               *this, 2, l3, c3, t3, len3, buf3, done3, *(files[2]), ctype
+            );
+
+            //
+            // Here our two buffers should be full or null-terminated.
+            // Perform the comparison of the buffers.
+            //
+            if ( nbc1 != nbc2 || nbc1 != nbc3 ) {
+               different = true;
+            }
+            else { 
+               for ( int ii = 0; ii < nbc1; ++ii ) {
+                  if ( buf1[ii] != buf2[ii] || buf1[ii] != buf3[ii] ) {
+                     different = true;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+
+      if ( !different ) {
          while ( lineNo <= getNbLines() ) {
-            const XxLine& line = getLine( lineNo );
-            if ( line.getType() == XxLine::DIFF_ALL ) {
+            XxLine& line = getLineNC( lineNo );
+            if ( line.getType() != ctype ) {
                break;
             }
-            lineNo++;
-         }
-         
-         if ( lineNo >= getNbLines() ) {
-            break;
-         }
-
-         // Do this region.
-         XxDln regNo = lineNo;
-         
-
-
-         // Skip current region.
-         while ( lineNo <= getNbLines() ) {
-            const XxLine& line = getLine( lineNo );
-            if ( line.getType() != XxLine::DIFF_ALL ) {
-               break;
-            }
-            lineNo++;
+            line.setIgnoreDisplay( true );
+            ++lineNo;
          }
       }
-         
-      
+
    }
-#endif
-
-#if 0 
-
-
-      if ( lineNo > getNbLines() ) {
-         return -1;
-      }
-
-
-
-   return cur;
-
-
-   int count = 0;
-   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
-      XxLine& line = getLineNC( ii );
-
-      if ( line.getType() == XxLine::DIFF_ALL ) {
-         XX_TRACE( "sjhshds" );
-         line.setIgnoreDisplay( true );
-         ++count;
-         if ( count == 10 ) {
-            break;
-         }
-      }
-   }
-#endif
 }
 
 XX_NAMESPACE_END

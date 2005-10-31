@@ -269,6 +269,7 @@ public slots:
    void hordiffTypeMultiple();
    void hordiffTypeUpdate();
    void toggleIgnoreHorizontalWs();
+   void toggleIgnorePerHunkWs();
    void toggleFormatClipboardText();
    void ignoreFileNone();
    void ignoreFileLeft();

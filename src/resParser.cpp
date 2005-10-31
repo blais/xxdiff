@@ -189,6 +189,11 @@ StringToken boolkwdList[] = {
    { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS, 
      "Ignore horizontal whitespace in horizontal diffs." },
 
+   { "IgnorePerHunkWhitespace", IGNORE_PERHUNK_WS, 
+     "For each hunk, ignore hunk if there are only whitespace and line break \
+changes within that hunk. This can be useful for ignoring code reformatting \
+for certain source code languages that allow it (e.g. C++)." },
+
    { "FormatClipboardText", FORMAT_CLIPBOARD_TEXT, 
      "Enables clipboard (copy-paste) formatting.  If disable, text that goes \
 in the clipboard is simply left unformatted." },
@@ -201,6 +206,11 @@ in the clipboard is simply left unformatted." },
 
    { "DisableCursorDisplay", DISABLE_CURSOR_DISPLAY, 
      "Disables displaying the line cursor." },
+
+   { "DrawPatternInFillerLines", DRAW_PATTERN_IN_FILLER_LINES, 
+     "Some people like to have a pattern drawn for filler lines to make it \
+really dead obvious that they are not real lines, but just inserted for \
+display purpose. This setting enables it." },
 
    { "HideCarriageReturns", HIDE_CR, 
      "Hides CR characters found in files created under DOS/Windows." },
@@ -237,10 +247,12 @@ XxBoolOpt boolMap[] = {
    BOOL_EXIT_IF_NO_CONFLICTS,
    BOOL_SELECT_MERGE,
    BOOL_IGNORE_HORIZONTAL_WS,
+   BOOL_IGNORE_PERHUNK_WS,
    BOOL_FORMAT_CLIPBOARD_TEXT,
    BOOL_IGNORE_ERRORS,
    BOOL_WARN_ABOUT_UNSAVED,
    BOOL_DISABLE_CURSOR_DISPLAY,
+   BOOL_DRAW_PATTERN_IN_FILLER_LINES,
    BOOL_HIDE_CR,
    BOOL_DIRDIFF_IGNORE_FILE_CHANGES,
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
@@ -337,6 +349,7 @@ StringToken accelList[] = {
    { "HorizontalDiffSingle", ACCEL_HORDIFF_SINGLE, 0 },
    { "HorizontalDiffMultiple", ACCEL_HORDIFF_MULTIPLE, 0 },
    { "ToggleIgnoreHorizontalWhitespace", ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS, 0 },
+   { "ToggleIgnorePerHunkWhitespace", ACCEL_TOGGLE_IGNORE_PERHUNK_WS, 0 },
    { "ToggleFormatClipboardText", ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT, 0 },
    { "IgnoreFileNone", ACCEL_IGNORE_FILE_NONE, 0 },
    { "IgnoreFileLeft", ACCEL_IGNORE_FILE_LEFT, 0 },

@@ -62,17 +62,19 @@
 %token <num> EXIT_IF_NO_CONFLICTS         1001
 %token <num> SELECT_MERGE                 1002
 %token <num> IGNORE_HORIZONTAL_WS         1003
-%token <num> FORMAT_CLIPBOARD_TEXT        1004
-%token <num> IGNORE_ERRORS                1005
-%token <num> WARN_ABOUT_UNSAVED           1006
-%token <num> DISABLE_CURSOR_DISPLAY       1007
-%token <num> HIDE_CR                      1008
-%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1009
-%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1010
-%token <num> DIRDIFF_RECURSIVE            1011
-%token <num> USE_INTERNAL_DIFF            1012
+%token <num> IGNORE_PERHUNK_WS            1004
+%token <num> FORMAT_CLIPBOARD_TEXT        1005
+%token <num> IGNORE_ERRORS                1006
+%token <num> WARN_ABOUT_UNSAVED           1007
+%token <num> DISABLE_CURSOR_DISPLAY       1008
+%token <num> DRAW_PATTERN_IN_FILLER_LINES 1009
+%token <num> HIDE_CR                      1010
+%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1011
+%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1012
+%token <num> DIRDIFF_RECURSIVE            1013
+%token <num> USE_INTERNAL_DIFF            1014
 /* XX_ENABLE_SAVE_MERGED_FILE */
-/* %token <num> FORCE_SAVE_MERGED_FILE       1013 */
+/* %token <num> FORCE_SAVE_MERGED_FILE       1015 */
 
 /* Note: check that we do not exceed maximum in resParser.cpp */
 
@@ -234,10 +236,12 @@ boolkwd		: EXIT_ON_SAME
 		| EXIT_IF_NO_CONFLICTS
 		| SELECT_MERGE
 		| IGNORE_HORIZONTAL_WS
+		| IGNORE_PERHUNK_WS
 		| FORMAT_CLIPBOARD_TEXT
 		| IGNORE_ERRORS
 		| WARN_ABOUT_UNSAVED
 		| DISABLE_CURSOR_DISPLAY
+		| DRAW_PATTERN_IN_FILLER_LINES
 		| HIDE_CR
 		| DIRDIFF_IGNORE_FILE_CHANGES
 		| DIRDIFF_BUILD_FROM_OUTPUT

@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 574 2002-05-30 13:35:29Z blais $
+# $Id: TODO 589 2002-08-06 19:59:54Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -13,15 +13,21 @@ Goals for 3.0 stable release:
 ------------------------------
 
    * Multiple horizontal diffs support (***DONE in 2.1).
-   * CVS unmerge conflicts feature (***DONE in 2.4).
-   * Save merged results feature (***DONE in 2.3).
    * Merged view pane display (***DONE in 2.2).
+   * Save merged results feature (***DONE in 2.3).
+   * CVS unmerge conflicts feature (***DONE in 2.4).
    * Do not use temporary files for stdin input anymore (***DONE in 2.5).
-   * Finish scrollbars resizing for paned merged view.
    * Support ignore-blank-lines (***DONE in 2.6)
-   * Display-ignore related features (e.g. per-hunk ws ignore).
+   * Qt-3.0 port (***DONE in 2.6).
+   * Display-ignore related features (***DONE in 2.7).
+
+
+   * Finish scrollbars resizing for paned merged view.
+
+Goals for 4.0 stable release:
+------------------------------
+
    * Some dirdiff improvements (exclude).
-   * Qt-3.0 port (**DONE in 2.6).
    * Windows port using Qt non-commercial license (almost done, doesn't
      link).
    * Improve error recovery in rcfile parsing.
@@ -30,23 +36,42 @@ Goals for 3.0 stable release:
 --------------------------------------------------------------------------------
 Tasks: current tasks
 
+   * xxdiff --version now results in the following error msg from Qt:
+      Mutex destroy failure: Device or resource busy
+     fix it. this doesn't seem to have other implications.
+
+
+(Split swap join improvements)
+
+   * Michael idea: split swap join where the cursor line is located
+
+(Urgent)
+
+   * Update documentation with this version.
+
+   * Make per-hunk display ignore toggleable
+
+//   * ./xxdiff mine util.h app.h Segfaults!!!! fix this??!
+// i think i just fixed it already
+
+
+   * XxText should accept() or ignore() its events.
+
+   * When in unmerge mode, saveAsMerge feature initializes merge file name as 01234567.
+
+   * Add format for filename label as well, useful for making merge comments.
+
+   * Invert logic of "Remove Empty Conditionals", that should be the default.
+
 
 (Per-hunk Ignore Whitespace)
 
-   * Add colors and line type for display-ignored type, defaults should be close
-     to SAME color
+   * Not sure that the split-swap-join vs. ignore-display behaviour is correct,
+     perhaps should become green anyway when split?
 
-   * Ignore horizontal whitespace option should make simple SAME lines almost
-     'SAME' color.  (i.e. if there are only whitespace differences, almost
-     ignore it!)
+   * Maybe we can use the horizontal diffs computation to speed up the per-hunk ws?
 
-   * Implement "per-line display-ignore whitespace" (easy, check bounds of
-     result from horizontal diffs)
-
-   * "Per-hunk ignore whitespace" (ignores whitespace if a hunk's non-whitespace
-     chars are all the same... this should allow filtering out most code
-     re-indentation and such).  Newlines have to match (but you can skip some).
-
+   * Implement partial hunk ignore ws, newlines have to match (but you can skip some).
 
 
 
@@ -59,21 +84,19 @@ Tasks: current tasks
 
 (Misc)
 
+   * Some of our display algorithms allow the user to effectively ignore certain
+     hunks. If all diff hunks are ignored by our display algorithms, could we
+     prevent xxdiff from even showing up at all? And if we do want it to remain
+     visible anyway, I think we should somehow put markers indicating at least
+     where whitespace changes occur anyway, in the margin or something, just to
+     be able to figure out if a file really does has some [whitespace] changes
+     or nothing at all.
+
    * The cursor is not restricted by scrolling using the scrollbars anymore!!!
-
-
-
-   * Implement per-hunk ignore!!!
-
-
-
 
    * When pasting to the clipboard, turn tabs into spaces, for much better
      results when pasting! remember, the clipboard formatting can otherwise
      change it.
-
-
-
 
    * Paned view problem, the hash pattern that is drawn is not cleared before it
      is drawn, switch workspaces with paned view and you'll see immediately.

@@ -134,6 +134,7 @@ enum MenuIds {
    ID_Hordiff_Single,
    ID_Hordiff_Multiple,
    ID_ToggleIgnoreHorizontalWs,
+   ID_ToggleIgnorePerHunkWs,
    ID_ToggleFormatClipboardText,
    ID_ToggleIgnoreTrailing,
    ID_ToggleIgnoreWhitespace,
@@ -361,6 +362,9 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
+         if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+            _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+         }
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
    }
@@ -1403,9 +1407,12 @@ void XxApp::createMenus()
       
       _menuids[ ID_ToggleIgnoreHorizontalWs ] = _displayMenu->insertItem( 
          "Ignore horizontal whitespace", this, SLOT(toggleIgnoreHorizontalWs()),
-         _resources->getAccelerator( 
-            ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS
-         )
+         _resources->getAccelerator( ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS )
+      );
+
+      _menuids[ ID_ToggleIgnorePerHunkWs ] = _displayMenu->insertItem( 
+         "Ignore per-hunk whitespace", this, SLOT(toggleIgnorePerHunkWs()),
+         _resources->getAccelerator( ACCEL_TOGGLE_IGNORE_PERHUNK_WS )
       );
       
       _menuids[ ID_ToggleHideCarriageReturns ] = _displayMenu->insertItem( 
@@ -1804,8 +1811,9 @@ bool XxApp::processDiff()
    //
    // Compute ignore-display algorithms on top of the diff process.
    //
+   // FIXME make toggleable, add resource
    if ( _diffs.get() != 0 ) {
-      _diffs->applyPerHunkDisplayIgnore( _nbFiles );
+      _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
    }
 
    //
@@ -2154,7 +2162,8 @@ void XxApp::editFile( const QString& filename )
 
       /* set socket reuse. */
       int reuse = 1;
-      ::setsockopt( _sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int) );
+      ::setsockopt( _sockfd, SOL_SOCKET, SO_REUSEADDR,
+                    (const char*)&reuse, sizeof(int) );
 
       struct sockaddr_un name;
       size_t size;
@@ -2301,6 +2310,9 @@ void XxApp::openFile( const XxFno no )
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
+         if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+            _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+         }
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
 
@@ -2402,6 +2414,9 @@ void XxApp::onRedoDiff()
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
+         if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+            _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+         }
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
       }
 
@@ -3584,6 +3599,21 @@ void XxApp::toggleIgnoreHorizontalWs()
 
 //------------------------------------------------------------------------------
 //
+void XxApp::toggleIgnorePerHunkWs()
+{
+   _resources->toggleBoolOpt( BOOL_IGNORE_PERHUNK_WS );
+
+   if ( _diffs.get() != 0 ) {
+      if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+         _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+      }
+      updateWidgets();
+   }
+   synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxApp::toggleFormatClipboardText()
 {
    _resources->toggleBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT );
@@ -3800,6 +3830,10 @@ void XxApp::synchronizeUI()
       _displayMenu->setItemChecked( 
          _menuids[ ID_ToggleIgnoreHorizontalWs ],
          _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS )
+      );
+      _displayMenu->setItemChecked( 
+         _menuids[ ID_ToggleIgnorePerHunkWs ],
+         _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS )
       );
       _displayMenu->setItemChecked( 
          _menuids[ ID_ToggleHideCarriageReturns ],

@@ -82,7 +82,9 @@ void XxResources::initialize()
    initializeOriginalXdiff();
 
    _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = false;
+   _boolOpts[ BOOL_IGNORE_PERHUNK_WS ] = false;
    _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = true;
+   _boolOpts[ BOOL_DRAW_PATTERN_IN_FILLER_LINES ] = true;
 
    _showOpts[ SHOW_OVERVIEW ] = true;
    _showOpts[ SHOW_FILENAMES ] = true;
@@ -219,10 +221,10 @@ void XxResources::initializeOriginalXdiff()
       setFbColors( COLOR_SELECTED               , "plum", "black" );
       setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
                                                 
-      setFbColors( COLOR_IGNORE_DISPLAY         , "grey", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey70", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey70", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY         , "grey85", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey80", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey80", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey80", "black" );
 
       setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
       setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
@@ -253,11 +255,13 @@ void XxResources::initializeOriginalXdiff()
    _boolOpts[ BOOL_EXIT_ON_SAME ] = false;
    _boolOpts[ BOOL_EXIT_IF_NO_CONFLICTS ] = false;
    _boolOpts[ BOOL_SELECT_MERGE ] = false;
-   _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = true;
+   _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = true; // FIXME is this right?
+   _boolOpts[ BOOL_IGNORE_PERHUNK_WS ] = false;
    _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = false;
    _boolOpts[ BOOL_IGNORE_ERRORS ] = false;
    _boolOpts[ BOOL_WARN_ABOUT_UNSAVED ] = false;
    _boolOpts[ BOOL_DISABLE_CURSOR_DISPLAY ] = false;
+   _boolOpts[ BOOL_DRAW_PATTERN_IN_FILLER_LINES ] = false;
    _boolOpts[ BOOL_HIDE_CR ] = false;
    _boolOpts[ BOOL_DIRDIFF_IGNORE_FILE_CHANGES ] = false;
    _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;

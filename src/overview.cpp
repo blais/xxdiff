@@ -151,6 +151,8 @@ void XxOverview::drawContents( QPainter* pp )
    int fileWidth = resources.getOverviewFileWidth();
    int sepWidth = resources.getOverviewSepWidth();
 
+   const bool perHunkWsEnabled = resources.getBoolOpt( BOOL_IGNORE_PERHUNK_WS );
+
    // Draw the file boxes.
    QPen pen;
    pen.setColor( Qt::black );
@@ -210,7 +212,8 @@ void XxOverview::drawContents( QPainter* pp )
             line.getLineColorType(
                resources.getIgnoreFile(),
                ii,
-               dtype, dtypeSup
+               dtype, dtypeSup,
+               perHunkWsEnabled
             );
 
             resources.getRegionColor( dtype, back, fore );

@@ -90,22 +90,32 @@ public:
    //         (A-B)         DIFFDEL_2
    //         (AB-)         DIFFDEL_3
 
+
+   // enum Misc {
+   //    NUM_MASK  = 0x03,
+   //    TYPE_MASK = 0xFC
+   //    DIFF_TYPE = 1 << 2,
+   //    DELETE_TYPE = 2 << 2,
+   //    INSERT_TYPE = 3 << 2,
+   //    DIFFDEL_TYPE = 4 << 2,
+   // };
+
    enum Type { 
-      SAME,
-      DIFF_1,
-      DIFF_2,
-      DIFF_3,
-      DELETE_1,
-      DELETE_2,
-      DELETE_3,
-      INSERT_1,
-      INSERT_2,
-      INSERT_3,
-      DIFF_ALL,
-      DIFFDEL_1,
-      DIFFDEL_2,
-      DIFFDEL_3,
-      DIRECTORIES,
+      SAME        /*= (0 << 2)*/,
+      DIFF_1      /*= (1 << 2) + 0*/,
+      DIFF_2      /*= (1 << 2) + 1*/,
+      DIFF_3      /*= (1 << 2) + 2*/,
+      DELETE_1    /*= (2 << 2) + 0*/,
+      DELETE_2    /*= (2 << 2) + 1*/,
+      DELETE_3    /*= (2 << 2) + 2*/,
+      INSERT_1    /*= (3 << 2) + 0*/,
+      INSERT_2    /*= (3 << 2) + 1*/,
+      INSERT_3    /*= (3 << 2) + 2*/,
+      DIFF_ALL    /*= (4 << 2)*/,
+      DIFFDEL_1   /*= (5 << 2) + 0*/,
+      DIFFDEL_2   /*= (5 << 2) + 1*/,
+      DIFFDEL_3   /*= (5 << 2) + 2*/,
+      DIRECTORIES /*= (6 << 2)*/,
       NB_TYPES
    };
 
@@ -205,7 +215,8 @@ public:
       const XxIgnoreFile ignoreFile,
       const XxFno        no,
       XxColor&           dtype,
-      XxColor&           dtypeSup
+      XxColor&           dtypeSup,
+      const bool         perHunkWsEnabled
    ) const;
 
    /*----- static member functions -----*/
@@ -253,7 +264,8 @@ private:
       const XxLine::Type newType,
       const XxFno        no,
       XxColor&           dtype,
-      XxColor&           dtypeSup
+      XxColor&           dtypeSup,
+      const bool         perHunkWsEnabled
    ) const;
    // </group>
 
@@ -270,9 +282,9 @@ private:
    Selection   _selection;
    XxHunk      _hunkId; // This is used for split/swap/join.
 
-   // Note: we could join the selection and ignore-display members into a
+   // Note: we could join the selection and per-hunk ws members into a
    // generalized "flags" member to save memory.
-   bool        _ignoreDisplay;
+   bool        _perHunkWs;
 
    // Horizontal diff brackets.
    const int*  _hordiffs[3];

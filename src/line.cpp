@@ -199,7 +199,7 @@ XxLine::XxLine(
    _type( type ),
    _selection( UNSELECTED ),
    _hunkId( 0 ),
-   _ignoreDisplay( false )
+   _perHunkWs( false )
 {
    _lineNo[0] = fline0;
    _lineNo[1] = fline1;
@@ -599,7 +599,7 @@ XxLine XxLine::getSplit( const XxFno no ) const
 
    newline.setSelection( _selection );
    newline.setHunkId( _hunkId );
-   newline.setIgnoreDisplay( _ignoreDisplay );
+   newline.setIgnoreDisplay( _perHunkWs );
    return newline;
 }
 
@@ -664,7 +664,9 @@ XxLine XxLine::join(
    }
 
    joined.setHunkId( line1.getHunkId() );
-   joined.setIgnoreDisplay( line1.getIgnoreDisplay() && line2.getIgnoreDisplay() );
+   joined.setIgnoreDisplay(
+      line1.getIgnoreDisplay() && line2.getIgnoreDisplay()
+   );
    return joined;
 }
 
@@ -733,7 +735,7 @@ XxLine XxLine::getPromoted( Type promoteType ) const
    XxLine nline( promoteType, _lineNo[0], _lineNo[1], _lineNo[2] );
    nline.setSelection( _selection );
    nline.setHunkId( _hunkId );
-   nline.setIgnoreDisplay( _ignoreDisplay );
+   nline.setIgnoreDisplay( _perHunkWs );
    return nline;
 }
 
@@ -757,11 +759,12 @@ void XxLine::getLineColorType(
    const XxIgnoreFile ignoreFile,
    const XxFno        no,
    XxColor&           dtype,
-   XxColor&           dtypeSup
+   XxColor&           dtypeSup,
+   const bool         perHunkWsEnabled
 ) const
 {
    if ( ignoreFile == IGNORE_NONE ) {
-      getLineColorTypeStd( getType(), no, dtype, dtypeSup );
+      getLineColorTypeStd( getType(), no, dtype, dtypeSup, perHunkWsEnabled );
    }
    else {
       if ( no == (ignoreFile - 1) ) {
@@ -770,7 +773,7 @@ void XxLine::getLineColorType(
       else {
          XxLine::Type newType = 
             _ignoreConvertTables[ int(ignoreFile) ][ getType() ];
-         getLineColorTypeStd( newType, no, dtype, dtypeSup );
+         getLineColorTypeStd( newType, no, dtype, dtypeSup, perHunkWsEnabled );
       }
    }
 }
@@ -836,7 +839,8 @@ void XxLine::getLineColorTypeStd(
    const XxLine::Type newType,
    const XxFno        no,
    XxColor&           dtype,
-   XxColor&           dtypeSup
+   XxColor&           dtypeSup,
+   const bool         perHunkWsEnabled
 ) const
 {
    if ( getLineColorIfSelected( no, dtype, dtypeSup ) ) {
@@ -844,10 +848,12 @@ void XxLine::getLineColorTypeStd(
    }
    // else
 
-   if ( _ignoreDisplay ) {
-      dtype = COLOR_IGNORE_DISPLAY;
-      dtypeSup = COLOR_IGNORE_DISPLAY_SUP;
-      return;
+   if ( _perHunkWs ) {
+      if ( perHunkWsEnabled ) {
+         dtype = COLOR_IGNORE_DISPLAY;
+         dtypeSup = COLOR_IGNORE_DISPLAY_SUP;
+         return;
+      }
    }
 
    int lno = mapTypeToFileNo( newType );

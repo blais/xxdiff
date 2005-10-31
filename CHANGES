@@ -2,8 +2,31 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 581 2002-06-11 10:25:10Z blais $
+# $Id: CHANGES 588 2002-08-06 19:18:54Z blais $
 #
+
+Version 2.7: (major features)
+------------------------------
+
+This release introduces a very useful feature for merge reviewers: diff hunks
+which contain only whitespace and line break changes will be detected and can
+optionally be flagged with a different color. This permits the reviewer to
+quickly ignore source code reidentation and reorganization changes.
+Also, alignment lines are now be filled in with a subtle pattern to better
+identity them (can be disabled).
+
+(Misc)
+
+   * Blank lines can now have a little cross-pattern drawn in them, to better
+     identify visually that they are not real file lines, but rather just
+     inserted for display purposes. This makes it dead obvious. Most won't care.
+   * Made little pattern on by default.
+
+(Per-hunk Ignore Whitespace)
+
+   * Implemented the per-hunk ignore whitespace feature for two-way and
+     three-way diffs.
+
 
 Version 2.6: (major features and minor bug fixes)
 ------------------------------
@@ -16,10 +39,6 @@ are included as well.
 
 Important note: qt3 is now required. 2.6 will not compile with qt2, due to
 differences in the UI designer files between qt versions. Such is life.
-
-
-Current development version
-------------------------------
 
 (Per-hunk Ignore Whitespace)
 

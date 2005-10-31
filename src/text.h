@@ -127,7 +127,7 @@ private:
    bool          _grab;
    XxDln         _grabTopLine;
    int           _grabDeltaLineNo;
-
+   
 };
 
 

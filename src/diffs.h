@@ -287,7 +287,10 @@ public:
 
    // Flags diff hunks that are equal except for whitespace and line breaks with
    // the ignore-display flag.
-   void applyPerHunkDisplayIgnore( const int nbFiles );
+   void computeIgnoreDisplay(
+      const int                      nbFiles,
+      const std::auto_ptr<XxBuffer>* files
+   );
 
    // Automatically merge by performing selections on file1, assuming order
    // "mine older yours", and leaving conflicts unselected.
@@ -316,7 +319,7 @@ public:
    // Dump debug output.
    std::ostream& dump( std::ostream& ) const;
 
-signals:
+   signals:
 
    /*----- member functions -----*/
 

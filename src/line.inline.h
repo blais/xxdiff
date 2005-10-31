@@ -42,7 +42,7 @@ inline XxLine::XxLine() :
    _type( SAME ),
    _selection( NEITHER ),
    _hunkId( -1 ),
-   _ignoreDisplay( false )
+   _perHunkWs( false )
 {
    // This is just initialization to remove UMRs in Purify.
    for ( int ii = 0; ii < 3; ++ii ) {
@@ -58,7 +58,7 @@ inline XxLine::XxLine( const XxLine& copy )
    _type = copy._type;
    _selection = copy._selection;
    _hunkId = copy._hunkId;
-   _ignoreDisplay = copy._ignoreDisplay;
+   _perHunkWs = copy._perHunkWs;
 
    for ( int ii = 0; ii < 3; ++ii ) {
       _lineNo[ii] = copy._lineNo[ii];
@@ -113,14 +113,14 @@ inline void XxLine::setSelection( Selection selection )
 //
 inline bool XxLine::getIgnoreDisplay() const
 {
-   return _ignoreDisplay;
+   return _perHunkWs;
 }
 
 //------------------------------------------------------------------------------
 //
 inline void XxLine::setIgnoreDisplay( const bool f )
 {
-   _ignoreDisplay = f;
+   _perHunkWs = f;
 }
 
 //------------------------------------------------------------------------------

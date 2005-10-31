@@ -216,6 +216,16 @@ ignored.  However, if whitespace has been added in the middle of a word, it will
 still be highlighted.
 </p>
 
+<h4>Per-hunk ignore whitespace</h4>
+
+<p>
+Diff Hunks with text on all sides but with just whitespace or line break
+differences will be detected by xxdiff and marked with a special flag. If the
+feature is enabled, those hunks will be drawn of a different color, thus
+enabling the reviewer to quickly ignore those hunks. See the merge review
+features section for more details.
+</p>
+
 <h4>Navigation</h4>
 
 <p>
@@ -718,6 +728,26 @@ specifiers similar to printf.  The following specifiers are allowed:
 Also note that clicking on the filename labels will put the filenames in the
 clipboard for similar cut-n-paste action.  This can be useful when reviewing
 ClearCase revision files, which often have very long p-names.
+</p>
+
+
+<h4>Per-hunk ignore whitespace</h4>
+
+<p>
+Many source code changes often just reindent or reorganize blocks of code, and
+result in many isolated hunks with no relevant changes to look at (for languages
+that don't use whitespace semantics anyway). For merge police duties, this can
+lead to more work to review changes, and typically, programmers (and groups,
+sometimes) will explicitly choose not to allow code beautification because of
+that very reason (...and the directed anger of merge cops themselves). xxdiff
+now has a new feature that alleviates this problem greatly: it will scan each
+diff hunk for non-whitespace changes, and if the only changes are of whitespace,
+it will mark the hunk with a special flag. The "ignore per-hunk whitespace"
+feature will draw these hunks with a different color, by default, a color very
+similar to the "same" hunks. The hunks are not ignored, however, as skipping
+from hunk to hunk will still stop at these hunks, but they can be very quickly
+ignored by the merge police. So go on ahead now, and reindent that code without
+fear.
 </p>
 
 

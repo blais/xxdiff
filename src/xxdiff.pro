@@ -34,8 +34,8 @@ CONFIG = release qt warn_on
 debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
-#XX_VERSION=2.5-devel
-XX_VERSION=2.6
+#XX_VERSION=2.7-devel
+XX_VERSION=2.7
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
@@ -96,6 +96,12 @@ linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
 #
 
 solaris-cc:TMAKE_CXXFLAGS += -DCOMPILER_SUNWSPRO
+
+#
+# solaris-cc-gcc
+#
+
+solaris-cc-gcc:TMAKE_CXXFLAGS += -DCOMPILER_GNU
 
 #
 # aix-xlc
