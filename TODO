@@ -2,6 +2,8 @@
 TODO: xxdiff
 ============
 
+* remove all the if 0 in builders (and in all the code)
+
 
 .. end
 

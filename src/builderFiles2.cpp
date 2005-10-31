@@ -308,14 +308,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
 	    if ( f1n1 != fline1 ) {
-#if 0 
-               XxFln fsize = f1n1 - fline1;
-               createIgnoreBlock( 
-                  fline1, fline2, fsize 
-               );
-               fline1 += fsize;
-               fline2 += fsize;
-#else
                XxFln fsize1 = f1n1 - fline1;
                XxFln fsize2 = f2n1 - fline2 + 1;
                createIgnoreBlock( 
@@ -323,7 +315,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                );
                fline1 += fsize1;
                fline2 += fsize2;
-#endif
             }
 
             int fsize = f1n2 - f1n1 + 1;
@@ -338,14 +329,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
 	    if ( f2n1 != fline2 ) {
-#if 0 
-               int fsize = f2n1 - fline2;
-               createIgnoreBlock( 
-                  fline1, fline2, fsize 
-               );
-               fline1 += fsize;
-               fline2 += fsize;
-#else
                XxFln fsize1 = f1n1 - fline1 + 1;
                XxFln fsize2 = f2n1 - fline2;
                createIgnoreBlock( 
@@ -353,7 +336,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                );
                fline1 += fsize1;
                fline2 += fsize2;
-#endif
             }
 
             int fsize = f2n2 - f2n1 + 1;
@@ -378,14 +360,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
             // }
 
 	    if ( f1n1 != fline1 ) {
-#if 0 
-               int fsize = f1n1 - fline1;
-               createIgnoreBlock( 
-                  fline1, fline2, fsize 
-               );
-               fline1 += fsize;
-               fline2 += fsize;
-#else
                XxFln fsize1 = f1n1 - fline1;
                XxFln fsize2 = f2n1 - fline2;
                createIgnoreBlock( 
@@ -393,7 +367,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                );
                fline1 += fsize1;
                fline2 += fsize2;
-#endif
             }
 
             int fsize1 = f1n2 - f1n1 + 1;
@@ -464,19 +437,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    // Add final ignore region if present.
    uint nbRemainingLines1 = buffer1.getNbLines() + 1 - fline1;
    uint nbRemainingLines2 = buffer2.getNbLines() + 1 - fline2;
-#if 0 
-   if ( nbRemainingLines1 != nbRemainingLines2 ) {
-      throw XxError( XX_EXC_PARAMS, _errors );
-   }
-#endif
    if ( nbRemainingLines1 > 0 || nbRemainingLines2 > 0 ) { 
-#if 0 
-      createIgnoreBlock( fline1, fline2, nbRemainingLines );
-#else
       createIgnoreBlock( fline1, buffer1.getNbLines() + 1 - fline1,
                          fline2, buffer2.getNbLines() + 1 - fline2,
                          buffer1, buffer2 );
-#endif
    }
 
 #if !defined(XX_INTERNAL_DIFFS) && !defined(WINDOWS)
@@ -556,6 +520,7 @@ void XxBuilderFiles2::createIgnoreBlock(
          lines2.push_back( no );
       }
    }
+
    XX_ASSERT( lines1.size() == lines2.size() );
 #endif
 

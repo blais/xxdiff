@@ -2,6 +2,25 @@
 CHANGES: xxdiff
 ===============
 
+Version 3.0.2: (minor bug fixes)
+--------------------------------
+
+* Fixed important bug with reloading files after they have been saved.  Load two
+  files with diffs, select various hunks, save files, reload diff.  It will
+  sometimes crash.  The problem was that the fileinfo structure was being
+  recycled and it cannot.
+
+* Removed old ifdef'ed code from builderFiles2.
+* Changed how the versioning is done, there is a single file in the root that
+  contains the version number now.
+* Moved version.{h,cpp} to proginfo.{h,cpp}
+* Removed dependency of some old scripts on obsolete parse_opts home-grown
+  module.
+* Converted xxcvs.newer to optparse, but I don't use it, no tests yet.
+* Added useful --select-files option to xxdiff-find-grep-sed.  There is enough
+  interesting behaviour in the grep-sed part of the script for this to be
+  worthwhile.
+
 Version 3.0.1: (minor bug fixes)
 --------------------------------
 

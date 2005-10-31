@@ -3,10 +3,11 @@
 # $RCSfile$
 #
 
-if [ ! -d "adm" ]; then
+if [ ! -d "adm" -a ! -f "VERSION" ]; then
      echo "You must be running this script from the topdir directory."
      exit 1;
 fi
 
-egrep "^XX_VERSION" src/xxdiff.pro | sed -e 's/^.*=//;'
+# this has become exceedingly simple.
+cat VERSION
 

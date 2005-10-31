@@ -24,7 +24,7 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <version.h>
+#include <proginfo.h>
 #include <help.h>
 #include <line.h>
 #include <resources.h>

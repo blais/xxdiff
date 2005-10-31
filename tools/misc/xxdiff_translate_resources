@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.1
+#!/usr/bin/env python
 #******************************************************************************\
 #* $RCSfile$
 #*
@@ -26,7 +26,8 @@ You might have to do some fixing by hand if this doesn't work.
 Use `xxdiff --list-resources' to help yourself.
 """
 
-__version__ = "$Revision: 682 $"
+__version__ = "$Revision: 744 $"
+__author__ = "Martin Blais <blais@furius.ca>"
 
 #===============================================================================
 # EXTERNAL DECLARATIONS

@@ -23,6 +23,9 @@
 # Generate with xxdiff.t template, as `tmake -t xxdiff.t xxdiff.pro > Makefile'
 #
 
+# Note: the version number is now in the VERSION file at the root and there is a
+# special make rule defined to generate an include file for it.
+
 TEMPLATE = xxdiff
 CONFIG = release qt warn_on thread
 
@@ -33,12 +36,6 @@ CONFIG = release qt warn_on thread
 
 debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
-
-#XX_VERSION=3.0-devel
-XX_VERSION=3.0.1
-
-TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
-TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
 
 INCLUDEPATH += .
 
@@ -114,7 +111,7 @@ DIFFUTILS_DIR = ../diffutils-2.7
 # 	$$DIFFUTILS_DIR/side.o \
 # 	$$DIFFUTILS_DIR/fnmatch.o \
 # 	$$DIFFUTILS_DIR/regex.o \
-# 	$$DIFFUTILS_DIR/version.o \
+# 	$$DIFFUTILS_DIR/proginfo.o \
 # 	$$DIFFUTILS_DIR/diff.o \
 # 	$$DIFFUTILS_DIR/diff3.o
 
@@ -162,7 +159,7 @@ HEADERS = \
 	diffutils_hack.h \
 	doc.html \
 	kdeSupport.h \
-	version.h
+	proginfo.h
 
 SOURCES = \
 	optionsDialog.cpp \
@@ -197,7 +194,7 @@ SOURCES = \
 	markers.cpp \
 	getopt.c \
 	getopt1.c \
-	version.c
+	proginfo.c
 
 #	diffutils.cpp \
 

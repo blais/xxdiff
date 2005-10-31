@@ -150,22 +150,8 @@ inline void rentxt(
          &brect
       );
 
-#if 0 
 #ifdef XX_DEBUG
-      {
-         QRect borect = fm.boundingRect( str, rlen );
-         QSize bsize = fm.size( Qt::SingleLine, str, rlen );
-         XX_TRACE( "AHAHAH "
-                   << borect.height() << " "
-                   << bsize.height() << " "
-                   << brect.height() << " "
-                   << fm.lineSpacing() );
-      }
-#endif
-#endif
-
-#ifdef XX_DEBUG
-      // FIXME remove
+      // For debug only, could be removed.
       if ( flag ) {
          QPen pushPen = p.pen();
          QPen stipplePen = pushPen;

@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 #
 # Tentative scons build file.
-# At this point this is probably not working. I'm just playing with this at the moment.
 #
+# At this point this is probably not working. I'm just playing with this at the
+# moment.
+#
+
+__version__ = "$Revision: 744 $"
+__author__ = "Martin Blais <blais@furius.ca>"
 
 import string, os.path
 

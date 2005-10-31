@@ -57,11 +57,12 @@ $(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
 help.o: doc.h
 help.obj: doc.h
 
-# Make the version number dependent on everything, so that we always recompile
-# this file whenever we link, thus updating that number.
-version.o: $(HEADERS) $(SOURCES) $(INTERFACES)
-version.obj: $(HEADERS) $(SOURCES) $(INTERFACES)
+# Automatically generate a simple include file from the version file.
+version.h: ../VERSION
+	echo "#define XX_VERSION \"`cat ../VERSION`\"" > $@
 
+proginfo.o: version.h
+proginfo.obj: version.h
 
 #
 # Additional dependencies.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #******************************************************************************\
 #* $Source$
 #* $Id$
@@ -34,6 +34,8 @@ destroyed. The queue empties itself (i.e. runs commands) automatically when
 destroyed.
 """
 
+__version__ = "$Revision$"
+__author__ = "Martin Blais <blais@furius.ca>"
 
 #===============================================================================
 # EXTERNAL DECLARATIONS

@@ -1,16 +1,22 @@
-#!/usr/bin/env python2
-#===============================================================================
-# Copyright (c) 2002 Safehouse International Limited, All Rights Reserved.
-#
-# This computer program is protected by copyright law and international
-# treaties.  Unauthorised reproduction or distribution of this computer
-# program, or any portion of it, may result in severe criminal and/or
-# civil penalties.  Safehouse International Limited reserves the rights
-# to prosecute infringements of its copyright, trade marks, trade names,
-# patents and other intellectual property rights subsisting in or used
-# in connection with the software (including all documentation and
-# manuals relating to it) to the maximum extent available under the law.
-#===============================================================================
+#!/usr/bin/env python
+#******************************************************************************\
+#* Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
 
 """Script to interface between xxdiff and CVS.
 
@@ -23,7 +29,7 @@ Usage:
 
 """
 
-__version__ = "$Revision: 739 $"
+__version__ = "$Revision: 745 $"
 __author__ = "Martin Blais"
 
 #===============================================================================
@@ -39,7 +45,6 @@ from os.path import exists, basename, dirname, isdir, isfile
 from os.path import join as joinpath
 from string import join
 
-import parse_opts
 import cvs
 import cmdqueue
 
@@ -77,7 +82,7 @@ class PrintCheckoutInfo:
 
     """Print both the current module name and sticky tag if present."""
 
-    name = ['pww']
+    names = ['pww']
 
     def execute( self, subargs ):
 
@@ -102,8 +107,7 @@ class PrintBranches:
       <args> are files for which we want to list the branches.
       """
 
-    name = ['lsbranches', 'listbranches', 'list_branches']
-    optmap = []
+    names = ['lsbranches', 'listbranches', 'list_branches']
 
     def execute( self, subargs ):
 
@@ -148,23 +152,34 @@ class List:
 
     """
 
-    name = ['ls', 'list', 'status']
-    optmap = [
-        ('short', 's', "Output short format (default)."),
-        ('long', 'l', "Output long format."),
-        ('recursive', 'R', "List files recursively."),
+    names = ['ls', 'list', 'status']
+
+    def addopts( self, parser ):
+        parser.add_option('-s', '--short', action='store_true',
+                          help="Output short format (default).")
+        parser.add_option('-l', '--long', action='store_true',
+                          help="Output long format.")
+        parser.add_option('-R', '--recursive', action='store_true',
+                          help="List files recursively.")
+        parser.add_option('-B', '--branch-only', action='store_true',
+                          help="Prints only files on the branch.")
+        parser.add_option('-M', '--modified-only', action='store_true',
+                          help="Prints only modified files.")
+        parser.add_option('-C', '--conflicts-only', action='store_true',
+                          help="Prints only conflict files.")
+        parser.add_option('-H', '--header', action='store_true',
+                          help="Print a nice header at the top (default is "
+                          "off).")
+        parser.add_option('-w', '--wide', action='store_true',
+                          help="Widen progressive display.")
+        parser.add_option('-p', '--final', action='store_true',
+                          help="Don't print results progressively (default).")
+        # this option allows a more compact output
+        parser.add_option('-a', '--all', action='store_true',
+                          help="Perform on all the files in the module.")
+
         #('orig-stamp', 'o',\
         # "Print first stamp of revision for non-branches (long only)."),
-        ('branch-only', 'B', "Prints only files on the branch."),
-        ('modified-only', 'M', "Prints only modified files."),
-        ('conflicts-only', 'C', "Prints only conflict files."),
-        ('header', 'H', "Print a nice header at the top (default is off)."),
-        ('wide', 'w', "Widen progressive display."),
-        ('final', 'p', "Don't print results progressively (default)."),
-        # this option allows a more compact output
-        ('all', 'a', "Perform on all the files in the module.")
-        ]
-
         #('added-only', 'A', "Prints only added files."),
         #('removed-only', 'D', "Prints only removed files."),
 
@@ -330,8 +345,7 @@ class ListBranchFiles(List):
 
     """
 
-    name = ['getmodfiles', 'get_mod_files', 'list_brfiles']
-    optmap = []
+    names = ['getmodfiles', 'get_mod_files', 'list_brfiles']
 
     def execute( self, subargs ):
 
@@ -378,19 +392,21 @@ class RemoveBranch:
 
     save_suffix = "%s.save.%d"
 
-    name = ['rmbranch', 'removebranch', 'remove_branch',
+    names = ['rmbranch', 'removebranch', 'remove_branch',
             'deletebranch', 'delete_branch']
-    optmap = [
-        ('save', 's', "Save backup files before reverting."), #? FIXME
-        ('save-suffix', None, "Save format (default is %s)." % save_suffix )
-        ]
+
+    def addopts( self, parser ):
+        parser.add_option('-s', '--save', action='store_true',
+                          help="Save backup files before reverting.")
+        parser.add_option('--save-suffix', action='store_true',
+                          help="Save format (default: %s)." % self.save_suffix)
 
     def execute( self, subargs ):
 
         if not self.opts.save_suffix:
             self.opts.save_suffix = Revert.save_suffix
 
-        if gopts.verbose: print "==> Checking that the files are on a branch"
+        if self.gopts.verbose: print "==> Checking that the files are on a branch"
         statusmap = {}
         for file in subargs:
             status = cvs.Status(file)
@@ -411,26 +427,26 @@ class RemoveBranch:
                     c += 1
                     savefn = self.opts.save_suffix % (file, c)
                 try:
-                    if gopts.verbose: print "==> Saving safe copy into %s" % savefn
+                    if self.gopts.verbose: print "==> Saving safe copy into %s" % savefn
                     shutil.copyfile(file, savefn)
                     print "Saved copy in '%s'" % savefn
                 except OSError, e:
                     raise Error( "Cannot copy file %s into %s: %s",
                                  (file, savefn, repr(e)) )
             else:
-                if not gopts.expert:
+                if not self.gopts.expert:
                     if not yesOrNo("Changes on '%s' will be lost, are you sure?" \
                                    % file):
                         print "Ignoring file '%s'" % file
                         continue
 
-            if gopts.verbose:
+            if self.gopts.verbose:
                 print "==> Deleting the repository revisions for file %s" % file
             cmd = '%s admin -o:%s %s' % \
                   (cvs.program, status.stickyTag(), file)
             cvs.delegate(cmd)
 
-            if gopts.verbose:
+            if self.gopts.verbose:
                 print "==> Updating file %s" % file
             cvs.delegate( "%s update -r %s %s" % (cvs.program, branch, file) )
             #if sts[0]:
@@ -453,26 +469,29 @@ class Revert:
 
     save_suffix = "%s.save.%d"
 
-    name = ['revert', 'uncheckout', 'unco']
-    optmap = [
-        ('save', 's', "Save backup files before reverting."), #? FIXME
-        ('save-suffix', None, "Save format (default is %s)." % save_suffix )
+    names = ['revert', 'uncheckout', 'unco']
+
+    def addopts( self, parser ):
+        parser.add_option('-s', '--save', action='store_true',
+                          help="Save backup files before reverting.")
+        parser.add_option('--save-suffix', action='store_true',
+                          help="Save format "
+                          "(default is %s)." % self.save_suffix)
         #('all', 'a', "Perform on all the modified files in the module.")
-        ]
 
     def execute( self, subargs ):
         if not self.opts.save_suffix:
             self.opts.save_suffix = Revert.save_suffix
 
         for file in subargs:
-            if gopts.verbose: print "==> Processing file %s." % file
+            if self.gopts.verbose: print "==> Processing file %s." % file
 
             if isdir(file):
                 print >> sys.stderr, \
                       "Directories not supported yet, ignoring %s." % file
                 continue
 
-            if gopts.verbose: print "==> Checking that file is modified"
+            if self.gopts.verbose: print "==> Checking that file is modified"
             status = cvs.Status(file)
             if status.status() not in cvs.Status.STATSET_MODIFIED:
                 print >> sys.stderr, "File %s is not Locally Modified." % file
@@ -485,20 +504,20 @@ class Revert:
                     c += 1
                     savefn = self.opts.save_suffix % (file, c)
                 try:
-                    if gopts.verbose: print "==> Saving safe copy into %s" % savefn
+                    if self.gopts.verbose: print "==> Saving safe copy into %s" % savefn
                     os.rename(file, savefn)
                     print "Saved copy in '%s'" % savefn
                 except OSError, e:
                     raise Error( "Cannot rename file %s into %s: %s",
                                  (file, savefn, repr(e)) )
             else:
-                if not gopts.expert:
+                if not self.gopts.expert:
                     if not yesOrNo("Changes on '%s' will be lost, are you sure?" \
                                    % file):
                         print "Ignoring file '%s'" % file
                         continue
 
-            if gopts.verbose: print "==> Reverting file"
+            if self.gopts.verbose: print "==> Reverting file"
             cvs.run( '%s update -C %s' % (cvs.program, file) )
 
             status.lstag = status.stickyTag()
@@ -526,19 +545,23 @@ class Fetch:
       thru option, only one filename is allowed.
     """
 
-    name = ['get', 'fetch', 'cat']
-    optmap = [
-        ('stdout', 'p', "Output to stdout (don't write output file)."),
-        ('module=', 'm', \
-         "Fetch files from specified module (no need for workarea)."),
-        ('revision=', 'r', "Specify which revision for filename."),
-        ]
+    names = ['get', 'fetch', 'cat']
 
     stdout_sep1 = 79 * '='
+    
+    def addopts( self, parser ):
+        parser.add_option('-p', '--stdout', action='store_true',
+                          help="Output to stdout (don't write output file).")
+        parser.add_option('-m', '--module', action='store',
+                          help="Fetch files from specified module (no need "
+                          "for workarea).")
+        parser.add_option('-r', '--revision', action='store',
+                          help="Specify which revision for filename.")
+    
 
     def execute( self, subargs ):
 
-        if gopts.verbose: print "==> Parsing arguments"
+        if self.gopts.verbose: print "==> Parsing arguments"
         if not subargs:
             raise Error('No file specified.')
 
@@ -549,9 +572,9 @@ class Fetch:
             subargs = [ '%s@@%s' % (subargs[0], self.opts.revision) ]
 
         for arg in subargs:
-            if gopts.verbose: print "==> Processing file %s", arg
+            if self.gopts.verbose: print "==> Processing file %s", arg
 
-            if gopts.verbose: print "==> Parsing filename"
+            if self.gopts.verbose: print "==> Parsing filename"
             mo = extfnre.match(arg)
             if mo:
                 (filename, rev) = mo.groups()
@@ -559,7 +582,7 @@ class Fetch:
                 filename = arg
                 rev = None
 
-            if gopts.verbose: print "==> Fetching file"
+            if self.gopts.verbose: print "==> Fetching file"
             (contents, errors) = cvs.fetch(filename, rev, None, self.opts.module)
             if contents == None:
                 print >> sys.stderr, \
@@ -569,7 +592,7 @@ class Fetch:
                 # don't crash it, continue, there may be many files.
                 continue
 
-            if gopts.verbose: print "==> Outputting file"
+            if self.gopts.verbose: print "==> Outputting file"
             if not rev:
                 rev = 'HEAD'
             if self.opts.stdout:
@@ -602,12 +625,17 @@ class Mani:
     temp_sfx = '.xxcvs_tempfile'
 
     # common diff options
-    optmap = [
-        ('ignore-all-space', 'w', 'Option given to diff(1).'),
-        ('ignore-space-change', 'b', 'Option given to diff(1).'),
-        ('ignore-case', 'i', 'Option given to diff(1).'),
-        ('ignore-blank-lines', 'l', 'Option given to diff(1).'),
-        ]
+
+    def addopts( self, parser ):
+        parser.add_option('-w', '--ignore-all-space', action='store_true',
+                          help="Option given to diff(1).")
+        parser.add_option('-b', '--ignore-space-change', action='store_true',
+                          help="Option given to diff(1).")
+        parser.add_option('-i', '--ignore-case', action='store_true',
+                          help="Option given to diff(1).")
+        parser.add_option('-l', '--ignore-blank-lines', action='store_true',
+                          help="Option given to diff(1).")
+
     #===========================================================================
     # CLASS Mani.QueueCmd
     #===========================================================================
@@ -688,7 +716,7 @@ class Mani:
     def parseFilename( self, fn ):
         """Parses a filename and returns a File object."""
 
-        if gopts.verbose: print "==> Parsing filename", fn
+        if self.gopts.verbose: print "==> Parsing filename", fn
         mo = extfnre.match(fn)
         if mo:
             (filename, rev) = mo.groups()
@@ -709,11 +737,11 @@ class Mani:
     def fetchFile( self, file, workarea=None, module=None ):
         tempname = tempfile.mktemp() + Mani.temp_sfx
         if file.empty:
-            if gopts.verbose:
+            if self.gopts.verbose:
                 print "==> Creating empty file into %s" % tempname
             contents = ''
         else:
-            if gopts.verbose:
+            if self.gopts.verbose:
                 print "==> Fetching file %s into %s" % (file.name, tempname)
 
             (contents, errors) = cvs.fetch(file.name, file.rev, workarea, module)
@@ -738,7 +766,7 @@ class Mani:
         options += self.extra_options
 
         if graphical:
-            cmd = [gopts.xxdiff] + options.split()
+            cmd = [self.gopts.xxdiff] + options.split()
             #cmd += '--exit-on-same ' # so we don't have annoying previews until stable
             idx = 0
             for file in filelist:
@@ -750,7 +778,7 @@ class Mani:
                 merged_filename = filelist[0].name + '.merge'
             cmd += ['--merged-filename=%s' % merged_filename]
         else:
-            cmd = [gopts.diff] + options.split()
+            cmd = [self.gopts.diff] + options.split()
 
         for file in filelist:
             if file.tempname:
@@ -760,10 +788,10 @@ class Mani:
             else:
                 cmd += ['%s' % file.name]
 
-        if gopts.verbose: print "==> Diffing command:", string.join(cmd)
+        if self.gopts.verbose: print "==> Diffing command:", string.join(cmd)
 
         if not self.queue:
-            if gopts.no_async:
+            if self.gopts.no_async:
                 self.queue = cmdqueue.SyncFakeQueue(1)
             else:
                 self.queue = cmdqueue.CmdQueue(1)
@@ -815,19 +843,25 @@ class Diff(Mani):
     """
 
     graphical_names = ['xdiff', 'xxdiff', 'graphical_diff']
-    name = ['diff', 'cmp', 'compare'] + graphical_names
+    names = ['diff', 'cmp', 'compare'] + graphical_names
 
-    optmap = [
-        ('module=', 'm', "Fetch files from specified module (no need for workarea)."),
-        ('textual', 't', "Run diff in text mode instead of graphical output." ),
-        ('revision=', 'r', "Diff local file copy with this revision." ),
-        ('previous', 'p', "Diff each file with its previous revision, or parent." ),
-        ('branch', 'B', "Diff each file with its parent branch (main)." ),
-        ('reverse', None, "Reverse order of files (order is by default reversed)."),
-        ] + Mani.optmap
+    def addopts( self, parser ):
+        Mani.addopts(self, parser)
+        parser.add_option('-m', '--module', action='store',
+                          help="Fetch files from specified module (no need for workarea).")
+        parser.add_option('-t', '--textual', action='store_true',
+                          help="Run diff in text mode instead of graphical output.")
+        parser.add_option('-r', '--revision', action='store',
+                          help="Diff local file copy with this revision.")
+        parser.add_option('-p', '--previous', action='store_true',
+                          help="Diff each file with its previous revision, or parent.")
+        parser.add_option('-B', '--branch', action='store_true',
+                          help="Diff each file with its parent branch (main).")
+        parser.add_option('--reverse', action='store_true',
+                          help="Reverse order of files (order is by default reversed).")
 
-    #  --recursive, -r            Option passed to 2-files diff(1). This is only
-    #                             meaningful for directory diffs.
+        #  --recursive, -r            Option passed to 2-files diff(1). This is only
+        #                             meaningful for directory diffs.
 
     # FIXME make it possible to view the differences between two stamps without
     # a checkout area
@@ -838,7 +872,7 @@ class Diff(Mani):
 
     def execute( self, subargs ):
 
-        if gopts.verbose: print "==> Validating arguments"
+        if self.gopts.verbose: print "==> Validating arguments"
         if not subargs:
             raise Error('No files specified.')
 
@@ -853,7 +887,7 @@ class Diff(Mani):
         if self.opts.module:
             indir = workarea
 
-        if gopts.verbose: print "==> Parsing filenames"
+        if self.gopts.verbose: print "==> Parsing filenames"
         # parse all filenames to potentially figure out if we need to compute
         # status to find previous or branch. this allows us to launch a single
         # status command if necessary (much faster).
@@ -865,9 +899,9 @@ class Diff(Mani):
             if self.opts.previous or self.opts.branch:
                 need_status.append(file)
 
-        if gopts.verbose: print "==> Getting status for needed filenames"
+        if self.gopts.verbose: print "==> Getting status for needed filenames"
         need_fns = map(lambda x: x.name, need_status)
-        if gopts.verbose: print "==>", need_fns
+        if self.gopts.verbose: print "==>", need_fns
         if self.opts.previous or self.opts.branch and need_status:
             mstatii = cvs.MultipleStatii(need_fns, 1, 0, indir)
             i = 0
@@ -879,7 +913,7 @@ class Diff(Mani):
                 file.status = status
                 i += 1
 
-        if gopts.verbose: print "==> Building filegroups"
+        if self.gopts.verbose: print "==> Building filegroups"
         filegroups = []
         if self.opts.revision:
             if len(fileobjs) != 1:
@@ -969,21 +1003,28 @@ class DiffModified(Mani):
 
     """
 
-    name = ['diffmodfiles', 'diff_mod_files', 'moddiff']
-    optmap = [
-        ('module=', 'm', "Fetch files from specified module (no need for workarea)."),
-        ('textual', 't', "Run diff in text mode instead of graphical output." ),
-        ('no-recursive', 'N', "Don't preview directories recursively."),
-        ('silent', None, "Don't be so verbose about progress and all."),
-        ('reverse', 'r', "Reverse order of files (order is by default reversed)."),
-        ] + Mani.optmap
+    names = ['diffmodfiles', 'diff_mod_files', 'moddiff']
 
+
+    def addopts( self, parser ):
+        Mani.addopts(self, parser)
+        parser.add_option('-m', '--module', action='store',
+                          help="Fetch files from specified module (no need for workarea).")
+        parser.add_option('-t', '--textual', action='store_true',
+                          help="Run diff in text mode instead of graphical output.")
+        parser.add_option('-N', '--no-recursive', action='store_true',
+                          help="Don't preview directories recursively.")
+        parser.add_option('--silent', action='store_true',
+                          help="Don't be so verbose about progress and all.")
+        parser.add_option('-r', '--reverse', action='store_true',
+                          help="Reverse order of files (order is by default reversed).")
+        
     def execute( self, subargs ):
 
         self.options = self.computeOptionsString()
         self.extra_options = ''
 
-        if gopts.verbose: print "==> Validating arguments"
+        if self.gopts.verbose: print "==> Validating arguments"
 
         workarea = getRoot()
         indir = None
@@ -1048,6 +1089,52 @@ class DiffModified(Mani):
             print
 
 
+#-------------------------------------------------------------------------------
+#
+def parse_subcommands( gparser, subcmds ):
+
+    """Parse given global arguments, find subcommand from given list of
+    subcommand objects, parse local arguments and return a tuple of global
+    options, selected command object, command options, and command arguments.
+    Call execute() on the command object to run. The command object has members
+    'self.gopts' and 'opts' set for global and command options respectively, you
+    don't need to call execute with those but you could if you wanted to."""
+
+    import optparse
+    global subcmds_map # needed for help command only.
+
+    # Build map of name -> command and docstring.
+    subcmds_map = {}
+    gparser.usage += '\n\nAvailable Subcommands\n\n'
+    for sc in subcmds:
+        gparser.usage += '- %s: %s\n' % (', '.join(sc.names),
+                                       sc.__doc__.splitlines()[0])
+        for n in sc.names:
+            assert n not in subcmds_map
+            subcmds_map[n] = sc
+
+    # Declare and parse global options.
+    gparser.disable_interspersed_args()
+
+    gopts, args = gparser.parse_args()
+    if not args:
+        gparser.print_help()
+        raise SystemExit("Error: you must specify a command to use.")
+    subcmdname, subargs = args[0], args[1:]
+
+    # Parse command arguments and invoke command.
+    try:
+        sc = subcmds_map[subcmdname]
+        lparser = optparse.OptionParser(sc.__doc__.strip())
+        if hasattr(sc, 'addopts'):
+            sc.addopts(lparser)
+        sc.gopts = gopts
+        sc.opts, subsubargs = lparser.parse_args(subargs)
+    except KeyError:
+        raise SystemExit("Error: invalid command '%s'" % subcmdname)
+
+    return sc.gopts, sc, sc.opts, subsubargs
+
 #===============================================================================
 # MAIN
 #===============================================================================
@@ -1065,18 +1152,26 @@ def getRoot():
     return co_root
 
 try:
+    import optparse
+    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
 
-    goptmap = [
-        ('verbose', 'v', "Verbose mode." ),
-        ('debug', None, "Full-on debug mode, including CVS commands." ),
-        ('expert', 'x', "Expert mode, skip confirmations, use with care." ),
-        ('dir=', 'D', "Specify workarea directory (default is cwd)." ),
-        ('cvs=', None, "Specify cvs executable." ),
-        ('diff=', None, "Specify textual diff executable." ),
-        ('xxdiff=', None, "Specify graphical diff executable." ),
-        ('no-async', None,
-         "Disable asynchronous command queuing for those commands that support it." ),
-        ]
+    parser.add_option('-v', '--verbose', action='store_true',
+                      help="Verbose mode.")
+    parser.add_option('--debug', action='store_true',
+                      help="Full-on debug mode, including CVS commands.")
+    parser.add_option('-x', '--expert', action='store_true',
+                      help="Expert mode, skip confirmations, use with care.")
+    parser.add_option('-D', '--dir', action='store',
+                      help="Specify workarea directory (default is cwd).")
+    parser.add_option('--cvs', action='store',
+                      help="Specify cvs executable.")
+    parser.add_option('--diff', action='store',
+                      help="Specify textual diff executable.")
+    parser.add_option('--xxdiff', action='store',
+                      help="Specify graphical diff executable.")
+    parser.add_option('--no-async', action='store_true',
+                      help="Disable asynchronous command queuing for those "
+                      "commands that support it.")
 
     # don't use 'd' in case we want it for cvsroot in the future.
         #('silent', 's', "Silent mode." ),
@@ -1095,16 +1190,7 @@ try:
         ]
         #Test()
 
-    # for now, remove aliases
-    #for sc in subcmds:
-    #    if type(sc.name) == type([]):
-    #        sc.name = [sc.name[0]]
-
-    version_msg = '%s -- %s\n' % (os.path.basename(sys.argv[0]), __version__[1:-1])
-    version_msg += 'Written by %s.' % __author__
-
-    (gopts, subcmd, subargs) = \
-            parse_opts.parse_options_subcmds( goptmap, subcmds, __doc__, version_msg )
+    gopts, sc, opts, args = parse_subcommands(parser, subcmds)
 
     if gopts.dir:
         if not exists(gopts.dir):
@@ -1140,11 +1226,10 @@ try:
         if os.environ.has_key('EXP_SCRIPTS_EXPERT'):
             gopts.expert = 1
 
-    subcmd.opts = gopts
-    subcmd.execute( subargs )
+    sc.execute(args)
 
     # delete all references to the subcmd here for the cmdqueue.
-    subcmds = subcmd = None
+    subcmds = subcmd = sc = None
 
 except Error, e:
     print error_str, e

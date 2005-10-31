@@ -1924,8 +1924,10 @@ bool XxApp::processDiff()
             QTextOStream oss( &str );
             oss << "Error executing \""
                 << _resources->getCommand( CMD_DIFF_FILES_2 )
-                << "\" command, couldn't build diffs:" << endl
-                << ex.getMsg() << endl;
+                << "\" command, could not build diffs:" << endl
+                << ex.getMsg() << endl
+                << "Maybe try --text option." << endl
+                << endl;
             outputDiffErrors( str );
             _returnValue = builder->getStatus();
             return false;
@@ -1952,8 +1954,10 @@ bool XxApp::processDiff()
             QTextOStream oss( &str );
             oss << "Error executing \""
                 << _resources->getCommand( CMD_DIFF_FILES_3 )
-                << "\" command, couldn't build diffs:" << endl
-                << ex.getMsg() << endl;
+                << "\" command, could not build diffs:" << endl
+                << ex.getMsg() << endl
+                << "Maybe try --text option." << endl
+                << endl;
             outputDiffErrors( str );
             _returnValue = builder->getStatus();
             return false;
@@ -2003,7 +2007,7 @@ bool XxApp::processDiff()
          QTextOStream oss( &str );
          oss << "Error executing \""
              << dirdiff_command
-             << "\" command, couldn't build diffs:" << endl
+             << "\" command, could not build diffs:" << endl
              << ex.getMsg() << endl;
          outputDiffErrors( str );
          _returnValue = builder->getStatus();
@@ -2606,11 +2610,15 @@ void XxApp::onRedoDiff()
          for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
             const XxBuffer& buffer = *_files[ii];
             if ( buffer.isTemporary() == false ) {
+               // We need to get the fileinfo again here because the size might
+               // have changed.
+               QFileInfo fileInfo( buffer.getName() );
+
                std::auto_ptr<XxBuffer> newbuf(
                   readFile( ii,
                             buffer.getName(),
                             buffer.getDisplayName(),
-                            buffer.getFileInfo(),
+                            fileInfo,
                             buffer.isTemporary() )
                );
                _files[ii] = newbuf;

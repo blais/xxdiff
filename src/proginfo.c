@@ -24,7 +24,9 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
+#include <proginfo.h>
 #include <version.h>
+
 
 /*==============================================================================
  * PUBLIC DECLARATIONS
@@ -33,7 +35,6 @@
 char const xx_name[] = "xxdiff";
 char const xx_version[] = XX_VERSION;
 char const xx_description[] = "A graphical file comparator and merge tool.";
-char const xx_copyright[] = "Copyright (C) 1999-2003  Martin Blais";
+char const xx_copyright[] = "Copyright (C) 1999-2004  Martin Blais";
 char const xx_homepage[] = "http://xxdiff.sourceforge.net";
 char const xx_bugs_email[] = "blais@furius.ca";
-
