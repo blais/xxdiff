@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 162 2001-05-28 18:32:02Z blais $
- * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
+ * $Id: app.h 178 2001-06-02 01:26:38Z blais $
+ * $Date: 2001-06-01 21:26:38 -0400 (Fri, 01 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -119,6 +119,7 @@ public:
    uint getNbFiles() const;
 
    // Returns the file for requested buffer.
+   // FIXME shouldn't you change this for getBuffer()?  do it everywhere too.
    XxBuffer* getFile( const XxFno no ) const;
 
    // Returns an array of the file pointers.
@@ -249,6 +250,8 @@ public slots:
    void diffFilesAtCursor();
    void copyFileLeftToRight();
    void copyFileRightToLeft();
+   void removeFileLeft();
+   void removeFileRight();
    void nextDifference();
    void previousDifference();
    void nextUnselected();
@@ -301,7 +304,11 @@ public slots:
    void toggleShowFilenames();
    void toggleHorizontalDiffs();
    void toggleIgnoreHorizontalWs();
-   void toggleCutAndPasteAnnotations();
+   void toggleFormatClipboardText();
+   void ignoreFileNone();
+   void ignoreFileLeft();
+   void ignoreFileMiddle();
+   void ignoreFileRight();
    void helpManPage();
    void helpColorLegend();
    void helpGenInitFile();
@@ -392,6 +399,9 @@ private:
 
    // Copy file from directory diffs.
    void copyFile( XxFno nnno ) const;
+
+   // Remove file from directory diffs.
+   void removeFile( XxFno nnno ) const;
 
    // Private non-const version of resource access (for dialogs).
    XxResources* getResourcesNC();

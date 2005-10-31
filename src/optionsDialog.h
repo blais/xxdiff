@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.h 161 2001-05-28 14:47:52Z blais $
- * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
+ * $Id: optionsDialog.h 186 2001-06-04 20:16:12Z blais $
+ * $Date: 2001-06-04 16:16:12 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -153,8 +153,9 @@ public slots:
    void checkboxHideCarriageReturns( int );
    void spinboxTabWidth( int );
    void checkboxIgnoreFileChanges( int );
-   void checkboxCutAndPasteAnnotations( int );
+   void checkboxFormatClipboardText( int );
    void checkboxDrawVerticalLine( int );
+   void comboIgnoreFile( const QString& );
 
    //---------------------------------------------------------------------------
    // Colors

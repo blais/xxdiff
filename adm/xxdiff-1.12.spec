@@ -1,7 +1,7 @@
-Summary: a graphical front end to the diff command
+Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 1.11.0
-Release: 5
+Version: 1.12
+Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
 Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.gz
@@ -50,11 +50,5 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/
 
 
 %changelog
-* Mon Jun  4 2001 Martin Blais <blais@iro.umontreal.ca>
-- fixed for QTDIR
-
-* Wed May 30 2001 Peder Stray <peder@linpro.no>
-- fixed .spec-file
-
-* Tue May 29 2001 Martin Blais <blais@discreet.com> 1.11.0-1
-- 1.11.0
+* Mon Jun  4 2001 Martin Blais <blais@discreet.com> 1.12-1
+- 1.12

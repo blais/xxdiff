@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 162 2001-05-28 18:32:02Z blais $
- * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
+ * $Id: app.cpp 178 2001-06-02 01:26:38Z blais $
+ * $Date: 2001-06-01 21:26:38 -0400 (Fri, 01 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -123,7 +123,7 @@ enum MenuIds {
    ID_ToggleShowFilenames,
    ID_ToggleHorizontalDiffs,
    ID_ToggleIgnoreHorizontalWs,
-   ID_ToggleCutAndPasteAnnotations,
+   ID_ToggleFormatClipboardText,
    ID_ToggleIgnoreTrailing,
    ID_ToggleIgnoreWhitespace,
    ID_ToggleIgnoreCase,
@@ -137,9 +137,15 @@ enum MenuIds {
    ID_TabsAtThree,
    ID_TabsAtFour,
    ID_TabsAtEight,
+   ID_IgnoreFileNone,
+   ID_IgnoreFileLeft,
+   ID_IgnoreFileMiddle,
+   ID_IgnoreFileRight,
    ID_View_DiffFilesAtCursor,
    ID_View_CopyRightToLeft,
-   ID_View_CopyLeftToRight 
+   ID_View_CopyLeftToRight,
+   ID_View_RemoveLeft,
+   ID_View_RemoveRight
 };
 
 
@@ -426,7 +432,7 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
 
    // Parse the resources given in the command line.
    parseCommandLineResources();
-   
+
 #if QT_VERSION < 220
    setFont( _resources->getAppFont(), true );
 #endif
@@ -1116,6 +1122,14 @@ void XxApp::createMenus()
          "Copy right file on left", this, SLOT(copyFileRightToLeft()),
          _resources->getAccelerator( XxResources::ACCEL_COPY_RIGHT_TO_LEFT )
       );
+      _menuids[ ID_View_RemoveLeft ] = viewMenu->insertItem( 
+         "Remove file on left", this, SLOT(removeFileLeft()),
+         _resources->getAccelerator( XxResources::ACCEL_REMOVE_LEFT )
+      );
+      _menuids[ ID_View_RemoveRight ] = viewMenu->insertItem( 
+         "Remove file on right", this, SLOT(removeFileRight()),
+         _resources->getAccelerator( XxResources::ACCEL_REMOVE_RIGHT )
+      );
       viewMenu->insertSeparator();
    }
    viewMenu->insertItem( 
@@ -1399,11 +1413,11 @@ void XxApp::createMenus()
    }
 
    _displayMenu->insertSeparator();
-   _menuids[ ID_ToggleCutAndPasteAnnotations ] = _displayMenu->insertItem( 
-      "Cut-and-paste annotations", this, 
-      SLOT(toggleCutAndPasteAnnotations()),
+   _menuids[ ID_ToggleFormatClipboardText ] = _displayMenu->insertItem( 
+      "Format clipboard text", this, 
+      SLOT(toggleFormatClipboardText()),
       _resources->getAccelerator( 
-         XxResources::ACCEL_TOGGLE_CUT_AND_PASTE_ANNOTATIONS 
+         XxResources::ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT
       )
    );
 
@@ -1435,6 +1449,29 @@ void XxApp::createMenus()
       _resources->getAccelerator( XxResources::ACCEL_TOGGLE_MARKERS )
    );
    _displayMenu->setItemEnabled( _menuids[ ID_ToggleShowMarkers ], false );
+
+
+   if ( _filesAreDirectories == false ) {
+
+      _displayMenu->insertSeparator();
+      
+      _menuids[ ID_IgnoreFileNone ] = _displayMenu->insertItem( 
+         "No ignore", this, SLOT(ignoreFileNone()),
+         _resources->getAccelerator( XxResources::ACCEL_IGNORE_FILE_NONE )
+      );
+      _menuids[ ID_IgnoreFileLeft ] = _displayMenu->insertItem( 
+         "Ignore left file", this, SLOT(ignoreFileLeft()),
+         _resources->getAccelerator( XxResources::ACCEL_IGNORE_FILE_LEFT )
+      );
+      _menuids[ ID_IgnoreFileMiddle ] = _displayMenu->insertItem( 
+         "Ignore middle file", this, SLOT(ignoreFileMiddle()),
+         _resources->getAccelerator( XxResources::ACCEL_IGNORE_FILE_MIDDLE )
+      );
+      _menuids[ ID_IgnoreFileRight ] = _displayMenu->insertItem( 
+         "Ignore right file", this, SLOT(ignoreFileRight()),
+         _resources->getAccelerator( XxResources::ACCEL_IGNORE_FILE_RIGHT )
+      );
+   }
 
 
    _displayMenu->setCheckable( true );
@@ -2073,6 +2110,11 @@ QPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
                                   ( no2 != -1 && !dirs ) );
       _viewPopup->setItemEnabled( _menuids[ ID_View_CopyLeftToRight ],
                                   ( no1 != -1 && !dirs ) );
+
+      _viewPopup->setItemEnabled( _menuids[ ID_View_RemoveLeft ],
+                                  ( no1 != -1 && !dirs ) );
+      _viewPopup->setItemEnabled( _menuids[ ID_View_RemoveRight ],
+                                  ( no2 != -1 && !dirs ) );
    }
 
    return _viewPopup;
@@ -3148,6 +3190,67 @@ void XxApp::copyFile( XxFno nnno ) const
 
 //------------------------------------------------------------------------------
 //
+void XxApp::removeFileLeft()
+{
+   removeFile( 0 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::removeFileRight()
+{
+   removeFile( 1 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::removeFile( XxFno nnno ) const
+{
+   XX_ASSERT( _filesAreDirectories == true );
+   if ( _nbFiles != 2 || _diffs.get() == 0 ) {
+      return;
+   }
+
+   const XxFno nosrc = nnno;
+
+   // First check if the file on the right exists, both by diff contents and by
+   // stat'ing file.
+   XxDln cursorLine = getCursorLine();
+   const XxLine& line = _diffs->getLine( cursorLine );
+
+   // Get filenames.
+   XxFln fline = line.getLineNo( nosrc );
+   if ( fline == -1 ) {
+      QMessageBox* box = new XxSuicideMessageBox( 
+         _mainWindow, "Error.", "File is empty.", QMessageBox::Warning
+      );
+      box->show();
+      return;
+   }
+   std::string filesrc = _files[nosrc]->getFileAtLine( fline );
+
+   int resp = QMessageBox::warning( 
+      _mainWindow, "xxdiff", "Delete file... are you sure?",
+      "Ok", "Cancel", QString::null, 0, 1
+   );
+   if ( resp == 1 ) {
+      // User has canceled.
+      return;
+   }
+   // Continue anyway.
+
+   // Remove file.
+   if ( XxUtil::removeFile( filesrc.c_str() ) != 0 ) {
+      QMessageBox* box = new XxSuicideMessageBox( 
+         _mainWindow, "Error.", "Error deleting file.", QMessageBox::Warning 
+      );
+      box->show();
+      return;
+   }
+}
+
+//------------------------------------------------------------------------------
+//
 void XxApp::nextDifference()
 {
    if ( _diffs.get() != 0 ) {
@@ -3759,10 +3862,46 @@ void XxApp::toggleIgnoreHorizontalWs()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::toggleCutAndPasteAnnotations()
+void XxApp::toggleFormatClipboardText()
 {
-   _resources->toggleBoolOpt( XxResources::CUT_AND_PASTE_ANNOTATIONS );
+   _resources->toggleBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT );
    synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::ignoreFileNone()
+{
+   _resources->setIgnoreFile( XxResources::IGNORE_NONE );
+   synchronizeUI();
+   repaintTexts();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::ignoreFileLeft()
+{
+   _resources->setIgnoreFile( XxResources::IGNORE_LEFT );
+   synchronizeUI();
+   repaintTexts();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::ignoreFileMiddle()
+{
+   _resources->setIgnoreFile( XxResources::IGNORE_MIDDLE );
+   synchronizeUI();
+   repaintTexts();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::ignoreFileRight()
+{
+   _resources->setIgnoreFile( XxResources::IGNORE_RIGHT );
+   synchronizeUI();
+   repaintTexts();
 }
 
 //------------------------------------------------------------------------------
@@ -3930,13 +4069,14 @@ void XxApp::synchronizeUI()
    }
 
    _displayMenu->setItemChecked( 
-      _menuids[ ID_ToggleCutAndPasteAnnotations ],
-      _resources->getBoolOpt( XxResources::CUT_AND_PASTE_ANNOTATIONS )
+      _menuids[ ID_ToggleFormatClipboardText ],
+      _resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
    );
 
    if ( _filesAreDirectories == false ) {
 
       uint tabWidth = _resources->getTabWidth();
+      _displayMenu->setItemChecked( _menuids[ ID_TabsAtThree ], tabWidth == 3 );
       _displayMenu->setItemChecked( _menuids[ ID_TabsAtFour ], tabWidth == 4 );
       _displayMenu->setItemChecked( _menuids[ ID_TabsAtEight ], tabWidth == 8 );
    }
@@ -3949,6 +4089,19 @@ void XxApp::synchronizeUI()
       _menuids[ ID_ToggleShowMarkers ], 
       _resources->getBoolOpt( XxResources::SHOW_MARKERS )
    );
+
+   if ( _filesAreDirectories == false ) {
+
+      XxResources::IgnoreFile ignoreFile = _resources->getIgnoreFile();
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileNone ], 
+                                    ignoreFile == XxResources::IGNORE_NONE );
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileLeft ], 
+                                    ignoreFile == XxResources::IGNORE_LEFT );
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileMiddle ], 
+                                    ignoreFile == XxResources::IGNORE_MIDDLE );
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileRight ], 
+                                    ignoreFile == XxResources::IGNORE_RIGHT );
+   }
 
    //---------------------------------------------------------------------------
 

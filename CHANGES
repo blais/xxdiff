@@ -2,15 +2,26 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 173 2001-05-31 04:03:39Z blais $
+# $Id: CHANGES 189 2001-06-04 21:47:40Z blais $
 #
 
 Current development version:
-
-
-
-<<<
-
+  
+   * Implemented options ui for ignore file feature.
+   * Fixed spec file for redhat compliance and succesfully sbumitted to
+     rhcontrib.
+   * Finished implementing `ignore file' feature.
+   * More progress implementing ignore file, almost done.
+   * New feature: implemented ignore file (in 3-way diffs mode only).
+   * Fixed missing tab-at-3 ui update.
+   * New feature: remove file.
+   * Added rudimentary support in the code for making timings using gtod().
+     Timings show that parsing resources is not a big problem under IRIX.
+   * Removed filename from clipboard text (not needed, usually annoying).
+   * Added `clipboard text format' format string to resources and
+     infrastructure, and implemented format clipboard text.
+   * Renamed `cut-n-paste annotations' to `clipboard text formatted' because
+     annotations are a different thing in cvs and clearcase.
    * Fixed spec file (thx to Peder Stray peder@linpro.no).
 
 ------------------------------
@@ -18,6 +29,9 @@ Current development version:
 Version 1.11:
 
    * Release.
+
+Version 1.10.1:
+
    * Fixed small symbol rcfile parsing problem
      (added symbols for full font spec)
    * Fixed --args with directory diffs (was not working).
@@ -721,26 +735,58 @@ Version 1.0:
 Wishlist/ToDo list:
 ------------------------------
 
+ - builder for patches
+ - drag sb overview
+ - indicator for unselected hunks
+
+great blue overhaul:
+ - replace all std::string to QString so we have just one type of strings.
+ - optimize resource loading using more involved lex/yacc parsing
+ - resource initialization should not be done through strings
+ - implement clearer doc/view model, where app is view/ui, and resources is data
+ - view should contains display data though, separate between display data and
+   other data
+
+
+
+
+ - resources must be able to:
+    - i like to have an enum list of all resources
+    - list themselves
+    - know which ones have changed since a snapshot
+    - be fast to load (don't query for all of them)
+    - parse better
+    - be easy to add a new one, all stuff in one place if possible
+    - have simple documentation for them
+    - support parsing from a file and a string or a list of strings
+
+
+ - pengeastegg
+
+ - eradicate std::string and standardize on QString, except for converting from
+   an ostringstream.  we want only one type of string, and we can't really
+   eradicate QString because we use Qt.  besides it's not that bad and all those
+   string conversions are probably costing something.
+
  - implement indicator for "remaining unselected regions"
-
- - configurable annotations (and remove filename)
-   - filename
-   - file number (1,2,3)
-   - line number
-   - line contents
-
- - optimize resource loading, perhaps put directly in grammar
-   - do timings to find out if it is a problem right now
-
- - mv xxct to xxcleartool and implement using distutils
- - separate cvs stuff from xxcvs into cvslib, use distutils
-
- - accept a patch file / make a patch file instead of just "save"
 
  - cvs and clearcase: write interface/protocol scripts
    - implement annotations query on top of that!!!
 
- - configure.in: QTDIR/lib path.  Try compiling from root user under linux box.
+ - optimize resource loading, perhaps put directly in grammar
+   - do timings to find out if it is a problem right now
+   - use custom lex/yacc with tags and all.
+
+ - mv xxct to xxcleartool and implement using distutils
+ - separate cvs stuff from xxcvs into cvslib, use distutils
+
+ - figure out why when a char isn't read by lex/yacc it is printed on stdout,
+   and fix that, it's annoying and stupid
+
+ - accept a patch file / make a patch file instead of just "save"
+
+ - configure.in: QTDIR/lib path.  Try compiling from root user under linux box
+   without a QTDIR set.
 
  - cvs unmerge:
 
@@ -750,20 +796,15 @@ Wishlist/ToDo list:
 
    2) build it in xxcvs
 
-
- - also add 'remove' to copy file menu, when appropriate, to make it
-   symmetrical.
-
- - link with GNU diff, script to modify the source code
-
  - hide one file's diffs using color table in 3-way diffs
 
  - merged view: should have the option of seeing both files' hunks
 
  - highlight search results (added over, markers)
 
- - I want mouse-drag with third button.
+ - show two or three sides in merged view, as an option
 
+ - link with GNU diff, script to modify the source code
 
 
 gijsbert dinner:

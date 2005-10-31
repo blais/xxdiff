@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 159 2001-05-28 02:34:04Z blais $
- * $Date: 2001-05-27 22:34:04 -0400 (Sun, 27 May 2001) $
+ * $Id: resources.cpp 183 2001-06-04 05:08:52Z blais $
+ * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -335,6 +335,14 @@ const nameDoc mapStrings[
      "accel.copyFileLeftToRight",
      "Accelerator for ``copy file left to right'' command."
    }, 
+   { XxResources::ACCEL_REMOVE_LEFT,
+     "accel.removeFileLeft",
+     "Accelerator for ``remove left file'' command."
+   }, 
+   { XxResources::ACCEL_REMOVE_RIGHT,
+     "accel.removeFileRight",
+     "Accelerator for ``remove right file'' command."
+   }, 
    { XxResources::ACCEL_NEXT_DIFFERENCE,
      "accel.nextDifference",
      "Accelerator for ``next difference'' command."
@@ -543,9 +551,25 @@ const nameDoc mapStrings[
      "accel.toggleIgnoreHorizontalWhitespace",
      "Accelerator for ``toggle ignore horizontal whitespace'' command."
    },
-   { XxResources::ACCEL_TOGGLE_CUT_AND_PASTE_ANNOTATIONS,
-     "accel.toggleCutAndPasteAnnotations",
-     "Accelerator for ``toggle cut-and-paste annotations'' command."
+   { XxResources::ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT,
+     "accel.toggleFormatClipboardText",
+     "Accelerator for ``toggle format clipboard text'' command."
+   },
+   { XxResources::ACCEL_IGNORE_FILE_NONE,
+     "accel.ignoreFileNone",
+     "Accelerator for ``ignore no files'' command."
+   },
+   { XxResources::ACCEL_IGNORE_FILE_LEFT,
+     "accel.ignoreFileLeft",
+     "Accelerator for ``ignore left file'' command."
+   },
+   { XxResources::ACCEL_IGNORE_FILE_MIDDLE,
+     "accel.ignoreFileMiddle",
+     "Accelerator for ``ignore middle file'' command."
+   },
+   { XxResources::ACCEL_IGNORE_FILE_RIGHT,
+     "accel.ignoreFileRight",
+     "Accelerator for ``ignore right file'' command."
    },
    { XxResources::ACCEL_HELP_MAN_PAGE,
      "accel.helpManPage",
@@ -790,6 +814,14 @@ const nameDoc mapStrings[
      "color.deletedSup.fore",
      "Foreground color for deleted text (shadowed)."
    },
+   { XxResources::COLOR_BACK_IGNORED,
+     "color.ignored.back",
+     "Background color for ignored text."
+   },
+   { XxResources::COLOR_FORE_IGNORED,
+     "color.ignored.fore",
+     "Foreground color for ignored text."
+   },
 
    { XxResources::COLOR_BACK_DIRECTORIES,
      "color.directories.back",
@@ -897,9 +929,9 @@ const nameDoc mapStrings[
      "ignoreHorizontalWhitespace",
      "If this resource is true, the horizontal diffs ignore whitespace."
    },
-   { XxResources::CUT_AND_PASTE_ANNOTATIONS,
-     "cutAndPasteAnnotations",
-     "If this resource is true, add annotations when pasting from xxdiff hunks."
+   { XxResources::FORMAT_CLIPBOARD_TEXT,
+     "formatClipboardText",
+     "If this resource is true, format text before placing it in the clipboard."
    },
    { XxResources::IGNORE_ERRORS,
      "ignoreErrors",
@@ -1044,10 +1076,13 @@ const nameDoc mapStrings[
    { XxResources::VERTICAL_LINE_POS,
      "verticalLinePosition",
      "Horizontal position of vertical line (in characters)."
+   },
+   { XxResources::CLIPBOARD_TEXT_FORMAT,
+     "clipboardTextFormat",
+     "Format string for formatted text that goes in the clipboard."
    }
 
 };
-
 
 /*==============================================================================
  * LOCAL CLASS XxDefaultsParser
@@ -1140,7 +1175,7 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::ACCEL_TOGGLE_OVERVIEW ] = "Alt+O";
    _map[ XxResources::ACCEL_TOGGLE_SHOW_FILENAMES ] = "Alt+S";
    _map[ XxResources::ACCEL_TOGGLE_HORIZONTAL_DIFFS ] = "Alt+W";
-   _map[ XxResources::ACCEL_TOGGLE_CUT_AND_PASTE_ANNOTATIONS ] = "Alt+A";
+   _map[ XxResources::ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT ] = "Alt+A";
    _map[ XxResources::ACCEL_HELP_ON_CONTEXT ] = "Shift+F1";
 
    _map[ XxResources::ACCEL_MERGED_CLOSE ] = "Alt+W";
@@ -1220,6 +1255,9 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::COLOR_BACK_DELETED_SUP      ] = "slategrey";
    _map[ XxResources::COLOR_FORE_DELETED_SUP      ] = "black";
 
+   _map[ XxResources::COLOR_BACK_IGNORED          ] = "grey70";
+   _map[ XxResources::COLOR_FORE_IGNORED          ] = "grey30";
+
    _map[ XxResources::COLOR_BACK_DIRECTORIES      ] = "mediumturquoise";
    _map[ XxResources::COLOR_FORE_DIRECTORIES      ] = "black";
                                                                       
@@ -1245,7 +1283,7 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::SHOW_FILENAMES ] = "false";
    _map[ XxResources::HORIZONTAL_DIFFS ] = "false";
    _map[ XxResources::IGNORE_HORIZONTAL_WS ] = "true";
-   _map[ XxResources::CUT_AND_PASTE_ANNOTATIONS ] = "false";
+   _map[ XxResources::FORMAT_CLIPBOARD_TEXT ] = "false";
    _map[ XxResources::IGNORE_ERRORS ] = "false";
    _map[ XxResources::WARN_ABOUT_UNSAVED ] = "false";
    _map[ XxResources::DISABLE_CURSOR_DISPLAY ] = "false";
@@ -1287,6 +1325,7 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::OVERVIEW_FILE_WIDTH ] = "20";
    _map[ XxResources::OVERVIEW_SEP_WIDTH ] = "14";
    _map[ XxResources::VERTICAL_LINE_POS ] = "80";
+   _map[ XxResources::CLIPBOARD_TEXT_FORMAT ] = "%N: %L";
 
 }
 
@@ -1558,6 +1597,9 @@ XxResources::XxResources()
    _fontApp.setItalic( true ); 
    _fontApp.setBold( true );
 
+   // FIXME should all be initialized like this.
+   _ignoreFile = IGNORE_NONE;
+
    // Initialize to defaults.
    XxDefaultsParser defaultsParser;
    parse( defaultsParser );
@@ -1690,6 +1732,9 @@ void XxResources::parse( XxResourcesParser& parser )
    }
    if ( query( parser, VERTICAL_LINE_POS, val ) ) {
       _verticalLinePos = atoi( val.c_str() );
+   }
+   if ( query( parser, CLIPBOARD_TEXT_FORMAT, val ) ) {
+      _clipboardTextFormat = val;
    }
    
 }   
@@ -1834,13 +1879,37 @@ void XxResources::setColor(
    _colors[ i ] = color;
 }
 
+//------------------------------------------------------------------------------
+//
+void XxResources::getLineColorType(
+   const XxLine& line,
+   const XxFno   no,
+   Resource&     dtype,
+   Resource&     dtypeSup
+) const
+{
+   if ( _ignoreFile == IGNORE_NONE ) {
+      getLineColorTypeStd( line, line.getType(), no, dtype, dtypeSup );
+   }
+   else {
+      if ( no == (_ignoreFile - 1) ) {
+         dtype = dtypeSup = COLOR_BACK_IGNORED;
+      }
+      else {
+         XxLine::Type newType = 
+            XxLine::_ignoreConvertTables[ int(_ignoreFile) ][ line.getType() ];
+         getLineColorTypeStd( line, newType, no, dtype, dtypeSup );
+      }
+   }
+}
 
 //------------------------------------------------------------------------------
 //
-XxResources::Resource XxResources::getLineColorType(
+bool XxResources::getLineColorIfSelected(
    const XxLine& line,
    const XxFno   no,
-   const bool    sup
+   Resource&     dtype,
+   Resource&     dtypeSup
 ) const
 {
    XxLine::Selection sel = line.getSelection();
@@ -1849,8 +1918,9 @@ XxResources::Resource XxResources::getLineColorType(
         sel == XxLine::SEL3 ) {
 
       if ( XxFno(sel) == no ) {
-         return ( sup == false ) ?
-            COLOR_BACK_SELECTED : COLOR_BACK_SELECTED_SUP;
+         dtype = COLOR_BACK_SELECTED;
+         dtypeSup = COLOR_BACK_SELECTED_SUP;
+         return true;
       }
       else if ( 
          ( ( line.getType() == XxLine::DELETE_1 || 
@@ -1870,43 +1940,47 @@ XxResources::Resource XxResources::getLineColorType(
       ) {
          // For regions that are not selected but whose text is the same as the
          // ones that are selected, color as selected as well.
-         return ( sup == false ) ?
-            COLOR_BACK_SELECTED : COLOR_BACK_SELECTED_SUP;
+         dtype = COLOR_BACK_SELECTED;
+         dtypeSup = COLOR_BACK_SELECTED_SUP;
+         return true;
       }
       else {
-         return ( sup == false ) ?
-            COLOR_BACK_DELETED : COLOR_BACK_DELETED_SUP;
+         dtype = COLOR_BACK_DELETED;
+         dtypeSup = COLOR_BACK_DELETED_SUP;
+         return true;
       }
    }
    else if ( sel == XxLine::NEITHER ) {
-      return ( sup == false ) ?
-         COLOR_BACK_DELETED : COLOR_BACK_DELETED_SUP;
+      dtype = COLOR_BACK_DELETED;
+      dtypeSup = COLOR_BACK_DELETED_SUP;
+      return true;
+   }
+   // else
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::getLineColorTypeStd(
+   const XxLine&      line,
+   const XxLine::Type newType,
+   const XxFno        no,
+   Resource&          dtype,
+   Resource&          dtypeSup
+) const
+{
+   if ( getLineColorIfSelected( line, no, dtype, dtypeSup ) ) {
+      return;
    }
    // else
 
-   int lno = -1;
-   switch ( line.getType() ) {
-      case XxLine::SAME: lno = -1; break;
-      case XxLine::DIFF_1: lno = 0; break;
-      case XxLine::DIFF_2: lno = 1; break;
-      case XxLine::DIFF_3: lno = 2; break;
-      case XxLine::DELETE_1: lno = 0; break;
-      case XxLine::DELETE_2: lno = 1; break;
-      case XxLine::DELETE_3: lno = 2; break;
-      case XxLine::INSERT_1: lno = 0; break;
-      case XxLine::INSERT_2: lno = 1; break;
-      case XxLine::INSERT_3: lno = 2; break;
-      case XxLine::DIFF_ALL: lno = -1; break;
-      case XxLine::DIFFDEL_1: lno = 0; break;
-      case XxLine::DIFFDEL_2: lno = 1; break;
-      case XxLine::DIFFDEL_3: lno = 2; break;
-      case XxLine::DIRECTORIES: lno = -1; break;
-   }
+   int lno = line.mapTypeToFileNo( newType );
 
-   switch ( line.getType() ) {
+   switch ( newType ) {
 
       case XxLine::SAME: {
-         return COLOR_BACK_SAME;
+         dtype = dtypeSup = COLOR_BACK_SAME;
+         return;
       }
 
       case XxLine::DIFF_1: 
@@ -1914,26 +1988,32 @@ XxResources::Resource XxResources::getLineColorType(
       case XxLine::DIFF_3: {
          if ( no == lno ) {
             if ( line.getLineNo(no) == -1 ) {
-               return COLOR_BACK_DIFF_ONE_NONLY;
+               dtype = dtypeSup = COLOR_BACK_DIFF_ONE_NONLY;
+               return;
             }
             else if ( line.getLineNo((no+1)%3) == -1 ) {
-               return COLOR_BACK_DIFF_ONE_ONLY;
+               dtype = dtypeSup = COLOR_BACK_DIFF_ONE_ONLY;
+               return;
             }
             else {
-               return ( sup == false ) ?
-                  COLOR_BACK_DIFF_ONE : COLOR_BACK_DIFF_ONE_SUP;
+               dtype = COLOR_BACK_DIFF_ONE;
+               dtypeSup = COLOR_BACK_DIFF_ONE_SUP;
+               return;
             }
          }
          else {
             if ( line.getLineNo(no) == -1 ) {
-               return COLOR_BACK_DIFF_TWO_NONLY;
+               dtype = dtypeSup = COLOR_BACK_DIFF_TWO_NONLY;
+               return;
             }
             else if ( line.getLineNo((no+1)%3) == -1 ) {
-               return COLOR_BACK_DIFF_TWO_ONLY;
+               dtype = dtypeSup = COLOR_BACK_DIFF_TWO_ONLY;
+               return;
             }
             else {
-               return ( sup == false ) ?
-                  COLOR_BACK_DIFF_TWO : COLOR_BACK_DIFF_TWO_SUP;
+               dtype = COLOR_BACK_DIFF_TWO;
+               dtypeSup = COLOR_BACK_DIFF_TWO_SUP;
+               return;
             }
          }
       }
@@ -1942,10 +2022,12 @@ XxResources::Resource XxResources::getLineColorType(
       case XxLine::DELETE_2:
       case XxLine::DELETE_3: {
          if ( no == lno ) {
-            return COLOR_BACK_DELETE_BLANK;
+            dtype = dtypeSup = COLOR_BACK_DELETE_BLANK;
+            return;
          }
          else {
-            return COLOR_BACK_DELETE;
+            dtype = dtypeSup = COLOR_BACK_DELETE;
+            return;
          }
       }
 
@@ -1953,24 +2035,29 @@ XxResources::Resource XxResources::getLineColorType(
       case XxLine::INSERT_2:
       case XxLine::INSERT_3: {
          if ( no == lno ) {
-            return COLOR_BACK_INSERT;
+            dtype = dtypeSup = COLOR_BACK_INSERT;
+            return;
          }
          else {
-            return COLOR_BACK_INSERT_BLANK;
+            dtype = dtypeSup = COLOR_BACK_INSERT_BLANK;
+            return;
          }
       }
 
       case XxLine::DIFF_ALL: {
          if ( line.getLineNo(no) == -1 ) {
-            return COLOR_BACK_DIFF_ALL_NONLY;
+            dtype = dtypeSup = COLOR_BACK_DIFF_ALL_NONLY;
+            return;
          }
          else if ( line.getLineNo((no+1)%3) == -1 &&
                    line.getLineNo((no+2)%3) == -1 ) {
-            return COLOR_BACK_DIFF_ALL_ONLY;
+            dtype = dtypeSup = COLOR_BACK_DIFF_ALL_ONLY;
+            return;
          }
          else {
-            return ( sup == false ) ?
-               COLOR_BACK_DIFF_ALL : COLOR_BACK_DIFF_ALL_SUP;
+            dtype = COLOR_BACK_DIFF_ALL;
+            dtypeSup = COLOR_BACK_DIFF_ALL_SUP;
+            return;
          }
       }
 
@@ -1978,29 +2065,33 @@ XxResources::Resource XxResources::getLineColorType(
       case XxLine::DIFFDEL_2:
       case XxLine::DIFFDEL_3: {
          if ( no == lno ) {
-            return COLOR_BACK_DIFFDEL_BLANK;
+            dtype = dtypeSup = COLOR_BACK_DIFFDEL_BLANK;
+            return;
          }
          // else
          if ( line.getLineNo(no) == -1 ) {
-            return COLOR_BACK_DIFFDEL_NONLY;
+            dtype = dtypeSup = COLOR_BACK_DIFFDEL_NONLY;
+            return;
          }
          else if ( line.getLineNo((no+1)%3) == -1 &&
                    line.getLineNo((no+2)%3) == -1 ) {
-            return COLOR_BACK_DIFFDEL_ONLY;
+            dtype = dtypeSup = COLOR_BACK_DIFFDEL_ONLY;
+            return;
          }
          else {
-            return ( sup == false ) ?
-               COLOR_BACK_DIFFDEL : COLOR_BACK_DIFFDEL_SUP;
+            dtype = COLOR_BACK_DIFFDEL;
+            dtypeSup = COLOR_BACK_DIFFDEL_SUP;
+            return;
          }
       }
 
       case XxLine::DIRECTORIES: {
-         return COLOR_BACK_DIRECTORIES;
+         dtype = dtypeSup = COLOR_BACK_DIRECTORIES;
+         return;
       }
-
    }
 
-   return COLOR_BACK_SAME; // unreached.
+   dtype = dtypeSup = COLOR_BACK_SAME; // unreached.
 }
 
 //------------------------------------------------------------------------------
@@ -2152,6 +2243,15 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( ofw != _overviewSepWidth ) {
          writeDocAttrib( this, os, VERTICAL_LINE_POS );
          os << _overviewSepWidth;
+         os << endl << endl;
+      }
+   }
+
+   {
+      query( defaults, CLIPBOARD_TEXT_FORMAT, val );
+      if ( val != _clipboardTextFormat ) {
+         writeDocAttrib( this, os, CLIPBOARD_TEXT_FORMAT );
+         os << _clipboardTextFormat;
          os << endl << endl;
       }
    }

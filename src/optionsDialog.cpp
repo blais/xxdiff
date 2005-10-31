@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 161 2001-05-28 14:47:52Z blais $
- * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
+ * $Id: optionsDialog.cpp 186 2001-06-04 20:16:12Z blais $
+ * $Date: 2001-06-04 16:16:12 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -40,6 +40,7 @@
 #include <qcolor.h>
 #include <qcolordialog.h>
 #include <qlabel.h>
+#include <qcombobox.h>
 
 #include <map>
 
@@ -175,12 +176,14 @@ XxOptionsDialog::XxOptionsDialog(
             this, SLOT( spinboxTabWidth(int) ) );
    connect( _checkboxDrawVerticalLine, SIGNAL( stateChanged(int) ), 
             this, SLOT( checkboxDrawVerticalLine(int) ) );
+   connect( _comboIgnoreFile, SIGNAL( textChanged(const QString&) ), 
+            this, SLOT( comboIgnoreFile(const QString&) ) );
 
    connect( _checkboxIgnoreFileChanges, SIGNAL( stateChanged(int) ), 
             this, SLOT( checkboxIgnoreFileChanges(int) ) );
 
-   connect( _checkboxCutAndPasteAnnotations, SIGNAL( stateChanged(int) ), 
-            this, SLOT( checkboxCutAndPasteAnnotations(int) ) );
+   connect( _checkboxFormatClipboardText, SIGNAL( stateChanged(int) ),
+            this, SLOT( checkboxFormatClipboardText(int) ) );
 
    //---------------------------------------------------------------------------
    // Colors
@@ -315,12 +318,19 @@ void XxOptionsDialog::synchronize()
       resources->getBoolOpt( XxResources::SHOW_VERTICAL_LINE )
    );
 
+   _comboIgnoreFile->setCurrentItem( int( resources->getIgnoreFile() ) );
+
+
    _checkboxIgnoreFileChanges->setChecked(
       resources->getBoolOpt( XxResources::DIRDIFF_IGNORE_FILE_CHANGES )
    );
 
-   _checkboxCutAndPasteAnnotations->setChecked(
-      resources->getBoolOpt( XxResources::CUT_AND_PASTE_ANNOTATIONS )
+   _checkboxFormatClipboardText->setChecked(
+      resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
+   );
+
+   _lineeditClipboardTextFormat->setText(
+      QString( resources->getClipboardTextFormat().c_str() )
    );
 
    //---------------------------------------------------------------------------
@@ -415,6 +425,9 @@ void XxOptionsDialog::onApply()
 
    resources->setVerticalLinePos( _spinboxVlinePos->value() );
 
+   resources->setIgnoreFile(
+      XxResources::IgnoreFile(_comboIgnoreFile->currentItem())
+   );
 
    resources->setBoolOpt( XxResources::DIRDIFF_IGNORE_FILE_CHANGES, 
                           _checkboxIgnoreFileChanges->isChecked() );
@@ -422,8 +435,14 @@ void XxOptionsDialog::onApply()
       redoDiff = true;
    }
 
-   resources->setBoolOpt( XxResources::CUT_AND_PASTE_ANNOTATIONS, 
-                          _checkboxCutAndPasteAnnotations->isChecked() );
+   resources->setBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT, 
+                          _checkboxFormatClipboardText->isChecked() );
+
+   std::string oldClipboardFormat = resources->getClipboardTextFormat();
+   const char* newClipboardFormat = _lineeditCommandFiles2->text().ascii();
+   if ( ::strcmp( newClipboardFormat, oldClipboardFormat.c_str() ) != 0 ) {
+      resources->setClipboardTextFormat( newClipboardFormat );
+   }
 
    //---------------------------------------------------------------------------
    // Colors
@@ -619,7 +638,7 @@ void XxOptionsDialog::checkboxIgnoreFileChanges( int state )
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxCutAndPasteAnnotations( int state )
+void XxOptionsDialog::checkboxFormatClipboardText( int state )
 {
    // nop.
 }
@@ -627,6 +646,13 @@ void XxOptionsDialog::checkboxCutAndPasteAnnotations( int state )
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::checkboxDrawVerticalLine( int state )
+{
+   // nop.
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOptionsDialog::comboIgnoreFile( const QString& )
 {
    // nop.
 }

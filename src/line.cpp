@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: line.cpp 183 2001-06-04 05:08:52Z blais $
+ * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -74,6 +74,81 @@ XX_NAMESPACE_BEGIN
 /*==============================================================================
  * CLASS XxLine
  *============================================================================*/
+
+
+XxLine::Type XxLine::_ignoreConvertTables[4][ XxLine::NB_TYPES ] = {
+   // No ignore.
+   {  XxLine::SAME,
+      XxLine::DIFF_1,
+      XxLine::DIFF_2,
+      XxLine::DIFF_3,
+      XxLine::DELETE_1,
+      XxLine::DELETE_2,
+      XxLine::DELETE_3,
+      XxLine::INSERT_1,
+      XxLine::INSERT_2,
+      XxLine::INSERT_3,
+      XxLine::DIFF_ALL,
+      XxLine::DIFFDEL_1,
+      XxLine::DIFFDEL_2,
+      XxLine::DIFFDEL_3,
+      XxLine::DIRECTORIES
+   },
+   // Ignoring file 0.
+   { /*SAME*/ XxLine::SAME,
+     /*DIFF_1*/ XxLine::SAME,
+     /*DIFF_2*/ XxLine::DIFF_ALL,
+     /*DIFF_3*/ XxLine::DIFF_ALL,
+     /*DELETE_1*/ XxLine::SAME,
+     /*DELETE_2*/ XxLine::INSERT_3,
+     /*DELETE_3*/ XxLine::INSERT_2,
+     /*INSERT_1*/ XxLine::INSERT_1,
+     /*INSERT_2*/ XxLine::INSERT_2,
+     /*INSERT_3*/ XxLine::INSERT_3,
+     /*DIFF_ALL*/ XxLine::DIFF_ALL,
+     /*DIFFDEL_1*/ XxLine::DIFF_ALL,
+     /*DIFFDEL_2*/ XxLine::INSERT_3,
+     /*DIFFDEL_3*/ XxLine::INSERT_2,
+     /*DIRECTORIES*/ XxLine::DIRECTORIES
+   },
+   // Ignoring file 1.
+   { /*SAME*/ XxLine::SAME,
+     /*DIFF_1*/ XxLine::DIFF_ALL,
+     /*DIFF_2*/ XxLine::SAME,
+     /*DIFF_3*/ XxLine::DIFF_ALL,
+     /*DELETE_1*/ XxLine::INSERT_3,
+     /*DELETE_2*/ XxLine::SAME,
+     /*DELETE_3*/ XxLine::INSERT_1,
+     /*INSERT_1*/ XxLine::INSERT_1,
+     /*INSERT_2*/ XxLine::INSERT_2,
+     /*INSERT_3*/ XxLine::INSERT_3,
+     /*DIFF_ALL*/ XxLine::DIFF_ALL,
+     /*DIFFDEL_1*/ XxLine::INSERT_3,
+     /*DIFFDEL_2*/ XxLine::DIFF_ALL,
+     /*DIFFDEL_3*/ XxLine::INSERT_1,
+     /*DIRECTORIES*/ XxLine::DIRECTORIES
+   },
+   // Ignoring file 2.
+   { /*SAME*/ XxLine::SAME,
+     /*DIFF_1*/ XxLine::DIFF_ALL,
+     /*DIFF_2*/ XxLine::DIFF_ALL,
+     /*DIFF_3*/ XxLine::SAME,
+     /*DELETE_1*/ XxLine::INSERT_2,
+     /*DELETE_2*/ XxLine::INSERT_1,
+     /*DELETE_3*/ XxLine::SAME,
+     /*INSERT_1*/ XxLine::INSERT_1,
+     /*INSERT_2*/ XxLine::INSERT_2,
+     /*INSERT_3*/ XxLine::INSERT_3,
+     /*DIFF_ALL*/ XxLine::DIFF_ALL,
+     /*DIFFDEL_1*/ XxLine::INSERT_2,
+     /*DIFFDEL_2*/ XxLine::INSERT_1,
+     /*DIFFDEL_3*/ XxLine::DIFF_ALL,
+     /*DIRECTORIES*/ XxLine::DIRECTORIES
+   }
+};
+
+
+
 
 //------------------------------------------------------------------------------
 //

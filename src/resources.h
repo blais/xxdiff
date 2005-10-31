@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 161 2001-05-28 14:47:52Z blais $
- * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
+ * $Id: resources.h 183 2001-06-04 05:08:52Z blais $
+ * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -124,6 +124,8 @@ public:
       ACCEL_DIFF_FILES_AT_CURSOR, 
       ACCEL_COPY_RIGHT_TO_LEFT, 
       ACCEL_COPY_LEFT_TO_RIGHT, 
+      ACCEL_REMOVE_LEFT, 
+      ACCEL_REMOVE_RIGHT, 
       ACCEL_NEXT_DIFFERENCE, 
       ACCEL_PREVIOUS_DIFFERENCE, 
       ACCEL_NEXT_UNSELECTED, 
@@ -175,7 +177,11 @@ public:
       ACCEL_TOGGLE_SHOW_FILENAMES,
       ACCEL_TOGGLE_HORIZONTAL_DIFFS,
       ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS,
-      ACCEL_TOGGLE_CUT_AND_PASTE_ANNOTATIONS,
+      ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT,
+      ACCEL_IGNORE_FILE_NONE,
+      ACCEL_IGNORE_FILE_LEFT,
+      ACCEL_IGNORE_FILE_MIDDLE,
+      ACCEL_IGNORE_FILE_RIGHT,
       ACCEL_HELP_MAN_PAGE,
       ACCEL_HELP_COLOR_LEGEND,
       ACCEL_HELP_ON_CONTEXT,
@@ -247,6 +253,9 @@ public:
       COLOR_BACK_DELETED_SUP,         // (shadowed)
       COLOR_FORE_DELETED_SUP,
 
+      COLOR_BACK_IGNORED,             // ignored file.
+      COLOR_FORE_IGNORED,      
+
       COLOR_BACK_DIRECTORIES,         // directories in directory diffs.
       COLOR_FORE_DIRECTORIES,      
 
@@ -283,7 +292,7 @@ public:
       SHOW_FILENAMES,
       HORIZONTAL_DIFFS,
       IGNORE_HORIZONTAL_WS,
-      CUT_AND_PASTE_ANNOTATIONS,
+      FORMAT_CLIPBOARD_TEXT,
       IGNORE_ERRORS,
       WARN_ABOUT_UNSAVED,
       DISABLE_CURSOR_DISPLAY,
@@ -329,6 +338,7 @@ public:
       OVERVIEW_FILE_WIDTH,
       OVERVIEW_SEP_WIDTH,
       VERTICAL_LINE_POS,
+      CLIPBOARD_TEXT_FORMAT,
 
       RESOURCE_LAST
    };
@@ -364,14 +374,30 @@ public:
    const QFont& getTextFont() const;
    // </group>
 
+   // Get/set ignore file setting.
+   //
+   // Note: the values are important, as they map the ignore conversion table.
+   // (see line.h)
+   enum IgnoreFile {
+      IGNORE_NONE = 0,
+      IGNORE_LEFT = 1,
+      IGNORE_MIDDLE = 2,
+      IGNORE_RIGHT = 3
+   };
+   // <group>
+   IgnoreFile getIgnoreFile() const;
+   void setIgnoreFile( IgnoreFile ignoreFile );
+   // </group>
+
    // Provide resource: display type colors.
    //
    // Get display color for line text.  Returns the resource for the background
    // color.
-   Resource getLineColorType(
+   void getLineColorType(
       const XxLine& line,
       const XxFno   no,
-      const bool    sup = false
+      Resource&     type,
+      Resource&     typeSup
    ) const;
 
    // Returns a region type's color.
@@ -439,13 +465,18 @@ public:
    void toggleCommandOption( Resource cmdId, Resource cmdOptionId );
    // </group>
 
+   // Get/set clipboard format string.
+   // <group>
+   const std::string& getClipboardTextFormat() const;
+   void setClipboardTextFormat( const std::string& format );
+   // </group>
+
    // Print out the modified resources and associated documentation as a
    // .xxdiffrc file.
    void genInitFile( const XxApp*, std::ostream& ) const;
 
    // Print out the resource list, default values and documentation.
    void listResources( std::ostream& ) const;
-
 
    /*----- static member functions -----*/
 
@@ -477,23 +508,42 @@ private:
       std::string&          value
    ) const;
 
+   // Implementations of the line color type algorithms.
+   // <group>
+   void getLineColorTypeStd(
+      const XxLine&      line,
+      const XxLine::Type newType,
+      const XxFno        no,
+      Resource&          type,
+      Resource&          typeSup
+   ) const;
+   bool getLineColorIfSelected(
+      const XxLine& line,
+      const XxFno   no,
+      Resource&     type,
+      Resource&     typeSup
+   ) const;
+   // </group>
+
    /*----- data members -----*/
 
    static XxResources* _instance;
 
-   QRect	_preferredGeometry;
-   int		_accelerators[ ACCEL_LAST - ACCEL_FIRST ];
-   QFont	_fontApp;
-   QFont	_fontText;
-   QColor	_colors[ COLOR_LAST - COLOR_FIRST ];
-   bool		_boolOpts[ BOOL_LAST - BOOL_FIRST ];
-   uint 	_tabWidth;
-   std::string  _commands[ COMMAND_LAST - COMMAND_FIRST ];
-   std::string  _commandOptions[ CMDOPT_LAST - CMDOPT_FIRST ];
-   uint		_overviewFileWidth;
-   uint		_overviewSepWidth;
-   uint		_verticalLinePos;
-   std::string  _tags[ TAG_LAST - TAG_FIRST ];
+   QRect       _preferredGeometry;
+   int         _accelerators[ ACCEL_LAST - ACCEL_FIRST ];
+   QFont       _fontApp;
+   QFont       _fontText;
+   QColor      _colors[ COLOR_LAST - COLOR_FIRST ];
+   bool        _boolOpts[ BOOL_LAST - BOOL_FIRST ];
+   uint        _tabWidth;
+   std::string _commands[ COMMAND_LAST - COMMAND_FIRST ];
+   std::string _commandOptions[ CMDOPT_LAST - CMDOPT_FIRST ];
+   uint        _overviewFileWidth;
+   uint        _overviewSepWidth;
+   uint        _verticalLinePos;
+   std::string _tags[ TAG_LAST - TAG_FIRST ];
+   std::string _clipboardTextFormat;
+   IgnoreFile  _ignoreFile;
 
 };
 

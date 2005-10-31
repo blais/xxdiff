@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 150 2001-05-24 06:18:40Z blais $
- * $Date: 2001-05-24 02:18:40 -0400 (Thu, 24 May 2001) $
+ * $Id: overview.cpp 181 2001-06-04 01:23:53Z blais $
+ * $Date: 2001-06-03 21:23:53 -0400 (Sun, 03 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -210,8 +210,8 @@ void XxOverview::drawContents( QPainter* pp )
             int ddy = yend - prevy[ii] + 1;
 
             const XxLine& line = diffs->getLine( start );
-            XxResources::Resource dtype =
-               resources->getLineColorType( line, ii, false );
+            XxResources::Resource dtype, dtypeSup;
+            resources->getLineColorType( line, ii, dtype, dtypeSup );
 
             resources->getRegionColor( dtype, back, fore );
             brush.setColor( back );

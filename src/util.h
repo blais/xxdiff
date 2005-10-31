@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 162 2001-05-28 18:32:02Z blais $
- * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
+ * $Id: util.h 186 2001-06-04 20:16:12Z blais $
+ * $Date: 2001-06-04 16:16:12 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,6 +41,11 @@
 #define INCL_STD_SIGNAL
 #endif
 
+#ifndef INCL_STD_IOSTREAM
+#include <iostream>
+#define INCL_STD_IOSTREAM
+#endif
+
 
 XX_NAMESPACE_BEGIN
 
@@ -66,6 +71,10 @@ public:
    // Destination may be a directory name or a filename.
    // Returns 0 if no error (see pclose(3)).
    static int copyFile( const char* src, const char* dest );
+
+   // Remove a file.
+   // Returns 0 if no error.
+   static int removeFile( const char* src );
 
    // Conduct some tests to determine if the input file is suitable for
    // processing by our program.  Return true on success.
@@ -97,6 +106,12 @@ public:
    // This is code for an interruptible system() call as shown as suggested in
    // GNU libc/Linux system(3) man page.
    static int interruptibleSystem( const char* command );
+
+   // Time snapshot (extremely rudimentary, modulo 100 seconds)
+   static long getCurrentTime();
+
+   // Print time value to stream.
+   static void printTime( std::ostream& os, long time );
 
 };
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 163 2001-05-28 21:28:37Z blais $
- * $Date: 2001-05-28 17:28:37 -0400 (Mon, 28 May 2001) $
+ * $Id: util.cpp 183 2001-06-04 05:08:52Z blais $
+ * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -164,6 +165,14 @@ int XxUtil::copyFile( const char* src, const char* dest )
    FILE* f = popen( cmd.c_str(), "r" );
    int r = pclose( f );
    return r;
+}
+
+//------------------------------------------------------------------------------
+//
+int XxUtil::removeFile( const char* src )
+{
+   XX_ASSERT( src != 0 );
+   return unlink( src );
 }
 
 //------------------------------------------------------------------------------
@@ -408,5 +417,23 @@ int XxUtil::interruptibleSystem( const char* command )
    return -1;
 }
 
+//------------------------------------------------------------------------------
+//
+long XxUtil::getCurrentTime()
+{
+   struct timeval tv;
+   struct timezone tz;
+   gettimeofday( &tv, &tz );
+   return long( ( tv.tv_sec % 100 ) * 1e6 + tv.tv_usec );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxUtil::printTime( std::ostream& os, long time )
+{
+   long tv_sec = long( time / 1e6 );
+   long tv_usec = time - long( tv_sec * 1e6 );
+   os << "sec.usec=" << tv_sec << "." << tv_usec << std::endl;
+}
 
 XX_NAMESPACE_END

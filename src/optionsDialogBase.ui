@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>554</width>
-            <height>397</height>
+            <width>613</width>
+            <height>428</height>
         </rect>
     </property>
     <property stdset="1">
@@ -666,6 +666,65 @@
                                             </spacer>
                                         </hbox>
                                     </widget>
+                                    <widget>
+                                        <class>QLayoutWidget</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>Layout15</cstring>
+                                        </property>
+                                        <hbox>
+                                            <property stdset="1">
+                                                <name>margin</name>
+                                                <number>0</number>
+                                            </property>
+                                            <property stdset="1">
+                                                <name>spacing</name>
+                                                <number>6</number>
+                                            </property>
+                                            <widget>
+                                                <class>QLabel</class>
+                                                <property stdset="1">
+                                                    <name>name</name>
+                                                    <cstring>TextLabel1_3</cstring>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>text</name>
+                                                    <string>Ignore file (3-way only):</string>
+                                                </property>
+                                            </widget>
+                                            <widget>
+                                                <class>QComboBox</class>
+                                                <item>
+                                                    <property>
+                                                        <name>text</name>
+                                                        <string>Ignore none</string>
+                                                    </property>
+                                                </item>
+                                                <item>
+                                                    <property>
+                                                        <name>text</name>
+                                                        <string>Ignore left file</string>
+                                                    </property>
+                                                </item>
+                                                <item>
+                                                    <property>
+                                                        <name>text</name>
+                                                        <string>Ignore middle file</string>
+                                                    </property>
+                                                </item>
+                                                <item>
+                                                    <property>
+                                                        <name>text</name>
+                                                        <string>Ignore right file</string>
+                                                    </property>
+                                                </item>
+                                                <property stdset="1">
+                                                    <name>name</name>
+                                                    <cstring>_comboIgnoreFile</cstring>
+                                                </property>
+                                            </widget>
+                                        </hbox>
+                                    </widget>
                                 </vbox>
                             </widget>
                             <widget>
@@ -760,15 +819,74 @@
                                 <number>6</number>
                             </property>
                             <widget>
-                                <class>QCheckBox</class>
+                                <class>QLayoutWidget</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>_checkboxCutAndPasteAnnotations</cstring>
+                                    <cstring>Layout15</cstring>
                                 </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>Cut-and-paste annotations</string>
+                                <property>
+                                    <name>layoutSpacing</name>
                                 </property>
+                                <hbox>
+                                    <property stdset="1">
+                                        <name>margin</name>
+                                        <number>0</number>
+                                    </property>
+                                    <property stdset="1">
+                                        <name>spacing</name>
+                                        <number>4</number>
+                                    </property>
+                                    <widget>
+                                        <class>QCheckBox</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>_checkboxFormatClipboardText</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Format clipboard text</string>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property>
+                                            <name>name</name>
+                                            <cstring>Spacer7</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>orientation</name>
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>sizeType</name>
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property>
+                                            <name>sizeHint</name>
+                                            <size>
+                                                <width>20</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                    <widget>
+                                        <class>QLabel</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>TextLabel1_2</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Clipboard format:</string>
+                                        </property>
+                                    </widget>
+                                    <widget>
+                                        <class>QLineEdit</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>_lineeditClipboardTextFormat</cstring>
+                                        </property>
+                                    </widget>
+                                </hbox>
                             </widget>
                         </vbox>
                     </widget>

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 160 2001-05-28 14:39:15Z blais $
- * $Date: 2001-05-28 10:39:15 -0400 (Mon, 28 May 2001) $
+ * $Id: lineNumbers.cpp 181 2001-06-04 01:23:53Z blais $
+ * $Date: 2001-06-03 21:23:53 -0400 (Sun, 03 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -131,8 +131,8 @@ void XxLineNumbers::drawContents( QPainter* pp )
       // Set background and foreground colors.
       QColor bcolor;
       QColor fcolor;
-      XxResources::Resource dtype =
-         resources->getLineColorType( line, _no, false );
+      XxResources::Resource dtype, dtypeSup;
+      resources->getLineColorType( line, _no, dtype, dtypeSup );
       resources->getRegionColor( dtype, bcolor, fcolor );
       QBrush brush( bcolor );
 

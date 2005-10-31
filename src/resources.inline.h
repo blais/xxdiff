@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 161 2001-05-28 14:47:52Z blais $
- * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
+ * $Id: resources.inline.h 178 2001-06-02 01:26:38Z blais $
+ * $Date: 2001-06-01 21:26:38 -0400 (Fri, 01 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -158,6 +158,34 @@ inline uint XxResources::getOverviewSepWidth() const
 inline uint XxResources::getVerticalLinePos() const
 {
    return _verticalLinePos;
+}
+
+//------------------------------------------------------------------------------
+//
+inline const std::string& XxResources::getClipboardTextFormat() const
+{
+   return _clipboardTextFormat;
+}
+
+//------------------------------------------------------------------------------
+//
+inline void XxResources::setClipboardTextFormat( const std::string& format )
+{
+   _clipboardTextFormat = format;
+}
+
+//------------------------------------------------------------------------------
+//
+inline XxResources::IgnoreFile XxResources::getIgnoreFile() const
+{
+   return _ignoreFile;
+}
+
+//------------------------------------------------------------------------------
+//
+inline void XxResources::setIgnoreFile( IgnoreFile ignoreFile )
+{
+   _ignoreFile = ignoreFile;
 }
 
 XX_NAMESPACE_END
