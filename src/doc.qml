@@ -720,13 +720,13 @@ the following to indicate the conflictual regions:
 
 <p>
 <pre>
-Some merged text.
->>>>>>>> MYFILE
-I added this.
-========
-This line added in main branch.
-<<<<<<<< 1.1
-Some finetext.
+  Some merged text.
+  >>>>>>>> MYFILE
+  I added this.
+  ========
+  This line added in main branch.
+  <<<<<<<< 1.1
+  Some finetext.
 </pre>
 </p>
 
@@ -754,6 +754,15 @@ merge would be to use your source code management system to fetch the common
 ancestor revision, the latest/head of the main branch and to invoke xxdiff with
 your file, the ancestor and the latest/head. You can also tell xxdiff to
 initially perform all non-conflictual selections automatically.
+</p>
+
+<h3>Unmerging merge conflicts with three files</h3>
+
+<p>
+diff3 can be used to produce a merged file in which all the three files' regions
+are shown if there is a conflict. xxdiff can also parse these files and display
+them as a three-way diff. You then have to invoke xxdiff with the 'unmerge3'
+command-line argument to let it know you want the file split in three.
 </p>
 
 

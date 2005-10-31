@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 511 2002-02-19 19:13:57Z blais $
- * $Date: 2002-02-19 14:13:57 -0500 (Tue, 19 Feb 2002) $
+ * $Id: resources.cpp 527 2002-02-25 06:57:14Z blais $
+ * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -320,6 +320,7 @@ void XxResources::initializeOriginalXdiff()
    // Defaults match CVS format.
    _tags[ TAG_UNMERGE_START ] = "<<<<<<<";
    _tags[ TAG_UNMERGE_SEP ] = "=======";
+   _tags[ TAG_UNMERGE_SEP_EXTRA ] = "|||||||";
    _tags[ TAG_UNMERGE_END ] = ">>>>>>>";
 
    //---------------------------------------------------------------------------

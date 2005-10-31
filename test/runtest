@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $Source$
-# $Id: runtest 522 2002-02-23 22:02:53Z  $
+# $Id: runtest 534 2002-02-27 03:01:18Z  $
 #
 # Copyright (c) 2001, Martin Blais. All rights reserved.
 #
@@ -234,6 +234,12 @@ waitexit;
 testhdr "Unmerge with one file. Should work."
 
 $XXDIFF --unmerge unmerge/basic
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Unmerge3 with one file. Should work."
+
+$XXDIFF --unmerge3 unmerge/diff3merge
 waitexit;
 
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: buffer.cpp 527 2002-02-25 06:57:14Z blais $
+ * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -114,7 +114,7 @@ XxBuffer::XxBuffer(
 //------------------------------------------------------------------------------
 //
 XxBuffer::XxBuffer( 
-   const QString& filename, 
+   const QString& filename,
    const QString& displayFilename,
    const bool     hideCR,
    const bool     deleteFile
@@ -129,16 +129,22 @@ XxBuffer::XxBuffer(
    XX_ASSERT( !filename.isEmpty() );
 
    // Stat the file.
-   QFileInfo finfo( _name );
-   if ( !finfo.exists() ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
+   if ( !_temporary ) {
 
-   if ( finfo.isDir() ) {
-      loadDirectory();
+      QFileInfo finfo( _name );
+      if ( !finfo.exists() ) {
+         throw XxIoError( XX_EXC_PARAMS );
+      }
+
+      if ( finfo.isDir() ) {
+         loadDirectory();
+      }
+      else {
+         loadFile( finfo );
+      }
    }
    else {
-      loadFile( finfo );
+      loadStream( stdin );
    }
 
    init();
@@ -180,15 +186,10 @@ void XxBuffer::init()
 //
 XxBuffer::~XxBuffer()
 {
-   if ( !_proxy ) {
-      delete[] _buffer;
+   if ( !_proxy && _buffer != 0 ) {
+      free( _buffer );
    }
    _buffer = 0;
-
-   // Delete the temporary file if asked for.
-   if ( _temporary == true ) {
-      unlink( _name.latin1() );
-   }
 
    if ( _renderBuffer != 0 ) {
       free( _renderBuffer );
@@ -204,6 +205,52 @@ void XxBuffer::setDisplayName( const QString& fn )
 
 //------------------------------------------------------------------------------
 //
+void XxBuffer::loadStream( FILE* fin )
+{
+   // Read stream into variable size buffer.
+   _bufferSize = 0;
+   XX_ASSERT( _buffer == 0 );
+   const unsigned int chunkSize = BUFSIZ * 16;
+   while ( !feof( fin ) ) {
+      _buffer = static_cast<char*>(
+         realloc( _buffer, _bufferSize * sizeof(char) + chunkSize )
+      );
+      size_t nitems = fread( & _buffer[ _bufferSize ], 1, chunkSize, fin );
+      if ( nitems < chunkSize ) {
+         if ( ferror( fin ) != 0 ) {
+            throw XxIoError( XX_EXC_PARAMS, "Error reading input stream." );
+         }
+      }
+      _bufferSize += nitems;
+   }
+
+   // Don't close the stream here, as it might be stdin, and we need that to
+   // remain open to be able to map the filedesc with dup2() and
+   // fileno(). Granted, we could just make it 0.
+
+   // Add a final newline if there isn't one.  This will simplify indexing.
+   if ( _bufferSize > 0 ) { // to support empty files.
+      if ( _buffer[ _bufferSize - 1 ] != '\n' ) {
+
+         // Potentially reallocate the buffer to accomodate the new char.
+         _buffer = static_cast<char*>(
+            realloc( _buffer, _bufferSize * sizeof(char) + 1 )
+         );
+
+         _buffer[ _bufferSize ] = '\n';
+         _bufferSize++;
+      }
+   }
+
+   if ( _hiddenCR ) {
+      processCarriageReturns();
+   }
+
+   indexFile();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxBuffer::loadFile( const QFileInfo& finfo )
 {
    // Find out the file size.
@@ -211,7 +258,7 @@ void XxBuffer::loadFile( const QFileInfo& finfo )
 
    // Allocate buffer.
    // add one for potential added newline.
-   _buffer = new char[ _bufferSize + 1 ];
+   _buffer = static_cast<char*>( malloc( (_bufferSize + 1) * sizeof(char) ) );
 
    // Read file into buffer.
    FILE* fp = fopen( _name.latin1(), "r" );
@@ -284,7 +331,7 @@ void XxBuffer::setDirectoryEntries(
 
    // Allocate buffer.
    // add one for potential added newline.
-   _buffer = new char[ _bufferSize + 1 ];
+   _buffer = static_cast<char*>( malloc( (_bufferSize + 1) * sizeof(char) ) );
    
    char* bufferPtr = _buffer;
    for ( QStringList::Iterator it = _directoryEntries.begin(); 
@@ -589,9 +636,7 @@ const QStringList& XxBuffer::getDirectoryEntries() const
 
 //------------------------------------------------------------------------------
 //
-QString XxBuffer::getBufferAtLine( 
-   const XxFln lineno
-) const
+QString XxBuffer::getBufferAtLine( const XxFln lineno ) const
 {
    QString filename = _name;
    if ( filename.constref( filename.length()-1 ) != '/' ) {

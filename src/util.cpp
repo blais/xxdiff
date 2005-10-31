@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 507 2002-02-19 02:44:39Z blais $
- * $Date: 2002-02-18 21:44:39 -0500 (Mon, 18 Feb 2002) $
+ * $Id: util.cpp 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -230,13 +230,32 @@ void XxUtil::spawnCommand(
    const char** argv,
    FILE** outf,
    FILE** errf,
-   void (*sigChldHandler)(int)
+   void (*sigChldHandler)(int),
+   const char* cstdin
 )
 {
    XX_ASSERT( argv );
 
-#ifndef WINDOWS
+/*#define DEBUG_TRACE_COMMAND*/
+#ifdef DEBUG_TRACE_COMMAND
+   QString command;
+   const char** arg;
+   for ( arg = argv; *arg != 0; ++arg ) {
+      command += QString(*arg) + QString(" ");
+   }
+   XX_TRACE( "Command: " << command.latin1() );
+#endif   
 
+#ifndef WINDOWS
+   
+   int pipe_fds_in[2];
+   if ( cstdin ) {
+      // Open the pipe.
+      if ( pipe( pipe_fds_in ) == -1 ) {
+         throw XxIoError( XX_EXC_PARAMS );
+      }
+   }
+   
    int pipe_fds_out[2];
    if ( outf ) {
       // Open the pipe.
@@ -256,19 +275,31 @@ void XxUtil::spawnCommand(
       case 0: { // the child
 
          /* 
+          * pipe standard input into the pipe
+          */
+         if ( cstdin ) {
+            if ( dup2( pipe_fds_in[0], fileno( stdin ) ) == -1 ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
+            close( pipe_fds_in[1] );
+         }
+         
+         /* 
           * redirect standard output and standard error into the pipe
           */
          if ( outf ) {
-            close( fileno( stdout ) );
-            if ( dup( pipe_fds_out[1] ) == -1 ) {
+            /*close( fileno( stdout ) );*/
+            /*if ( dup( pipe_fds_out[1] ) == -1 ) {*/
+            if ( dup2( pipe_fds_out[1], fileno( stdout ) ) == -1 ) {
                throw XxIoError( XX_EXC_PARAMS );
             }
             close( pipe_fds_out[0] );
          }
 
          if ( errf ) {
-            close( fileno( stderr ) );
-            if ( dup( pipe_fds_err[1] ) == -1 ) {
+            /*close( fileno( stderr ) );*/
+            /*if ( dup( pipe_fds_err[1] ) == -1 ) {*/
+            if ( dup2( pipe_fds_err[1], fileno( stderr ) ) == -1 ) {
                throw XxIoError( XX_EXC_PARAMS );
             }
             close( pipe_fds_err[0] );
@@ -308,6 +339,9 @@ void XxUtil::spawnCommand(
           * writer end of the pipe in the child will not cause an EOF 
           * condition for the reader
           */
+         if ( cstdin ) {
+            close( pipe_fds_in[0] );
+         }
          if ( outf ) {
             close( pipe_fds_out[1] );
          }
@@ -316,7 +350,24 @@ void XxUtil::spawnCommand(
          }
 
          /* 
-          * return the reader side of the pipe as a stdio stream
+          * if requested, write into stdin of the subprocess.
+          */
+         if ( cstdin ) {
+            FILE* inf = fdopen( pipe_fds_in[1], "w" );
+            
+            unsigned int len = strlen( cstdin );
+            // XX_TRACE( "writing " << len << " bytes" );
+            if ( fwrite( cstdin, sizeof(char), len, inf ) != len ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
+
+            if ( fclose( inf ) != 0 ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
+         }
+
+         /* 
+          * return the reader side of the pipe as a stdio stream.
           */
          if ( outf ) {
             *outf = fdopen( pipe_fds_out[0], "r" );
@@ -352,13 +403,6 @@ void XxUtil::spawnCommand(
 
 //       exit( 1 );
 //    }
-   
-   QString command;
-   const char** arg;
-   for ( arg = argv; *arg != 0; ++arg ) {
-      command += QString(*arg) + QString(" ");
-   }
-   XX_TRACE( command.latin1() );
 
    FILE* outputf;
    

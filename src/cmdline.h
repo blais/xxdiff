@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.h 496 2002-02-09 21:00:10Z blais $
- * $Date: 2002-02-09 16:00:10 -0500 (Sat, 09 Feb 2002) $
+ * $Id: cmdline.h 527 2002-02-25 06:57:14Z blais $
+ * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -129,6 +129,8 @@ private:
    QString       _filenames[3];
 
    bool          _unmerge;
+   // Nb.files to unmerge into.
+   int           _unmergeNbFiles;
 
 
    /*----- static data members -----*/

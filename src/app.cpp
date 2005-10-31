@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: app.cpp 533 2002-02-27 03:01:18Z blais $
+ * $Date: 2002-02-26 22:01:18 -0500 (Tue, 26 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -270,7 +270,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    // Here is where in unmerge mode we make xxdiff think that it has two
    // files. There will be other special cases for this throughout the code too.
    if ( _cmdline._unmerge == true ) { 
-      _nbFiles = 2;
+      _nbFiles = _cmdline._unmergeNbFiles;
    }
 
    // Add extra diff arguments.
@@ -313,7 +313,6 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
          }
       }
       else {
-         XX_ASSERT( _nbFiles == 2 );
          std::auto_ptr<XxBuffer> newbuf(
             readFile( 0,
                       filenames[0],
@@ -327,6 +326,14 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
             new XxBuffer( (*_files[0]), filenames[0], displayFilenames[0] )
          );
          _files[1] = newbuf2;
+
+         if ( _cmdline._unmergeNbFiles == 3 ) {
+            // Make a proxy for the other buffer.
+            std::auto_ptr<XxBuffer> newbuf2(
+               new XxBuffer( (*_files[0]), filenames[0], displayFilenames[0] )
+            );
+            _files[2] = newbuf2;
+         }
       }
 
       bool succ = processDiff();
@@ -432,10 +439,10 @@ XxApp::~XxApp()
 //
 uint XxApp::processFileNames(
    const XxCmdline& cmdline,
-   QString filenames[3],
-   QString displayFilenames[3],
-   bool    created[3],
-   bool&   filesAreDirectories
+   QString          filenames[3],
+   QString          displayFilenames[3],
+   bool             isTemporary[3],
+   bool&            filesAreDirectories
 )
 {
    uint nbFiles = 0;
@@ -525,41 +532,15 @@ uint XxApp::processFileNames(
       }
    }
 
-   bool stdinCopied = false;
+   bool stdinSeen = false;
    for ( XxFno iii = 0; iii < cmdline._nbFilenames; ++iii ) {
       if ( cmdline._filenames[iii] == "-" ) {
-         XX_ASSERT( stdinCopied == false );
-         stdinCopied = true;
+         XX_ASSERT( stdinSeen == false );
+         stdinSeen = true;
             
+         filenames[iii] = cmdline._filenames[iii];
          displayFilenames[iii] = cmdline._stdinFilename;
-         char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
-#ifndef WINDOWS
-         int tfd = mkstemp( temporaryFilename );
-         FILE *fout;
-         if ( ( fout = fdopen( tfd, "w" ) ) == NULL ) {
-#else
-         mktemp( temporaryFilename );
-         FILE *fout;
-         if ( ( fout = fopen( temporaryFilename, "w" ) ) == NULL ) {
-#endif
-            throw XxIoError( XX_EXC_PARAMS, 
-                             "Error opening temporary file." );
-         }
-   
-         filenames[iii] = temporaryFilename;
-         created[iii] = true;
-         XxUtil::copyToFile( stdin, fout );
-
-         // Important comment: unfortunately we cannot use the unlink() trick
-         // here since we will call the subordinate diff on this file, so it
-         // needs to be visible in the directory.  Perhaps we could relink it
-         // just before calling the subordinate diff and then unlinking it
-         // right after.  Something to think about.
-
-         if ( fclose( fout ) != 0 ) {
-            throw XxIoError( XX_EXC_PARAMS,
-                             "Error closing temporary file." );
-         }
+         isTemporary[iii] = true;
       }
       else {
          QString fname = cmdline._filenames[iii];
@@ -640,7 +621,11 @@ void XxApp::createUI()
 
    QVBoxLayout* overviewLayout =
       new QVBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
-   overviewLayout->addWidget( _remUnselView );
+   if ( !_cmdline._originalXdiff ) {
+      // FIXME We cannot undo this once xxdiff has started. Not that we mind so
+      // much.
+      overviewLayout->addWidget( _remUnselView );
+   }
    overviewLayout->addWidget( _overview );
 
    topLayout->addWidget( _overviewArea );
@@ -1313,7 +1298,7 @@ void XxApp::createMenus()
 
    if ( _filesAreDirectories == false ) {
 
-      if ( _nbFiles == 2 ) {
+      if ( _nbFiles == 2 && _cmdline._unmerge == false ) {
          _optionsMenu->insertSeparator();
 
          _menuids[ ID_ToggleIgnoreTrailing ] = _optionsMenu->insertItem( 
@@ -1632,20 +1617,31 @@ bool XxApp::processDiff()
       std::auto_ptr<XxBuilder> builderTmp( builderUnmerge );
       builder = builderTmp;
       try {
-         QString leftName, rightName;
-         std::auto_ptr<XxDiffs> tmp(
-            builderUnmerge->process(
-               *(_files[0]), _resources, leftName, rightName
-            )
-         );
-         _diffs = tmp;
+         
+         QString leftName, middleName, rightName;
+         if ( _cmdline._unmergeNbFiles == 2 ) {
+            std::auto_ptr<XxDiffs> tmp(
+               builderUnmerge->process(
+                  *(_files[0]), _resources, leftName, rightName
+               )
+            );
+            _diffs = tmp;
+         }
+         else {
+            std::auto_ptr<XxDiffs> tmp(
+               builderUnmerge->process(
+                  *(_files[0]), _resources, leftName, middleName, rightName
+               )
+            );
+            _diffs = tmp;
+         }
          XX_ASSERT( _diffs.get() != 0 );
 
          // Reindexing. We have chosen to use a different strategy because we'd
          // really like to keep the line numbers from the original conflict
          // file. This works and fools all the code into thinking it's a normal
          // two-file diff, but we'd lose the real line numbers.
-         _diffs->reindex( _files[0], _files[1] );
+         _diffs->reindex( _files[0], _files[1], _files[2] );
 
          // Add names from tags to display filenames.
          if ( !leftName.isEmpty() ) {
@@ -1682,8 +1678,8 @@ bool XxApp::processDiff()
             std::auto_ptr<XxDiffs> tmp(
                filesBuilder->process(
                   _resources->getCommand( CMD_DIFF_FILES_2 ),
-                  _files[0]->getName(), _files[0]->getNbLines(),
-                  _files[1]->getName(), _files[1]->getNbLines()
+                  *_files[0],
+                  *_files[1]
                )
             );
             _diffs = tmp;
@@ -1709,9 +1705,9 @@ bool XxApp::processDiff()
             std::auto_ptr<XxDiffs> tmp(
                filesBuilder->process(
                   _resources->getCommand( CMD_DIFF_FILES_3 ),
-                  _files[0]->getName(), _files[0]->getNbLines(),
-                  _files[1]->getName(), _files[1]->getNbLines(),
-                  _files[2]->getName(), _files[2]->getNbLines()
+                  *_files[0],
+                  *_files[1],
+                  *_files[2]
                )
             );
             _diffs = tmp;
@@ -1758,13 +1754,7 @@ bool XxApp::processDiff()
             );
          }
          std::auto_ptr<XxDiffs> tmp(
-            dirsBuilder->process(
-               dirdiff_command,
-               _files[0]->getName(),
-               _files[0].get(),
-               _files[1]->getName(),
-               _files[1].get()
-            )
+            dirsBuilder->process( dirdiff_command, *_files[0], *_files[1] )
          );
          _diffs = tmp;
          XX_ASSERT( _diffs.get() != 0 );
@@ -2304,40 +2294,60 @@ void XxApp::onRedoDiff()
    if ( nbFiles > 0 ) {
       XxDln cursorLine = getCursorLine();
       XxDln centerLine = _central->getCenterLine();
+      
+      bool succ = false; // Do nothing.
 
       // Reread the files.
       if ( _cmdline._unmerge == false ) {
          for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-            std::auto_ptr<XxBuffer> newbuf(
-               readFile( ii,
-                         _files[ii]->getName(),
-                         _files[ii]->getDisplayName(),
-                         _files[ii]->isTemporary() )
-            );
-            _files[ii] = newbuf;
+            const XxBuffer& buffer = *_files[ii];
+            if ( buffer.isTemporary() == false ) {
+               std::auto_ptr<XxBuffer> newbuf(
+                  readFile( ii,
+                            buffer.getName(),
+                            buffer.getDisplayName(),
+                            buffer.isTemporary() )
+               );
+               _files[ii] = newbuf;
+            }
          }
+
+         // Do the diff.
+         succ = processDiff();
       }
       else {
-         XX_ASSERT( _nbFiles == 2 );
-         std::auto_ptr<XxBuffer> newbuf(
-            readFile( 0,
-                      _files[0]->getName(),
-                      _files[0]->getDisplayName(),
-                      _files[0]->isTemporary() )
-         );
-         _files[0] = newbuf;
+         const XxBuffer& buffer1 = *_files[0];
+         if ( buffer1.isTemporary() == false ) {
+            std::auto_ptr<XxBuffer> newbuf(
+               readFile( 0,
+                         _files[0]->getName(),
+                         _files[0]->getDisplayName(),
+                         _files[0]->isTemporary() )
+            );
+            _files[0] = newbuf;
 
-         // Make a proxy for the other buffer.
-         std::auto_ptr<XxBuffer> newbuf2(
-            new XxBuffer( (*_files[0]),
-                          _files[0]->getName(),
-                          _files[0]->getDisplayName() )
-         );
-         _files[1] = newbuf2;
+            // Make a proxy for the other buffer.
+            std::auto_ptr<XxBuffer> newbuf2(
+               new XxBuffer( (*_files[0]),
+                             _files[0]->getName(),
+                             _files[0]->getDisplayName() )
+            );
+            _files[1] = newbuf2;
+
+            if ( _cmdline._unmergeNbFiles == 3 ) {
+               // Make a proxy for the other buffer.
+               std::auto_ptr<XxBuffer> newbuf2(
+                  new XxBuffer( (*_files[0]),
+                                _files[0]->getName(),
+                                _files[0]->getDisplayName() )
+               );
+               _files[2] = newbuf2;
+            }
+
+            // Do the diff.
+            succ = processDiff();
+         }
       }
-
-      // Do the diff.
-      bool succ = processDiff();
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {

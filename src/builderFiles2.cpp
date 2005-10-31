@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: builderFiles2.cpp 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -29,6 +29,7 @@
 #include <diffs.h>
 #include <util.h>
 #include <diffutils.h>
+#include <buffer.h>
 
 #include <qstring.h>
 #include <qtextstream.h>
@@ -210,20 +211,28 @@ XxBuilderFiles2::~XxBuilderFiles2()
 //------------------------------------------------------------------------------
 //
 std::auto_ptr<XxDiffs> XxBuilderFiles2::process( 
-   const QString& command,
-   const QString& path1,
-   const uint     nbLines1,
-   const QString& path2,
-   const uint     nbLines2
+   const QString&  command,
+   const XxBuffer& buffer1,
+   const XxBuffer& buffer2
 )
 {
    initLines();
 
 //#define XX_INTERNAL_DIFFS
 
+   // Note: only one buffer can be a temporary.
+   const char* cstdin = 0;
+   uint len;
+   if ( buffer1.isTemporary() ) {
+      cstdin = buffer1.getTextLine( 1, len );
+   }
+   else if ( buffer2.isTemporary() ) {
+      cstdin = buffer2.getTextLine( 1, len );
+   }
+
    QStringList filenames;
-   filenames.append( path1 );
-   filenames.append( path2 );
+   filenames.append( buffer1.getName() );
+   filenames.append( buffer2.getName() );
    const char** out_args;
 #ifdef XX_INTERNAL_DIFFS
    int argc = 
@@ -233,7 +242,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 #ifndef XX_INTERNAL_DIFFS
    FILE* fout;
    FILE* ferr;
-   XxUtil::spawnCommand( out_args, &fout, &ferr );
+   XxUtil::spawnCommand( out_args, &fout, &ferr, 0, cstdin );
    if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -409,8 +418,8 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    }
 
    // Add final ignore region if present.
-   uint nbRemainingLines = nbLines1 + 1 - fline1;
-   if ( nbRemainingLines != nbLines2 + 1 - fline2 ) {
+   uint nbRemainingLines = buffer1.getNbLines() + 1 - fline1;
+   if ( nbRemainingLines != buffer2.getNbLines() + 1 - fline2 ) {
       throw XxError( XX_EXC_PARAMS, _errors );
    }
    if ( nbRemainingLines > 0 ) { 

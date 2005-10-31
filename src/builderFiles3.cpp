@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles3.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: builderFiles3.cpp 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,6 +28,7 @@
 #include <exceptions.h>
 #include <diffs.h>
 #include <util.h>
+#include <buffer.h>
 
 #include <qstring.h>
 #include <qtextstream.h>
@@ -406,27 +407,37 @@ XxBuilderFiles3::~XxBuilderFiles3()
 //------------------------------------------------------------------------------
 //
 std::auto_ptr<XxDiffs> XxBuilderFiles3::process( 
-   const QString& command,
-   const QString& path1,
-   const uint     nbLines1,
-   const QString& path2,
-   const uint     nbLines2,
-   const QString& path3,
-   const uint     nbLines3
+   const QString&  command,
+   const XxBuffer& buffer1,
+   const XxBuffer& buffer2,
+   const XxBuffer& buffer3
 )
 {
    initLines();
 
+   // Note: only one buffer can be a temporary.
+   const char* cstdin = 0;
+   uint len;
+   if ( buffer1.isTemporary() ) {
+      cstdin = buffer1.getTextLine( 1, len );
+   }
+   else if ( buffer2.isTemporary() ) {
+      cstdin = buffer2.getTextLine( 1, len );
+   }
+   else if ( buffer3.isTemporary() ) {
+      cstdin = buffer3.getTextLine( 1, len );
+   }
+
    QStringList filenames;
-   filenames.append( path1 );
-   filenames.append( path2 );
-   filenames.append( path3 );
+   filenames.append( buffer1.getName() );
+   filenames.append( buffer2.getName() );
+   filenames.append( buffer3.getName() );
    const char** out_args;
    XxUtil::splitArgs( command, filenames, out_args );
 
    FILE* fout;
    FILE* ferr;
-   XxUtil::spawnCommand( out_args, &fout, &ferr );
+   XxUtil::spawnCommand( out_args, &fout, &ferr, 0, cstdin );
    if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -559,9 +570,9 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    }
 
    // Add final ignore region if present.
-   uint nbRemainingLines = nbLines1 + 1 - fline1;
-   if ( nbRemainingLines != nbLines2 + 1 - fline2 ||
-        nbRemainingLines != nbLines3 + 1 - fline3 ) {
+   uint nbRemainingLines = buffer1.getNbLines() + 1 - fline1;
+   if ( nbRemainingLines != buffer2.getNbLines() + 1 - fline2 ||
+        nbRemainingLines != buffer3.getNbLines() + 1 - fline3 ) {
       throw XxError( XX_EXC_PARAMS, _errors );
    }
    if ( nbRemainingLines > 0 ) { 

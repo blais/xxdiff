@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 485 2002-02-07 20:10:05Z blais $
- * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
+ * $Id: util.h 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -99,11 +99,14 @@ public:
    // standard error have been redirected.
    //
    // If you don't want the pipes, let outf and/or errf be null.
+   //
+   // If cstdin is not null, it is piped into the subprocess standard input.
    static void spawnCommand( 
       const char** argv,
       FILE** outf,
       FILE** errf,
-      void (*sigChldHandler)(int) = 0
+      void (*sigChldHandler)(int) = 0,
+      const char* cstdin = 0
    );
 
    // Convenience for above method, without output.

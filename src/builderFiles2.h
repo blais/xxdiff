@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.h 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: builderFiles2.h 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -52,6 +52,12 @@
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class XxBuffer;
+
+/*==============================================================================
  * CLASS XxBuilderFiles2
  *============================================================================*/
 
@@ -79,11 +85,9 @@ public:
    // allocated XxDiffs object.  However, there might be warnings, so you may
    // want to check hasErrors() if you want to display those.
    std::auto_ptr<XxDiffs> process(
-      const QString& command,
-      const QString& path1,
-      const uint     nbLines1,
-      const QString& path2,
-      const uint     nbLines2
+      const QString&  command,
+      const XxBuffer& buffer1,
+      const XxBuffer& buffer2
    );
 
 private:

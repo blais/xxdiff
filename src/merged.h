@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.h 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: merged.h 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -68,9 +68,6 @@ XX_NAMESPACE_BEGIN
 
 class XxApp;
 class XxText;
-// class XxMergedFrame;
-// class XxMergedWindow; //FIXME remove
-
 
 /*==============================================================================
  * CLASS XxMergedFrame

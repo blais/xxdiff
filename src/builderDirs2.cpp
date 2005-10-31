@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: builderDirs2.cpp 525 2002-02-25 00:17:30Z blais $
+ * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -305,10 +305,8 @@ void patchUpMissingTypes(
 void buildSolelyFromOutput(
    FILE*                     fout,
    QTextOStream&             errors,
-   const QString&            path1,
-   XxBuffer*                 buffer1,
-   const QString&            path2,
-   XxBuffer*                 buffer2,
+   XxBuffer&                 buffer1,
+   XxBuffer&                 buffer2,
    std::vector<DirDiffType>& types1,
    std::vector<DirDiffType>& types2
 )
@@ -319,6 +317,8 @@ void buildSolelyFromOutput(
    types1.clear();
    types2.clear();
 
+   QString path1 = buffer1.getName();
+   QString path2 = buffer2.getName();
    const int len1 = path1.length();
    const int len2 = path2.length();
 
@@ -383,8 +383,8 @@ void buildSolelyFromOutput(
    qfout.close();
 
    // Build the buffers.
-   buffer1->setDirectoryEntries( entries1 );
-   buffer2->setDirectoryEntries( entries2 );
+   buffer1.setDirectoryEntries( entries1 );
+   buffer2.setDirectoryEntries( entries2 );
 }
 
 //------------------------------------------------------------------------------
@@ -392,16 +392,14 @@ void buildSolelyFromOutput(
 void buildAgainstReadDirectory(
    FILE*                     fout,
    QTextOStream&             errors,
-   const QString&            path1,
-   const XxBuffer*           buffer1,
-   const QString&            path2,
-   const XxBuffer*           buffer2,
+   const XxBuffer&           buffer1,
+   const XxBuffer&           buffer2,
    std::vector<DirDiffType>& types1,
    std::vector<DirDiffType>& types2
 )
 {
-   const QStringList& entries1 = buffer1->getDirectoryEntries();
-   const QStringList& entries2 = buffer2->getDirectoryEntries();
+   const QStringList& entries1 = buffer1.getDirectoryEntries();
+   const QStringList& entries2 = buffer2.getDirectoryEntries();
 #ifdef LOCAL_TRACE
    {
       for ( QStringList::ConstIterator iter = entries1.begin();
@@ -419,6 +417,9 @@ void buildAgainstReadDirectory(
    types2.clear();
    types1.insert( types1.begin(), entries1.count(), UNKNOWN );
    types2.insert( types2.begin(), entries2.count(), UNKNOWN );
+
+   QString path1 = buffer1.getName();
+   QString path2 = buffer2.getName();
 
    const int len1 = path1.length();
    const int len2 = path2.length();
@@ -539,13 +540,14 @@ XxBuilderDirs2::~XxBuilderDirs2()
 //
 std::auto_ptr<XxDiffs> XxBuilderDirs2::process( 
    const QString& command,
-   const QString& path1,
-   XxBuffer*      buffer1,
-   const QString& path2,
-   XxBuffer*      buffer2
+   XxBuffer&      buffer1,
+   XxBuffer&      buffer2
 )
 {
    initLines();
+
+   QString path1 = buffer1.getName();
+   QString path2 = buffer2.getName();
 
    QStringList filenames;
    filenames.append( path1 );
@@ -569,12 +571,12 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    // Note: for now we don't support recursive diffs built against a directory.
    if ( _buildSolelyFromOutput || _isDiffRecursive ) {
       buildSolelyFromOutput(
-         fout, errors, path1, buffer1, path2, buffer2, types1, types2
+         fout, errors, buffer1, buffer2, types1, types2
       );
    }
    else {
       buildAgainstReadDirectory( 
-         fout, errors, path1, buffer1, path2, buffer2, types1, types2
+         fout, errors, buffer1, buffer2, types1, types2
       );
    }
    ::fclose( fout );

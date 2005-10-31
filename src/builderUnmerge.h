@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderUnmerge.h 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: builderUnmerge.h 528 2002-02-25 17:08:09Z blais $
+ * $Date: 2002-02-25 12:08:09 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -37,6 +37,10 @@
 
 #ifndef INCL_XXDIFF_DIFFS
 #include <diffs.h>
+#endif
+
+#ifndef INCL_XXDIFF_LINE
+#include <line.h>
 #endif
 
 #ifndef INCL_STD_MEMORY
@@ -98,6 +102,15 @@ public:
       QString&           outFileRight
    );
 
+   // Like the above process() method, but unmerge in 3 files instead of 2.
+   std::auto_ptr<XxDiffs> process(
+      const XxBuffer&    buffer,
+      const XxResources& resources,
+      QString&           outFileLeft,
+      QString&           outFileMiddle,
+      QString&           outFileRight
+   );
+
 private:
 
    /*----- member functions -----*/
@@ -107,6 +120,12 @@ private:
    void createIgnoreBlock( 
       XxFln fline1,
       XxFln fline2,
+      uint  fsize
+   );
+   void createIgnoreBlock( 
+      XxFln fline1,
+      XxFln fline2,
+      XxFln fline3,
       uint  fsize
    );
 
@@ -127,6 +146,17 @@ private:
       uint  fsize
    );
    // </group>
+
+   // Create a DIFF_ALL or DIFF_DEL block.
+   void create3Block( 
+      XxLine::Type type,
+      XxFln        f1n1,
+      XxFln        f1n2,
+      XxFln        f2n1,
+      XxFln        f2n2,
+      XxFln        f3n1,
+      XxFln        f3n2
+   );
 
    /*----- data members -----*/
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.inline.h 520 2002-02-23 21:55:59Z blais $
- * $Date: 2002-02-23 16:55:59 -0500 (Sat, 23 Feb 2002) $
+ * $Id: buffer.inline.h 528 2002-02-25 17:08:09Z blais $
+ * $Date: 2002-02-25 12:08:09 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,8 +34,18 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-inline const QString& XxBuffer::getName() const
+inline bool XxBuffer::isTemporary() const
 {
+   return _temporary;
+}
+
+//------------------------------------------------------------------------------
+//
+inline QString XxBuffer::getName() const
+{
+   if ( isTemporary() ) {
+      return QString("-");
+   }
    return _name;
 }
 
@@ -44,13 +54,6 @@ inline const QString& XxBuffer::getName() const
 inline const QString& XxBuffer::getDisplayName() const
 {
    return _displayName;
-}
-
-//------------------------------------------------------------------------------
-//
-inline bool XxBuffer::isTemporary() const
-{
-   return _temporary;
 }
 
 //------------------------------------------------------------------------------

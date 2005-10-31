@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: searchDialog.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: searchDialog.cpp 527 2002-02-25 06:57:14Z blais $
+ * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -63,6 +63,11 @@ XxSearchDialog::XxSearchDialog(
 
    connect( _buttonGotoLine, SIGNAL( clicked() ),
             this, SLOT( onGotoLine() ) );
+
+
+   if ( _app->getNbFiles() == 2 ) {
+      _comboGotoWhichFile->removeItem( 2 );
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -91,8 +96,11 @@ void XxSearchDialog::onGotoLine()
    }
 
    XxDiffs* diffs = _app->getDiffs();
-   XxDln dline = diffs->getDisplayLine( gline, fno );
-   _app->setCursorLine( dline );
+   XxBuffer* buffer = _app->getBuffer( fno );
+   XxDln dline = diffs->getDisplayLine( gline, *buffer, fno );
+   if ( dline != -1 ) {
+      _app->setCursorLine( dline );
+   }
 }
 
 //------------------------------------------------------------------------------

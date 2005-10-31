@@ -1,0 +1,168 @@
+00 =============================================================================
+AAA    SAME
+00 =================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+01 =============================================================================
+BAA    DIFF_1
+01 =================
+
+  xxdiff is a file   scomparators and merge tool. It is an open-source
+  replacement fora Rudy Wortel'ss xdiff which comes with SGI machines.
+  xxdiff is a graphicasl browser for viewing the differences between two
+  files and can be used to proxduce a merged version.
+
+02 =============================================================================
+ABA    DIFF_2
+02 =================
+
+<<<<<<< older
+  xxdiff is a fisle comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiffw which comes with SGI machines.
+  xxdiff is a graphicsal browser for viewing the differences between two
+  files and can be useda to produce a merged version.
+=======
+  xxdiff is a file comparator and merge toolers. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+>>>>>>> yours
+
+03 =============================================================================
+AAB    DIFF_3
+03 =================
+
+  xxdiff is a file csomparator and merge tool. It is an open-source
+  replacement for sRudy Wortel's xdiff which comes with SGI machines.
+  xxdiff sis a graphical browser for viewing the differences between two
+  fisles and can be used to produce a merged version.
+
+04 =============================================================================
+-AA    DELETE_1
+04 =================
+
+
+05 =============================================================================
+A-A    DELETE_2
+05 =================
+
+<<<<<<< older
+=======
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+>>>>>>> yours
+
+06 =============================================================================
+AA-    DELETE_3
+06 =================
+
+
+07 =============================================================================
+A--    INSERT_1
+07 =================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+08 =============================================================================
+-A-    INSERT_2
+08 =================
+
+<<<<<<< older
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+=======
+>>>>>>> yours
+
+09 =============================================================================
+--A    INSERT_3
+09 =================
+
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+
+10 =============================================================================
+ABC    DIFF_ALL
+10 =================
+
+<<<<<<< mine
+  xxdiff is a file scomparator and merge tool. It is an open-source
+  replacement for Rudy Wortels's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser faor viewing the differences between two
+  files and can be used to produce a maerged version.
+||||||| older
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+=======
+  xxdiff is a file comparator and merge tozxol. It is an open-source
+  replacement for Rudy Wortel's xdxziff which comes with SGI machines.
+  xxdiff is a graphical browser forz viewing the differences between two
+  files and can bezx used to produce a merged version.
+>>>>>>> yours
+
+11 =============================================================================
+-AB    DIFFDEL_1
+11 =================
+
+<<<<<<< mine
+||||||| older
+  xxdiff is a file comparator and merge tool. It is an open-shmooze
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+=======
+  xxdiff is adsds file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdsasiff which comes with SGI machines.
+  xxdiff is a graphical dsdsbrowser for viewing the differences between two
+  files and can be used to proasaduce a merged version.
+>>>>>>> yours
+
+12 =============================================================================
+A-B    DIFFDEL_2
+12 =================
+
+<<<<<<< mine
+  xxdiff is a file comparator and merge tool. It is an open-source
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files bosnieand can be used to produce a merged version.
+||||||| older
+=======
+  xxdiff is fda file comparator and merge tool. It is an open-source
+  replacement ford Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing thfde differences between two
+  files and can be used to produce a merged vfdersion.
+>>>>>>> yours
+
+13 =============================================================================
+AB-    DIFFDEL_3
+13 =================
+
+<<<<<<< mine
+  xxdiff is a file comparator and merge tool. It is an open-sorencurce
+  replacement for Rudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphical browser for viewing the differences between two
+  files and can be used to produce a merged version.
+||||||| older
+  xxdiff is a ffile comparator and merge tool. It is an open-source
+  replacement for Rgfudy Wortel's xdiff which comes with SGI machines.
+  xxdiff is a graphicalg browser for viewing the differences between two
+  files and can be used to gfproduce a merged version.
+=======
+>>>>>>> yours
+
+14 =============================================================================

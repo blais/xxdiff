@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.h 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: buffer.h 527 2002-02-25 06:57:14Z blais $
+ * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -43,6 +43,11 @@
 #ifndef INCL_STD_IOSFWD
 #include <iosfwd>
 #define INCL_STD_IOSFWD
+#endif
+
+#ifndef INCL_STD_STDIO
+#include <stdio.h>
+#define INCL_STD_STDIO
 #endif
 
 #ifndef INCL_QT_QSTRING
@@ -106,7 +111,7 @@ public:
    virtual ~XxBuffer();
 
    // Get file name.
-   const QString& getName() const;
+   QString getName() const;
 
    // Get/set display filename.
    // <group>
@@ -178,9 +183,7 @@ public:
 
    // If this is a buffer containing a directory (i.e. a list of files), return
    // the full path of the filename at line lineno.
-   QString getBufferAtLine( 
-      const XxFln lineno
-   ) const;
+   QString getBufferAtLine( const XxFln lineno ) const;
 
    // Reindex the buffer lines, according to the given table. The table
    // indicates what current lines the new lines should point to.
@@ -190,7 +193,6 @@ public:
    // Returns the line number to display for given text line.
    XxFln getDisplayLineNo( const XxFln fline ) const;
 
-
 private:
 
    /*----- member functions -----*/
@@ -199,8 +201,11 @@ private:
    void init();
 
    // Load the file in the buffer.
+   // <group>
    void loadFile( const QFileInfo& );
    void loadDirectory();
+   void loadStream( FILE* fin );
+   // </group>
 
    // Process the buffer to remove the carriage returns. Do this before
    // indexing!

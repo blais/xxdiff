@@ -2,11 +2,47 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 520 2002-02-23 21:55:59Z blais $
+# $Id: CHANGES 532 2002-02-27 02:46:54Z blais $
 #
 
 Current development version
 ------------------------------
+
+Version 2.5: (major features)
+------------------------------
+
+This release removes the saving of standard input into temporary files and adds
+support for unmerging merge conflicts into three files (if the conflicts contain
+the information, such as when using "diff3 -m").
+
+(No Temporary Files)
+
+   * Removed saving of stdin to a temporary file. This could be considered is a
+     major security update, because if you were using decrypted files to
+     standard input of xxdiff. xxdiff used to save its stdin into a temporary
+     file for redoing diffs. For example, running something like
+     "gpg -d secret.asc | xxdiff - public.asc" would save a decrypted copy of
+     secret into /var/tmp. Kill xxdiff and it would lie there. Now that's
+     fixed.
+   * When a file is from stdin, redo-diff clears xxdiffs, that was
+     crashing. With the new changes that don't save to a temporary file, that
+     fixes the problem.
+
+(CVS unmerge conflicts)
+
+   * Updated documentation for unmerge3 feature.
+   * Finished implementation of unmerge3 feature. We won't try to insert
+     interrupted regions for the unmerge 3-files version, just insert SAME
+     regions then (including markers).
+   * Finished first implementation of unmerge3 feature.
+   * Started implementation of parser for "diff3 --show-all" merge conflicts.
+   * Disabled more useless UI in unmerge mode.
+
+(Misc)
+
+   * Slight improvement to goto file feature, fixed bug with goto-line in
+     unmerge mode.
+
 
 
 Version 2.4: (major feature)

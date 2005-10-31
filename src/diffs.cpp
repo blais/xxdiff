@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: diffs.cpp 528 2002-02-25 17:08:09Z blais $
+ * $Date: 2002-02-25 12:08:09 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1622,27 +1622,39 @@ bool XxDiffs::checkSelections( const XxLine::Selection sel ) const
 
 //------------------------------------------------------------------------------
 //
-XxDln XxDiffs::getDisplayLine( const XxFln fline, const XxFno fno ) const
+XxDln XxDiffs::getDisplayLine(
+   const XxFln     rdline,
+   const XxBuffer& buffer,
+   const XxFno     fno
+) const
 {
    for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
 
-      if ( line.getLineNo( fno ) == fline ) {
+      XxFln fline = line.getLineNo( fno );
+      if ( fline == -1 ) {
+         continue;
+      }
+      XxFln dfline = buffer.getDisplayLineNo( fline );
+      if ( dfline >= rdline ) {
          return ii;
       }
    }
-   return 0;
+   return -1;
 }
 
 //------------------------------------------------------------------------------
 //
 void XxDiffs::reindex( 
    const std::auto_ptr<XxBuffer>& file1,
-   const std::auto_ptr<XxBuffer>& file2
+   const std::auto_ptr<XxBuffer>& file2,
+   const std::auto_ptr<XxBuffer>& file3
 )
 {
+   XxFno nbFiles = ( file3.get() == 0 ) ? 2 : 3;
+
    // Go through the diffs on each side and generate re-indexing tables.
-   for ( XxFln fi = 0; fi < 2; ++fi ) {
+   for ( XxFno fi = 0; fi < nbFiles; ++fi ) {
       std::vector<XxFln> reindexTbl;
       reindexTbl.push_back( -1 );
       int fline = 0;
@@ -1652,16 +1664,18 @@ void XxDiffs::reindex(
          if ( lno != -1 ) {
             reindexTbl.push_back( line.getLineNo( fi ) );
             ++fline;
-            /*line.setDisplayLineNo( fi, lno );*/ // FIXME remove
             line.setLineNo( fi, fline );
          }
       }
 
-      if ( fi == 0 ) {
+      if ( fi == 0 && file1.get() != 0 ) {
          file1->reindex( reindexTbl );
       }
-      else if ( fi == 1 ) {
+      else if ( fi == 1 && file2.get() != 0 ) {
          file2->reindex( reindexTbl );
+      }
+      else if ( fi == 2 && file3.get() != 0 ) {
+         file3->reindex( reindexTbl );
       }
    }
 }

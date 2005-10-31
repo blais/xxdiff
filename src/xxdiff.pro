@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 520 2002-02-23 21:55:59Z blais $
-# $Date: 2002-02-23 16:55:59 -0500 (Sat, 23 Feb 2002) $
+# $Id: xxdiff.pro 532 2002-02-27 02:46:54Z blais $
+# $Date: 2002-02-26 21:46:54 -0500 (Tue, 26 Feb 2002) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -30,7 +30,7 @@ CONFIG = release qt warn_on
 debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
-XX_VERSION=2.4
+XX_VERSION=2.5
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION-devel ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""

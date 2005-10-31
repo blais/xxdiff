@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderUnmerge.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: builderUnmerge.cpp 530 2002-02-26 08:06:58Z blais $
+ * $Date: 2002-02-26 03:06:58 -0500 (Tue, 26 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <iostream>
 
-// #define LOCAL_TRACE
+#define LOCAL_TRACE
 #ifdef LOCAL_TRACE
 #define XX_LOCAL_TRACE(x) XX_TRACE(x)
 #else
@@ -48,57 +48,59 @@
  * LOCAL DECLARATIONS
  *============================================================================*/
 
+namespace {
+XX_NAMESPACE_USING
+
+/*==============================================================================
+ * CLASS XxConflictFormatError
+ *============================================================================*/
+
+class XxConflictFormatError : public XxError, 
+                              public std::runtime_error {
+
+public:
+
+   /*----- member functions -----*/
+
+   // Constructor with state.
+   XxConflictFormatError(
+      XX_EXC_PARAMS_DECL(file,line),
+      const XxFln f1n1, 
+      const XxFln f1n2, 
+      const XxFln f2n1, 
+      const XxFln f2n2,
+      const XxFln f3n1, 
+      const XxFln f3n2 
+   );
+
+};
+
+//------------------------------------------------------------------------------
+//
+XxConflictFormatError::XxConflictFormatError(
+   XX_EXC_PARAMS_DECL(file,line),
+   XxFln f1n1, 
+   XxFln f1n2,
+   XxFln f2n1, 
+   XxFln f2n2,
+   XxFln f3n1, 
+   XxFln f3n2
+) :
+   XxError( file, line ),
+   std::runtime_error( "Conflicts format error." )
+{
+   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   oss << "Error parsing conflicts file:"
+       << " (" << f1n1 << "," << f1n2 << ")  file2: " 
+       << " (" << f2n1 << "," << f2n2 << ")  file3: " 
+       << " (" << f3n1 << "," << f3n2 << ")" << endl;
+}
+
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
  *============================================================================*/
-
-/*==============================================================================
- * CLASS XxBuilderUnmerge
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-XxBuilderUnmerge::XxBuilderUnmerge() :
-   XxBuilder()
-{}
-
-//------------------------------------------------------------------------------
-//
-XxBuilderUnmerge::~XxBuilderUnmerge()
-{}
-
-//------------------------------------------------------------------------------
-//
-// FIXME grab information from the tags to set the display names.
-
-std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
-   const XxBuffer&    buffer,
-   const XxResources& resources,
-   QString&           outFileLeft,
-   QString&           outFileRight
-)
-{
-   initLines();
-
-   // Note: starting from qt-3, QRegExp will have group matching, so we could
-   // have the tags specified using reg.exps instead of strings.
-
-   enum InConflict { OUTSIDE, IN1, IN2 };
-   InConflict inConflict = OUTSIDE;
-
-   QTextOStream errors( &_errors );
-
-   XxFln f1n1 = -1;
-   XxFln f1n2 = -1;
-   XxFln f2n1 = -1;
-   XxFln f2n2 = -1;
-   f1n1 = 1;
-
-   QString tagStart = resources.getTag( TAG_UNMERGE_START );
-   QString tagSep = resources.getTag( TAG_UNMERGE_SEP );
-   QString tagEnd = resources.getTag( TAG_UNMERGE_END );
 
 //    // Prepare name buffers.
 //    char* outStart = 0;
@@ -152,6 +154,52 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 //       ++nbExpEnd;
 //    }
 
+}
+
+/*==============================================================================
+ * CLASS XxBuilderUnmerge
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxBuilderUnmerge::XxBuilderUnmerge() :
+   XxBuilder()
+{}
+
+//------------------------------------------------------------------------------
+//
+XxBuilderUnmerge::~XxBuilderUnmerge()
+{}
+
+//------------------------------------------------------------------------------
+//
+std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+   const XxBuffer&    buffer,
+   const XxResources& resources,
+   QString&           outFileLeft,
+   QString&           outFileRight
+)
+{
+   initLines();
+
+   // Note: starting from qt-3, QRegExp will have group matching, so we could
+   // have the tags specified using reg.exps instead of strings.
+
+   enum InConflict { OUTSIDE, IN1, IN2 };
+   InConflict inConflict = OUTSIDE;
+
+   QTextOStream errors( &_errors );
+
+   XxFln f1n1 = -1;
+   XxFln f1n2 = -1;
+   XxFln f2n1 = -1;
+   XxFln f2n2 = -1;
+   f1n1 = 1;
+
+   QString tagStart = resources.getTag( TAG_UNMERGE_START );
+   QString tagSep = resources.getTag( TAG_UNMERGE_SEP );
+   QString tagEnd = resources.getTag( TAG_UNMERGE_END );
+
    XX_LOCAL_TRACE( "start tag: " << tagStart /*<< " " << nbExpStart*/ );
    XX_LOCAL_TRACE( "sep tag: " << tagSep /*<< " " << nbExpSep*/ );
    XX_LOCAL_TRACE( "end tag: " << tagEnd /*<< " " << nbExpEnd*/ );
@@ -166,8 +214,6 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
       const char* textline = buffer.getTextLine( l, len );
 
       if ( inConflict == OUTSIDE ) {
-         XX_LOCAL_TRACE( sscanf( textline, tagStart ) );
-
          if ( qstrncmp( textline, tagStart, tagStart.length() ) == 0 ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
@@ -220,6 +266,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                createChangeBlock( f1n1, f2n1, fsize1, fsize2 );
             }
 
+            f1n2 = f2n1 = f2n2 = -1;
             f1n1 = l + 1;
             inConflict = OUTSIDE;
 
@@ -284,6 +331,253 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
 //------------------------------------------------------------------------------
 //
+std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+   const XxBuffer&    buffer,
+   const XxResources& resources,
+   QString&           outFileLeft,
+   QString&           outFileMiddle,
+   QString&           outFileRight
+)
+{
+   initLines();
+
+   // Note: starting from qt-3, QRegExp will have group matching, so we could
+   // have the tags specified using reg.exps instead of strings.
+
+   enum InConflict { OUTSIDE, IN1, IN2, IN3 };
+   InConflict inConflict = OUTSIDE;
+
+   QTextOStream errors( &_errors );
+
+   XxFln f1n1 = -1;
+   XxFln f1n2 = -1;
+   XxFln f2n1 = -1;
+   XxFln f2n2 = -1;
+   XxFln f3n1 = -1;
+   XxFln f3n2 = -1;
+   f1n1 = 1;
+
+   QString tagStart = resources.getTag( TAG_UNMERGE_START );
+   QString tagSep1 = resources.getTag( TAG_UNMERGE_SEP_EXTRA );
+   QString tagSep2 = resources.getTag( TAG_UNMERGE_SEP );
+   QString tagEnd = resources.getTag( TAG_UNMERGE_END );
+
+   XX_LOCAL_TRACE( "start tag: " << tagStart /*<< " " << nbExpStart*/ );
+   XX_LOCAL_TRACE( "sep1 tag: " << tagSep1 /*<< " " << nbExpSep*/ );
+   XX_LOCAL_TRACE( "sep2 tag: " << tagSep2 /*<< " " << nbExpSep*/ );
+   XX_LOCAL_TRACE( "end tag: " << tagEnd /*<< " " << nbExpEnd*/ );
+
+   QCString fileFirst;
+
+   QCString fileLeft;
+   QCString fileMiddle;
+   QCString fileRight;
+
+   int nbLines = buffer.getNbLines();
+   XX_LOCAL_TRACE( "nbLines " << nbLines );
+   for ( XxFln l = 1; l <= nbLines; ++l ) {
+      uint len;
+      const char* textline = buffer.getTextLine( l, len );
+
+      if ( inConflict == OUTSIDE ) {
+         if ( qstrncmp( textline, tagStart, tagStart.length() ) == 0 ) {
+            XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
+            XX_CHECK( l - f1n1 >= 0 );
+            createIgnoreBlock( f1n1, f1n1, f1n1, l - f1n1 );
+            f1n1 = l + 1;
+            inConflict = IN1;
+
+            // Grab string after opening tag, if present.
+            // Note that we only take the first such tag to appear in the file.
+            if ( len > tagStart.length() ) {
+               fileFirst = QCString( &textline[tagStart.length()],
+                                     len - tagStart.length() + 1 );
+               fileFirst = fileFirst.stripWhiteSpace();
+            }
+         }
+         else {
+            // Do nothing, accumulate.
+         }
+      }
+      else if ( inConflict == IN1 ) {
+         if ( qstrncmp( textline, tagSep1, tagSep1.length() ) == 0 ) {
+            f1n2 = l;
+            f2n1 = l + 1;
+            inConflict = IN2;
+
+            // Grab string after tag, if present.
+            // Note that we only take the first such tag to appear in the file.
+            if ( fileMiddle.isEmpty() && len > tagStart.length() ) {
+               fileMiddle = QCString( &textline[tagStart.length()],
+                                      len - tagStart.length() + 1 );
+               fileMiddle = fileMiddle.stripWhiteSpace();
+            }
+         }
+         else if ( qstrncmp( textline, tagSep2, tagSep2.length() ) == 0 ) {
+            f1n2 = l;
+            f3n1 = l + 1;
+            inConflict = IN3;
+         }
+         else {
+            // Do nothing, accumulate.
+         }
+      }
+      else if ( inConflict == IN2 ) {
+         if ( qstrncmp( textline, tagSep2, tagSep2.length() ) == 0 ) {
+            f2n2 = l;
+            f3n1 = l + 1;
+            inConflict = IN3;
+         }
+         else {
+            // Do nothing, accumulate.
+         }
+      }
+      else if ( inConflict == IN3 ) {
+         if ( qstrncmp( textline, tagEnd, tagEnd.length() ) == 0 ) {
+            f3n2 = l;
+            int fsize1 = f1n2 - f1n1;
+            int fsize2 = f2n2 - f2n1;
+            int fsize3 = f3n2 - f3n1;
+            XX_CHECK( fsize1 >= 0 && fsize2 >= 0 && fsize3 >= 0 );
+            XX_LOCAL_TRACE( "f1n1, f1n2, f2n1, f2n2, f3n1, f3n2 " 
+                            << f1n1 << " " << f1n2 << " "
+                            << f2n1 << " " << f2n2 << " "
+                            << f3n1 << " " << f3n2 );
+            if ( fsize1 == 0 && fsize2 == 0 && fsize3 == 0 ) {
+               errors << "Warning: empty change at line " << (f1n1 - 1)
+                      << " in file with conflicts." << endl;
+            }
+            else if ( f2n1 == -1 ) {
+               //
+               // This was a two-region conflict.
+               //
+               if ( !fileFirst.isEmpty() && fileMiddle.isEmpty() ) {
+                  fileMiddle = fileFirst;
+               }
+
+               if ( fsize1 == 0 ) {
+                  for ( int ii = 0; ii < fsize3; ++ii ) {
+                     XxLine line( XxLine::DELETE_2, f3n1 + ii, -1, f3n1 + ii );
+                     line.setHunkId( _curHunk );
+                     addLine( line );
+                  }
+               }
+               else if ( fsize3 == 0 ) {
+                  for ( int ii = 0; ii < fsize1; ++ii ) {
+                     XxLine line( XxLine::INSERT_2, -1, f1n1 + ii, -1 );
+                     line.setHunkId( _curHunk );
+                     addLine( line );
+                  }
+               }
+               else { // if ( fsize1 > 0 && fsize3 > 0 )
+                  for ( int ii = 0; ii < fsize1; ++ii ) {
+                     XxLine line( XxLine::DIFF_2,
+                                  f3n1 + ii, f1n1 + ii, f3n1 + ii );
+                     line.setHunkId( _curHunk );
+                     addLine( line );
+                  }
+               }
+               _curHunk++;
+            }
+            else {
+               //
+               // This was a three-region conflict.
+               //
+               if ( !fileFirst.isEmpty() && fileLeft.isEmpty() ) {
+                  fileLeft = fileFirst;
+               }
+
+               if ( fsize1 > 0 && fsize2 > 0 && fsize3 > 0 ) {
+                  create3Block(
+                     XxLine::DIFF_ALL, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                  );
+               }
+               else if ( fsize1 == 0 ) {
+                  if ( fsize2 == 0 || fsize3 == 0 ) {
+                     throw XxConflictFormatError(
+                        XX_EXC_PARAMS, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                     );
+                  }
+                  create3Block(
+                     XxLine::DIFFDEL_1, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                  );
+               }
+               else if ( fsize2 == 0 ) {
+                  if ( fsize1 == 0 || fsize3 == 0 ) {
+                     throw XxConflictFormatError(
+                        XX_EXC_PARAMS, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                     );
+                  }
+                  create3Block(
+                     XxLine::DIFFDEL_2, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                  );
+               }
+               else if ( fsize3 == 0 ) {
+                  if ( fsize1 == 0 || fsize2 == 0 ) {
+                     throw XxConflictFormatError(
+                        XX_EXC_PARAMS, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                     );
+                  }
+                  create3Block(
+                     XxLine::DIFFDEL_3, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2
+                  );
+               }
+               else {
+                  XX_ASSERT( false );
+               }
+               _curHunk++;
+            }
+
+            f1n2 = f2n1 = f2n2 = f3n1 = f3n2 = -1;
+            f1n1 = l + 1;
+            inConflict = OUTSIDE;
+
+            // Grab string after opening tag, if present.
+            // Note that we only take the first such tag to appear in the file.
+            if ( len > tagEnd.length() && fileRight.isEmpty() ) {
+               fileRight = QCString( &textline[tagEnd.length()],
+                                     len - tagEnd.length() + 1 );
+               fileRight = fileRight.stripWhiteSpace();
+            }
+         }
+         else {
+            // Do nothing, accumulate.
+         }
+      }
+
+   }
+   
+   // Warn if we ended up in an unfinished region.
+   if ( inConflict != OUTSIDE ) {
+      createIgnoreBlock( f1n1 - 1, f1n1 - 1, f1n1 - 1, nbLines + 1 - (f1n1-1) );
+
+      errors << "Warning: file ends inside change at line " << (f1n1 - 1)
+             << endl;
+   }
+   else if ( f1n1 <= nbLines ) {
+      // Add final ignore region if present.
+      createIgnoreBlock( f1n1, f1n1, f1n1, nbLines + 1 - f1n1 );
+   }
+
+   XX_LOCAL_TRACE( "DONE" );
+
+   // Saved error text.
+   errors << flush;
+   XX_LOCAL_TRACE( "Errors: " << _errors );
+
+   XX_LOCAL_TRACE( "Left: " << fileLeft );
+   XX_LOCAL_TRACE( "Middle: " << fileMiddle );
+   XX_LOCAL_TRACE( "Right: " << fileRight );
+
+   outFileLeft = fileLeft;
+   outFileMiddle = fileMiddle;
+   outFileRight = fileRight;
+   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   return ap;
+}
+
+//------------------------------------------------------------------------------
+//
 void XxBuilderUnmerge::createIgnoreBlock( 
    XxFln fline1,
    XxFln fline2,
@@ -292,6 +586,23 @@ void XxBuilderUnmerge::createIgnoreBlock(
 {
    for ( uint ii = 0; ii < fsize; ++ii ) {
       XxLine line( XxLine::SAME, fline1 + ii, fline2 + ii );
+      line.setHunkId( _curHunk );
+      addLine( line );
+   }
+   _curHunk++;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxBuilderUnmerge::createIgnoreBlock( 
+   XxFln fline1,
+   XxFln fline2,
+   XxFln fline3,
+   uint  fsize
+)
+{
+   for ( uint ii = 0; ii < fsize; ++ii ) {
+      XxLine line( XxLine::SAME, fline1 + ii, fline2 + ii, fline3 + ii );
       line.setHunkId( _curHunk );
       addLine( line );
    }
@@ -363,6 +674,46 @@ void XxBuilderUnmerge::createInsertRightBlock(
       addLine( line );
    }
    _curHunk++;
+}
+
+
+//------------------------------------------------------------------------------
+//
+void XxBuilderUnmerge::create3Block( 
+   XxLine::Type type,
+   XxFln        f1n1,
+   XxFln        f1n2,
+   XxFln        f2n1,
+   XxFln        f2n2,
+   XxFln        f3n1,
+   XxFln        f3n2
+)
+{
+   int fsize1 = f1n2 - f1n1;
+   int fsize2 = f2n2 - f2n1;
+   int fsize3 = f3n2 - f3n1;
+
+   int maxsize = std::max( fsize1, std::max( fsize2, fsize3 ) ); // FIXME + 1
+   XX_LOCAL_TRACE( "maxsize=" << maxsize );
+   XX_ASSERT( maxsize > 0 );
+
+   int n1, n2, n3;
+   for ( int ii = 0;  ii < maxsize; ++ii ) {
+      n1 = n2 = n3 = -1;
+      if ( f1n1 < f1n2 ) {
+         n1 = f1n1++;
+      }
+      if ( f2n1 < f2n2 ) {
+         n2 = f2n1++;
+      }
+      if ( f3n1 < f3n2 ) {
+         n3 = f3n1++;
+      }
+
+      XxLine line( type, n1, n2, n3 );
+      line.setHunkId( _curHunk );
+      addLine( line );
+   }
 }
 
 XX_NAMESPACE_END

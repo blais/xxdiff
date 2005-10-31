@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 519 2002-02-23 17:43:56Z blais $
+# $Id: TODO 529 2002-02-25 22:52:14Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -13,40 +13,41 @@ Goals for 3.0 stable release:
 ------------------------------
 
    * Multiple horizontal diffs support (***DONE in 2.1).
-   * CVS unmerge conflicts feature.
+   * CVS unmerge conflicts feature (***DONE in 2.4).
    * Save merged results feature (***DONE in 2.3).
-   * Display-ignore related features (e.g. per-hunk ws ignore).
-   * Support ignore-blank-lines (will use internal display-ignore feature)
    * Merged view pane display (***DONE in 2.2).
+   * Do not use temporary files for stdin input anymore (***DONE in 2.5).
+   * Finish scrollbars resizing for paned merged view.
+   * Support ignore-blank-lines (will use internal display-ignore feature)
+   * Display-ignore related features (e.g. per-hunk ws ignore).
    * Some dirdiff improvements (exclude).
    * Qt-3.0 port.
-   * Windows port using Qt-3.0 non-commercial license.
-   * Make error recovery work better in rcfile parsing.
+   * Windows port using Qt-3.0 non-commercial license (almost done, doesn't
+     link).
+   * Improve error recovery in rcfile parsing.
 
 
 --------------------------------------------------------------------------------
 Tasks: current tasks
 
 
-   * Add dummy line creation for new XxDiffs in all builders.
+(Memory Checking)
 
+   * Run valgrind and mpatrol once again to stabilize.
 
 
 (Raw diff output)
 
    * Implement a window to display the raw diff output. Some people may enjoy
-     this.
+     this. kompare (kdiff2) has this.
 
 
 (Misc)
   
-   * Add a first item to _lines for XxDiffs, so that we don't have to subtract 1
-     everytime!!!
-
    * When using replace file on a local file, "./" is added before the displayed
      filename, find out why, and eradicate if possible.
 
-   * Convert arrays of string to use a QStringList in many place
+   * Convert arrays of string to use a QStringList in many places
      (e.g. cmdline.h)
 
    * I think we could free the buffers before reloading them on redo diff.
@@ -56,30 +57,10 @@ Tasks: current tasks
 
 
 
-(Outstanding Bugs)
-
-   * When a file is from stdin, redo-diff clears xxdiffs, at the very least it
-     should not do anything (perhaps disable redo diff?).
-
-
-
 (CVS unmerge conflicts)
-
-   * Goto line will not work.
-
-   * Gray out useless menu items/buttons.
 
    * It would be nice that if you click on the filename labels it wouldn't add
      the "(SOMEFILE)" into the clipboard.
-
-   * diff3 and cvs markers seem to be different, perhaps implement parser for
-     both.
-
-   * Check for precise syntax of CVS conflict markers
-
-      * How is it different with 3 files? does this make any sense? diff3 -m?
-
-      * Compare our current output tags, are they ok?
 
 
 (Printed output)
@@ -435,24 +416,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
 
    * Add a line at the bottom for interactive search widget and ignore pattern
      widgets (line edits)
-
-
-(Temporary files)
-
-   * Does xxdiff try to cleanup tmp file on startup? if so that is a bug, 
-     because one can run multiple xxdiff's on the host.
-
-   * Unlink the temporary files right away, the problem is that we need the temp
-     file around for "redo diff", investigate using mknod() instead just during
-     the time we redo the diff, so that we really insure we don't leave some old
-     temporary files lying around when the user interrupts xxdiff (or when we
-     crash ;-)).
-
-   * Perhaps implement using a catched signal to delete tmp files?
-
-   * Can I use a named pipe instead?  would that be better?
-     does it just delete itself once it's done?
-
 
 
 (Documentation)

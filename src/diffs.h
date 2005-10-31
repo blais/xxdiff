@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $Id: diffs.h 528 2002-02-25 17:08:09Z blais $
+ * $Date: 2002-02-25 12:08:09 -0500 (Mon, 25 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -151,7 +151,11 @@ public:
    const XxLine& getLine( const XxDln lineno ) const;
 
    // Given a file line number in a specific file, returns the display line no.
-   XxDln getDisplayLine( const XxFln fline, const XxFno fno ) const;
+   XxDln getDisplayLine(
+      const XxFln     rdline,
+      const XxBuffer& buffer,
+      const XxFno     fno
+   ) const;
 
    // Applies a selection to a line.
    void selectLine( XxDln lineNo, XxLine::Selection selection );
@@ -296,9 +300,12 @@ public:
    // Re-index the buffers so that the lines they believe they have seem to be
    // contiguous, and adjust the diffs accordingly. This method modifies both
    // the buffers as well as this instance. This is used for unmerge.
+   //
+   // file3 can be null.
    void reindex( 
       const std::auto_ptr<XxBuffer>& file1,
-      const std::auto_ptr<XxBuffer>& file2
+      const std::auto_ptr<XxBuffer>& file2,
+      const std::auto_ptr<XxBuffer>& file3
    );
 
 
