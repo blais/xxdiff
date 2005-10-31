@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 56 2000-12-25 20:15:47Z  $
- * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
+ * $Id: help.cpp 64 2001-03-11 01:06:13Z  $
+ * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -516,6 +516,9 @@ void XxHelp::dumpVersion( std::ostream& os )
 #endif
 #ifdef XX_USE_RUNTIME_HELP
    os << " runtime_help";
+#endif
+#if QT_VERSION < 220
+   os << " old-qt";
 #endif
    os << "." << endl;
 }

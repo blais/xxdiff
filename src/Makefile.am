@@ -28,8 +28,12 @@ UIDESIGNER_GENSOURCES = $(UIDESIGNER_FILES:.ui=.cpp)
 $(UIDESIGNER_GENHEADERS) : $(UIDESIGNER_FILES)
 $(UIDESIGNER_GENSOURCES) : $(UIDESIGNER_FILES)
 
+$(UIDESIGNER_GENSOURCES) : $(UIDESIGNER_GENHEADERS)
+
 UIDESIGNER_MYHEADERS = $(UIDESIGNER_FILES_IMPL:Base.ui=.h)
 UIDESIGNER_MYSOURCES = $(UIDESIGNER_FILES_IMPL:Base.ui=.cpp)
+
+xxdiff_DEPENDENCIES += $(UIDESIGNER_GENHEADERS) $(UIDESIGNER_GENSOURCES) 
 
 .ui.h:
 	$(UIC) $< -o $@
@@ -40,7 +44,6 @@ UIDESIGNER_MYSOURCES = $(UIDESIGNER_FILES_IMPL:Base.ui=.cpp)
 ui_dialogs: $(UIDESIGNER_FILES)
 
 EXTRA_DIST += $(UIDESIGNER_FILES)
-
 
 
 ################################################################################
@@ -55,6 +58,11 @@ RCFILE_FILES = rcfileParser.cpp
 endif
 
 xxdiff_SOURCES = \
+	optionsDialogBase.cpp \
+	optionsDialog.cpp \
+	searchDialogBase.cpp \
+	searchDialog.cpp \
+	markersWidgetBase.cpp \
 	app.cpp \
 	suicideMessageBox.cpp \
 	dialogs.cpp \
@@ -79,20 +87,16 @@ xxdiff_SOURCES = \
 	rcfileParser.cpp \
 	markersFileDialog.cpp \
 	getopt.c \
-	getopt1.c \
-	optionsDialogBase.cpp \
-	optionsDialog.cpp \
-	searchDialogBase.cpp \
-	searchDialog.cpp \
-	markersWidgetBase.cpp
-
-# autoconf is giving me pain with this stuff, f**k that.
-#	 $(UIDESIGNER_GENSOURCES) 
-#	 $(UIDESIGNER_MYSOURCES) 
+	getopt1.c
 
 
 # This determines which files go in the distribution.
 noinst_HEADERS = \
+	optionsDialogBase.h \
+	optionsDialog.h \
+	searchDialogBase.h \
+	searchDialog.h \
+	markersWidgetBase.h \
 	app.h \
 	app.inline.h \
 	suicideMessageBox.h \
@@ -124,16 +128,7 @@ noinst_HEADERS = \
 	util.h \
 	xrmParser.h \
 	markersFileDialog.h \
-	getopt.h \
-	optionsDialogBase.h \
-	optionsDialog.h \
-	searchDialogBase.h \
-	searchDialog.h \
-	markersWidgetBase.h
-
-# autoconf is giving me pain with this stuff, f**k that.
-#	 $(UIDESIGNER_GENHEADERS) \
-#	 $(UIDESIGNER_MYHEADERS) 
+	getopt.h
 
 
 #BUILT_SOURCES =	man.h \
@@ -143,9 +138,9 @@ noinst_HEADERS = \
 
 # FIXME automoc fails when I try to optionally not compile the parser files.
 
-man_MANS = xxdiff.man
+man_MANS = xxdiff.1
 
-EXTRA_DIST += xxdiff.man mine older yours pixmaps old
+EXTRA_DIST += xxdiff.1 mine older yours pixmaps old
 
 ################################################################################
 # Qt moc targets
@@ -219,9 +214,9 @@ LIBS += $(LINKSTATIC_LIBS) -lX11 -lXext -lm
 ################################################################################
 # --enable-runtime-help option
 
-man.h: xxdiff.man
+man.h: xxdiff.1
 	echo "char manText[] = " > man.h
-	nroff -man xxdiff.man | col -b | sed -e 's/\(.*\)/"\1\\\n"/' >> man.h
+	nroff -man xxdiff.1 | col -b | sed -e 's/\(.*\)/"\1\\\n"/' >> man.h
 	echo ";" >> man.h
 
 help.o: man.h
@@ -373,3 +368,6 @@ DISTCLEANFILES = rcfileParser.y.c rcfileParser.y.h rcfileParser.lex.c
 
 MAINTAINERCLEANFILES = xxdiff.catman man.h \
 	$(UIDESIGNER_HEADERS) $(UIDESIGNER_SOURCES)
+
+
+MOC=$(QTDIR)/bin/moc

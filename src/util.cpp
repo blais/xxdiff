@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 56 2000-12-25 20:15:47Z  $
- * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
+ * $Id: util.cpp 64 2001-03-11 01:06:13Z  $
+ * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -135,13 +135,8 @@ bool XxUtil::isDirectory( const char* filename )
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::copyToFile( FILE* fin, const char* name )
+void XxUtil::copyToFile( FILE* fin, FILE* fout )
 {
-   FILE *fout;
-   if ( ( fout = fopen (name, "a") ) == NULL ) {
-      throw new XxIoError( "Error opening temporary file." );
-   }
-   
    while ( !feof(fin) ) {
       char buffer[BUFSIZ];
       size_t nitems = fread( buffer, 1, BUFSIZ, fin );
@@ -152,9 +147,6 @@ void XxUtil::copyToFile( FILE* fin, const char* name )
    if ( ferror( fin ) || ferror( fout ) ) {
       fclose(fout);
       throw new XxIoError( "Error writing temporary file." );
-   }
-   if ( fclose( fout ) != 0 ) {
-      throw new XxIoError( "Error closing temporary file." );
    }
 }
 

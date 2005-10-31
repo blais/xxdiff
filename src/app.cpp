@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 56 2000-12-25 20:15:47Z  $
- * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
+ * $Id: app.cpp 64 2001-03-11 01:06:13Z  $
+ * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -614,11 +614,20 @@ uint XxApp::readFileNames(
             stdinCopied = true;
             
             displayFilenames[ii] = _stdinFilename;
-            char* temporaryFilename = tempnam( 0, "xxdif" );
+            char temporaryFilename[32] = "xxdiff.XXXXXX";
+            int tfd = mkstemp( temporaryFilename );
+            FILE *fout;
+            if ( ( fout = fdopen( tfd, "w") ) == NULL ) {
+               throw new XxIoError( "Error opening temporary file." );
+            }
+   
             filenames[ii] = temporaryFilename;
-            free( temporaryFilename );
             created[ii] = true;
-            XxUtil::copyToFile( stdin, filenames[ii].c_str() );
+            XxUtil::copyToFile( stdin, fout );
+
+            if ( fclose( fout ) != 0 ) {
+               throw new XxIoError( "Error closing temporary file." );
+            }
          }
          else {
             std::string fname = argv[ii];

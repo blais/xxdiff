@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 56 2000-12-25 20:15:47Z  $
- * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
+ * $Id: resources.cpp 64 2001-03-11 01:06:13Z  $
+ * $Date: 2001-03-10 20:06:13 -0500 (Sat, 10 Mar 2001) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -2126,8 +2126,8 @@ void XxResources::listResources( std::ostream& os ) const
    
    std::string val;
    for ( int ii = RESOURCE_FIRST; ii < RESOURCE_LAST; ++ii ) {
+      writeDocAttrib( this, os, Resource(ii) );
       if ( query( defaults, Resource(ii), val ) ) {
-         writeDocAttrib( this, os, Resource(ii) );
          os << val << endl << endl;
       }
    }

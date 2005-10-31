@@ -7,7 +7,7 @@ fi
 # Note: this script assume that release_bin has already been called.
 
 echo "Getting version number"
-VERSION=`tools/get_version`
+VERSION=`grep AM_INIT_AUTOMAKE configure.in | sed -e 's/[^0-9]*\([.0-9]*\).*/\1/'`
 echo "   Version is " $VERSION
 
 echo "Creating spec file"
@@ -23,7 +23,7 @@ echo "Building binary package"
 rpm -ba /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
 
 echo "Copy binary package home"
-cp /usr/src/redhat/RPMS/i386/xxdiff-$VERSION*.i386.rpm /tmp
-chmod 777 /tmp/xxdiff-$VERSION*.i386.rpm
+cp /usr/src/redhat/RPMS/i386/xxdiff-$VERSION*.i386.rpm /home/blais
+chmod 777 /home/blais/xxdiff-$VERSION*.i386.rpm
 
 echo "Done."

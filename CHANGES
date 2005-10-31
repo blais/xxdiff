@@ -1,6 +1,36 @@
 CHANGES for xxdiff
 ------------------------------
 
+cool idea: add a command to be run to automatically load the said file in emacs,
+e.g. click on title bar and send an emacsclient command.
+
+
+I want mouse-drag with third buttn.
+
+Also, in 3-way diff, it would be nice to be able to ignore one file and to diff only the two other ones without restarting, with keeping the three files. You could do this with just changing the colors, and the next/previous methods.
+
+
+
+Guillaume Kerrien <gkerrien@free.fr>
+>  > - file copy in directory view ( e.g. "copy selected file from left side to
+>  > right side ...")
+>  
+>  Great idea!  I'll take note for the next version.
+>  
+Version 1.9.1:
+   * Fixed bug in --list-resources option, now prints all resources, regardless
+     if they have a value or not.
+
+
+Version 1.9:
+
+
+
+
+
+
+
+
 
 Version 1.8.3:
 
