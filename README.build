@@ -1,8 +1,13 @@
-xxdiff README
-------------------------------
+				 xxdiff README
+			 ------------------------------
+					
+xxdiff is a graphical file and directories comparison and merge tool.
 
-Home page: http://xxdiff.sourceforge.net
+Official home page: http://xxdiff.sourceforge.net
 Author: Martin Blais <blais@iro.umontreal.ca>
+
+Full documentation is available from the Help menu or web site.
+
 
 Building from source:
 ------------------------------
@@ -10,98 +15,79 @@ Building from source:
 #
 # compile xxdiff itself
 #
-
 # We use tmake, you'll need it, install the latest version if you can.
-# http://www.trolltech.com
+# http://www.trolltech.com.  Make sure your TMAKEPATH is properly set to point
+# to the architecture specific tmake directory.
 #
 # If you try to compile under a Sun machine, you'll need GNU make.  Don't waste
 # your time with Sun's make.
 
-
 cd xxdiff/src
-tmake -t xxdiff.t xxdiff.pro > Makefile
-
-
-# Compile
+tmake xxdiff.pro > Makefile
 make
 
 
-# Installling by hand.
+#
+# installation
+#
 su - 
 install xxdiff/src/xxdiff /usr/X11R6/bin
 
-
-
-#
-# Compile warnings
-#
-You could get some of the following warnings, due to a bug in libstdc++ that
-comes with 2.96:
-
-In file included from stringResParser.cpp:35:
-/usr/include/g++-3/sstream: In method `int stringbuf::sync ()':
-/usr/include/g++-3/sstream:171: warning: comparison between signed and unsigned integer expressions
+# you can generate HTML documentation with 'xxdiff --help-html' if you want.
 
 
 
-Source packaging:
-------------------------------
-make dist
-
-
-
-Redhat Linux packaging:
-------------------------------
-# Standard procedure: cp pristine distribution sources and run automated build.
-cp xxdiff-<version>.tar.gz /usr/src/redhat/SOURCES
-rpm -ba xxdiff/spec/xxdiff-<version>.spec
-
-# Installing from redhat package.
-rpm -Uvh xxdiff-<version>.i386.rpm
-
-
-
-Debian Linux packaging:
-------------------------------
-See web page for link.
-
-
-
-OpenBSD packaging:
-------------------------------
-In the ports tree.
-
-
-
-SGI packaging:
-------------------------------
-make ; tools/release_dist
-#To install the SGI package you'll need fw_qt and it's prerequisites.
-
-
-# Installing from tardist package.
-inst -f xxdiff-<version>.mips.tardist
-> go
-
-
-
-My release process:
+Packaging:
 ------------------------------
 
-0) make sure the tmake makefile is a release and not debug tmake.
+   * Source packaging:
+     tools/release_src
 
-1) build
-make dist (problem with autoconf 2.50, fix bug by hand $$/ to $$d/)
-build src.rpm and i389.rpm for linux
-build mips.tardist on sgi
+   * Simple binary packaging (all platforms):
+     tools/release_bin
 
-2) distribute
-add release to sourceforge project
-upload to sourceforge htdocs (secondary download location)
-upload to sourceforge web page
-upload to rhcontrib.bero.org
+   * Redhat Linux packaging:
+     tools/release_i386_rpm
 
-3) announce
-release announcement on freshmeat.net
-announce from sourceforge project release
+   * Debian Linux packaging:
+     See web page for link to current port.
+
+   * OpenBSD packaging:
+     In the ports tree.
+
+   * SGI packaging:
+     tools/release_mips_tardist
+     # to install the SGI package you'll need fw_qt and it's prerequisites.
+
+     # installing from tardist package.
+     inst -f xxdiff-<version>.mips.tardist
+     > go
+
+
+
+
+The author's own release process:
+------------------------------
+
+   0) check 
+      1a) tmake makefile is in release
+      1b) version number is correct
+
+   1) apply release tag to cvs files 
+
+   2) build (see instructions above)
+      2a) run tests in xxdiff/test
+
+   3) build packages (see instructions above)
+
+   4) distribute
+      - add release to sourceforge project
+      - upload to sourceforge htdocs (secondary download location)
+      - upload to sourceforge web page
+      - upload to rhcontrib.bero.org
+
+   5) announce
+      - sourceforge project release announcement
+      - freshmeat.net
+      - ...
 

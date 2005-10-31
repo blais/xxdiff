@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 308 2001-10-24 05:00:40Z blais $
- * $Date: 2001-10-24 01:00:40 -0400 (Wed, 24 Oct 2001) $
+ * $Id: exceptions.cpp 352 2001-11-06 20:00:01Z blais $
+ * $Date: 2001-11-06 15:00:01 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -88,12 +88,12 @@ XxUsageError::XxUsageError(
 {
    if ( version == true ) {
       // Overwrite base class msg.
-      QTextStream oss( &_msg, IO_WriteOnly );
+      QTextStream oss( &_msg, IO_WriteOnly | IO_Truncate );
       XxHelp::dumpVersion( oss );
    }
    else if ( msg.isEmpty() ) {
       // Overwrite base class msg.
-      QTextStream oss( &_msg, IO_WriteOnly );
+      QTextStream oss( &_msg, IO_WriteOnly | IO_Truncate );
       XxHelp::dumpUsage( oss );
    }
    else {

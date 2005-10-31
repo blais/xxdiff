@@ -292,7 +292,8 @@ You can customize what shows up in this region from the command-line.  Clicking
 on the filename puts it in the clipboard for cut-n-paste.  (This label will
 intelligently display the end part of the filename if it is too long to fit.)
 This region also display the text line that the line cursor is in, for each
-file.
+file.  You can customize what gets displayed in this labeled by using a
+command-line option.
 </li>
 
 <li>
@@ -721,12 +722,22 @@ customizable resources in this version of xxdiff.
 <a name="faq">
 <h2>Frequently Asked Questions (FAQ)</h2>
 
-<h3> Can I diff files with CRLF DOS characters in them? </h3>
+<!-- ---------------------------------------- -->
+<h3>Can I diff files with CRLF DOS characters in them?</h3>
 
 <p>
 If you want to diff files with CRLF characters in them, you can use the 'ignore
 whitespace option to GNU diff, which will work, even if only one of the files
 has the DOS characters in it.
+</p>
+
+<!-- ---------------------------------------- -->
+<h3>How do I make xxdiff display the revision number of a file?</h3>
+
+<p>
+By default, the filenames window display the filename.  From the command-line,
+howver, you can set it to display an arbitrary string, which could include your
+current revision number.
 </p>
 
 <!-- ----------------------------------------------------------------------- -->

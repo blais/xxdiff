@@ -1,31 +1,90 @@
 #!/bin/sh
 
+function waitread() { 
+    echo "   <press enter>" && read
+}
+
+function waitexit() { 
+    echo "   <exit xxdiff>"
+}
+
 XXDIFF=../src/xxdiff
 
-#------------------------------
-# print out help
+echo "========================================================================="
+echo "Print out version"
 
-echo "Print out help 
+$XXDIFF --version
+waitread;
+
+echo "========================================================================="
+echo "print out help"
+
 $XXDIFF --help
+waitread;
 
+echo "========================================================================="
+echo "print HTML documentation"
 
-#------------------------------
-# print out HTML documentation
+$XXDIFF --help-html | tee /tmp/out.html
 
-$XXDIFF --help-html
+echo "=============================="
+echo "open and check file:/tmp/doc.html in your browser"
+waitread;
+rm -f /tmp/out.html
 
+echo "========================================================================="
+echo "listing resources"
 
+$XXDIFF --list-resources | tee /tmp/xxdiffrc
+waitread;
 
+echo "========================================================================="
+echo "opening xxdiff with output resources"
+echo "there should be no warnings here."
 
+XXDIFFRC=/tmp/xxdiffrc $XXDIFF mine mine
+waitexit;
+rm -f /tmp/xxdiffrc
 
+echo "========================================================================="
+echo "testing --no-rcfile"
 
-#------------------------------
-# specify cmdline resourcep
+$XXDIFF --no-rcfile mine mine
+waitexit;
 
+echo "========================================================================="
+echo "testing --orig-xdiff"
 
-todo
+$XXDIFF --no-rcfile --orig-xdiff mine mine
+waitexit;
 
+echo "========================================================================="
+echo "normal 2-way diff"
 
+$XXDIFF mine older
+waitexit;
 
+echo "========================================================================="
+echo "normal 3-way diff"
 
-$XXDIFF --list-resources > should be able to read it after
+$XXDIFF mine older yours
+waitexit;
+
+echo "========================================================================="
+echo "normal 2-way dir. diff"
+
+$XXDIFF dir1 dir3
+waitexit;
+
+echo "========================================================================="
+echo "normal 2-way recursive dir. diff"
+
+$XXDIFF -r dir1 dir3
+waitexit;
+
+echo "========================================================================="
+echo "3-way with auto merge"
+
+$XXDIFF --merge mine older yours
+waitexit;
+

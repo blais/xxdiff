@@ -2,89 +2,65 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 348 2001-11-06 06:50:46Z blais $
+# $Id: CHANGES 352 2001-11-06 20:00:01Z blais $
 #
 
-ADVICE TO THE CUSTOMER:  we are currently doing major renovations,
-please come back later, or stick with the latest stable release--1.13.
-I'm down to writing documentation and packaging, I'll release after that is
-nice and clean.
---$Date: 2001-11-06 01:50:46 -0500 (Tue, 06 Nov 2001) $
-
-Features remaining todo for 2.0 release:
 ------------------------------
 
-   * try mips build stripped and release, to see if it works now.
-     if it does, fix tools/release_bin
-
-   * setup list of features to try for release criteria (regression tests)
-
-   * update all /tools dir.
-
-   * announce: web site, fm, bero, qt, discreet, cervisia, wincvs, etc.
-
-   * web site: add documentation, remove xxscripts, add emacs trick to start xxdiff automatically on previous file
-
-    add translate sscript, remove xxscripts
-
-   * update root README
-
-
-
-Current development version:
-------------------------------
-
-
-
-------------------------------
-
-***NOT YET RELEASED*** Version 2.0: (stable)
+Version 2.0: (stable release)
 
    Changes since 1.13:  the focus of this release is an internal rewrite for
    stability, portability and code sanity before embarking on a series of new
    features.  There are not many user-visible changes, but you should switch
    anyway, for stability.
 
-   Summary:
+   Summary of changes since 1.13:
 
-   * ALL logged bugs have been fixed, including some nasty ones.  xxdiff is now
-     more stable than ever, has been purified.
+      * ALL logged bugs have been fixed, including some nasty ones.  xxdiff is
+	now more stable than ever, has been purified.
 
-   * Removed internal dependency on std::string, we are now using QString
-     everywhere internally.  Much less STL dependency now.  This should improve
-     portability considerably (it was ported again to Solaris).
+      * Removed internal dependency on std::string, we are now using QString
+	everywhere internally.  Much less STL dependency now.  This should
+	improve portability considerably (it was ported again to Solaris).
 
-   * The resources system was rewritten completely, including the parser, which
-     now defines its own little resources language.  Parsing the resources file
-     should be much more efficient that it was.  The resources file format has
-     changed.  Also, by default xxdiff will now turn on its cool unique
-     features as they appear.  The output of --list-resources should now be
-     parsable directly.  Xrm resources support has been removed.
+      * The resources system was rewritten completely, including the parser,
+	which now defines its own little resources language.  Parsing the
+	resources file should be much more efficient that it was.  The resources
+	file format has changed.  Also, by default xxdiff will now turn on its
+	cool unique features as they appear.  The output of --list-resources
+	should now be parsable directly.  Xrm resources support has been
+	removed.
 
-   * User-visible changes: toolbar buttons have been reorganized slightly and
-     bitmap are now nice and final.  Color legend is now integrated in the
-     options dialog.  You can now customize fonts from the options dialog.  The
-     options dialog has been reorganized.  You can now maximized the geometry
-     from the resources.  Cheesy logo added.  Error messages are now better.
+      * User-visible changes: toolbar buttons have been reorganized slightly and
+	bitmap are now nice and final.  Color legend is now integrated in the
+	options dialog.  You can now customize fonts from the options dialog.
+	The options dialog has been reorganized.  You can now maximized the
+	geometry from the resources.  Cheesy logo added.  Error messages are now
+	better.
 
-   * Full documentation is now included with xxdiff and will be online.
+      * Full documentation is now included with xxdiff and will be online.
 
-   * Commands that don't require the display don't attempt to open a display
-     connection anymore.
+      * Commands that don't require the display don't attempt to open a display
+	connection anymore.
 
-   * Build system has changed, we are now using tmake.
+      * Build system has changed, we are now using tmake.
 
-   * The text area rendering code has been rewritten entirely.  Rendering very
-     very long lines should now work correctly.
+      * The text area rendering code has been rewritten entirely.  Rendering
+	very very long lines should now work correctly.
 
-   * The code was prepared for an upcoming Windows port tentative.
+      * The code was prepared for an upcoming Windows port tentative.
 
+   ---------------------------
 
+   * Fixed bug with version printing missing endl in release mode.
 
 ------------------------------
 
 Version 1.16: (pre-release)
 
+   * Setup trivial regression test script (gotta start this eventually).
+   * Updated root README file instructions.
+   * Updated all /tools dir.
    * Added documentation table of contents.
    * Fixed output of resources into HTML with HTML-able tags (XxHelp::xmlize()).
    * Removed all stat() calls, replaced by QFileInfo.
@@ -121,7 +97,7 @@ Version 1.16: (pre-release)
    * Moved archive in its own CVS module and renamed xxdiff-doc xxdiff-web.
    * Added HTML documentation, still need to finish and polish it.
    * Removed linking to internal diffs linkage before release
-     (internal diffs to be done after 2.0).
+     (internal diffs to be done af ter 2.0).
    * Changed tmake spec so we don't have to specify xxdiff.t
    * Fixed bug with horizontal resizing on font change.
    * Fixed diff3 parsing which had just been broken.
@@ -1030,6 +1006,29 @@ Wishlist/ToDo todo TODO list:
 
 After 2.0:
 ------------------------------
+
+   release
+
+   * try mips build stripped and release, to see if it works now.
+     if it does, fix tools/release_bin
+
+   * announce: web site, fm, bero, qt, discreet, cervisia, wincvs, 
+     sgi freeware, ...
+
+   * web site: add emacs trick to start xxdiff automatically on previous file
+
+   * add to google direcotry!!!
+
+   * change screenshots, add a single, complete nicer one
+
+
+
+
+
+
+   * "xxdiff -w" should toggle the actuall command switch specified in the
+     resources for ignore whitespace, do belley's request at the same time
+
 
    * put all the resources text as what's this in the options dialog
 

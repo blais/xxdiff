@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 345 2001-11-06 02:20:49Z blais $
-# $Date: 2001-11-05 21:20:49 -0500 (Mon, 05 Nov 2001) $
+# $Id: xxdiff.pro 352 2001-11-06 20:00:01Z blais $
+# $Date: 2001-11-06 15:00:01 -0500 (Tue, 06 Nov 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -25,7 +25,7 @@
 #
 
 TEMPLATE = xxdiff
-CONFIG = debug qt warn_on
+CONFIG = release qt warn_on
 
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
@@ -57,7 +57,11 @@ irix-n32:TMAKE_CFLAGS = $$TMAKE_CXXFLAGS
 irix-n32:TMAKE_MOC = ${QTDIR}/bin/moc
 
 irix-n32:TMAKE_LIBS += -lC -lCio -lgen -lm
-irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,/usr/freeware/lib32
+irix-n32:TMAKE_LIBDIR_QT = $(QTDIR)/lib32
+irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib32
+
+irix-n32:TMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
+
 
 #
 # linux-g++

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_src 348 2001-11-06 06:50:46Z blais $
+# $Id: release_src 350 2001-11-06 08:22:24Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -24,8 +24,12 @@ CVS_RSH=ssh
 cvs -z3 -d:ext:bor.iro.umontreal.ca:/u/blais/cvsroot \
    export -d xxdiff-$VERSION -r xxdiff_$UVERSION xxdiff
 
-echo "Compressing source into archive"
-tar zcvf xxdiff-${VERSION}.tar.gz xxdiff-${VERSION}
+if [ $? = 0 ]; then 
+    echo "Compressing source into archive"
+    tar zcvf ../xxdiff-${VERSION}.tar.gz xxdiff-${VERSION}
+else
+    echo "Error exporting source"
+fi
 
 echo "Cleaning up"
 cd .. && rm -rf $TMP

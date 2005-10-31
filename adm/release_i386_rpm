@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_i386_rpm 348 2001-11-06 06:50:46Z blais $
+# $Id: release_i386_rpm 352 2001-11-06 20:00:01Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -15,7 +15,7 @@ VERSION=`tools/get_version`
 echo "   Version is " $VERSION
 
 echo "Creating spec file"
-cp tools/xxdiff-rpm.spec > /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
+cp tools/xxdiff-rpm.spec /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
 
 echo "Copying pristine build"
 PRISTINE=../xxdiff-$VERSION.tar.gz
@@ -25,13 +25,17 @@ fi
 cp $PRISTINE /usr/src/redhat/SOURCES
 
 echo "Building binary package"
-rpm -ba /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
+rpm -ba --nodeps /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
+# Note: we use nodeps here because tmake package is not quite common yet under 
+# rh-7.1.
 
 echo "Copy binary package home"
-cp /usr/src/redhat/RPMS/i386/xxdiff-$VERSION*.i386.rpm /home/blais
-chmod 777 /home/blais/xxdiff-$VERSION*.i386.rpm
+DEST=/tmp
+cp /usr/src/redhat/RPMS/i386/xxdiff-$VERSION*.i386.rpm ${DEST}
+chmod 777 ${DEST}/xxdiff-$VERSION*.i386.rpm
 
-cp /usr/src/redhat/RPMS/i386/xxdiff-$VERSION*.src.rpm /home/blais
-chmod 777 /home/blais/xxdiff-$VERSION*.src.rpm
+cp /usr/src/redhat/SRPMS/xxdiff-$VERSION*.src.rpm ${DEST}
+chmod 777 ${DEST}/xxdiff-$VERSION*.src.rpm
 
+echo "Packages should be in $DEST."
 echo "Done."

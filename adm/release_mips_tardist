@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_mips_tardist 348 2001-11-06 06:50:46Z blais $
+# $Id: release_mips_tardist 352 2001-11-06 20:00:01Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -12,7 +12,7 @@ VERSION=`tools/get_version`
 
 SBASE=$HOME/xxdiff
 COMPONENTS="xxdiff xxdiff.idb xxdiff.sw xxdiff.man"
-DEST=$HOME/xxdiff-$VERSION.mips.tardist
+DEST=$PWD/../xxdiff-$VERSION.mips.tardist
 
 # Generate distribution.
 gendist -sbase $SBASE -idb $SBASE/tools/xxdiff-sgi.idb \
