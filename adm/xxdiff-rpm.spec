@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 2.0.2
+Version: 2.0.3
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
@@ -48,6 +48,9 @@ install -c -m 755 -s src/xxdiff ${RPM_BUILD_ROOT}/usr/X11R6/bin/
 
 
 %changelog
+* Thu Nov 29 2001 Martin Blais <blais@discreet.com>
+- released 2.0.3
+
 * Sun Nov 5 2001 Martin Blais <blais@discreet.com>
 - Made it work with tmake.
 

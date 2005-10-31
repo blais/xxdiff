@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 352 2001-11-06 20:00:01Z blais $
-# $Date: 2001-11-06 15:00:01 -0500 (Tue, 06 Nov 2001) $
+# $Id: xxdiff.pro 431 2001-11-30 02:24:05Z  $
+# $Date: 2001-11-29 21:24:05 -0500 (Thu, 29 Nov 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -32,7 +32,7 @@ debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 INCLUDEPATH += .
 
 LEXYACC  = resParser
-TMAKE_CLEAN += $$LEXYACC.lex.c $$LEXYACC.y.c $$LEXYACC.y.h
+TMAKE_CLEAN += $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
 
 
 #

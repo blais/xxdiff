@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 358 2001-11-07 21:23:34Z blais $
- * $Date: 2001-11-07 16:23:34 -0500 (Wed, 07 Nov 2001) $
+ * $Id: diffs.cpp 431 2001-11-30 02:24:05Z  $
+ * $Date: 2001-11-29 21:24:05 -0500 (Thu, 29 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1259,8 +1259,11 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    }
 
    // Erase old lines.
-   std::vector<XxLine>::iterator istart = & getLineNC( lstart.front() );
-   std::vector<XxLine>::iterator iend = & getLineNC( lend.back() );
+   std::vector<XxLine>::iterator istart = _lines.begin();
+   istart += lstart.front() - 1;
+   std::vector<XxLine>::iterator iend = _lines.begin();
+   iend += lend.back() - 1;
+
    _lines.erase( istart, iend + 1 );
    _lines.insert( istart, newLines.begin(), newLines.end() );
 

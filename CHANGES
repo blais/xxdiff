@@ -2,10 +2,37 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 369 2001-11-11 03:03:41Z  $
+# $Id: CHANGES 431 2001-11-30 02:24:05Z  $
 #
 
-Current version:
+Version 2.0.3: (portability release)
+------------------------------
+
+This release includes very minor changes for backwards portability to
+Redhat-6.2, as well as a minor enhancement to allow the Debian package to have
+its documentation automatically generated (--html-help doesn't require a display
+connection anymore).
+
+*** Change Log ***
+
+(Better automated packaging)
+
+   * --html-help now does not require a display connection, so that the
+       packaging scripts can generate the documentation from the executable on a
+       machine without display connection access (suggestion of Tomas Pospisek).
+
+(Redhat-6.2 Portability)
+
+   * Make sure we can now compile under rh-6.2 (thx to Fabrice Crestois).
+   * Removed std::auto_ptr<>::reset().
+   * Small iterator change in diffs.cpp for rh-6.2 compilation.
+
+(Misc)
+
+   * Removed circular dependendy in resParser.lex.c, this was due to the fact
+     that by default make considers a lex file to have .l suffix and not .lex.
+     We could patch it with a simple rule, but instead we rename the file to 
+     use the standard suffix.
 
 Version 2.0.2: (bug-fix release)
 ------------------------------

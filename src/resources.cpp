@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: resources.cpp 431 2001-11-30 02:24:05Z  $
+ * $Date: 2001-11-29 21:24:05 -0500 (Thu, 29 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -159,51 +159,55 @@ void XxResources::initializeOriginalXdiff()
 
    //---------------------------------------------------------------------------
 
-   setFbColors( COLOR_SAME             , "grey", "black" );
-   setFbColors( COLOR_DIFF_ONE         , "palegoldenrod", "black" );
-   setFbColors( COLOR_DIFF_ONE_SUP     , "lemonchiffon3", "black" );
-   setFbColors( COLOR_DIFF_ONE_ONLY    , "palegoldenrod", "black" );
-   setFbColors( COLOR_DIFF_ONE_NONLY   , "lemonchiffon3", "black" );
-   setFbColors( COLOR_DIFF_TWO         , "lightblue2", "black" );
-   setFbColors( COLOR_DIFF_TWO_SUP     , "lightblue3", "black" );
-   setFbColors( COLOR_DIFF_TWO_ONLY    , "lightblue2",  "black" );
-   setFbColors( COLOR_DIFF_TWO_NONLY   , "lightblue3", "black" );
+   if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
+      setFbColors( COLOR_SAME             , "grey", "black" );
+      setFbColors( COLOR_DIFF_ONE         , "palegoldenrod", "black" );
+      setFbColors( COLOR_DIFF_ONE_SUP     , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ONE_ONLY    , "palegoldenrod", "black" );
+      setFbColors( COLOR_DIFF_ONE_NONLY   , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_TWO         , "lightblue2", "black" );
+      setFbColors( COLOR_DIFF_TWO_SUP     , "lightblue3", "black" );
+      setFbColors( COLOR_DIFF_TWO_ONLY    , "lightblue2",  "black" );
+      setFbColors( COLOR_DIFF_TWO_NONLY   , "lightblue3", "black" );
              
-   setFbColors( COLOR_DELETE           , "lightblue2", "black" );
-   setFbColors( COLOR_DELETE_BLANK     , "grey64", "black" );
+      setFbColors( COLOR_DELETE           , "lightblue2", "black" );
+      setFbColors( COLOR_DELETE_BLANK     , "grey64", "black" );
              
-   setFbColors( COLOR_INSERT           , "darkseagreen2", "black" );
-   setFbColors( COLOR_INSERT_BLANK     , "grey64", "black" );
+      setFbColors( COLOR_INSERT           , "darkseagreen2", "black" );
+      setFbColors( COLOR_INSERT_BLANK     , "grey64", "black" );
              
-   setFbColors( COLOR_DIFF_ALL         , "palegoldenrod", "black" );
-   setFbColors( COLOR_DIFF_ALL_SUP     , "lemonchiffon3", "black" );
-   setFbColors( COLOR_DIFF_ALL_ONLY    , "palegoldenrod", "black" );
-   setFbColors( COLOR_DIFF_ALL_NONLY   , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ALL         , "palegoldenrod", "black" );
+      setFbColors( COLOR_DIFF_ALL_SUP     , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ALL_ONLY    , "palegoldenrod", "black" );
+      setFbColors( COLOR_DIFF_ALL_NONLY   , "lemonchiffon3", "black" );
              
-   setFbColors( COLOR_DIFFDEL          , "palegoldenrod", "black" );
-   setFbColors( COLOR_DIFFDEL_SUP      , "lemonchiffon3", "black" );
-   setFbColors( COLOR_DIFFDEL_ONLY     , "palegoldenrod", "black" );
-   setFbColors( COLOR_DIFFDEL_NONLY    , "lemonchiffon3", "black" );
-   setFbColors( COLOR_DIFFDEL_BLANK    , "grey64", "black" );
+      setFbColors( COLOR_DIFFDEL          , "palegoldenrod", "black" );
+      setFbColors( COLOR_DIFFDEL_SUP      , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFFDEL_ONLY     , "palegoldenrod", "black" );
+      setFbColors( COLOR_DIFFDEL_NONLY    , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFFDEL_BLANK    , "grey64", "black" );
              
-   setFbColors( COLOR_SELECTED         , "plum", "black" );
-   setFbColors( COLOR_SELECTED_SUP     , "thistle", "black" );
+      setFbColors( COLOR_SELECTED         , "plum", "black" );
+      setFbColors( COLOR_SELECTED_SUP     , "thistle", "black" );
              
-   setFbColors( COLOR_DELETED          , "lightslategrey", "black" );
-   setFbColors( COLOR_DELETED_SUP      , "slategrey", "black" );
+      setFbColors( COLOR_DELETED          , "lightslategrey", "black" );
+      setFbColors( COLOR_DELETED_SUP      , "slategrey", "black" );
              
-   setFbColors( COLOR_IGNORED          , "grey70", "grey30" );
+      setFbColors( COLOR_IGNORED          , "grey70", "grey30" );
              
-   setFbColors( COLOR_DIRECTORIES      , "mediumturquoise", "black" );
+      setFbColors( COLOR_DIRECTORIES      , "mediumturquoise", "black" );
                                                          
-   setFbColors( COLOR_MERGED_UNDECIDED , "lemonchiffon3", "black" );
-   setFbColors( COLOR_MERGED_DECIDED_1 , "grey70", "black" );
-   setFbColors( COLOR_MERGED_DECIDED_2 , "grey70", "black" );
-   setFbColors( COLOR_MERGED_DECIDED_3 , "grey70", "black" );
+      setFbColors( COLOR_MERGED_UNDECIDED , "lemonchiffon3", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_1 , "grey70", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_2 , "grey70", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_3 , "grey70", "black" );
+   }   
              
    _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
-   _backColors[ COLOR_CURSOR ].setNamedColor( "white" );
-   _backColors[ COLOR_VERTICAL_LINE ].setNamedColor( "red" );
+   _backColors[ COLOR_CURSOR ] =
+      QColor( 0xff, 0xff, 0xff, QColor::Rgb ); // white
+   _backColors[ COLOR_VERTICAL_LINE ] = 
+      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
    // Note: we don't use the fore colors for these guys.
 
    //---------------------------------------------------------------------------
@@ -483,11 +487,13 @@ void XxResources::setColor(
    const QString& colorstr
 )
 {
-   if ( fore ) {
-      _foreColors[ int(colorType) ].setNamedColor( colorstr );
-   }
-   else {
-      _backColors[ int(colorType) ].setNamedColor( colorstr );
+   if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
+      if ( fore ) {
+         _foreColors[ int(colorType) ].setNamedColor( colorstr );
+      }
+      else {
+         _backColors[ int(colorType) ].setNamedColor( colorstr );
+      }
    }
    emit changed();
 }

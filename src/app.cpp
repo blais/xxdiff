@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 358 2001-11-07 21:23:34Z blais $
- * $Date: 2001-11-07 16:23:34 -0500 (Wed, 07 Nov 2001) $
+ * $Id: app.cpp 431 2001-11-30 02:24:05Z  $
+ * $Date: 2001-11-29 21:24:05 -0500 (Thu, 29 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1537,10 +1537,11 @@ void XxApp::readFile(
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         _files[no].reset( new XxBuffer( false, filename, displayFilename ) );
+         std::auto_ptr<XxBuffer> tmp( new XxBuffer( false, filename, displayFilename ) );
+	 _files[no] = tmp;
       }
       else {
-         _files[no].reset( 
+         std::auto_ptr<XxBuffer> tmp( 
             new XxBuffer( 
                filename, 
                displayFilename, 
@@ -1548,6 +1549,7 @@ void XxApp::readFile(
                isTemporary 
             )
          );
+         _files[no] = tmp;
       }
    }
    catch ( const std::exception& ex ) {
@@ -1589,14 +1591,15 @@ void XxApp::reReadFile( const XxFno no )
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         _files[no].reset( new XxBuffer( 
+         std::auto_ptr<XxBuffer> tmp( new XxBuffer( 
             false,
             oldfile->getName(),
             oldfile->getDisplayName()
          ) );
+         _files[no] = tmp;
       }
       else {
-         _files[no].reset( 
+         std::auto_ptr<XxBuffer> tmp(
             new XxBuffer( 
                oldfile->getName(),
                oldfile->getDisplayName(),
@@ -1604,6 +1607,7 @@ void XxApp::reReadFile( const XxFno no )
                oldfile->isTemporary()
             )
          );
+         _files[no] = tmp;
       }
    }
    catch ( const std::exception& ex ) {

@@ -18,8 +18,8 @@ YACC = #$ $text = "bison -d";
 
 ####### Lex/yacc files
 
-LEXIN = #$ $text = Expand("LEXYACC") . ".lex";
-LEXOUT = #$ $text = Expand("LEXYACC") . ".lex.c";
+LEXIN = #$ $text = Expand("LEXYACC") . ".l";
+LEXOUT = #$ $text = Expand("LEXYACC") . ".l.c";
 YACCIN = #$ $text = Expand("LEXYACC") . ".y";
 YACCOUTC = #$ $text = Expand("LEXYACC") . ".y.c";
 YACCOUTH = #$ $text = Expand("LEXYACC") . ".y.h";

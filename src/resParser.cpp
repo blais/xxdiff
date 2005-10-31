@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: resParser.cpp 431 2001-11-30 02:24:05Z  $
+ * $Date: 2001-11-29 21:24:05 -0500 (Thu, 29 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -645,7 +645,7 @@ char lexerBuffer[ LEX_BUFFER_MAX ];
 #define YYPARSE_PARAM resources
 #define YY_DECL       int yylex( YYSTYPE* yylval )
 
-#include <resParser.lex.c>
+#include <resParser.l.c>
 #include <resParser.y.c>
 
 // Reset warnings under IRIX.
@@ -1129,6 +1129,13 @@ void XxResParser::listResources( QTextStream& os )
 //
 QString XxResParser::getResourceRef()
 {
+   // Important note: we cannot require a display connection here, so we cannot
+   // print the correct font names and named colors.  This is fine, however,
+   // since this output only goes towards printing the HTML help, and we don't
+   // mind if the default values for fonts and colors are not included in the
+   // documentation.  In fact, since they might vary between X servers, we'd
+   // rather have a constant documentation output than a varying one.
+
    QString resref;
    QTextOStream os( &resref );
 
@@ -1162,9 +1169,14 @@ QString XxResParser::getResourceRef()
          XxAccel accel = XxAccel( accelList[ii]._token );
          int aval = res.getAccelerator( accel );
          QString astr("");
-         if ( aval != 0 ) {
-            astr = QAccel::keyToString( aval );
-         }
+            if ( qApp != 0 ) {
+               if ( aval != 0 ) {
+                  astr = QAccel::keyToString( aval );
+               }
+            }
+            else {
+               astr = "&lt;key&gt;";
+            }
          os << tok->_name << "." << accelList[ii]._name << ": \""
             << XxHelp::xmlize( astr ) << "\"" << endl;
       }
@@ -1176,8 +1188,14 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( STPARAM(kwdList), FONT_APP );
       const QFont& fontApp = res.getFontApp();
-      os << tok->_name << ": \""
-         << XxHelp::xmlize( fontApp.rawName() ) << "\"" << endl;
+      os << tok->_name << ": \"";
+      if ( qApp != 0 ) {
+         os << XxHelp::xmlize( fontApp.rawName() );
+      }
+      else {
+         os << "&lt;xfld-font-spec&gt;";
+      }
+      os << "\"" << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;
@@ -1188,8 +1206,15 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( STPARAM(kwdList), FONT_TEXT );
       const QFont& fontText = res.getFontText();
-      os << tok->_name << ": \""
-         << XxHelp::xmlize( fontText.rawName() ) << "\"" << endl;
+      os << tok->_name << ": \"";
+      if ( qApp != 0 ) {
+         os << XxHelp::xmlize( fontText.rawName() );
+      }
+      else {
+         os << "&lt;xfld-font-spec&gt;";
+      }
+      os << "\"" << endl;
+
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;
@@ -1211,11 +1236,24 @@ QString XxResParser::getResourceRef()
          XxColor color = XxColor( tokc->_token );
 
          drbegin( os );
-         os << tok->_name << "." << tokc->_name << ".Fore" << ": \""
-            << res.getColor( color, true ).name() << "\"" << endl;
 
-         os << tok->_name << "." << tokc->_name << ".Back" << ": \""
-            << res.getColor( color, false ).name() << "\"" << endl;
+         os << tok->_name << "." << tokc->_name << ".Fore" << ": \"";
+         if ( qApp != 0 ) {
+            os << res.getColor( color, true ).name();
+         }
+         else { 
+            os << "&lt;color&gt;";
+         }
+         os << "\"" << endl;
+
+         os << tok->_name << "." << tokc->_name << ".Back" << ": \"";
+         if ( qApp != 0 ) {
+            os << res.getColor( color, false ).name();
+         }
+         else { 
+            os << "&lt;color&gt;";
+         }
+         os << "\"" << endl;
 
          drend( os );
          ddbegin( os );

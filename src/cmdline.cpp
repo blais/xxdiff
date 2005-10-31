@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.cpp 369 2001-11-11 03:03:41Z  $
- * $Date: 2001-11-10 22:03:41 -0500 (Sat, 10 Nov 2001) $
+ * $Id: cmdline.cpp 431 2001-11-30 02:24:05Z  $
+ * $Date: 2001-11-29 21:24:05 -0500 (Thu, 29 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -383,10 +383,7 @@ void XxCmdline::listResources()
 //
 void XxCmdline::printHtmlHelp()
 {
-   // We need a QApplication object to be able to list the resources
-   // documentation.  Perhaps we could revise this.
-   int argc = 0;
-   QApplication app( argc, 0 );
+   // Note: we do not require a display connection here.
 
    {
       QTextStream os( stdout, IO_WriteOnly );
