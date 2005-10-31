@@ -1,0 +1,1487 @@
+-------------------------------------------------------------------------
+00
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+-------------------------------------------------------------------------
+10
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+20
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+-------------------------------------------------------------------------
+30
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+40
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+-------------------------------------------------------------------------
+01
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+11
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+21
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+31
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+41
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 59: 44768 Broken pipe             cat $FILE4
+     39509 Exit 2                  | $XXDIFF - $NFILE
+-------------------------------------------------------------------------
+02
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+-------------------------------------------------------------------------
+12
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+22
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Directory diffs detected, not yet supported.
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+32
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+42
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 70: 44064 Broken pipe             cat $FILE4
+     42155 Exit 2                  | $XXDIFF - $DIRR1
+-------------------------------------------------------------------------
+03
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+13
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+23
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+33
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+43
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 81: 43965 Broken pipe             cat $FILE4
+     44012 Exit 2                  | $XXDIFF - $NDIRR
+-------------------------------------------------------------------------
+04
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+-------------------------------------------------------------------------
+14
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 86: 44817 Broken pipe             cat $FILE4
+     44063 Exit 2                  | $XXDIFF $NFILE -
+-------------------------------------------------------------------------
+24
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 88: 44706 Broken pipe             cat $FILE4
+     44760 Exit 2                  | $XXDIFF $DIRR1 -
+-------------------------------------------------------------------------
+34
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 90: 38542 Broken pipe             cat $FILE4
+     44806 Exit 2                  | $XXDIFF $NDIRR -
+-------------------------------------------------------------------------
+44
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 92: 44827 Broken pipe             cat $FILE4
+     42136 Exit 2                  | $XXDIFF - -
+-------------------------------------------------------------------------
+000
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+001
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+002
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+003
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+004
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+100
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+101
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+102
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+103
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+104
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 118: 42425 Broken pipe             cat $FILE4
+     38154 Exit 2                  | $XXDIFF $NFILE $FILE2 -
+-------------------------------------------------------------------------
+200
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+201
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+202
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+203
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+204
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+300
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+301
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+302
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+303
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+304
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 140: 40881 Broken pipe             cat $FILE4
+     44720 Exit 2                  | $XXDIFF $NDIRR $FILE2 -
+-------------------------------------------------------------------------
+400
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+401
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 145: 44832 Broken pipe             cat $FILE4
+     40874 Exit 2                  | $XXDIFF - $FILE2 $NFILE
+-------------------------------------------------------------------------
+402
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+403
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 149: 44913 Broken pipe             cat $FILE4
+     44902 Exit 2                  | $XXDIFF - $FILE2 $NDIRR
+-------------------------------------------------------------------------
+404
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 151: 44911 Broken pipe             cat $FILE4
+     43087 Exit 2                  | $XXDIFF - $FILE2 -
+-------------------------------------------------------------------------
+010
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+011
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+012
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+013
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+014
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 162: 44915 Broken pipe             cat $FILE4
+     44925 Exit 2                  | $XXDIFF $FILE1 $NFILE -
+-------------------------------------------------------------------------
+110
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+111
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+112
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+113
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+114
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 173: 44922 Broken pipe             cat $FILE4
+     44936 Exit 2                  | $XXDIFF $NFILE $NFILE -
+-------------------------------------------------------------------------
+210
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+211
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+212
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+213
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+214
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 184: 44953 Broken pipe             cat $FILE4
+     44944 Exit 2                  | $XXDIFF $DIRR1 $NFILE -
+-------------------------------------------------------------------------
+310
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+311
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+312
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+313
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+314
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 195: 44949 Broken pipe             cat $FILE4
+     39825 Exit 2                  | $XXDIFF $NDIRR $NFILE -
+-------------------------------------------------------------------------
+410
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 198: 44892 Broken pipe             cat $FILE4
+     44959 Exit 2                  | $XXDIFF - $NFILE $FILE3
+-------------------------------------------------------------------------
+411
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 200: 44896 Broken pipe             cat $FILE4
+     43222 Exit 2                  | $XXDIFF - $NFILE $NFILE
+-------------------------------------------------------------------------
+412
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 202: 44792 Broken pipe             cat $FILE4
+     44859 Exit 2                  | $XXDIFF - $NFILE $DIRR3
+-------------------------------------------------------------------------
+413
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 204: 44727 Broken pipe             cat $FILE4
+     44957 Exit 2                  | $XXDIFF - $NFILE $NDIRR
+-------------------------------------------------------------------------
+414
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 206: 44955 Broken pipe             cat $FILE4
+     44958 Exit 2                  | $XXDIFF - $NFILE -
+-------------------------------------------------------------------------
+020
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+021
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+022
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+023
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+024
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+120
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+121
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+122
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+123
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+124
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 228: 44967 Broken pipe             cat $FILE4
+     44937 Exit 2                  | $XXDIFF $NFILE $DIRR1 -
+-------------------------------------------------------------------------
+220
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+221
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+222
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Directory diffs detected, not yet supported.
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+223
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+224
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 239: 44948 Broken pipe             cat $FILE4
+     44919 Exit 2                  | $XXDIFF $DIRR1 $DIRR1 -
+-------------------------------------------------------------------------
+320
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+321
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+322
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+323
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+324
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 250: 44977 Broken pipe             cat $FILE4
+     44910 Exit 2                  | $XXDIFF $NDIRR $DIRR1 -
+-------------------------------------------------------------------------
+420
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+421
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 255: 44997 Broken pipe             cat $FILE4
+     44995 Exit 2                  | $XXDIFF - $DIRR1 $NFILE
+-------------------------------------------------------------------------
+422
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 257: 44943 Broken pipe             cat $FILE4
+     44961 Exit 2                  | $XXDIFF - $DIRR1 $DIRR3
+-------------------------------------------------------------------------
+423
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 259: 45003 Broken pipe             cat $FILE4
+     44950 Exit 2                  | $XXDIFF - $DIRR1 $NDIRR
+-------------------------------------------------------------------------
+424
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 261: 44990 Broken pipe             cat $FILE4
+     44994 Exit 2                  | $XXDIFF - $DIRR1 -
+-------------------------------------------------------------------------
+030
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+031
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+032
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+033
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+034
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 272: 43422 Broken pipe             cat $FILE4
+     44945 Exit 2                  | $XXDIFF $FILE1 $NDIRR -
+-------------------------------------------------------------------------
+130
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+131
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+132
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+133
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+134
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 283: 44504 Broken pipe             cat $FILE4
+     45000 Exit 2                  | $XXDIFF $NFILE $NDIRR -
+-------------------------------------------------------------------------
+230
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+231
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+232
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+233
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+234
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 294: 44969 Broken pipe             cat $FILE4
+     44719 Exit 2                  | $XXDIFF $DIRR1 $NDIRR -
+-------------------------------------------------------------------------
+330
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+331
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+332
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+333
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+-------------------------------------------------------------------------
+334
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 305: 45032 Broken pipe             cat $FILE4
+     45004 Exit 2                  | $XXDIFF $NDIRR $NDIRR -
+-------------------------------------------------------------------------
+430
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 308: 44996 Broken pipe             cat $FILE4
+     45021 Exit 2                  | $XXDIFF - $NDIRR $FILE3
+-------------------------------------------------------------------------
+431
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 310: 45025 Broken pipe             cat $FILE4
+     44978 Exit 2                  | $XXDIFF - $NDIRR $NFILE
+-------------------------------------------------------------------------
+432
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 312: 45008 Broken pipe             cat $FILE4
+     45020 Exit 2                  | $XXDIFF - $NDIRR $DIRR3
+-------------------------------------------------------------------------
+433
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 314: 44991 Broken pipe             cat $FILE4
+     44976 Exit 2                  | $XXDIFF - $NDIRR $NDIRR
+-------------------------------------------------------------------------
+434
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 316: 45031 Broken pipe             cat $FILE4
+     45040 Exit 2                  | $XXDIFF - $NDIRR -
+-------------------------------------------------------------------------
+040
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+041
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 321: 45035 Broken pipe             cat $FILE4
+     45054 Exit 2                  | $XXDIFF $FILE1 - $NFILE
+-------------------------------------------------------------------------
+042
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+043
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 325: 45058 Broken pipe             cat $FILE4
+     45028 Exit 2                  | $XXDIFF $FILE1 - $NDIRR
+-------------------------------------------------------------------------
+044
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 327: 45027 Broken pipe             cat $FILE4
+     45059 Exit 2                  | $XXDIFF $FILE1 - -
+-------------------------------------------------------------------------
+140
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 330: 45051 Broken pipe             cat $FILE4
+     45061 Exit 2                  | $XXDIFF $NFILE - $FILE3
+-------------------------------------------------------------------------
+141
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 332: 45056 Broken pipe             cat $FILE4
+     45024 Exit 2                  | $XXDIFF $NFILE - $NFILE
+-------------------------------------------------------------------------
+142
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 334: 45046 Broken pipe             cat $FILE4
+     45064 Exit 2                  | $XXDIFF $NFILE - $DIRR3
+-------------------------------------------------------------------------
+143
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 336: 45029 Broken pipe             cat $FILE4
+     45066 Exit 2                  | $XXDIFF $NFILE - $NDIRR
+-------------------------------------------------------------------------
+144
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 338: 45057 Broken pipe             cat $FILE4
+     41706 Exit 2                  | $XXDIFF $NFILE - -
+-------------------------------------------------------------------------
+240
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+-------------------------------------------------------------------------
+241
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 343: 45048 Broken pipe             cat $FILE4
+     45036 Exit 2                  | $XXDIFF $DIRR1 - $NFILE
+-------------------------------------------------------------------------
+242
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 345: 45014 Broken pipe             cat $FILE4
+     45017 Exit 2                  | $XXDIFF $DIRR1 - $DIRR3
+-------------------------------------------------------------------------
+243
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 347: 45016 Broken pipe             cat $FILE4
+     45053 Exit 2                  | $XXDIFF $DIRR1 - $NDIRR
+-------------------------------------------------------------------------
+244
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 349: 45063 Broken pipe             cat $FILE4
+     44998 Exit 2                  | $XXDIFF $DIRR1 - -
+-------------------------------------------------------------------------
+340
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 352: 45072 Broken pipe             cat $FILE4
+     45026 Exit 2                  | $XXDIFF $NDIRR - $FILE3
+-------------------------------------------------------------------------
+341
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 354: 45019 Broken pipe             cat $FILE4
+     45079 Exit 2                  | $XXDIFF $NDIRR - $NFILE
+-------------------------------------------------------------------------
+342
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 356: 45075 Broken pipe             cat $FILE4
+     45073 Exit 2                  | $XXDIFF $NDIRR - $DIRR3
+-------------------------------------------------------------------------
+343
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 358: 45011 Broken pipe             cat $FILE4
+     45070 Exit 2                  | $XXDIFF $NDIRR - $NDIRR
+-------------------------------------------------------------------------
+344
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+System error: No such file or directory
+
+./testCmdLine: line 360: 44974 Broken pipe             cat $FILE4
+     45067 Exit 2                  | $XXDIFF $NDIRR - -
+-------------------------------------------------------------------------
+440
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 363: 45013 Broken pipe             cat $FILE4
+     45037 Exit 2                  | $XXDIFF - - $FILE3
+-------------------------------------------------------------------------
+441
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 365: 45052 Broken pipe             cat $FILE4
+     45047 Exit 2                  | $XXDIFF - - $NFILE
+-------------------------------------------------------------------------
+442
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 367: 45074 Broken pipe             cat $FILE4
+     45041 Exit 2                  | $XXDIFF - - $DIRR3
+-------------------------------------------------------------------------
+443
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 369: 45080 Broken pipe             cat $FILE4
+     45077 Exit 2                  | $XXDIFF - - $NDIRR
+-------------------------------------------------------------------------
+444
+QFont: not an XLFD: "*-clean-medium-r-normal-*-14-*", using raw mode
+Usage: 
+   xxdiff [OPTION] <file1> <file2>
+	where <filex> can be - for stdin
+
+Options: 
+   --help         Show this help message.
+   --version, -v  Show the program version and compilation options.
+   --no-xrm       Don't query X resources.
+   -N <string>    When input is read from stdin this option specifies
+                  the string to use in place of it's name in the 
+                  title bar.  If not specified the string "<stdin>"
+                  is used.
+   -D             If there are no differences then exit quietly 
+                  with exit code of 0.
+   -w             Passed on to diff(1). Ignore whitespace when 
+                  comparing the two files.
+   -b             Passed on to diff(1). Ignore trailing blanks 
+                  when comparing the two files.
+   -i             Passed on to diff(1). Ignore case when comparing
+                  the two files.
+
+./testCmdLine: line 371: 44862 Broken pipe             cat $FILE4
+     44880 Exit 2                  | $XXDIFF - - -

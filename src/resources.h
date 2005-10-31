@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 422 2001-11-28 23:41:31Z blais $
- * $Date: 2001-11-28 18:41:31 -0500 (Wed, 28 Nov 2001) $
+ * $Id: resources.h 446 2001-12-06 06:06:31Z blais $
+ * $Date: 2001-12-06 01:06:31 -0500 (Thu, 06 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_RESOURCES
 #define INCL_XXDIFF_RESOURCES
@@ -115,8 +115,8 @@ enum XxAccel {
    ACCEL_SEARCH,
    ACCEL_SEARCH_FORWARD,
    ACCEL_SEARCH_BACKWARD,
-   ACCEL_SCROLL_DOWN,
-   ACCEL_SCROLL_UP,
+   ACCEL_PAGE_DOWN,
+   ACCEL_PAGE_UP,
    ACCEL_CURSOR_DOWN,
    ACCEL_CURSOR_UP,
    ACCEL_CURSOR_TOP,
@@ -201,46 +201,50 @@ enum XxAccel {
 enum XxColor {
    COLOR_SAME,
 
-   COLOR_INSERT,              // A in A--, -A-, --A blocks.
-   COLOR_INSERT_BLANK,        // - in A--, -A-, --A blocks.
-                                       
-   COLOR_DIFF_ALL,            // A,B or C in ABC blocks.
-   COLOR_DIFF_ALL_SUP,        // (shadowed)
-   COLOR_DIFF_ALL_ONLY,       // (when other is blank)
-   COLOR_DIFF_ALL_NONLY,      // (when blank)
-
-   COLOR_DIFF_ONE,            // B in BAA, ABA, AAB blocks.
-   COLOR_DIFF_ONE_SUP,        // (shadowed)
-   COLOR_DIFF_ONE_ONLY,       // (when other is blank)
-   COLOR_DIFF_ONE_NONLY,      // (when blank)
-   COLOR_DIFF_TWO,            // A in BAA, ABA, AAB blocks.
-   COLOR_DIFF_TWO_SUP,        // (shadowed)
-   COLOR_DIFF_TWO_ONLY,       // (when other is blank)
-   COLOR_DIFF_TWO_NONLY,      // (when blank)
-                                       
-   COLOR_DELETE,              // A in -AA, A-A, AA- blocks.
-   COLOR_DELETE_BLANK,        // - in -AA, A-A, AA- blocks.
-                                       
-   COLOR_DIFFDEL,             // A and B in -AB, A-B, AB- blocks.
-   COLOR_DIFFDEL_SUP,         // (shadowed)
-   COLOR_DIFFDEL_ONLY,        // (when other is blank)
-   COLOR_DIFFDEL_NONLY,       // (when blank)
-   COLOR_DIFFDEL_BLANK,       // - in -AB, A-B, AB- blocks.
-
-   COLOR_SELECTED,            // selected text.
-   COLOR_SELECTED_SUP,        // (shadowed)
-
-   COLOR_DELETED,             // deleted text.
-   COLOR_DELETED_SUP,         // (shadowed)
-
-   COLOR_IGNORED,             // ignored file.
-
-   COLOR_DIRECTORIES,         // directories in directory diffs.
-
-   COLOR_MERGED_UNDECIDED,    // undecided text (merged view).
-   COLOR_MERGED_DECIDED_1,    // decided text, file 1 (merged view).
-   COLOR_MERGED_DECIDED_2,    // decided text, file 2 (merged view).
-   COLOR_MERGED_DECIDED_3,    // decided text, file 3 (merged view).
+   COLOR_INSERT,               // A in A--, -A-, --A blocks.
+   COLOR_INSERT_BLANK,         // - in A--, -A-, --A blocks.
+                                        
+   COLOR_DIFF_ALL,             // A,B or C in ABC blocks.
+   COLOR_DIFF_ALL_SUP,         // (shadowed)
+   COLOR_DIFF_ALL_ONLY,        // (when other is blank)
+   COLOR_DIFF_ALL_NONLY,       // (when blank)
+                               
+   COLOR_DIFF_ONE,             // B in BAA, ABA, AAB blocks.
+   COLOR_DIFF_ONE_SUP,         // (shadowed)
+   COLOR_DIFF_ONE_ONLY,        // (when other is blank)
+   COLOR_DIFF_ONE_NONLY,       // (when blank)
+   COLOR_DIFF_TWO,             // A in BAA, ABA, AAB blocks.
+   COLOR_DIFF_TWO_SUP,         // (shadowed)
+   COLOR_DIFF_TWO_ONLY,        // (when other is blank)
+   COLOR_DIFF_TWO_NONLY,       // (when blank)
+                                        
+   COLOR_DELETE,               // A in -AA, A-A, AA- blocks.
+   COLOR_DELETE_BLANK,         // - in -AA, A-A, AA- blocks.
+                                        
+   COLOR_DIFFDEL,              // A and B in -AB, A-B, AB- blocks.
+   COLOR_DIFFDEL_SUP,          // (shadowed)
+   COLOR_DIFFDEL_ONLY,         // (when other is blank)
+   COLOR_DIFFDEL_NONLY,        // (when blank)
+   COLOR_DIFFDEL_BLANK,        // - in -AB, A-B, AB- blocks.
+                               
+   COLOR_SELECTED,             // selected text.
+   COLOR_SELECTED_SUP,         // (shadowed)
+                               
+   COLOR_DELETED,              // deleted text.
+   COLOR_DELETED_SUP,          // (shadowed)
+                               
+   COLOR_IGNORED,              // ignored file.
+                               
+   COLOR_DIRECTORIES,          // directories in directory diffs.
+                               
+   COLOR_MERGED_UNDECIDED,     // undecided text (merged view).
+   COLOR_MERGED_DECIDED_1,     // decided text, file 1 (merged view).
+   COLOR_MERGED_DECIDED_1_SUP, // decided text, file 1, shadowed (merged view).
+   COLOR_MERGED_DECIDED_2,     // decided text, file 2 (merged view).
+   COLOR_MERGED_DECIDED_2_SUP, // decided text, file 2, shadowed (merged view).
+   COLOR_MERGED_DECIDED_3,     // decided text, file 3 (merged view).
+   COLOR_MERGED_DECIDED_3_SUP, // decided text, file 3, shadowed (merged view).
+   COLOR_MERGED_DECIDED_NEITHER, // decided text, neither files.
 
    // Other colors.
    COLOR_BACKGROUND,

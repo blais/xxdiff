@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.l 399 2001-11-22 06:19:13Z blais $
- * $Date: 2001-11-22 01:19:13 -0500 (Thu, 22 Nov 2001) $
+ * $Id: resParser.l 432 2001-11-30 07:21:57Z blais $
+ * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 %{
 /*  #define YYSTYPE QString */

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 412 2001-11-23 16:46:21Z blais $
- * $Date: 2001-11-23 11:46:21 -0500 (Fri, 23 Nov 2001) $
+ * $Id: resParser.cpp 446 2001-12-06 06:06:31Z blais $
+ * $Date: 2001-12-06 01:06:31 -0500 (Thu, 06 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -236,8 +236,8 @@ StringToken accelList[] = {
    { "Search", ACCEL_SEARCH, 0 },
    { "SearchForward", ACCEL_SEARCH_FORWARD, 0 },
    { "SearchBackward", ACCEL_SEARCH_BACKWARD, 0 },
-   { "ScrollDown", ACCEL_SCROLL_DOWN, 0 },
-   { "ScrollUp", ACCEL_SCROLL_UP, 0 },
+   { "ScrollDown", ACCEL_PAGE_DOWN, 0 },
+   { "ScrollUp", ACCEL_PAGE_UP, 0 },
    { "CursorDown", ACCEL_CURSOR_DOWN, 0 },
    { "CursorUp", ACCEL_CURSOR_UP, 0 },
    { "CursorTop", ACCEL_CURSOR_TOP, 0 },
@@ -389,10 +389,18 @@ StringToken colorList[] = {
      " Merged view undecided text " },
    { "MergedDecided1", COLOR_MERGED_DECIDED_1,
      " Merged view decided text, file 1 " },
+   { "MergedDecided1Sup", COLOR_MERGED_DECIDED_1_SUP,
+     " Merged view decided text, file 1 (shadowed) " },
    { "MergedDecided2", COLOR_MERGED_DECIDED_2,
      " Merged view decided text, file 2 " },
+   { "MergedDecided2Sup", COLOR_MERGED_DECIDED_2_SUP,
+     " Merged view decided text, file 2 (shadowed) " },
    { "MergedDecided3", COLOR_MERGED_DECIDED_3,
      " Merged view decided text, file 3 " },
+   { "MergedDecided3Sup", COLOR_MERGED_DECIDED_3_SUP,
+     " Merged view decided text, file 3 (shadowed) " },
+   { "MergedDecidedNeither", COLOR_MERGED_DECIDED_NEITHER,
+     " Merged view decided text, neither files " },
 
    { "Background", COLOR_BACKGROUND,
      " Global background color " },
@@ -1235,6 +1243,13 @@ void XxResParser::listResources( QTextStream& os )
 //
 QString XxResParser::getResourceRef()
 {
+   // Important note: we cannot require a display connection here, so we cannot
+   // print the correct font names and named colors.  This is fine, however,
+   // since this output only goes towards printing the HTML help, and we don't
+   // mind if the default values for fonts and colors are not included in the
+   // documentation.  In fact, since they might vary between X servers, we'd
+   // rather have a constant documentation output than a varying one.
+
    QString resref;
    QTextOStream os( &resref );
 
@@ -1268,9 +1283,14 @@ QString XxResParser::getResourceRef()
          XxAccel accel = XxAccel( accelList[ii]._token );
          int aval = res.getAccelerator( accel );
          QString astr("");
-         if ( aval != 0 ) {
-            astr = QAccel::keyToString( aval );
-         }
+            if ( qApp != 0 ) {
+               if ( aval != 0 ) {
+                  astr = QAccel::keyToString( aval );
+               }
+            }
+            else {
+               astr = "&lt;key&gt;";
+            }
          os << tok->_name << "." << accelList[ii]._name << ": \""
             << XxHelp::xmlize( astr ) << "\"" << endl;
       }
@@ -1282,8 +1302,14 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( STPARAM(kwdList), FONT_APP );
       const QFont& fontApp = res.getFontApp();
-      os << tok->_name << ": \""
-         << XxHelp::xmlize( fontApp.rawName() ) << "\"" << endl;
+      os << tok->_name << ": \"";
+      if ( qApp != 0 ) {
+         os << XxHelp::xmlize( fontApp.rawName() );
+      }
+      else {
+         os << "&lt;xfld-font-spec&gt;";
+      }
+      os << "\"" << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;
@@ -1294,8 +1320,15 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( STPARAM(kwdList), FONT_TEXT );
       const QFont& fontText = res.getFontText();
-      os << tok->_name << ": \""
-         << XxHelp::xmlize( fontText.rawName() ) << "\"" << endl;
+      os << tok->_name << ": \"";
+      if ( qApp != 0 ) {
+         os << XxHelp::xmlize( fontText.rawName() );
+      }
+      else {
+         os << "&lt;xfld-font-spec&gt;";
+      }
+      os << "\"" << endl;
+
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;
@@ -1317,11 +1350,24 @@ QString XxResParser::getResourceRef()
          XxColor color = XxColor( tokc->_token );
 
          drbegin( os );
-         os << tok->_name << "." << tokc->_name << ".Fore" << ": \""
-            << res.getColor( color, true ).name() << "\"" << endl;
 
-         os << tok->_name << "." << tokc->_name << ".Back" << ": \""
-            << res.getColor( color, false ).name() << "\"" << endl;
+         os << tok->_name << "." << tokc->_name << ".Fore" << ": \"";
+         if ( qApp != 0 ) {
+            os << res.getColor( color, true ).name();
+         }
+         else { 
+            os << "&lt;color&gt;";
+         }
+         os << "\"" << endl;
+
+         os << tok->_name << "." << tokc->_name << ".Back" << ": \"";
+         if ( qApp != 0 ) {
+            os << res.getColor( color, false ).name();
+         }
+         else { 
+            os << "&lt;color&gt;";
+         }
+         os << "\"" << endl;
 
          drend( os );
          ddbegin( os );

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.h 416 2001-11-26 06:14:44Z blais $
- * $Date: 2001-11-26 01:14:44 -0500 (Mon, 26 Nov 2001) $
+ * $Id: merged.h 450 2001-12-08 01:15:24Z blais $
+ * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_MERGED
 #define INCL_XXDIFF_MERGED
@@ -33,6 +33,10 @@
 
 #ifndef INCL_XXDIFF_TYPES
 #include <types.h>
+#endif
+
+#ifndef INCL_XXDIFF_SCROLLVIEW
+#include <scrollView.h>
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
@@ -63,94 +67,10 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 class XxApp;
-class XxMergedText;
-class XxMergedFrame;
-class XxMergedWindow;
+class XxText;
+// class XxMergedFrame;
+// class XxMergedWindow; //FIXME remove
 
-/*==============================================================================
- * CLASS XxMergedText
- *============================================================================*/
-
-// <summary> a text widget that displays the merged diffs </summary>
-
-class XxMergedText : public QFrame {
-
-   Q_OBJECT
-
-   /*----- types and enumerations -----*/
-
-   typedef QFrame BaseClass;
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxMergedText( 
-      XxMergedFrame*  main,
-      XxApp*          app,
-      QWidget*        parent = 0,
-      const char*     name = 0
-   );
-
-   // Destructor.
-   virtual ~XxMergedText();
-
-   // See base class.
-   // Override to expand.
-   virtual QSizePolicy sizePolicy() const;
-
-   // See base class.
-   virtual void drawContents( QPainter* );
-
-   // Get/set the top visible line.
-   // <group>
-   void setTopLine( XxDln lineNo ) const;
-   XxDln getTopLine() const;
-   // </group>
-
-   // Get/set the center line.
-   // <group>
-   void setCenterLine( XxDln lineNo );
-   // </group>
-
-public slots:
-
-   void verticalScroll( int );
-   void horizontalScroll( int );
-   void adjustVertically();
-
-
-protected:
-
-   /*----- member functions -----*/
-
-   // See base class.
-   // <group>
-   virtual void mousePressEvent( QMouseEvent* );
-   virtual void mouseMoveEvent( QMouseEvent* );
-   virtual void mouseReleaseEvent( QMouseEvent* );
-   // </group>
-   virtual void resizeEvent( QResizeEvent* );
-   // </group>
-
-private:
-
-   /*----- types and enumerations -----*/
-
-   enum { HEIGHT_DELETED_REGION = 2 };
-
-   /*----- data members -----*/
-
-   XxMergedFrame* _main;
-   XxApp*         _app;
-   uint           _nbDisplayLines;
-   XxDln          _topLine;
-   bool           _grab;
-   XxDln          _grabTopLine;
-   int            _grabDeltaLineNo;
-
-};
 
 /*==============================================================================
  * CLASS XxMergedFrame
@@ -158,13 +78,13 @@ private:
 
 // <summary> merged text with scrollbars </summary>
 
-class XxMergedFrame : public QWidget {
+class XxMergedFrame : public XxScrollView {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef QWidget BaseClass;
+   typedef XxScrollView BaseClass;
 
 public:
 
@@ -172,30 +92,31 @@ public:
 
    // Constructor.
    XxMergedFrame( 
-      XxApp*      app, 
-      QWidget*    parent = 0,
-      const char* name = 0 
+      XxApp*          app, 
+      QWidget*        parent = 0,
+      const char*     name = 0 
    );
-
-   // Access to the scrollbars.
-   QScrollBar* getHorizontalScrollbar();
-   QScrollBar* getVerticalScrollbar();
 
    // See base class.
    virtual void update();
 
+   // See base class XxScrollView.
+   // <group>
+   virtual QSize computeDisplaySize() const;
+   virtual uint computeTextLength() const;
+   virtual uint getNbDisplayLines() const;
+   // </group>
+   
 public slots:
 
-   void appCursorChanged( int );
-   void appScrolled( int );
+   // Reacts to a cursor change.
+   void onCursorChanged( int cursorLine );
 
 private:
 
    /*----- data members -----*/
 
-   XxMergedText* _merged;
-   QScrollBar*   _vscroll;
-   QScrollBar*   _hscroll;
+   XxText* _text;
 
 };
 

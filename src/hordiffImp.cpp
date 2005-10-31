@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: hordiffImp.cpp 417 2001-11-26 23:06:52Z blais $
- * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
+ * $Id: hordiffImp.cpp 432 2001-11-30 07:21:57Z blais $
+ * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -28,6 +28,8 @@
 #include <resources.h>
 
 #include <qcstring.h>
+
+#include <ctype.h> // isspace()
  
 XX_NAMESPACE_BEGIN
 

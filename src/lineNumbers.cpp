@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: lineNumbers.cpp 439 2001-12-03 05:17:26Z blais $
+ * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -26,6 +26,7 @@
 
 #include <lineNumbers.h>
 #include <app.h>
+#include <central.h>
 #include <resources.h>
 #include <diffs.h>
 #include <buffer.h>
@@ -55,13 +56,15 @@ XX_NAMESPACE_BEGIN
 //------------------------------------------------------------------------------
 //
 XxLineNumbers::XxLineNumbers( 
-   XxApp*      app, 
-   const XxFno no, 
-   QWidget*    parent, 
-   const char* name 
+   XxApp*          app, 
+   XxCentralFrame* central, 
+   const XxFno     no, 
+   QWidget*        parent, 
+   const char*     name 
 ) :
    QFrame( parent, name, WResizeNoErase ),
    _app( app ),
+   _central( central ),
    _no( no )
 {
    // This must be set equal to the one in XxText for proper vertical alignment
@@ -110,7 +113,7 @@ void XxLineNumbers::drawContents( QPainter* pp )
    //
    // Draw appropriate content.
    //
-   uint topLine = _app->getTopLine();
+   uint topLine = _central->getTopLine();
 
    // Font.
    p.setFont( resources.getFontText() );
@@ -118,9 +121,8 @@ void XxLineNumbers::drawContents( QPainter* pp )
 
    QPen pen;
 
-   uint displayLines = _app->getNbDisplayLines();
-   uint nbLines = 
-      std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
+   uint displayLines = _central->getNbDisplayLines();
+   uint nbLines = std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
 
    QString lnFormat;
    lnFormat.sprintf( "%%%dd", _app->getMaxDigits() );

@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 423 2001-11-29 05:32:12Z blais $
-# $Date: 2001-11-29 00:32:12 -0500 (Thu, 29 Nov 2001) $
+# $Id: xxdiff.pro 465 2002-01-30 02:30:09Z blais $
+# $Date: 2002-01-29 21:30:09 -0500 (Tue, 29 Jan 2002) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -25,11 +25,11 @@
 #
 
 TEMPLATE = xxdiff
-CONFIG = debug qt warn_on
+CONFIG = release qt warn_on
 
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
-XX_VERSION=2.1
+XX_VERSION=2.2
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION-devel ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
@@ -85,6 +85,18 @@ linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
 
 solaris-cc:TMAKE_CXXFLAGS += -DCOMPILER_SUNWSPRO
 
+#
+# aix-xlc
+#
+
+aix-xlc:TMAKE_CXXFLAGS += -DCOMPILER_AIXXLC
+
+#
+# osf1-g++
+#
+
+osf1-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+
 
 # Add diff files to link against directly
 DIFFUTILS_DIR = ../diffutils-2.7
@@ -136,7 +148,9 @@ HEADERS = \
 	resources.h \
 	resources.inline.h \
 	accelUtil.h \
+	copyLabel.h \
 	text.h \
+	scrollView.h \
 	central.h \
 	merged.h \
 	lineNumbers.h \
@@ -156,7 +170,9 @@ SOURCES = \
 	suicideMessageBox.cpp \
 	main.cpp \
 	overview.cpp \
+	copyLabel.cpp \
 	text.cpp \
+	scrollView.cpp \
 	central.cpp \
 	merged.cpp \
 	lineNumbers.cpp \

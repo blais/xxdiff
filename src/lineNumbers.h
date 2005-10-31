@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.h 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: lineNumbers.h 439 2001-12-03 05:17:26Z blais $
+ * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_LINENUMBERS
 #define INCL_XXDIFF_LINENUMBERS
@@ -40,16 +40,14 @@
 #define INCL_QT_QFRAME
 #endif
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
 class XxApp;
-
+class XxCentralFrame;
 
 /*==============================================================================
  * CLASS XxLineNumbers
@@ -66,10 +64,11 @@ public:
    // Constructor.  no is which file this widget is supposed to display (-1 for
    // none).
    XxLineNumbers( 
-      XxApp*      app, 
-      const XxFno no = -1,
-      QWidget*    parent = 0,
-      const char* name = 0 
+      XxApp*          app, 
+      XxCentralFrame* central, 
+      const XxFno     no = -1,
+      QWidget*        parent = 0,
+      const char*     name = 0 
    );
 
    // Destructor.
@@ -83,11 +82,11 @@ private:
 
    /*----- data members -----*/
 
-   XxApp*	_app;
-   const int	_no;
+   XxApp*          _app;
+   XxCentralFrame* _central;
+   const int       _no;
 
 };
-
 
 XX_NAMESPACE_END
 

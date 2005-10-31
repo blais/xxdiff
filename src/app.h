@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 422 2001-11-28 23:41:31Z blais $
- * $Date: 2001-11-28 18:41:31 -0500 (Wed, 28 Nov 2001) $
+ * $Id: app.h 443 2001-12-05 01:04:36Z blais $
+ * $Date: 2001-12-04 20:04:36 -0500 (Tue, 04 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_APP
 #define INCL_XXDIFF_APP
@@ -63,13 +63,12 @@
  *============================================================================*/
 
 class QMainWindow;
-class QScrollBar;
-class QLabel;
-class QDialog;
 class QSocketNotifier;
 class QToolBar;
 class QMessageBox;
 class QSplitter;
+class QLabel;
+class QPopupMenu;
 
 XX_NAMESPACE_BEGIN
 
@@ -88,6 +87,7 @@ class XxBuffer;
 class XxResources;
 class XxOptionsDialog;
 class XxSearchDialog;
+class XxCentralFrame;
 
 /*==============================================================================
  * CLASS XxApp
@@ -137,46 +137,20 @@ public:
    // Returns the number of lines in the diffs.
    XxDln getNbLines() const;
 
-   // Adjust scrollbars after a resize.
-   void adjustScrollbars( bool force = false );
-
-   // Returns the horizontal position.
-   uint getHorizontalPos() const;
-
-   // Requests for a certain top line to be displayed.  The actual top line that
-   // will be displayed might not be the one that is requested, due to the fact
-   // that we want to avoid letting the user scroll past the end of the file, by
-   // resizing or otherwise).  The actual top line that was computed is
-   // returned.
-   // Out-of-bounds values are permitted.
-   XxDln setTopLine( const XxDln lineNo );
-
-   // Like vertical pos, but tries to center the line instead.  The actual top
-   // line that was computed is returned.
-   XxDln setCenterLine( const XxDln lineNo );
-
-   // Like vertical pos, but tries to set the bottom line instead.  The actual
-   // bottom line that was computed is returned.
-   XxDln setBottomLine( const XxDln lineNo );
-
-   // Sets the cursor line.  Returns the old cursor line.  Value will remain
+   // Get/set the cursor line.  Returns the old cursor line.  Value will remain
    // unchanged if an out-of-bounds value is asked for.  Note: may scroll to
    // insure that the current line is visible.
-   XxDln setCursorLine( const XxDln lineNo );
-
-   // Returns the top/center/bottom/current display line.
    // <group>
-   XxDln getTopLine() const;
-   XxDln getCenterLine() const;
-   XxDln getBottomLine() const;
+   XxDln setCursorLine( const XxDln lineNo, const bool recenter = false );
    XxDln getCursorLine() const;
    // </group>
 
-   // Returns the current number of display lines.
-   XxDln getNbDisplayLines() const;
+   // Make sure that the cursor line is visible between the given boundaries.
+   // Return true if the cursor has been moved.
+   bool adjustCursor( const int topLine, const int bottomLine );
 
-   // Process a main window resize event.
-   void adjustComponents();
+   // Adjusts line number size.
+   void adjustLineNumbers();
 
    // Returns the main window's size.
    QRect getMainWindowGeometry() const;
@@ -203,22 +177,10 @@ public:
 public slots:
 
    // Redraws the text widgets.
-   void repaintTexts();
+   void updateWidgets();
 
    // On a number of line change in diffs.
    void onNbLinesChanged();
-
-   // Updates the line number labels.
-   void updateLineNumberLabels( int );
-
-   // Scrollbars.
-   // <group>
-   void horizontalScroll( int );
-   void scrollRight();
-   void scrollLeft();
-   void verticalScroll( int );
-   void verticalScroll2( int );
-   // </group>
 
    // This gets called in the main thread when the edit is done.
    void editDone();
@@ -241,12 +203,6 @@ public slots:
    void search();
    void searchForward();
    void searchBackward();
-   void scrollDown();
-   void scrollUp();
-   void cursorDown();
-   void cursorUp();
-   void cursorTop();
-   void cursorBottom();
    void redoDiff();
    void editDiffOptions();
    void editDisplayOptions();
@@ -297,14 +253,13 @@ public slots:
    void qualityNormal();
    void qualityFastest();
    void qualityHighest();
+   void toggleShowFilenames();
    void togglePaneMergedView();
    void togglePopupMergedView();
    void toggleToolbar();
    void toggleLineNumbers();
-   void adjustLineNumbers();
    void toggleVerticalLine();
    void toggleOverview();
-   void toggleShowFilenames();
    void hordiffTypeNone();
    void hordiffTypeSingle();
    void hordiffTypeMultiple();
@@ -319,18 +274,30 @@ public slots:
    void helpGenInitFile();
    void helpAbout();
    // </group>
-   
+
+   // Keyboard accelerators cursor motion callbacks.
+   // <group>
+   void pageDown(); 
+   void pageUp(); 
+   void cursorDown(); 
+   void cursorUp(); 
+   void cursorTop(); 
+   void cursorBottom(); 
+   // </group>
+
 signals:
 
+   // Signal emitted when the cursor changes line.
    void cursorChanged( int cursorLine );
-   void scrolled( int topLine );
+
+   // Signal emitted when the size of the displayed text changes.
+   void textSizeChanged();
 
 private:
 
    /*----- friends -----*/
 
-   friend class XxDiffArgumentsDialog;
-   friend class XxOptionsDialog;
+   friend class XxOptionsDialog; // For non-const access to the resources.
 
    /*----- member functions -----*/
 
@@ -358,7 +325,7 @@ private:
 
    // Creates the interface.
    // <group>
-   void createUI( uint nbFiles );
+   void createUI();
    void createOnContextHelp();
    void createMenus();
    QToolBar* createToolbar();
@@ -370,10 +337,6 @@ private:
    // Compute the number of pixels of the longest line.
    uint computeTextWidth() const;
    
-   // Moves the cursor line so that it is visible after a scroll or resize.
-   // Return true if the cursor has been moved.
-   bool adjustCursor();
-
    // Tries to save the selected contents to the specified filename.  If ask is
    // true, ask the user for the filename (and use filename as default value).
    void saveToFile( const QString& filename, const bool ask );
@@ -436,32 +399,23 @@ private:
    QStyle*                 _style;
    QMainWindow*            _mainWindow;
    QMessageBox*            _diffErrorsMsgBox;
-   QWidget*                _centralWidget;
    QSplitter*              _splitter;
    XxMergedFrame*          _paneMergedView;
    XxMergedWindow*         _popupMergedView;
-   QWidget*                _textsWidget;
+   XxCentralFrame*         _central;
    QPopupMenu*             _viewPopup;
    QPopupMenu*             _optionsMenu;
    QPopupMenu*             _displayMenu;
    QPopupMenu*             _hordiffMenu;
    QPopupMenu*             _windowsMenu;
    int                     _menuids[ MAX_MENUIDS ];
+   QWidget*                _overviewArea;
+   QLabel*                 _remUnselView;
    XxOverview*             _overview;
    XxSearchDialog*         _searchDialog;
    XxOptionsDialog*        _optionsDialog;
-   QLabel*                 _filenameLabel[3];
-   QLabel*                 _lineNumberLabel[3];
-   XxLineNumbers*          _lineNumbers[3];
-   XxText*                 _text[3];
    QToolBar*               _toolbar;
-   QScrollBar*             _vscroll[2];
-   QScrollBar*             _hscroll;
-   QFont                   _font;
    mutable uint            _textWidth;
-   uint                    _displayWidth;  // Last value cached. 
-   uint                    _displayHeight; // Last value cached.
-   XxDln                   _displayLines;
    XxDln                   _cursorLine;
                                 	
    //
@@ -472,7 +426,7 @@ private:
    std::auto_ptr<XxBuffer> _files[3];
    std::auto_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;
-                                	
+
    XxResources*            _resources;
 
    // Data from parsing the cmdline.

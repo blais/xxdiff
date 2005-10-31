@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 422 2001-11-28 23:41:31Z blais $
- * $Date: 2001-11-28 18:41:31 -0500 (Wed, 28 Nov 2001) $
+ * $Id: diffs.cpp 451 2001-12-08 22:01:23Z blais $
+ * $Date: 2001-12-08 17:01:23 -0500 (Sat, 08 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -415,6 +415,7 @@ XxDln XxDiffs::findNextDifference( XxDln lineNo ) const
    if ( cur > XxDln(_lines.size()) ) {
       return -1;
    }
+
    return cur;
 }
 
@@ -662,6 +663,56 @@ bool XxDiffs::isAllSelected() const
       }
    }
    return true;
+}
+
+//------------------------------------------------------------------------------
+//
+uint XxDiffs::countRemainingUnselected() const
+{
+   // Make sure that there are no more unselected regions.
+   bool inhunk = false;
+   XxHunk curHunk;
+   XxLine::Type curType;
+   uint nbunsel = 0;
+   for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
+      const XxLine& line = getLine( ii );
+      XxLine::Type type = line.getType();
+      
+      /*XX_TRACE( "no " << ii << " - type " << type << " - hunk " << inhunk );*/
+
+      if ( !inhunk ) {
+
+         if ( type != XxLine::SAME && 
+              type != XxLine::DIRECTORIES && 
+              line.getSelection() == XxLine::UNSELECTED ) {
+
+            ++nbunsel;
+            inhunk = true;
+            curHunk = line.getHunkId();
+            curType = type;
+
+            /*XX_TRACE( "entering hunk" );*/
+         }
+      }
+      else { 
+
+         if ( type == XxLine::SAME ||
+              type == XxLine::DIRECTORIES ||
+              line.getSelection() != XxLine::UNSELECTED ) {
+
+            inhunk = false;
+            /*XX_TRACE( "leaving hunk" );*/
+         }
+         else if ( line.getHunkId() != curHunk || line.getType() != curType ) {
+
+            ++nbunsel;
+            curHunk = line.getHunkId();
+            curType = line.getType();
+            /*XX_TRACE( "switching hunks" );*/
+         }
+      }
+   }
+   return nbunsel;
 }
 
 //------------------------------------------------------------------------------
@@ -1265,6 +1316,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    istart += lstart.front() - 1;
    std::vector<XxLine>::iterator iend = _lines.begin();
    iend += lend.back() - 1;
+
    _lines.erase( istart, iend + 1 );
    _lines.insert( istart, newLines.begin(), newLines.end() );
 

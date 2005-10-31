@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.inline.h 416 2001-11-26 06:14:44Z blais $
- * $Date: 2001-11-26 01:14:44 -0500 (Mon, 26 Nov 2001) $
+ * $Id: app.inline.h 439 2001-12-03 05:17:26Z blais $
+ * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -26,12 +26,14 @@
 
 #ifndef INCL_XXDIFF_DIFFS
 #include <diffs.h>
-#define INCL_XXDIFF_DIFFS
 #endif
 
-#ifndef INCL_XXDIFF_FILE
+#ifndef INCL_XXDIFF_BUFFER
 #include <buffer.h>
-#define INCL_XXDIFF_FILE
+#endif
+
+#ifndef INCL_XXDIFF_CENTRAL
+#include <central.h>
 #endif
 
 #ifndef INCL_QT_QSCROLLBAR
@@ -39,9 +41,7 @@
 #define INCL_QT_QSCROLLBAR
 #endif
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * CLASS XxApp
@@ -111,61 +111,6 @@ inline const XxResources& XxApp::getResources() const
 inline XxResources& XxApp::getResourcesNC()
 {
    return *_resources;
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxDln XxApp::getNbDisplayLines() const
-{
-   return _displayLines;
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxDln XxApp::getTopLine() const
-{
-   if ( _diffs.get() == 0 ) {
-      return 0;
-   }
-   return _vscroll[0]->value() + 1;
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxDln XxApp::getCenterLine() const
-{
-   if ( _diffs.get() == 0 ) {
-      return 0;
-   }
-   return std::min( _vscroll[0]->value() + 1 + getNbDisplayLines() / 2, 
-                    int(_diffs->getNbLines()) );
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxDln XxApp::getBottomLine() const
-{
-   if ( _diffs.get() == 0 ) {
-      return 0;
-   }
-   int botline = std::min( 
-      getTopLine() /* top line */
-      + (getNbDisplayLines() - 1) /* to bottom line */
-      - 1, /* don't allow cursor on half-displayed line */
-      int(_diffs->getNbLines())
-   );
-   return std::max( botline, 1 ); // treat special case where display is one
-                                  // line high.
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxDln XxApp::getCursorLine() const
-{
-   if ( _diffs.get() == 0 ) {
-      return 0;
-   }
-   return _cursorLine;
 }
 
 XX_NAMESPACE_END

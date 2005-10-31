@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: proginfo.h 381 2001-11-16 00:55:15Z blais $
- * $Date: 2001-11-15 19:55:15 -0500 (Thu, 15 Nov 2001) $
+ * $Id: proginfo.h 432 2001-11-30 07:21:57Z blais $
+ * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_VERSION
 #define INCL_XXDIFF_VERSION

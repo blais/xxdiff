@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: searchDialog.h 294 2001-10-21 07:27:43Z blais $
- * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
+ * $Id: searchDialog.h 432 2001-11-30 07:21:57Z blais $
+ * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_SEARCHDIALOG
 #define INCL_XXDIFF_SEARCHDIALOG

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.h 207 2001-06-15 21:11:06Z blais $
- * $Date: 2001-06-15 17:11:06 -0400 (Fri, 15 Jun 2001) $
+ * $Id: overview.h 439 2001-12-03 05:17:26Z blais $
+ * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_OVERVIEW
 #define INCL_XXDIFF_OVERVIEW
@@ -45,7 +45,7 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 class XxApp;
-
+class XxCentralFrame;
 
 /*==============================================================================
  * CLASS XxOverview
@@ -64,7 +64,12 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxOverview( XxApp* app, QWidget * parent = 0, const char* name = 0 );
+   XxOverview(
+      XxApp*          app,
+      XxCentralFrame* central,
+      QWidget *       parent = 0,
+      const char*     name = 0
+   );
 
    // Destructor.
    virtual ~XxOverview();
@@ -91,26 +96,25 @@ private:
 
    /*----- data members -----*/
 
-   XxApp* _app;
+   XxApp*          _app;
+   XxCentralFrame* _central;
 
    // Data computed upon resizing.
-   int    _fileL[3]; // Left borders of files (in pixels).
-   int    _fileR[3]; // Right borders of file (in pixels).
-   int    _fileT[3]; // Top of files (in pixels).
-   int    _fileB[3]; // Bottom of files (in pixels).
-   int    _fileDy[3]; // Length of files (in pixels).
+   int             _fileL[3]; // Left borders of files (in pixels).
+   int             _fileR[3]; // Right borders of file (in pixels).
+   int             _fileT[3]; // Top of files (in pixels).
+   int             _fileB[3]; // Bottom of files (in pixels).
+   int             _fileDy[3]; // Length of files (in pixels).
 
-   int    _regL[3]; // Left borders of visible region (in pixels).
-   int    _regR[3]; // Right borders of visible region (in pixels).
+   int             _regL[3]; // Left borders of visible region (in pixels).
+   int             _regR[3]; // Right borders of visible region (in pixels).
 
-   int    _manipNo;
-   int    _manipTopLine;
-   int    _manipFlines;
-   int    _manipAnchor;
+   int             _manipNo;
+   int             _manipTopLine;
+   int             _manipFlines;
+   int             _manipAnchor;
    
-
 };
-
 
 XX_NAMESPACE_END
 

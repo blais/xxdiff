@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# $Id: release_src 404 2001-11-22 07:39:59Z blais $
+#
+
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
+
+# Package for source release.
+echo "Getting version"
+VERSION=`tools/get_version`
+UVERSION=`echo $VERSION | sed -e 's/\./_/g'`
+RTAG=xxdiff_$UVERSION
+echo "Version $VERSION, Release tag $RTAG"
+
+echo "Creating temporary space to extract source"
+TMP=xxdiff-tmp
+
+cd .. && mkdir $TMP && cd $TMP
+
+echo "Exporting source from CVS"
+CVS_RSH=ssh
+cvs -z3 -d:ext:bor.iro.umontreal.ca:/u/blais/cvsroot \
+   export -d xxdiff-$VERSION -r $RTAG xxdiff
+
+if [ $? = 0 ]; then 
+    echo "Compressing source into archive"
+    tar zcvf ../xxdiff-${VERSION}.tar.gz xxdiff-${VERSION}
+else
+    echo "Error exporting source"
+fi
+
+echo "Cleaning up"
+cd .. && rm -rf $TMP

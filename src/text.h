@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.h 376 2001-11-13 05:13:06Z blais $
- * $Date: 2001-11-13 00:13:06 -0500 (Tue, 13 Nov 2001) $
+ * $Id: text.h 450 2001-12-08 01:15:24Z blais $
+ * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_TEXT
 #define INCL_XXDIFF_TEXT
@@ -40,16 +40,14 @@
 #define INCL_QT_QFRAME
 #endif
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
 class XxApp;
-
+class XxScrollView;
 
 /*==============================================================================
  * CLASS XxText
@@ -58,18 +56,19 @@ class XxApp;
 // <summary> a text widget that can display diffs </summary>
 
 class XxText : public QFrame {
-
+    
 public:
 
    /*----- member functions -----*/
 
-   // Constructor.  no is which file this text is supposed to display (-1 for
-   // none).
+   // Constructor.  no is which file this text is supposed to display.  If you
+   // use -1, this text will display the merged results.
    XxText( 
-      XxApp*      app, 
-      const XxFno no = -1,
-      QWidget*    parent = 0,
-      const char* name = 0 
+      XxApp*        app,
+      XxScrollView* sv,
+      const XxFno   no = -1,
+      QWidget*      parent = 0,
+      const char*   name = 0 
    );
 
    // Destructor.
@@ -83,10 +82,14 @@ public:
    virtual void drawContents( QPainter* );
 
    // Returns the number of lines that can be displayed.
-   XxDln computeDisplayLines() const;
+   uint computeDisplayLines() const;
 
    // Returns the width of pixels that can display text.
    uint getDisplayWidth() const;
+
+   // Compute approx. number of lines that would be need to be fit inside a
+   // merged view.
+   uint computeMergedLines() const;
 
 protected:
 
@@ -105,6 +108,9 @@ private:
 
    /*----- static member functions -----*/
 
+   // Returns true if this text is displaying merged results.
+   bool isMerged() const;
+
    static QString formatClipboardLine(
       const QString& clipboardFormat,
       const XxFno    fileno,
@@ -115,11 +121,12 @@ private:
 
    /*----- data members -----*/
 
-   XxApp*      _app;
-   const XxFno _no;
-   bool        _grab;
-   XxDln       _grabTopLine;
-   int         _grabDeltaLineNo;
+   XxApp*        _app;
+   XxScrollView* _sv;
+   const XxFno   _no;
+   bool          _grab;
+   XxDln         _grabTopLine;
+   int           _grabDeltaLineNo;
 
 };
 

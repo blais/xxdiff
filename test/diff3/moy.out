@@ -1,0 +1,50 @@
+====1
+1:8,9c
+  This is text inserted in file a.
+  
+2:7a
+3:7a
+====2
+1:17a
+3:15a
+2:16,17c
+  This is text inserted in file b.
+  
+====3
+1:23a
+2:23a
+3:22,23c
+  This is text inserted in file b.
+  
+====3
+1:31c
+2:31c
+  This is text that will be deleted in file c.
+3:30a
+====1
+1:35a
+2:36c
+3:35c
+  This is text that will be deleted in file a.
+====2
+1:39c
+3:39c
+  This is text that will be deleted in file b.
+2:39a
+====
+1:45,47c
+  This is text that was inserted in file a and other different 
+  text was also inserted in file b.
+  
+2:45,47c
+  This is the different text we were talking about in 
+  file a.
+  
+3:44a
+====
+1:53c
+  Earlier this month, a coalition of companies released
+2:53c
+  Earlier this month, chagned a coalition of companies released
+3:50c
+  Earlier this month, a coalition of compasjknies released

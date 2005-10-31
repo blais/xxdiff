@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# $Id: release_bin 358 2001-11-07 21:23:34Z blais $
+#
+
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
+
+# Package for simple binary release.
+VERSION=`tools/get_version`
+echo "Making binary release version $VERSION"
+
+PLAT=`tools/config.guess`
+case $PLAT in
+        *sparc*)
+        PEXT=sparc ;;
+
+        *mips*)
+        PEXT=mips ;;
+
+        *linux*)
+        PEXT=i386 ;;
+esac
+    
+PDIR=xxdiff-$VERSION.$PEXT
+ROOT=..
+
+mkdir $ROOT/$PDIR
+cp src/xxdiff $ROOT/$PDIR
+
+strip $ROOT/$PDIR/xxdiff
+
+cp README $ROOT/$PDIR
+cp CHANGES $ROOT/$PDIR
+
+cd ..
+tar cvf - $PDIR | gzip > $PDIR.tar.gz
+rm -rf $PDIR

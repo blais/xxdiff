@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 291 2001-10-20 22:15:00Z blais $
- * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
+ * $Id: overview.cpp 439 2001-12-03 05:17:26Z blais $
+ * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -54,9 +54,15 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-XxOverview::XxOverview( XxApp* app, QWidget * parent, const char* name ) :
+XxOverview::XxOverview(
+   XxApp*          app,
+   XxCentralFrame* central,
+   QWidget *       parent,
+   const char*     name
+) :
    QFrame( parent, name, WResizeNoErase ),
-   _app( app )
+   _app( app ),
+   _central( central )
 {
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
@@ -229,8 +235,8 @@ void XxOverview::drawContents( QPainter* pp )
    p.setBrush( backgroundColor );
    int curppos[3];
    XxDln curline = _app->getCursorLine();
-   XxDln topline = _app->getTopLine();
-   XxDln bottomline = _app->getBottomLine();
+   XxDln topline = _central->getTopLine();
+   XxDln bottomline = _central->getBottomLine();
    QColor cursorColor = resources.getColor( COLOR_CURSOR );
    for ( ii = 0; ii < nbFiles; ++ii ) {
       bool aempty;
@@ -256,6 +262,10 @@ void XxOverview::drawContents( QPainter* pp )
       p.setPen( Qt::black );
 
       // Compute arrow position.
+      if ( curline == 0 ) {
+         continue;
+      }
+
       float fcfline = diffs->getBufferLine( ii, curline, aempty ) + 0.5;
       if ( aempty == true ) {
          fcfline += 0.5;
@@ -346,8 +356,8 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
 
    const XxDiffs* diffs = _app->getDiffs();
    /*XxDln curline = _app->getCursorLine();*/
-   XxDln topline = _app->getTopLine();
-   XxDln bottomline = _app->getBottomLine();
+   XxDln topline = _central->getTopLine();
+   XxDln bottomline = _central->getBottomLine();
 
    XxBuffer* files[3];
    XxFln flines[3];
@@ -397,7 +407,8 @@ void XxOverview::mouseMoveEvent( QMouseEvent* e )
 
       XxFln newTopLine = _manipTopLine + dline;
 
-      _app->setTopLine( newTopLine );
+      _central->setTopLine( newTopLine );
+      // Will this be enough to make the rest happen too? e.g. merged view?
    }
 }
 

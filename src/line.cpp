@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 417 2001-11-26 23:06:52Z blais $
- * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
+ * $Id: line.cpp 451 2001-12-08 22:01:23Z blais $
+ * $Date: 2001-12-08 17:01:23 -0500 (Sat, 08 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -265,7 +265,7 @@ std::ostream& operator << (
 )
 {
    os << "Line: type=";
-   os << typeString[ int( line.getType() ) ];
+   os << typeString[ int( line.getType() ) ] << "  ";
 
    os << line.getLineNo(0) << "  ";
    os << line.getLineNo(1) << "  ";

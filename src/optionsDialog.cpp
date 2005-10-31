@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 393 2001-11-20 07:54:25Z blais $
- * $Date: 2001-11-20 02:54:25 -0500 (Tue, 20 Nov 2001) $
+ * $Id: optionsDialog.cpp 438 2001-12-01 20:17:36Z blais $
+ * $Date: 2001-12-01 15:17:36 -0500 (Sat, 01 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -583,16 +583,14 @@ void XxOptionsDialog::onApply()
    }
 
    if ( !XxResources::compareFonts( _fontApp,
-                                         resources.getFontApp() ) ) {
+                                    resources.getFontApp() ) ) {
       resources.setFontApp( _fontApp );
       _app->setFont( _fontApp, true );
    }
    if ( !XxResources::compareFonts( _fontText,
-                                         resources.getFontText() ) ) {
+                                    resources.getFontText() ) ) {
       resources.setFontText( _fontText );
       _app->invalidateTextWidth();
-      _app->adjustScrollbars( true );
-      _app->adjustLineNumbers();
    }
 
    //---------------------------------------------------------------------------
@@ -622,7 +620,7 @@ void XxOptionsDialog::onApply()
       _app->onRedoDiff();
    }
    else {
-      _app->repaintTexts();
+      _app->updateWidgets();
    }
 
    // Reconnect.

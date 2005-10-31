@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: defs.h 290 2001-10-20 00:45:36Z blais $
- * $Date: 2001-10-19 20:45:36 -0400 (Fri, 19 Oct 2001) $
+ * $Id: defs.h 442 2001-12-04 07:04:06Z blais $
+ * $Date: 2001-12-04 02:04:06 -0500 (Tue, 04 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_DEFS
 #define INCL_XXDIFF_DEFS
@@ -92,7 +92,7 @@ typedef unsigned int 	uint;
 
 #define XX_TRACE(x)		std::cerr << "xx_trace " << x << std::endl;
 
-#define XX_TRACE_COMPILE(x)	x
+#define XX_DEBUG_COMPILE(x)	x
 
 #else
 
@@ -100,7 +100,7 @@ typedef unsigned int 	uint;
 
 #define XX_TRACE(x)
 
-#define XX_TRACE_COMPILE(x)
+#define XX_DEBUG_COMPILE(x)
 
 #endif
 

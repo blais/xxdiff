@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 405 2001-11-22 17:51:48Z blais $
- * $Date: 2001-11-22 12:51:48 -0500 (Thu, 22 Nov 2001) $
+ * $Id: text.cpp 458 2002-01-03 02:48:38Z blais $
+ * $Date: 2002-01-02 21:48:38 -0500 (Wed, 02 Jan 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -26,6 +26,7 @@
 
 #include <text.h>
 #include <app.h>
+#include <scrollView.h>
 #include <resources.h>
 #include <diffs.h>
 #include <buffer.h>
@@ -52,7 +53,6 @@
 
 //#define XX_DEBUG_TEXT  1
 
-
 #ifndef XX_DEBUG_TEXT
 #define XX_RED_RECT(x,y,w,h) x, y, w, h
 #define XX_RED_WIDTH(w) w
@@ -61,17 +61,24 @@
 #define XX_RED_WIDTH(w) w+2
 #endif
 
-
-XX_NAMESPACE_BEGIN
-
 /*==============================================================================
  * LOCAL DECLARATIONS
  *============================================================================*/
 
+namespace {
+
 /*----- constants -----*/
+
+const int HEIGHT_NEITHER_REGION = 4;
+const int HEIGHT_EMPTY_REGION = HEIGHT_NEITHER_REGION;
 
 const int xch_search_delta = 100;
 const int xch_draw_delta = 100;
+
+/*----- types and enumerations -----*/
+
+enum SkipType { SK_NOSKIP = 0, SK_UNSEL = 1, SK_NEITHER = 2, SK_EMPTY = 3 };
+
 
 //------------------------------------------------------------------------------
 //
@@ -105,7 +112,7 @@ inline void rentxt(
          &brect
       );
       
-      xpx += nw; // XX_RED_WIDTH( brect.width() );
+      xpx += XX_RED_WIDTH( nw ); // XX_RED_WIDTH( brect.width() );
       xch += rlen;
       
       if ( xpx > wwidth ) {
@@ -113,6 +120,10 @@ inline void rentxt(
       }
    }
 }
+
+}
+
+XX_NAMESPACE_BEGIN
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -125,13 +136,15 @@ inline void rentxt(
 //------------------------------------------------------------------------------
 //
 XxText::XxText( 
-   XxApp*      app, 
-   const XxFno no, 
-   QWidget*    parent, 
-   const char* name 
+   XxApp*        app, 
+   XxScrollView* sv,
+   const XxFno   no, 
+   QWidget*      parent, 
+   const char*   name 
 ) :
    QFrame( parent, name, WResizeNoErase ),
    _app( app ),
+   _sv( sv ),
    _no( no ),
    _grab( false )
 {
@@ -148,6 +161,13 @@ XxText::XxText(
 //
 XxText::~XxText()
 {
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxText::isMerged() const
+{
+   return _no == -1;
 }
 
 //------------------------------------------------------------------------------
@@ -180,12 +200,16 @@ void XxText::drawContents( QPainter* pp )
    const int w = rect.width();
    const int h = rect.height();
 
-   XxBuffer* file = _app->getBuffer( _no );
+   XxBuffer* files[3];
+   for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
+      files[ii] = _app->getBuffer( ii );
+   }
+
    const XxDiffs* diffs = _app->getDiffs();
    const XxResources& resources = _app->getResources();
 
    // If it is empty, erase the whole widget with blank color.
-   if ( file == 0 || diffs == 0 ) {
+   if ( ( !isMerged() && files[_no] == 0 ) || diffs == 0 ) {
       QColor backgroundColor = resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
@@ -197,8 +221,9 @@ void XxText::drawContents( QPainter* pp )
    //
    // Draw appropriate content.
    //
-   XxDln topLine = _app->getTopLine();
-   uint horizontalPos = _app->getHorizontalPos();
+   XxDln topLine = _sv->getTopLine();
+   XxDln cursorLine = _app->getCursorLine();
+   uint horizontalPos = _sv->getHorizontalPos();
    uint tabWidth = resources.getTabWidth();
 
    // The painter's clip region is already set (verified).
@@ -207,13 +232,11 @@ void XxText::drawContents( QPainter* pp )
    p.setFont( resources.getFontText() );
    QFontMetrics fm = p.fontMetrics();
 
+   const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
+
    // Don't draw background of chars since we'll draw first.
    p.setBackgroundMode( Qt::TransparentMode );
    QPen pen;
-
-   XxDln displayLines = _app->getNbDisplayLines();
-   uint nbLines = 
-      std::min( displayLines, XxDln(diffs->getNbLines() - (topLine - 1)) );
 
    bool hori =
       ( resources.getHordiffType() != HD_NONE ) && !diffs->isDirectoryDiff();
@@ -225,41 +248,144 @@ void XxText::drawContents( QPainter* pp )
 
    int* hbuffer0;
    int* hbuffer1;
-#ifdef XX_DEBUG
-   int hbufferSize = 
-#endif
+   XX_DEBUG_COMPILE( int hbufferSize = )
       resources.getHordiffBuffers( hbuffer0, hbuffer1 );
    XX_ASSERT( hbuffer0 && hbuffer1 );
 
-   for ( uint ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
+   uint irenline = 0;
+   uint icurline = topLine;
+
+   int cursorY1 = -1;
+   int cursorY2 = -1;
+
+   SkipType skip = SK_NOSKIP;
+
+   int py;
+   XxLine::Type prevtype;
+   XxLine::Type type = XxLine::SAME;
+   while ( y < h && icurline <= diffs->getNbLines() ) {
+
+      // FIXME not all control paths set the skip parameter.
 
       // Get line to display.
-      const XxLine& line = diffs->getLine( topLine + ii );
+      prevtype = type;
+      const XxLine& line = diffs->getLine( icurline++ );
+      type = line.getType();
 
-      // Set background and foreground colors.
+      XxFno renNo = _no;
       XxColor idtype, idtypeSup;
-      line.getLineColorType( 
-         resources.getIgnoreFile(),
-         _no,
-         idtype, idtypeSup 
-      );
-      
+      if ( isMerged() ) {
+
+         if ( type != XxLine::SAME && 
+              type != XxLine::DIRECTORIES ) {
+
+            XxLine::Selection sel = line.getSelection();
+            if ( sel == XxLine::UNSELECTED ) {
+               if ( skip != SK_UNSEL ) {
+                  skip = SK_UNSEL;
+
+                  //
+                  // Draw undecided marker.
+                  //
+                  QColor bcolor;
+                  QColor fcolor;
+                  resources.getRegionColor( COLOR_MERGED_UNDECIDED,
+                                            bcolor, fcolor );
+
+                  p.setBackgroundColor( bcolor );
+                  QBrush brush( fcolor );
+                  brush.setStyle( QBrush::BDiagPattern );
+            
+                  p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
+                              brush );
+                  
+                  py = y;
+                  y += HEIGHT_UNSEL_REGION;
+               }
+
+               if ( int(icurline-1) == cursorLine ) {
+                  cursorY1 = py;
+                  cursorY2 = y;
+               }
+               continue;
+            }
+            else if ( sel == XxLine::NEITHER ) {
+               if ( skip != SK_NEITHER ) {
+                  skip = SK_NEITHER;
+
+                  //
+                  // Draw neither marker.
+                  //
+                  QColor bcolor;
+                  QColor fcolor;
+                  resources.getRegionColor( COLOR_MERGED_DECIDED_NEITHER,
+                                            bcolor, fcolor );
+
+                  QBrush brush( bcolor );
+                  p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_NEITHER_REGION ),
+                              brush );
+                  
+                  py = y;
+                  y += HEIGHT_NEITHER_REGION;
+               }
+
+               if ( int(icurline-1) == cursorLine ) {
+                  cursorY1 = py;
+                  cursorY2 = y;
+               }
+               continue;
+            }
+            else {
+               // Render selected side.
+               renNo = int(sel);
+               switch ( renNo ) {
+                  case 0: {
+                     idtype = COLOR_MERGED_DECIDED_1;
+                     idtypeSup = COLOR_MERGED_DECIDED_1_SUP;
+                  } break;
+                  case 1: {
+                     idtype = COLOR_MERGED_DECIDED_2;
+                     idtypeSup = COLOR_MERGED_DECIDED_2_SUP;
+                  } break;
+                  case 2: {
+                     idtype = COLOR_MERGED_DECIDED_3;
+                     idtypeSup = COLOR_MERGED_DECIDED_3_SUP;
+                  } break;
+               }
+            }
+         }
+         else {
+            renNo = 0; // Any side would be fine for SAME regions.
+            idtype = idtypeSup = COLOR_SAME;
+            skip = SK_NOSKIP;
+         }
+      }
+      else {
+         // Set background and foreground colors.
+         line.getLineColorType(
+            resources.getIgnoreFile(), renNo, idtype, idtypeSup
+         );
+      }
+
       QColor bcolor;
       QColor fcolor;
       resources.getRegionColor( idtype, bcolor, fcolor );
 
       // Render text.
-      XxFln fline = line.getLineNo( _no );
+      XxFln fline = line.getLineNo( renNo );
       if ( fline != -1 ) {
+
+         py = y;
+
          uint length;
-         const char* lineText = file->getTextLine( fline, length );
+         const char* lineText = files[renNo]->getTextLine( fline, length );
          
          const int bhd = 0;
          int ehd;
          const char* renderedText;
 
          // Copy array of hordiffs.
-         const int* hordiffs = line.getHorDiffs( _no );
+         const int* hordiffs = line.getHorDiffs( renNo );
 
          if ( hordiffs ) {
             int c = 0;
@@ -271,7 +397,7 @@ void XxText::drawContents( QPainter* pp )
             XX_CHECK( c < hbufferSize );
             hbuffer0[c] = -1;
 
-            renderedText = file->renderTextWithTabs( 
+            renderedText = files[renNo]->renderTextWithTabs( 
                lineText, length, tabWidth, ehd, hbuffer0
             );
 
@@ -282,7 +408,7 @@ void XxText::drawContents( QPainter* pp )
             XX_CHECK( c < hbufferSize );
          }
          else {
-            renderedText = file->renderTextWithTabs( 
+            renderedText = files[renNo]->renderTextWithTabs( 
                lineText, length, tabWidth, ehd, 0
             );
          }
@@ -317,14 +443,14 @@ void XxText::drawContents( QPainter* pp )
          QBrush fillerBrush( bcolor );
 
          if ( hori &&
-              line.hasHorizontalDiffs( _no ) &&
-              ( line.getType() == XxLine::DIFF_1 ||
-                line.getType() == XxLine::DIFF_2 ||
-                line.getType() == XxLine::DIFF_3 ||
-                line.getType() == XxLine::DIFF_ALL ||
-                line.getType() == XxLine::DIFFDEL_1 ||
-                line.getType() == XxLine::DIFFDEL_2 ||
-                line.getType() == XxLine::DIFFDEL_3 ) ) {
+              line.hasHorizontalDiffs( renNo ) &&
+              ( type == XxLine::DIFF_1 ||
+                type == XxLine::DIFF_2 ||
+                type == XxLine::DIFF_3 ||
+                type == XxLine::DIFF_ALL ||
+                type == XxLine::DIFFDEL_1 ||
+                type == XxLine::DIFFDEL_2 ||
+                type == XxLine::DIFFDEL_3 ) ) {
 
             //
             // Render with horizontal diffs.
@@ -379,9 +505,6 @@ void XxText::drawContents( QPainter* pp )
                xpx,
                w, y, fm
             );
-            if ( xpx > w ) {
-               continue;
-            }
          }
          
          // Filler part.
@@ -392,15 +515,46 @@ void XxText::drawContents( QPainter* pp )
                fillerBrush
             );
          }
+
+         y += fm.lineSpacing();
       }
       else {
-         // The line is empty, just fill in the background.
-         QBrush backBrush( bcolor );
-         p.fillRect(
-            XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
-            backBrush
-         );
+
+         if ( !isMerged() ) {
+            py = y;
+
+            // The line is empty, just fill in the background.
+            QBrush backBrush( bcolor );
+            p.fillRect(
+               XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
+               backBrush
+            );
+            y += fm.lineSpacing();
+         }
+         else { 
+            // For merged view, render the first empty line as thin.
+            if ( skip != SK_EMPTY && type != prevtype ) {
+               skip = SK_EMPTY;
+               
+               //
+               // Draw empty marker.
+               //
+               QBrush brush( bcolor );
+               p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_EMPTY_REGION ),
+                           brush );
+                  
+               py = y;
+               y += HEIGHT_EMPTY_REGION;
+            }
+         }
       }
+
+      if ( int(icurline-1) == cursorLine ) {
+         cursorY1 = py;
+         cursorY2 = y;
+      }
+
+      ++irenline;
    }
    p.setBackgroundMode( TransparentMode );
 
@@ -408,19 +562,16 @@ void XxText::drawContents( QPainter* pp )
    if ( y < h ) {
       QColor backgroundColor = resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
-      p.fillRect( 0, y, w, h - y, brush );
+
+      p.fillRect( XX_RED_RECT( 0, y, w, h - y ), brush );
    }
 
    // Draw line cursor.
-   if ( !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
-
-      XxDln cursorLine = _app->getCursorLine();
-      int relLine = cursorLine - topLine;
-      
+   if ( cursorY1 != -1 && cursorY2 != -1 &&
+        !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
-      y = relLine * fm.lineSpacing() - 1;
-      p.drawRect( 0, y, w, fm.lineSpacing() + 2 );
+      p.drawRect( 0, cursorY1 - 1, w, cursorY2 - cursorY1 + 1 );
    }
 
    // Draw vertical line.
@@ -439,7 +590,7 @@ void XxText::drawContents( QPainter* pp )
 
 //------------------------------------------------------------------------------
 //
-XxDln XxText::computeDisplayLines() const
+uint XxText::computeDisplayLines() const
 {
    const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
@@ -452,19 +603,15 @@ void XxText::mousePressEvent( QMouseEvent* event )
 {
    // Find the line.
    XxDiffs* diffs = _app->getDiffs();
-   XxBuffer* buffer = _app->getBuffer( _no );
-   const XxResources& resources = _app->getResources();
-   if ( diffs == 0 || buffer == 0 ) {
+   if ( diffs == 0 ) {
       return;
    }
 
-   QString clipboardFormat = resources.getClipboardFormat();
-   QString filename = buffer->getDisplayName();
-
+   const XxResources& resources = _app->getResources();
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
    XxDln dlineno = event->y() / fm.lineSpacing();
-   XxDln lineno = _app->getTopLine() + dlineno;
+   XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
       return;
@@ -474,7 +621,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    if ( event->button() == RightButton ) {
       if ( event->state() & ControlButton ) {
          _grab = true;
-         _grabTopLine = _app->getTopLine();
+         _grabTopLine = _sv->getTopLine();
          _grabDeltaLineNo = dlineno;
       }
       else {
@@ -484,6 +631,18 @@ void XxText::mousePressEvent( QMouseEvent* event )
          return;
       }
    }
+
+   if ( isMerged() ) {
+      return;
+   }
+
+   XxBuffer* buffer = _app->getBuffer( _no );
+   if ( buffer == 0 ) {
+      return;
+   }
+   QString filename = buffer->getDisplayName();
+   QString clipboardFormat = resources.getClipboardFormat();
+
 
    // Perform the selection and create cut text.
    QString textCopy;
@@ -593,7 +752,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
       const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
       XxDln dlineno = event->y() / fm.lineSpacing();
-      _app->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
+      _sv->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
    }
 }
 
@@ -619,7 +778,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
    XxDln dlineno = event->y() / fm.lineSpacing();
-   XxDln lineno = _app->getTopLine() + dlineno;
+   XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
       return;
@@ -637,11 +796,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
 //
 void XxText::resizeEvent( QResizeEvent* )
 {
-   // We postpone the resizing of the parent until when one of the texts has
-   // been resized in order to be able to compute the number of lines properly.
-   if ( _no == 0 ) {
-      _app->adjustComponents();
-   }
+   _sv->adjustScrollbars();
 }
 
 //------------------------------------------------------------------------------
@@ -649,6 +804,177 @@ void XxText::resizeEvent( QResizeEvent* )
 uint XxText::getDisplayWidth() const
 {
    return contentsRect().width();
+}
+
+//------------------------------------------------------------------------------
+//
+uint XxText::computeMergedLines() const
+{
+   // Count equivalent number of lines that would be rendered in the merged
+   // view.
+
+   const XxDiffs* diffs = _app->getDiffs();
+   if ( diffs == 0 ) {
+      return 0;
+   }
+
+   const QFont& font = _app->getResources().getFontText();
+   QFontMetrics fm( font );
+   const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
+
+   // Count the number of equivalent lines.
+   int y = 0;
+   SkipType skip = SK_NOSKIP;
+   XxLine::Type prevtype;
+   XxLine::Type type = XxLine::SAME;
+   for ( uint icurline = 1; icurline <= diffs->getNbLines(); ++icurline ) {
+// #if 0 
+
+//       prevtype = type;
+//       const XxLine& line = diffs->getLine( icurline++ );
+//       type = line.getType();
+
+//       XxFno renNo = _no;
+//       if ( isMerged() ) {
+
+//          if ( type != XxLine::SAME && 
+//               type != XxLine::DIRECTORIES ) {
+
+//             XxLine::Selection sel = line.getSelection();
+//             if ( sel == XxLine::UNSELECTED ) {
+//                if ( skip != SK_UNSEL ) {
+//                   skip = SK_UNSEL;
+//                   y += HEIGHT_UNSEL_REGION;
+//                }
+//                continue;
+//             }
+//             else if ( sel == XxLine::NEITHER ) {
+//                if ( skip != SK_NEITHER ) {
+//                   skip = SK_NEITHER;
+//                   y += HEIGHT_NEITHER_REGION;
+//                }
+//                continue;
+//             }
+//             else {
+//                // Render selected side.
+//                renNo = int(sel);
+//                skip = SK_NOSKIP;
+//             }
+//          }
+//          else {
+//             renNo = 0; // Any side would be fine for SAME regions.
+//             skip = SK_NOSKIP;
+//          }
+//       }
+
+//       // Render text.
+//       XxFln fline = line.getLineNo( renNo );
+//       if ( fline != -1 ) {
+//          y += fm.lineSpacing();
+//       }
+//       else {
+
+//          if ( !isMerged() ) {
+//             y += fm.lineSpacing();
+//          }
+//          else { 
+//             // For merged view, render the first empty line as thin.
+//             if ( skip != SK_EMPTY && type != prevtype ) {
+//                skip = SK_EMPTY;
+//                y += HEIGHT_EMPTY_REGION;
+//             }
+//          }
+//       }
+//    }
+// #endif
+
+      // Get line to display.
+      prevtype = type;
+      const XxLine& line = diffs->getLine( icurline );
+      type = line.getType();
+
+      XxFno renNo = _no;
+      if ( isMerged() ) {
+
+         if ( type != XxLine::SAME && 
+              type != XxLine::DIRECTORIES ) {
+
+            XxLine::Selection sel = line.getSelection();
+            if ( sel == XxLine::UNSELECTED ) {
+               if ( skip != SK_UNSEL ) {
+                  skip = SK_UNSEL;
+
+                  //
+                  // Draw undecided marker.
+                  //
+                  y += HEIGHT_UNSEL_REGION;
+                  XX_TRACE( "HEIGHT_UNSEL_REGION " << y );
+               }
+               continue;
+            }
+            else if ( sel == XxLine::NEITHER ) {
+               if ( skip != SK_NEITHER ) {
+                  skip = SK_NEITHER;
+
+                  //
+                  // Draw neither marker.
+                  //
+                  y += HEIGHT_NEITHER_REGION;
+                  XX_TRACE( "HEIGHT_NEITHER_REGION " << y );
+               }
+               continue;
+            }
+            else {
+               // Render selected side.
+               renNo = int(sel);
+            }
+         }
+         else {
+            renNo = 0; // Any side would be fine for SAME regions.
+            skip = SK_NOSKIP;
+         }
+      }
+      else {
+      }
+
+      // Render text.
+      XxFln fline = line.getLineNo( renNo );
+      if ( fline != -1 ) {
+
+         y += fm.lineSpacing();
+         XX_TRACE( "fm.lineSpacing() " << y );
+      }
+      else {
+
+         if ( !isMerged() ) {
+
+            // The line is empty, just fill in the background.
+            y += fm.lineSpacing();
+            XX_TRACE( "fm.lineSpacing() " << y );
+         }
+         else { 
+            // For merged view, render the first empty line as thin.
+            if ( skip != SK_EMPTY && type != prevtype ) {
+               skip = SK_EMPTY;
+               
+               //
+               // Draw empty marker.
+               //
+               y += HEIGHT_EMPTY_REGION;
+               XX_TRACE( "HEIGHT_EMPTY_REGION " << y );
+            }
+         }
+      }
+   }
+
+
+   XX_TRACE( "y = " << y 
+             << " ls = " << fm.lineSpacing()
+             << " difflines = " << diffs->getNbLines() );
+
+   int approxNbLines = y / fm.lineSpacing() + 1;
+   XX_TRACE( "approxNbLines = " << approxNbLines );
+   return approxNbLines;
 }
 
 //------------------------------------------------------------------------------

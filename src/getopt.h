@@ -152,7 +152,7 @@ extern int _getopt_internal (int argc, char *const *argv,
 #else /* not __STDC__ */
 
 /* hack this badly so that it compiles under Solaris C++ compiler */
-#ifndef COMPILER_SUNWSPRO
+#if !defined(COMPILER_SUNWSPRO) && !defined(COMPILER_AIXXLC)
 extern int getopt ();
 
 # ifndef __need_getopt
@@ -167,7 +167,7 @@ extern int _getopt_internal ();
 extern int getopt_long( int argc, char *const *argv, const char *__shortopts,
 		        const struct option *__longopts, int *__longind );
 
-#endif /* COMPILER_SUNWSPRO */
+#endif /* COMPILER_SUNWSPRO || COMPILER_AIXXLC */
 
 #endif /* __STDC__ */
 

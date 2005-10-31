@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 417 2001-11-26 23:06:52Z blais $
- * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
+ * $Id: line.h 464 2002-01-30 02:00:34Z blais $
+ * $Date: 2002-01-29 21:00:34 -0500 (Tue, 29 Jan 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_LINE
 #define INCL_XXDIFF_LINE
@@ -43,6 +43,11 @@
 #ifndef INCL_QT_QSTRING
 #include <qstring.h>
 #define INCL_QT_QSTRING
+#endif
+
+#ifndef INCL_STD_IOSTREAM
+#include <iostream>
+#define INCL_STD_IOSTREAM
 #endif
 
 

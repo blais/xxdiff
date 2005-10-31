@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 423 2001-11-29 05:32:12Z blais $
- * $Date: 2001-11-29 00:32:12 -0500 (Thu, 29 Nov 2001) $
+ * $Id: app.cpp 458 2002-01-03 02:48:38Z blais $
+ * $Date: 2002-01-02 21:48:38 -0500 (Wed, 02 Jan 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -44,6 +44,7 @@
 #include <searchDialog.h>
 #include <markersFileDialog.h>
 #include <resParser.h>
+#include <central.h>
 
 #include <qmainwindow.h>
 #include <qpopupmenu.h>
@@ -60,7 +61,6 @@
 #include <qwhatsthis.h>
 #include <qclipboard.h>
 #include <qsocketnotifier.h>
-#include <qtooltip.h>
 #include <qtoolbar.h>
 #include <qtoolbutton.h>
 #include <qtextstream.h>
@@ -186,7 +186,8 @@ private:
    XxApp* _app;
 
 };
- 
+//------------------------------------------------------------------------------
+// 
 //------------------------------------------------------------------------------
 //
 XxMainWindow::XxMainWindow( 
@@ -198,181 +199,6 @@ XxMainWindow::XxMainWindow(
    QMainWindow( parent, name, f ),
    _app( app )
 {}
-
-/*==============================================================================
- * LOCAL CLASS XxCopyLabelTip
- *============================================================================*/
-
-// <summary> a tooltip that only tips when the string of an associated label is
-// too long.  </summary>
-
-class XxCopyLabelTip : public QToolTip {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxCopyLabelTip( QLabel* parent );
-
-   // See base class.
-   virtual void maybeTip( const QPoint& );
-
-};
-
-/*==============================================================================
- * LOCAL CLASS XxCopyLabel
- *============================================================================*/
-
-// <summary> a label that puts its contents into the clipboard when clicked on
-// </summary>
-
-class XxCopyLabel : public QLabel {
-
-public:
-
-   /*----- types and enumerations -----*/
-
-   enum {
-      SAFETY_OFFSET = 10
-   };
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxCopyLabel( QWidget* parent );
-
-   // Destructor.
-   ~XxCopyLabel();
-
-   // See base class.
-   // <group>
-   virtual QSize sizeHint() const;
-   virtual void setText( const QString& );
-   virtual void mousePressEvent( QMouseEvent* );
-   virtual void resizeEvent( QResizeEvent* );
-   // </group>
-
-   // Returns the full text of the label.
-   const QString& getFullText() const;
-
-private:
-
-   XxCopyLabelTip* _tip;
-   QString         _fulltext;
-};
-
-
-/*==============================================================================
- * LOCAL CLASS XxCopyLabelTip
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-XxCopyLabelTip::XxCopyLabelTip( QLabel* parent ) :
-   QToolTip( parent )
-{
-}
-
-//------------------------------------------------------------------------------
-//
-void XxCopyLabelTip::maybeTip( const QPoint& )
-{
-   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
-   XX_CHECK( clabel != 0 );
-   QString tex = clabel->getFullText();
-   QFontMetrics fm = clabel->fontMetrics();
-   QRect br = fm.boundingRect( tex );
-   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
-      tip( clabel->rect(), tex );
-   }
-}
-
-/*==============================================================================
- * LOCAL CLASS XxCopyLabel
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-XxCopyLabel::XxCopyLabel( QWidget* parent ) :
-   QLabel( parent )
-{
-   setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
-   _tip = new XxCopyLabelTip( this );
-}
-
-//------------------------------------------------------------------------------
-//
-XxCopyLabel::~XxCopyLabel()
-{
-   delete _tip;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxCopyLabel::setText( const QString& s )
-{
-   _fulltext = s;
-   QLabel::setText( s );
-}
-
-//------------------------------------------------------------------------------
-//
-const QString& XxCopyLabel::getFullText() const
-{
-   return _fulltext;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxCopyLabel::mousePressEvent( QMouseEvent* event )
-{
-   QClipboard *cb = QApplication::clipboard();
-   cb->setText( _fulltext );
-   QLabel::mousePressEvent( event );
-}
-
-//------------------------------------------------------------------------------
-//
-QSize XxCopyLabel::sizeHint() const
-{
-   QSize hint = QLabel::sizeHint();
-   hint.setWidth( 0 );
-   return hint;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxCopyLabel::resizeEvent( QResizeEvent* event )
-{
-   setText( _fulltext );
-   QString tex = text();
-   QFontMetrics fm = fontMetrics();
-   QRect br = fm.boundingRect( tex );
-   while ( br.width() + SAFETY_OFFSET > width() ) {
-
-      // Remove beginning part
-      //
-      // Note: also check for '\' in case we ever port to Windoze.
-      int pos = -1;
-      if ( tex.find( "[...]/", 0 ) == 0 ) {
-         pos = tex.find( '/', 6 );
-      }
-      else {
-         pos = tex.find( '/', 0 );
-      }
-
-      if ( pos == -1 ) {
-         break;
-      }
-      
-      tex.replace( 0, pos + 1, "[...]/" );
-      br = fm.boundingRect( tex );
-   }
-   
-   QLabel::setText( tex );
-   QLabel::resizeEvent( event );
-}
 
 }
 
@@ -391,7 +217,6 @@ XX_NAMESPACE_BEGIN
 int XxApp::_sockfd = -1;
 QSocketNotifier* XxApp::_socketNotifier = 0;
 
-
 //------------------------------------------------------------------------------
 //
 XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
@@ -404,16 +229,11 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _searchDialog( 0 ),
    _optionsDialog( 0 ),
    _textWidth( 0 ),
-   _displayWidth( 0 ),
-   _displayHeight( 0 ),
-   _displayLines( 0 ),
-   _cursorLine( 0 ), // disallowed value on purpose
+   _cursorLine( 1 ), // disallowed value on purpose
    _filesAreDirectories( false ),
    _resources( 0 ),
    _cmdline( cmdline )
 {
-   _vscroll[0] = _vscroll[1] = 0;
-
    // By default, if not specified, force SGI style.
    if ( _cmdline._forceStyle == false ) {
       _style = new QSGIStyle;
@@ -463,7 +283,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _resources->setCommand( cmdResId, cmd );
 
    // Create the interface.
-   createUI( _nbTextWidgets );
+   createUI();
 
    // Add some context help.
    createOnContextHelp();
@@ -539,6 +359,9 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       _diffErrorsMsgBox->show();
       _diffErrorsMsgBox = 0; // forget about it, it'll get sad and suicide.
    }
+
+   // Update the widgets the first time.
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -675,7 +498,7 @@ uint XxApp::processFileNames(
 
 //------------------------------------------------------------------------------
 //
-void XxApp::createUI( uint nbTextWidgets )
+void XxApp::createUI()
 {
    XX_ASSERT( _resources != 0 );
 
@@ -687,13 +510,13 @@ void XxApp::createUI( uint nbTextWidgets )
 
    // Central widget.
    //
-   _centralWidget = new QWidget( _mainWindow );
+   QWidget* topCentralWidget = new QWidget( _mainWindow );
    QHBoxLayout* topLayout =
-      new QHBoxLayout( _centralWidget, 0, -1, "topLayout" );
+      new QHBoxLayout( topCentralWidget, 0, -1, "topLayout" );
 
    // Pane merged widget.
    //
-   _splitter = new QSplitter( _centralWidget, "splitter" );
+   _splitter = new QSplitter( topCentralWidget, "splitter" );
    _splitter->setOrientation( Qt::Vertical );
          
    topLayout->addWidget( _splitter );
@@ -705,7 +528,13 @@ void XxApp::createUI( uint nbTextWidgets )
 
    // Texts widget (texts).
    //
-   _textsWidget = new QWidget( _splitter, "textsWidget" );
+   _central = new XxCentralFrame( this, _splitter, "centralFrame" );
+   _central->showFilenames( _resources->getShowOpt( SHOW_FILENAMES ) );
+
+   // Hide filename widgets on startup if requested.
+   if ( _resources->getShowOpt( SHOW_FILENAMES ) == false ) {
+      _central->showFilenames( _resources->getShowOpt( SHOW_FILENAMES ) );
+   }
 
    // Adjust splitter (after we've create two children for it to contain).
    uint smpp = _resources->getShowPaneMergedViewPercent();
@@ -715,79 +544,23 @@ void XxApp::createUI( uint nbTextWidgets )
    _splitter->setSizes( vl );
 
 
-   QVBoxLayout* textAndSbLayout =
-      new QVBoxLayout( _textsWidget, 0, -1, "textAndSbLayout" );
-   QHBoxLayout* textLayout =
-      new QHBoxLayout( textAndSbLayout, -1, "textLayout" );
-
-   QFont smaller = font();
-   smaller.setPointSize( smaller.pointSize() - 2 );
-
-   for ( uint ii = 0; ii < nbTextWidgets; ++ii ) { 
-      if ( ii == 1 ) {
-         _vscroll[0] = new QScrollBar( _textsWidget, "vscroll[0]" );
-         _vscroll[0]->setFixedWidth( 20 );
-         textLayout->addWidget( _vscroll[0] );
-         connect( _vscroll[0], SIGNAL(valueChanged(int)),
-                  this, SLOT(verticalScroll(int)) );
-      }
-      if ( ii == 2 ) {
-         _vscroll[1] = new QScrollBar( _textsWidget, "vscroll[1]" );
-         _vscroll[1]->setFixedWidth( 20 );
-         textLayout->addWidget( _vscroll[1] );
-         connect( _vscroll[1], SIGNAL(valueChanged(int)),
-                  this, SLOT(verticalScroll2(int)) );
-      }
-
-      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1, "layout" );
-      //textLayout->setStretchFactor( layout, 1 ); useless to make equal
-
-      // Create filename and line number labels.
-      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1, "fnLayout" );
-      _filenameLabel[ii] = new XxCopyLabel( _textsWidget );
-      _filenameLabel[ii]->setFont( smaller );
-      _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
-      _filenameLabel[ii]->setMinimumWidth( 1 );
-      _filenameLabel[ii]->setLineWidth( 2 );
-
-      _lineNumberLabel[ii] =
-         new QLabel( "9999", _textsWidget, "lineNumberLabel" );
-      _lineNumberLabel[ii]->setAlignment( AlignCenter );
-      _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
-      _lineNumberLabel[ii]->setLineWidth( 2 );
-      _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
-      _lineNumberLabel[ii]->setText( "" );
-
-      if ( _resources->getShowOpt( SHOW_FILENAMES ) == false ) {
-         _filenameLabel[ii]->hide();
-         _lineNumberLabel[ii]->hide();
-      }
-      fnLayout->addWidget( _filenameLabel[ii], 10 );
-      fnLayout->addWidget( _lineNumberLabel[ii], 1 );
-
-      // Create linenumbers widget and text widget.
-      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1, "fnLayout2" );
-      _text[ii] = new XxText( this, ii, _textsWidget, "text" );
-      _lineNumbers[ii] =
-         new XxLineNumbers( this, ii, _textsWidget, "lineNumbers" );
-
-      fnLayout2->addWidget( _lineNumbers[ii] );
-      fnLayout2->addWidget( _text[ii] );
-   }
-
-   _hscroll = new QScrollBar( Qt::Horizontal, _textsWidget, "hscroll" );
-   _hscroll->setFixedHeight( 20 );
-   connect( _hscroll, SIGNAL(valueChanged(int)), 
-            this, SLOT(horizontalScroll(int)) );
-   textAndSbLayout->addWidget( _hscroll );
-
-   // Overview area.
+   // Overview and remaining unselected regions indicator area.
    //
-   _overview = new XxOverview( this, _centralWidget, "overview" );
+   _overviewArea = new QWidget( topCentralWidget );
+   _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
+   _remUnselView->setAlignment( Qt::AlignCenter );
+   _overview = new XxOverview( this, _central, _overviewArea, "overview" );
+
+   QVBoxLayout* overviewLayout =
+      new QVBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
+   overviewLayout->addWidget( _remUnselView );
+   overviewLayout->addWidget( _overview );
+
+   topLayout->addWidget( _overviewArea );
+
    if ( _resources->getShowOpt( SHOW_OVERVIEW ) == false ) {
-      _overview->hide();
+      _overviewArea->hide();
    }
-   topLayout->addWidget( _overview );
 
    //
    // Create menus.
@@ -795,28 +568,63 @@ void XxApp::createUI( uint nbTextWidgets )
    createMenus();
 
    // Add some extra accelerators.
+   //
+   // Note: these have effect at the top level only, they are not bound specific
+   // to a particular widget.
    QAccel* a = new QAccel( _mainWindow );
-   a->connectItem( a->insertItem(Key_Space), this, SLOT(scrollDown()) ); 
-   a->connectItem( a->insertItem(Key_Backspace), this, SLOT(scrollUp()) ); 
+   a->connectItem( a->insertItem(Key_Delete), 
+                   this, SLOT(selectRegionNeither()) );
 
-   a->connectItem( a->insertItem(Key_Prior), this, SLOT(scrollUp()) ); 
-   a->connectItem( a->insertItem(Key_Next), this, SLOT(scrollDown()) ); 
-
+   //
+   // Cursor motion.
+   //
    a->connectItem( a->insertItem(Key_Down), this, SLOT(cursorDown()) ); 
    a->connectItem( a->insertItem(Key_Up), this, SLOT(cursorUp()) ); 
 
    a->connectItem( a->insertItem(Key_Home), this, SLOT(cursorTop()) ); 
    a->connectItem( a->insertItem(Key_End), this, SLOT(cursorBottom()) ); 
 
-   a->connectItem( a->insertItem(Key_Right), this, SLOT(scrollRight()) ); 
-   a->connectItem( a->insertItem(Key_Left), this, SLOT(scrollLeft()) ); 
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_DOWN ) ),
+      this, SLOT(cursorDown())
+   );
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_UP ) ),
+      this, SLOT(cursorUp())
+   );
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_TOP ) ),
+      this, SLOT(cursorTop())
+   );
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ) ),
+      this, SLOT(cursorBottom())
+   );
 
-   a->connectItem( a->insertItem(Key_Delete), this, SLOT(selectRegionNeither()) ); 
+   //
+   // Page motion.
+   //
+   a->connectItem( a->insertItem(Key_Space), this, SLOT(pageDown()) );
+   a->connectItem( a->insertItem(Key_Backspace), this, SLOT(pageUp()) );
+
+   a->connectItem( a->insertItem(Key_Prior), this, SLOT(pageUp()) );
+   a->connectItem( a->insertItem(Key_Next), this, SLOT(pageDown()) );
+
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_PAGE_DOWN ) ),
+      this, SLOT(pageDown())
+   );
+   a->connectItem(
+      a->insertItem( _resources->getAccelerator( ACCEL_PAGE_UP ) ),
+      this, SLOT(pageUp())
+   );
+
 
    // Make some connections.
-   connect( this, SIGNAL(cursorChanged(int)), this, SLOT(repaintTexts()) );
-   connect( this, SIGNAL(cursorChanged(int)), 
-            this, SLOT(updateLineNumberLabels(int)) );
+   connect( this, SIGNAL(cursorChanged(int)),
+            this, SLOT(updateWidgets()) );
+   connect( this, SIGNAL(cursorChanged(int)),
+            _central, SLOT(updateLineNumberLabels(int)) );
 
    //
    // Create toolbar
@@ -835,8 +643,8 @@ void XxApp::createUI( uint nbTextWidgets )
    //
    // Show it!
    //
-   _centralWidget->updateGeometry();
-   _mainWindow->setCentralWidget( _centralWidget );
+   topCentralWidget->updateGeometry();
+   _mainWindow->setCentralWidget( topCentralWidget );
    setMainWidget( _mainWindow );
 
    _isUICreated = true;
@@ -1063,26 +871,7 @@ QToolBar* XxApp::createToolbar()
 //
 void XxApp::createOnContextHelp()
 {
-   QWhatsThis::add( _vscroll[0],
-                    XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
-   if ( _vscroll[1] != 0 ) {
-      QWhatsThis::add( _vscroll[1],
-                       XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
-   }
-   QWhatsThis::add( _hscroll, XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
    QWhatsThis::add( _overview, XxHelp::getWhatsThisText( XxHelp::OVERVIEW ) );
-
-   for ( int ii = 0; ii < _nbTextWidgets; ++ii ) {
-      QWhatsThis::add(
-         _filenameLabel[ii], XxHelp::getWhatsThisText( XxHelp::FILENAME )
-      );
-      QWhatsThis::add(
-         _lineNumberLabel[ii], XxHelp::getWhatsThisText( XxHelp::LINENO )
-      );
-      QWhatsThis::add(
-         _text[ii], XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW )
-      );
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -1177,27 +966,11 @@ void XxApp::createMenus()
    );
    editMenu->insertSeparator();
    editMenu->insertItem( 
-      "Scroll down", this, SLOT(scrollDown()), 
-      _resources->getAccelerator( ACCEL_SCROLL_DOWN ) 
-   );
-   editMenu->insertItem( 
-      "Scroll up", this, SLOT(scrollUp()), 
-      _resources->getAccelerator( ACCEL_SCROLL_UP ) 
-   );
-   editMenu->insertItem( 
-      "Cursor down", this, SLOT(cursorDown()), 
-      _resources->getAccelerator( ACCEL_CURSOR_DOWN ) 
-   );
-   editMenu->insertItem( 
-      "Cursor up", this, SLOT(cursorUp()), 
-      _resources->getAccelerator( ACCEL_CURSOR_UP ) 
-   );
-   editMenu->insertItem( 
-      "Cursor top", this, SLOT(cursorTop()), 
+      "Beginning of file", this, SLOT(cursorTop()), 
       _resources->getAccelerator( ACCEL_CURSOR_TOP ) 
    );
    editMenu->insertItem( 
-      "Cursor bottom", this, SLOT(cursorBottom()), 
+      "End of file", this, SLOT(cursorBottom()), 
       _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ) 
    );
 
@@ -1672,10 +1445,13 @@ void XxApp::readFile(
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         _files[no].reset( new XxBuffer( false, filename, displayFilename ) );
+         std::auto_ptr<XxBuffer> tmp(
+            new XxBuffer( false, filename, displayFilename )
+         );
+         _files[no] = tmp;
       }
       else {
-         _files[no].reset( 
+         std::auto_ptr<XxBuffer> tmp(
             new XxBuffer( 
                filename, 
                displayFilename, 
@@ -1683,6 +1459,7 @@ void XxApp::readFile(
                isTemporary 
             )
          );
+         _files[no] = tmp;
       }
    }
    catch ( const std::exception& ex ) {
@@ -1700,7 +1477,7 @@ void XxApp::readFile(
 
    // Set filename label.
    if ( _files[no].get() != 0 ) {
-      _filenameLabel[no]->setText( _files[no]->getDisplayName() );
+      _central->setFilename( no, _files[no]->getDisplayName() );
    }
 
    // Note: we should also readjust the width and hor. scrollbar here, really,
@@ -1724,14 +1501,17 @@ void XxApp::reReadFile( const XxFno no )
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
-         _files[no].reset( new XxBuffer( 
-            false,
-            oldfile->getName(),
-            oldfile->getDisplayName()
-         ) );
+         std::auto_ptr<XxBuffer> tmp(
+            new XxBuffer( 
+               false,
+               oldfile->getName(),
+               oldfile->getDisplayName()
+            )
+         );
+         _files[no] = tmp;
       }
       else {
-         _files[no].reset( 
+         std::auto_ptr<XxBuffer> tmp(
             new XxBuffer( 
                oldfile->getName(),
                oldfile->getDisplayName(),
@@ -1739,6 +1519,7 @@ void XxApp::reReadFile( const XxFno no )
                oldfile->isTemporary()
             )
          );
+         _files[no] = tmp;
       }
    }
    catch ( const std::exception& ex ) {
@@ -1917,7 +1698,7 @@ bool XxApp::processDiff()
    //
    if ( _diffs.get() != 0 ) {
 
-      connect( _diffs.get(), SIGNAL(changed()), this, SLOT(repaintTexts()) );
+      connect( _diffs.get(), SIGNAL(changed()), this, SLOT(updateWidgets()) );
       connect( _diffs.get(), SIGNAL(nbLinesChanged()), 
                this, SLOT(onNbLinesChanged()) );
       
@@ -1931,12 +1712,13 @@ bool XxApp::processDiff()
       
       // Reset update connections and adjust scrollbars.
       if ( _diffs.get() != 0 ) {
-         connect( _diffs.get(), SIGNAL(changed()), this, SLOT(repaintTexts()) );
+         connect( _diffs.get(), SIGNAL(changed()),
+                  this, SLOT(updateWidgets()) );
       }
 
       // Note: this should also be done, but more efficiently for each loaded
       // file separately.
-      adjustScrollbars( true );
+      emit textSizeChanged();
    }
 
    return _returnValue == 2 || _diffs.get() != 0;
@@ -2014,16 +1796,17 @@ uint XxApp::getTextWidth() const
 void XxApp::invalidateTextWidth()
 {
    _textWidth = 0;
+   emit textSizeChanged();
+   adjustLineNumbers();
 }
 
 //------------------------------------------------------------------------------
 //
-void XxApp::adjustComponents()
+void XxApp::adjustLineNumbers()
 {
-   // The first text widget calls this.
-   adjustScrollbars();
-   adjustCursor();
-   adjustLineNumbers();
+   _central->adjustLineNumbers(
+      _resources->getShowOpt( SHOW_LINE_NUMBERS ), _resources->getFontText()
+   );
 }
 
 //------------------------------------------------------------------------------
@@ -2064,246 +1847,17 @@ QPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
 
 //------------------------------------------------------------------------------
 //
-void XxApp::adjustScrollbars( bool force )
+void XxApp::updateWidgets()
 {
-   // Horizontal scrollbar.
+   _central->update();
 
-   // Compute the minimum of the text widths here, because the text widths may
-   // vary depending on the width of the lineNumbers widget.
-   uint displayWidth = 0;
-   for ( int ii = 0; ii < _nbTextWidgets; ++ii ) {
-      displayWidth = std::max( displayWidth, _text[ii]->getDisplayWidth() );
-   }
-
-   if ( force == true || 
-        _displayWidth != displayWidth ) {
-      _displayWidth = displayWidth;
-
-      // Leave a pixel margin to the right of text.
-      uint textWidth = getTextWidth() + 16; // 10 pixels. right margin.
-      if ( textWidth <= _displayWidth ) {
-         _hscroll->setRange( 0, 0 );
-         _hscroll->hide();
+   if ( _remUnselView->isVisible() ) {
+      uint remNb = 0;
+      if ( _diffs.get() ) {
+         remNb = _diffs->countRemainingUnselected();
       }
-      else {
-         _hscroll->setSteps( 1, _displayWidth );
-         _hscroll->setRange( 0, textWidth - _displayWidth );
-         _hscroll->show();
-      }
-
-      if ( int( textWidth - _displayWidth ) < _hscroll->value() ) {
-         _hscroll->setValue( textWidth - _displayWidth );
-         // Note: this will indirectly trigger a redraw.
-      }
-   }
-
-   // Vertical scrollbar.
-   if ( force == true || 
-        _displayHeight != (uint)_text[0]->height() ) {
-      XxDln displayLines = _text[0]->computeDisplayLines();
-      if ( force == true || 
-           _displayLines != displayLines ) {
-         _displayLines = displayLines;
-         _vscroll[0]->setSteps( 1, _displayLines );
-         if ( _vscroll[1] != 0 ) {
-            _vscroll[1]->setSteps( 1, _displayLines );
-         }
-
-         XxDln topLine = getTopLine();
-
-         if ( _diffs.get() == 0 ) {
-            _vscroll[0]->setRange( 0,0 );
-            if ( _vscroll[1] != 0 ) {
-               _vscroll[1]->setRange( 0,0 );
-            }
-         }
-         else {
-            XxDln maxLine = 
-               std::max( 0, XxDln( _diffs->getNbLines() - _displayLines + 1 ) );
-            _vscroll[0]->setRange( 0, maxLine );
-            if ( _vscroll[1] != 0 ) {
-               _vscroll[1]->setRange( 0, maxLine );
-            }
-         }
-
-         setTopLine( topLine );
-         // Note: this will indirectly trigger a redraw.
-      }
-      else {
-         // We need to redraw the lower portion, that's why we redraw here.
-         repaintTexts();
-      }
-   }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::horizontalScroll( int /*value*/ )
-{
-   repaintTexts();
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::scrollRight()
-{
-   _hscroll->setValue( _hscroll->value() + _hscroll->lineStep() * 10 );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::scrollLeft()
-{
-   _hscroll->setValue( _hscroll->value() - _hscroll->lineStep() * 10 );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::verticalScroll( int value )
-{
-   adjustCursor();
-   repaintTexts();
-   emit scrolled( getTopLine() );
-   if ( _vscroll[1] != 0 ) {
-      // Will only change if different.
-      _vscroll[1]->setValue( value );
-   }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::verticalScroll2( int value )
-{
-   _vscroll[0]->setValue( value );
-   verticalScroll( value );
-}
-
-//------------------------------------------------------------------------------
-//
-uint XxApp::getHorizontalPos() const
-{
-   return _hscroll->value();
-}
-
-
-//------------------------------------------------------------------------------
-//
-XxDln XxApp::setTopLine( const XxDln lineNo )
-{
-   if ( _diffs.get() == 0 ) {
-      return 1;
-   }
-
-   XxDln oldLine = getTopLine();
-   XxDln validLine = 
-      std::max( XxDln(1), std::min( XxDln(_diffs->getNbLines()), lineNo ) );
-   XxDln displayableLine = 
-      std::min(
-         validLine, 
-         std::max( XxDln(1), 
-                   XxDln(_diffs->getNbLines() - (getNbDisplayLines() - 2)) )
-      );
-   _vscroll[0]->setValue( displayableLine - 1 );
-   if ( _vscroll[1] != 0 ) {
-      _vscroll[1]->setValue( displayableLine - 1 );
-   }
-   // Note: this will trigger the scroll signal indirectly.
-   
-   adjustCursor();
-
-   return oldLine;
-}
-
-//------------------------------------------------------------------------------
-//
-XxDln XxApp::setCenterLine( const XxDln lineNo )
-{
-   if ( _diffs.get() == 0 ) {
-      return 1;
-   }
-
-   XxDln oldLine = getCenterLine();
-
-   setTopLine( lineNo - getNbDisplayLines() / 2 );
-
-   return oldLine;
-}
-
-//------------------------------------------------------------------------------
-//
-XxDln XxApp::setBottomLine( const XxDln lineNo )
-{
-   if ( _diffs.get() == 0 ) {
-      return 1;
-   }
-
-   XxDln oldLine = getBottomLine();
-
-   setTopLine( lineNo - (getNbDisplayLines() - 2) );
-
-   return oldLine;
-}
-
-//------------------------------------------------------------------------------
-//
-XxDln XxApp::setCursorLine( const XxDln lineNo )
-{
-   XxDln oldLine = _cursorLine;
-
-   // Validate and set.
-   XxDln validLine = 
-      std::max( XxDln(1), std::min( XxDln(getNbLines()), lineNo ) );
-   _cursorLine = validLine;
-
-   // Scroll to display.
-   if ( _cursorLine < getTopLine() ) {
-      setTopLine( _cursorLine );
-   }
-   else if ( _cursorLine > getBottomLine() ) {
-      setBottomLine( _cursorLine );
-   }
-
-   if ( _cursorLine != oldLine ) {
-      emit cursorChanged( _cursorLine );
-   }
-   return oldLine;
-}
-
-//------------------------------------------------------------------------------
-//
-bool XxApp::adjustCursor()
-{
-   XxDln oldLine = _cursorLine;
-   _cursorLine = 
-      std::max( getTopLine(), std::min( getBottomLine(), oldLine ) );
-   if ( _cursorLine != oldLine ) {
-      emit cursorChanged( _cursorLine );
-      return true;
-   }
-   return false;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::updateLineNumberLabels( int cursorLine )
-{
-   if ( _diffs.get() != 0 ) {
-      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-         bool aempty;
-
-         XxFln fline = _diffs->getBufferLine( ii, cursorLine, aempty );
-         _lineNumberLabel[ii]->setNum( fline );
-      }
-   }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::repaintTexts()
-{
-   for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-      _lineNumbers[ii]->update();
-      _text[ii]->update();
+// FIXME error do this on diff change not on update
+      _remUnselView->setNum( int(remNb) );
    }
    if ( _overview->isVisible() ) {
       _overview->update();
@@ -2320,7 +1874,7 @@ void XxApp::repaintTexts()
 //
 void XxApp::onNbLinesChanged()
 {
-   adjustScrollbars( true );
+   emit textSizeChanged();
 }
 
 //------------------------------------------------------------------------------
@@ -2338,8 +1892,7 @@ void XxApp::saveToFile( const QString& filename, const bool ask )
       // Bring the user to the first unselected region.
       XxDln nextNo = _diffs->findNextUnselected( 0 );
       XX_ASSERT( nextNo != -1 );
-      setCursorLine( nextNo );
-      setCenterLine( nextNo );
+      setCursorLine( nextNo, true );
    }
 
    // Remove ClearCase extended syntax if it is there.
@@ -2604,7 +2157,7 @@ void XxApp::openFile( const XxFno no )
 
       // Reset the cursor line.
       setCursorLine( 1 );
-      repaintTexts();
+      updateWidgets();
    }
 }
 
@@ -2627,8 +2180,7 @@ void XxApp::selectAndNext( XxLine::Selection selection )
          nextNo = _diffs->findNextUnselected( 1 );
       }
       if ( nextNo != -1 ) {
-         setCursorLine( nextNo );
-         setCenterLine( nextNo );
+         setCursorLine( nextNo, true );
          return;
       }
       // Otherwise we're done, ask user to save file.
@@ -2643,7 +2195,7 @@ void XxApp::onRedoDiff()
    XxFno nbFiles = getNbFiles();
    if ( nbFiles > 0 ) {
       XxDln cursorLine = getCursorLine();
-      XxDln centerLine = getCenterLine();
+      XxDln centerLine = _central->getCenterLine();
 
       // Reread the files.
       for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
@@ -2661,8 +2213,8 @@ void XxApp::onRedoDiff()
       // Try to set the same lines as it used to have before the redo.
       // Reset the cursor line.
       setCursorLine( cursorLine );
-      setCenterLine( centerLine );
-      repaintTexts();
+      _central->setCenterLine( centerLine );
+      updateWidgets();
    }
 }
 
@@ -2740,8 +2292,8 @@ void XxApp::saveAsRight()
 //
 void XxApp::saveAsMerged()
 {
+   XX_TRACE( "Not yet implemented." );
    // FIXME not implemented yet
-   throw XxUsageError( XX_EXC_PARAMS, "Not yet implemented." );
 }
 
 //------------------------------------------------------------------------------
@@ -2927,12 +2479,10 @@ void XxApp::searchForward()
       XxDiffs::SearchResult sres =
          _diffs->findNextSearch( getCursorLine() );
       if ( sres.isValid() ) {
-	 setCursorLine( sres._lineNo );
-	 setCenterLine( sres._lineNo );
+	 setCursorLine( sres._lineNo, true );
       }
       else {
-	 setCursorLine( _diffs->getNbLines() );
-         setCenterLine( _diffs->getNbLines() );
+	 setCursorLine( _diffs->getNbLines(), true );
       }
    }
 }
@@ -2945,84 +2495,12 @@ void XxApp::searchBackward()
       XxDiffs::SearchResult sres = 
          _diffs->findPreviousSearch( getCursorLine() );
       if ( sres.isValid() ) {
-         setCursorLine( sres._lineNo );
-         setCenterLine( sres._lineNo );
+         setCursorLine( sres._lineNo, true );
       }
       else {
-         setCursorLine( 1 );
-         setCenterLine( 1 );
+         setCursorLine( 1, true );
       }
    }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::scrollDown()
-{
-   XxDln diff = (getNbDisplayLines() - 3);
-   // Note: we leave 3 lines in common.
-
-   // Scroll.
-   XxDln topLine = getTopLine();
-   setTopLine( topLine + diff );
-
-   // Keep cursor in center.
-   if ( topLine == getTopLine() ) {
-      setCursorLine( getNbLines() );
-   }
-   else {
-      setCursorLine( getCenterLine() );
-   }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::scrollUp()
-{
-   XxDln diff = (getNbDisplayLines() - 3);
-   // Note: we leave 3 lines in common.
-
-   // Scroll.
-   XxDln topLine = getTopLine();
-   setTopLine( topLine - diff );
-
-   // Keep cursor in center.
-   if ( topLine == getTopLine() ) {
-      setCursorLine( 1 );
-   }
-   else {
-      setCursorLine( getCenterLine() );
-   }
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::cursorDown()
-{
-   setCursorLine( getCursorLine() + 1 );
-   setCenterLine( getCursorLine() );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::cursorUp()
-{
-   setCursorLine( getCursorLine() - 1 );
-   setCenterLine( getCursorLine() );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::cursorTop()
-{
-   setCursorLine( 1 );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::cursorBottom()
-{
-   setCursorLine( getNbLines() );
 }
 
 //------------------------------------------------------------------------------
@@ -3257,12 +2735,10 @@ void XxApp::nextDifference()
    if ( _diffs.get() != 0 ) {
       XxDln nextNo = _diffs->findNextDifference( _cursorLine );
       if ( nextNo != -1 ) {
-         setCursorLine( nextNo );
-         setCenterLine( nextNo );
+         setCursorLine( nextNo, true );
       }
       else {
-         setCursorLine( _diffs->getNbLines() );
-         setCenterLine( _diffs->getNbLines() );
+         setCursorLine( _diffs->getNbLines(), true );
       }
    }
 }
@@ -3274,12 +2750,10 @@ void XxApp::previousDifference()
    if ( _diffs.get() != 0 ) {
       XxDln nextNo = _diffs->findPreviousDifference( _cursorLine );
       if ( nextNo != -1 ) {
-         setCursorLine( nextNo );
-         setCenterLine( nextNo );
+         setCursorLine( nextNo, true );
       }
       else {
-         setCursorLine( 1 );
-         setCenterLine( 1 );
+         setCursorLine( 1, true );
       }
    }
 }
@@ -3291,12 +2765,10 @@ void XxApp::nextUnselected()
    if ( _diffs.get() != 0 ) {
       XxDln nextNo = _diffs->findNextUnselected( _cursorLine );
       if ( nextNo != -1 ) {
-         setCursorLine( nextNo );
-         setCenterLine( nextNo );
+         setCursorLine( nextNo, true );
       }
       else {
-         setCursorLine( _diffs->getNbLines() );
-         setCenterLine( _diffs->getNbLines() );
+         setCursorLine( _diffs->getNbLines(), true );
       }
    }
 }
@@ -3308,12 +2780,10 @@ void XxApp::previousUnselected()
    if ( _diffs.get() != 0 ) {
       XxDln nextNo = _diffs->findPreviousUnselected( _cursorLine );
       if ( nextNo != -1 ) {
-         setCursorLine( nextNo );
-         setCenterLine( nextNo );
+         setCursorLine( nextNo, true );
       }
       else {
-         setCursorLine( 1 );
-         setCenterLine( 1 );
+         setCursorLine( 1, true );
       }
    }
 }
@@ -3469,7 +2939,7 @@ void XxApp::selectRegionMiddleAndNext()
 {
    selectAndNext( XxLine::SEL2 );
 }
- 
+
 //------------------------------------------------------------------------------
 //
 void XxApp::selectRegionRightAndNext()
@@ -3556,10 +3026,9 @@ void XxApp::setTabWidth( const int newTabWidth )
 {
    _resources->setTabWidth( newTabWidth );
 
-   _displayWidth = 0; // This is a hack to force adjustment of hscrollbar.
-   adjustScrollbars();
+   emit textSizeChanged();
    synchronizeUI();
-   repaintTexts();   
+   updateWidgets();   
 }
 
 //------------------------------------------------------------------------------
@@ -3694,6 +3163,14 @@ void XxApp::setQuality( XxQuality quality )
 
 //------------------------------------------------------------------------------
 //
+void XxApp::toggleShowFilenames()
+{
+   _central->showFilenames( _resources->toggleShowOpt( SHOW_FILENAMES ) );
+   synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxApp::togglePaneMergedView()
 {
    if ( _nbFiles == 0 || _diffs.get() == 0 ) {
@@ -3731,10 +3208,8 @@ void XxApp::togglePopupMergedView()
 
       // Resize the merged window to have the same size as the text widgets.
       int mh = _mainWindow->menuBar()->height();
-      int sw = _vscroll[0]->width(); 
-      int sh = _hscroll->height();
-      _popupMergedView->resize( QSize( _text[0]->width() + sw,
-                                    _text[0]->height() + mh + sh ) );
+      _popupMergedView->resize( QSize( _central->getOneWidth(),
+                                       _central->getOneHeight() + mh ) );
       _popupMergedView->show();
    }
    else {
@@ -3768,44 +3243,8 @@ void XxApp::toggleLineNumbers()
    _resources->toggleShowOpt( SHOW_LINE_NUMBERS );
 
    adjustLineNumbers();
-
    synchronizeUI();
-
-   // Let the resizing occur, process all events, for when adjustScrollbars gets
-   // called the sizes have been updated.  Yes, this is a horrible hack but it
-   // works (unless your window takes >50 secs. to resize).
-   processEvents( 50 );
-
-   adjustScrollbars( true );
-   repaintTexts();
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::adjustLineNumbers()
-{
-   if ( _resources->getShowOpt( SHOW_LINE_NUMBERS ) ) {
-      // Compute the maximum line numbers width.  This has to be the same for
-      // all the texts, in order to have a consistent horizontal scrollbar.
-      uint lnw = 0;
-      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-         lnw = std::max(
-            lnw,
-            _files[ii]->computeLineNumbersWidth( _resources->getFontText() ) +
-            ( _lineNumbers[ii]->width() - 
-              _lineNumbers[ii]->contentsRect().width() + 2 ) );
-         
-      }
-      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-         _lineNumbers[ii]->setFixedWidth( lnw );
-         _lineNumbers[ii]->show();
-      }
-   }
-   else {
-      for ( XxFno ii = 0; ii < _nbTextWidgets; ++ii ) {
-         _lineNumbers[ii]->hide();
-      }
-   }
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -3813,7 +3252,7 @@ void XxApp::adjustLineNumbers()
 void XxApp::toggleVerticalLine()
 {
    _resources->toggleShowOpt( SHOW_VERTICAL_LINE );
-   repaintTexts();
+   updateWidgets();
    synchronizeUI();
 }
 
@@ -3824,30 +3263,12 @@ void XxApp::toggleOverview()
    _resources->toggleShowOpt( SHOW_OVERVIEW );
 
    if ( _resources->getShowOpt( SHOW_OVERVIEW ) ) {
-      _overview->show();
+      _overviewArea->show();
    }
    else {
-      _overview->hide();
+      _overviewArea->hide();
    }
-   synchronizeUI();
-}
 
-//------------------------------------------------------------------------------
-//
-void XxApp::toggleShowFilenames()
-{
-   _resources->toggleShowOpt( SHOW_FILENAMES );
-
-   for ( int ii = 0; ii < _nbTextWidgets; ++ii ) {
-      if ( _resources->getShowOpt( SHOW_FILENAMES ) ) {
-         _filenameLabel[ii]->show();
-         _lineNumberLabel[ii]->show();
-      }
-      else {
-         _filenameLabel[ii]->hide();
-         _lineNumberLabel[ii]->hide();
-      }
-   }
    synchronizeUI();
 }
 
@@ -3881,7 +3302,7 @@ void XxApp::hordiffTypeUpdate()
 {
    if ( _diffs.get() != 0 ) {
       _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
-      repaintTexts();
+      updateWidgets();
    }
    synchronizeUI();
 }
@@ -3894,7 +3315,7 @@ void XxApp::toggleIgnoreHorizontalWs()
 
    if ( _diffs.get() != 0 ) {
       _diffs->initializeHorizontalDiffs( *_resources, getBuffers(), true );
-      repaintTexts();
+      updateWidgets();
    }
    synchronizeUI();
 }
@@ -3913,7 +3334,7 @@ void XxApp::ignoreFileNone()
 {
    _resources->setIgnoreFile( IGNORE_NONE );
    synchronizeUI();
-   repaintTexts();
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -3922,7 +3343,7 @@ void XxApp::ignoreFileLeft()
 {
    _resources->setIgnoreFile( IGNORE_LEFT );
    synchronizeUI();
-   repaintTexts();
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -3931,7 +3352,7 @@ void XxApp::ignoreFileMiddle()
 {
    _resources->setIgnoreFile( IGNORE_MIDDLE );
    synchronizeUI();
-   repaintTexts();
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -3940,7 +3361,7 @@ void XxApp::ignoreFileRight()
 {
    _resources->setIgnoreFile( IGNORE_RIGHT );
    synchronizeUI();
-   repaintTexts();
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -4203,4 +3624,108 @@ void XxApp::handlerSIGCHLD( int )
    write( _sockfd, &buf, sizeof(char) );
 }
 
+//==============================================================================
+// Scroll mediator, cursor manager, etc.
+//==============================================================================
+
+//------------------------------------------------------------------------------
+//
+XxDln XxApp::getCursorLine() const
+{
+   if ( _diffs.get() == 0 ) {
+      return 0;
+   }
+   return _cursorLine;
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxApp::setCursorLine( const XxDln lineNo, const bool recenter )
+{
+   XxDln oldLine = _cursorLine;
+
+   // Validate and set.
+   XxDln validLine = 
+      std::max( XxDln(1), std::min( XxDln(getNbLines()), lineNo ) );
+   _cursorLine = validLine;
+
+   if ( _cursorLine != oldLine ) {
+      emit cursorChanged( _cursorLine );
+   }
+
+   if ( recenter ) {
+      _central->recenter();
+   }
+
+   return oldLine;
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxApp::adjustCursor( const int topLine, const int bottomLine )
+{
+   // Insures that the cursor lies within the boundaries given in parameters.
+   XxDln cursorLine = getCursorLine();
+   if ( cursorLine < topLine ) {
+      setCursorLine( topLine );
+      return true;
+   }
+   else if ( cursorLine > bottomLine ) {
+      setCursorLine( bottomLine );
+      return true;
+   }
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::pageDown()
+{
+   // Note: we leave 5 lines in common, and we skip pages the size of the
+   // central texts.
+   XxDln diff = _central->getNbDisplayLines() - 5;
+
+   setCursorLine( getCursorLine() + diff, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::pageUp()
+{
+   // Note: we leave 5 lines in common, and we skip pages the size of the
+   // central texts.
+   XxDln diff = _central->getNbDisplayLines() - 5;
+
+   setCursorLine( getCursorLine() - diff, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::cursorDown()
+{
+   setCursorLine( getCursorLine() + 1, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::cursorUp()
+{
+   setCursorLine( getCursorLine() - 1, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::cursorTop()
+{
+   setCursorLine( 1, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::cursorBottom()
+{
+   setCursorLine( getNbLines(), true );
+}
+
 XX_NAMESPACE_END
+

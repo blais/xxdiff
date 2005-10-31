@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.h 296 2001-10-22 05:58:27Z blais $
- * $Date: 2001-10-22 01:58:27 -0400 (Mon, 22 Oct 2001) $
+ * $Id: optionsDialog.h 432 2001-11-30 07:21:57Z blais $
+ * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_OPTIONSDIALOG
 #define INCL_XXDIFF_OPTIONSDIALOG

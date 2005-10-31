@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: central.h 423 2001-11-29 05:32:12Z blais $
- * $Date: 2001-11-29 00:32:12 -0500 (Thu, 29 Nov 2001) $
+ * $Id: central.h 450 2001-12-08 01:15:24Z blais $
+ * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_CENTRAL
 #define INCL_XXDIFF_CENTRAL
@@ -35,6 +35,10 @@
 #include <types.h>
 #endif
 
+#ifndef INCL_XXDIFF_SCROLLVIEW
+#include <scrollView.h>
+#endif
+
 #ifndef INCL_QT_QMAINWINDOW
 #include <qmainwindow.h>
 #define INCL_QT_QMAINWINDOW
@@ -45,15 +49,11 @@
 #define INCL_QT_QFRAME
 #endif
 
-#ifndef INCL_QT_QWIDGET
-#include <qwidget.h>
-#define INCL_QT_QWIDGET
-#endif
-
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
+class QLabel;
 class QScrollBar;
 
 XX_NAMESPACE_BEGIN
@@ -63,9 +63,8 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 class XxApp;
-class XxCentralText;
-class XxCentralFrame;
-class XxCentralWindow;
+class XxLineNumbers;
+class XxText;
 
 /*==============================================================================
  * CLASS XxCentralFrame
@@ -73,13 +72,13 @@ class XxCentralWindow;
 
 // <summary> central text with scrollbars </summary>
 
-class XxCentralFrame : public QWidget {
+class XxCentralFrame : public XxScrollView {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef QWidget BaseClass;
+   typedef XxScrollView BaseClass;
 
 public:
 
@@ -87,30 +86,74 @@ public:
 
    // Constructor.
    XxCentralFrame( 
-      XxApp*      app, 
-      QWidget*    parent = 0,
-      const char* name = 0 
+      XxApp*          app, 
+      QWidget*        parent = 0,
+      const char*     name = 0 
    );
-
-   // Access to the scrollbars.
-   QScrollBar* getHorizontalScrollbar();
-   QScrollBar* getVerticalScrollbar();
 
    // See base class.
    virtual void update();
 
+   // See base class XxScrollView.
+   // <group>
+   virtual QSize computeDisplaySize() const;
+   virtual uint computeTextLength() const;
+   virtual uint getNbDisplayLines() const;
+   // </group>
+   
+   // Hides or shows the filenames labels.
+   void showFilenames( const bool show );
+
+   // Sets the filename displayed in one of the filenames labels.
+   void setFilename( XxFln no, const QString& fn );
+
+   // Returns the width and height that one of the text widgets would have if it
+   // was adorned with a scrollbar on each side.  This is used specifically by
+   // the merged view.
+   // <group>
+   int getOneWidth() const;
+   int getOneHeight() const;
+   // </group>
+
 public slots:
 
-   void appCursorChanged( int );
-   void appScrolled( int );
+   // Updates the line number labels with current cursor line.
+   void updateLineNumberLabels( int );
+
+   // Updates the line numbers widgets sizes and shows or hides them depending
+   // on the current state.
+   void adjustLineNumbers( bool show, const QFont& fontText );
+
+   // Reacts to a cursor change.
+   void onCursorChanged( int cursorLine );
+
+   // Keyboard accelerators scrolling callbacks.
+   // This is only defined on the central widget.
+   // <group>
+   void scrollRight();
+   void scrollLeft();
+   // </group>
+
+protected:
+
+   /*----- member functions -----*/
+
+   // See base class.
+   virtual void verticalScroll( int /*value*/ );
 
 private:
 
+   /*----- member functions -----*/
+
+   // Set what's-this strings.
+   void createOnContextHelp();
+
    /*----- data members -----*/
 
-   XxCentralText* _central;
-   QScrollBar*    _vscroll;
-   QScrollBar*    _hscroll;
+   QLabel*        _filenameLabel[3];
+   QLabel*        _lineNumberLabel[3];
+   XxLineNumbers* _lineNumbers[3];
+   XxText*        _text[3];
 
 };
 

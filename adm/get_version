@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# $Id: get_version 404 2001-11-22 07:39:59Z blais $
+#
+
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
+
+egrep "^XX_VERSION" src/xxdiff.pro | sed -e 's/^.*=//;'
+

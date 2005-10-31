@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 420 2001-11-27 22:56:50Z blais $
- * $Date: 2001-11-27 17:56:50 -0500 (Tue, 27 Nov 2001) $
+ * $Id: diffs.h 442 2001-12-04 07:04:06Z blais $
+ * $Date: 2001-12-04 02:04:06 -0500 (Tue, 04 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 #ifndef INCL_XXDIFF_DIFFS
 #define INCL_XXDIFF_DIFFS
@@ -223,6 +223,9 @@ public:
 
    // Returns false if there are still some unselected lines.
    bool isAllSelected() const;
+
+   // Counts the remaining unselected hunks.
+   uint countRemainingUnselected() const;
 
    // Save merged with selected regions.  If there are still some unselected
    // regions it will return false but save anyway.

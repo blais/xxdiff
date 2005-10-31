@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: central.cpp 423 2001-11-29 05:32:12Z blais $
- * $Date: 2001-11-29 00:32:12 -0500 (Thu, 29 Nov 2001) $
+ * $Id: central.cpp 450 2001-12-08 01:15:24Z blais $
+ * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *****************************************************************************/
+ ******************************************************************************/
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -30,6 +30,9 @@
 #include <resources.h>
 #include <diffs.h>
 #include <buffer.h>
+#include <copyLabel.h>
+#include <lineNumbers.h>
+#include <help.h>
 
 #include <qscrollview.h>
 #include <qpainter.h>
@@ -39,6 +42,8 @@
 #include <qpopupmenu.h>
 #include <qmenubar.h>
 #include <qlayout.h>
+#include <qwhatsthis.h>
+#include <qaccel.h>
 
 #include <qapplication.h>
 #include <qclipboard.h>
@@ -63,46 +68,111 @@ XxCentralFrame::XxCentralFrame(
    QWidget*    parent, 
    const char* name 
 ) :
-   BaseClass( parent, name )
+   BaseClass( app, parent, name )
 {
-   QVBoxLayout* vlayout = new QVBoxLayout( this );
-   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   XX_CHECK( app );
+   uint nbTextWidgets = _app->getNbFiles();
 
-   _central = new XxCentralText( this, app, this );
-   hlayout->addWidget( _central );
+   // Texts widget (texts).
+   //
 
-   _vscroll = new QScrollBar( this );
-   _vscroll->setFixedWidth( 20 );
-   hlayout->addWidget( _vscroll );
+   QVBoxLayout* textAndSbLayout =
+      new QVBoxLayout( this, 0, -1, "textAndSbLayout" );
+   QHBoxLayout* textLayout =
+      new QHBoxLayout( textAndSbLayout, -1, "textLayout" );
 
-   _hscroll = new QScrollBar( Qt::Horizontal, this );
+   QFont smaller = font();
+   smaller.setPointSize( smaller.pointSize() - 2 );
+
+   for ( uint ii = 0; ii < nbTextWidgets; ++ii ) { 
+      if ( ii == 1 ) {
+         _vscroll[0] = new QScrollBar( this, "vscroll[0]" );
+         _vscroll[0]->setFixedWidth( 20 );
+         textLayout->addWidget( _vscroll[0] );
+         connect( _vscroll[0], SIGNAL(valueChanged(int)),
+                  this, SLOT(verticalScroll(int)) );
+      }
+      if ( ii == 2 ) {
+         _vscroll[1] = new QScrollBar( this, "vscroll[1]" );
+         _vscroll[1]->setFixedWidth( 20 );
+         textLayout->addWidget( _vscroll[1] );
+         connect( _vscroll[1], SIGNAL(valueChanged(int)),
+                  this, SLOT(verticalScroll2(int)) );
+      }
+
+      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1, "layout" );
+      //textLayout->setStretchFactor( layout, 1 ); useless to make equal
+
+      // Create filename and line number labels.
+      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1, "fnLayout" );
+      _filenameLabel[ii] = new XxCopyLabel( this );
+      _filenameLabel[ii]->setFont( smaller );
+      _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
+      _filenameLabel[ii]->setMinimumWidth( 1 );
+      _filenameLabel[ii]->setLineWidth( 2 );
+
+      _lineNumberLabel[ii] =
+         new QLabel( "9999", this, "lineNumberLabel" );
+      _lineNumberLabel[ii]->setAlignment( AlignCenter );
+      _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
+      _lineNumberLabel[ii]->setLineWidth( 2 );
+      _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
+      _lineNumberLabel[ii]->setText( "" );
+
+      fnLayout->addWidget( _filenameLabel[ii], 10 );
+      fnLayout->addWidget( _lineNumberLabel[ii], 1 );
+
+      // Create linenumbers widget and text widget.
+      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1, "fnLayout2" );
+      _text[ii] = new XxText( _app, this, ii, this, "text" );
+      _lineNumbers[ii] =
+         new XxLineNumbers( _app, this, ii, this, "lineNumbers" );
+
+      fnLayout2->addWidget( _lineNumbers[ii] );
+      fnLayout2->addWidget( _text[ii] );
+   }
+
+   _hscroll = new QScrollBar( Qt::Horizontal, this, "hscroll" );
    _hscroll->setFixedHeight( 20 );
-
-   vlayout->addWidget( _hscroll );
-
-   connect( _vscroll, SIGNAL(valueChanged(int)),
-            _central, SLOT(verticalScroll(int)) );
    connect( _hscroll, SIGNAL(valueChanged(int)),
-            _central, SLOT(horizontalScroll(int)) );
+            this, SLOT(horizontalScroll(int)) );
 
-   // Track application's scrolling window.
-   connect( app, SIGNAL(cursorChanged(int)),
-            this, SLOT(appCursorChanged(int)) );
-   connect( app, SIGNAL(scrolled(int)), this, SLOT(appScrolled(int)) );
+   textAndSbLayout->addWidget( _hscroll );
+
+   createOnContextHelp();
+
+   // Add some extra accelerators.
+   QAccel* a = new QAccel( this );
+
+   a->connectItem( a->insertItem(Key_Right), this, SLOT(scrollRight()) );
+   a->connectItem( a->insertItem(Key_Left), this, SLOT(scrollLeft()) );
+
+   // Watch cursor changes.
+   connect( app, SIGNAL(cursorChanged(int)), this, SLOT(onCursorChanged(int)) );
 }
 
 //------------------------------------------------------------------------------
 //
-QScrollBar* XxCentralFrame::getHorizontalScrollbar()
+void XxCentralFrame::createOnContextHelp()
 {
-   return _hscroll;
-}
+   QWhatsThis::add( _vscroll[0], XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+   if ( _vscroll[1] != 0 ) {
+      QWhatsThis::add( _vscroll[1],
+                       XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+   }
+   QWhatsThis::add( _hscroll, XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
 
-//------------------------------------------------------------------------------
-//
-QScrollBar* XxCentralFrame::getVerticalScrollbar()
-{
-   return _vscroll;
+   for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
+      QWhatsThis::add(
+         _filenameLabel[ii], XxHelp::getWhatsThisText( XxHelp::FILENAME )
+      );
+      QWhatsThis::add(
+         _lineNumberLabel[ii], XxHelp::getWhatsThisText( XxHelp::LINENO )
+      );
+      QWhatsThis::add(
+         _text[ii], XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW )
+      );
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -110,35 +180,187 @@ QScrollBar* XxCentralFrame::getVerticalScrollbar()
 void XxCentralFrame::update()
 {
    BaseClass::update();
-   _central->update();  // We need this (verified Mon Nov 26 21:12:10 EST 2001),
-                       // otherwise the central view does not update when the
-                       // cursor does not change but the selection changes.
+   int nbFiles = _app->getNbFiles();
+   for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+      _lineNumbers[ii]->update();
+      _text[ii]->update();
+   }
+   updateLineNumberLabels( _app->getCursorLine() );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxCentralFrame::appCursorChanged( int cursorLine )
+QSize XxCentralFrame::computeDisplaySize() const
 {
-   // When cursor changes, try to track it at the center line of the central
-   // view.  Important note: this will try to set as the center line what SHOULD
-   // be the center line if the diffs were all expanded.  Thus the region where
-   // the cursor would show up in the central view will most of the time be
-   // higher than the center, but never above the top of the window.  This is a
-   // good heuristic, since it allows you to see more of the region when
-   // collapsing/expanding (IOW if the central view was really centered that
-   // wouldn't be very good because the top half wouldn't be very useful (you do
-   // need some though, for context).  If you don't understand all this shtuff,
-   // just think that this is why the central view isn't really centered on the
-   // cursor.
-   _central->setCenterLine( cursorLine );
+   uint displayWidth = 0;
+   for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
+      displayWidth =
+         std::max( displayWidth, uint(_text[ii]->contentsRect().width()) );
+   }
+
+   uint displayHeight = _text[0]->contentsRect().height();
+
+   return QSize( displayWidth, displayHeight );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxCentralFrame::appScrolled( int /*topLine*/ )
+uint XxCentralFrame::computeTextLength() const
 {
-   // Use this to track the top line of the application.
-   // _central->setTopLine( topLine );
+   const XxDiffs* diffs = _app->getDiffs();
+   if ( diffs != 0 ) {
+      return diffs->getNbLines();
+   }
+   return 0;
+}
+
+//------------------------------------------------------------------------------
+//
+uint XxCentralFrame::getNbDisplayLines() const
+{
+   return _text[0]->computeDisplayLines();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::showFilenames( const bool show )
+{
+   for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) { 
+      if ( show ) {
+         _filenameLabel[ii]->show();
+         _lineNumberLabel[ii]->show();
+      }
+      else {
+         _filenameLabel[ii]->hide();
+         _lineNumberLabel[ii]->hide();
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::setFilename( XxFln no, const QString& fn )
+{
+   XX_CHECK( uint(no) < _app->getNbFiles() );
+   _filenameLabel[ int(no) ]->setText( fn );
+}
+
+//------------------------------------------------------------------------------
+//
+int XxCentralFrame::getOneWidth() const
+{
+   return _text[0]->width() + _vscroll[0]->width();
+}
+
+//------------------------------------------------------------------------------
+//
+int XxCentralFrame::getOneHeight() const
+{
+   return _text[0]->height() + _hscroll->height();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::updateLineNumberLabels( int cursorLine )
+{
+   XxDiffs* diffs = _app->getDiffs();
+   if ( diffs != 0 ) {
+      int nbFiles = _app->getNbFiles();
+      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+         bool aempty;
+
+         XxFln fline = diffs->getBufferLine( ii, cursorLine, aempty );
+         _lineNumberLabel[ii]->setNum( fline );
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::adjustLineNumbers( bool show, const QFont& fontText )
+{
+   int nbFiles = _app->getNbFiles();
+   if ( show ) {
+      // Compute the maximum line numbers width.  This has to be the same for
+      // all the texts, in order to have a consistent horizontal scrollbar.
+      uint lnw = 0;
+      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+         XxBuffer* file = _app->getBuffer( ii );
+         XX_ASSERT( file );
+         lnw = std::max(
+            lnw,
+            file->computeLineNumbersWidth( fontText ) +
+            ( _lineNumbers[ii]->width() -
+              _lineNumbers[ii]->contentsRect().width() + 2 ) );
+         
+      }
+      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+         _lineNumbers[ii]->setFixedWidth( lnw );
+         _lineNumbers[ii]->show();
+      }
+   }
+   else {
+      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+         _lineNumbers[ii]->hide();
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::onCursorChanged( int cursorLine )
+{
+   // Scroll to make sure that the display always includes the cursor line.
+   if ( cursorLine < getTopLine() ) {
+      setTopLine( cursorLine );
+   }
+   else if ( cursorLine > getBottomLine() ) {
+      setBottomLine( cursorLine );
+   }
+}
+
+// //------------------------------------------------------------------------------
+// //
+// void XxCentralFrame::horizontalScroll( int /*value*/ )
+// {
+//    _app->updateWidgets();
+// }
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::verticalScroll( int value )
+{
+   // Make sure that the app's cursor is always within our boundaries.
+   _app->adjustCursor( getTopLine(), getBottomLine() );
+
+   BaseClass::verticalScroll( value );
+//    _app->updateWidgets();
+//    if ( _vscroll[1] != 0 ) {
+//       // Will only change if different.
+//       _vscroll[1]->setValue( value );
+//    }
+}
+
+// //------------------------------------------------------------------------------
+// //
+// void XxCentralFrame::verticalScroll2( int value )
+// {
+//    _vscroll[0]->setValue( value );
+//    verticalScroll( value );
+// }
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::scrollRight()
+{
+   _hscroll->setValue( _hscroll->value() + _hscroll->lineStep() * 10 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxCentralFrame::scrollLeft()
+{
+   _hscroll->setValue( _hscroll->value() - _hscroll->lineStep() * 10 );
 }
 
 XX_NAMESPACE_END
