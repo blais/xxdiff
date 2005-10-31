@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: builderDirs2.cpp 256 2001-10-08 02:29:13Z blais $
+ * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,6 +34,7 @@
 #include <qstringlist.h>
 #include <qtextstream.h>
 
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -79,7 +80,8 @@ char* typeString[5] = {
  * CLASS XxParseDiffError
  *============================================================================*/
 
-class XxParseDiffError : public std::exception {
+class XxParseDiffError : public XxError,
+                         public std::runtime_error {
 
 public:
 
@@ -87,22 +89,9 @@ public:
 
    // Constructor with state.
    XxParseDiffError(
-      const char* buf,
-      const char* file, 
-      int         lineno
+      XX_EXC_PARAMS_DECL(file,line),
+      const char* buf
    );
-
-   // Destructor.
-   virtual ~XxParseDiffError() XX_THROW_NOTHING;
-
-   // See base class.
-   virtual const char* what() const XX_THROW_NOTHING;
-
-private:
-
-   /*----- data members -----*/
-
-   QString _msg;
 
 };
 
@@ -113,27 +102,15 @@ private:
 //------------------------------------------------------------------------------
 //
 XxParseDiffError::XxParseDiffError(
-   const char* buf,
-   const char* file, 
-   int         lineno
-)
+   XX_EXC_PARAMS_DECL(file,line),
+   const char* buf
+) :
+   XxError( file, line ),
+   std::runtime_error( "Parse diff output error." )
 {
-   QTextOStream oss( &_msg );
+   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
    oss << "Error parsing diff output: " << endl
-       << buf << endl
-       << "File: " << file << "Line: " << lineno << endl;
-}
-
-//------------------------------------------------------------------------------
-//
-XxParseDiffError::~XxParseDiffError() XX_THROW_NOTHING
-{}
-
-//------------------------------------------------------------------------------
-//
-const char* XxParseDiffError::what() const XX_THROW_NOTHING
-{
-   return _msg.latin1();
+       << buf << endl;
 }
 
 /*==============================================================================
@@ -159,7 +136,7 @@ bool parseDiffLine(
       bufPtr += 8;
       const char* colonPtr = ::strstr( bufPtr, ": " );
       if ( colonPtr == 0 ) {
-         throw XxParseDiffError( buf, XX_EXC_PARAMS );
+         throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
 
       //int len = colonPtr - bufPtr;
@@ -175,7 +152,7 @@ bool parseDiffLine(
          onlyDir = cmp1 > cmp2 ? 0 : 1;
       }
       else if ( cmp1 != 0 && cmp2 != 0 ) {
-         throw XxParseDiffError( buf, XX_EXC_PARAMS );
+         throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
       else {
          onlyDir = cmp1 == 0 ? 0 : 1;
@@ -209,7 +186,7 @@ bool parseDiffLine(
       bufPtr += 6;
       const char* andPtr = ::strstr( bufPtr, " and " );
       if ( andPtr == 0 ) {
-         throw XxParseDiffError( buf, XX_EXC_PARAMS );
+         throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
       const char* filenamePtr = bufPtr + len1;
       if ( *filenamePtr == '/' ) {
@@ -226,7 +203,7 @@ bool parseDiffLine(
          type = IDENTICAL;
       }
       else {
-         throw XxParseDiffError( buf, XX_EXC_PARAMS );
+         throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
       error = false;
    }
@@ -234,7 +211,7 @@ bool parseDiffLine(
       bufPtr += 23;
       const char* andPtr = ::strstr( bufPtr, " and " );
       if ( andPtr == 0 ) {
-         throw XxParseDiffError( buf, XX_EXC_PARAMS );
+         throw XxParseDiffError( XX_EXC_PARAMS, buf );
       }
       const char* filenamePtr = bufPtr + len1;
       if ( *filenamePtr == '/' ) {

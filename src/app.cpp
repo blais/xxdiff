@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: app.cpp 257 2001-10-08 04:28:33Z blais $
+ * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -45,7 +45,6 @@
 #include <optionsDialog.h>
 #include <searchDialog.h>
 #include <markersFileDialog.h>
-#include <stringResParser.h>
 #include <rcfileParser.h>
 
 #include <getopt.h>
@@ -77,6 +76,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <sstream> // FIXME for rcfileParser only. move to QTextIStream
 
 #include <stdlib.h>
 #include <fcntl.h>
@@ -453,9 +453,9 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
 
 #ifdef DONT_SUPPORT_DIRECTORY_DIFFS
    if ( _filesAreDirectories == true ) {
-      std::cerr << "Directory diffs detected, not yet supported." << std::endl;
       // Directory diffs not yet supported.
-      throw XxUsageError( XX_EXC_PARAMS );
+      throw XxUsageError( XX_EXC_PARAMS, 
+                          "Directory diffs detected, not yet supported." );
    }
 #endif
 
@@ -1750,9 +1750,10 @@ bool XxApp::processDiff()
    }
    else {
       if ( _nbFiles != 2 ) {
-         std::cerr << "Directory diffs can only be performed with two files."
-                   << std::ends;
-         throw XxUsageError( XX_EXC_PARAMS );
+         throw XxUsageError(
+            XX_EXC_PARAMS,
+            "Directory diffs can only be performed with two files."
+         );
       }
 
       XxBuilderDirs2 builder(
@@ -1890,10 +1891,10 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
               
       switch ( c ) {
          case 'h':
-            throw XxUsageError( XX_EXC_PARAMS, true );
+            throw XxUsageError( XX_EXC_PARAMS, QString::null, true );
 
          case 'v':
-            throw XxUsageError( XX_EXC_PARAMS, true, true );
+            throw XxUsageError( XX_EXC_PARAMS, QString::null, true, true );
 
          case 'n':
             _useRcfile = false;
@@ -1907,28 +1908,35 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
             break;
 
          case 'D': {
-            if ( _stringResParser == 0 ) {
-               _stringResParser = new XxStringResParser; 
+            QByteArray str;
+            {
+               QTextOStream oss( str );
+               oss << XxResources::getResourceName( XxResources::EXIT_ON_SAME )
+                   << ": true" << endl;
             }
-            QString res( 
-               XxResources::getResourceName( XxResources::EXIT_ON_SAME )
-            );
-            res.append( ":true" );
+            QTextIStream iss( str );
 
-            _stringResParser->addString( res );
+            if ( _stringResParser == 0 ) {
+               _stringResParser = new XxRcfileParser; 
+            }
+            _stringResParser->parse( iss );
          } break;
 
          case 'r': {
-            if ( _stringResParser == 0 ) {
-               _stringResParser = new XxStringResParser; 
+            QByteArray str;
+            {
+               QTextOStream oss( str );
+               oss << XxResources::getResourceName( 
+                  XxResources::DIRDIFF_RECURSIVE 
+               ) << ": true" << endl;
             }
-            QString res( 
-               XxResources::getResourceName( XxResources::DIRDIFF_RECURSIVE ) 
-            );
-            res.append( ":true" );
-            _stringResParser->addString( res );
-         } break;
+            QTextIStream iss( str );
 
+            if ( _stringResParser == 0 ) {
+               _stringResParser = new XxRcfileParser; 
+            }
+            _stringResParser->parse( iss );
+         } break;
 
          case 'w':
          case 'b':
@@ -1982,16 +1990,19 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
             _stdinFilename = optarg;
             break;
 
-         case 'R':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
+         case 'R': {
+            QByteArray str;
+            {
+               QTextOStream oss( str );
+               oss << optarg << endl << endl << flush;
             }
+            QTextIStream iss( str );
+
             if ( _stringResParser == 0 ) {
-               _stringResParser = new XxStringResParser; 
+               _stringResParser = new XxRcfileParser; 
             }
-            // Keep it for later.
-            _stringResParser->addString( optarg );
-            break;
+            _stringResParser->parse( iss );
+         } break;
 
          case 0:
             throw XxInternalError( XX_EXC_PARAMS );
@@ -2016,8 +2027,17 @@ void XxApp::buildResources()
 {
    // Note: the UI hasn't been built at this point.
    if ( _useRcfile == true ) {
-      XxRcfileParser rcfileParser;
-      _resources->parse( rcfileParser );
+      try {
+         QString rcfilename = XxRcfileParser::getRcFilename();
+         XxRcfileParser rcfileParser;
+         rcfileParser.parse( rcfilename );
+         _resources->parse( rcfileParser );
+      }
+      catch ( const XxIoError& ioerr ) {
+         QMessageBox::critical( 
+            _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
+         );
+      }
    }
 }
 

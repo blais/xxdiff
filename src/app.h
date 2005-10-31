@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 247 2001-10-04 01:01:13Z blais $
- * $Date: 2001-10-03 21:01:13 -0400 (Wed, 03 Oct 2001) $
+ * $Id: app.h 256 2001-10-08 02:29:13Z blais $
+ * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -37,6 +37,10 @@
 
 #ifndef INCL_XXDIFF_RESOURCES
 #include <resources.h>
+#endif
+
+#ifndef INCL_XXDIFF_RCFILEPARSER
+#include <rcfileParser.h>
 #endif
 
 #ifndef INCL_QT_QAPPLICATION
@@ -464,7 +468,7 @@ private:
    int                     _returnValue;
    QString                 _userFilenames[3];
    QString                 _stdinFilename;
-   XxStringResParser*      _stringResParser;
+   XxRcfileParser*         _stringResParser;
    bool                    _useRcfile;
    QString                 _extraDiffArgs;
    bool                    _sepDiff;

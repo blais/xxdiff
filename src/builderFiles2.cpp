@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: builderFiles2.cpp 256 2001-10-08 02:29:13Z blais $
+ * $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,7 @@
 #include <qstring.h>
 #include <qtextstream.h>
 
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -123,21 +124,22 @@ bool parseDiffLine(
    return error;
 }
 
+#if 0 // Not needed for now.
+
 /*==============================================================================
  * CLASS XxParseDiffError
  *============================================================================*/
 
-class XxParseDiffError : public std::exception {
+class XxParseDiffError : public XxError,
+                         public std::runtime_error {
 
 public:
 
    /*----- member functions -----*/
 
-   // Default constructor.
-   XxParseDiffError();
-
    // Constructor with state.
    XxParseDiffError(
+      XX_EXC_PARAMS_DECL(file,line),
       const XxFln fline1, 
       const XxFln fline2, 
       const XxFln f1n1, 
@@ -146,60 +148,28 @@ public:
       const XxFln f2n2 
    );
 
-   // Destructor.
-   virtual ~XxParseDiffError() XX_THROW_NOTHING;
-
-   // See base class.
-   virtual const char* what() const XX_THROW_NOTHING;
-
-private:
-
-   /*----- data members -----*/
-
-   QString _msg;
-
 };
-
-/*==============================================================================
- * CLASS XxParseDiffError
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-XxParseDiffError::XxParseDiffError()
-{
-   QTextOStream oss( &_msg );
-   oss << "Error parsing diff output." << endl;
-}
 
 //------------------------------------------------------------------------------
 //
 XxParseDiffError::XxParseDiffError(
+   XX_EXC_PARAMS_DECL(file,line),
    const XxFln fline1, 
    const XxFln fline2, 
    const XxFln f1n1, 
    const XxFln f1n2, 
    const XxFln f2n1, 
    const XxFln f2n2 
-)
+) :
+   XxError( file, line ),
+   std::runtime_error( "Parse diff output error." )
 {
-   QTextOStream oss( &_msg );
+   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
    oss << "Error parsing diff output: file1:" 
        << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: " 
        << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
 }
-
-//------------------------------------------------------------------------------
-//
-XxParseDiffError::~XxParseDiffError() XX_THROW_NOTHING
-{}
-
-//------------------------------------------------------------------------------
-//
-const char* XxParseDiffError::what() const XX_THROW_NOTHING
-{
-   return _msg.latin1();
-}
+#endif
 
 }
 

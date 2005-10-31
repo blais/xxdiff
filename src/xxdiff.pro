@@ -1,6 +1,6 @@
 #*****************************************************************************\
-# $Id: xxdiff.pro 247 2001-10-04 01:01:13Z blais $
-# $Date: 2001-10-03 21:01:13 -0400 (Wed, 03 Oct 2001) $
+# $Id: xxdiff.pro 256 2001-10-08 02:29:13Z blais $
+# $Date: 2001-10-07 22:29:13 -0400 (Sun, 07 Oct 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -111,7 +111,6 @@ HEADERS = \
 	main.h \
 	man.h \
 	overview.h \
-	stringResParser.h \
 	rcfileParser.h \
 	resources.h \
 	resources.inline.h \
@@ -143,7 +142,6 @@ SOURCES = \
 	line.cpp \
 	buffer.cpp \
 	resources.cpp \
-	stringResParser.cpp \
 	rcfileParser.cpp \
 	markersFileDialog.cpp \
 	diffutils.cpp \

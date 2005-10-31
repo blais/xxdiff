@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: exceptions.cpp 257 2001-10-08 04:28:33Z blais $
+ * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -78,10 +78,11 @@ const QString& XxError::getMsg() const XX_THROW_NOTHING
 //
 XxUsageError::XxUsageError( 
    XX_EXC_PARAMS_DECL(file,line),
-   bool benine,
-   bool version
+   const QString& msg = QString::null,
+   bool           benine,
+   bool           version
 ) :
-   XxError( file, line ),
+   XxError( file, line, msg ),
    std::domain_error( "Usage error." ),
    _benine( benine )
 {

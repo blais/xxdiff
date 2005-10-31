@@ -2,13 +2,22 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 254 2001-10-06 19:19:36Z blais $
+# $Id: CHANGES 256 2001-10-08 02:29:13Z blais $
 #
 
 Current development version:
 
   Current tasks:
     - port to windoze using mingw32 and publish executable
+    - rename XxRcfileParser to XxResourceParser
+    - rewrite resource parser all with lex/yacc
+    - resource defaults are just another instance of the resources
+    - fix 'r' and 'D' options back
+    - remove _stringResParser from XxApp
+
+
+   * Removed the XxStringResParser
+   * Cleaned up some of the privately declared exceptions.
 
 
 ------------------------------

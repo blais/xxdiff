@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.h 250 2001-10-04 19:56:59Z blais $
- * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
+ * $Id: exceptions.h 257 2001-10-08 04:28:33Z blais $
+ * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -108,8 +108,9 @@ public:
    // version messages instead of the usage.
    XxUsageError( 
       XX_EXC_PARAMS_DECL(file,line),
-      bool benine = false,
-      bool version = false 
+      const QString& msg = QString::null,
+      bool           benine = false,
+      bool           version = false 
    );
 
    // Returns true if this is a benine exception.

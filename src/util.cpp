@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 252 2001-10-05 00:33:42Z blais $
- * $Date: 2001-10-04 20:33:42 -0400 (Thu, 04 Oct 2001) $
+ * $Id: util.cpp 257 2001-10-08 04:28:33Z blais $
+ * $Date: 2001-10-08 00:28:33 -0400 (Mon, 08 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -69,6 +69,7 @@ bool installSigChldHandler(
 {
 // Disabled crud that doesn't work (it works only the first time, the second
 // time around the handler is called immediately upon setting up the handler).
+   (void)sigChldHandler;
 #if 0 
    XX_ASSERT( sigChldHandler != 0 );
 
