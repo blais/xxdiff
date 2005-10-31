@@ -22,7 +22,7 @@ cd .. && mkdir $TMP && cd $TMP
 
 echo "Exporting source from CVS"
 CVS_RSH=ssh
-cvs -z3 -d:ext:bor.iro.umontreal.ca:/u/blais/cvsroot \
+cvs -z3 -d:ext:blais@vor.iro.umontreal.ca:/u/blais/cvsroot \
    export -d xxdiff-$VERSION -r $RTAG xxdiff
 
 if [ $? = 0 ]; then 

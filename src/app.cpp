@@ -362,7 +362,8 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
-         if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+         if ( !_filesAreDirectories &&
+              _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
             _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
          }
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
@@ -1811,9 +1812,11 @@ bool XxApp::processDiff()
    //
    // Compute ignore-display algorithms on top of the diff process.
    //
-   // FIXME make toggleable, add resource
    if ( _diffs.get() != 0 ) {
-      _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+      if ( !_filesAreDirectories &&
+           _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+         _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
+      }
    }
 
    //
@@ -2310,7 +2313,8 @@ void XxApp::openFile( const XxFno no )
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
-         if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+         if ( !_filesAreDirectories &&
+              _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
             _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
          }
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
@@ -2414,7 +2418,8 @@ void XxApp::onRedoDiff()
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
-         if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+         if ( !_filesAreDirectories &&
+              _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
             _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
          }
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
@@ -3604,7 +3609,8 @@ void XxApp::toggleIgnorePerHunkWs()
    _resources->toggleBoolOpt( BOOL_IGNORE_PERHUNK_WS );
 
    if ( _diffs.get() != 0 ) {
-      if ( _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
+      if ( !_filesAreDirectories &&
+           _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS ) ) {
          _diffs->computeIgnoreDisplay( _nbFiles, getBuffers() );
       }
       updateWidgets();

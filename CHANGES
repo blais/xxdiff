@@ -2,10 +2,21 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 588 2002-08-06 19:18:54Z blais $
+# $Id: CHANGES 595 2002-08-07 19:51:21Z blais $
 #
 
-Version 2.7: (major features)
+Current development release
+------------------------------
+
+Version 2.7.1: (minor bug fixes)
+------------------------------
+
+   * Fixed bug with rendering per-hunk ignore whitespace with directory diffs.
+
+
+
+
+Version 2.7: (minor features)
 ------------------------------
 
 This release introduces a very useful feature for merge reviewers: diff hunks
