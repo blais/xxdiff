@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 48 2000-10-03 04:43:36Z  $
- * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
+ * $Id: optionsDialog.cpp 56 2000-12-25 20:15:47Z  $
+ * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -373,11 +373,20 @@ void XxOptionsDialog::onApply()
    //---------------------------------------------------------------------------
    // Display
 
-   resources->setBoolOpt( XxResources::HORIZONTAL_DIFFS, 
-                          _checkboxHorizontalDiffs->isChecked() );
+   bool reinitHorizontalDiffs = false;
+   if ( resources->getBoolOpt( XxResources::HORIZONTAL_DIFFS ) !=
+        _checkboxHorizontalDiffs->isChecked() ) {
+      resources->setBoolOpt( XxResources::HORIZONTAL_DIFFS, 
+                             _checkboxHorizontalDiffs->isChecked() );
+      reinitHorizontalDiffs = true;
+   }
 
-   resources->setBoolOpt( XxResources::IGNORE_HORIZONTAL_WS, 
-                          _checkboxIgnoreHorizontalWhitespace->isChecked() );
+   if ( resources->getBoolOpt( XxResources::IGNORE_HORIZONTAL_WS ) !=
+        _checkboxIgnoreHorizontalWhitespace->isChecked() ) {
+      resources->setBoolOpt( XxResources::IGNORE_HORIZONTAL_WS, 
+                             _checkboxIgnoreHorizontalWhitespace->isChecked() );
+      reinitHorizontalDiffs = true;
+   }
 
    resources->setBoolOpt( XxResources::HIDE_CR, 
                           _checkboxHideCarriageReturns->isChecked() );
@@ -409,6 +418,12 @@ void XxOptionsDialog::onApply()
    //---------------------------------------------------------------------------
 
    _app->synchronizeUI();
+   
+   if ( reinitHorizontalDiffs == true ) {
+      XxDiffs* diffs = _app->getDiffs();
+      diffs->initializeHorizontalDiffs( _app->getFiles(), true );
+   }
+
    if ( redoDiff == true ) {
       _app->onRedoDiff();
    }

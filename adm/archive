@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Package for source release or nightly transfer.
-VERSION=`grep AM_INIT_AUTOMAKE configure.in | sed -e 's/[^0-9]*\([.0-9]*\).*/\1/'`
+VERSION=`tools/get_version`
 echo "Making source release version $VERSION";
 
 echo "Making clean"

@@ -1,7 +1,7 @@
 /******************************************************************************\
- * $Id: diffs.cpp 48 2000-10-03 04:43:36Z  $
+ * $Id: diffs.cpp 56 2000-12-25 20:15:47Z  $
 
- * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
+ * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1312,7 +1312,7 @@ bool XxDiffs::splitSwapJoin( uint lineNo, uint nbFiles )
 //
 void XxDiffs::initializeHorizontalDiffs(
    const std::auto_ptr<XxBuffer>* files,
-   const bool                   force
+   const bool                     force
 )
 {
    XX_ASSERT( files[0].get() != 0 );

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 48 2000-10-03 04:43:36Z  $
- * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
+ * $Id: app.cpp 56 2000-12-25 20:15:47Z  $
+ * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -381,7 +381,7 @@ QSocketNotifier* XxApp::_socketNotifier = 0;
 
 //------------------------------------------------------------------------------
 //
-XxApp::XxApp( int argc, char** argv ) :
+XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    QApplication( argc, argv ),
    _isUICreated( false ),
    _diffErrorsMsgBox( 0 ),
@@ -399,12 +399,14 @@ XxApp::XxApp( int argc, char** argv ) :
 {
    _vscroll[0] = _vscroll[1] = 0;
 
+   if ( forceStyle == true ) {
 #if QT_VERSION >= 220
-   _style = new QSGIStyle;
+      _style = new QSGIStyle;
 #else
-   _style = new QMotifStyle;
+      _style = new QMotifStyle;
 #endif
-   setStyle( _style );
+      setStyle( _style );
+   }
 
    // Create resources object.
    _resources = XxResources::getInstance();
@@ -422,17 +424,6 @@ XxApp::XxApp( int argc, char** argv ) :
    // Parse the resources given in the command line.
    parseCommandLineResources();
    
-   // Add extra diff arguments.
-   XX_ASSERT( _resources != 0 );
-   XxResources::Resource cmdResId = _nbFiles == 2 ? 
-      XxResources::COMMAND_DIFF_FILES_2 : 
-      XxResources::COMMAND_DIFF_FILES_3;
-
-   std::string cmd = _resources->getCommand( cmdResId );
-   XxOptionsDialog::addToCommand( cmd, _extraDiffArgs.c_str() );
-   _resources->setCommand( cmdResId, cmd.c_str() );
-
-
 #if QT_VERSION < 220
    setFont( _resources->getAppFont(), true );
 #endif
@@ -442,17 +433,17 @@ XxApp::XxApp( int argc, char** argv ) :
    std::string filenames[3];
    std::string displayFilenames[3];
    bool isTemporary[3] = { false, false, false };
-   _nbFiles = readFileNames( 
+   _nbFiles = readFileNames(
       argc, argv, filenames, displayFilenames, isTemporary, _filesAreDirectories
    );
    _nbTextWidgets = _nbFiles;
-   if ( _nbTextWidgets == 0 ) { // Create the two widgets anyway.
-      _nbTextWidgets = 2;
+   if ( _nbTextWidgets == 0 ) {
+      throw new XxUsageError;
    }
 
 #ifdef DONT_SUPPORT_DIRECTORY_DIFFS
    if ( _filesAreDirectories == true ) {
-      std::cout << "Directory diffs detected, not yet supported." << std::endl;
+      std::cerr << "Directory diffs detected, not yet supported." << std::endl;
       // Directory diffs not yet supported.
       throw new XxUsageError;
    }
@@ -462,6 +453,16 @@ XxApp::XxApp( int argc, char** argv ) :
    if ( _nbFiles != 0 && _nbFiles != 2 && _nbFiles != 3 ) {
       throw new XxUsageError;
    }
+
+   // Add extra diff arguments.
+   XX_ASSERT( _resources != 0 );
+   XxResources::Resource cmdResId = _nbFiles == 2 ? 
+      XxResources::COMMAND_DIFF_FILES_2 : 
+      XxResources::COMMAND_DIFF_FILES_3;
+
+   std::string cmd = _resources->getCommand( cmdResId );
+   XxOptionsDialog::addToCommand( cmd, _extraDiffArgs.c_str() );
+   _resources->setCommand( cmdResId, cmd.c_str() );
 
    // Create the interface.
    createUI( _nbTextWidgets );
@@ -1847,10 +1848,11 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
          case 'w':
          case 'b':
          case 'i':
-            _extraDiffArgs.append( " -" );
-            char optionString[2];
-            optionString[0] = c;
-            optionString[1] = 0;
+            char optionString[4];
+            optionString[0] = ' ';
+            optionString[1] = '-';
+            optionString[2] = c;
+            optionString[3] = 0;
             _extraDiffArgs.append( optionString );
             break;
 
@@ -3349,7 +3351,7 @@ void XxApp::setFileDiffOptions( XxResources::Resource option )
    XxResources::Resource cmdResId = _nbFiles == 2 ? 
       XxResources::COMMAND_DIFF_FILES_2 : 
       XxResources::COMMAND_DIFF_FILES_3;
-   _resources->setCommandOption( cmdResId, option, true );
+   _resources->toggleCommandOption( cmdResId, option );
    
    synchronizeUI();
    if ( _optionsDialog != 0 ) {

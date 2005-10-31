@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: main.cpp 48 2000-10-03 04:43:36Z  $
- * $Date: 2000-10-03 00:43:36 -0400 (Tue, 03 Oct 2000) $
+ * $Id: main.cpp 56 2000-12-25 20:15:47Z  $
+ * $Date: 2000-12-25 15:15:47 -0500 (Mon, 25 Dec 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -79,7 +79,16 @@ int main( int argc, char** argv, char** envp )
 
    int retval = 2; // errors.
    try {
-      XxApp app( argc, argv );
+      // Search original arguments to see if the style has been explicitly
+      // forced.
+      int aa;
+      for ( aa = 0; aa < argc; ++aa ) {
+         if ( ::strncmp( argv[aa], "-style", 6 ) == 0 ) {
+            break;
+         }
+      }
+
+      XxApp app( argc, argv, (aa == argc) );
       app.exec();
       retval = app.getReturnValue();
    }

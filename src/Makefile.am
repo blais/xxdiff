@@ -14,11 +14,11 @@ SUFFIXES += .ui
 UIC=$(QTDIR)/bin/uic
 
 UIDESIGNER_FILES_IMPL = \
-	optionsDialogBase.ui \
-	searchDialogBase.ui
+	 optionsDialogBase.ui \
+	 searchDialogBase.ui
 
 UIDESIGNER_FILES_NOIMPL = \
-	markersWidgetBase.ui
+	 markersWidgetBase.ui
 
 UIDESIGNER_FILES = $(UIDESIGNER_FILES_IMPL) $(UIDESIGNER_FILES_NOIMPL)
 
@@ -80,8 +80,15 @@ xxdiff_SOURCES = \
 	markersFileDialog.cpp \
 	getopt.c \
 	getopt1.c \
-	$(UIDESIGNER_GENSOURCES) \
-	$(UIDESIGNER_MYSOURCES) 
+	optionsDialogBase.cpp \
+	optionsDialog.cpp \
+	searchDialogBase.cpp \
+	searchDialog.cpp \
+	markersWidgetBase.cpp
+
+# autoconf is giving me pain with this stuff, f**k that.
+#	 $(UIDESIGNER_GENSOURCES) 
+#	 $(UIDESIGNER_MYSOURCES) 
 
 
 # This determines which files go in the distribution.
@@ -118,13 +125,20 @@ noinst_HEADERS = \
 	xrmParser.h \
 	markersFileDialog.h \
 	getopt.h \
-	$(UIDESIGNER_GENHEADERS) \
-	$(UIDESIGNER_MYHEADERS) 
+	optionsDialogBase.h \
+	optionsDialog.h \
+	searchDialogBase.h \
+	searchDialog.h \
+	markersWidgetBase.h
+
+# autoconf is giving me pain with this stuff, f**k that.
+#	 $(UIDESIGNER_GENHEADERS) \
+#	 $(UIDESIGNER_MYHEADERS) 
 
 
-BUILT_SOURCES =	man.h \
-		$(UIDESIGNER_GENHEADERS) \
-		$(UIDESIGNER_GENSOURCES)
+#BUILT_SOURCES =	man.h \
+#		  $(UIDESIGNER_GENHEADERS) \
+#		  $(UIDESIGNER_GENSOURCES)
 
 
 # FIXME automoc fails when I try to optionally not compile the parser files.

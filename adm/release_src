@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Package for source release for nightly transfer.
-VERSION=`grep AM_INIT_AUTOMAKE configure.in | sed -e 's/[^0-9]*\([.0-9]*\).*/\1/'`
+VERSION=`tools/get_version`
 echo "Making source distribution";
 
 # Normally this is what should be used, but this fucks up what the automoc
@@ -18,6 +18,6 @@ bn=`basename $PWD`
 dn=`dirname $PWD`
 tarfilename="xxdiff-$VERSION.src.tar.gz"
 cd $dn
-cp $bn xxdiff-$VERSION
+cp -R $bn xxdiff-$VERSION
 rm -f $tarfilename
 tar zcvf $tarfilename xxdiff-$VERSION

@@ -1,6 +1,21 @@
 CHANGES for xxdiff
 ------------------------------
 
+
+Version 1.8.3:
+
+   * Disable opening with no files.
+   * add URL to web page in about box.
+   * Changed Makefile not to use buggy automatic filenames (broken with automoc)
+   * Starting xxdiff without filenames is not possible anymore.
+   * Fixed -w and -b cmdline switches
+   * Fixed toggle options bug from menus
+   * Fixed options dialog bug.
+
+Version 1.8.2:
+
+   * release and ?
+
 Version 1.8.1:
 
    * Started using CVS and ChangeLog actively, so releases now should contain
@@ -634,6 +649,30 @@ Version 1.0:
 
 Wishlist/ToDo list:
 ------------------------------
+
+ - cut and paste of a single filename should not include the \n
+   (but only when the hunk is not multiline)
+
+ - launching xxdiff dirs with two same directories results in an empty
+   buffer thingy, because diff itself just silently returns.
+
+ - have a progress meter thingy for long processes (e.g. conf conf-dl)
+
+ - ignore horiztonal whitespace option is buggy:
+   two different lines who are different at their beginning, but the end
+   is the same except for some whitespace.
+
+ - toolbar buttons brokne under octane
+ - edit color dialog broken under octane2
+
+ - add "-a" option to xxdiff as well
+ - add "--args" option to xxdiff as well
+ - and add a way to pass in arguments to diff command
+
+
+
+
+
 
   * try to avoid loading Qt library in case of option -D specified, for faster
     startup (hubert)
