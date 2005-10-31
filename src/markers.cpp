@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,7 +164,11 @@ XxMarkersDialog::XxMarkersDialog(
    hlayout->addItem( spacer );
 
    _buttonOk = new QPushButton( this, "_buttonOk" );
+#if (QT_VERSION >= 0x030000)
    _buttonOk->setText( trUtf8( "Ok" ) );
+#else
+   _buttonOk->setText( "Ok" );
+#endif
    _buttonOk->setDefault( TRUE );
    hlayout->addWidget( _buttonOk );
    QSpacerItem* spacer_2 =
@@ -172,7 +176,11 @@ XxMarkersDialog::XxMarkersDialog(
    hlayout->addItem( spacer_2 );
 
    _buttonCancel = new QPushButton( this, "_buttonCancel" );
+#if (QT_VERSION >= 0x030000)
    _buttonCancel->setText( trUtf8( "Cancel" ) );
+#else
+   _buttonCancel->setText( "Cancel" );
+#endif
    hlayout->addWidget( _buttonCancel );
    QSpacerItem* spacer_3 =
       new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );

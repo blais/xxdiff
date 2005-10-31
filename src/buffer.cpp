@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,15 +116,17 @@ XxBuffer::XxBuffer(
 //------------------------------------------------------------------------------
 //
 XxBuffer::XxBuffer( 
-   const QString& filename,
-   const QString& displayFilename,
-   const bool     hideCR,
-   const bool     deleteFile,
-   const char     newlineChar
+   const QString&   filename,
+   const QString&   displayFilename,
+   const QFileInfo& fileInfo,
+   const bool       hideCR,
+   const bool       deleteFile,
+   const char       newlineChar
 ) :
    _newlineChar( newlineChar ),
    _name( filename ),
    _displayName( displayFilename ),
+   _fileInfo( fileInfo ),
    _hiddenCR( hideCR ),
    _temporary( deleteFile ),
    _proxy( false ),
@@ -135,16 +137,15 @@ XxBuffer::XxBuffer(
    // Stat the file.
    if ( !_temporary ) {
 
-      QFileInfo finfo( _name );
-      if ( !finfo.exists() ) {
+      if ( !fileInfo.exists() ) {
          throw XxIoError( XX_EXC_PARAMS );
       }
 
-      if ( finfo.isDir() ) {
+      if ( fileInfo.isDir() ) {
          loadDirectory();
       }
       else {
-         loadFile( finfo );
+         loadFile( fileInfo );
       }
    }
    else {
@@ -157,13 +158,15 @@ XxBuffer::XxBuffer(
 //------------------------------------------------------------------------------
 //
 XxBuffer::XxBuffer(
-   const XxBuffer& orig,
-   const QString&  filename,
-   const QString&  displayFilename
+   const XxBuffer&  orig,
+   const QString&   filename,
+   const QString&   displayFilename,
+   const QFileInfo& fileInfo
 ) :
    _newlineChar( orig._newlineChar ),
    _name( filename ),
    _displayName( displayFilename ),
+   _fileInfo( fileInfo ),
    _hiddenCR( orig._hiddenCR ),
    _temporary( false ),
    _proxy( true ),
@@ -206,6 +209,13 @@ XxBuffer::~XxBuffer()
 void XxBuffer::setDisplayName( const QString& fn )
 {
    _displayName = fn;
+}
+
+//------------------------------------------------------------------------------
+//
+const QFileInfo& XxBuffer::getFileInfo() const
+{
+   return _fileInfo;
 }
 
 //------------------------------------------------------------------------------
@@ -445,6 +455,13 @@ void XxBuffer::reindex( const std::vector<XxFln>& reindexTbl )
       _lengths.push_back( oldLengths[reidx] );
 #endif
    }
+
+   // Add last line
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   _index.push_back( oldLengths[ reindexTbl.back() ] );
+#else
+   _index.push_back( oldIndex[ reindexTbl.back() + 1 ] );
+#endif
 
    _dpyLineNos = reindexTbl;
 }

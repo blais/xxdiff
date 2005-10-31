@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,6 +170,10 @@ QString formatOptionsPlain(
             cch += word.length() + 1;
          }
       }
+      oss << endl;
+
+      // Add an extra line between the options, there are so much that it will
+      // make it clearer.
       oss << endl;
    }
    oss << endl;
@@ -443,30 +447,42 @@ QString XxHelp::getManual()
    int idx = 0;
 
    // Fill in the invocation section.
-   QString vertag( "<version>" );
+   QString vertag( "<version/>" );
    int idxver = srcManual.find( vertag, idx );
    if ( idxver != -1 ) {
       manual += srcManual.mid( idx, idxver );
       manual += getVersion();
       idx = idxver + vertag.length();
    }
+   else {
+      std::cerr << "Warning: cannot find version tag in documentation text" 
+                << std::endl;
+   }
 
    // Fill in the invocation section.
-   QString invtag( "<invocation>" );
+   QString invtag( "<invocation/>" );
    int idxinv = srcManual.find( invtag, idx );
    if ( idxinv != -1 ) {
       manual += srcManual.mid( idx, idxinv - idx );
       manual += getUsage( XxCmdline::OPT_ALL, false );
       idx = idxinv + invtag.length();
    }
+   else {
+      std::cerr << "Warning: cannot find invocation tag in documentation text" 
+                << std::endl;
+   }
 
    // Fill in the resource reference section.
-   QString restag( "<resourceref>" );
+   QString restag( "<resourceref/>" );
    int idxres = srcManual.find( restag, idx );
    if ( idxres != -1 ) {
       manual += srcManual.mid( idx, idxres - idx );
       manual += XxResParser::getResourceRef();
       idx = idxres + restag.length();
+   }
+   else {
+      std::cerr << "Warning: cannot find resourceref tag in documentation text" 
+                << std::endl;
    }
 
    // Add rest of documentation.
@@ -495,8 +511,8 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
    aboutData->addAuthor(
       "Martin Blais",
       "Original author, core developer, and maintainer",
-      "blais@iro.umontreal.ca",
-      "http://www.iro.umontreal.ca/~blais/");
+      "blais@furius.ca",
+      "http://furius.ca");
    aboutData->addAuthor("Trevor Harmon", "KDE port", "trevor@vocaro.com");
    
    QDialog* box = new XxAboutDialog( parent, aboutData );
@@ -511,7 +527,7 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
        << endl
        << xx_description << endl
        << endl
-       << "Author: Martin Blais <blais@iro.umontreal.ca>" << endl
+       << "Author: Martin Blais <blais@furius.ca>" << endl
        << xx_homepage << endl
        << "Version: " << getVersion() << endl;
 
@@ -555,6 +571,14 @@ QString XxHelp::xmlize( const QString& in )
       }
    }
    return out;
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxHelp::getInvocationTxt()
+{
+   // Return invocation section as plain text.
+   return getUsage( XxCmdline::OPT_ALL, true );
 }
 
 XX_NAMESPACE_END

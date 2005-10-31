@@ -1,0 +1,7 @@
+===========
+CVS Support
+===========
+
+Important note:  cvs.py is working well, and being used in other contexts, but I
+haven't had time to implement xxcvs yet.  This xxcvs needs updating.
+

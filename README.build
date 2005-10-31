@@ -1,149 +1,291 @@
-				 xxdiff README
-			 ------------------------------
+====================================
+xxdiff: Build Notes and Instructions
+====================================
 
 xxdiff is a graphical file and directories comparison and merge tool.
 
-Official home page: http://xxdiff.sourceforge.net
-Author: Martin Blais <blais@iro.umontreal.ca>
+Official home page:
+    http://xxdiff.sourceforge.net
+Author:
+    Martin Blais <blais@furius.ca>
 
 Full documentation is available from the Help menu or web site.
+Various integration tools are available under the tools subdirectory
+(CVS, ClearCase, etc.)
+
+Building from source
+====================
+
+Requirements
+------------
+
+- GNU make.  You will need GNU make.  Don't waste your time with other makes,
+  many are known not to work (Sun's, as well as OSF1).
+
+- A C++ compiler with a decent STL (g++-2.96 or more will do).
+
+- flex and bison
+
+- Qt-3.x
+
+- tmake-1.7 or more (old versions, e.g. tmake-1.4, have problems with the
+  INTERFACE keyword and don't generate appropriate rules for building the .ui
+  files). This won't work with qmake.
+
+  tmake can be found at http://www.trolltech.com/download/tmake.html
+
+Compiling
+---------
+
+Compile xxdiff itself with tmake (http://www.trolltech.com).  tmake is
+the old build tool that Qt used to be building with, and we would be
+happy to switch to qmake but we're using features from tmake that are
+not supported in qmake.
+
+Make sure your ``TMAKEPATH`` is properly set to point to the
+architecture specific tmake directory::
+
+   cd xxdiff/src
+   tmake xxdiff.pro > Makefile
+   make
+
+Notes
+~~~~~
+
+* you may have to set your QTDIR manually (e.g. to /usr/lib/qt3)
+
+* you may have to edit CONFIG to include the option 'thread' or not, depending
+  on if you have only the multi-threaded version of qt installed or not
+  (libqt-mt).
+  xxdiff does not specifically need it and can build and run without the
+  multi-threaded version of Qt.  Re-run take after making the change.
 
 
-Building from source:
-------------------------------
+Installation
+------------
 
-#
-# Requirements:
-#
-# - GNU make.  You will need GNU make.  Don't waste your time with other makes,
-#   many are known not to work (Sun's, as well as OSF1).
-#
-# - A C++ compiler with a decent STL (g++-2.96 or more will do).
-#
-# - flex and bison
-#
-# - Qt-3.x
-#
-# - tmake-1.7 or more (old versions, e.g. tmake-1.4, have problems with the
-#   INTERFACE keyword and don't generate appropriate rules for building the .ui
-#   files). This won't work with qmake.
-#
-#   tmake can be found at http://www.trolltech.com/download/tmake.html
-#
+::
+
+    su -
+    install xxdiff/src/xxdiff /usr/X11R6/bin
+
+You can generate HTML documentation with ``xxdiff --help-html`` if you want.
 
 
-#
-# compile xxdiff itself
-#
-# http://www.trolltech.com.  Make sure your TMAKEPATH is properly set to point
-# to the architecture specific tmake directory.
+Building against qt-2.x (e.g. RedHat Advanced Server)
+-----------------------------------------------------
 
-cd xxdiff/src
-tmake xxdiff.pro > Makefile
-make
+As of version 3.0, xxdiff was back ported to compile with qt2 for RedHat AS (and
+I supposed for all people with old version of qt).  A very small amount of minor
+features has been disabled for that to work.  The affected features are:
 
+- qt style (look and feel provided by qt)
+- font name conversions
+- printing the time in the filename title format string
 
-#
-# installation
-#
-su -
-install xxdiff/src/xxdiff /usr/X11R6/bin
+To build it, first copy the files under .../src/qt2 into .../src like this::
 
-# you can generate HTML documentation with 'xxdiff --help-html' if you want.
+   cd xxdiff/src ; cp qt2/* .
 
+Then go about compiling xxdiff the normal way (described above, basically,
+tmake, make).
 
 
-Building from source, under Windows:
-------------------------------
+Building under Windows
+----------------------
 
-This has been done with success by one of my users (suamor @ sourceforge.net).
+This has been done with success by one of my users (suamor at
+sourceforge.net).
 
 Here is what I was advising before his contribution:
 
- - install Cygwin
- - install qt non-commercial version
- - use nmake.exe
- - you'll have to hack the makefile produced by tmake, it's not working.
- - you'll have to add DEFINES += QT_DLL to the compilation options
+- install Cygwin
+- install qt non-commercial version
+- use nmake.exe
+- you'll have to hack the makefile produced by tmake, it's not working.
+- you'll have to add DEFINES += QT_DLL to the compilation options
 
 I think this is how he compiled it:
 
- - try using contrib/xxdiff.pro.windows, and run qmake on it
- - tweak until it works.
+- try using contrib/xxdiff.pro.windows, and run qmake on it
+- tweak until it works.
 
-Please refrain from asking Windows-related questions to me, it's and endless,
-complicated task, and frankly, unless you've already figured out the problems
-I'm not really interested. I don't even have a Windows box to test it on and I
-probably won't have one for a good while (hopefully I'll never have to have
-one). If you want to compile under Windows, you've got to be somewhat of a
-hacker, and then I'm sure you don't need me for that. You're on your
-own. Besides, I wouldn't have the answer anyway. I have already wasted countless
-hours trying to make this work under Windows, and although I was pretty damn
-close, I never quite finished it. Maybe the tools will mature and it will be
-easier one day.
+Please refrain from asking Windows-related questions to me, it's and
+endless, complicated task, and frankly, unless you've already figured
+out the problems I'm not really interested. I don't even have a
+Windows box to test it on and I probably won't have one for a good
+while (hopefully I'll never have to have one). If you want to compile
+under Windows, you've got to be somewhat of a hacker, and then I'm
+sure you don't need me for that. You're on your own. Besides, I
+wouldn't have the answer anyway. I have already wasted countless hours
+trying to make this work under Windows, and although I was pretty damn
+close, I never quite finished it. Maybe the tools will mature and it
+will be easier one day.
 
-However, I will happily include any contributions in the source tree that would
-help others make this happen.
-
-
-
-Packaging:
-------------------------------
-
-   * Source packaging:
-     tools/release_src
-
-   * Simple binary packaging (all platforms):
-     tools/release_bin
-
-   * Redhat Linux packaging:
-     tools/release_i386_rpm
-
-   * Debian Linux packaging:
-     See web page for link to current port.
-
-   * OpenBSD packaging:
-     In the ports tree.
-
-   * SGI packaging:
-     tools/release_mips_tardist
-     # to install the SGI package you'll need fw_qt and it's prerequisites.
-
-     # installing from tardist package.
-     inst -f xxdiff-<version>.mips.tardist
-     > go
+However, I will happily include any contributions in the source tree
+that would help others make this happen.
 
 
+Alexandre Feblot <alexandre.feblot at art.alcatel.fr> writes:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hi, I enjoy (means can't deal without) xxdiff, since I don't work
+anymore on SGI were I loved xdiff.  This week end, I compiled it under
+win XP / Cygwin. This is the way I did it, if you want to add this in
+your README.
+
+Cheers.
+
+Alexandre F.
+
+
+Needs:
+- binary, gcc2 compiled qt-3.0.4 (qt_304_b1.tar.bz2)
+  from http://sourceforge.net/projects/kde-cygwin
+- tmake > 1.7 (www.trolltech.com)
+- gcc-2 (v2.95.3 for me): anyway, xxdiff doesn't compile with gcc 3.3.1
+
+
+Do this:
+- setenv TMAKEPATH /home/alex/tmake-1.11/lib/cygwin-g++
+- setenv QTDIR /home/alex/qt3
+
+- The Qt lib seems to have been compiled without large file option,
+  leading to undefined symbols. -> patch the standard includes just
+  for the compilation time:
+
+  - /usr/include/cygwin/config.h  Put into comment::
+
+      #define __LARGE64_FILES 1
+      #define __CYGWIN_USE_BIG_TYPES__ 1
+
+  - /usr/include/sys/config.h  Put into comment::
+
+      #define __LARGE64_FILES 1
+
+- cd xxdiff-2.9.2/src
+
+- xxdiff.pro patch to be used with tmake 1.11.
+  Put into comment::
+
+      linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+      osf1-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+      (these lines caused tmake syntax errors for me)
+
+- /home/alex/tmake-1.11/bin/tmake xxdiff.pro > Makefile
+
+- Correct the generated makefile:
+
+  - replace gcc2 with gcc-2  in CC definition
+    doesn't compile with gcc 3.3.1)
+  - remove -DQT_THREAD_SUPPORT in CFLAGS and CXXFLAGS definition
+  - replace -lqt-mt with -lqt, and remove -lpthread in LIBS definition
+    (qt_304_b1.tar.bz2 doesn't contain the multithread version of Qt lib)
+
+- make
+
+- add qt-3.dll in the path::
+
+     setenv PATH "$PATH":$QTDIR/bin
+
+* enjoy.
+  and remember to get back the standard includes to their original state.
+
+Note:  xxdiff.pro.windows used with qmake just creates a mess which
+doesn't compile:
+
+ - missing include paths -> undefined functions
+ - no flex and bison compilation handling
+ - ...
+
+
+
+
+
+
+Building under .NET
+-------------------
+
+Adam Zell (zellster) writes:
+
+To build xxdiff with Microsoft Visual Studio .NET, the following
+changes are needed:
+
+1) Copy win32-msvc rules and rename them win32-msvc.net.
+2) Add -EHsc to compiler flags.
+3) Uncomment out /NODEFAULTLIBS ...
+4) Comment out the min, max, and getenv definitions in winfixes/winfixes.h.
+
+The resulting executable will link, but will fail at run-time inside
+of Qt.  If you can make it work, please contact me and I will include
+the necessary fixes.
+
+
+Building under Mac OS X w/ XFree86 port
+---------------------------------------
+
+The relevant part within the makefile is under macx-g++
+
+- Info on the Mac XFree86 port: http://apple.com/macosx/x11/
+
+- Info on the OpenDarwin ports: http://opendarwin.org/projects/darwinports/
+
+
+Packaging
+=========
+
+* Source packaging:
+  adm/release_src
+
+* Simple binary packaging (all platforms):
+  adm/release_bin
+
+* Redhat Linux packaging:
+  adm/release_i386_rpm
+
+* Debian Linux packaging:
+  See web page for link to current port.
+
+* OpenBSD packaging:
+  In the ports tree.
+
+* SGI packaging:
+  adm/release_mips_tardist
+
+  Note: to install the SGI package you'll need fw_qt and it's
+  prerequisites. Installing from tardist package::
+
+    inst -f xxdiff-<version>.mips.tardist
+    > go
 
 
 The author's own release process:
-------------------------------
+---------------------------------
 
-   0) check
-      1a) tmake makefile is in release
-      1b) version number is correct
+0) check
+   1a) tmake makefile is in release
+   1b) version number is correct
 
-   1) apply release tag to cvs files
+1) apply release tag to cvs files
 
-   2) build (see instructions above)
-      2a) run tests in xxdiff/test
+2) build (see instructions above)
+   2a) run tests in xxdiff/test
 
-   3) build packages (see instructions above)
+3) build packages (see instructions above)
 
-   4) distribute
-      - add release to sourceforge project
-      - upload to sourceforge htdocs (secondary download location)
-      - upload to sourceforge web page
-      - upload to rhcontrib.bero.org
+4) distribute
+   - add release to sourceforge project
+   - upload to sourceforge htdocs (secondary download location)
+   - upload to sourceforge web page
+   - upload to rhcontrib.bero.org
 
-   5) announce
-      - sourceforge project release announcement
-      - update web site
-      - freshmeat
-      - rh-contrib (bero)
-      - qt-interest
-      - cervisia ml
-      - wincvs ml
-      - sgi freeware
-      - discreet
-
+5) announce
+   - sourceforge project release announcement
+   - update web site
+   - freshmeat
+   - rh-contrib (bero)
+   - qt-interest
+   - cervisia ml
+   - wincvs ml
+   - sgi freeware
+   - discreet

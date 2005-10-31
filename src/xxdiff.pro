@@ -2,7 +2,7 @@
 #*****************************************************************************\
 # $RCSfile$
 #
-# Copyright (C) 2001-2002  Martin Blais <blais@iro.umontreal.ca>
+# Copyright (C) 2001-2003  Martin Blais <blais@furius.ca>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
 #XX_VERSION=2.9.1-devel
-XX_VERSION=2.9.2
+XX_VERSION=3.0
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
@@ -65,7 +65,6 @@ win32-msvc:INCLUDEPATH += winfixes
 #
 
 irix-n32:TMAKE_CXXFLAGS += -woff 1375,1424,3201,1209,1110 -LANG:std
-irix-n32:TMAKE_CXXFLAGS += -DCOMPILER_MIPSPRO
 
 # always disable full warnings for C code.
 irix-n32:TMAKE_CFLAGS_WARN_ON =
@@ -85,35 +84,18 @@ irix-n32:TMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 # linux-g++
 #
 
-linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
-
 # debugging memory problems
 #linux-g++:TMAKE_CXXFLAGS += -fcheck-memory-usage
 #linux-g++:TMAKE_LIBS += -lmpatrol -lbfd -liberty
 
 #
-# solaris-cc
+# Max OS X with XFree86 port, macx-g++
 #
 
-solaris-cc:TMAKE_CXXFLAGS += -DCOMPILER_SUNWSPRO
+macx-g++:TMAKE_CXXFLAGS += -D__GNU_LIBRARY__
+macx-g++:TMAKE_CXXFLAGS -= -fno-exceptions
 
-#
-# solaris-cc-gcc
-#
 
-solaris-cc-gcc:TMAKE_CXXFLAGS += -DCOMPILER_GNU
-
-#
-# aix-xlc
-#
-
-aix-xlc:TMAKE_CXXFLAGS += -DCOMPILER_AIXXLC
-
-#
-# osf1-g++
-#
-
-osf1-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
 
 
 # Add diff files to link against directly
@@ -178,7 +160,7 @@ HEADERS = \
 	getopt.h \
 	diffutils.h \
 	diffutils_hack.h \
-	doc.qml \
+	doc.html \
 	kdeSupport.h \
 	version.h
 
@@ -224,7 +206,7 @@ INTERFACES = \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
 
-TARGET = xxdiff
+TARGET = ../bin/xxdiff
 
 #DEPENDPATH=../../include
 

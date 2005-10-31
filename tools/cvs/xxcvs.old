@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 #
 # $Source$
-# $Id: xxcvs.old 576 2002-06-03 15:08:07Z blais $
+# $Id: xxcvs.old 682 2003-12-25 21:32:57Z blais $
 #
 # Copyright (c) 2002, Martin Blais. All rights reserved.
 #
@@ -17,8 +17,8 @@ Usage:
 """
 
 
-__version__ = "$Revision: 576 $"
-__author__ = "Martin Blais <blais@iro.umontreal.ca>"
+__version__ = "$Revision: 682 $"
+__author__ = "Martin Blais <blais@furius.ca>"
 
 #===============================================================================
 # EXTERNAL DECLARATIONS

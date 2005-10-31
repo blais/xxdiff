@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,12 +50,16 @@ const char* exceptionPreface = "xxdiff: exception caught: ";
 XX_NAMESPACE_USING
 
 extern char** environ;
+static char s_env_string_LC_ALL[] = "LC_ALL=C";
 
 //------------------------------------------------------------------------------
 //
 int main( int argc, char** argv, char** envp ) 
 {
    environ = envp;
+
+   // Override user locale or xxdiff could not parse localized diff output...
+   putenv(s_env_string_LC_ALL);
 
    int retval = 2; // errors.
    try {

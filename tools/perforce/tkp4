@@ -1,0 +1,20 @@
+# Date: Mon, 21 Apr 2003 20:35:18 -0400
+# From: Christian Fowler <cfowler@lulu.com>
+# To: blais@IRO.UMontreal.CA
+# Subject: perforce scripts for xxdiff
+# 
+# Thanks for the great app!
+# 
+# first, here are the hacked lines of tkp4 available at
+# http://web.cuug.ab.ca/~macdonal/tkp4/. Roughly lines 5511 to
+# 5518:
+
+diffRevs {
+    set idx  [$p4(rhListbox) curselection]
+    set rev1 [lindex [lindex [$p4(rhListbox) get[lindex $idx 0]] 0] 1]
+    set rev2 [lindex [lindex [$p4(rhListbox) get[lindex $idx 1]] 0] 1]
+    exec p4 print -q $p4(RevisionHistoryFile)#$rev1 > /tmp/tkp4-#$rev1
+    exec p4 print -q $p4(RevisionHistoryFile)#$rev2 > /tmp/tkp4-#$rev2
+    exec xxdiff /tmp/tkp4-#$rev1 /tmp/tkp4-#$rev2 &
+}
+

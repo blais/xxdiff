@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,21 +60,20 @@
 /* see BOOLKWD_BASE above */
 %token <num> EXIT_ON_SAME                 1000
 %token <num> EXIT_IF_NO_CONFLICTS         1001
-%token <num> SELECT_MERGE                 1002
-%token <num> IGNORE_HORIZONTAL_WS         1003
-%token <num> IGNORE_PERHUNK_WS            1004
-%token <num> FORMAT_CLIPBOARD_TEXT        1005
-%token <num> IGNORE_ERRORS                1006
-%token <num> WARN_ABOUT_UNSAVED           1007
-%token <num> DISABLE_CURSOR_DISPLAY       1008
-%token <num> DRAW_PATTERN_IN_FILLER_LINES 1009
-%token <num> HIDE_CR                      1010
-%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1011
-%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1012
-%token <num> DIRDIFF_RECURSIVE            1013
-%token <num> USE_INTERNAL_DIFF            1014
-/* XX_ENABLE_SAVE_MERGED_FILE */
-/* %token <num> FORCE_SAVE_MERGED_FILE       1015 */
+%token <num> EXIT_WITH_MERGE_STATUS       1002
+%token <num> SELECT_MERGE                 1003
+%token <num> IGNORE_HORIZONTAL_WS         1004
+%token <num> IGNORE_PERHUNK_WS            1005
+%token <num> FORMAT_CLIPBOARD_TEXT        1006
+%token <num> IGNORE_ERRORS                1007
+%token <num> WARN_ABOUT_UNSAVED           1008
+%token <num> DISABLE_CURSOR_DISPLAY       1009
+%token <num> DRAW_PATTERN_IN_FILLER_LINES 1010
+%token <num> HIDE_CR                      1011
+%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1012
+%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1013
+%token <num> DIRDIFF_RECURSIVE            1014
+%token <num> USE_INTERNAL_DIFF            1015
 
 /* Note: check that we do not exceed maximum in resParser.cpp */
 
@@ -180,17 +179,23 @@ prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
 style		: STYLE COLON STRING
 		{
                    /*printf( "==> style: %s\n", $3 );*/
+#if (QT_VERSION >= 0x030000)
                    QStringList styles = QStyleFactory::keys();
                    QString styleKey( $3 );
                    if ( styles.find( styleKey ) != styles.end() ) {
                       RESOURCES->setStyleKey( styleKey );
                    }
                    else {
+#endif
                       QString err = QString( "Requested style key does not exist." );
+#if (QT_VERSION >= 0x030000)
                       err += QString( "\nValid styles are: " );
                       err += styles.join( ", " );
+#endif
                       yyerror( err.latin1() );
+#if (QT_VERSION >= 0x030000)
                    }
+#endif
                 }
                 ;
 
@@ -236,6 +241,7 @@ boolopt		: boolkwd COLON BOOLEAN
 
 boolkwd		: EXIT_ON_SAME
 		| EXIT_IF_NO_CONFLICTS
+		| EXIT_WITH_MERGE_STATUS
 		| SELECT_MERGE
 		| IGNORE_HORIZONTAL_WS
 		| IGNORE_PERHUNK_WS
@@ -250,7 +256,6 @@ boolkwd		: EXIT_ON_SAME
 		| DIRDIFF_RECURSIVE
 		| USE_INTERNAL_DIFF
 		;
-		/*| FORCE_SAVE_MERGED_FILE*/
 
 command		: COMMAND DOT COMMANDNAME COLON STRING
 		{

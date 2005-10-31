@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,12 +60,16 @@
 #define INCL_QT_QSTRINGLIST
 #endif
 
+#ifndef INCL_QT_QFILEINFO
+#include <qfileinfo.h>
+#define INCL_QT_QFILEINFO
+#endif
+
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
 class QFont;
-class QFileInfo;
 
 XX_NAMESPACE_BEGIN
 
@@ -94,19 +98,21 @@ public:
    // Constructor.  This will load the file in memory and index the beginnings
    // of each line.
    XxBuffer( 
-      const QString& filename, 
-      const QString& displayFilename,
-      const bool     hideCR = true,
-      const bool     deleteFile = false,
-      const char     newlineChar = '\n'
+      const QString&   filename, 
+      const QString&   displayFilename,
+      const QFileInfo& fileInfo,
+      const bool       hideCR = true,
+      const bool       deleteFile = false,
+      const char       newlineChar = '\n'
    );
 
    // Constructor that can impersonate another buffer but that does not own the
    // data. This is used to share the data for unmerge mode.
    XxBuffer(
-      const XxBuffer& orig,
-      const QString&  filename,
-      const QString&  displayFilename
+      const XxBuffer&  orig,
+      const QString&   filename,
+      const QString&   displayFilename,
+      const QFileInfo& fileInfo
    );
 
    // Destructor.
@@ -120,6 +126,9 @@ public:
    const QString& getDisplayName() const;
    void setDisplayName( const QString& );
    // </group>
+
+   // Get/set stat info for file.
+   const QFileInfo& getFileInfo() const;
 
    // Returns true if this file is stored as a temporary file.
    bool isTemporary() const;
@@ -225,6 +234,7 @@ private:
 
    QString            _name;
    QString            _displayName;
+   QFileInfo          _fileInfo;
    bool               _hiddenCR;
    bool               _temporary;
    bool               _proxy;
@@ -245,10 +255,10 @@ private:
    // consider this reasonable for all purposes. However, this could be easily
    // changed to int below if necessary.
    //
-   // We had to introduce an explicit vector of lengths because the since the
-   // unmerge feature was introduced, since we're sharing the very text buffer
-   // that the multiple buffers use we cannot anymore rely on buffer lines
-   // appearing next to each other in the data array.
+   // We had to introduce an explicit vector of lengths because since the
+   // unmerge feature was introduced, we're sharing the very text buffer that
+   // the multiple buffers use we cannot anymore rely on buffer lines appearing
+   // next to each other in the data array.
    std::vector<short> _lengths;
 #endif
 

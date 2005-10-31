@@ -1,0 +1,165 @@
+===============================
+Integrating xxdiff with scripts
+===============================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2004-01-21
+:Abstract:
+
+   A summary of some of the features and techniques that can be used to
+   integrate xxdiff with your own homegrown programs.
+
+.. contents:: Table of Contents
+
+Introduction
+------------
+
+xxdiff is built with integration in mind since the first version.  It does not
+include builtin support for specific source control systems, such as CVS or
+ClearCase.  Instead, its command-line interface is built so that it can easily
+be called in various ways within a workflow of file comparison, policing and
+review, and interactive merging of changes.
+
+This approach has been used with success by the author in a variety of
+environments, with various revision control systems (CVS, ClearCase, others).
+This document aims at introducing these features and explaining how they are
+meant to be used.
+
+Features and Techniques
+-----------------------
+
+Automatic Maximizing
+~~~~~~~~~~~~~~~~~~~~
+
+Often xxdiff is used in a policing context, where the reviewer/"merge cop" will
+have to visualize a series of files one-by-one and make comments on each. Many
+people like to maximize their xxdiff to perform this arduous task. You can set
+the ``Geometry`` resource to special value ``Maximize`` for that purpose.  (Note
+that you can also specify arbitraty resource strings on the command-line with
+the ``--resource`` option).
+
+
+Reading Files from Stdin
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes it can be convenient to use the output of a process directly as input
+for comparison, for example, something like this::
+
+    cat foo.c | sed -e 's/get_instance/getInstance/g' | xxdiff foo.c -
+
+You can specify ``-`` in lieu of a filename on the xxdiff command-line to let it
+know to read standard input for that file position.  (Internally, xxdiff will
+have to create a temporary file by itself to spawn GNU diff on it but you don't
+really need to know that.)
+
+Note that xxdiff currently cannot read different files from different file
+descriptors, i.e. it can only read from stdin or files.
+
+
+Adding Arbitraty Information to Filenames
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the xxdiff interface, the filename is shown over the corresponding file.
+
+Often when calling xxdiff from a wrapper script, you will run xxdiff on a
+temporary file, or accepting input from stdin.  It can also be that there is a
+special semantic associated with a particular file (e.g. "old" or "new" file),
+or that the file has been somehow manipulated automatically before being
+compared, or that it represents a specific revision. It is only natural that you
+would want to show this information in the graphical comparison program.
+
+To that extent, xxdiff allows you to specify what information you want displayed
+over the file.  Use the ``--title1``, ``--title2`` or ``--title3`` options to
+have xxdiff display what you want it to.
+
+
+Setting the Output Filename
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes you may be invoking xxdiff with the intent of maybe getting a merged
+output file as a result. In order to specify where this result should lie,
+xxdiff provides the concept of "merged filename", which is the default location
+where it will save the results of user selections, the merged file.  You can
+provide this filename on the command-line with the ``--merged-filename`` option.
+
+Note that when a merged filename is specific on the command-line, xxdiff will
+not warn when overwriting that file. We assume that since you specify a
+particular file to be used for merged output, you expect it to be potentially
+overwritten.
+
+
+Requesting Accept/Merge/Reject Decision
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes you may want to **force** the user to produce a merged file as the
+result of file comparison.  For this purpose, we provide the Decision or
+Accept/Merge/Reject mode in xxdiff, triggered with the ``--decision`` option.  
+
+In this mode, xxdiff will not let you exit normally.  Instead:
+
+- if you press 'A', the file on the right will be saved as the merged file and
+  ``ACCEPT`` will be printed on stdout;
+
+- if you press 'R', the file on the left will be saved as the merged file and
+  ``REJECT`` will be printed on stdout;
+
+- if you press 'M', the results of user selections will be saved as the merged
+  file and ``MERGED`` will be printed on stdout;
+
+In all three cases, the merged file will be saved with the appropriate contents.
+Note that if xxdiff gets terminated otherwise (e.g. by the window manager), it
+will print out the string ``NODECISION``.
+
+The calling script can invoke xxdiff (specifying ``--merged-filename``) and read
+its stdout to find out the result of the decision, and then pick up the merged
+file and do whatever is desired with it.
+
+If you prefer to work with the mouse, three distinct buttons will appear on the
+toolbar for that purpose.
+
+
+Indication of Input Processing Completion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In some circumstances, a calling script will generate temporary files for a
+short time, just to pass them on to xxdiff as input.  If you want to delete
+those files as soon as possible, you may use the ``--indicate-input-processed``
+option to xxdiff which will make it print the string 'INPUT-PROCESSED` as soon
+as it does not need its inputs anymore.
+
+Thus you would do something like this:
+
+1) invoke xxdiff asynchrously (e.g. in a child process);
+2) read from its output (from a pipe), until the INPUT-PROCESSED string is seen;
+3) delete the input files;
+4) wait for xxdiff to complete.
+
+
+Return Value
+~~~~~~~~~~~~
+
+By default, xxdiff returns the same return value that GNU diff does (see
+diff(1)).  
+
+This behaviour is altered if you use the ``--exit-with-merge-status`` option:
+if all diff hunks are selected and no unsaved selections exist, only then xxdiff
+will exit with code of 0.
+
+
+Conditional Display
+~~~~~~~~~~~~~~~~~~~
+
+If ``--exit-on-same`` is selected xxdiff does not show its UI and exits if the
+files are have no differences (according to GNU diff).
+
+If ``--exit-if-no-conflicts`` is selected xxdiff does not show its UI and exits
+if automatic merging would result in no conflicts.
+
+
+Examples
+--------
+
+You can look at the various scripts available in the distribution in the `bin
+directory <../bin/>`_ or the `tools directory <../tools/>`_. They are working
+examples of integration between xxdiff and Bourne-shell and Python scripts.
+

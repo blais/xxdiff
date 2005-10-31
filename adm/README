@@ -1,1 +1,8 @@
-All these tools are made to be run from the root.
+In this directory lie scripts that I use to build packages, etc.
+These should never be installed in binary distribution.
+
+All these scripts are made to be run from the root of the xxdiff source tree,
+e.g.
+
+   cd xxdiff-<version>/ ; adm/build_rpm
+

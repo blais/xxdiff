@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+#
+# Tentative scons build file.
+# At this point this is probably not working. I'm just playing with this at the moment.
+#
+
+import string, os.path
+
+env = Environment()
+
+headers = """
+	optionsDialog.h 
+	searchDialog.h 
+	app.h 
+	app.inline.h 
+	cmdline.h 
+	suicideMessageBox.h 
+	defs.h 
+	types.h 
+	diffs.h 
+	diffs.inline.h 
+	builder.h 
+	builder.inline.h 
+	builderFiles2.h 
+	builderFiles3.h 
+	builderDirs2.h 
+	builderUnmerge.h 
+	builderSingle.h 
+	exceptions.h 
+	buffer.h 
+	buffer.inline.h 
+	help.h 
+	hordiffImp.h 
+	line.h 
+	line.inline.h 
+	main.h 
+	overview.h 
+	resParser.h 
+	resources.h 
+	resources.inline.h 
+	accelUtil.h 
+	copyLabel.h 
+	text.h 
+	scrollView.h 
+	central.h 
+	merged.h 
+	lineNumbers.h 
+	util.h 
+	markers.h 
+	getopt.h 
+	diffutils.h 
+	diffutils_hack.h 
+	doc.html 
+	kdeSupport.h 
+	version.h
+""".split()
+
+sources = """
+	optionsDialog.cpp 
+	searchDialog.cpp 
+	app.cpp 
+	cmdline.cpp 
+	suicideMessageBox.cpp 
+	main.cpp 
+	overview.cpp 
+	copyLabel.cpp 
+	text.cpp 
+	scrollView.cpp 
+	central.cpp 
+	merged.cpp 
+	lineNumbers.cpp 
+	util.cpp 
+	help.cpp 
+	exceptions.cpp 
+	builder.cpp 
+	builderFiles2.cpp 
+	builderFiles3.cpp 
+	builderDirs2.cpp 
+	builderUnmerge.cpp 
+	builderSingle.cpp 
+	diffs.cpp 
+	hordiffImp.cpp 
+	line.cpp 
+	buffer.cpp 
+	resources.cpp 
+	accelUtil.cpp 
+	resParser.cpp 
+	markers.cpp 
+	getopt.c 
+	getopt1.c 
+	version.c
+""".split()
+#	diffutils.cpp 
+
+interfaces = """
+	markersWidgetBase.ui 
+	optionsDialogBase.ui 
+	searchDialogBase.ui
+""".split()
+
+#-------------------------------------------------------------------------------
+
+uic = os.path.join(os.environ['QTDIR'], 'bin', 'uic')
+IntHeaderBuilder = Builder(action='%s $SOURCE -o $TARGET' % uic, suffix='.cpp', src_suffix='.ui') 
+
+
+def buildIntSource( target, source, evn ):
+    print '=================', target, source, env
+    #action='%s $SOURCE -o $TARGET' % uic
+    
+IntSourceBuilder = Builder(action=Action(buildIntSource), suffix='.cpp', src_suffix='.ui') 
+
+#IntSourceBuilder = Builder(action='%s $SOURCE -o $TARGET' % uic, suffix='.cpp', src_suffix='.ui') 
+# env.Append(BUILDERS = {'InterfaceSource': interfacesource_builder})
+
+
+#-------------------------------------------------------------------------------
+#
+def processInterface( interfaces ):
+    new_sources = []
+    for interface in interfaces:
+        header = interface.replace('.ui', '.h')
+        source = interface.replace('.ui', '.cpp')
+        new_sources.append(source)
+        IntSourceBuilder(env, target=source, source=interface)
+        IntHeaderBuilder(env, target=header, source=interface)
+        env.Depends(source, header)
+    return new_sources
+
+sources += processInterface(interfaces)
+
+
+#interfacesource_builder = Builder(name='InterfaceSource',
+#                            action='%s $SOURCE -i ??? -o $TARGET' % uic,
+#                            src_suffix='.ui') 
+#/usr/lib/qt3/bin/uic markersWidgetBase.ui -i markersWidgetBase.h -o markersWidgetBase.cpp
+#
+#
+# nasm_env = Environment(BUILDERS = [nasm_builder]) 
+# nasm_files = 'unix/snapvector unix/ftol' 
+# nasm_objs = [ nasm_env.Nasm(target=x+'.o', source=x+'.nasm') for x in string.split(nasm_files) ] 
+# 
+#... 
+# 
+# env.Program(target='spam', source = source_list + nasm_objs)
+# 
+
+
+
+
+env.Build('markersWidgetBase.cpp')
+
+prog = env.Program(target='xxdiff', source=sources)
+
+Default(prog) 

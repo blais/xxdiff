@@ -1,8 +1,9 @@
+
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,6 +118,7 @@ public:
       const QString& msg = QString::null,
       int            helpMask = 0
    );
+   virtual ~XxUsageError() XX_THROW_NOTHING {}
 
 };
 
@@ -137,6 +139,7 @@ public:
       XX_EXC_PARAMS_DECL(file,line),
       const QString& msg = QString::null // use errno string only.
    );
+   virtual ~XxIoError() XX_THROW_NOTHING {}
 
 };
 
@@ -157,9 +160,9 @@ public:
    XxInternalError( 
       XX_EXC_PARAMS_DECL(file,line)
    );
+   virtual ~XxInternalError() XX_THROW_NOTHING {}
 
 };
-
 
 XX_NAMESPACE_END
 

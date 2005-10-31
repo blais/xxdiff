@@ -27,7 +27,7 @@ function waitexit {
     read
 }
 
-XXDIFF=../src/xxdiff
+XXDIFF=../bin/xxdiff
 
 #-------------------------------------------------------------------------------
 testhdr "Print version"
@@ -59,7 +59,7 @@ testhdr "Print HTML documentation"
 $XXDIFF --help-html | tee /tmp/out.html
 
 echo "=============================="
-echo "Open and check file:/tmp/doc.html in your browser"
+echo "Open and check file:/tmp/out.html in your browser"
 waitread;
 rm -f /tmp/out.html
 
@@ -240,7 +240,6 @@ testhdr "Unmerge3 with one file. Should work."
 
 $XXDIFF --unmerge3 unmerge/diff3merge
 waitexit;
-
 
 #-------------------------------------------------------------------------------
 #

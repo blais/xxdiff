@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -226,6 +226,7 @@ XxText::XxText(
    setBackgroundMode( NoBackground );
 #endif
 
+#if (QT_VERSION >= 0x030000)
    // Initialize clipboard to use mouse selection.
    //
    // We do this multiple times for nothing, but I'd rather have it here
@@ -235,6 +236,7 @@ XxText::XxText(
 
    // Bind clear to change signal.
    connect( cb, SIGNAL(selectionChanged()), this, SLOT(clearRegionSelect()) );
+#endif
 }
 
 //------------------------------------------------------------------------------

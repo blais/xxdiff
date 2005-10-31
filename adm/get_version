@@ -3,7 +3,7 @@
 # $RCSfile$
 #
 
-if [ ! -d "tools" ]; then
+if [ ! -d "adm" ]; then
      echo "You must be running this script from the topdir directory."
      exit 1;
 fi

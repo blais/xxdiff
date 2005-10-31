@@ -1,15 +1,16 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 2.9.2
+Version: 3.0
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
 Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.gz
 URL: http://xxdiff.sourceforge.net
-Packager: Martin Blais <blais@iro.umontreal.ca>
+Packager: Martin Blais <blais@furius.ca>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
-Requires: qt
-BuildRequires: qt-devel tmake
+Requires: qt >= 2.0
+BuildRequires: qt-devel >= 2.0
+BuildRequires: tmake flex bison
 
 %description
 xxdiff is a graphical browser for viewing the differences between two
@@ -27,6 +28,12 @@ fi
 
 cd src
 tmake xxdiff.pro > Makefile
+
+# Copy files for qt2 if necessary.
+if ! grep -q 'define.*QT_VERSION.*0x03' ${QTDIR}/include/qglobal.h ; then 
+    cp qt2/*.{h,cpp} .
+fi
+
 make
 ./xxdiff --help-html > xxdiff-doc.html
 
@@ -53,49 +60,57 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 
 
 %changelog
-* Wed Mar 17 2003 Martin Blais <blais@iro.umontreal.ca>
+* Wed Jan 21 2004 Martin Blais <blais@furius.ca>
+- released 3.0. Did not test this spec file, I do run RedHat anymore.
+
+* Wed Jan 14 2004 Martin Blais <blais@furius.ca>
+- added conditional file copy operation to support for qt2 (untested, no RH).
+- took required version of qt down to qt2, not sure if we should not do a
+  separate spec file instead.
+
+* Wed Mar 17 2003 Martin Blais <blais@furius.ca>
 - released 2.9.2.
 
-* Wed Sep 20 2002 Martin Blais <blais@iro.umontreal.ca>
+* Wed Sep 20 2002 Martin Blais <blais@furius.ca>
 - released 2.9.1.
 
-* Wed Sep 19 2002 Martin Blais <blais@iro.umontreal.ca>
+* Wed Sep 19 2002 Martin Blais <blais@furius.ca>
 - released 2.9.
 
-* Wed Aug 28 2002 Martin Blais <blais@iro.umontreal.ca>
+* Wed Aug 28 2002 Martin Blais <blais@furius.ca>
 - released 2.8.
 
-* Tue Aug 10 2002 Martin Blais <blais@iro.umontreal.ca>
+* Tue Aug 10 2002 Martin Blais <blais@furius.ca>
 - released 2.7.
 
-* Tue Aug 8 2002 Martin Blais <blais@iro.umontreal.ca>
+* Tue Aug 8 2002 Martin Blais <blais@furius.ca>
 - released 2.7.1.
 
-* Tue Aug 6 2002 Martin Blais <blais@iro.umontreal.ca>
+* Tue Aug 6 2002 Martin Blais <blais@furius.ca>
 - released 2.7.
 
-* Mon Jun 3 2002 Martin Blais <blais@iro.umontreal.ca>
+* Mon Jun 3 2002 Martin Blais <blais@furius.ca>
 - released 2.6.
 
-* Thu Feb 26 2002 Martin Blais <blais@iro.umontreal.ca>
+* Thu Feb 26 2002 Martin Blais <blais@furius.ca>
 - released 2.5.
 
-* Thu Feb 23 2002 Martin Blais <blais@iro.umontreal.ca>
+* Thu Feb 23 2002 Martin Blais <blais@furius.ca>
 - added documentation generation and released 2.4.
 
-* Sat Feb 9 2002 Martin Blais <blais@iro.umontreal.ca>
+* Sat Feb 9 2002 Martin Blais <blais@furius.ca>
 - removed setting of user/group for man (thanks for crazy_pete@swissinfo.org)
 
-* Thu Feb 6 2002 Martin Blais <blais@iro.umontreal.ca>
+* Thu Feb 6 2002 Martin Blais <blais@furius.ca>
 - added documentation generation and released 2.3.
 
-* Wed Jan 30 2002 Martin Blais <blais@iro.umontreal.ca>
+* Wed Jan 30 2002 Martin Blais <blais@furius.ca>
 - updated version number for interim release
 
-* Sat Nov 24 2001 Martin Blais <blais@iro.umontreal.ca>
+* Sat Nov 24 2001 Martin Blais <blais@furius.ca>
 - added generic man page install.
 
-* Thu Nov 22 2001 Martin Blais <blais@iro.umontreal.ca>
+* Thu Nov 22 2001 Martin Blais <blais@furius.ca>
 - 2.1
 
 * Sun Nov 5 2001 Martin Blais <blais@discreet.com>
@@ -110,7 +125,7 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 * Thu Jun  7 2001 Martin Blais <blais@discreet.com> 1.12-2
 - don't reset QTDIR if it is already set.
 
-* Mon Jun  4 2001 Martin Blais <blais@iro.umontreal.ca>
+* Mon Jun  4 2001 Martin Blais <blais@furius.ca>
 - fixed for QTDIR
 
 * Mon Jun  4 2001 Martin Blais <blais@discreet.com> 1.12-1

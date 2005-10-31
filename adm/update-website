@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# $Id: update-website 690 2003-12-26 01:26:36Z blais $
+#
+
+# Simple script that helps me remember how to update the sourceforge website.
+
+# create temp directory
+TMPDIR=/tmp/xxdiff-website
+mkdir $TMPDIR
+cd $TMPDIR
+
+# export a copy
+CVS_RSH=ssh
+export CVS_RSH
+cvs -z3 -d:ext:blais@vor.iro.umontreal.ca:/u/blais/cvsroot \
+   export -r HEAD xxdiff
+
+# compress it
+tar jcvf xxdiff.tar.bz2 xxdiff
+
+# copy over to account
+scp xxdiff.tar.bz2 shell.sourceforge.net:/home/groups/x/xx/xxdiff/tmp
+
+# uncompress it
+ssh shell.sourceforge.net '( cd /home/groups/x/xx/xxdiff ; mv xxdiff xxdiff.old ; tar jxvf tmp/xxdiff.tar.bz2 ; rm -rf tmp/xxdiff.old ; mv xxdiff.old tmp )'
+
+rm -rf $TMPDIR

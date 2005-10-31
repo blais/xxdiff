@@ -1,0 +1,245 @@
+#!/usr/bin/env python
+#******************************************************************************\
+#* $Source$
+#* $Id: xxdiff-find-grep-sed 725 2004-01-21 16:23:18Z blais $
+#* $Date: 2004-01-21 11:23:18 -0500 (Wed, 21 Jan 2004) $
+#*
+#* Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+
+"""find-grep-sed [<options>] <regexp> <sed-cmd> [<root> ...]
+
+Useful script to perform global replacement of a pattern in a set of files.
+
+Walks a directory hierarchy, optionally selects some files according to regular
+expressions on the filename (default is to use all files), then greps the files
+for some pattern, and if there is a match, run the given file through a sed
+command and replace the file with that output.
+
+Notes
+-----
+
+- there is an option to request confirmation through xxdiff.
+- the script automatically creates backup files.
+- the script automatically generates a detailed log of its actions and
+  a text summary of all the differences beteween the original and new files.
+- the script can optionally checkout the file with ClearCase before performing
+  the replacement.
+
+"""
+
+__version__ = "$Revision: 725 $"
+__author__ = "Martin Blais <blais@furius.ca>"
+
+#===============================================================================
+# EXTERNAL DECLARATIONS
+#===============================================================================
+
+import sys, os, re
+from os.path import *
+import commands, tempfile, shutil
+
+#===============================================================================
+# LOCAL DECLARATIONS
+#===============================================================================
+
+tmpprefix = '%s.' % basename(sys.argv[0])
+
+#-------------------------------------------------------------------------------
+#
+def backup( fn, opts ):
+    """Compute backup filename and copy backup file."""
+
+    if opts.backup_type == 'parallel':
+        fmt = '%s.bak.%d'
+        ii = 0
+        while 1:
+            backupfn = fmt % (fn, ii)
+            if not exists(backupfn):
+                break
+            ii += 1
+
+    elif opts.backup_type == 'other':
+        ##afn = abspath(fn)
+        backupfn = normpath(join(opts.backup_dir, fn))
+    else:
+        backupfn = None
+
+    if backupfn:
+        print 'Backup:', backupfn
+        ddn = dirname(backupfn)
+        if not exists(ddn):
+            os.makedirs(ddn)
+        shutil.copy2(fn, backupfn)
+
+#-------------------------------------------------------------------------------
+#
+def replace( fn, sedcmd, opts ):
+    """Perform the replacement."""
+
+    print '=' * 80
+    print
+    print 'File:    ', fn
+    print 'Absolute:', abspath(fn)
+    backup(fn, opts)
+    print
+
+    difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
+
+    tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+    if opts.dry_run:
+        cmd = 'sed -e "%s" "%s" > "%s"' % (sedcmd, fn, tmpf.name)
+        s, o = commands.getstatusoutput(cmd)
+
+        diffcmd = difffmt % (fn, tmpf.name)
+        s, o = commands.getstatusoutput(diffcmd)
+
+    else:
+        if opts.checkout_clearcase:
+            print 'Checking out the file'
+            os.system('cleartool co -nc "%s"' % fn)
+            print
+
+        if not os.access(fn, os.W_OK):
+            raise SystemExit("Error: cannot write to file '%s'." % fn)
+
+        cmd = 'sed -e "%s" "%s" > "%s"' % (sedcmd, fn, tmpf.name)
+        s, o = commands.getstatusoutput(cmd)
+        if s != 0:
+            raise SystemExit(
+                "Error: running sed command:\nFile:%s\n%s" % (fn, o))
+
+        # --context=4
+        diffcmd = difffmt % (fn, tmpf.name)
+        s, o = commands.getstatusoutput(diffcmd)
+
+    rv = os.WEXITSTATUS(s)
+    if rv == 0:
+        print >> sys.stderr
+        print >> sys.stderr, "Warning: no differences."
+        print >> sys.stderr
+
+    #print
+    #print '_' * 80
+    print o
+    #print '_' * 80
+    #print
+    print
+
+    if not opts.dry_run:
+        if opts.no_confirm:
+            shutil.copyfile(tmpf.name, fn)
+        else:
+            tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+
+            cmd = ('xxdiff --decision --merged-filename "%s" ' + \
+                  '--title2 "NEW FILE" "%s" "%s" ') % \
+                  (tmpf2.name, fn, tmpf.name)
+            s, o = commands.getstatusoutput(cmd)
+
+            print o
+            if o == 'ACCEPT':
+                shutil.copyfile(tmpf.name, fn)
+            elif o == 'REJECT' or o == 'NODECISION':
+                pass # do nothing
+            elif o == 'MERGED':
+                shutil.copyfile(tmpf2.name, fn)
+            else:
+                raise SystemExit("Error: unexpected answer from xxdiff: %s" % o)
+
+
+#===============================================================================
+# MAIN
+#===============================================================================
+
+def main():
+    import optparse
+    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
+    parser.add_option('-b', '--backup-type', action='store', type='choice',
+                      choices=['parallel', 'other', 'none'], metavar="CHOICE",
+                      default='other',
+                      help="selects the backup type")
+    parser.add_option('--backup-dir', action='store',
+                      help="specify backup directory for type 'other'")
+    parser.add_option('-s', '--select', action='append',
+                      metavar="REGEXP", default=[],
+                      help="adds a regular expression for files to match " +
+                      "against.")
+    parser.add_option('-c', '--select-cpp', action='store_true',
+                      help="adds a regular expression for selecting C++ "
+                      "files to match against.")
+    parser.add_option('-C', '--checkout-clearcase', action='store_true',
+                      help="checkout files with clearcase before storing.")
+    parser.add_option('-n', '--dry-run', action='store_true',
+                      help="print the commands that would be executed " +
+                      "but don't really run them.")
+    parser.add_option('-t', '--no-confirm', action='store_true',
+                      help="do not ask for confirmation with graphical "
+                      "diff viewer.")
+    opts, args = parser.parse_args()
+
+    if len(args) < 2:
+        raise SystemExit("Error: you must specify at least a regular "
+                         "expression and a sed command")
+    regexp, sedcmd = args[0:2]
+    roots = args[2:] or ['.']
+
+
+    if opts.backup_type == 'other':
+        if not opts.backup_dir:
+            opts.backup_dir = tempfile.mkdtemp(prefix=tmpprefix)
+        print "Storing backup files under:", opts.backup_dir
+    else:
+        if opts.backup_dir:
+            raise SystemExit("Error: backup-dir is only valid for backups of "
+                             "type 'other'.")
+
+    # add cpp files
+    if opts.select_cpp:
+        opts.select.append('.*\.(h(pp)?|c(pp|\+\+|c)?)')
+    # process all files if no filter specified
+    if not opts.select:
+        opts.select = ['.*']
+    select = map(re.compile, opts.select)
+
+    for root in roots:
+        for dn, dirs, files in os.walk(root):
+            ffiles = []
+            for fn in files:
+                for s in select:
+                    if s.match(fn):
+                        ffiles.append(fn)
+                        break
+
+            sfiles = map(lambda x: join(dn, x), ffiles)
+            for fn in sfiles:
+                cmd = 'grep -q "%s" "%s"' % (regexp, fn)
+                s, o = commands.getstatusoutput(cmd)
+                rv = os.WEXITSTATUS(s)
+                if rv == 0:
+                    replace(fn, sedcmd, opts)
+
+
+    # repeat message at the end for convenience.
+    if opts.backup_type == 'other' and opts.backup_dir:
+        print
+        print "Storing backup files under:", opts.backup_dir
+        print
+
+if __name__ == '__main__':
+    main()

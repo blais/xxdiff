@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,11 @@
 #ifndef INCL_QT_QSTRING
 #include <qstring.h>
 #define INCL_QT_QSTRING
+#endif
+
+#ifndef INCL_QT_QFILEINFO
+#include <qfileinfo.h>
+#define INCL_QT_QFILEINFO
 #endif
 
 #ifndef INCL_QT_QSTRINGLIST
@@ -90,6 +95,12 @@ public:
       bool           testAscii,
       bool&          isDirectory
    );
+   static bool testFile(
+      const QString&   filename,
+      const QFileInfo& finfo,
+      bool             testAscii,
+      bool&            isDirectory
+   );
 
    // Quick heuristic to test whether a file's contents are ascii text
    static bool isAsciiText( const QString& filename );
@@ -131,6 +142,12 @@ public:
       const QStringList& filenames,
       const char**&      out_args
    );
+   static int splitArgs( 
+      const QString&     command,
+      const QString *    titles[3],
+      const QStringList& filenames,
+      const char**&      out_args
+   );
 
    // Free args allocated with splitArgs.
    static void freeArgs( const char**& out_args );
@@ -138,6 +155,17 @@ public:
    // Remove ClearCase extension to filename if it is present.
    static QString removeClearCaseExt( const QString& );
 
+   // Formats user provided format much like GNU coreutils version of stat(2).
+   // Performs stat(2)-like %-format sequencing for display names. Output will
+   // be in target.  Returns true if success.
+   static bool formatFilename(
+      QString&         target,
+      const QString&   masterformat,
+      const QFileInfo& finfo,
+      bool             isStdin,
+      const QString&   filename,
+      bool             newest = false
+   );
 
 };
 

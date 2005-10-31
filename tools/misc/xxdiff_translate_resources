@@ -2,7 +2,7 @@
 #******************************************************************************\
 #* $RCSfile$
 #*
-#* Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
+#* Copyright (C) 2001  Martin Blais <blais@furius.ca>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ You might have to do some fixing by hand if this doesn't work.
 Use `xxdiff --list-resources' to help yourself.
 """
 
-__version__ = "$Revision: 565 $"
+__version__ = "$Revision: 682 $"
 
 #===============================================================================
 # EXTERNAL DECLARATIONS

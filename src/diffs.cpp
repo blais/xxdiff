@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -568,7 +568,7 @@ XxDln XxDiffs::findNextUnselected( XxDln lineNo ) const
    // Seek to next unselected line.
    cur = std::max( 1, cur );
    while ( cur <= getNbLines() ) {
-      const XxLine& line = getLine( cur ); 
+      const XxLine& line = getLine( cur );
       if ( line.getType() != XxLine::SAME &&
            line.getType() != XxLine::DIRECTORIES &&
            line.getSelection() == XxLine::UNSELECTED ) {
@@ -621,6 +621,31 @@ XxDln XxDiffs::findPreviousUnselected( XxDln lineNo ) const
    if ( cur <= 0 ) {
       return -1;
    }
+   return cur;
+}
+
+
+//------------------------------------------------------------------------------
+//
+XxDln XxDiffs::findNextNonSameLine( XxDln lineNo ) const
+{
+   if ( lineNo > getNbLines() ) {
+      return -1;
+   }
+
+   // Seek to next line that is not same.
+   XxDln cur = lineNo + 1;
+   while ( cur <= getNbLines() ) {
+      const XxLine& line = getLine( cur );
+      if ( line.getType() != XxLine::SAME ) {
+         break;
+      }
+      cur++;
+   }
+   if ( cur > getNbLines() ) {
+      return -1;
+   }
+
    return cur;
 }
 
@@ -739,7 +764,7 @@ bool XxDiffs::isAllSelected() const
    for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
       XxLine::Type type = line.getType();
-      if ( type != XxLine::SAME && 
+      if ( type != XxLine::SAME &&
            type != XxLine::DIRECTORIES ) {
          XxLine::Selection selection = line.getSelection();
          if ( selection == XxLine::UNSELECTED ) {
@@ -762,13 +787,13 @@ uint XxDiffs::countRemainingUnselected() const
    for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
       XxLine::Type type = line.getType();
-      
+
       /*XX_TRACE( "no " << ii << " - type " << type << " - hunk " << inhunk );*/
 
       if ( !inhunk ) {
 
-         if ( type != XxLine::SAME && 
-              type != XxLine::DIRECTORIES && 
+         if ( type != XxLine::SAME &&
+              type != XxLine::DIRECTORIES &&
               line.getSelection() == XxLine::UNSELECTED ) {
 
             ++nbunsel;
@@ -779,7 +804,7 @@ uint XxDiffs::countRemainingUnselected() const
             /*XX_TRACE( "entering hunk" );*/
          }
       }
-      else { 
+      else {
 
          if ( type == XxLine::SAME ||
               type == XxLine::DIRECTORIES ||
@@ -802,9 +827,9 @@ uint XxDiffs::countRemainingUnselected() const
 
 //------------------------------------------------------------------------------
 //
-bool XxDiffs::save( 
+bool XxDiffs::save(
    const XxResources&             resources,
-   QTextStream&                   os, 
+   QTextStream&                   os,
    const std::auto_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
@@ -912,7 +937,7 @@ bool XxDiffs::save(
 
          if ( selection != XxLine::NEITHER ) {
             int no = int(selection);
-            if ( line.getType() == XxLine::SAME || 
+            if ( line.getType() == XxLine::SAME ||
                  line.getType() == XxLine::DIRECTORIES ) {
                no = 0;
             }
@@ -1434,7 +1459,7 @@ void XxDiffs::initializeHorizontalDiffs(
    XX_ASSERT( files[1].get() != 0 );
 
    if ( force == true ||
-        _lastInitializedDiffType != resources.getHordiffType() || 
+        _lastInitializedDiffType != resources.getHordiffType() ||
         _lastInitializedContext != resources.getHordiffContext()
    ) {
 
@@ -1700,7 +1725,7 @@ XxDln XxDiffs::getDisplayLine(
 
 //------------------------------------------------------------------------------
 //
-void XxDiffs::reindex( 
+void XxDiffs::reindex(
    const std::auto_ptr<XxBuffer>& file1,
    const std::auto_ptr<XxBuffer>& file2,
    const std::auto_ptr<XxBuffer>& file3
@@ -1748,7 +1773,7 @@ void XxDiffs::computeIgnoreDisplay(
       if ( lineNo == -1 ) {
          break;
       }
-      
+
       const XxLine& cline = getLine( lineNo );
       const XxLine::Type ctype = cline.getType();
 
@@ -1760,23 +1785,23 @@ void XxDiffs::computeIgnoreDisplay(
          }
          nbDiffFiles = 2;  fno0 = 0;  fno1 = 1;
       }
-      else { 
+      else {
          XX_ASSERT( nbFiles == 3 );
-         
+
          switch ( ctype ) {
-            case XxLine::DIFF_ALL: 
+            case XxLine::DIFF_ALL:
                nbDiffFiles = 3;  fno0 = 0;  fno1 = 1; /* 2 hard-coded */ break;
-            case XxLine::DIFF_1: 
+            case XxLine::DIFF_1:
                nbDiffFiles = 2;  fno0 = 0;  fno1 = 1; break;
-            case XxLine::DIFF_2: 
+            case XxLine::DIFF_2:
                nbDiffFiles = 2;  fno0 = 0;  fno1 = 1; break;
-            case XxLine::DIFF_3: 
+            case XxLine::DIFF_3:
                nbDiffFiles = 2;  fno0 = 0;  fno1 = 2; break;
-            case XxLine::DIFFDEL_1: 
+            case XxLine::DIFFDEL_1:
                nbDiffFiles = 2;  fno0 = 1;  fno1 = 2; break;
-            case XxLine::DIFFDEL_2: 
+            case XxLine::DIFFDEL_2:
                nbDiffFiles = 2;  fno0 = 0;  fno1 = 2; break;
-            case XxLine::DIFFDEL_3: 
+            case XxLine::DIFFDEL_3:
                nbDiffFiles = 2;  fno0 = 0;  fno1 = 1; break;
             default:
                continue;
@@ -1832,7 +1857,7 @@ void XxDiffs::computeIgnoreDisplay(
             if ( nbc1 != nbc2 ) {
                different = true;
             }
-            else { 
+            else {
                for ( int ii = 0; ii < nbc1; ++ii ) {
                   if ( buf1[ii] != buf2[ii] ) {
                      different = true;
@@ -1882,7 +1907,7 @@ void XxDiffs::computeIgnoreDisplay(
             if ( nbc1 != nbc2 || nbc1 != nbc3 ) {
                different = true;
             }
-            else { 
+            else {
                for ( int ii = 0; ii < nbc1; ++ii ) {
                   if ( buf1[ii] != buf2[ii] || buf1[ii] != buf3[ii] ) {
                      different = true;

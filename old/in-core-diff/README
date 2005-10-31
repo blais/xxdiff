@@ -1,0 +1,13 @@
+====================
+In-Core Diff Patches
+====================
+
+This directory contains patches to be applied to specific versions of GNU diff
+or other diffs with available source code, so that we can compile xxdiff
+in-core. The reason is that we wanted at some point to not have to spawn an
+externel GNU diff, especially under Windows.
+
+We never completed this task but had some success binding directly to GNU diff
+at some point.  However, it was never maintained nor shipped as a working
+feature.  Nevertheless, we keep patches here in case we ever want to revive this
+idea.

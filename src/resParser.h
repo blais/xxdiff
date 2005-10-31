@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public:
    // Print out the resource list, default values and documentation.
    static void listResources( QTextStream& );
 
-   // Returns resource reference help, formatted with qml.
+   // Returns resource reference help, formatted with HTML.
    static QString getResourceRef();
 
    // Special tags for cmdline resources.

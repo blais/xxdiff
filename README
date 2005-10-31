@@ -1,0 +1,224 @@
+================================================================
+xxdiff: Graphical File And Directories Comparator And Merge Tool
+================================================================
+
+.. contents:: Table of Contents
+
+Description
+===========
+
+This is the official home of **xxdiff**, a graphical file and
+directories comparator and merge tool.
+
+**xxdiff** is provided under the GNU GPL open source license. It has
+reached stable state, and is known to run on many popular unices,
+including IRIX, Linux, Solaris, HP/UX, DEC Tru64.  It has been
+deployed inside many large organizations and is being actively
+maintained by its author (Martin Blais).
+
+
+Features
+--------
+
+- Comparing **two** files, **three** files, or two **directories**
+  (shallow and recursive);
+
+- **Horizontal diffs** highlighting;
+
+- Files can be **merged** interactively and resulting output
+  visualized and saved;
+
+- Has features to assist in performing **merge reviews/policing**;
+
+- Can **unmerge CVS conflicts** in automatically merged file and
+  display them as two files, to help resolve conflicts;
+
+- Uses **external diff program** to compute differences: works with
+  GNU diff, SGI diff and ClearCase's cleardiff, and any other diff
+  whose output is similar to those;
+
+- Fully customizable with a resource file;
+
+- Look-and-feel similar to Rudy Wortel's/SGI xdiff, it is desktop
+  agnostic (i.e. will work equally well with KDE or Gnome);
+
+- Features and output that ease integration with scripts.
+
+**xxdiff** was (and probably still is) tested daily in a merge
+reviewing/policing context by more than 50 engineers at `discreet
+<http://www.discreet.com>`_, and since this task is a
+significant part of their development process, many of the features
+are a direct result of suggestions from these people while the author
+was working there.
+
+New releases and updates are announced on freshmeat. You can register
+for notification at either freshmeat or sourceforge.  xxdiff is
+implemented in C++ and its runtime dependencies is only the **Qt UI
+toolkit** from TrollTech.
+
+Unicode and Inline Editing
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**xxdiff** does not support comparing files encoded with Unicode.
+Also, it does not support inline editing of the diffed files.  If you
+need these features, you could try emacs or Meld (although both of
+these lack some of the most interesting features of xxdiff).
+
+
+Documentation
+=============
+
+- `User's Manual <doc/xxdiff-doc.html>`_ *(user's manual, all features, FAQ)*;
+- `Integrating xxdiff with scripts <doc/xxdiff-integration.html>`_;
+- `The almost secret nifty features of xxdiff <doc/xxdiff-secrets.html>`_;
+- `CHANGES <CHANGES>`_ *(news, recent changes, history)*;
+- `TODO <TODO>`_ *(future features, wishlist)*;
+
+
+Screenshots
+-----------
+
+- `Screenshots <doc/screenshots/dirindex.html>`_
+
+
+Download
+========
+
+* `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
+  *(source and binaries)*
+
+
+Tools
+-----
+
+**xxdiff** comes with a bunch of wrapper Python scripts that invoke xxdiff in
+creative ways.  The author has been using these for a long time now and decided
+for version 3.0 to clean them up and make them a little more generic so everyone
+can use them.
+
+- `xxdiff-find-grep-sed <doc/xxdiff-find-grep-sed.html>`_: walk a directory
+  hierarchy, and perform a conditional sed replacement on a given pattern,
+  accepting, rejecting or merging each change graphically;
+
+- `xxdiff-encrypted <doc/xxdiff-encrypted.html>`_: compare contents of encrypted
+  files and merged into encrypted file.  This script takes care of decrypting
+  the input files and encrypting the merged output file with `gpg
+  <http://www.gnupg.org>`_.
+
+- `xxdiff-match <doc/xxdiff-match.html>`_: run xxdiff on a arbitrary set of
+  files, matching pairs or triples of files by basename. This effectively allows
+  you to do something like this::
+
+     xxdiff-match srcold/*.c srcnew/*.c
+
+- `xxdiff-cvs-diff <doc/xxdiff-cvs-diff.html>`_: preview CVS changes and if
+  desired accept/reject changes to commit individually;
+
+- `xxdiff-patch <doc/xxdiff-patch-UNFINISHED.html>`_ (UNFINISHED): preview and
+  accept/reject a patch to a set of files.  **This script is unfinished because
+  we have not been dealing with file additions and deletions, feel free to chip
+  in**;
+
+Working versions and help files for `scripts that support configuration
+management systems <tools>`_ can be found in the distribution under the tools/
+directory (CVS, ClearCase, etc.).
+
+Packages
+--------
+
+Packages are available for some specific operating systems. Here are links to
+the relevant pages.  The author does not publish binaries anymore.
+
+- `Linux / Redhat package (2)
+  <http://rhcontrib.bero.org/search.php?show=DevelopmentTools>`_ (from redhat
+  contrib)
+
+- `Linux / Debian package <http://www.sourcepole.ch/sources/software/xxdiff/>`_
+  (provided by Tomas Pospisek)
+
+- `Linux / Mandrake package <http://www.geek.co.il/RPMS/xxdiff>`_ (maintained by
+  Oded Arbel)
+
+- `Linux / Gentoo port <http://www.gentoo.org/dyn/pkgs/dev-util/xxdiff.xml>`_
+  (in the dev-utils category)
+
+- `OpenBSD / ports tree <http://www.openbsd.org/ports.html>`_ (maintained by Dan
+  Weeks, available in the ports tree)
+
+- `IRIX / Tardist package <http://freeware.sgi.com>`_ (provided by the
+  SGI freeware team (version may be lagging behind))
+
+
+Reporting Bugs
+==============
+
+* `Reporting Bugs <http://sourceforge.net/tracker/?group_id=2198>`_
+  *(bugs and feature requests)*
+
+**PLEASE!** report bugs using the bug tracker instead of email. It is extremely
+simple, quick and easy to use, you don't even have to have a SourceForge
+account, and it allows me to track issues and desired features, as well as keep
+a history and dates.  Please do not send the author email about bugs.  Log them,
+you don't even need a SourceForge account. Thank you.
+
+
+Installation
+============
+
+Dependencies
+------------
+
+Build dependencies are:
+
+- Qt-3.2 or higher
+- tmake
+- a C++ compiler, flex and yacc
+
+Runtime dependencies are:
+
+- Qt-3.2 or higher
+
+
+Portability
+-----------
+
+xxdiff is known to build and work on a great majority of UNIX platforms where Qt
+works.  It has also been ported it to Mac OSX.
+
+
+External Links
+==============
+
+- `SourceForge Project Page <http://sourceforge.net/projects/xxdiff>`_
+
+- `Freshmeat Application Index <http://www.freshmeat.net/projects/xxdiff>`_
+
+- `Open Source Directory (OSDir) application index
+  <http://www.osdir.com/Downloads-req-viewdownloaddetails-lid-402-ttitle-xxdiff.html>`_
+
+- Other file comparison programs at `Google directory
+  <http://directory.google.com/Top/Computers/Software/File_Management/File_Comparison/>`_,
+  `DMOZ <http://dmoz.org/Computers/Software/File_Management/File_Comparison/>`_
+
+- `Author's Homepage <http://furius.ca>`_
+
+
+Copyright and License
+=====================
+
+Copyright (C) 2001-2004  Martin Blais.  All Rights Reserved.
+
+This code is distributed under the `GNU General Public License <COPYING>`_;
+
+
+Author
+======
+
+Martin Blais <blais@furius.ca>
+
+.. official sourceforge logo code snippet
+
+.. image:: http://sourceforge.net/sflogo.php?group_id=2198&type=1
+   :width: 88
+   :height: 31
+   :alt: SourceForge Logo

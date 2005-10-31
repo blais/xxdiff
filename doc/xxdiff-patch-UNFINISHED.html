@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="Docutils 0.3.0: http://docutils.sourceforge.net/" />
+<title>xxdiff-patch</title>
+<meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
+<link rel="stylesheet" href="/docutils-style.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="xxdiff-patch">
+<h1 class="title">xxdiff-patch</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.6</td></tr>
+</tbody>
+</table>
+<div class="abstract topic">
+<p class="topic-title">Abstract</p>
+<p>This simple script splits the input patch for the individual files it
+represents, applies the individual patches to temporary files and for each,
+spawns an xxdiff for it.  This effectively allows you merge the patch
+interactively.  You can accept or reject a patch for each file.  You can also
+merge the patch interactively with xxdiff, and select for the merged results to
+be applied on the output file.</p>
+</div>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title"><a name="table-of-contents">Table of Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#description" id="id1" name="id1">Description</a><ul>
+<li><a class="reference" href="#examples" id="id2" name="id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#usage" id="id3" name="id3">Usage</a></li>
+<li><a class="reference" href="#options" id="id4" name="id4">Options</a></li>
+<li><a class="reference" href="#download" id="id5" name="id5">Download</a></li>
+</ul>
+</div>
+<div class="section" id="description">
+<h1><a class="toc-backref" href="#id1" name="description">Description</a></h1>
+<p>This simple script splits the input patch for the individual files it
+represents, applies the individual patches to temporary files and for each,
+spawns an xxdiff for it.  This effectively allows you merge the patch
+interactively.  You can accept or reject a patch for each file.  You can also
+merge the patch interactively with xxdiff, and select for the merged results to
+be applied on the output file.</p>
+<p>If no &lt;patchfile&gt; is specified, xxdiff-patch attempts to read the patch from
+stdin.</p>
+<p>Important: the new (patched) file will always be shown on the right.  The
+patched file will display (patched) in its filename title.  When a decision is
+asked to the user, ACCEPT always means keep/save the file that appears on the
+right.  The script takes the following actions upon the answer:</p>
+<ul class="simple">
+<li>ACCEPT: keep/copy the file on the right side to the output file;</li>
+<li>REJECT: keep/copy the file on the left side to the output file;</li>
+<li>MERGED: copy the merged file on the output file;</li>
+</ul>
+<p>If a patch for a file is accepted or merged, before being overwritten, a copy of
+the original files are saved with the extension .orig, like patch itself.</p>
+<p>Note: notice that the --reverse and --invert options below are implementing
+orthogonal behaviour.  It can be confusing to understand the differences
+between these two.  If the a reverse patch is indeed reverting changes (and
+not constructed in the incorrect order), applying the patch will revert the
+changes as well (the display order is not changed).  This behaviour is
+exactly like that of patch.  Using invert, however, changes the logic of
+what this script does upon accepting or rejecting a patch.  In any case, you
+will always find the 'new file if accepted' on the right side and the
+patched file is indicated with a string in the filename title.</p>
+<div class="section" id="examples">
+<h2><a class="toc-backref" href="#id2" name="examples">Examples</a></h2>
+<blockquote>
+<p>To apply a patch, simply cd into the root of the directory where the patch
+should be applied, and invoke like this:</p>
+<blockquote>
+cat patchfile | xxdiff-patch</blockquote>
+<p>To preview the changes that have been made in a cvs checkout area, use the
+following command:</p>
+<pre class="literal-block">
+cvs diff | xxdiff-patch --reverse --invert --preview
+</pre>
+<p>(For better cvs-specific behaviour about committing changes, see script
+xxdiff-cvs-diff.)</p>
+</blockquote>
+<div class="important">
+<p class="admonition-title">Important</p>
+This script is unfinished, we still need to implement file addition/removal
+support.</div>
+</div>
+</div>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#id3" name="usage">Usage</a></h1>
+<pre class="literal-block">
+xxdiff-patch [&lt;options&gt;] [&lt;patchfile&gt;]
+</pre>
+</div>
+<div class="section" id="options">
+<h1><a class="toc-backref" href="#id4" name="options">Options</a></h1>
+<pre class="literal-block">
+--version             show program's version number and exit
+-h, --help            show this help message and exit
+-xOPTS, --xxdiff-options=OPTS
+                      specifies additional options to pass on to xxdiff.
+-pOPTS, --patch-options=OPTS
+                      specifies additional options to pass on to patch.
+-sSTRIP, --strip=STRIP
+                      strip option to patch, provided for convenience.
+-R, --reverse         apply the patch as a reverse patch (see
+                      patch(1) option --reverse).  The patched file will be
+                      shown as the new file regardless.
+-I, --invert          change the order of the displayed files, so that
+                      the patched file shows as the old file.  Accepting a
+                      change will thus do nothing and rejecting a change
+                      will copy the patched file over.
+-n, --dry-run, --preview
+                      don't apply the patch, just show the
+                      differences (you don't have to make any decisions).
+-B, --no-backup       disable backup filesa
+</pre>
+</div>
+<div class="section" id="download">
+<h1><a class="toc-backref" href="#id5" name="download">Download</a></h1>
+<p><a class="reference" href="../bin/xxdiff-patch-UNFINISHED">Download program here</a>.</p>
+</div>
+</div>
+</body>
+</html>

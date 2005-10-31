@@ -3,7 +3,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2001-2002, Martin Blais <blais@iro.umontreal.ca>
+#* Copyright (C) 2001-2002, Martin Blais <blais@furius.ca>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -250,7 +250,7 @@ def sortRevisionList( list ):
 #-------------------------------------------------------------------------------
 #
 def getModule( dir ):
-    """Returns the name of the module with given directory."""
+    """Returns the name of the module within the given directory."""
 
     # go cat the CVS/Repository file because only it is guaranteed to
     # contain the correct module name.
@@ -260,6 +260,25 @@ def getModule( dir ):
         f.close()
     except:
         raise Error('Reading repository file for module.')
+    return module.strip()
+
+#-------------------------------------------------------------------------------
+#
+def getTag( dir ):
+    """Returns the name of the tag within the given directory.
+    If no tag exists, return None."""
+
+    fn = os.path.join(dir, 'CVS', 'Tag')
+    if not os.path.exists(fn):
+        return None
+    
+    # go cat the CVS/Tag file.
+    try:
+        f = open(fn, 'r')
+        module = f.readline()
+        f.close()
+    except:
+        raise Error('Reading tag file for module.')
     return module.strip()
 
 #-------------------------------------------------------------------------------
@@ -778,6 +797,11 @@ class Status:
             return rev_prev
         else:
             return self.parentBranchRev(rev_or_tag)
+
+    def isBranched( self ):
+        """Returns true if the current sticky tag of this status is a branch
+        tag."""
+        return isBranchRev(self.sticky_tag)
 
     
 #===============================================================================

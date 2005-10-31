@@ -1,0 +1,147 @@
+dnl
+dnl $Id: configure.in 732 2004-01-21 22:00:17Z  $
+dnl $Date: 2004-01-21 17:00:17 -0500 (Wed, 21 Jan 2004) $
+dnl
+dnl Copyright (C) 1999-2001  Martin Blais <blais@furius.ca>
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+dnl
+
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src/defs.h)
+
+XXDIFF_MAJOR_VERSION=1
+XXDIFF_MINOR_VERSION=13
+
+AC_SUBST(XXDIFF_MAJOR_VERSION)
+AC_SUBST(XXDIFF_MINOR_VERSION)
+
+XXDIFF_VERSION=$XXDIFF_MAJOR_VERSION.$XXDIFF_MINOR_VERSION
+AC_SUBST(XXDIFF_VERSION)
+
+dnl Use the following for version with micro number.
+dnl XXDIFF_MICRO_VERSION=0
+dnl AC_SUBST(XXDIFF_MICRO_VERSION)
+dnl XXDIFF_VERSION=$XXDIFF_MAJOR_VERSION.$XXDIFF_MINOR_VERSION.$XXDIFF_MICRO_VERSION
+
+
+AM_INIT_AUTOMAKE(xxdiff,${XXDIFF_VERSION})
+AM_PROG_LIBTOOL
+
+dnl Really required since autoconf 2.50.
+AC_CANONICAL_BUILD
+
+AC_PROG_MAKE_SET
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_PROG_YACC
+dnl AM_PROG_LEX
+
+AC_PATH_QT_MOC
+AC_PATH_PROG(UIC, uic, $QTDIR/bin/uic, $QTDIR/bin:$PATH)
+
+dnl Checks for libraries +
+dnl Checks for C compiler flags that X needs and the X linker flags
+AC_PATH_XTRA
+CFLAGS="$CFLAGS $X_CFLAGS"
+LDFLAGS="$LDFLAGS $X_LIBS"
+dnl AC_SUBST(LDFLAGS)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_HEADER_DIRENT
+AC_HEADER_STAT
+AC_TYPE_SIGNAL
+dnl AC_REPLACE_GNU_GETOPT
+
+AC_CHECK_HEADERS(limits.h unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for library functions.
+AC_CHECK_FUNCS(strdup strerror strstr)
+
+
+dnl
+dnl Automake does not let us have GNU make conditionals inside Makefile.am
+dnl so we've got to use automake conditionals instead, which have to be 
+dnl declared here.
+dnl 
+AM_CONDITIONAL(IS_COMPILER_GNU, test x$GXX = xyes)
+
+AM_CONDITIONAL(IS_COMPILER_MIPSPRO,
+test x$build_vendor = xsgi)
+
+AM_CONDITIONAL(IS_COMPILER_SUNWSPRO,
+test x$build_vendor = xsun)
+
+AM_CONDITIONAL(IS_COMPILER_COMPAQCXX,
+echo $build_triplet | grep -q '\-osf' && $CXX -V | grep -q Compaq)
+
+dnl
+dnl xxdiff options
+dnl
+
+dnl
+dnl debug option
+dnl
+AC_ARG_ENABLE(debug,
+[  --enable-debug          turn on debugging],
+[case "${enableval}" in
+yes) debug=true ;;
+no)  debug=false ;;
+*) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+esac
+AC_MSG_RESULT([xxdiff option: debugging is on.])
+AC_DEFINE(XX_DEBUG)],
+[debug=false
+AC_MSG_RESULT([xxdiff option: debugging is off.])])
+
+AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
+
+
+dnl
+dnl static vs. dynamic linking
+dnl
+AC_ARG_ENABLE(linkstatic,
+[  --enable-linkstatic     restricts linking to static STLport and Qt libs],
+[case "${enableval}" in
+yes) linkstatic=true ;;
+no)  linkstatic=false ;;
+*) AC_MSG_ERROR(bad value ${enableval} for --enable-linkstatic) ;;
+esac
+AC_MSG_RESULT([xxdiff option: linking statically to STLport and Qt.])]
+AC_DEFINE(XX_LINKSTATIC),
+[linkstatic=false
+AC_MSG_RESULT([xxdiff option: linking dynamically to STLport and Qt.])])
+
+AM_CONDITIONAL(LINKSTATIC, test x$linkstatic = xtrue)
+
+
+dnl
+dnl use STLport or libstdc++
+dnl
+AC_ARG_ENABLE(stlport,
+[  --enable-stlport	   enable compiling with STLport.],
+AC_MSG_RESULT([xxdiff option: compiling using STLport.])
+AC_DEFINE(XX_USE_STLPORT),
+AC_MSG_RESULT([xxdiff option: compiling using libstdc++.])
+)
+
+AM_CONDITIONAL(USE_STLPORT, test x$stlport = xtrue)
+
+AC_OUTPUT(Makefile src/Makefile)

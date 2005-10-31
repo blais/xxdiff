@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -255,6 +255,9 @@ XxLine::XxLine(
          break;
       case DIRECTORIES:
          XX_ASSERT( fline0 != -1 && fline1 != -1 /*&& fline2 != -1*/ );
+         break;
+      case NB_TYPES:
+         XX_ABORT();
          break;
    }
 #endif

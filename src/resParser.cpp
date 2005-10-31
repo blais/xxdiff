@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,9 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qstring.h>
+#if (QT_VERSION >= 0x030000)
 #include <qstylefactory.h>
+#endif
 
 #include <stdexcept>
 #include <iostream>
@@ -186,6 +188,9 @@ StringToken boolkwdList[] = {
    { "ExitIfNoConflicts", EXIT_IF_NO_CONFLICTS,
      "If true, exit if after an automatic merge there are no conflicts." },
 
+   { "ExitWithMergeStatus", EXIT_WITH_MERGE_STATUS,
+     "If true, exit with error code 0 if all merges selected and saved." },
+
    { "AutoSelectMerge", SELECT_MERGE,
      "Pre-selected non-conflictual regions as an automatic merge would." },
 
@@ -235,19 +240,13 @@ only, and unless you're doing development you should leave this to default \
      "(Not implemented) Use internal diff computation, does not spawn external \
 diff program." }
 
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   { "ForceSaveMergedFIle", FORCE_SAVE_MERGED_FILE,
-     "Put xxdiff in a mode where it is forced to save to the merged file. This \
-option is made available as a resource because it was easy but you\'ll most \
-likely want to use it rather from the command line." }
-#endif
-
 };
 
 /* Be careful: order must be the same as for token declaration. */
 XxBoolOpt boolMap[] = {
    BOOL_EXIT_ON_SAME,
    BOOL_EXIT_IF_NO_CONFLICTS,
+   BOOL_EXIT_WITH_MERGE_STATUS,
    BOOL_SELECT_MERGE,
    BOOL_IGNORE_HORIZONTAL_WS,
    BOOL_IGNORE_PERHUNK_WS,
@@ -261,19 +260,20 @@ XxBoolOpt boolMap[] = {
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
    BOOL_DIRDIFF_RECURSIVE,
    BOOL_USE_INTERNAL_DIFF
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   BOOL_FORCE_SAVE_MERGED_FILE
-#endif
 };
 
 StringToken accelList[] = {
    { "Exit", ACCEL_EXIT, 0 },
+   { "ExitAccept", ACCEL_EXIT_ACCEPT, 0 },
+   { "ExitMerged", ACCEL_EXIT_MERGED, 0 },
+   { "ExitReject", ACCEL_EXIT_REJECT, 0 },
    { "OpenLeft", ACCEL_OPEN_LEFT, 0 },
    { "OpenMiddle", ACCEL_OPEN_MIDDLE, 0 },
    { "OpenRight", ACCEL_OPEN_RIGHT, 0 },
    { "SaveAsLeft", ACCEL_SAVE_AS_LEFT, 0 },
    { "SaveAsMiddle", ACCEL_SAVE_AS_MIDDLE, 0 },
    { "SaveAsRight", ACCEL_SAVE_AS_RIGHT, 0 },
+   { "SaveAsMerged", ACCEL_SAVE_AS_MERGED, 0 },
    { "SaveAs", ACCEL_SAVE_AS, 0 },
    { "SaveSelectedOnly", ACCEL_SAVE_SELECTED_ONLY, 0 },
    { "EditLeft", ACCEL_EDIT_LEFT, 0 },
@@ -292,6 +292,7 @@ StringToken accelList[] = {
    { "EditDiffOptions", ACCEL_EDIT_DIFF_OPTIONS, 0 },
    { "EditDisplayOptions", ACCEL_EDIT_DISPLAY_OPTIONS, 0 },
    { "DiffFilesAtCursor", ACCEL_DIFF_FILES_AT_CURSOR, 0 },
+   { "NextAndDiffFiles", ACCEL_NEXT_AND_DIFF_FILES, 0 },
    { "CopyFileRightToLeft", ACCEL_COPY_RIGHT_TO_LEFT, 0 },
    { "CopyFileLeftToRight", ACCEL_COPY_LEFT_TO_RIGHT, 0 },
    { "RemoveFileLeft", ACCEL_REMOVE_LEFT, 0 },
@@ -821,8 +822,10 @@ char lexerBuffer[ LEX_BUFFER_MAX ];
 #pragma reset woff 1506
 #endif
 
-// Prevent warning under IRIX and Linux.
+#ifdef COMPILER_MIPSPRO
+// Prevent warning under IRIX.
 char* dummy_full_match = yy_full_match;
+#endif
 
 //------------------------------------------------------------------------------
 //
@@ -986,7 +989,8 @@ void XxResParser::parse( QTextStream& input, XxResources& resources )
       yylineno = 1; // Reset lineno.
    
       yyrestart( 0 );
-      YY_FLUSH_BUFFER;
+      // YY_FLUSH_BUFFER is undef'ed, use its definition to flush the buffer.
+      yy_flush_buffer( YY_CURRENT_BUFFER );
       BEGIN(INITIAL);
       yyparse( &resources );
    }
@@ -1082,13 +1086,25 @@ void XxResParser::genInitFile(
    const QFont& fontApp = res1.getFontApp();
    if ( !XxResources::compareFonts( fontApp, res2.getFontApp() ) ) {
       os << searchTokenName( STPARAM(kwdList), FONT_APP )
-         << ": \"" << fontApp.rawName() << "\"" << endl;
+         << ": \"" 
+#if (QT_VERSION >= 0x030000)
+         << fontApp.toString()
+#else
+         << fontApp.rawName()
+#endif
+         << "\"" << endl;
    }
 
    const QFont& fontText = res1.getFontText();
    if ( !XxResources::compareFonts( fontText, res2.getFontText() ) ) {
       os << searchTokenName( STPARAM(kwdList), FONT_TEXT ) 
-         << ": \"" << fontText.rawName() << "\"" << endl;
+         << ": \""
+#if (QT_VERSION >= 0x030000)
+         << fontText.toString()
+#else
+         << fontText.rawName()
+#endif
+         << "\"" << endl;
    }
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
@@ -1266,11 +1282,23 @@ void XxResParser::listResources( QTextStream& os )
 
    const QFont& fontApp = res.getFontApp();
    os << searchTokenName( STPARAM(kwdList), FONT_APP )
-      << ": \"" << fontApp.rawName().latin1() << "\"" << endl;
+      << ": \"" 
+#if (QT_VERSION >= 0x030000)
+      << fontApp.toString()
+#else
+      << fontApp.rawName()
+#endif
+      << "\"" << endl;
 
    const QFont& fontText = res.getFontText();
    os << searchTokenName( STPARAM(kwdList), FONT_TEXT ) 
-      << ": \"" << fontText.rawName().latin1() << "\"" << endl;
+      << ": \""
+#if (QT_VERSION >= 0x030000)
+      << fontText.toString()
+#else
+      << fontText.rawName()
+#endif
+      << "\"" << endl;
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
    const char* colorStr = searchTokenName( STPARAM(kwdList), COLOR );
@@ -1449,7 +1477,13 @@ QString XxResParser::getResourceRef()
       const QFont& fontApp = res.getFontApp();
       os << tok->_name << ": \"";
       if ( qApp != 0 ) {
-         os << XxHelp::xmlize( fontApp.rawName() );
+         os << XxHelp::xmlize( 
+#if (QT_VERSION >= 0x030000)
+            fontApp.toString()
+#else
+            fontApp.rawName()
+#endif
+         );
       }
       else {
          os << "&lt;xfld-font-spec&gt;";
@@ -1467,7 +1501,13 @@ QString XxResParser::getResourceRef()
       const QFont& fontText = res.getFontText();
       os << tok->_name << ": \"";
       if ( qApp != 0 ) {
-         os << XxHelp::xmlize( fontText.rawName() );
+         os << XxHelp::xmlize(
+#if (QT_VERSION >= 0x030000)
+            fontText.toString()
+#else
+            fontText.rawName()
+#endif
+         );
       }
       else {
          os << "&lt;xfld-font-spec&gt;";

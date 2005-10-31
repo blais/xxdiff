@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,9 @@
 #include <qlayout.h>
 #include <qscrollbar.h>
 #include <qlabel.h>
+#if (QT_VERSION >= 0x030000)
 #include <qstylefactory.h>
+#endif
 #include <qfont.h>
 #include <qmessagebox.h>
 #include <qfiledialog.h>
@@ -111,11 +113,15 @@
 #include "pixmaps/select_region_unselect.xpm"
 #include "pixmaps/split_swap_join.xpm"
 #include "pixmaps/diff_files.xpm"
+#include "pixmaps/diff_files_next.xpm"
 #include "pixmaps/save_as_left.xpm"
 #include "pixmaps/save_as_middle.xpm"
 #include "pixmaps/save_as_right.xpm"
 #include "pixmaps/save_as_merged.xpm"
 #include "pixmaps/save_as.xpm"
+#include "pixmaps/return_accept.xpm"
+#include "pixmaps/return_reject.xpm"
+#include "pixmaps/return_merged.xpm"
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -155,6 +161,7 @@ enum MenuIds {
    ID_IgnoreFileMiddle,
    ID_IgnoreFileRight,
    ID_View_DiffFilesAtCursor,
+   ID_View_NextAndDiffFiles,
    ID_View_CopyRightToLeft,
    ID_View_CopyLeftToRight,
    ID_View_RemoveLeft,
@@ -247,7 +254,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _cmdline( cmdline ),
    _newlineChar( '\n' )
 {
-   if ( _cmdline._macNewlines ) { 
+   if ( _cmdline._macNewlines ) {
       _newlineChar = '\015';
    }
 
@@ -255,11 +262,13 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _resources = buildResources();
 
 #ifndef XX_KDE
+#if (QT_VERSION >= 0x030000)
    // By default, if not specified, force SGI style.
    if ( _cmdline._forceStyle == false ) {
       _style = QStyleFactory::create( _resources->getStyleKey() );
       setStyle( _style );
    }
+#endif
 #endif
 
 #ifndef XX_KDE
@@ -271,9 +280,15 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    // Read in the file names.
    QString filenames[3];
    QString displayFilenames[3];
+   QFileInfo fileInfos[3];
    bool isTemporary[3] = { false, false, false };
    _nbFiles = processFileNames(
-      _cmdline, filenames, displayFilenames, isTemporary, _filesAreDirectories
+      _cmdline,
+      filenames,
+      displayFilenames,
+      fileInfos,
+      isTemporary,
+      _filesAreDirectories
    );
 
    // Note: this is already pretty much validated in XxCmdline.
@@ -298,21 +313,15 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       _nbFiles = 2;
    }
 
-   // Add extra diff arguments.
+   // Add the extra diff arguments to all the command strings, we don't want to
+   // bother with finding out which command, because it may change at runtime
+   // (perhaps not yet supported but might in the future).
    XX_ASSERT( _resources != 0 );
-   XxCommand cmdResId;
-   if ( _filesAreDirectories == false ) {
-      cmdResId = _nbFiles == 2 ?
-         CMD_DIFF_FILES_2 :
-         CMD_DIFF_FILES_3;
+   for ( int ii = 0; ii < 4; ++ii ) {
+      QString cmd = _resources->getCommand( XxCommand(ii) );
+      XxOptionsDialog::addToCommand( cmd, _cmdline._extraDiffArgs );
+      _resources->setCommand( XxCommand(ii), cmd );
    }
-   else {
-      cmdResId = CMD_DIFF_DIRECTORIES;
-   }
-
-   QString cmd = _resources->getCommand( cmdResId );
-   XxOptionsDialog::addToCommand( cmd, _cmdline._extraDiffArgs );
-   _resources->setCommand( cmdResId, cmd );
 
    // Create the interface.
    createUI();
@@ -332,6 +341,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
                readFile( ii,
                          filenames[ii],
                          displayFilenames[ii],
+                         fileInfos[ii],
                          isTemporary[ii] )
             );
             _files[ii] = newbuf;
@@ -344,6 +354,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
             readFile( 0,
                       filenames[0],
                       displayFilenames[0],
+                      fileInfos[0],
                       isTemporary[0] )
          );
          _files[0] = newbuf;
@@ -360,6 +371,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
             readFile( 0,
                       filenames[0],
                       displayFilenames[0],
+                      fileInfos[0],
                       isTemporary[0] )
          );
          _files[0] = newbuf;
@@ -367,7 +379,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
          // Make a proxy for the other buffer.
          std::auto_ptr<XxBuffer> newbuf2(
             new XxBuffer(
-               (*_files[0]), filenames[0], displayFilenames[0]
+               (*_files[0]), filenames[0], displayFilenames[0], fileInfos[0]
             )
          );
          _files[1] = newbuf2;
@@ -376,7 +388,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
             // Make a proxy for the other buffer.
             std::auto_ptr<XxBuffer> newbuf2(
                new XxBuffer(
-                  (*_files[0]), filenames[0], displayFilenames[0]
+                  (*_files[0]), filenames[0], displayFilenames[0], fileInfos[0]
                )
             );
             _files[2] = newbuf2;
@@ -384,6 +396,13 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       }
 
       bool succ = processDiff();
+
+      // Here we just finished reading all the files and processing the diffs,
+      // we're ready to run without the input files at all. Spit out a note
+      // about that if requested.
+      if ( _cmdline._indicateInputProcessed == true ) {
+         std::cout << "INPUT-PROCESSED" << std::endl << std::flush;
+      }
 
       // Adjust UI elements
       // Set filename label.
@@ -492,6 +511,7 @@ uint XxApp::processFileNames(
    const XxCmdline& cmdline,
    QString          filenames[3],
    QString          displayFilenames[3],
+   QFileInfo        fileInfos[3],
    bool             isTemporary[3],
    bool&            filesAreDirectories
 )
@@ -527,8 +547,8 @@ uint XxApp::processFileNames(
             isDirectory[ii] = false;
          }
          else {
-            QFileInfo finfo( cmdline._filenames[ii] );
-            isDirectory[ii] = finfo.isDir();
+            fileInfos[ii] = QFileInfo( cmdline._filenames[ii] );
+            isDirectory[ii] = fileInfos[ii].isDir();
             if ( ! isDirectory[ii] ) {
                filePathIndex = ii;
                nbPathFiles++;
@@ -557,8 +577,7 @@ uint XxApp::processFileNames(
       // Find basename and append to directories.
       if ( !filesAreDirectories && nbPathFiles < nbFiles ) {
          XX_ASSERT( filePathIndex != -1 );
-         QFileInfo finfo( cmdline._filenames[ filePathIndex ] );
-         bn = finfo.fileName();
+         bn = fileInfos[filePathIndex].fileName();
       }
 
    }
@@ -574,8 +593,8 @@ uint XxApp::processFileNames(
       filesAreDirectories = false;
 
       if ( cmdline._nbFilenames == 1 ) {
-         QFileInfo finfo( cmdline._filenames[0] );
-         if ( finfo.isDir() ) {
+         fileInfos[0] = QFileInfo( cmdline._filenames[0] );
+         if ( fileInfos[0].isDir() ) {
             throw XxUsageError(
                XX_EXC_PARAMS,
                "Input in unmerge or single mode must be a file."
@@ -585,15 +604,23 @@ uint XxApp::processFileNames(
       }
    }
 
+   int newest = -1;
+   unsigned int newTime = 0;
    bool stdinSeen = false;
    for ( XxFno iii = 0; iii < cmdline._nbFilenames; ++iii ) {
       if ( cmdline._filenames[iii] == "-" ) {
          XX_ASSERT( stdinSeen == false );
          stdinSeen = true;
-
+         fileInfos[iii] = QFileInfo(); // also to mark that it's stdin.
          filenames[iii] = cmdline._filenames[iii];
          displayFilenames[iii] = cmdline._stdinFilename;
          isTemporary[iii] = true;
+         newest = true;
+#if (QT_VERSION >= 0x030000)
+         newTime = QDateTime::currentDateTime().toTime_t();
+#else
+         newTime = 0; // Not supported with qt2.
+#endif
       }
       else {
          QString fname = cmdline._filenames[iii];
@@ -602,15 +629,39 @@ uint XxApp::processFileNames(
             fname.append( "/" );
             XX_ASSERT( !bn.isEmpty() );
             fname.append( bn );
+            fileInfos[iii] = QFileInfo(fname);
          }
          displayFilenames[iii] = fname;
          filenames[iii] = fname;
          bool isdir;
-         XxUtil::testFile( filenames[iii], false, isdir );
+         XxUtil::testFile( filenames[iii], fileInfos[iii], false, isdir );
+#if (QT_VERSION >= 0x030000)
+         if ( fileInfos[iii].lastModified().toTime_t() > newTime ) {
+             newTime = fileInfos[iii].lastModified().toTime_t();
+             newest = iii;
+         }
+#else
+         newTime = 0; // Not supported with qt2.
+#endif
       }
+   }
 
+   for ( XxFno iii = 0; iii < cmdline._nbFilenames; ++iii ) {
       if ( ! cmdline._userFilenames[iii].isEmpty() ) {
-         displayFilenames[iii] = cmdline._userFilenames[iii];
+         if ( 0 > cmdline._userFilenames[iii].find('%') ) {
+            displayFilenames[iii] = cmdline._userFilenames[iii];
+         }
+         else {
+            if ( ! XxUtil::formatFilename( displayFilenames[iii],
+                                           cmdline._userFilenames[iii],
+                                           fileInfos[iii],
+                                           isTemporary[iii],
+                                           filenames[iii],
+                                           newest == iii ) ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Malformed %-format sequence in titles" );
+            }
+         }
       }
    }
 
@@ -740,8 +791,10 @@ void XxApp::createUI()
    //
    // Page motion.
    //
-   a->connectItem( a->insertItem(Key_Space), this, SLOT(pageDown()) );
-   a->connectItem( a->insertItem(Key_Backspace), this, SLOT(pageUp()) );
+
+   // Don't bind these, SPC is used for the dirdiffs.
+   // a->connectItem( a->insertItem(Key_Space), this, SLOT(pageDown()) );
+   // a->connectItem( a->insertItem(Key_Backspace), this, SLOT(pageUp()) );
 
    a->connectItem( a->insertItem(Key_Prior), this, SLOT(pageUp()) );
    a->connectItem( a->insertItem(Key_Next), this, SLOT(pageDown()) );
@@ -777,7 +830,9 @@ void XxApp::createUI()
    }
 
    // Connect closing window to quit().
+#if (QT_VERSION >= 0x030000)
    connect( this, SIGNAL(lastWindowClosed()), this, SLOT(quit()) );
+#endif
 
    //
    // Show it!
@@ -809,40 +864,57 @@ QkToolBar* XxApp::createToolbar()
       this, SLOT(saveAsMerged()), toolbar
    );
 
-   QPixmap pmSaveAsLeft(
-      const_cast<const char**>( save_as_left_xpm )
-   );
-   /*QToolButton* butSaveAsLeft = */new QToolButton(
-      pmSaveAsLeft,
-      "Save as left",
-      "Save as left",
-      this, SLOT(saveAsLeft()), toolbar
-   );
+   QToolButton* butSaveAsLeft = 0;
+   QToolButton* butSaveAsMiddle = 0;
+   QToolButton* butSaveAsRight = 0;
+   if ( _cmdline._unmerge == false ) {
 
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   /*QToolButton* butSaveAsMiddle = 0;*/
-#endif
-   if ( _nbFiles == 3 ) {
+      QPixmap pmSaveAsLeft(
+         const_cast<const char**>( save_as_left_xpm )
+      );
+      butSaveAsLeft = new QToolButton(
+         pmSaveAsLeft,
+         "Save as left",
+         "Save as left",
+         this, SLOT(saveAsLeft()), toolbar
+      );
+
+      if ( _nbFiles == 3 ) {
+         QPixmap pmSaveAsMiddle(
+            const_cast<const char**>( save_as_middle_xpm )
+         );
+         butSaveAsMiddle = new QToolButton(
+            pmSaveAsMiddle,
+            "Save as middle",
+            "Save as middle",
+            this, SLOT(saveAsMiddle()), toolbar
+         );
+      }
+
+      QPixmap pmSaveAsRight(
+         const_cast<const char**>( save_as_right_xpm )
+      );
+      butSaveAsRight = new QToolButton(
+         pmSaveAsRight,
+         "Save as right",
+         "Save as right",
+         this, SLOT(saveAsRight()), toolbar
+      );
+
+   }
+   else {
+
       QPixmap pmSaveAsMiddle(
          const_cast<const char**>( save_as_middle_xpm )
       );
       /*butSaveAsMiddle = */new QToolButton(
          pmSaveAsMiddle,
-         "Save as middle",
-         "Save as middle",
-         this, SLOT(saveAsMiddle()), toolbar
+         "Save as original",
+         "Save as original",
+         this, SLOT(saveAsLeft()), toolbar
       );
-   }
 
-   QPixmap pmSaveAsRight(
-      const_cast<const char**>( save_as_right_xpm )
-   );
-   QToolButton* butSaveAsRight = new QToolButton(
-      pmSaveAsRight,
-      "Save as right",
-      "Save as right",
-      this, SLOT(saveAsRight()), toolbar
-   );
+   }
 
    QPixmap pmSaveAs(
       const_cast<const char**>( save_as_xpm )
@@ -854,18 +926,8 @@ QkToolBar* XxApp::createToolbar()
       this, SLOT(saveAs()), toolbar
    );
 
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
-      butSaveAsLeft->setEnabled( false );
-      if ( butSaveAsMiddle ) {
-         butSaveAsMiddle->setEnabled( false );
-      }
-      butSaveAsRight->setEnabled( false );
-      butSaveAs->setEnabled( false );
-   }
-#endif
-
-   if ( _cmdline._unmerge == true || _cmdline._single == true ) {
+   if ( _cmdline._single == true ) {
+      XX_CHECK( butSaveAsRight );
       butSaveAsRight->setEnabled( false );
    }
 
@@ -1022,6 +1084,52 @@ QkToolBar* XxApp::createToolbar()
          "Diff files at cursor",
          this, SLOT(diffFilesAtCursor()), toolbar
       );
+
+      QPixmap pmNextAndDiffFiles(
+         const_cast<const char**>( diff_files_next_xpm )
+      );
+      new QToolButton(
+         pmNextAndDiffFiles,
+         "Move to next difference and diff files at cursor",
+         "Move to next difference and diff files at cursor",
+         this, SLOT(nextAndDiffFiles()), toolbar
+      );
+   }
+
+   toolbar->addSeparator();
+
+   // Review status.
+   if ( _cmdline._forceDecision == true ) {
+
+      QPixmap pmQuitReject(
+         const_cast<const char**>( return_reject_xpm )
+      );
+      /*butQuitReject = */new QToolButton(
+         pmQuitReject,
+         "Exit with output indicating rejection of the change.",
+         "Quit Reject",
+         this, SLOT(quitReject()), toolbar
+      );
+
+      QPixmap pmQuitMerged(
+         const_cast<const char**>( return_merged_xpm )
+      );
+      /*butQuitMerged = */new QToolButton(
+         pmQuitMerged,
+         "Exit with output indicating changes have been merged manually.",
+         "Quit Merged",
+         this, SLOT(quitMerged()), toolbar
+      );
+
+      QPixmap pmQuitAccept(
+         const_cast<const char**>( return_accept_xpm )
+      );
+      /*butQuitAccept = */new QToolButton(
+         pmQuitAccept,
+         "Exit with output indicating acceptance of the change.",
+         "Quit Accept",
+         this, SLOT(quitAccept()), toolbar
+      );
    }
 
    return toolbar;
@@ -1057,24 +1165,30 @@ void XxApp::createMenus()
    fileMenu->insertSeparator();
 
    int ids[6];
+   if ( _cmdline._unmerge == false ) {
+      /*ids[0] = */fileMenu->insertItem(
+         "Save as left", this, SLOT(saveAsLeft()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+      );
+      if ( _nbFiles == 3 ) {
+         /*ids[1] = */fileMenu->insertItem(
+            "Save as middle", this, SLOT(saveAsMiddle()),
+            _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
+         );
+      }
+      ids[2] = fileMenu->insertItem(
+         "Save as right", this, SLOT(saveAsRight()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+      );
 
-   /*ids[0] = */fileMenu->insertItem(
-      "Save as left", this, SLOT(saveAsLeft()),
-      _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
-   );
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   ids[1] = -1;
-#endif
-   if ( _nbFiles == 3 ) {
-      /*ids[1] = */fileMenu->insertItem(
-         "Save as middle", this, SLOT(saveAsMiddle()),
-         _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
+   }
+   else {
+      /*ids[0] = */fileMenu->insertItem(
+         "Save as original", this, SLOT(saveAsLeft()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
       );
    }
-   ids[2] = fileMenu->insertItem(
-      "Save as right", this, SLOT(saveAsRight()),
-      _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
-   );
+
    fileMenu->insertItem(
       "Save as merged", this, SLOT(saveAsMerged()),
       _resources->getAccelerator( ACCEL_SAVE_AS_MERGED )
@@ -1088,16 +1202,6 @@ void XxApp::createMenus()
       _resources->getAccelerator( ACCEL_SAVE_SELECTED_ONLY )
    );
 
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
-      for ( int ii = 0; ii < 5; ++ii ) {
-         if ( ids[ii] != -1 ) {
-            fileMenu->setItemEnabled( ids[ii], false );
-         }
-      }
-   }
-#endif
-
    fileMenu->insertSeparator();
    fileMenu->insertItem(
       "Redo diff", this, SLOT(redoDiff()),
@@ -1106,7 +1210,7 @@ void XxApp::createMenus()
    fileMenu->insertSeparator();
    fileMenu->insertItem(
       "Edit left file", this, SLOT(editLeft()),
-     _resources->getAccelerator( ACCEL_EDIT_LEFT )
+      _resources->getAccelerator( ACCEL_EDIT_LEFT )
    );
    if ( _nbFiles == 3 ) {
       fileMenu->insertItem(
@@ -1126,10 +1230,27 @@ void XxApp::createMenus()
 
    fileMenu->insertSeparator();
 
-   fileMenu->insertItem(
-      "Exit", this, SLOT(quit()),
-      _resources->getAccelerator( ACCEL_EXIT )
-   );
+   if ( _cmdline._forceDecision == false ) {
+      fileMenu->insertItem(
+         "Exit", this, SLOT(quit()),
+         _resources->getAccelerator( ACCEL_EXIT )
+      );
+   }
+   else {
+
+      fileMenu->insertItem(
+         "Exit with ACCEPT", this, SLOT(quitAccept()),
+         _resources->getAccelerator( ACCEL_EXIT_ACCEPT )
+      );
+      fileMenu->insertItem(
+         "Exit with MERGED", this, SLOT(quitMerged()),
+         _resources->getAccelerator( ACCEL_EXIT_MERGED )
+      );
+      fileMenu->insertItem(
+         "Exit with REJECT", this, SLOT(quitReject()),
+         _resources->getAccelerator( ACCEL_EXIT_REJECT )
+      );
+   }
 
    //---------------------------------------------------------------------------
 
@@ -1165,6 +1286,10 @@ void XxApp::createMenus()
       _menuids[ ID_View_DiffFilesAtCursor ] = viewMenu->insertItem(
          "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
          _resources->getAccelerator( ACCEL_DIFF_FILES_AT_CURSOR )
+      );
+      _menuids[ ID_View_NextAndDiffFiles ] = viewMenu->insertItem(
+         "Next and diff files", this, SLOT(nextAndDiffFiles()),
+         _resources->getAccelerator( ACCEL_NEXT_AND_DIFF_FILES )
       );
       _menuids[ ID_View_CopyLeftToRight ] = viewMenu->insertItem(
          "Copy left file to right", this, SLOT(copyFileLeftToRight()),
@@ -1612,10 +1737,11 @@ void XxApp::createMenus()
 //------------------------------------------------------------------------------
 //
 std::auto_ptr<XxBuffer> XxApp::readFile(
-   const XxFno    no,
-   const QString& filename,
-   const QString& displayFilename,
-   bool           isTemporary
+   const XxFno      no,
+   const QString&   filename,
+   const QString&   displayFilename,
+   const QFileInfo& fileInfo,
+   bool             isTemporary
 )
 {
    XX_ASSERT( 0 <= no && no <= 2 );
@@ -1640,6 +1766,7 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
             new XxBuffer(
                filename,
                displayFilename,
+               fileInfo,
                _resources->getBoolOpt( BOOL_HIDE_CR ),
                isTemporary,
                _newlineChar
@@ -1847,6 +1974,11 @@ bool XxApp::processDiff()
             XX_EXC_PARAMS,
             "Directory diffs can only be performed with two files."
          );
+      }
+
+      if ( _cmdline._forceDecision == true ) {
+         throw XxUsageError( XX_EXC_PARAMS,
+                             "Cannot force decision on directory diffs." );
       }
 
       XxBuilderDirs2* dirsBuilder = new XxBuilderDirs2(
@@ -2078,6 +2210,7 @@ void XxApp::updateWidgets()
       if ( _diffs.get() ) {
          remNb = _diffs->countRemainingUnselected();
       }
+
 // FIXME error do this on diff change not on update
       _remUnselView->setNum( int(remNb) );
 
@@ -2102,6 +2235,35 @@ void XxApp::updateWidgets()
 void XxApp::onNbLinesChanged()
 {
    emit textSizeChanged();
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxApp::askOverwrite( const QString& filename ) const
+{
+   // Check for file existence.
+   QFileInfo finfo( filename );
+   if ( finfo.exists() ) {
+      QString msg;
+      {
+         QTextOStream oss( &msg );
+         oss << "File \"" << filename << "\" exists";
+         if ( ! finfo.isWritable() ) {
+            oss << " (AND IS NOT WRITABLE)";
+         }
+         oss << ", overwrite?";
+      }
+
+      int resp = QMessageBox::warning(
+         _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
+      );
+      if ( resp == 1 ) {
+         // User has canceled.
+         return false;
+      }
+      // Continue anyway, overwrite file accepted.
+   }
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -2178,25 +2340,8 @@ bool XxApp::saveToFile(
    XX_ASSERT( !f.isEmpty() );
 
    if ( !overwrite ) {
-      // Check for file existence.
-      QFileInfo finfo( f );
-      if ( finfo.exists() ) {
-         QString msg;
-         if ( finfo.isWritable() ) {
-            msg = QString("File exists, overwrite?");
-         }
-         else {
-            msg = QString("File exists (AND IS NOT WRITABLE), overwrite?");
-         }
-
-         int resp = QMessageBox::warning(
-            _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
-         );
-         if ( resp == 1 ) {
-            // User has canceled.
-            return false;
-         }
-         // Continue anyway.
+      if ( ! askOverwrite( f ) ) {
+         return false;
       }
    }
 
@@ -2289,8 +2434,10 @@ void XxApp::editFile( const QString& filename )
       }
 
       /* set socket reuse. */
+      /* Note: the const char* cast is necessary for SUNWspro. */
       int reuse = 1;
-      ::setsockopt( _sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int) );
+      ::setsockopt( _sockfd, SOL_SOCKET, SO_REUSEADDR,
+                    (const char *)&reuse, sizeof(int) );
 
       /* Give the socket a name.  */
       struct sockaddr_in name;
@@ -2394,11 +2541,12 @@ void XxApp::openFile( const XxFno no )
          box->show();
          return;
       }
+
+      QFileInfo fileInfo( f );
       std::auto_ptr<XxBuffer> newbuf(
-         readFile( no, f, f, false )
+         readFile( no, f, f, fileInfo, false )
       );
       _files[no] = newbuf;
-
 
       bool succ = processDiff();
 
@@ -2470,6 +2618,7 @@ void XxApp::onRedoDiff()
                   readFile( ii,
                             buffer.getName(),
                             buffer.getDisplayName(),
+                            buffer.getFileInfo(),
                             buffer.isTemporary() )
                );
                _files[ii] = newbuf;
@@ -2486,6 +2635,7 @@ void XxApp::onRedoDiff()
             readFile( 0,
                       _files[0]->getName(),
                       _files[0]->getDisplayName(),
+                      _files[0]->getFileInfo(),
                       _files[0]->isTemporary() )
          );
          _files[0] = newbuf;
@@ -2504,6 +2654,8 @@ void XxApp::onRedoDiff()
                readFile( 0,
                          _files[0]->getName(),
                          _files[0]->getDisplayName(),
+                         // FIXME not sure if we should redo fileinfo here...
+                         _files[0]->getFileInfo(),
                          _files[0]->isTemporary() )
             );
             _files[0] = newbuf;
@@ -2512,7 +2664,8 @@ void XxApp::onRedoDiff()
             std::auto_ptr<XxBuffer> newbuf2(
                new XxBuffer( (*_files[0]),
                              _files[0]->getName(),
-                             _files[0]->getDisplayName() )
+                             _files[0]->getDisplayName(),
+                             _files[0]->getFileInfo() )
             );
             _files[1] = newbuf2;
 
@@ -2521,7 +2674,8 @@ void XxApp::onRedoDiff()
                std::auto_ptr<XxBuffer> newbuf2(
                   new XxBuffer( (*_files[0]),
                                 _files[0]->getName(),
-                                _files[0]->getDisplayName() )
+                                _files[0]->getDisplayName(),
+                                _files[0]->getFileInfo() )
                );
                _files[2] = newbuf2;
             }
@@ -2623,7 +2777,12 @@ void XxApp::saveAsRight()
 void XxApp::saveAsMerged()
 {
    QString mergedName = getMergedFilename();
-   saveToFile( mergedName, false );
+
+   // Note: overwrite automatically if merged filename as on the cmdline.
+   saveToFile( mergedName,
+               false,
+               false /*default*/,
+               ! _cmdline._mergedFilename.isEmpty() );
 }
 
 //------------------------------------------------------------------------------
@@ -2640,6 +2799,11 @@ bool XxApp::validateNeedToSave( uint no ) const
 {
    if ( _diffs.get() == 0 ) {
       return false;
+   }
+
+   // We always need to save an unmerged file.
+   if ( _cmdline._unmerge == true ) {
+      return true;
    }
 
    if ( _diffs->checkSelections( XxLine::Selection(no) ) == true ) {
@@ -2722,24 +2886,8 @@ void XxApp::saveSelectedOnly()
    }
 
    // Check for file existence.
-   QFileInfo finfo( f );
-   if ( finfo.exists() ) {
-      QString msg;
-      if ( finfo.isWritable() ) {
-         msg = QString("File exists, overwrite?");
-      }
-      else {
-         msg = QString("File exists (AND IS NOT WRITABLE), overwrite?");
-      }
-
-      int resp = QMessageBox::warning(
-         _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
-      );
-      if ( resp == 1 ) {
-         // User has canceled.
-         return;
-      }
-      // Continue anyway.
+   if ( ! askOverwrite( f ) ) {
+      return;
    }
 
    QFile outfile( f );
@@ -2810,7 +2958,7 @@ void XxApp::quit()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::exit( int retcode )
+void XxApp::exit( int retcode, const char* decisionString )
 {
    static bool exited = false;
    if ( exited == false ) {
@@ -2823,13 +2971,12 @@ void XxApp::exit( int retcode )
 
    // If an output file is request upon exiting, do it here.
    // This can only be requested from the cmdline.
-   if ( _cmdline._outputOnExit == true ) {
-      QString mergedName = getMergedFilename();
-      if ( ! saveToFile(
-              mergedName, false, !_mainWindow->isVisible(), true
-           ) ) {
-         exited = false;
-         return; // Don't quit! Output *IS* required.
+   if ( _cmdline._forceDecision == true ) {
+      if ( decisionString != 0 ) {
+         std::cout << decisionString << std::endl;
+      }
+      else {
+         std::cout << "NODECISION" << std::endl;
       }
    }
    else {
@@ -2852,6 +2999,22 @@ void XxApp::exit( int retcode )
             // Continue anyway.
          }
       }
+   }
+
+   if ( _resources->getBoolOpt( BOOL_EXIT_WITH_MERGE_STATUS ) == true) {
+     // Determine Merge Status
+     // If NOT merges were selected, OR NOT all merge selection saved,
+     // merge is considered uncompleted
+     //
+     if ((_diffs->isAllSelected() == false) ||
+         ((_diffs.get() != 0) &&
+          ((_diffs->isDirty() == true) &&
+           (_diffs->isSomeSelected() == true)))) {
+         _returnValue = 3; // diff uses 1,2 so use 3 to be 'diff'erent!
+     }
+     else {
+         _returnValue = 0;
+     }
    }
 
    QkApplication::exit( retcode );
@@ -2948,6 +3111,7 @@ void XxApp::diffFilesAtCursor()
 
    // Get filenames.
    QStringList filenames;
+   const QString * titles[3] = { NULL, NULL, NULL };
 
    XxDln cursorLine = getCursorLine();
    const XxLine& line = _diffs->getLine( cursorLine );
@@ -2961,6 +3125,15 @@ void XxApp::diffFilesAtCursor()
          XX_ASSERT( empty == false );
 
          filenames.append( _files[ii]->getBufferAtLine( fline ) );
+
+         // Add the title there if we have it.
+         if ( 0 > _cmdline._userFilenames[ii].find('%') ) {
+             QString * tmpTitle = new QString();
+             tmpTitle->sprintf( "--title%d=%s",
+                                ii+1,
+                                _cmdline._userFilenames[ii].latin1() );
+             titles[ii] = tmpTitle;
+         }
       }
 
    }
@@ -2981,16 +3154,16 @@ void XxApp::diffFilesAtCursor()
       filenames.append( _files[1]->getBufferAtLine( fline ) );
    }
 
-   if ( filenames.size() > 0 ) {
+   if ( filenames.count() > 0 ) {
       // Spawn a diff.
       QString command = argv()[0];
 
-      if ( filenames.size() == 1 ) {
+      if ( filenames.count() == 1 ) {
          command += QString(" --single ");
       }
 
       const char** args;
-      XxUtil::splitArgs( command, filenames, args );
+      XxUtil::splitArgs( command, titles, filenames, args );
 
       try {
          XxUtil::spawnCommand( args );
@@ -3007,10 +3180,28 @@ void XxApp::diffFilesAtCursor()
          );
          box->show();
       }
+      for ( XxFno ii = 0; ii < 2; ++ii)
+         delete titles[ii];
 
       XxUtil::freeArgs( args );
    }
 
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::nextAndDiffFiles()
+{
+   if ( _diffs.get() != 0 ) {
+      XxDln nextNo = _diffs->findNextNonSameLine( _cursorLine );
+      if ( nextNo != -1 ) {
+         setCursorLine( nextNo, true );
+         diffFilesAtCursor();
+      }
+      else {
+         setCursorLine( _diffs->getNbLines(), true );
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -3065,17 +3256,8 @@ void XxApp::copyFile( XxFno nnno ) const
    else {
       filedst = _files[nodst]->getBufferAtLine( fline );
 
-      QFileInfo finfo( filedst );
-      if ( finfo.exists() ) {
-         int resp = QMessageBox::warning(
-            _mainWindow, "xxdiff", "File exists, overwrite?",
-            "Ok", "Cancel", QString::null, 0, 1
-         );
-         if ( resp == 1 ) {
-            // User has canceled.
-            return;
-         }
-         // Continue anyway.
+      if ( ! askOverwrite( filedst ) ) {
+         return;
       }
    }
 
@@ -3847,17 +4029,8 @@ void XxApp::helpGenInitFile()
    }
    XX_ASSERT( !f.isEmpty() );
 
-   QFileInfo finfo( f );
-   if ( finfo.exists() ) {
-      int resp = QMessageBox::warning(
-         _mainWindow, "xxdiff", "File exists, overwrite?",
-         "Ok", "Cancel", QString::null, 0, 1
-      );
-      if ( resp == 1 ) {
-         // User has canceled.
-         return;
-      }
-      // Continue anyway.
+   if ( ! askOverwrite( f ) ) {
+      return;
    }
 
    // Open a file.
@@ -4196,6 +4369,43 @@ bool XxApp::computeAbsoluteDifference() const
       }
       return bool( ::memcmp( b1, b2, bs1 ) ) || bool( ::memcmp( b1, b3, bs1 ) );
    }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::quitAccept()
+{
+   exit( _returnValue, "ACCEPT" );
+   selectGlobalRight();
+   bool saved =
+      saveToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
+   XX_ASSERT( saved );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::quitReject()
+{
+   exit( _returnValue, "REJECT" );
+   selectGlobalLeft();
+   bool saved =
+      saveToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
+   XX_ASSERT( saved );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::quitMerged()
+{
+   // Force saving a merged file.
+   QString mergedName = getMergedFilename();
+   if ( ! saveToFile(
+           mergedName, false, !_mainWindow->isVisible(), true
+        ) ) {
+      return; // Don't quit! Output *IS* required.
+   }
+
+   exit( _returnValue, "MERGED" );
 }
 
 XX_NAMESPACE_END

@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,8 +93,11 @@ public:
    // Returns usage text. If `plain' is set to true, filter out formatting tags.
    static QString getUsage( int helpMask, bool plain = false );
 
-   // Returns user's manual, formatted in qml.
+   // Returns user's manual, formatted in HTML.
    static QString getManual();
+
+   // Returns the invocation section, as plain text.
+   static QString getInvocationTxt();
 
    // </group>
 

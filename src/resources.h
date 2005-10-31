@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ class XxApp;
 enum XxBoolOpt {
    BOOL_EXIT_ON_SAME,
    BOOL_EXIT_IF_NO_CONFLICTS,
+   BOOL_EXIT_WITH_MERGE_STATUS,
    BOOL_SELECT_MERGE,
    BOOL_IGNORE_HORIZONTAL_WS,
    BOOL_IGNORE_PERHUNK_WS,
@@ -86,9 +87,6 @@ enum XxBoolOpt {
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
    BOOL_DIRDIFF_RECURSIVE,
    BOOL_USE_INTERNAL_DIFF,
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
-   BOOL_FORCE_SAVE_MERGED_FILE,
-#endif
    BOOL_LAST // Not a real resource.
 };
 
@@ -107,9 +105,12 @@ enum XxShowOpt {
 // Accelerators.
 enum XxAccel {
    ACCEL_EXIT,
+   ACCEL_EXIT_ACCEPT,
+   ACCEL_EXIT_MERGED,
+   ACCEL_EXIT_REJECT,
    ACCEL_OPEN_LEFT,
-   ACCEL_OPEN_MIDDLE, 
-   ACCEL_OPEN_RIGHT, 
+   ACCEL_OPEN_MIDDLE,
+   ACCEL_OPEN_RIGHT,
    ACCEL_SAVE_AS_LEFT,
    ACCEL_SAVE_AS_MIDDLE,
    ACCEL_SAVE_AS_RIGHT,
@@ -117,8 +118,8 @@ enum XxAccel {
    ACCEL_SAVE_AS,
    ACCEL_SAVE_SELECTED_ONLY,
    ACCEL_EDIT_LEFT,
-   ACCEL_EDIT_MIDDLE, 
-   ACCEL_EDIT_RIGHT, 
+   ACCEL_EDIT_MIDDLE,
+   ACCEL_EDIT_RIGHT,
    ACCEL_SEARCH,
    ACCEL_SEARCH_FORWARD,
    ACCEL_SEARCH_BACKWARD,
@@ -131,38 +132,39 @@ enum XxAccel {
    ACCEL_REDO_DIFF,
    ACCEL_EDIT_DIFF_OPTIONS,
    ACCEL_EDIT_DISPLAY_OPTIONS,
-   ACCEL_DIFF_FILES_AT_CURSOR, 
-   ACCEL_COPY_RIGHT_TO_LEFT, 
-   ACCEL_COPY_LEFT_TO_RIGHT, 
-   ACCEL_REMOVE_LEFT, 
-   ACCEL_REMOVE_RIGHT, 
-   ACCEL_NEXT_DIFFERENCE, 
-   ACCEL_PREVIOUS_DIFFERENCE, 
-   ACCEL_NEXT_UNSELECTED, 
-   ACCEL_PREVIOUS_UNSELECTED, 
-   ACCEL_SELECT_GLOBAL_LEFT, 
-   ACCEL_SELECT_GLOBAL_MIDDLE, 
-   ACCEL_SELECT_GLOBAL_RIGHT, 
+   ACCEL_DIFF_FILES_AT_CURSOR,
+   ACCEL_NEXT_AND_DIFF_FILES,
+   ACCEL_COPY_RIGHT_TO_LEFT,
+   ACCEL_COPY_LEFT_TO_RIGHT,
+   ACCEL_REMOVE_LEFT,
+   ACCEL_REMOVE_RIGHT,
+   ACCEL_NEXT_DIFFERENCE,
+   ACCEL_PREVIOUS_DIFFERENCE,
+   ACCEL_NEXT_UNSELECTED,
+   ACCEL_PREVIOUS_UNSELECTED,
+   ACCEL_SELECT_GLOBAL_LEFT,
+   ACCEL_SELECT_GLOBAL_MIDDLE,
+   ACCEL_SELECT_GLOBAL_RIGHT,
    ACCEL_SELECT_GLOBAL_NEITHER,
    ACCEL_SELECT_GLOBAL_UNSELECT,
-   ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT, 
-   ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE, 
-   ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT, 
+   ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT,
+   ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE,
+   ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT,
    ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER,
    ACCEL_SELECT_GLOBAL_MERGE,
-   ACCEL_SELECT_REGION_LEFT, 
-   ACCEL_SELECT_REGION_MIDDLE, 
-   ACCEL_SELECT_REGION_RIGHT, 
+   ACCEL_SELECT_REGION_LEFT,
+   ACCEL_SELECT_REGION_MIDDLE,
+   ACCEL_SELECT_REGION_RIGHT,
    ACCEL_SELECT_REGION_NEITHER,
    ACCEL_SELECT_REGION_UNSELECT,
-   ACCEL_SELECT_REGION_LEFT_AND_NEXT, 
-   ACCEL_SELECT_REGION_MIDDLE_AND_NEXT, 
-   ACCEL_SELECT_REGION_RIGHT_AND_NEXT, 
+   ACCEL_SELECT_REGION_LEFT_AND_NEXT,
+   ACCEL_SELECT_REGION_MIDDLE_AND_NEXT,
+   ACCEL_SELECT_REGION_RIGHT_AND_NEXT,
    ACCEL_SELECT_REGION_NEITHER_AND_NEXT,
    ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN,
-   ACCEL_SELECT_LINE_LEFT, 
-   ACCEL_SELECT_LINE_MIDDLE, 
-   ACCEL_SELECT_LINE_RIGHT, 
+   ACCEL_SELECT_LINE_LEFT,
+   ACCEL_SELECT_LINE_MIDDLE,
+   ACCEL_SELECT_LINE_RIGHT,
    ACCEL_SELECT_LINE_NEITHER,
    ACCEL_SELECT_LINE_UNSELECT,
    ACCEL_TABS_AT_3,
@@ -188,7 +190,7 @@ enum XxAccel {
    ACCEL_TOGGLE_OVERVIEW,
    ACCEL_TOGGLE_SHOW_FILENAMES,
    ACCEL_HORDIFF_NONE,
-   ACCEL_HORDIFF_SINGLE, 
+   ACCEL_HORDIFF_SINGLE,
    ACCEL_HORDIFF_MULTIPLE,
    ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS,
    ACCEL_TOGGLE_IGNORE_PERHUNK_WS,
@@ -212,12 +214,12 @@ enum XxColor {
 
    COLOR_INSERT,               // A in A--, -A-, --A blocks.
    COLOR_INSERT_BLANK,         // - in A--, -A-, --A blocks.
-                                        
+
    COLOR_DIFF_ALL,             // A,B or C in ABC blocks.
    COLOR_DIFF_ALL_SUP,         // (shadowed)
    COLOR_DIFF_ALL_ONLY,        // (when other is blank)
    COLOR_DIFF_ALL_NONLY,       // (when blank)
-                               
+
    COLOR_DIFF_ONE,             // B in BAA, ABA, AAB blocks.
    COLOR_DIFF_ONE_SUP,         // (shadowed)
    COLOR_DIFF_ONE_ONLY,        // (when other is blank)
@@ -226,19 +228,19 @@ enum XxColor {
    COLOR_DIFF_TWO_SUP,         // (shadowed)
    COLOR_DIFF_TWO_ONLY,        // (when other is blank)
    COLOR_DIFF_TWO_NONLY,       // (when blank)
-                                        
+
    COLOR_DELETE,               // A in -AA, A-A, AA- blocks.
    COLOR_DELETE_BLANK,         // - in -AA, A-A, AA- blocks.
-                                        
+
    COLOR_DIFFDEL,              // A and B in -AB, A-B, AB- blocks.
    COLOR_DIFFDEL_SUP,          // (shadowed)
    COLOR_DIFFDEL_ONLY,         // (when other is blank)
    COLOR_DIFFDEL_NONLY,        // (when blank)
    COLOR_DIFFDEL_BLANK,        // - in -AB, A-B, AB- blocks.
-                               
+
    COLOR_SELECTED,             // selected text.
    COLOR_SELECTED_SUP,         // (shadowed)
-                               
+
    COLOR_IGNORE_DISPLAY,       // ignored for display purposes.
    COLOR_IGNORE_DISPLAY_SUP,   // (shadowed)
    COLOR_IGNORE_DISPLAY_ONLY,  // (when other is blank)
@@ -246,11 +248,11 @@ enum XxColor {
 
    COLOR_DELETED,              // deleted text.
    COLOR_DELETED_SUP,          // (shadowed)
-                               
+
    COLOR_IGNORED,              // ignored file.
-                               
+
    COLOR_DIRECTORIES,          // directories in directory diffs.
-                               
+
    COLOR_MERGED_UNDECIDED,     // undecided text (merged view).
    COLOR_MERGED_DECIDED_1,     // decided text, file 1 (merged view).
    COLOR_MERGED_DECIDED_1_SUP, // decided text, file 1, shadowed (merged view).
@@ -271,10 +273,10 @@ enum XxColor {
 
 // Command lines.
 enum XxCommand {
-   CMD_DIFF_FILES_2,
-   CMD_DIFF_FILES_3,
-   CMD_DIFF_DIRECTORIES,
-   CMD_DIFF_DIRECTORIES_REC,
+   CMD_DIFF_FILES_2 = 0,
+   CMD_DIFF_FILES_3 = 1,
+   CMD_DIFF_DIRECTORIES = 2,
+   CMD_DIFF_DIRECTORIES_REC = 3,
    CMD_EDIT,
    CMD_LAST // Not a real resource.
 };
@@ -318,8 +320,8 @@ enum XxIgnoreFile {
 
 // Quality types.
 enum XxQuality {
-   QUALITY_NORMAL, 
-   QUALITY_FASTEST, 
+   QUALITY_NORMAL,
+   QUALITY_FASTEST,
    QUALITY_HIGHEST
 };
 

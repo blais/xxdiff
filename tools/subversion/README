@@ -1,0 +1,6 @@
+==================
+Subversion support
+==================
+
+Not done yet, I want to add a wrapper script that will fetch revisions and run
+xxdiff on them.

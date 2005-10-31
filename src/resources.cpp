@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,9 @@
 #include <qnamespace.h>
 #include <qapplication.h> // to get desktop
 #include <qregexp.h>
+#if (QT_VERSION >= 0x030000)
 #include <qstylefactory.h>
+#endif
 
 #include <iostream>
 #include <string.h> // ::strcmp
@@ -110,6 +112,9 @@ void XxResources::initializeOriginalXdiff()
    }
    
    _accelerators[ ACCEL_EXIT ] = Qt::CTRL | Qt::Key_Q;
+   _accelerators[ ACCEL_EXIT_ACCEPT ] = Qt::Key_A;
+   _accelerators[ ACCEL_EXIT_MERGED ] = Qt::Key_M;
+   _accelerators[ ACCEL_EXIT_REJECT ] = Qt::Key_R;
                   
    _accelerators[ ACCEL_SEARCH ] = Qt::CTRL | Qt::Key_S;
    _accelerators[ ACCEL_SEARCH_FORWARD ] = Qt::CTRL | Qt::Key_F;
@@ -121,6 +126,8 @@ void XxResources::initializeOriginalXdiff()
    _accelerators[ ACCEL_CURSOR_TOP ] = Qt::Key_Home;
    _accelerators[ ACCEL_CURSOR_BOTTOM ] = Qt::Key_End;
    _accelerators[ ACCEL_REDO_DIFF ] = Qt::CTRL | Qt::Key_R;
+   _accelerators[ ACCEL_DIFF_FILES_AT_CURSOR ] = Qt::Key_Return;
+   _accelerators[ ACCEL_NEXT_AND_DIFF_FILES ] = Qt::Key_Space;
    _accelerators[ ACCEL_NEXT_DIFFERENCE ] = Qt::Key_N;
    _accelerators[ ACCEL_PREVIOUS_DIFFERENCE ] = Qt::Key_P;
    _accelerators[ ACCEL_NEXT_UNSELECTED ] = Qt::Key_B;
@@ -179,8 +186,8 @@ void XxResources::initializeOriginalXdiff()
 
       // Try to set the default font to be as close as possible as that under the
       // original xdiff under SGI.
-      //_fontText.setRawName( "*-clean-medium-r-normal-*-14-*" ); // XLFD warning
-      // _fontText.setRawName( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
+      //_fontText.fromString( "*-clean-medium-r-normal-*-14-*" ); // XLFD warning
+      // _fontText.fromString( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
       //_fontText.setItalic( false );
       //_fontText.setFamily( "Lucida" );
       _fontText.setStyleHint( QFont::TypeWriter, QFont::PreferMatch );
@@ -261,6 +268,7 @@ void XxResources::initializeOriginalXdiff()
 
    _boolOpts[ BOOL_EXIT_ON_SAME ] = false;
    _boolOpts[ BOOL_EXIT_IF_NO_CONFLICTS ] = false;
+   _boolOpts[ BOOL_EXIT_WITH_MERGE_STATUS ] = false;
    _boolOpts[ BOOL_SELECT_MERGE ] = false;
    _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = true; // FIXME is this right?
    _boolOpts[ BOOL_IGNORE_PERHUNK_WS ] = false;
@@ -274,9 +282,6 @@ void XxResources::initializeOriginalXdiff()
    _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;
    _boolOpts[ BOOL_DIRDIFF_RECURSIVE ] = false;
    _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   _boolOpts[ BOOL_FORCE_SAVE_MERGED_FILE ] = false;
-#endif
 
    //---------------------------------------------------------------------------
 
@@ -320,8 +325,8 @@ void XxResources::initializeOriginalXdiff()
    _commandSwitch[ CMDSW_FILES_IGNORE_CASE ] = "-i";
    _commandSwitch[ CMDSW_FILES_IGNORE_BLANK_LINES ] = "-B";
    _commandSwitch[ CMDSW_FILES_QUALITY_NORMAL ] = "";
-   _commandSwitch[ CMDSW_FILES_QUALITY_FASTEST ] = "-d";
-   _commandSwitch[ CMDSW_FILES_QUALITY_HIGHEST ] = "-H";
+   _commandSwitch[ CMDSW_FILES_QUALITY_FASTEST ] = "-H";
+   _commandSwitch[ CMDSW_FILES_QUALITY_HIGHEST ] = "-d";
 
    //---------------------------------------------------------------------------
 
@@ -399,6 +404,7 @@ void XxResources::setPreferredGeometry( const QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
+#if (QT_VERSION >= 0x030000)
 void XxResources::setStyleKey( const QString& styleKey )
 {
    QStringList styles = QStyleFactory::keys();
@@ -406,6 +412,11 @@ void XxResources::setStyleKey( const QString& styleKey )
    _styleKey = styleKey;
    emit changed();
 }
+#else
+void XxResources::setStyleKey( const QString& /*styleKey*/ )
+{
+}
+#endif
 
 //------------------------------------------------------------------------------
 //
@@ -434,7 +445,11 @@ bool XxResources::setAccelerator( XxAccel accel, const QString& val )
 //
 bool XxResources::setFontApp( const QString& val )
 {
+#if (QT_VERSION >= 0x030000)
+   _fontApp.fromString( val );
+#else
    _fontApp.setRawName( val );
+#endif
    emit changed();
    return true; // never generates error.
 }
@@ -452,7 +467,11 @@ bool XxResources::setFontApp( const QFont& font )
 //
 bool XxResources::setFontText( const QString& val )
 {
+#if (QT_VERSION >= 0x030000)
+   _fontText.fromString( val );
+#else
    _fontText.setRawName( val );
+#endif
    emit changed();
    return true; // never generates error.
 }
@@ -779,7 +798,11 @@ void XxResources::setMergedFilename( const QString& fn )
 bool XxResources::compareFonts( const QFont& f1, const QFont& f2 )
 {
    if ( f1.rawMode() || f2.rawMode() ) {
+#if (QT_VERSION >= 0x030000)
+      return f1.toString() == f2.toString();
+#else
       return f1.rawName() == f2.rawName();
+#endif
    }
    return f1 == f2;
 }

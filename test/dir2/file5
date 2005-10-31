@@ -1,0 +1,57 @@
+#!/bin/bash  #-- not used anyhow
+#
+# $Id: file5 700 2003-12-29 01:56:41Z blais $
+#
+sdjhsdsjhsj
+# echo "Bashrc executed"
+
+export SHELL=bash
+
+
+# Reset environment in bash if requested.  The reason why we do this is for
+# setting stuff that depends on the calling process environment, e.g. with
+# ClearCase.
+
+if [ -f "$HOME/.cache.bashenv" ]; then
+    # echo "Resetting environment in .bashrc"
+    . $HOME/the-config/.env.pre
+    . $HOME/the-config/.env.scopes
+    . $HOME/the-config/.env.post
+fi
+
+# check for cache first
+if [ ! -f "$HOME/.cache.disable" -a \
+     -f "$HOME/.cache.bashrc.$SITE.$PLAT.$HOST" ]; then
+
+    echo "Using cached .bashrc";
+    . $HOME/.cache.bashrc.$SITE.$PLAT.$HOST
+
+else
+
+    #---------------------------------------------------------------------------
+    # source scope-specific bashrc's
+    
+    if [ -f $HOME/the-config/share/.bashrc.local ]; then
+    	. $HOME/the-config/share/.bashrc.local
+    fi
+    
+    if [ -f $HOME/the-config/site/$SITE/.bashrc.local ]; then
+    	. $HOME/the-config/site/$SITE/.bashrc.local
+    fi
+    
+    if [ -f $HOME/the-config/plat/$PLAT/.bashrc.local ]; then
+    	. $HOME/the-config/plat/$PLAT/.bashrc.local
+    fi
+    
+    if [ -f $HOME/the-config/host/$HOST/.bashrc.local ]; then
+    	. $HOME/the-config/host/$HOST/.bashrc.local
+    fi
+    
+    if [ -f $HOME/the-config/site/$SITE/plat/$PLAT/.bashrc.local ]; then
+    	. $HOME/the-config/site/$SITE/plat/$PLAT/.bashrc.local
+    fi
+    
+    if [ -f $HOME/the-config/host/$HOST/plat/$PLAT/.bashrc.local ]; then
+    	. $HOME/the-config/host/$HOST/plat/$PLAT/.bashrc.local
+    fi
+fi

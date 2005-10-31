@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,10 @@
 /*==============================================================================
  * EXTERNAL DECLARATIONS
  *============================================================================*/
+
+#ifndef INCL_XXDIFF_COMPILER
+#include <compiler.h>
+#endif
 
 //
 // Types and enumerations
@@ -61,10 +65,7 @@ typedef unsigned int 	uint;
 // Std differences.
 //
 
-#if defined COMPILER_MIPSPRO
-#define XX_THROW_NOTHING  throw()
-
-#elif defined COMPILER_GNU
+#if defined COMPILER_GCC
 
 #if __GNUC__ >= 3
 #define XX_THROW_NOTHING  throw()
@@ -72,7 +73,10 @@ typedef unsigned int 	uint;
 #define XX_THROW_NOTHING  __STL_NOTHROW
 #endif
 
-#elif defined COMPILER_COMPAQCXX
+#elif COMPILER_MIPSPRO
+#define XX_THROW_NOTHING  throw()
+
+#elif defined COMPILER_DECCXX
 #define XX_THROW_NOTHING  _RWSTD_THROW_SPEC_NULL
 
 #else

@@ -3,16 +3,16 @@
 # $RCSfile$
 #
 
-if [ ! -d "tools" ]; then
+if [ ! -d "adm" ]; then
      echo "You must be running this script from the topdir directory."
      exit 1;
 fi
 
 # Package for simple binary release.
-VERSION=`tools/get_version`
+VERSION=`adm/get_version`
 echo "Making binary release version $VERSION"
 
-PLAT=`tools/config.guess`
+PLAT=`adm/config.guess`
 case $PLAT in
         *sparc*)
         PEXT=sparc ;;

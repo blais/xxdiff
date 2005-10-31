@@ -1,0 +1,102 @@
+diff --exclude=CVS -6 -Naur diffutils-2.7/config.hin /home/blais/tmp/diffutils-2.7/config.hin
+--- diffutils-2.7/config.hin	2001-09-30 19:10:23.000000000 -0400
++++ /home/blais/tmp/diffutils-2.7/config.hin	1994-09-28 20:51:31.000000000 -0400
+@@ -1,10 +1,8 @@
+ /* config.hin.  Generated automatically from configure.in by autoheader.  */
+ 
+-#include "../src/diffutils_hack.h"
+-
+ /* Define if using alloca.c.  */
+ #undef C_ALLOCA
+ 
+ /* Define if the closedir function returns void instead of int.  */
+ #undef CLOSEDIR_VOID
+ 
+diff --exclude=CVS -6 -Naur diffutils-2.7/diff.c /home/blais/tmp/diffutils-2.7/diff.c
+--- diffutils-2.7/diff.c	2004-01-20 14:32:42.034468584 -0500
++++ /home/blais/tmp/diffutils-2.7/diff.c	1994-09-22 12:47:00.000000000 -0400
+@@ -222,13 +222,13 @@
+   {"help", 0, 0, 141},
+   {"binary", 0, 0, 142},
+   {0, 0, 0, 0}
+ };
+ 
+ int
+-diffutils_diff_main (argc, argv)
++main (argc, argv)
+      int argc;
+      char *argv[];
+ {
+   int val;
+   int c;
+   int prev = -1;
+diff --exclude=CVS -6 -Naur diffutils-2.7/diff3.c /home/blais/tmp/diffutils-2.7/diff3.c
+--- diffutils-2.7/diff3.c	2001-10-01 15:26:49.000000000 -0400
++++ /home/blais/tmp/diffutils-2.7/diff3.c	1994-10-01 01:14:15.000000000 -0400
+@@ -220,13 +220,13 @@
+ 
+ /*
+  * Main program.  Calls diff twice on two pairs of input files,
+  * combines the two diffs, and outputs them.
+  */
+ int
+-diffutils_diff3_main (argc, argv)
++main (argc, argv)
+      int argc;
+      char **argv;
+ {
+   int c, i;
+   int mapping[3];
+   int rev_mapping[3];
+diff --exclude=CVS -6 -Naur diffutils-2.7/diffutils.pro /home/blais/tmp/diffutils-2.7/diffutils.pro
+--- diffutils-2.7/diffutils.pro	2001-09-25 16:40:19.000000000 -0400
++++ /home/blais/tmp/diffutils-2.7/diffutils.pro	1969-12-31 19:00:00.000000000 -0500
+@@ -1,48 +0,0 @@
+-TEMPLATE	= app
+-
+-CONFIG		+= qt warn_on release
+-
+-# for windows:
+-win32-msvc:TMAKE_CXXFLAGS = -GX -DWINDOWS
+-
+-HEADERS = \
+-	cmpbuf.h \
+-	diff.h \
+-	fnmatch.h \
+-	getopt.h \
+-	regex.h \
+-	system.h
+-
+-SOURCES = \
+-	alloca.c \
+-	analyze.c \
+-	cmp.c \
+-	cmpbuf.c \
+-	context.c \
+-	diff.c \
+-	diff3.c \
+-	dir.c \
+-	ed.c \
+-	error.c \
+-	fnmatch.c \
+-	getopt.c \
+-	getopt1.c \
+-	ifdef.c \
+-	io.c \
+-	memchr.c \
+-	normal.c \
+-	regex.c \
+-	sdiff.c \
+-	side.c \
+-	util.c \
+-	version.c \
+-	waitpid.c \
+-	xmalloc.c
+-
+-TARGET		= diffutils
+-
+-DEPENDPATH=
+-
+-INCLUDEPATH=.
+-
+-REQUIRES=large-config

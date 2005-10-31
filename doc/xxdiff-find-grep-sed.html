@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="Docutils 0.3.0: http://docutils.sourceforge.net/" />
+<title>xxdiff-find-grep-sed</title>
+<meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
+<link rel="stylesheet" href="/docutils-style.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="xxdiff-find-grep-sed">
+<h1 class="title">xxdiff-find-grep-sed</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.9</td></tr>
+</tbody>
+</table>
+<div class="abstract topic">
+<p class="topic-title">Abstract</p>
+<p>Useful script to perform global replacement of a pattern in a set of files.</p>
+</div>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title"><a name="table-of-contents">Table of Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#description" id="id1" name="id1">Description</a><ul>
+<li><a class="reference" href="#notes" id="id2" name="id2">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#usage" id="id3" name="id3">Usage</a></li>
+<li><a class="reference" href="#options" id="id4" name="id4">Options</a></li>
+<li><a class="reference" href="#download" id="id5" name="id5">Download</a></li>
+</ul>
+</div>
+<div class="section" id="description">
+<h1><a class="toc-backref" href="#id1" name="description">Description</a></h1>
+<p>Useful script to perform global replacement of a pattern in a set of files.</p>
+<p>Walks a directory hierarchy, optionally selects some files according to regular
+expressions on the filename (default is to use all files), then greps the files
+for some pattern, and if there is a match, run the given file through a sed
+command and replace the file with that output.</p>
+<div class="section" id="notes">
+<h2><a class="toc-backref" href="#id2" name="notes">Notes</a></h2>
+<ul class="simple">
+<li>there is an option to request confirmation through xxdiff.</li>
+<li>the script automatically creates backup files.</li>
+<li>the script automatically generates a detailed log of its actions and
+a text summary of all the differences beteween the original and new files.</li>
+<li>the script can optionally checkout the file with ClearCase before performing
+the replacement.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#id3" name="usage">Usage</a></h1>
+<pre class="literal-block">
+find-grep-sed [&lt;options&gt;] &lt;regexp&gt; &lt;sed-cmd&gt; [&lt;root&gt; ...]
+</pre>
+</div>
+<div class="section" id="options">
+<h1><a class="toc-backref" href="#id4" name="options">Options</a></h1>
+<pre class="literal-block">
+--version             show program's version number and exit
+-h, --help            show this help message and exit
+-bCHOICE, --backup-type=CHOICE
+                      selects the backup type
+--backup-dir=BACKUP_DIR
+                      specify backup directory for type 'other'
+-sREGEXP, --select=REGEXP
+                      adds a regular expression for files to match against.
+-c, --select-cpp      adds a regular expression for selecting C++ files to
+                      match against.
+-C, --checkout-clearcase
+                      checkout files with clearcase before storing.
+-n, --dry-run         print the commands that would be executed but don't
+                      really run them.
+-t, --no-confirm      do not ask for confirmation with graphical diff viewer.
+</pre>
+</div>
+<div class="section" id="download">
+<h1><a class="toc-backref" href="#id5" name="download">Download</a></h1>
+<p><a class="reference" href="../bin/xxdiff-find-grep-sed">Download program here</a>.</p>
+</div>
+</div>
+</body>
+</html>

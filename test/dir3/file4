@@ -1,6 +1,6 @@
 #!/bin/bash  #-- not used anyhow
 #
-# $Id: file4 2 2000-09-15 02:19:22Z blais $
+# $Id: file4 694 2003-12-27 07:22:12Z blais $
 #
 
 # echo "Bashrc executed"
@@ -14,9 +14,9 @@ export SHELL=bash
 
 if [ -f "$HOME/.cache.bashenv" ]; then
     # echo "Resetting environment in .bashrc"
-    . $HOME/conf/.env.pre
-    . $HOME/conf/.env.scopes
-    . $HOME/conf/.env.post
+    . $HOME/the-config/.env.pre
+    . $HOME/the-config/.env.scopes
+    . $HOME/the-config/.env.post
 fi
 
 # check for cache first
@@ -31,27 +31,27 @@ else
     #---------------------------------------------------------------------------
     # source scope-specific bashrc's
     
-    if [ -f $HOME/conf/share/.bashrc.local ]; then
-    	. $HOME/conf/share/.bashrc.local
+    if [ -f $HOME/the-config/share/.bashrc.local ]; then
+    	. $HOME/the-config/share/.bashrc.local
     fi
     
-    if [ -f $HOME/conf/site/$SITE/.bashrc.local ]; then
-    	. $HOME/conf/site/$SITE/.bashrc.local
+    if [ -f $HOME/the-config/site/$SITE/.bashrc.local ]; then
+    	. $HOME/the-config/site/$SITE/.bashrc.local
     fi
     
-    if [ -f $HOME/conf/plat/$PLAT/.bashrc.local ]; then
-    	. $HOME/conf/plat/$PLAT/.bashrc.local
+    if [ -f $HOME/the-config/plat/$PLAT/.bashrc.local ]; then
+    	. $HOME/the-config/plat/$PLAT/.bashrc.local
     fi
     
-    if [ -f $HOME/conf/host/$HOST/.bashrc.local ]; then
-    	. $HOME/conf/host/$HOST/.bashrc.local
+    if [ -f $HOME/the-config/host/$HOST/.bashrc.local ]; then
+    	. $HOME/the-config/host/$HOST/.bashrc.local
     fi
     
-    if [ -f $HOME/conf/site/$SITE/plat/$PLAT/.bashrc.local ]; then
-    	. $HOME/conf/site/$SITE/plat/$PLAT/.bashrc.local
+    if [ -f $HOME/the-config/site/$SITE/plat/$PLAT/.bashrc.local ]; then
+    	. $HOME/the-config/site/$SITE/plat/$PLAT/.bashrc.local
     fi
     
-    if [ -f $HOME/conf/host/$HOST/plat/$PLAT/.bashrc.local ]; then
-    	. $HOME/conf/host/$HOST/plat/$PLAT/.bashrc.local
+    if [ -f $HOME/the-config/host/$HOST/plat/$PLAT/.bashrc.local ]; then
+    	. $HOME/the-config/host/$HOST/plat/$PLAT/.bashrc.local
     fi
 fi

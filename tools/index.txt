@@ -1,3 +1,20 @@
+=========================================
+Version Control Tools and Other Utilities
+=========================================
+
+This directory contains tools that can be used to link xxdiff with version
+control systems.  Some of these are unfinished.  Use them to build your own
+(they should be simple anyway) and I'd be happy to add your contributions in
+here.
+
 Important note:  cvs.py is working well, and being used in other
 contexts, but I haven't had time to implement xxcvs and xxcleartool 
 yet.
+
+- `clearcase <clearcase>`_
+- `cvs <cvs>`_
+- `emacs <emacs>`_
+- `misc <misc>`_
+- `perforce <perforce>`_
+- `subversion <subversion>`_
+- `tla/arch <tla>`_

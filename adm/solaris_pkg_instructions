@@ -1,26 +1,8 @@
-From jens.apel@web.de Thu Apr 18 10:26:53 2002
-Return-Path: <jens.apel@web.de>
-Received: from mailgate5.cinetic.de (mailgate5.cinetic.de [217.72.192.165])
-	by mercure.iro.umontreal.ca (8.12.1/8.12.1) with ESMTP id g3IERCe4010046
-	for <blais@iro.umontreal.ca>; Thu, 18 Apr 2002 10:27:13 -0400
-Received: from web.de (fmomail02.dlan.cinetic.de [172.20.1.46])
-	by mailgate5.cinetic.de (8.11.2/8.11.2/SuSE Linux 8.11.0-0.4) with SMTP id g3IEQqv11815
-	for blais@iro.umontreal.ca; Thu, 18 Apr 2002 16:26:53 +0200
 Date: Thu, 18 Apr 2002 16:26:53 +0200
-Message-Id: <200204181426.g3IEQqv11815@mailgate5.cinetic.de>
-MIME-Version: 1.0
 Organization: http://freemail.web.de/
 From: Jens Apel <jens.apel@web.de>
-To: blais@IRO.UMontreal.CA
 Subject: Solaris Package Build Script for xxdiff
 Precedence: fm-user
-Content-Type: text/plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-X-SpamBouncer: 1.4 (8/24/01)
-X-SBPass: NoBounce
-X-SBClass: OK
-X-UID: 2271
 
 Hello Martin,
 thanks for writing xxdiff - a real cool tool.
@@ -51,10 +33,10 @@ Jens
 # 
 # Building the Package:
 # 1. copy this script to 
-#    xxdiff-2.5/tools/build_pkg.sh
+#    xxdiff-2.5/adm/build_pkg.sh
 # 2. chmod u+x build_pkg.sh
 # 3. Run it
-#    cd tools
+#    cd adm
 #    ./build_pkg.sh
 #    This will create the package xxdiff-2.5-sol8-sparc-local.pkg
 # 4. Install it
@@ -94,7 +76,7 @@ cat > $FAKE_ROOT/pkginfo << _EOF
 PKG=$PKGNAME
 NAME=xxdiff for Solaris
 DESC="Graphical tool for comparing and merging files using Qt and diff"
-VENDOR="Martin Blais <blais@iro.umontreal.ca"
+VENDOR="Martin Blais <blais@furius.ca"
 BASEDIR=/usr/local
 ARCH=$ARCH
 VERSION=$VERSION
@@ -105,7 +87,7 @@ _EOF
 ## Build copyright file
 echo "Building copyright file..."
 cat > $FAKE_ROOT/copyright << _EOF
-Copyright (C) 1999-2002 Martin Blais <blais@iro.umontreal.ca>
+Copyright (C) 1999-2002 Martin Blais <blais@furius.ca>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -144,11 +126,3 @@ echo | pkgtrans -os . $OUTPUTFILE
 mv $OUTPUTFILE ..
 cd ..
 rm -rf $FAKE_ROOT
-
-
-
-________________________________________________________________
-Keine verlorenen Lotto-Quittungen, keine vergessenen Gewinne mehr! 
-Beim WEB.DE Lottoservice: http://tippen2.web.de/?x=13
-
-

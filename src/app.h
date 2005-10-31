@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,11 @@
 #ifndef INCL_QT_QAPPLICATION
 #include <qapplication.h>
 #define INCL_QT_QAPPLICATION
+#endif
+
+#ifndef INCL_QT_QFILEINFO
+#include <qfileinfo.h>
+#define INCL_QT_QFILEINFO
 #endif
 
 #ifndef INCL_STD_MEMORY
@@ -114,7 +119,7 @@ public:
    // Destructor.
    virtual ~XxApp();
 
-   // See base clas.
+   // See base class.
    int exec();
 
    // Returns the number of files.
@@ -176,12 +181,12 @@ public:
    void invalidateTextWidth();
 
    // Overloaded exit method.
-   virtual void exit( int retcode = 0 );
+   virtual void exit( int retcode = 0, const char* decisionString = 0 );
 
 public slots:
 
-// Redraws the text widgets.
-void updateWidgets();
+   // Redraws the text widgets.
+   void updateWidgets();
 
    // On a number of line change in diffs.
    void onNbLinesChanged();
@@ -211,6 +216,7 @@ void updateWidgets();
    void editDiffOptions();
    void editDisplayOptions();
    void diffFilesAtCursor();
+   void nextAndDiffFiles();
    void copyFileLeftToRight();
    void copyFileRightToLeft();
    void removeFileLeft();
@@ -282,15 +288,22 @@ void updateWidgets();
 
    // Keyboard accelerators cursor motion callbacks.
    // <group>
-   void pageDown(); 
-   void pageUp(); 
-   void cursorDown(); 
-   void cursorUp(); 
-   void cursorTop(); 
-   void cursorBottom(); 
+   void pageDown();
+   void pageUp();
+   void cursorDown();
+   void cursorUp();
+   void cursorTop();
+   void cursorBottom();
    // </group>
 
-   signals:
+   // Return one of accept, reject, merged.
+   // <group>
+   void quitAccept();
+   void quitReject();
+   void quitMerged();
+   // </group>
+
+signals:
 
    // Signal emitted when the cursor changes line.
    void cursorChanged( int cursorLine );
@@ -311,11 +324,12 @@ private:
    XxResources* buildResources() const;
 
    // Reads in a file.
-   std::auto_ptr<XxBuffer> readFile( 
-      const XxFno    no, 
-      const QString& filename,
-      const QString& displayFilename,
-      bool           isTemporary = false
+   std::auto_ptr<XxBuffer> readFile(
+      const XxFno      no,
+      const QString&   filename,
+      const QString&   displayFilename,
+      const QFileInfo& fileInfo,
+      bool             isTemporary = false
    );
 
    // Processes the diff command, be really careful with this.  Returns false if
@@ -338,11 +352,12 @@ private:
 
    // Compute the number of pixels of the longest line.
    uint computeTextWidth() const;
-   
+
    // Tries to save the selected contents to the specified filename.  If ask is
    // true, ask the user for the filename (and use filename as default value).
+   // 'noCancel' disables the cancel button.
    //
-   // Returns true if succesfully saved, false if cancelled.
+   // Returns true if successfully saved, false if cancelled.
    bool saveToFile(
       const QString& filename,
       const bool     ask,
@@ -385,14 +400,19 @@ private:
    // Compute if there is even a single byte different between the files.
    bool computeAbsoluteDifference() const;
 
+   // Check if the file exists, and ask the user about overwriting a file if so,
+   // return true if overwrite accepted.
+   bool askOverwrite( const QString& filename ) const;
+
    /*----- static member functions -----*/
 
    // Reads the file arguments, returns the number of files to be read, creates
    // temporary files if necessary (from stdin).
-   static uint processFileNames( 
+   static uint processFileNames(
       const XxCmdline& cmdline,
       QString          filenames[3],
       QString          displayFilenames[3],
+      QFileInfo        fileInfos[3],
       bool             created[3],
       bool&            directories
    );
@@ -433,7 +453,7 @@ private:
    QkToolBar*              _toolbar;
    mutable uint            _textWidth;
    XxDln                   _cursorLine;
-                                	
+
    //
    // Real data.
    //

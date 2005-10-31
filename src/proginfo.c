@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 char const xx_name[] = "xxdiff";
 char const xx_version[] = XX_VERSION;
 char const xx_description[] = "A graphical file comparator and merge tool.";
-char const xx_copyright[] = "Copyright (C) 1999-2002  Martin Blais";
+char const xx_copyright[] = "Copyright (C) 1999-2003  Martin Blais";
 char const xx_homepage[] = "http://xxdiff.sourceforge.net";
-char const xx_bugs_email[] = "blais@iro.umontreal.ca";
+char const xx_bugs_email[] = "blais@furius.ca";
 

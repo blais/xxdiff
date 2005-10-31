@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,6 +210,9 @@ public:
    XxDln findNextUnselected( XxDln lineNo ) const;
    XxDln findPreviousUnselected( XxDln lineNo ) const;
    // </group>
+
+   // Finds the next line (file) with changes.  Returns -1 if not ofund.
+   XxDln findNextNonSameLine( XxDln lineNo ) const;
 
    // Returns the number of non-blank lines between start and end.
    uint getNbFileLines( 

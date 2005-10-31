@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +97,8 @@ int initOptions(
 
 /*----- static data members -----*/
 
+// Free simple switch characters: 'c', 'j', 'k', 'p', 'q', 't', 'x', 'y'
+
 //
 // Generic options.
 //
@@ -115,7 +117,7 @@ XxCmdline::Option XxCmdline::_optionsGeneric[] = {
    }, 
 //#define XX_KDE_CMDLINE
 #ifdef XX_KDE_CMDLINE
-   { "author", 0, false, 'X', 
+   { "author", 0, false, 'z', 
      "Show author information."
    }, 
 #endif
@@ -146,7 +148,12 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "If there are no conflicts after making automatic merge selections, then "
      "exit quietly with exit code of 0."
    }, 
-   { "single", 0, false, 'x', 
+   { "exit-with-merge-status", 'X', false, 'X', 
+     "If all diff hunks are selected and no unsaved selections exist, then "
+     "exit with code of 0. Normally, xxdiff will pass back the diff return "
+     "code."
+   }, 
+   { "single", 'S', false, 'S', 
      "Load a single file for display. This is a strange feature for those who "
      "like the display of code with xxdiff."
    },
@@ -176,7 +183,7 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
    { "titlein", 'N', true, 'N', // This is kept for xdiff compatibility only.
      "Display 'str' for filename in given in stdin."
    }, 
-   { "resource", 0, true, 'R',
+   { "resource", 'R', true, 'R',
      "Pass on string 'str' to resource parser.  Resources given in this manner "
      "on the command line supersede other resource mechanisms.  One can "
      "specify multiple resource settings by repeating this option."
@@ -191,21 +198,30 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
    { "merged-filename", 'M', true, 'M',
      "Specifies the filename of the merged file for output."
    },
-   { "output-on-exit", 'O', false, 'O',
-     "Forces saving to the merged filename upon exit. Note: If the file "
-     "exists, no warning is given about overwriting the file. If there are "
-     "unresolved conflicts, a popup dialog will appear."
+   { "decision", 'O', false, 'O',
+     "Forces the user to take a decision upon exit. The user can choose "
+     "between ACCEPT, REJECT or MERGED, in which case saving to the "
+     "merged filename is forced (if the merged file exists, no warning "
+     "is given about overwriting the file). If there are unresolved "
+     "conflicts, a popup dialog will appear.  If ACCEPT or REJECT are "
+     "selected, no merged file is required.  In all cases, a single line "
+     "is output with the decision that was made.  This generic "
+     "functionality is useful for better integration with scripts that "
+     "require some form of decision to be made by the user."
    },
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-   { "force-save-merged", 'S', false, 'S',
-     "Put xxdiff in a mode where it is forced to save to the merged file. "
-     "Leaving xxdiff will save as the merged filename. Use this with care, it "
-     "is provided for specific cisconstances and can be annoying."
-   }, 
-#endif
    { "mac", 0, false, 'G',
      "Split the file lines at single carriage returns instead of newlines."
-     "This should allow xxdiff working on Mac OSX."
+     "This should allow xxdiff working on Mac OSX.  Note that this will not "
+     "enable xxdiff to process Mac files under UNIX, unless the underlying "
+     "diff program that is invoked to compute the diffs supports the newlines. "
+     "(This is not the case under Linux with GNU diff, for example."
+   },
+   { "indicate-input-processed", 0, false, 'j',
+     "Indicate that the input files have been entirely processed and are not "
+     "needed anymore by printing out the string INPUT-PROCESSED on stdout as "
+     "soon as possible. This can be used by scripts which create temporary "
+     "files to delete those as soon as xxdiff has finished reading them. "
+     "This only works from startup."
    },
 };
 
@@ -238,8 +254,7 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "Treat all files as text and compare them "
      "line-by-line, even if they do not appear to be text."
    }, 
-#if 0 
-   { "exclude", 0, true, 'e',
+   { "exclude", 'e', true, 'e',
      "When comparing directories, ignore files and subdirectories whose "
      "basenames match pattern."
    },
@@ -247,7 +262,6 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "When comparing directories, ignore files and subdirectories whose "
      "basenames match any pattern contained in file."
    },
-#endif
 
 };
 
@@ -318,8 +332,9 @@ XxCmdline::XxCmdline() :
    _single( false ),
    _unmerge( false ),
    _unmergeNbFiles( 2 ),
-   _outputOnExit( false ),
+   _forceDecision( false ),
    _macNewlines( false ),
+   _indicateInputProcessed( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -451,19 +466,17 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
                 << ": true" << endl;
          } break;
 
+         case 'X': {
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
+                << ": true" << endl;
+         } break;
+
          case 'm': {
             QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
             oss << XxResParser::getBoolOptName( BOOL_SELECT_MERGE )
                 << ": true" << endl;
          } break;
-
-#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
-         case 'S': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
-            oss << XxResParser::getBoolOptName( BOOL_FORCE_SAVE_MERGED_FILE )
-                << ": true" << endl;
-         } break;
-#endif
 
          case 'U': {
             _unmerge = true;
@@ -475,7 +488,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _unmergeNbFiles = 3;
          } break;
 
-         case 'x': {
+         case 'S': {
             _single = true;
          } break;
 
@@ -537,7 +550,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          } break;
          
          case 'O': {
-            _outputOnExit = true;
+            _forceDecision = true;
          } break;
          
          case 'G': {
@@ -567,19 +580,13 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          } break;
 
          case 'e': {
-            QCString qtopts( optarg );
-            qtopts.simplifyWhiteSpace();
-            QTextStream oss( stderr, IO_WriteOnly );
-            oss << qtopts << endl;
-            // FIXME todo, support exclude=pattern
+            _extraDiffArgs.append( " --exclude=" );
+            _extraDiffArgs.append( QCString( optarg ) );
          } break;
 
          case 'f': {
-            QCString qtopts( optarg );
-            qtopts.simplifyWhiteSpace();
-            QTextStream oss( stderr, IO_WriteOnly );
-            oss << qtopts << endl;
-            // FIXME todo, support exclude-from=file
+            _extraDiffArgs.append( " --exclude-from=" );
+            _extraDiffArgs.append( QCString( optarg ) );
          } break;
 
          //
@@ -650,6 +657,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
             oss << XxResParser::getKwdName( FONT_TEXT )
                 << ": \"" << optarg << "\"" << endl;
+         } break;
+
+         case 'j': {
+            _indicateInputProcessed = true;
          } break;
 
          case 0:
@@ -766,16 +777,7 @@ void XxCmdline::printHtmlHelp()
 
    {
       QTextStream os( stdout, IO_WriteOnly );
-      os << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">"
-         << endl
-         << "<html>" << endl
-         << "<head>" << endl
-         << "<title>xxdiff documentation</title>" << endl
-         << "</head>" << endl
-         << "<body>" << endl
-         << XxHelp::getManual() << endl
-         << "</body>" << endl
-         << "</html>" << endl;
+      os << XxHelp::getManual();
    }
 }
 
@@ -793,7 +795,7 @@ void XxCmdline::printVersion()
 #endif
            << endl;
    oss_cout << QString("  (Qt: %1)").arg( qVersion() ) << endl;
-   oss_cout << "  Written by Martin Blais <blais@iro.umontreal.ca>" << endl
+   oss_cout << "  Written by Martin Blais <blais@furius.ca>" << endl
             << flush;
 }
 

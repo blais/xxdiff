@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# $Source$
+# $Id: cvs-xdiff 101 2001-04-02 16:21:21Z blais $
+#
+
+#
+# validate parameters
+#
+
+# get module name
+#module=`basename $PWD`
+module=`cat CVS/Repository`
+echo In Module "$module":
+
+# get filename
+filename=$1
+if [ -z "$filename" ] ; then
+   echo "Usage: xdiffcvs <filename> [<revleft> [<revright>]]" 
+   exit 1 
+fi
+
+# get revision numbers, if present
+revleft=$2
+revright=$3
+
+
+#
+# create the two temporary files
+#
+current=$PWD
+
+# create left file
+cvs co -p$revleft $module/$filename,v > /tmp/xdiffcvs-left.tmp
+
+# create the right file
+if [ -z "$revright" ] ; then
+   cp $filename /tmp/xdiffcvs-right.tmp
+   chmod 700 /tmp/xdiffcvs-right.tmp
+else
+   cvs co -p$revright $module/$filename,v > /tmp/xdiffcvs-right.tmp
+fi
+
+# echo message
+echo ===============================================================================
+if [ -z "$revleft" ] ; then
+   echo Left: $filename -- Latest \|\| Right: $filename -- Local
+elif [ -z "$revright" ] ; then
+   echo Left: $filename -- Rev $revleft \|\| Right: $filename -- Local
+else
+   echo Left: $filename -- Rev $revleft \|\| Right: $filename -- $revright
+fi
+echo ===============================================================================
+
+#
+# spawn xdiff on them
+#
+xdiff /tmp/xdiffcvs-left.tmp /tmp/xdiffcvs-right.tmp &
+
+#
+# cleanup
+#
+sleep 5 # give xdiff time to load the files...
+rm /tmp/xdiffcvs-left.tmp
+rm /tmp/xdiffcvs-right.tmp
+

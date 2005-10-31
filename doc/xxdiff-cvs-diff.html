@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="Docutils 0.3.0: http://docutils.sourceforge.net/" />
+<title>xxdiff-cvs-diff</title>
+<meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
+<link rel="stylesheet" href="/docutils-style.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="xxdiff-cvs-diff">
+<h1 class="title">xxdiff-cvs-diff</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
+<tr><th class="docinfo-name">Version:</th>
+<td>1.6</td></tr>
+</tbody>
+</table>
+<div class="abstract topic">
+<p class="topic-title">Abstract</p>
+<p>This simple script invokes 'cvs diff' with the given file arguments, then splits
+the output patch for individual files, applies the reverse patches to temporary
+files and for each file it then spawns an xxdiff to preview each modified file
+separately.  This allows you to preview the current changes that are made in a
+cvs checkout.</p>
+</div>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title"><a name="table-of-contents">Table of Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#description" id="id1" name="id1">Description</a></li>
+<li><a class="reference" href="#usage" id="id2" name="id2">Usage</a></li>
+<li><a class="reference" href="#options" id="id3" name="id3">Options</a></li>
+<li><a class="reference" href="#download" id="id4" name="id4">Download</a></li>
+</ul>
+</div>
+<div class="section" id="description">
+<h1><a class="toc-backref" href="#id1" name="description">Description</a></h1>
+<p>This simple script invokes 'cvs diff' with the given file arguments, then splits
+the output patch for individual files, applies the reverse patches to temporary
+files and for each file it then spawns an xxdiff to preview each modified file
+separately.  This allows you to preview the current changes that are made in a
+cvs checkout.</p>
+<p>Optionally, you can decide to accept changed and they are committed file by file
+by this script.  In that case, the spawned xxdiff asks for a decision by the
+user, then the script takes the following actions upon the answer:</p>
+<ul class="simple">
+<li>ACCEPT: keep the new file as it is and commit</li>
+<li>MERGED: copy the merged file on the new file and commit</li>
+<li>REJECT: don't do anything, keep the new file as it but do not commit.</li>
+</ul>
+<p>For more generic behaviour about merging patches graphically, see also
+xxdiff-patch.  The current script is really about committing &quot;some&quot; cvs changes.</p>
+</div>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#id2" name="usage">Usage</a></h1>
+<pre class="literal-block">
+xxdiff-cvs-diff [&lt;options&gt;] [&lt;file&gt; &lt;file&gt; ...]
+</pre>
+</div>
+<div class="section" id="options">
+<h1><a class="toc-backref" href="#id3" name="options">Options</a></h1>
+<pre class="literal-block">
+--version     show program's version number and exit
+-h, --help    show this help message and exit
+-c, --commit  ask for confirmation and commit accepted changes.
+</pre>
+</div>
+<div class="section" id="download">
+<h1><a class="toc-backref" href="#id4" name="download">Download</a></h1>
+<p><a class="reference" href="../bin/xxdiff-cvs-diff">Download program here</a>.</p>
+</div>
+</div>
+</body>
+</html>

@@ -45,10 +45,13 @@ $(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
 #-------------------------------------------------------------------------------
 # support for documentation transformation
 
-.SUFFIXES: .qml
+.SUFFIXES: .html .txt
 
-.qml.h: 
-	sed -e 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
+.txt.html:
+	docutils-html --output-encoding=iso-8859-1 $< $@
+
+.html.h: 
+	sed -e 's/\"/\\\"/g;s/$$/\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
 	echo 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' 
 
 help.o: doc.h
@@ -67,3 +70,8 @@ version.obj: $(HEADERS) $(SOURCES) $(INTERFACES)
 #
 cmdline.o: $(YACCOUTH)
 cmdline.obj: $(YACCOUTH)
+
+
+doc: xxdiff
+	echo "This is the user's manual for version: " > version.txt
+	xxdiff --version | head -n1 >> version.txt

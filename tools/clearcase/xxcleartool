@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #******************************************************************************\
-#* $Id: xxcleartool 459 2002-01-11 02:44:49Z blais $
-#* $Date: 2002-01-10 21:44:49 -0500 (Thu, 10 Jan 2002) $
+#* $Id: xxcleartool 682 2003-12-25 21:32:57Z blais $
+#* $Date: 2003-12-25 16:32:57 -0500 (Thu, 25 Dec 2003) $
 #*
-#* Copyright (C) 2001 Martin Blais <blais@iro.umontreal.ca>
+#* Copyright (C) 2001 Martin Blais <blais@furius.ca>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -28,11 +28,11 @@ commonly performed file comparison tasks in relation to ClearCase use. See the
 individual command descriptions to find out what it can do.
 
 If you find a task that you perform often and it is not project- or
-company-specific, send a suggestion to the author at blais@iro.umontreal.ca.
+company-specific, send a suggestion to the author at blais@furius.ca.
 """
 
-__version__ = "$Revision: 459 $"
-__author__ = "Martin Blais <blais@iro.umontreal.ca>"
+__version__ = "$Revision: 682 $"
+__author__ = "Martin Blais <blais@furius.ca>"
 __state__ = "$State$"
 # $Source$
 

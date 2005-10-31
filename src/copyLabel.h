@@ -2,7 +2,7 @@
 /******************************************************************************\
  * $RCSfile$
  *
- * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2003  Martin Blais <blais@furius.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@ XX_NAMESPACE_BEGIN
 
 class XxCopyLabel : public QLabel {
 
+   Q_OBJECT
+
 public:
 
    /*----- types and enumerations -----*/
@@ -67,7 +69,7 @@ public:
    XxCopyLabel( QWidget* parent );
 
    // Destructor.
-   ~XxCopyLabel();
+   virtual ~XxCopyLabel();
 
    // See base class.
    // <group>

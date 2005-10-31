@@ -1,0 +1,7 @@
+==========================================
+Emacs style for editing xxdiff source code
+==========================================
+
+This directory contains emacs modifications that I use to edit the xxdiff source
+code.  If you use emacs and you want to modify xxdiff, using this style will
+make it easier for me to include your patches.
