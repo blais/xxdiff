@@ -1,6 +1,6 @@
 				 xxdiff README
 			 ------------------------------
-					
+
 xxdiff is a graphical file and directories comparison and merge tool.
 
 Official home page: http://xxdiff.sourceforge.net
@@ -13,22 +13,20 @@ Building from source:
 ------------------------------
 
 #
-# External dependencies.
-#
-# To build Qt, you'll need:
+# Requirements:
 #
 # - GNU make.  You will need GNU make.  Don't waste your time with other makes,
 #   many are known not to work (Sun's, as well as OSF1).
 #
-# - A C++ compiler with a decent STL
+# - A C++ compiler with a decent STL (g++-2.96 or more will do).
 #
 # - flex and bison
 #
-# - Qt-2.3.x  (Note: xxdiff has not yet been ported to Qt-3.x)
+# - Qt-3.x
 #
 # - tmake-1.7 or more (old versions, e.g. tmake-1.4, have problems with the
 #   INTERFACE keyword and don't generate appropriate rules for building the .ui
-#   files).
+#   files). This won't work with qmake.
 #
 
 
@@ -46,7 +44,7 @@ make
 #
 # installation
 #
-su - 
+su -
 install xxdiff/src/xxdiff /usr/X11R6/bin
 
 # you can generate HTML documentation with 'xxdiff --help-html' if you want.
@@ -71,14 +69,19 @@ I think this is how he compiled it:
  - try using contrib/xxdiff.pro.windows, and run qmake on it
  - tweak until it works.
 
-Please don't bother me with Windows compilation questions, it's endless,
-complicated, and frankly, unless you've already figure out the problems I'm not
-interested. I don't even have a Windows box to test it on and I probably won't
-have one for a good while. If you want to compile under Windows, you've got to
-be somewhat of a hacker, and then I'm sure you don't need me for that. You're on
-your own. Besides, I wouldn't have the answer anyway.
+Please refrain from asking Windows-related questions to me, it's and endless,
+complicated task, and frankly, unless you've already figured out the problems
+I'm not really interested. I don't even have a Windows box to test it on and I
+probably won't have one for a good while (hopefully I'll never have to have
+one). If you want to compile under Windows, you've got to be somewhat of a
+hacker, and then I'm sure you don't need me for that. You're on your
+own. Besides, I wouldn't have the answer anyway. I have already wasted countless
+hours trying to make this work under Windows, and although I was pretty damn
+close, I never quite finished it. Maybe the tools will mature and it will be
+easier one day.
 
-However, I will happily include your contributions in the source tree.
+However, I will happily include any contributions in the source tree that would
+help others make this happen.
 
 
 
@@ -114,11 +117,11 @@ Packaging:
 The author's own release process:
 ------------------------------
 
-   0) check 
+   0) check
       1a) tmake makefile is in release
       1b) version number is correct
 
-   1) apply release tag to cvs files 
+   1) apply release tag to cvs files
 
    2) build (see instructions above)
       2a) run tests in xxdiff/test

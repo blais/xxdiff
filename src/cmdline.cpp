@@ -188,9 +188,9 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "Specifies the filename of the merged file for output."
    },
    { "output-on-exit", 'O', false, 'O',
-     "Forces saving to the merged filename upon exit. Note: If the file exists, no "
-     "warning is given about overwriting the file. If there are unresolved conflicts, "
-     "a popup dialog will appear."
+     "Forces saving to the merged filename upon exit. Note: If the file "
+     "exists, no warning is given about overwriting the file. If there are "
+     "unresolved conflicts, a popup dialog will appear."
    },
 #ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    { "force-save-merged", 'S', false, 'S',
@@ -230,6 +230,14 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "Treat all files as text and compare them "
      "line-by-line, even if they do not appear to be text."
    }, 
+   { "exclude", 0, true, 'e',
+     "When comparing directories, ignore files and subdirectories whose "
+     "basenames match pattern."
+   },
+   { "exclude-from", 0, true, 'f',
+     "When comparing directories, ignore files and subdirectories whose "
+     "basenames match any pattern contained in file."
+   },
 
 };
 
@@ -536,6 +544,22 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
             oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
                 << ": true" << endl;
+         } break;
+
+         case 'e': {
+            QCString qtopts( optarg );
+            qtopts.simplifyWhiteSpace();
+            QTextStream oss( stderr, IO_WriteOnly );
+            oss << qtopts << endl;
+            // FIXME todo, support exclude=pattern
+         } break;
+
+         case 'f': {
+            QCString qtopts( optarg );
+            qtopts.simplifyWhiteSpace();
+            QTextStream oss( stderr, IO_WriteOnly );
+            oss << qtopts << endl;
+            // FIXME todo, support exclude-from=file
          } break;
 
          //

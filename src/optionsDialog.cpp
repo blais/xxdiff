@@ -431,7 +431,7 @@ void XxOptionsDialog::synchronize()
    );
 
    _lineeditClipboardFormat->setText(
-      resources.getClipboardFormat()
+      resources.getClipboardLineFormat()
    );
 
    _fontApp = resources.getFontApp();
@@ -578,10 +578,10 @@ void XxOptionsDialog::onApply()
    resources.setBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT, 
                          _checkboxFormatClipboardText->isChecked() );
 
-   QString oldClipboardFormat = resources.getClipboardFormat();
+   QString oldClipboardFormat = resources.getClipboardLineFormat();
    QString newClipboardFormat = _lineeditClipboardFormat->text();
    if ( newClipboardFormat != oldClipboardFormat ) {
-      resources.setClipboardFormat( newClipboardFormat );
+      resources.setClipboardLineFormat( newClipboardFormat );
    }
 
    if ( !XxResources::compareFonts( _fontApp,

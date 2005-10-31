@@ -1672,10 +1672,24 @@ bool XxApp::processDiff()
                _files[0]->getDisplayName() + " (" + leftName + ")"
             );
          }
-         if ( !rightName.isEmpty() ) {
-            _files[1]->setDisplayName( 
-               _files[1]->getDisplayName() + " (" + rightName + ")"
-            );
+         if ( _cmdline._unmergeNbFiles == 2 ) {
+            if ( !rightName.isEmpty() ) {
+               _files[1]->setDisplayName( 
+                  _files[1]->getDisplayName() + " (" + rightName + ")"
+               );
+            }
+         }
+         else {
+            if ( !middleName.isEmpty() ) {
+               _files[1]->setDisplayName( 
+                  _files[1]->getDisplayName() + " (" + middleName + ")"
+               );
+            }
+            if ( !rightName.isEmpty() ) {
+               _files[2]->setDisplayName( 
+                  _files[2]->getDisplayName() + " (" + rightName + ")"
+               );
+            }
          }
       }
       catch ( const XxError& ex ) {

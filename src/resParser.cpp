@@ -139,8 +139,11 @@ is used to save files." },
    { "VerticalLinePosition", VERTICAL_LINE_POS, 
      "Initial column to draw vertical alignment line." },
 
-   { "ClipboardFormat", CLIPBOARD_FORMAT, 
-     "Format of formatted clipboard text." },
+   { "ClipboardHeaderFormat", CLIPBOARD_HEAD_FORMAT, 
+     "Format of header for selection of text for formatted clipboard text." },
+
+   { "ClipboardLineFormat", CLIPBOARD_LINE_FORMAT, 
+     "Format of each selection line for formatted clipboard text." },
 
    { "HorizontalDiffType", HORDIFF_TYPE,
      "Type of horizontal diffs display.  Can be one of \
@@ -195,7 +198,7 @@ changes within that hunk. This can be useful for ignoring code reformatting \
 for certain source code languages that allow it (e.g. C++)." },
 
    { "FormatClipboardText", FORMAT_CLIPBOARD_TEXT, 
-     "Enables clipboard (copy-paste) formatting.  If disable, text that goes \
+     "Enables clipboard (copy-paste) formatting.  If disabled, text that goes \
 in the clipboard is simply left unformatted." },
 
    { "IgnoreErrors", IGNORE_ERRORS,
@@ -463,7 +466,9 @@ StringToken colorList[] = {
    { "Cursor", COLOR_CURSOR,
      " Line cursor color " },
    { "VerticalLine", COLOR_VERTICAL_LINE,
-     " Vertical line color " }
+     " Vertical line color " },
+   { "TextSelection", COLOR_TEXT_SELECTION,
+     " Color of text region selection " }
 };
 
 StringToken commandList[] = {
@@ -1191,9 +1196,15 @@ void XxResParser::genInitFile(
       }
    }
 
-   if ( res1.getClipboardFormat() != res2.getClipboardFormat() ) {
-      os << searchTokenName( STPARAM(kwdList), CLIPBOARD_FORMAT ) << ": \""
-         << res1.getClipboardFormat() << "\"" << endl;
+   if ( res1.getClipboardHeadFormat() !=
+        res2.getClipboardHeadFormat() ) {
+      os << searchTokenName( STPARAM(kwdList), CLIPBOARD_HEAD_FORMAT ) << ": \""
+         << res1.getClipboardHeadFormat() << "\"" << endl;
+   }
+   if ( res1.getClipboardLineFormat() !=
+        res2.getClipboardLineFormat() ) {
+      os << searchTokenName( STPARAM(kwdList), CLIPBOARD_LINE_FORMAT ) << ": \""
+         << res1.getClipboardLineFormat() << "\"" << endl;
    }
 
    if ( res1.getHordiffType() != res2.getHordiffType() ) {
@@ -1339,8 +1350,10 @@ void XxResParser::listResources( QTextStream& os )
          << b1.latin1() << "\"" << endl;
    }
 
-   os << searchTokenName( STPARAM(kwdList), CLIPBOARD_FORMAT ) << ": \""
-      << res.getClipboardFormat() << "\"" << endl;
+   os << searchTokenName( STPARAM(kwdList), CLIPBOARD_HEAD_FORMAT ) << ": \""
+      << res.getClipboardHeadFormat() << "\"" << endl;
+   os << searchTokenName( STPARAM(kwdList), CLIPBOARD_LINE_FORMAT ) << ": \""
+      << res.getClipboardLineFormat() << "\"" << endl;
 
    const char* hdtstr[3] = { "None", "Single", "Multiple" };
    os << searchTokenName( STPARAM(kwdList), HORDIFF_TYPE ) << ": "
@@ -1681,8 +1694,19 @@ QString XxResParser::getResourceRef()
    {
       drbegin( os );
       const StringToken* tok =
-         searchToken( STPARAM(kwdList), CLIPBOARD_FORMAT );
-      QString cf = XxHelp::xmlize( res.getClipboardFormat() );
+         searchToken( STPARAM(kwdList), CLIPBOARD_HEAD_FORMAT );
+      QString cf = XxHelp::xmlize( res.getClipboardHeadFormat() );
+      os << tok->_name << ": \"" << cf << "\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+   {
+      drbegin( os );
+      const StringToken* tok =
+         searchToken( STPARAM(kwdList), CLIPBOARD_LINE_FORMAT );
+      QString cf = XxHelp::xmlize( res.getClipboardLineFormat() );
       os << tok->_name << ": \"" << cf << "\"" << endl;
       drend( os );
       ddbegin( os );

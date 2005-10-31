@@ -191,9 +191,16 @@ inline uint XxResources::getVerticalLinePos() const
 
 //------------------------------------------------------------------------------
 //
-inline const QString& XxResources::getClipboardFormat() const
+inline const QString& XxResources::getClipboardHeadFormat() const
 {
-   return _clipboardFormat;
+   return _clipboardHeadFormat;
+}
+
+//------------------------------------------------------------------------------
+//
+inline const QString& XxResources::getClipboardLineFormat() const
+{
+   return _clipboardLineFormat;
 }
 
 //------------------------------------------------------------------------------

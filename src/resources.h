@@ -264,6 +264,7 @@ enum XxColor {
    COLOR_BACKGROUND,
    COLOR_CURSOR,
    COLOR_VERTICAL_LINE,
+   COLOR_TEXT_SELECTION,
 
    COLOR_LAST // Not a real resource.
 };
@@ -504,10 +505,12 @@ public:
    void setTag( XxTag, const QString& );
    // </group>
 
-   // Get/set clipboard format string.
+   // Get/set clipboard selection or line format string.
    // <group>
-   const QString& getClipboardFormat() const;
-   void setClipboardFormat( const QString& format );
+   const QString& getClipboardHeadFormat() const;
+   void setClipboardHeadFormat( const QString& format );
+   const QString& getClipboardLineFormat() const;
+   void setClipboardLineFormat( const QString& format );
    // </group>
 
    // Get/set type of horizontal diffs.
@@ -609,7 +612,8 @@ private:
    uint         _overviewSepWidth;
    uint         _verticalLinePos;
    QString      _tags[ TAG_LAST ];
-   QString      _clipboardFormat;
+   QString      _clipboardHeadFormat;
+   QString      _clipboardLineFormat;
    XxIgnoreFile _ignoreFile;
    XxHordiff    _hordiffType;
    uint         _hordiffMax;

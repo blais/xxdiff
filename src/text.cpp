@@ -212,8 +212,12 @@ XxText::XxText(
    _app( app ),
    _sv( sv ),
    _no( no ),
-   _grab( false )
+   _grabMode( NONE ),
+   _dontClearOnce( false )
 {
+   _regionSelect[0] = -1;
+   _regionSelect[1] = -1;
+
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
 #ifdef XX_DEBUG_TEXT
@@ -226,8 +230,11 @@ XxText::XxText(
    //
    // We do this multiple times for nothing, but I'd rather have it here
    // localized where it is implemented. This doesn't hurt.
-   QClipboard *cb = QkApplication::clipboard();
+   QClipboard* cb = QkApplication::clipboard();
    cb->setSelectionMode( true );
+
+   // Bind clear to change signal.
+   connect( cb, SIGNAL(selectionChanged()), this, SLOT(clearRegionSelect()) );
 }
 
 //------------------------------------------------------------------------------
@@ -299,6 +306,9 @@ void XxText::drawContents( QPainter* pp )
    uint horizontalPos = _sv->getHorizontalPos();
    uint tabWidth = resources.getTabWidth();
 
+   int selRegY1 = -1;
+   int selRegY2 = -1;
+
    // The painter's clip region is already set (verified).
 
    // Font.
@@ -350,9 +360,12 @@ void XxText::drawContents( QPainter* pp )
 
       // FIXME not all control paths set the skip parameter.
 
+      int curline = icurline;
+      icurline++;
+
       // Get line to display.
       prevtype = type;
-      const XxLine& line = diffs->getLine( icurline++ );
+      const XxLine& line = diffs->getLine( curline );
       type = line.getType();
 
       XxFno renNo = _no;
@@ -386,7 +399,7 @@ void XxText::drawContents( QPainter* pp )
                   y += HEIGHT_UNSEL_REGION;
                }
 
-               if ( int(icurline-1) == cursorLine ) {
+               if ( curline == cursorLine ) {
                   cursorY1 = py;
                   cursorY2 = y;
                }
@@ -412,7 +425,7 @@ void XxText::drawContents( QPainter* pp )
                   y += HEIGHT_NEITHER_REGION;
                }
 
-               if ( int(icurline-1) == cursorLine ) {
+               if ( curline == cursorLine ) {
                   cursorY1 = py;
                   cursorY2 = y;
                }
@@ -647,9 +660,17 @@ void XxText::drawContents( QPainter* pp )
          }
       }
 
-      if ( int(icurline-1) == cursorLine ) {
+      if ( curline == cursorLine ) {
          cursorY1 = py;
          cursorY2 = y;
+      }
+
+      if ( _regionSelect[0] == curline ) {
+         // Just draw over in the left border.
+         selRegY1 = py;
+      }
+      if ( _regionSelect[1] == curline ) {
+         selRegY2 = y;
       }
 
       ++irenline;
@@ -670,6 +691,19 @@ void XxText::drawContents( QPainter* pp )
       QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
       p.drawRect( 0, cursorY1 - 1, w, cursorY2 - cursorY1 + 2 );
+   }
+
+   // Draw selected region marker.
+   if ( _regionSelect[0] < topLine ) {
+      selRegY1 = 0;
+   }
+   if ( _regionSelect[1] >= icurline ) {
+      selRegY2 = y;
+   }
+   if ( selRegY1 != -1 && selRegY2 != -1 ) {
+      QColor selRegColor = resources.getColor( COLOR_TEXT_SELECTION );
+      QBrush brush( selRegColor );
+      p.fillRect( XX_RED_RECT( 0, selRegY1, 3, selRegY2 - selRegY1 ), brush );
    }
 
    // Draw vertical line.
@@ -716,18 +750,34 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
 
    // Activate popup in third button.
-   if ( event->button() == RightButton ) {
-      if ( event->state() & ControlButton ) {
-         _grab = true;
-         _grabTopLine = _sv->getTopLine();
-         _grabDeltaLineNo = dlineno;
-      }
-      else {
-         const XxLine& line = diffs->getLine( lineno );
-         QkPopupMenu* popup = _app->getViewPopup( line );
-         popup->popup( event->globalPos() );
-         return;
-      }
+   if ( event->button() == RightButton && event->state() & ControlButton ) {
+
+      _grabMode = MOUSE_DRAG;
+      _grabTopLine = _sv->getTopLine();
+      _grabDeltaLineNo = dlineno;
+      return;
+   }
+   else if ( event->button() == LeftButton && event->state() & AltButton ) {
+
+      _grabMode = REGION_SELECT;
+      _grabTopLine = _sv->getTopLine();
+      _grabDeltaLineNo = dlineno;
+
+      QClipboard* cb = QkApplication::clipboard();
+      cb->clear();
+
+      _regionSelect[0] = _grabTopLine + dlineno;
+      _regionSelect[1] = -1;
+      update();
+      return;
+   }
+   else if ( event->button() == RightButton ) {
+
+      // Popup.
+      const XxLine& line = diffs->getLine( lineno );
+      QkPopupMenu* popup = _app->getViewPopup( line );
+      popup->popup( event->globalPos() );
+      return;
    }
 
    // Interactive toggling of debug drawing structures.
@@ -748,7 +798,8 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
    QString filename = buffer->getDisplayName();
-   QString clipboardFormat = resources.getClipboardFormat();
+   QString clipboardHeadFormat = resources.getClipboardHeadFormat();
+   QString clipboardLineFormat = resources.getClipboardLineFormat();
 
 
    // Perform the selection and create cut text.
@@ -784,8 +835,8 @@ void XxText::mousePressEvent( QMouseEvent* event )
                }
                if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                     == true ) {
-                  QString forline = formatClipboardLine( 
-                     clipboardFormat, _no, fline, filename, adt
+                  QString forline = formatClipboard( 
+                     clipboardLineFormat, _no, fline, filename, adt
                   );
                   textCopy += forline;
                }
@@ -815,34 +866,10 @@ void XxText::mousePressEvent( QMouseEvent* event )
       // Compute region text.
       XxDln start, end;
       diffs->findRegion( lineno, start, end );
-      for ( XxDln l = start; l <= end; ++l ) {
-         const XxLine& line = diffs->getLine( l );
-         XxFln fline = line.getLineNo( _no );
-         if ( fline != -1 ) {
-            uint len;
-            const char* text = buffer->getTextLine( fline, len );
-            if ( text != 0 ) {
-               QString adt;
-               if ( len > 0 ) {
-                  adt.setLatin1( text, len );
-               }
-               if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
-                    == true ) {
-                  QString forline = formatClipboardLine( 
-                     clipboardFormat, _no, fline, filename, adt
-                  );
-                  textCopy += forline;
-               }
-               else {
-                  textCopy += adt;
-               }
-               textCopy += QString("\n");
-            }
-         }
-      }
+      textCopy = getRegionText( start, end );
    }
 
-   QClipboard *cb = QkApplication::clipboard();
+   QClipboard* cb = QkApplication::clipboard();
    cb->setText( textCopy );
 
    if ( event->button() == LeftButton || 
@@ -853,13 +880,113 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
+QString XxText::getRegionText( XxDln start, XxDln end ) const
+{
+   // Note: we could eventually replace this by a more generic function in
+   // XxDiffs.
+
+   XxDiffs* diffs = _app->getDiffs();
+   XxBuffer* buffer = _app->getBuffer( _no );
+   XX_ASSERT( diffs != 0 && buffer != 0 );
+   QString filename = buffer->getDisplayName();
+
+   QString textCopy;
+   const XxResources& resources = _app->getResources();
+   QString clipboardHeadFormat = resources.getClipboardHeadFormat();
+   QString clipboardLineFormat = resources.getClipboardLineFormat();
+
+   bool headerAdded = false;
+
+   for ( XxDln l = start; l <= end; ++l ) {
+      const XxLine& line = diffs->getLine( l );
+      XxFln fline = line.getLineNo( _no );
+      if ( fline != -1 ) {
+
+         if ( ! headerAdded ) {
+            QString header = formatClipboard( 
+               clipboardHeadFormat, _no, fline, filename, QString("")
+            );
+            textCopy += header;
+            headerAdded = true;
+         }
+
+         uint len;
+         const char* text = buffer->getTextLine( fline, len );
+         if ( text != 0 ) {
+            QString adt;
+            if ( len > 0 ) {
+               adt.setLatin1( text, len );
+            }
+            if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
+                 == true ) {
+               QString forline = formatClipboard( 
+                  clipboardLineFormat, _no, fline, filename, adt
+               );
+               textCopy += forline;
+            }
+            else {
+               textCopy += adt;
+            }
+            textCopy += QString("\n");
+         }
+      }
+   }
+   return textCopy;
+}
+
+//------------------------------------------------------------------------------
+//
 void XxText::mouseMoveEvent( QMouseEvent* event )
 {
-   if ( _grab ) {
+   if ( _grabMode != NONE ) {
       const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
       XxDln dlineno = event->y() / fm.lineSpacing();
-      _sv->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
+
+      if ( _grabMode == MOUSE_DRAG ) {
+         _sv->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
+      }
+      else if ( _grabMode == REGION_SELECT ) {
+
+         if ( isMerged() ) {
+            return;
+         }
+
+         XxDiffs* diffs = _app->getDiffs();
+         if ( diffs == 0 ) {
+            return;
+         }
+
+         XxDln newSel = _grabTopLine + dlineno;
+         if ( newSel > diffs->getNbLines() ) {
+            return;
+         }
+
+         XxDln origSel = _grabTopLine + _grabDeltaLineNo;
+         if ( origSel < newSel ) {
+            _regionSelect[0] = origSel;
+            _regionSelect[1] = newSel;
+         }
+         else {
+            _regionSelect[1] = origSel;
+            _regionSelect[0] = newSel;
+         }
+         // Keep em sorted.
+         XX_CHECK( ( _regionSelect[0] == -1 || _regionSelect[1] == -1 ) || 
+                   ( _regionSelect[0] <= _regionSelect[1] ) );
+         
+         update();
+
+         // Compute region text.
+         if ( _regionSelect[0] != -1 && _regionSelect[1] != -1 ) {
+            QString textCopy =
+               getRegionText( _regionSelect[0], _regionSelect[1] );
+
+            _dontClearOnce = true;
+            QClipboard* cb = QkApplication::clipboard();
+            cb->setText( textCopy );
+         }
+      }
    }
 }
 
@@ -867,8 +994,8 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
 //
 void XxText::mouseReleaseEvent( QMouseEvent* /*event*/ )
 {
-   // Release grab in all case. It won't hurt.
-   _grab = false;
+   // Release grab in all cases. It won't hurt.
+   _grabMode = NONE;
 }
 
 //------------------------------------------------------------------------------
@@ -1086,15 +1213,15 @@ uint XxText::computeMergedLines() const
 
 //------------------------------------------------------------------------------
 //
-QString XxText::formatClipboardLine(
-   const QString& clipboardFormat,
+QString XxText::formatClipboard(
+   const QString& clipboardLineFormat,
    const XxFno    fileno,
    const XxFln    lineno,
    const QString& filename,
    const QString& lineContents
 )
 {
-   QString forline = clipboardFormat;
+   QString forline = clipboardLineFormat;
    
    typedef int PosType;
    PosType notfound = -1;
@@ -1149,6 +1276,17 @@ QString XxText::formatClipboardLine(
    }
 
    return forline;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxText::clearRegionSelect()
+{
+   if ( !_dontClearOnce ) {
+      _regionSelect[0] = _regionSelect[1] = -1;
+      update();
+   }
+   _dontClearOnce = false;
 }
 
 XX_NAMESPACE_END

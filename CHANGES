@@ -2,12 +2,22 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 611 2002-08-28 19:07:35Z blais $
+# $Id: CHANGES 621 2002-09-18 23:55:06Z blais $
 #
 
 Current development release
 ------------------------------
 
+
+Version 2.9: (minor features)
+------------------------------
+
+   * Implemented variable text selection in text widget.
+     Press ALT-Button1 and drag to select text that gets put in the 
+     clipboard.
+
+   * Split formatting into header formatting for the whole selection text and
+     per-line formatting.
 
 
 Version 2.8: (minor bug fixes)

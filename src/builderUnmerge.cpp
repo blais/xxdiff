@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <iostream>
 
-#define LOCAL_TRACE
+// #define LOCAL_TRACE
 #ifdef LOCAL_TRACE
 #define XX_LOCAL_TRACE(x) XX_TRACE(x)
 #else

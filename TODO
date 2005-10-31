@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 611 2002-08-28 19:07:35Z blais $
+# $Id: TODO 620 2002-09-18 18:44:18Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -35,6 +35,52 @@ Goals for 4.0 stable release:
 
 --------------------------------------------------------------------------------
 Tasks: current tasks
+
+2 prorities for review:
+
+   1) make able to make comments rapidly
+
+   2) make able to see if there are any changes at all (turn off all ignore options at once?)
+      or perhaps look at the diff output
+
+   * quote output of clipboard header format \n's to be able to read back the
+     xxdiffrc file.
+
+
+   * create separate popup menus for different builders instead of ifdef
+     technology
+
+   * add "Edit Merged Filename" to resolve conflicts.
+
+   * implement --exclude and --exclude-from for directories, it would be really
+     useful for CVS directories
+
+   * implement arbitrary secondary selection, with filename in the clipboard,
+     for making easy merge comments, that would print filename, and pasted text
+
+   * Special "File" dialog with display and real filenames, with save as,
+     replace and edit buttons.
+
+   * try this: with horizontal diffs, remove two first chars of a line whose
+     indentation has changed, the horizontal diff will span from the beginning
+     of the line. this is not desired.
+
+   * Bug "xxdiff --unmerge <file>" (and not unmerge3) crashes with floating
+     point exception on this file contents:
+
+           <<<<<<< A 
+           lines from A 
+           ||||||| B 
+           lines from B 
+           ======= 
+           lines from C 
+           >>>>>>> C 
+
+
+   * in 3-way diffs mode, when you ignore one file, you must recompute the
+     horizontal diffs between the other two files only!  this would be very
+     useful actually.
+
 
    * Add Accel.Quit alias for Accel.Exit
 
@@ -85,6 +131,8 @@ Tasks: current tasks
 
 
 (Misc)
+
+   * scrolling with the scrollbar doesn't seem to restrict the cursor anymore
 
    * Some of our display algorithms allow the user to effectively ignore certain
      hunks. If all diff hunks are ignored by our display algorithms, could we

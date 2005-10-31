@@ -248,6 +248,8 @@ void XxResources::initializeOriginalXdiff()
       QColor( 0xff, 0xff, 0xff, QColor::Rgb ); // white
    _backColors[ COLOR_VERTICAL_LINE ] = 
       QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
+   _backColors[ COLOR_TEXT_SELECTION ] = 
+      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
    // Note: we don't use the fore colors for these guys.
 
    //---------------------------------------------------------------------------
@@ -349,7 +351,9 @@ void XxResources::initializeOriginalXdiff()
 
    //---------------------------------------------------------------------------
 
-   _clipboardFormat = QString("%L: %s");
+   _clipboardHeadFormat =
+      QString("\nIn file \"%F\":\n------------------------------\n");
+   _clipboardLineFormat = QString("%L: %s");
 
    _ignoreFile = IGNORE_NONE;
 
@@ -705,9 +709,17 @@ void XxResources::setVerticalLinePos( uint vlinePos )
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setClipboardFormat( const QString& format )
+void XxResources::setClipboardHeadFormat( const QString& format )
 {
-   _clipboardFormat = format;
+   _clipboardHeadFormat = format;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setClipboardLineFormat( const QString& format )
+{
+   _clipboardLineFormat = format;
    emit changed();
 }
 

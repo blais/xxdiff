@@ -705,17 +705,18 @@ rejects those changes, making comments along the way.
 </p>
 
 <p>
-For this purpose, xxdiff puts selected text in the clipboard text buffer when
-you select it.  Thus, the merge cop can select a region, and paste the results
-in a neighboring editor window.
+For this purpose, xxdiff puts selected text (i.e. when you click on a diff hunk)
+in the clipboard text buffer when you select it.  Thus, the merge cop can select
+a region, and paste the results in a neighboring editor window.
 </p>
 
 <p>
 These snippets of code will typically be interspersed with comments.  xxdiff can
 be format the line contents before they are copied to the clipboard, to make
 them distinct from the merge comments.  This can be enabled using the "format
-clipboard text" option.  The clipboard format is a string that contains format
-specifiers similar to printf.  The following specifiers are allowed:
+clipboard text" option.  The clipboard line format is a string that contains
+format specifiers similar to printf for each line to be formatted prior to being
+put on the clipboard.  The following specifiers are allowed:
 </p>
 <ul>
 <li><b>%N</b>: file line (0 is leftmost file);</li>
@@ -725,9 +726,24 @@ specifiers similar to printf.  The following specifiers are allowed:
 </ul>
 
 <p>
+There is also a "clipboard header format" resource for adding the filename at
+the top of the copied text. This is useful for quickly pasting into a merge
+comments file.
+</p>
+
+<p>
 Also note that clicking on the filename labels will put the filenames in the
 clipboard for similar cut-n-paste action.  This can be useful when reviewing
 ClearCase revision files, which often have very long p-names.
+</p>
+
+<h4>Variable text selection</h4>
+
+<p>
+You can press ALT and Button1 to select an arbitrary number of lines.  The
+selected lines will be marked with a special border to show what gets put in the
+clipboard. This is very useful when you don't want to quote an entire diff hunk,
+or a section of text that straddles hunks.
 </p>
 
 

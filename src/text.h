@@ -56,7 +56,9 @@ class XxScrollView;
 // <summary> a text widget that can display diffs </summary>
 
 class XxText : public QFrame {
-    
+   
+   Q_OBJECT
+
 public:
 
    /*----- member functions -----*/
@@ -91,6 +93,10 @@ public:
    // merged view.
    uint computeMergedLines() const;
 
+public slots:
+
+   virtual void clearRegionSelect();
+   
 protected:
 
    /*----- member functions -----*/
@@ -106,12 +112,16 @@ protected:
 
 private:
 
+   /*----- types and enumerations -----*/
+
+   enum GrabMode { NONE, MOUSE_DRAG, REGION_SELECT };
+
    /*----- static member functions -----*/
 
    // Returns true if this text is displaying merged results.
    bool isMerged() const;
 
-   static QString formatClipboardLine(
+   static QString formatClipboard(
       const QString& clipboardFormat,
       const XxFno    fileno,
       const XxFln    lineno,
@@ -119,15 +129,19 @@ private:
       const QString& lineContents
    );
 
+   // Returns the region text, formatted.
+   QString getRegionText( XxDln start, XxDln end ) const;
+
    /*----- data members -----*/
 
    XxApp*        _app;
    XxScrollView* _sv;
    const XxFno   _no;
-   bool          _grab;
+   GrabMode      _grabMode;
    XxDln         _grabTopLine;
    int           _grabDeltaLineNo;
-   
+   int           _regionSelect[2]; // Selected text region for review.
+   bool          _dontClearOnce; // one-time flag for our own clipboard calls.
 };
 
 

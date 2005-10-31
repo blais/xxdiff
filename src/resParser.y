@@ -104,7 +104,8 @@
 
 %token <num> VERTICAL_LINE_POS
 
-%token <num> CLIPBOARD_FORMAT
+%token <num> CLIPBOARD_HEAD_FORMAT
+%token <num> CLIPBOARD_LINE_FORMAT
 
 %token <num> HORDIFF_TYPE
 %token <num>   HORDIFF
@@ -146,7 +147,8 @@ stmt		: error '\n'
 		| overview_file_width
 		| overview_sep_width
 		| vertical_line_pos
-		| clipboard_format
+		| clipboard_head_format
+		| clipboard_line_format
 		| hordiff_type
 		| hordiff_max
 		| hordiff_context
@@ -325,13 +327,19 @@ vertical_line_pos : VERTICAL_LINE_POS COLON NUMBER
                 }
 		;
 
-clipboard_format : CLIPBOARD_FORMAT COLON STRING
+clipboard_head_format : CLIPBOARD_HEAD_FORMAT COLON STRING
 		{
                    /*printf( "==> clipboard format: %s\n", $3 );*/
-                   RESOURCES->setClipboardFormat( $3 );
+                   RESOURCES->setClipboardHeadFormat( $3 );
                 }
 		;
 
+clipboard_line_format : CLIPBOARD_LINE_FORMAT COLON STRING
+		{
+                   /*printf( "==> clipboard format: %s\n", $3 );*/
+                   RESOURCES->setClipboardLineFormat( $3 );
+                }
+		;
 
 hordiff_type	: HORDIFF_TYPE COLON HORDIFF
 		{
