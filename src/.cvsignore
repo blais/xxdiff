@@ -8,8 +8,7 @@
 *Base.h
 *Base.cpp
 Makefile
-Makefile.in
-man.h
 xxdiff
 ii_files
 moc_*
+doc.h

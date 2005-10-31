@@ -1,0 +1,277 @@
+#!/usr/bin/env python2.1
+#******************************************************************************\
+#* $Id: xxdiff_translate_resources 348 2001-11-06 06:50:46Z blais $
+#* $Date: 2001-11-06 01:50:46 -0500 (Tue, 06 Nov 2001) $
+#*
+#* Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+
+"""Translate xxdiff resource file format 1.x into 2.x format.
+
+You might have to do some fixing by hand if this doesn't work.
+Use `xxdiff --list-resources' to help yourself.
+"""
+
+__version__ = "$Revision: 348 $"
+
+#===============================================================================
+# EXTERNAL DECLARATIONS
+#===============================================================================
+
+import os, os.path, sys
+import string, re
+import distutils.fancy_getopt as fgetopt  # getopt()
+
+#===============================================================================
+# LOCAL DECLARATIONS
+#===============================================================================
+
+strkwds = {}
+strkwds['accel.exit'] = 'Accel.Exit'
+strkwds['accel.search'] = 'Accel.Search'
+strkwds['accel.searchForward'] = 'Accel.SearchForward'
+strkwds['accel.searchBackward'] = 'Accel.SearchBackward'
+strkwds['accel.scrollDown'] = 'Accel.ScrollDown'
+strkwds['accel.scrollUp'] = 'Accel.ScrollUp'
+strkwds['accel.cursorDown'] = 'Accel.CursorDown'
+strkwds['accel.cursorUp'] = 'Accel.CursorUp'
+strkwds['accel.cursorTop'] = 'Accel.CursorTop'
+strkwds['accel.cursorBottom'] = 'Accel.CursorBottom'
+strkwds['accel.redoDiff'] = 'Accel.RedoDiff'
+strkwds['accel.nextDifference'] = 'Accel.NextDifference'
+strkwds['accel.previousDifference'] = 'Accel.PreviousDifference'
+strkwds['accel.nextUnselected'] = 'Accel.NextUnselected'
+strkwds['accel.previousUnselected'] = 'Accel.PreviousUnselected'
+strkwds['accel.selectGlobalLeft'] = 'Accel.SelectGlobalLeft'
+strkwds['accel.selectGlobalMiddle'] = 'Accel.SelectGlobalMiddle'
+strkwds['accel.selectGlobalRight'] = 'Accel.SelectGlobalRight'
+strkwds['accel.selectGlobalNeither'] = 'Accel.SelectGlobalNeither'
+strkwds['accel.selectGlobalUnselect'] = 'Accel.SelectGlobalUnselect'
+strkwds['accel.selectGlobalMerge'] = 'Accel.SelectGlobalMerge'
+strkwds['accel.selectRegionLeft'] = 'Accel.SelectRegionLeft'
+strkwds['accel.selectRegionMiddle'] = 'Accel.SelectRegionMiddle'
+strkwds['accel.selectRegionRight'] = 'Accel.SelectRegionRight'
+strkwds['accel.selectRegionNeither'] = 'Accel.SelectRegionNeither'
+strkwds['accel.selectRegionUnselect'] = 'Accel.SelectRegionUnselect'
+strkwds['accel.selectRegionLeftAndNext'] = 'Accel.SelectRegionLeftAndNext'
+strkwds['accel.selectRegionMiddleAndNext'] = 'Accel.SelectRegionMiddleAndNext'
+strkwds['accel.selectRegionRightAndNext'] = 'Accel.SelectRegionRightAndNext'
+strkwds['accel.selectRegionNeitherAndNext'] = 'Accel.SelectRegionNeitherAndNext'
+strkwds['accel.selectRegionSplitSwapMerge'] = 'Accel.SelectRegionSplitSwapMerge'
+strkwds['accel.selectLineLeft'] = 'Accel.SelectLineLeft'
+strkwds['accel.selectLineMiddle'] = 'Accel.SelectLineMiddle'
+strkwds['accel.selectLineRight'] = 'Accel.SelectLineRight'
+strkwds['accel.selectLineNeither'] = 'Accel.SelectLineNeither'
+strkwds['accel.selectLineUnselect'] = 'Accel.SelectLineUnselect'
+strkwds['accel.tabsAt3'] = 'Accel.TabsAt3'
+strkwds['accel.tabsAt4'] = 'Accel.TabsAt4'
+strkwds['accel.tabsAt8'] = 'Accel.TabsAt8'
+strkwds['accel.mergedView'] = 'Accel.MergedView'
+strkwds['accel.toggleLineNumbers'] = 'Accel.ToggleLineNumbers'
+strkwds['accel.toggleMarkers'] = 'Accel.ToggleMarkers'
+strkwds['accel.toggleOverview'] = 'Accel.ToggleOverview'
+strkwds['accel.toggleShowFilenames'] = 'Accel.ToggleShowFilenames'
+strkwds['accel.toggleHorizontalDiffs'] = 'Accel.ToggleHorizontalDiffs'
+strkwds['accel.toggleFormatClipboardText'] = 'Accel.ToggleFormatClipboardText'
+strkwds['accel.helpOnContext'] = 'Accel.HelpOnContext'
+strkwds['accel.mergedClose'] = 'Accel.MergedClose'
+strkwds['color.same.back'] = 'Color.Same.Fore'
+strkwds['color.same.fore'] = 'Color.Same.Fore'
+strkwds['color.diffOne.back'] = 'Color.DiffOne.Fore'
+strkwds['color.diffOne.fore'] = 'Color.DiffOne.Fore'
+strkwds['color.diffOneSup.back'] = 'Color.DiffOneSup.Fore'
+strkwds['color.diffOneSup.fore'] = 'Color.DiffOneSup.Fore'
+strkwds['color.diffOneOnly.back'] = 'Color.DiffOneOnly.Fore'
+strkwds['color.diffOneOnly.fore'] = 'Color.DiffOneOnly.Fore'
+strkwds['color.diffOneNonly.back'] = 'Color.DiffOneNonly.Fore'
+strkwds['color.diffOneNonly.fore'] = 'Color.DiffOneNonly.Fore'
+strkwds['color.diffTwo.back'] = 'Color.DiffTwo.Fore'
+strkwds['color.diffTwo.fore'] = 'Color.DiffTwo.Fore'
+strkwds['color.diffTwoSup.back'] = 'Color.DiffTwoSup.Fore'
+strkwds['color.diffTwoSup.fore'] = 'Color.DiffTwoSup.Fore'
+strkwds['color.diffTwoOnly.back'] = 'Color.DiffTwoOnly.Fore'
+strkwds['color.diffTwoOnly.fore'] = 'Color.DiffTwoOnly.Fore'
+strkwds['color.diffTwoNonly.back'] = 'Color.DiffTwoNonly.Fore'
+strkwds['color.diffTwoNonly.fore'] = 'Color.DiffTwoNonly.Fore'
+strkwds['color.delete.back'] = 'Color.Delete.Fore'
+strkwds['color.delete.fore'] = 'Color.Delete.Fore'
+strkwds['color.deleteBlank.back'] = 'Color.DeleteBlank.Fore'
+strkwds['color.deleteBlank.fore'] = 'Color.DeleteBlank.Fore'
+strkwds['color.insert.back'] = 'Color.Insert.Fore'
+strkwds['color.insert.fore'] = 'Color.Insert.Fore'
+strkwds['color.insertBlank.back'] = 'Color.InsertBlank.Fore'
+strkwds['color.insertBlank.fore'] = 'Color.InsertBlank.Fore'
+strkwds['color.diffAll.back'] = 'Color.DiffAll.Fore'
+strkwds['color.diffAll.fore'] = 'Color.DiffAll.Fore'
+strkwds['color.diffAllSup.back'] = 'Color.DiffAllSup.Fore'
+strkwds['color.diffAllSup.fore'] = 'Color.DiffAllSup.Fore'
+strkwds['color.diffAllOnly.back'] = 'Color.DiffAllOnly.Fore'
+strkwds['color.diffAllOnly.fore'] = 'Color.DiffAllOnly.Fore'
+strkwds['color.diffAllNonly.back'] = 'Color.DiffAllNonly.Fore'
+strkwds['color.diffAllNonly.fore'] = 'Color.DiffAllNonly.Fore'
+strkwds['color.diffDel.back'] = 'Color.DiffDel.Fore'
+strkwds['color.diffDel.fore'] = 'Color.DiffDel.Fore'
+strkwds['color.diffDelSup.back'] = 'Color.DiffDelSup.Fore'
+strkwds['color.diffDelSup.fore'] = 'Color.DiffDelSup.Fore'
+strkwds['color.diffDelOnly.back'] = 'Color.DiffDelOnly.Fore'
+strkwds['color.diffDelOnly.fore'] = 'Color.DiffDelOnly.Fore'
+strkwds['color.diffDelNonly.back'] = 'Color.DiffDelNonly.Fore'
+strkwds['color.diffDelNonly.fore'] = 'Color.DiffDelNonly.Fore'
+strkwds['color.diffDelBlank.back'] = 'Color.DiffDelBlank.Fore'
+strkwds['color.diffDelBlank.fore'] = 'Color.DiffDelBlank.Fore'
+strkwds['color.selected.back'] = 'Color.Selected.Fore'
+strkwds['color.selected.fore'] = 'Color.Selected.Fore'
+strkwds['color.selectedSup.back'] = 'Color.SelectedSup.Fore'
+strkwds['color.selectedSup.fore'] = 'Color.SelectedSup.Fore'
+strkwds['color.deleted.back'] = 'Color.Deleted.Fore'
+strkwds['color.deleted.fore'] = 'Color.Deleted.Fore'
+strkwds['color.deletedSup.back'] = 'Color.DeletedSup.Fore'
+strkwds['color.deletedSup.fore'] = 'Color.DeletedSup.Fore'
+strkwds['color.ignored.back'] = 'Color.Ignored.Fore'
+strkwds['color.ignored.fore'] = 'Color.Ignored.Fore'
+strkwds['color.directories.back'] = 'Color.Directories.Fore'
+strkwds['color.directories.fore'] = 'Color.Directories.Fore'
+strkwds['color.mergedUndecided.back'] = 'Color.MergedUndecided.Fore'
+strkwds['color.mergedUndecided.fore'] = 'Color.MergedUndecided.Fore'
+strkwds['color.mergedDecided1.back'] = 'Color.MergedDecided1.Fore'
+strkwds['color.mergedDecided1.fore'] = 'Color.MergedDecided1.Fore'
+strkwds['color.mergedDecided2.back'] = 'Color.MergedDecided2.Fore'
+strkwds['color.mergedDecided2.fore'] = 'Color.MergedDecided2.Fore'
+strkwds['color.mergedDecided3.back'] = 'Color.MergedDecided3.Fore'
+strkwds['color.mergedDecided3.fore'] = 'Color.MergedDecided3.Fore'
+strkwds['color.background'] = 'Color.Background.Fore'
+strkwds['color.cursor'] = 'Color.Cursor.Fore'
+strkwds['color.verticalLine'] = 'Color.VerticalLine.Fore'
+strkwds['font.text'] = 'FontText'
+strkwds['font.app'] = 'FontApp'
+strkwds['command.diffFiles2'] = 'Command.DiffFiles2'
+strkwds['command.diffFiles3'] = 'Command.DiffFiles3'
+strkwds['command.diffDirectories'] = 'Command.DiffDirectories'
+strkwds['command.diffDirectoriesRec'] = 'Command.DiffDirectoriesRec'
+strkwds['command.manual'] = '# removed command.manual'
+strkwds['command.edit'] = 'Command.Edit'
+strkwds['commandOption.ignoreTrailingBlanks'] = \
+   'CommandSwitch.IgnoreTrailingBlanks'
+strkwds['commandOption.ignoreWhitespace'] = 'CommandSwitch.IgnoreWhitespace'
+strkwds['commandOption.ignoreCase'] = 'CommandSwitch.IgnoreCase'
+strkwds['commandOption.ignoreBlankLines'] = 'CommandSwitch.IgnoreBlankLines'
+strkwds['commandOption.qualityNormal'] = 'CommandSwitch.QualityNormal'
+strkwds['commandOption.qualityFastest'] = 'CommandSwitch.QualityFastest'
+strkwds['commandOption.qualityHighest'] = 'CommandSwitch.QualityHighest'
+strkwds['tag.conflict.separator'] = 'Tag.Conflict.End'
+strkwds['tag.conflict.end'] = 'Tag.Conflict.End'
+strkwds['tag.conditional.ifdef'] = 'Tag.Conditional.Else'
+strkwds['tag.conditional.elseif'] = 'Tag.Conditional.Else'
+strkwds['tag.conditional.else'] = 'Tag.Conditional.Else'
+strkwds['tag.conditional.endif'] = 'Tag.Conditional.Else'
+strkwds['clipboardTextFormat'] = 'ClipboardFormat'
+
+ordkwds = {}
+ordkwds['geometry'] = 'Geometry'
+ordkwds['exitOnSame'] = 'ExitOnSame'
+ordkwds['windows.showToolbar'] = 'Show.Toolbar'
+ordkwds['windows.showLineNumbers'] = 'Show.LineNumbers'
+ordkwds['windows.showOverview'] = 'Show.Overview'
+ordkwds['windows.showFilenames'] = 'Show.Filenames'
+ordkwds['horizontalDiffs'] = 'HorizontalDiffs'
+ordkwds['ignoreHorizontalWhitespace'] = 'IgnoreHorizontalWhitespace'
+ordkwds['formatClipboardText'] = 'FormatClipboardText'
+ordkwds['ignoreErrors'] = 'IgnoreErrors'
+ordkwds['warnAboutUnsaved'] = 'WarnAboutUnsaved'
+ordkwds['disableCursorDisplay'] = 'DisableCursorDisplay'
+ordkwds['hideCarriageReturns'] = 'HideCarriageReturns'
+ordkwds['dirDiff.ignoreFileChanges'] = 'DirDiffIgnoreFileChanges'
+ordkwds['dirDiff.buildSolelyFromOutput'] = 'DirDiffBuildSolelyFromOutput'
+ordkwds['dirDiff.recursive'] = 'DirDiffRecursive'
+ordkwds['tabWidth'] = 'TabWidth'
+ordkwds['overviewFileWidth'] = 'OverviewFileWidth'
+ordkwds['overviewSepWidth'] = 'OverviewSepWidth'
+ordkwds['verticalLinePosition'] = 'VerticalLinePosition'
+
+
+#===============================================================================
+# MAIN
+#===============================================================================
+
+# Options declaration
+optmap = [
+    ( 'help', 'h', "show detailed help message." ),
+    ( 'file=', 'f', "specifies location of rc file." ),
+    ]
+
+def opt_translate(opt):
+    o = opt[0]
+    if o[-1] == '=': # option takes an argument?
+        o = o[:-1]
+    return fgetopt.translate_longopt( o )
+
+global opts
+opts = fgetopt.OptionDummy( map( opt_translate, optmap ) )
+parser = fgetopt.FancyGetopt( optmap )
+
+try:
+    args = parser.getopt( args=sys.argv[1:], object=opts )
+except:
+    print >> sys.stderr, "Error: argument error. Use --help for more info."
+    sys.exit(1)
+
+#
+# end options parsing.
+
+if opts.help:
+    for i in parser.generate_help( __doc__ ):
+        print i
+    print
+    sys.exit(1)
+
+if not opts.file:
+    opts.file = os.path.join( os.environ['HOME'], ".xxdiffrc" )
+    if not os.path.exists(opts.file):
+        print "# No .xxdiffrc file, nothing to do."
+        sys.exit(0)
+
+# open input file
+try:
+    f = open(opts.file, 'r')
+    lines = f.readlines()
+    f.close()
+except IOError, e:
+    print >> sys.stderr, "Error reading rcfile", e
+    sys.exit(1)
+
+# print to stdout
+comre = re.compile( "^\s*#" )
+resre = re.compile( "^([^:]+):(.*)$" )
+for l in lines:
+    if comre.match( l ):
+        # leave comment in
+        print l
+        continue
+    
+    mo = resre.match( l )
+    if mo:
+        (name, value) = map( string.strip, mo.groups() )
+        if strkwds.has_key(name):
+            print strkwds[name], ': "%s"' % value
+        elif ordkwds.has_key(name):
+            print ordkwds[name], ': %s' % value
+        else:
+            print >> sys.stderr,\
+                  "Ignored old resource:", name, "with value", value
+    else:
+        print l

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: main.cpp 290 2001-10-20 00:45:36Z blais $
- * $Date: 2001-10-19 20:45:36 -0400 (Fri, 19 Oct 2001) $
+ * $Id: main.cpp 311 2001-10-24 22:47:06Z blais $
+ * $Date: 2001-10-24 18:47:06 -0400 (Wed, 24 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -25,12 +25,13 @@
  *============================================================================*/
 
 #include <main.h>
+#include <cmdline.h>
 #include <app.h>
 #include <exceptions.h>
 
 #include <exception>
 #include <iostream>
-
+#include <memory>
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -38,25 +39,9 @@
 
 namespace {
 
-//------------------------------------------------------------------------------
-//
-void silentMsgHandler( QtMsgType type, const char *msg )
-{
-   switch ( type ) {
-      case QtFatalMsg: {
-         std::cerr << "Fatal: " << msg << std::endl;
-      } break;
-
-      case QtDebugMsg:
-      case QtWarningMsg: {
-      }
-   }
-}
-
 const char* exceptionPreface = "xxdiff: exception caught: ";
 
 }
-
 
 /*==============================================================================
  * MAIN
@@ -71,27 +56,27 @@ extern char** environ;
 int main( int argc, char** argv, char** envp ) 
 {
    environ = envp;
-#ifndef XX_DEBUG
-   // Shut up!
-   qInstallMsgHandler( silentMsgHandler );
-#else
-   (void)silentMsgHandler;
-#endif
 
    int retval = 2; // errors.
    try {
-      // Search original arguments to see if the style has been explicitly
-      // forced.
-      int aa;
-      for ( aa = 0; aa < argc; ++aa ) {
-         if ( ::strncmp( argv[aa], "-style", 6 ) == 0 ) {
-            break;
-         }
-      }
+      // Parse command line.
+      XxCmdline cmdline;
+      bool run = cmdline.parseCommandLine( argc, argv );
 
-      XxApp app( argc, argv, (aa == argc) );
-      app.exec();
-      retval = app.getReturnValue();
+      if ( run ) {
+         // Initialization framework.
+         XxResParser::initialize();
+         
+         // Create application and connect.
+         XxApp app( argc, argv, cmdline );
+
+         // Run event loop.
+         app.exec();
+         retval = app.getReturnValue();
+      }
+      else {
+         retval = 0;
+      }
    }
    catch ( const XxError& ex ) {
       std::cerr << ex.getMsg() << std::endl;

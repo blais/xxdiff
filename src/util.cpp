@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: util.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -30,6 +30,7 @@
 
 #include <qstring.h>
 #include <qtextstream.h>
+#include <qfileinfo.h>
 
 #include <iostream>
 #include <sys/types.h>
@@ -47,8 +48,6 @@
 
 #define popen _popen
 #define pclose _pclose
-#define access _access
-#define R_OK 04
 
 #endif
 
@@ -117,21 +116,6 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-bool XxUtil::isDirectory( const QString& filename )
-{
-   struct stat buf;
-   if ( stat( filename.latin1(), &buf ) != 0 ) {
-      QString os;
-      QTextOStream oss( &os );
-      oss << "Cannot open file: " << filename;
-      throw XxIoError( XX_EXC_PARAMS, os );
-   }
-   return ((buf.st_mode&S_IFMT) == S_IFDIR);
-}
-
-
-//------------------------------------------------------------------------------
-//
 void XxUtil::copyToFile( FILE* fin, FILE* fout )
 {
    while ( !feof(fin) ) {
@@ -174,27 +158,18 @@ bool XxUtil::testFile(
    bool&          isDirectory
 )
 {
-   struct stat buf;
-   
    // Check for access.
-   if ( access( filename.latin1(), R_OK ) != 0 ) {
+   QFileInfo finfo( filename );
+
+   if ( !finfo.exists() || !finfo.isReadable() ) {
       QString s;
       QTextOStream oss( & s );
       oss << "Cannot access file: " << filename;
       throw XxIoError( XX_EXC_PARAMS, s );
    }
 
-   // Stat file.
-   if ( stat( filename.latin1(), &buf ) != 0 ) {
-      QString os;
-      QTextOStream oss( &os );
-      oss << "Cannot open file: " << filename;
-      throw XxIoError( XX_EXC_PARAMS, os );
-   }
-
    // Check if file is a regular file or a directory.  
-   if ( !( ((buf.st_mode&S_IFMT) == S_IFREG) || 
-           ((buf.st_mode&S_IFMT) == S_IFDIR) ) ) {
+   if ( !( finfo.isFile() || finfo.isDir() ) ) {
       QString os;
       QTextOStream oss( &os );
       oss << "Error: not an ordinary file or a directory";
@@ -202,7 +177,7 @@ bool XxUtil::testFile(
    }
 
    // If file is a directory.
-   if ( ((buf.st_mode&S_IFMT) == S_IFDIR) ) {
+   if ( finfo.isDir() ) {
       isDirectory = true;
       return true;
    }
@@ -246,8 +221,10 @@ bool XxUtil::isAsciiText( const QString& filename )
 
 //------------------------------------------------------------------------------
 //
-bool XxUtil::spawnCommand( 
+void XxUtil::spawnCommand(
    const char** argv,
+   FILE** outf,
+   FILE** errf,
    void (*sigChldHandler)(int)
 )
 {
@@ -255,58 +232,19 @@ bool XxUtil::spawnCommand(
 
 #ifndef WINDOWS
 
-   switch ( fork() ) {
-      case 0: { // the child
-
-         if ( execvp( argv[0], (char**)argv ) == -1 ) {
-            exit( 1 );
-         }
-
-         // Unreached.
-
-      } break;
-      
-      case -1: { // fork error
+   int pipe_fds_out[2];
+   if ( outf ) {
+      // Open the pipe.
+      if ( pipe( pipe_fds_out ) == -1 ) {
          throw XxIoError( XX_EXC_PARAMS );
       }
-
-      default: {
-         if ( sigChldHandler ) {
-            if ( installSigChldHandler( sigChldHandler ) == false ) {
-               return false;
-            }
-         }
-      }
-   }
-#endif
-   
-   // The parent. Return. Forget about it.
-   return true;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxUtil::spawnCommandWithOutput(
-   const char** argv,
-   FILE*& outf,
-   FILE*& errf,
-   void (*sigChldHandler)(int)
-)
-{
-   XX_ASSERT( argv );
-
-   outf = errf = 0; // initialize.
-#ifndef WINDOWS
-
-   // Open the pipe.
-   int pipe_fds_out[2];
-   if ( pipe( pipe_fds_out ) == -1 ) {
-      throw XxIoError( XX_EXC_PARAMS );
    }
 
    int pipe_fds_err[2];
-   if ( pipe( pipe_fds_err ) == -1 ) {
-      throw XxIoError( XX_EXC_PARAMS );
+   if ( errf ) {
+      if ( pipe( pipe_fds_err ) == -1 ) {
+         throw XxIoError( XX_EXC_PARAMS );
+      }
    }
 
    switch ( fork() ) {
@@ -315,17 +253,21 @@ void XxUtil::spawnCommandWithOutput(
          /* 
           * redirect standard output and standard error into the pipe
           */
-         close( fileno( stdout ) );
-         if ( dup( pipe_fds_out[1] ) == -1 ) {
-            throw XxIoError( XX_EXC_PARAMS );
-         }
-         close( fileno( stderr ) );
-         if ( dup( pipe_fds_err[1] ) == -1 ) {
-            throw XxIoError( XX_EXC_PARAMS );
+         if ( outf ) {
+            close( fileno( stdout ) );
+            if ( dup( pipe_fds_out[1] ) == -1 ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
+            close( pipe_fds_out[0] );
          }
 
-         close( pipe_fds_out[0] );
-         close( pipe_fds_err[0] );
+         if ( errf ) {
+            close( fileno( stderr ) );
+            if ( dup( pipe_fds_err[1] ) == -1 ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
+            close( pipe_fds_err[0] );
+         }
          
          if ( execvp( argv[0], const_cast<char**>(argv) ) == -1 ) {
             // Send parent some output telling it we couldn't exec.
@@ -336,11 +278,6 @@ void XxUtil::spawnCommandWithOutput(
             }
             fwrite( errs.latin1(), errs.length(), 1, stderr );
             fwrite( "\n", 1, 1, stderr );
-//             fwrite( stderr, pipe_fds_err[0], errs.latin1(), errs.length() );
-//             fwrite( stderr, pipe_fds_err[0], "\n", 1 );
-            
-//             close( pipe_fds_out[0] );
-//             close( pipe_fds_err[1] );
 
             exit( 1 );
          }
@@ -366,16 +303,27 @@ void XxUtil::spawnCommandWithOutput(
           * writer end of the pipe in the child will not cause an EOF 
           * condition for the reader
           */
-         close( pipe_fds_out[1] );
-         close( pipe_fds_err[1] );
+         if ( outf ) {
+            close( pipe_fds_out[1] );
+         }
+         if ( errf ) {
+            close( pipe_fds_err[1] );
+         }
 
          /* 
           * return the reader side of the pipe as a stdio stream
           */
-         outf = fdopen( pipe_fds_out[0], "r" );
-         errf = fdopen( pipe_fds_err[0], "r" );
-         if ( !outf || !errf ) {
-            throw XxIoError( XX_EXC_PARAMS );
+         if ( outf ) {
+            *outf = fdopen( pipe_fds_out[0], "r" );
+            if ( !*outf ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
+         }
+         if ( errf ) {
+            *errf = fdopen( pipe_fds_err[0], "r" );
+            if ( !*errf ) {
+               throw XxIoError( XX_EXC_PARAMS );
+            }
          }
       }
    }
@@ -383,6 +331,16 @@ void XxUtil::spawnCommandWithOutput(
 
    // Not reached.
    return;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxUtil::spawnCommand( 
+   const char** argv,
+   void (*sigChldHandler)(int)
+)
+{
+   spawnCommand( argv, 0, 0, sigChldHandler );
 }
 
 //------------------------------------------------------------------------------

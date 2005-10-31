@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 302 2001-10-23 05:14:10Z blais $
- * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+ * $Id: resParser.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,6 +28,7 @@
 
 #include <resParser.h>
 #include <exceptions.h>
+#include <help.h>
 
 #ifndef INCL_RESPARSER_Y
 #include <resParser.y.h>
@@ -37,6 +38,8 @@
 #include <qaccel.h>
 #include <qapplication.h>
 #include <qfont.h>
+#include <qfile.h>
+#include <qfileinfo.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -65,35 +68,102 @@ struct StringToken {
 /*----- variables -----*/
 
 StringToken kwdList[] = {
-   { "Geometry", PREFGEOMETRY, 0 },
-   { "Accel", ACCEL, 0 },
-   { "Color", COLOR, 0 },
-   { "FontApp", FONT_APP, 0 },
-   { "FontText", FONT_TEXT, 0 },
-   { "Show", SHOW, 0 },
-   { "Command", COMMAND, 0 },
-   { "CommandSwitch", COMMANDSW, 0 },
-   { "Tag", TAG, 0 },
-   { "TabWidth", TAB_WIDTH, 0 },
-   { "OverviewFileWidth", OVERVIEW_FILE_WIDTH, 0 },
-   { "OverviewSepWidth", OVERVIEW_SEP_WIDTH, 0 },
-   { "VerticalLinePosition", VERTICAL_LINE_POS, 0 },
-   { "ClipboardFormat", CLIPBOARD_FORMAT, 0 }
+   { "Geometry", PREFGEOMETRY,
+     "Preferred geometry upon initialization.  Format is the same a X geometry \
+specification, plus you can also use `Maximize' to maximize on startup" },
+
+   { "Accel", ACCEL,
+   "Accelerators for most functionality. The name of the accelerator should be \
+explicit enough that you can find which function it is bound to." },
+
+   { "Color", COLOR,
+     "Color choice for diff hunks, and for certain other items in the text \
+view." },
+
+   { "FontApp", FONT_APP,
+     "General application font, used for widgets and menus." },
+
+   { "FontText", FONT_TEXT,
+     "Font to use for diff text view." },
+
+   { "Show", SHOW, 
+     "Set of options to determine if some ui display is visible or not upon \
+startup." },
+
+   { "Command", COMMAND, 
+     "Commands to use to generate diffs.  xxdiff is only an interface to \
+display diff results, it doesn't actually compute diffs itself, unless you use \
+the internal commands options, where it uses the same arguments as specified \
+here.  Most likely these are the GNU diff commands and options." },
+
+   { "CommandSwitch", COMMANDSW,
+     "Definitions of cmdline switches that should be used to toggle diff \
+options. The defaults are the GNU diff switches (see diff(1))." },
+
+   { "Tag", TAG, 
+     "Tags used for conditionals used for unselected regions, when that option \
+is used to save files." },
+   
+   { "TabWidth", TAB_WIDTH, 
+     "Tab character alignment width." },
+
+   { "OverviewFileWidth", OVERVIEW_FILE_WIDTH, 
+     "In overview area, width (in pixels) of each file." },
+
+   { "OverviewSepWidth", OVERVIEW_SEP_WIDTH,
+     "In overview area, width (in pixels) between each file." },
+
+   { "VerticalLinePosition", VERTICAL_LINE_POS, 
+     "Initial column to draw vertical alignment line." },
+
+   { "ClipboardFormat", CLIPBOARD_FORMAT, 
+     "Format of formatted clipboard text." }
+
 };
 
 StringToken boolkwdList[] = {
-   { "ExitOnSame", EXIT_ON_SAME, 0 },
-   { "HorizontalDiffs", HORIZONTAL_DIFFS, 0 },
-   { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS, 0 },
-   { "FormatClipboardText", FORMAT_CLIPBOARD_TEXT, 0 },
-   { "IgnoreErrors", IGNORE_ERRORS, 0 },
-   { "WarnAboutUnsaved", WARN_ABOUT_UNSAVED, 0 },
-   { "DisableCursorDisplay", DISABLE_CURSOR_DISPLAY, 0 },
-   { "HideCarriageReturns", HIDE_CR, 0 },
-   { "DirDiffIgnoreFileChanges", DIRDIFF_IGNORE_FILE_CHANGES, 0 },
-   { "DirDiffBuildSolelyFromOutput", DIRDIFF_BUILD_FROM_OUTPUT, 0 },
-   { "DirDiffRecursive", DIRDIFF_RECURSIVE, 0 },
-   { "UseInternalDiff", USE_INTERNAL_DIFF, 0 }
+   { "ExitOnSame", EXIT_ON_SAME,
+     "If true, exit if both files have no differences." },
+
+   { "HorizontalDiffs", HORIZONTAL_DIFFS, 
+     "Enable horizontal diffs display." },
+
+   { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS, 
+     "Ignore horizontal whitespace in horizontal diffs." },
+
+   { "FormatClipboardText", FORMAT_CLIPBOARD_TEXT, 
+     "Enables clipboard (copy-paste) formatting.  If disable, text that goes \
+in the clipboard is simply left unformatted." },
+
+   { "IgnoreErrors", IGNORE_ERRORS,
+     "Disables diff errors reporting." },
+
+   { "WarnAboutUnsaved", WARN_ABOUT_UNSAVED, 
+     "Enables warning upon exiting with unsaved selections." },
+
+   { "DisableCursorDisplay", DISABLE_CURSOR_DISPLAY, 
+     "Disables displaying the line cursor." },
+
+   { "HideCarriageReturns", HIDE_CR, 
+     "Hides CR characters found in files created under DOS/Windows." },
+
+   { "DirDiffIgnoreFileChanges", DIRDIFF_IGNORE_FILE_CHANGES, 
+     "In directory diffs, ignores file changes, show just additions and \
+deletions." },
+
+   { "DirDiffBuildSolelyFromOutput", DIRDIFF_BUILD_FROM_OUTPUT, 
+     "In directory diffs, building diffs only from output, not checking \
+against actual directory contents.  This is a self-verification feature \
+only, and unless you're doing developemnt you should leave this to default \
+(true)." },
+
+   { "DirDiffRecursive", DIRDIFF_RECURSIVE,
+     "In directory diffs, enable recursive diff'ing of subdirectories." },
+
+   { "UseInternalDiff", USE_INTERNAL_DIFF,
+     "(Not implemented) Use internal diff computation, does not spawn external \
+diff program." }
+
 };
 
 /* Be careful: order must be the same as for token declaration. */
@@ -154,8 +224,8 @@ StringToken accelList[] = {
    { "SelectGlobalUnselectedLeft", ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT, 0 },
    { "SelectGlobalUnselectedMiddle", ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE, 0 },
    { "SelectGlobalUnselectedRight", ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT, 0 },
-   { "SelectGlobalUnselectedNeither", 
-                                    ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER, 0 },
+   { "SelectGlobalUnselectedNeither", ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER, 
+     0 },
    { "SelectGlobalMerge", ACCEL_SELECT_GLOBAL_MERGE, 0 },
    { "SelectRegionLeft", ACCEL_SELECT_REGION_LEFT, 0 },
    { "SelectRegionMiddle", ACCEL_SELECT_REGION_MIDDLE, 0 },
@@ -211,28 +281,7 @@ StringToken colorList[] = {
 
    { "Same", COLOR_SAME,
      " Identical text " },
-   { "DiffOne", COLOR_DIFF_ONE,
-     " Different in one file " },
-   { "DiffOneSup", COLOR_DIFF_ONE_SUP,
-     " Different in one file (shadowed) " },
-   { "DiffOneOnly", COLOR_DIFF_ONE_ONLY,
-     " Different in one file (only text on lines) " },
-   { "DiffOneNonly", COLOR_DIFF_ONE_NONLY,
-     " Different in one file (blank side)" },
-   { "DiffTwo", COLOR_DIFF_TWO,
-     " Common text in two files only " },
-   { "DiffTwoSup", COLOR_DIFF_TWO_SUP,
-     " Common text in two files only (shadowed) " },
-   { "DiffTwoOnly", COLOR_DIFF_TWO_ONLY,
-     " Common text in two files only (only text on lines) " },
-   { "DiffTwoNonly", COLOR_DIFF_TWO_NONLY,
-     " Common text in two files only (blank side) " },
 
-   { "Delete", COLOR_DELETE,
-     " Delete text (side with text) " },
-   { "DeleteBlank", COLOR_DELETE_BLANK,
-     " Delete text (blank side) " },
-                                      
    { "Insert", COLOR_INSERT,
      " Insert text (side with text) " },
    { "InsertBlank", COLOR_INSERT_BLANK,
@@ -247,16 +296,38 @@ StringToken colorList[] = {
    { "DiffAllNonly", COLOR_DIFF_ALL_NONLY,
      " Different in all files (blank side) " },
                                       
+   { "DiffOne", COLOR_DIFF_ONE,
+     " (diff3 only) Different in one file " },
+   { "DiffOneSup", COLOR_DIFF_ONE_SUP,
+     " (diff3 only) Different in one file (shadowed) " },
+   { "DiffOneOnly", COLOR_DIFF_ONE_ONLY,
+     " (diff3 only) Different in one file (only text on lines) " },
+   { "DiffOneNonly", COLOR_DIFF_ONE_NONLY,
+     " (diff3 only) Different in one file (blank side)" },
+   { "DiffTwo", COLOR_DIFF_TWO,
+     " (diff3 only) Common text in two files only " },
+   { "DiffTwoSup", COLOR_DIFF_TWO_SUP,
+     " (diff3 only) Common text in two files only (shadowed) " },
+   { "DiffTwoOnly", COLOR_DIFF_TWO_ONLY,
+     " (diff3 only) Common text in two files only (only text on lines) " },
+   { "DiffTwoNonly", COLOR_DIFF_TWO_NONLY,
+     " (diff3 only) Common text in two files only (blank side) " },
+
+   { "Delete", COLOR_DELETE,
+     " (diff3 only) Delete text (side with text) " },
+   { "DeleteBlank", COLOR_DELETE_BLANK,
+     " (diff3 only) Delete text (blank side) " },
+                                      
    { "DiffDel", COLOR_DIFFDEL,
-     " Different and delete text " },
+     " (diff3 only) Different and delete text " },
    { "DiffDelSup", COLOR_DIFFDEL_SUP,
-     " Different and delete text (shadowed) " },
+     " (diff3 only) Different and delete text (shadowed) " },
    { "DiffDelOnly", COLOR_DIFFDEL_ONLY,
-     " Different and delete text (only text on lines) " },
+     " (diff3 only) Different and delete text (only text on lines) " },
    { "DiffDelNonly", COLOR_DIFFDEL_NONLY,
-     " Different and delete text (blank side) " },
+     " (diff3 only) Different and delete text (blank side) " },
    { "DiffDelBlank", COLOR_DIFFDEL_BLANK,
-     " Different and delete text (empty side) " },
+     " (diff3 only) Different and delete text (empty side) " },
                                       
    { "Selected", COLOR_SELECTED,
      " Selected text " },
@@ -271,7 +342,7 @@ StringToken colorList[] = {
      " Ignore text " },
 
    { "Directories", COLOR_DIRECTORIES,
-     " Directories in directory diffs " },
+     " (dir.diffs only) Directories in directory diffs " },
                                       
    { "MergedUndecided", COLOR_MERGED_UNDECIDED,
      " Merged view undecided text " },
@@ -291,11 +362,20 @@ StringToken colorList[] = {
 };
 
 StringToken commandList[] = {
-   { "DiffFiles2", CMD_DIFF_FILES_2, 0 },
-   { "DiffFiles3", CMD_DIFF_FILES_3, 0 },
-   { "DiffDirectories", CMD_DIFF_DIRECTORIES, 0 },
-   { "DiffDirectoriesRec", CMD_DIFF_DIRECTORIES_REC, 0 },
-   { "Edit", CMD_EDIT, 0 }
+   { "DiffFiles2", CMD_DIFF_FILES_2, 
+     "Command to use for comparing two files." },
+
+   { "DiffFiles3", CMD_DIFF_FILES_3, 
+     "Command to use for comparing three files." },
+   
+   { "DiffDirectories", CMD_DIFF_DIRECTORIES, 
+     "Command to use for comparing two directories, non-recursively." },
+   
+   { "DiffDirectoriesRec", CMD_DIFF_DIRECTORIES_REC, 
+     "Command to use for comparing two directories, recursively." },
+   
+   { "Edit", CMD_EDIT, 
+     "Command to use to spawn an editor on a file." }
 };
 
 StringToken commandSwitchList[] = {
@@ -309,21 +389,40 @@ StringToken commandSwitchList[] = {
 };
 
 StringToken showList[] = {
-   { "Toolbar", SHOW_TOOLBAR, 0 },
-   { "LineNumbers", SHOW_LINE_NUMBERS, 0 },
-   { "Markers", SHOW_MARKERS, 0 },
-   { "VerticalLine", SHOW_VERTICAL_LINE, 0 },
-   { "Overview", SHOW_OVERVIEW, 0 },
-   { "Filenames", SHOW_FILENAMES, 0 } 
+   { "Toolbar", SHOW_TOOLBAR, 
+     "Show toolbar on startup." },
+
+   { "LineNumbers", SHOW_LINE_NUMBERS, 
+     "Show line numbers on startup." },
+
+   { "VerticalLine", SHOW_VERTICAL_LINE, 
+     "Show vertical line on startup." },
+
+   { "Overview", SHOW_OVERVIEW, 
+     "Show toolbar on startup." },
+
+   { "Filenames", SHOW_FILENAMES, 
+     "Show toolbar on startup." }
 };
 
 StringToken tagList[] = {
-   { "Conflict.Separator", TAG_CONFLICT_SEPARATOR, 0 },
-   { "Conflict.End", TAG_CONFLICT_END, 0 },
-   { "Conditional.Ifdef", TAG_CONDITIONAL_IF, 0 },
-   { "Conditional.Elseif", TAG_CONDITIONAL_ELSEIF, 0 },
-   { "Conditional.Else", TAG_CONDITIONAL_ELSE, 0 },
-   { "Conditional.Endif", TAG_CONDITIONAL_ENDIF, 0 }
+   { "Conflict.Separator", TAG_CONFLICT_SEPARATOR, 
+     "String used to separate chunks when saving with conflicts." },
+
+   { "Conflict.End", TAG_CONFLICT_END, 
+     "String used to end chunks when saving with conflicts." },
+
+   { "Conditional.Ifdef", TAG_CONDITIONAL_IF, 
+     "Ifdef String used when saving with conditionals." },
+
+   { "Conditional.Elseif", TAG_CONDITIONAL_ELSEIF, 
+     "Elseif String used when saving with conditionals." },
+
+   { "Conditional.Else", TAG_CONDITIONAL_ELSE, 
+     "Else String used when saving with conditionals." },
+
+   { "Conditional.Endif", TAG_CONDITIONAL_ENDIF, 
+     "Endif String used when saving with conditionals." }
 };
 
 //------------------------------------------------------------------------------
@@ -335,6 +434,8 @@ int compareTokensStrings( const void* v1, const void* v2 )
       const_cast<StringToken*>( static_cast<const StringToken*>(v2) )->_name
    );
 }
+
+#define STPARAM( ll )  ll, sizeof(ll)/sizeof(StringToken)
 
 //------------------------------------------------------------------------------
 //
@@ -364,7 +465,7 @@ int searchTokenString(
 
 //------------------------------------------------------------------------------
 //
-const char* searchToken( 
+const StringToken* searchToken( 
    const StringToken* llist,
    const int          nbmem,
    const int          token
@@ -377,10 +478,22 @@ const char* searchToken(
    // Return 0 if not found (this should not really happen).
    for ( int ii = 0; ii < nbmem; ++ii ) {
       if ( llist[ii]._token == token ) {
-         return llist[ii]._name;
+         return &( llist[ii] );
       }
    }
+   XX_ABORT();
    return 0;
+}
+
+//------------------------------------------------------------------------------
+//
+const char* searchTokenName(
+   const StringToken* llist,
+   const int          nbmem,
+   const int          token
+)
+{
+   return searchToken( llist, nbmem, token )->_name;
 }
 
 //------------------------------------------------------------------------------
@@ -428,12 +541,38 @@ bool readGeometry( const QString& val, QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
-void writeGeometry( std::ostream& os, const QRect& geom ) 
+QString formatGeometry( const QRect& geom ) 
 {
-   os << searchToken( 
-      kwdList, sizeof(kwdList)/sizeof(StringToken), PREFGEOMETRY
-   ) << ": " << geom.width() << "x" << geom.height() << std::endl;
+   return QString( "%1x%2" ).arg( geom.width() ).arg( geom.height() );
    // Note: don't write window position.
+}
+
+//------------------------------------------------------------------------------
+//
+void drbegin( QTextStream& os )
+{
+   os << "<PRE>" << endl;
+}
+
+//------------------------------------------------------------------------------
+//
+void drend( QTextStream& os )
+{
+   os << "</PRE>" << endl;
+}
+
+//------------------------------------------------------------------------------
+//
+void ddbegin( QTextStream& os )
+{
+   os << "<BLOCKQUOTE>" << endl;
+}
+
+//------------------------------------------------------------------------------
+//
+void ddend( QTextStream& os )
+{
+   os << "</BLOCKQUOTE>" << endl;
 }
 
 }
@@ -498,7 +637,7 @@ int parseFromKeywordList(
 
 /*----- variables -----*/
 
-QTextIStream* is = 0;
+QTextStream* is = 0;
 
 #define LEX_BUFFER_MAX	2048
 char lexerBuffer[ LEX_BUFFER_MAX ];
@@ -590,15 +729,14 @@ using namespace XxResParserNS;
 void XxResParser::initialize()
 {
    // Sort maps for efficiency in lookup.
-   sortTokens( kwdList, sizeof(kwdList)/sizeof(StringToken) );
-   sortTokens( boolkwdList, sizeof(boolkwdList)/sizeof(StringToken) );
-   sortTokens( accelList, sizeof(accelList)/sizeof(StringToken) );
-   sortTokens( colorList, sizeof(colorList)/sizeof(StringToken) );
-   sortTokens( commandList, sizeof(commandList)/sizeof(StringToken) );
-   sortTokens( commandSwitchList,
-               sizeof(commandSwitchList)/sizeof(StringToken) );
-   sortTokens( showList, sizeof(showList)/sizeof(StringToken) );
-   sortTokens( tagList, sizeof(tagList)/sizeof(StringToken) );
+   sortTokens( STPARAM(kwdList) );
+   sortTokens( STPARAM(boolkwdList) );
+   sortTokens( STPARAM(accelList) );
+   sortTokens( STPARAM(colorList) );
+   sortTokens( STPARAM(commandList) );
+   sortTokens( STPARAM(commandSwitchList) );
+   sortTokens( STPARAM(showList) );
+   sortTokens( STPARAM(tagList) );
 }
 
 //------------------------------------------------------------------------------
@@ -646,29 +784,31 @@ void XxResParser::parse( const QString& filename, XxResources& resources )
    }
 
    // Stat the file.
-   struct stat buf;
-   if ( stat( filename.latin1(), &buf ) != 0 ) {
+   QFileInfo finfo( filename );
+   if ( !finfo.exists() ) {
       return; // file does not exist.
    }
-   if ( !S_ISREG( buf.st_mode )  ) {
+   if ( !finfo.isFile() ) {
       return; // file is not a regular file.
    }
 
-   // Open the file.
-   FILE* fp = fopen( filename.latin1(), "r" );
-   if ( !fp ) {
-      throw XxIoError( XX_EXC_PARAMS, "Couldn't open resource." );
-   }
-
-   QTextIStream file( fp );
+   QFile file( filename );
+   if ( file.open( IO_ReadOnly ) ) {
+      QTextStream filestr( &file );
    
-   // Parse the file.
-   parse( file, resources );
+      // Parse the file.
+      parse( filestr, resources );
+      
+      file.close();
+   }
+   else {
+      throw XxIoError( XX_EXC_PARAMS, "Couldn't open resource file." );
+   }
 }
 
 //------------------------------------------------------------------------------
 //
-void XxResParser::parse( QTextIStream& input, XxResources& resources )
+void XxResParser::parse( QTextStream& input, XxResources& resources )
 {
 #if YYDEBUG != 0
    yydebug = 1;
@@ -735,24 +875,22 @@ QString XxResParser::getColorDescription( XxColor color )
 void XxResParser::genInitFile(
    const XxResources& res1,
    const XxResources& res2,
-   std::ostream&      os
+   QTextStream&       os
 )
 {
    // Compute differences between defaults and current resources.
-   using namespace std;
    int ii;
-
-   const int kwdsize = sizeof(kwdList)/sizeof(StringToken);
 
    const QRect& geom = res1.getPreferredGeometry();
    if ( geom != res2.getPreferredGeometry() ) {
-      writeGeometry( os, geom );
+      os << searchTokenName( STPARAM(kwdList), PREFGEOMETRY ) << ": "
+         << formatGeometry( geom ) << endl;
    }
    // Perhaps we should change the default init geometry here to use the actual
    // application geometry.
 
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
-   const char* accelStr = searchToken( kwdList, kwdsize, ACCEL );
+   const char* accelStr = searchTokenName( STPARAM(kwdList), ACCEL );
    for ( ii = 0; ii < nbaccel; ++ii ) {
       XxAccel accel = XxAccel( accelList[ii]._token );
       if ( res1.getAccelerator( accel ) != res2.getAccelerator( accel ) ) {
@@ -762,24 +900,24 @@ void XxResParser::genInitFile(
             astr = QAccel::keyToString( aval );
          }
          os << accelStr << "." << accelList[ii]._name << ": \""
-            << astr.latin1() << "\"" << endl;
+            << astr << "\"" << endl;
       }
    }
 
    const QFont& fontApp = res1.getFontApp();
-   if ( compareFonts( fontApp, res2.getFontApp() ) ) {
-      os << searchToken( kwdList, kwdsize, FONT_APP )
-         << ": \"" << fontApp.rawName().latin1() << "\"" << endl;
+   if ( !XxResources::compareFonts( fontApp, res2.getFontApp() ) ) {
+      os << searchTokenName( STPARAM(kwdList), FONT_APP )
+         << ": \"" << fontApp.rawName() << "\"" << endl;
    }
 
    const QFont& fontText = res1.getFontText();
-   if ( fontText != res2.getFontText() ) {
-      os << searchToken( kwdList, kwdsize, FONT_TEXT ) 
-         << ": \"" << fontText.rawName().latin1() << "\"" << endl;
+   if ( !XxResources::compareFonts( fontText, res2.getFontText() ) ) {
+      os << searchTokenName( STPARAM(kwdList), FONT_TEXT ) 
+         << ": \"" << fontText.rawName() << "\"" << endl;
    }
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
-   const char* colorStr = searchToken( kwdList, kwdsize, COLOR );
+   const char* colorStr = searchTokenName( STPARAM(kwdList), COLOR );
    for ( ii = 0; ii < nbcolors; ++ii ) {
       XxColor color = XxColor( colorList[ii]._token );
 
@@ -798,7 +936,7 @@ void XxResParser::genInitFile(
 
    int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
    for ( ii = 0; ii < nbbool; ++ii ) {
-      XxBoolOpt bo = XxBoolOpt(boolkwdList[ii]._token);
+      XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
       bool b1 = res1.getBoolOpt( bo );
       if ( b1 != res2.getBoolOpt( bo ) ) {
          os << boolkwdList[ii]._name << ": " 
@@ -807,7 +945,7 @@ void XxResParser::genInitFile(
    }
 
    int nbshow = sizeof(showList)/sizeof(StringToken);
-   const char* showStr = searchToken( kwdList, kwdsize, SHOW );
+   const char* showStr = searchTokenName( STPARAM(kwdList), SHOW );
    for ( ii = 0; ii < nbshow; ++ii ) {
       XxShowOpt bo = XxShowOpt(showList[ii]._token);
       bool b1 = res1.getShowOpt( bo );
@@ -818,60 +956,61 @@ void XxResParser::genInitFile(
    }
 
    if ( res1.getTabWidth() != res2.getTabWidth() ) {
-      os << searchToken( kwdList, kwdsize, TAB_WIDTH ) << ": "
+      os << searchTokenName( STPARAM(kwdList), TAB_WIDTH ) << ": "
          << res1.getTabWidth() << endl;
    }
    
    int nbcommand = sizeof(commandList)/sizeof(StringToken);
-   const char* commandStr = searchToken( kwdList, kwdsize, COMMAND );
+   const char* commandStr = searchTokenName( STPARAM(kwdList), COMMAND );
    for ( ii = 0; ii < nbcommand; ++ii ) {
       XxCommand bo = XxCommand(commandList[ii]._token);
       const QString& b1 = res1.getCommand( bo );
       if ( b1 != res2.getCommand( bo ) ) {
          os << commandStr << "." << commandList[ii]._name << ": \""
-            << b1.latin1() << "\"" << endl;
+            << b1 << "\"" << endl;
       }
    }
 
    int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
-   const char* commandSwitchStr = searchToken( kwdList, kwdsize, COMMANDSW );
+   const char* commandSwitchStr =
+      searchTokenName( STPARAM(kwdList), COMMANDSW );
    for ( ii = 0; ii < nbcommandSwitch; ++ii ) {
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       const QString& b1 = res1.getCommandSwitch( bo );
       if ( b1 != res2.getCommandSwitch( bo ) ) {
          os << commandSwitchStr << "." << commandSwitchList[ii]._name << ": \""
-            << b1.latin1() << "\"" << endl;
+            << b1 << "\"" << endl;
       }
    }
 
    if ( res1.getOverviewFileWidth() != res2.getOverviewFileWidth() ) {
-      os << searchToken( kwdList, kwdsize, OVERVIEW_FILE_WIDTH ) << ": "
+      os << searchTokenName( STPARAM(kwdList), OVERVIEW_FILE_WIDTH ) << ": "
          << res1.getOverviewFileWidth() << endl;
    }
 
    if ( res1.getOverviewSepWidth() != res2.getOverviewSepWidth() ) {
-      os << searchToken( kwdList, kwdsize, OVERVIEW_SEP_WIDTH ) << ": "
+      os << searchTokenName( STPARAM(kwdList), OVERVIEW_SEP_WIDTH ) << ": "
          << res1.getOverviewSepWidth() << endl;
    }
 
    if ( res1.getVerticalLinePos() != res2.getVerticalLinePos() ) {
-      os << searchToken( kwdList, kwdsize, VERTICAL_LINE_POS ) << ": "
+      os << searchTokenName( STPARAM(kwdList), VERTICAL_LINE_POS ) << ": "
          << res1.getVerticalLinePos() << endl;
    }
 
    int nbtag = sizeof(tagList)/sizeof(StringToken);
-   const char* tagStr = searchToken( kwdList, kwdsize, TAG );
+   const char* tagStr = searchTokenName( STPARAM(kwdList), TAG );
    for ( ii = 0; ii < nbtag; ++ii ) {
       XxTag bo = XxTag(tagList[ii]._token);
       const QString& b1 = res1.getTag( bo );
       if ( b1 != res2.getTag( bo ) ) {
          os << tagStr << "." << tagList[ii]._name << ": \""
-            << b1.latin1() << "\"" << endl;
+            << b1 << "\"" << endl;
       }
    }
 
    if ( res1.getClipboardFormat() != res2.getClipboardFormat() ) {
-      os << searchToken( kwdList, kwdsize, CLIPBOARD_FORMAT ) << ": \""
+      os << searchTokenName( STPARAM(kwdList), CLIPBOARD_FORMAT ) << ": \""
          << res1.getClipboardFormat() << "\"" << endl;
    }
 
@@ -881,19 +1020,18 @@ void XxResParser::genInitFile(
 
 //------------------------------------------------------------------------------
 //
-void XxResParser::listResources( std::ostream& os )
+void XxResParser::listResources( QTextStream& os )
 {
    // Output all resource names and documentation.
-   const XxResources res;
-   using namespace std;
+   const XxResources res( false );
 
    int ii;
-   const int kwdsize = sizeof(kwdList)/sizeof(StringToken);
 
-   writeGeometry( os, res.getPreferredGeometry() );
+   os << searchTokenName( STPARAM(kwdList), PREFGEOMETRY ) << ": "
+      << formatGeometry( res.getPreferredGeometry() ) << endl;
 
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
-   const char* accelStr = searchToken( kwdList, kwdsize, ACCEL );
+   const char* accelStr = searchTokenName( STPARAM(kwdList), ACCEL );
    for ( ii = 0; ii < nbaccel; ++ii ) {
       XxAccel accel = XxAccel( accelList[ii]._token );
       int aval = res.getAccelerator( accel );
@@ -906,15 +1044,15 @@ void XxResParser::listResources( std::ostream& os )
    }
 
    const QFont& fontApp = res.getFontApp();
-   os << searchToken( kwdList, kwdsize, FONT_APP )
+   os << searchTokenName( STPARAM(kwdList), FONT_APP )
       << ": \"" << fontApp.rawName().latin1() << "\"" << endl;
 
    const QFont& fontText = res.getFontText();
-   os << searchToken( kwdList, kwdsize, FONT_TEXT ) 
+   os << searchTokenName( STPARAM(kwdList), FONT_TEXT ) 
       << ": \"" << fontText.rawName().latin1() << "\"" << endl;
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
-   const char* colorStr = searchToken( kwdList, kwdsize, COLOR );
+   const char* colorStr = searchTokenName( STPARAM(kwdList), COLOR );
    for ( ii = 0; ii < nbcolors; ++ii ) {
       XxColor color = XxColor( colorList[ii]._token );
 
@@ -927,13 +1065,13 @@ void XxResParser::listResources( std::ostream& os )
 
    int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
    for ( ii = 0; ii < nbbool; ++ii ) {
-      XxBoolOpt bo = XxBoolOpt(boolkwdList[ii]._token);
+      XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
       bool b1 = res.getBoolOpt( bo );
       os << boolkwdList[ii]._name << ": " << ( b1 ? "True" : "False" ) << endl;
    }
 
    int nbshow = sizeof(showList)/sizeof(StringToken);
-   const char* showStr = searchToken( kwdList, kwdsize, SHOW );
+   const char* showStr = searchTokenName( STPARAM(kwdList), SHOW );
    for ( ii = 0; ii < nbshow; ++ii ) {
       XxShowOpt bo = XxShowOpt(showList[ii]._token);
       bool b1 = res.getShowOpt( bo );
@@ -941,11 +1079,11 @@ void XxResParser::listResources( std::ostream& os )
          << ( b1 ? "True" : "False" ) << endl;
    }
 
-   os << searchToken( kwdList, kwdsize, TAB_WIDTH ) << ": "
+   os << searchTokenName( STPARAM(kwdList), TAB_WIDTH ) << ": "
       << res.getTabWidth() << endl;
    
    int nbcommand = sizeof(commandList)/sizeof(StringToken);
-   const char* commandStr = searchToken( kwdList, kwdsize, COMMAND );
+   const char* commandStr = searchTokenName( STPARAM(kwdList), COMMAND );
    for ( ii = 0; ii < nbcommand; ++ii ) {
       XxCommand bo = XxCommand(commandList[ii]._token);
       const QString& b1 = res.getCommand( bo );
@@ -954,7 +1092,8 @@ void XxResParser::listResources( std::ostream& os )
    }
 
    int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
-   const char* commandSwitchStr = searchToken( kwdList, kwdsize, COMMANDSW );
+   const char* commandSwitchStr =
+      searchTokenName( STPARAM(kwdList), COMMANDSW );
    for ( ii = 0; ii < nbcommandSwitch; ++ii ) {
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       const QString& b1 = res.getCommandSwitch( bo );
@@ -962,17 +1101,17 @@ void XxResParser::listResources( std::ostream& os )
          << b1.latin1() << "\"" << endl;
    }
 
-   os << searchToken( kwdList, kwdsize, OVERVIEW_FILE_WIDTH ) << ": "
+   os << searchTokenName( STPARAM(kwdList), OVERVIEW_FILE_WIDTH ) << ": "
       << res.getOverviewFileWidth() << endl;
 
-   os << searchToken( kwdList, kwdsize, OVERVIEW_SEP_WIDTH ) << ": "
+   os << searchTokenName( STPARAM(kwdList), OVERVIEW_SEP_WIDTH ) << ": "
       << res.getOverviewSepWidth() << endl;
 
-   os << searchToken( kwdList, kwdsize, VERTICAL_LINE_POS ) << ": "
+   os << searchTokenName( STPARAM(kwdList), VERTICAL_LINE_POS ) << ": "
       << res.getVerticalLinePos() << endl;
 
    int nbtag = sizeof(tagList)/sizeof(StringToken);
-   const char* tagStr = searchToken( kwdList, kwdsize, TAG );
+   const char* tagStr = searchTokenName( STPARAM(kwdList), TAG );
    for ( ii = 0; ii < nbtag; ++ii ) {
       XxTag bo = XxTag(tagList[ii]._token);
       const QString& b1 = res.getTag( bo );
@@ -980,7 +1119,7 @@ void XxResParser::listResources( std::ostream& os )
          << b1.latin1() << "\"" << endl;
    }
 
-   os << searchToken( kwdList, kwdsize, CLIPBOARD_FORMAT ) << ": \""
+   os << searchTokenName( STPARAM(kwdList), CLIPBOARD_FORMAT ) << ": \""
       << res.getClipboardFormat() << "\"" << endl;
 
    // Ignore file not saved (cannot be read).
@@ -988,22 +1127,280 @@ void XxResParser::listResources( std::ostream& os )
 
 //------------------------------------------------------------------------------
 //
-QString XxResParser::getBoolOptName( XxBoolOpt bo )
+QString XxResParser::getResourceRef()
 {
-   const char* stoken = searchToken( 
-      boolkwdList, sizeof(boolkwdList)/sizeof(StringToken), int(bo) + 1000 
-   );
-   return QString( stoken );
-}
+   QString resref;
+   QTextOStream os( &resref );
+
+   // Output all resource names and documentation.
+   const XxResources res( false );
+
+   int ii;
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), PREFGEOMETRY );
+      os << tok->_name << ": "
+         << formatGeometry( res.getPreferredGeometry() ) << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      int nbaccel = sizeof(accelList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), ACCEL );
+      os << tok->_name << "." << "[NAME]." << ": \"[ACCELERATOR]\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+
+      drbegin( os );
+      for ( ii = 0; ii < nbaccel; ++ii ) {
+         XxAccel accel = XxAccel( accelList[ii]._token );
+         int aval = res.getAccelerator( accel );
+         QString astr("");
+         if ( aval != 0 ) {
+            astr = QAccel::keyToString( aval );
+         }
+         os << tok->_name << "." << accelList[ii]._name << ": \""
+            << XxHelp::xmlize( astr ) << "\"" << endl;
+      }
+      drend( os );
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), FONT_APP );
+      const QFont& fontApp = res.getFontApp();
+      os << tok->_name << ": \""
+         << XxHelp::xmlize( fontApp.rawName() ) << "\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), FONT_TEXT );
+      const QFont& fontText = res.getFontText();
+      os << tok->_name << ": \""
+         << XxHelp::xmlize( fontText.rawName() ) << "\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      int nbcolors = sizeof(colorList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), COLOR );
+      os << tok->_name << "." << "[NAME].[Fore|Back]"
+         << ": \"[COLOR]\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+
+      for ( ii = 0; ii < nbcolors; ++ii ) {
+         const StringToken* tokc = &( colorList[ii] );
+         XxColor color = XxColor( tokc->_token );
+
+         drbegin( os );
+         os << tok->_name << "." << tokc->_name << ".Fore" << ": \""
+            << res.getColor( color, true ).name() << "\"" << endl;
+
+         os << tok->_name << "." << tokc->_name << ".Back" << ": \""
+            << res.getColor( color, false ).name() << "\"" << endl;
+
+         drend( os );
+         ddbegin( os );
+         os << tokc->_desc << endl;
+         ddend( os );
+      }
+      ddend( os );
+   }
+
+   {
+      int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
+      for ( ii = 0; ii < nbbool; ++ii ) {
+         XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
+         bool b1 = res.getBoolOpt( bo );
+         const StringToken* tok = &( boolkwdList[ii] );
+
+         drbegin( os );
+         os << tok->_name << ": " << ( b1 ? "True" : "False" ) << endl;
+         drend( os );
+         ddbegin( os );
+         os << tok->_desc << endl;
+         ddend( os );
+      }
+   }
+
+   {
+      drbegin( os );
+      int nbshow = sizeof(showList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), SHOW );
+      os << tok->_name << "." << "[NAME]" << ": [True|False]" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+
+      for ( ii = 0; ii < nbshow; ++ii ) {
+         const StringToken* tokc = &( showList[ii] );
+         XxShowOpt bo = XxShowOpt(tokc->_token);
+         bool b1 = res.getShowOpt( bo );
+
+         drbegin( os );
+         os << tok->_name << "."
+            << tokc->_name << ": " << ( b1 ? "True" : "False" ) << endl;
+         drend( os );
+         ddbegin( os );
+         os << tokc->_desc << endl;
+         ddend( os );
+      }
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), TAB_WIDTH );
+      os << tok->_name << ": " << res.getTabWidth() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+
+   {
+      drbegin( os );
+      int nbcommand = sizeof(commandList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), COMMAND );
+      os << tok->_name << "." << "[NAME]" << ": \"[COMMAND]\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+
+      for ( ii = 0; ii < nbcommand; ++ii ) {
+         const StringToken* tokc = &( commandList[ii] );
+         XxCommand bo = XxCommand(tokc->_token);
+         QString b1 = XxHelp::xmlize( res.getCommand( bo ) );
+
+         drbegin( os );
+         os << tok->_name << "." << tokc->_name << ": \""
+            << b1 << "\"" << endl;
+         drend( os );
+         ddbegin( os );
+         os << tokc->_desc << endl;
+         ddend( os );
+      }
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), COMMANDSW );
+      for ( ii = 0; ii < nbcommandSwitch; ++ii ) {
+         XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
+         QString b1 = XxHelp::xmlize( res.getCommandSwitch( bo ) );
+         os << tok->_name << "." << commandSwitchList[ii]._name << ": \""
+            << b1 << "\"" << endl;
+      }
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok =
+         searchToken( STPARAM(kwdList), OVERVIEW_FILE_WIDTH );
+      os << tok->_name << ": " << res.getOverviewFileWidth() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok =
+         searchToken( STPARAM(kwdList), OVERVIEW_SEP_WIDTH );
+      os << tok->_name << ": " << res.getOverviewSepWidth() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok =
+         searchToken( STPARAM(kwdList), VERTICAL_LINE_POS );
+      os << tok->_name << ": " << res.getVerticalLinePos() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      int nbtag = sizeof(tagList)/sizeof(StringToken);
+      const StringToken* tok = searchToken( STPARAM(kwdList), TAG );
+      os << tok->_name << "." << "[NAME]" << ": [True|False]" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+
+      for ( ii = 0; ii < nbtag; ++ii ) {
+         const StringToken* tokc = &( tagList[ii] );
+         XxTag bo = XxTag(tokc->_token);
+         QString b1 = XxHelp::xmlize( res.getTag( bo ) );
+
+         drbegin( os );
+         os << tok->_name << "."
+            << tokc->_name << ": \"" << b1 << "\"" << endl;
+         drend( os );
+         ddbegin( os );
+         os << tokc->_desc << endl;
+         ddend( os );
+      }
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok =
+         searchToken( STPARAM(kwdList), CLIPBOARD_FORMAT );
+      QString cf = XxHelp::xmlize( res.getClipboardFormat() );
+      os << tok->_name << ": \"" << cf << "\"" << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   // Ignore file not saved (cannot be read).
+
+   os << flush;
+   return resref;
+}   
 
 //------------------------------------------------------------------------------
 //
-bool XxResParser::compareFonts( const QFont& f1, const QFont& f2 )
+QString XxResParser::getBoolOptName( XxBoolOpt bo )
 {
-   if ( f1.rawMode() || f2.rawMode() ) {
-      return f1.rawName() == f2.rawName();
-   }
-   return f1 == f2;
+   const char* stoken =
+      searchTokenName( STPARAM(boolkwdList), int(bo) + BOOLKWD_BASE );
+   return QString( stoken );
 }
 
 XX_NAMESPACE_END

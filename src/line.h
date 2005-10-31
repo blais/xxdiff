@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 274 2001-10-16 02:05:34Z blais $
- * $Date: 2001-10-15 22:05:34 -0400 (Mon, 15 Oct 2001) $
+ * $Id: line.h 343 2001-11-06 00:43:50Z blais $
+ * $Date: 2001-11-05 19:43:50 -0500 (Mon, 05 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -116,6 +116,9 @@ public:
    };
 
    /*----- member functions -----*/
+
+   // Default constructor, initialize to an invalid line.
+   XxLine();
 
    // Constructor (3-way).
    // For DIFF regions who have one side blank just specify -1 for that side.

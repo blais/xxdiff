@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.h 242 2001-10-01 21:11:40Z blais $
- * $Date: 2001-10-01 17:11:40 -0400 (Mon, 01 Oct 2001) $
+ * $Id: text.h 340 2001-11-05 07:34:53Z blais $
+ * $Date: 2001-11-05 02:34:53 -0500 (Mon, 05 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -97,6 +97,7 @@ protected:
    virtual void mousePressEvent( QMouseEvent* );
    virtual void mouseMoveEvent( QMouseEvent* );
    virtual void mouseReleaseEvent( QMouseEvent* );
+   virtual void mouseDoubleClickEvent( QMouseEvent* );
    virtual void resizeEvent( QResizeEvent* );
    // </group>
 

@@ -1,7 +1,12 @@
 #!/bin/sh
 #
-# $Id: release_mips_tardist 194 2001-06-05 21:44:25Z blais $
+# $Id: release_mips_tardist 348 2001-11-06 06:50:46Z blais $
 #
+
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
 
 VERSION=`tools/get_version`
 
@@ -9,14 +14,9 @@ SBASE=$HOME/xxdiff
 COMPONENTS="xxdiff xxdiff.idb xxdiff.sw xxdiff.man"
 DEST=$HOME/xxdiff-$VERSION.mips.tardist
 
-
 # Generate distribution.
-gendist -sbase $SBASE -idb $SBASE/spec/xxdiff-sgi.idb \
- -spec $SBASE/spec/xxdiff-sgi.spec -dist /tmp -all
+gendist -sbase $SBASE -idb $SBASE/tools/xxdiff-sgi.idb \
+ -spec $SBASE/tools/xxdiff-sgi.spec -dist /tmp -all
 
 ( cd /tmp  ; tar cvf $DEST $COMPONENTS ; rm $COMPONENTS )
-
-
-
-
 

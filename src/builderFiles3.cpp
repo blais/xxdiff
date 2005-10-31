@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles3.cpp 299 2001-10-23 03:28:01Z blais $
- * $Date: 2001-10-22 23:28:01 -0400 (Mon, 22 Oct 2001) $
+ * $Id: builderFiles3.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,6 +31,7 @@
 
 #include <qstring.h>
 #include <qtextstream.h>
+#include <qfile.h>
 
 #include <stdexcept>
 #include <stdio.h>
@@ -88,7 +89,7 @@ XxParseDiffError::XxParseDiffError(
    XxError( file, line ),
    std::runtime_error( "Parse diff output error." )
 {
-    QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
    oss << "Error parsing diff3 output:"
        << " (" << f1n1 << "," << f1n2 << ")  file2: " 
        << " (" << f2n1 << "," << f2n2 << ")  file3: " 
@@ -102,15 +103,15 @@ XxParseDiffError::XxParseDiffError(
 //------------------------------------------------------------------------------
 //
 bool parseDiffLine( 
-   XxLine::Type& type,
-   const char*   buf, 
-   int&          sno, 
-   XxFln&        f1n1, 
-   XxFln&        f1n2, 
-   XxFln&        f2n1, 
-   XxFln&        f2n2, 
-   XxFln&        f3n1, 
-   XxFln&        f3n2 
+   XxLine::Type&  type,
+   const QString& line, 
+   int&           sno, 
+   XxFln&         f1n1, 
+   XxFln&         f1n2, 
+   XxFln&         f2n1, 
+   XxFln&         f2n2, 
+   XxFln&         f3n1, 
+   XxFln&         f3n2 
 )
 {
    //
@@ -200,6 +201,8 @@ bool parseDiffLine(
       ); \
   }
 
+   const char* buf = line.latin1();
+
    XX_LOCAL_TRACE( "" );
    XX_LOCAL_TRACE( "" );
    XX_LOCAL_TRACE( "" );
@@ -214,18 +217,18 @@ bool parseDiffLine(
       XX_LOCAL_TRACE( "recognized text line" );
       error = false;
    }
-   else if ( sscanf( buf, "====%d\n", &sno ) == 1 ) {
+   else if ( sscanf( buf, "====%d", &sno ) == 1 ) {
       XX_LOCAL_TRACE( "recognized numbered block start" );
       f1n1 = f1n2 = f2n1 = f2n2 = f3n1 = f3n2 = -1;
       error = false;
    }
-   else if ( strncmp( buf, "====\n", 5 ) == 0 ) {
+   else if ( strncmp( buf, "====", 4 ) == 0 ) {
       XX_LOCAL_TRACE( "recognized un-unumbered block start" );
       sno = -1;
       f1n1 = f1n2 = f2n1 = f2n2 = f3n1 = f3n2 = -1;
       error = false;
    }
-   else if ( sscanf( buf, "%d:%d,%d%[c]\n", &r, &n1, &n2, cbuf ) == 4 ) {
+   else if ( sscanf( buf, "%d:%d,%d%[c]", &r, &n1, &n2, cbuf ) == 4 ) {
       XX_LOCAL_TRACE( "recognized range change" );
       switch ( r ) {
          case 1: {
@@ -244,7 +247,7 @@ bool parseDiffLine(
       checkForCompletion = true;
       error = false;
    }
-   else if ( sscanf( buf, "%d:%d%[c]\n", &r, &n1, cbuf ) == 3 ) {
+   else if ( sscanf( buf, "%d:%d%[c]", &r, &n1, cbuf ) == 3 ) {
       XX_LOCAL_TRACE( "recognized one-line change" );
       switch ( r ) {
          case 1: {
@@ -263,7 +266,7 @@ bool parseDiffLine(
       checkForCompletion = true;
       error = false;
    }
-   else if ( sscanf( buf, "%d:%d%[a]\n", &r, &n1, cbuf ) == 3 ) {
+   else if ( sscanf( buf, "%d:%d%[a]", &r, &n1, cbuf ) == 3 ) {
       XX_LOCAL_TRACE( "recognized append" );
       switch ( r ) {
          case 1: {
@@ -412,7 +415,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
 
    FILE* fout;
    FILE* ferr;
-   XxUtil::spawnCommandWithOutput( out_args, fout, ferr );
+   XxUtil::spawnCommand( out_args, &fout, &ferr );
    if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -425,16 +428,25 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
 
    bool foundDifferences = false;
    QTextOStream errors( &_errors );
-   char buffer[BUFSIZ+1];
    int sno;
    XxFln f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
-   while ( fgets( buffer, BUFSIZ, fout ) != 0 ) {
+
+   QFile qfout;
+   qfout.open( IO_ReadOnly, fout );
+   QTextStream outputs( &qfout );
+
+   while ( true ) {
+      QString line = outputs.readLine();
+      if ( line.isNull() ) {
+         break;
+      }
+
       XxLine::Type type;
-      if ( parseDiffLine( type, buffer,
+      if ( parseDiffLine( type, line,
                           sno, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2 ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
          errors << "Diff error:" << endl;
-         errors << buffer << endl;
+         errors << line << endl;
          continue;
       }
 
@@ -446,7 +458,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       XX_LOCAL_TRACE( "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
       XX_LOCAL_TRACE( "  f3n1=" << f3n1 << "  f3n2=" << f3n2 );
 #endif
-
+      
       if ( type != XxLine::SAME ) {
          foundDifferences = true;
          int fsize1 = f1n1 - fline1;
@@ -502,13 +514,22 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
          _curHunk++;
       }
    }
+   qfout.close();
    
    // Collect stderr.
-   while ( fgets( buffer, BUFSIZ, ferr ) != 0 ) {
-      errors << buffer << endl;
+   QFile qferr;
+   qferr.open( IO_ReadOnly, ferr );
+   {
+      QTextStream errorss( &qferr );
+      QString errstr = errorss.read();
+      if ( !errstr.isNull() ) {
+         errors << errstr << endl;
+      }
    }
+   qferr.close();
 
    // Saved error text.
+   errors << flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
@@ -519,14 +540,14 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
          throw XxIoError( XX_EXC_PARAMS );
       }
       _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-      throw XxIoError( XX_EXC_PARAMS );
+      throw XxError( XX_EXC_PARAMS, _errors );
    }
 
    // Add final ignore region if present.
    uint nbRemainingLines = nbLines1 + 1 - fline1;
    if ( nbRemainingLines != nbLines2 + 1 - fline2 ||
         nbRemainingLines != nbLines3 + 1 - fline3 ) {
-      throw XxIoError( XX_EXC_PARAMS );
+      throw XxError( XX_EXC_PARAMS, _errors );
    }
    if ( nbRemainingLines > 0 ) { 
       createIgnoreBlock( fline1, fline2, fline3, int(nbRemainingLines) );

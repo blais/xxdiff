@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 302 2001-10-23 05:14:10Z blais $
- * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+ * $Id: builderDirs2.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,7 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qtextstream.h>
+#include <qfile.h>
 
 #include <stdexcept>
 #include <stdio.h>
@@ -120,16 +121,18 @@ XxParseDiffError::XxParseDiffError(
 //------------------------------------------------------------------------------
 //
 bool parseDiffLine( 
-   const char*  buf,
-   const char*  dir1,
-   int          len1,
-   const char*  dir2,
-   int          len2,
-   DirDiffType& type,
-   QString&     filename,
-   int&         onlyDir
+   const QString& line,
+   const QString& dir1,
+   int            len1,
+   const QString& dir2,
+   int            len2,
+   DirDiffType&   type,
+   QString&       filename,
+   int&           onlyDir
 )
 {
+   const char* buf = line.latin1();
+
    bool error;
    const char* bufPtr = buf;
    onlyDir = -1; /* don't take chances with chance */
@@ -141,8 +144,8 @@ bool parseDiffLine(
       }
       
       //int len = colonPtr - bufPtr;
-      int cmp1 = ::strncmp( bufPtr, dir1, len1 );
-      int cmp2 = ::strncmp( bufPtr, dir2, len2 );
+      int cmp1 = ::strncmp( bufPtr, dir1.latin1(), len1 );
+      int cmp2 = ::strncmp( bufPtr, dir2.latin1(), len2 );
       // Note: you cannot compare the lengths because these might be directory
       // diffs.
       if ( cmp1 == 0 && cmp2 == 0 ) {
@@ -297,11 +300,11 @@ void patchUpMissingTypes(
 //------------------------------------------------------------------------------
 //
 void buildSolelyFromOutput(
-   FILE*                     fp,
+   FILE*                     fout,
    QTextOStream&             errors,
-   const char*               path1,
+   const QString&            path1,
    XxBuffer*                 buffer1,
-   const char*               path2,
+   const QString&            path2,
    XxBuffer*                 buffer2,
    std::vector<DirDiffType>& types1,
    std::vector<DirDiffType>& types2
@@ -313,26 +316,33 @@ void buildSolelyFromOutput(
    types1.clear();
    types2.clear();
 
-   int len1 = ::strlen( path1 );
-   int len2 = ::strlen( path2 );
+   const int len1 = path1.length();
+   const int len2 = path2.length();
 
-   char buffer[BUFSIZ+1];
-   while ( fgets( buffer, BUFSIZ, fp ) != 0 ) {
+   QFile qfout;
+   qfout.open( IO_ReadOnly, fout );
+   QTextStream outputs( &qfout );
+
+   while ( true ) {
+      QString line = outputs.readLine();
+      if ( line.isNull() ) {
+         break;
+      }
 
       DirDiffType type;
       QString filename;
       int onlyDir = -1;
       if ( parseDiffLine(
-         buffer, path1, len1, path2, len2, type, filename, onlyDir
+         line, path1, len1, path2, len2, type, filename, onlyDir
       ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
          errors << "Diff error:" << endl;
-         errors << buffer << endl;
+         errors << line << endl;
          continue;
       }
 
 #ifdef LOCAL_TRACE
-      XX_TRACE( buffer 
+      XX_TRACE( line 
                 << typeString[ type ] << "   " 
                 << filename.latin1() << "   "
                 << onlyDir );
@@ -367,6 +377,7 @@ void buildSolelyFromOutput(
          }
       }
    }
+   qfout.close();
 
    // Build the buffers.
    buffer1->setDirectoryEntries( entries1 );
@@ -376,11 +387,11 @@ void buildSolelyFromOutput(
 //------------------------------------------------------------------------------
 //
 void buildAgainstReadDirectory(
-   FILE*                     fp,
+   FILE*                     fout,
    QTextOStream&             errors,
-   const char*               path1,
+   const QString&            path1,
    const XxBuffer*           buffer1,
-   const char*               path2,
+   const QString&            path2,
    const XxBuffer*           buffer2,
    std::vector<DirDiffType>& types1,
    std::vector<DirDiffType>& types2
@@ -406,26 +417,33 @@ void buildAgainstReadDirectory(
    types1.insert( types1.begin(), entries1.count(), UNKNOWN );
    types2.insert( types2.begin(), entries2.count(), UNKNOWN );
 
-   int len1 = ::strlen( path1 ); 
-   int len2 = ::strlen( path2 );
+   const int len1 = path1.length();
+   const int len2 = path2.length();
 
-   char buffer[BUFSIZ+1];
-   while ( fgets( buffer, BUFSIZ, fp ) != 0 ) {
+   QFile qfout;
+   qfout.open( IO_ReadOnly, fout );
+   QTextStream outputs( &qfout );
+
+   while ( true ) {
+      QString line = outputs.readLine();
+      if ( line.isNull() ) {
+         break;
+      }
 
       DirDiffType type;
       QString filename;
       int onlyDir = -1;
       if ( parseDiffLine(
-         buffer, path1, len1, path2, len2, type, filename, onlyDir
+         line, path1, len1, path2, len2, type, filename, onlyDir
       ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
          errors << "Diff error:" << endl;
-         errors << buffer << endl;
+         errors << line << endl;
          continue;
       }
 
 #ifdef LOCAL_TRACE
-      XX_TRACE( buffer
+      XX_TRACE( line
                 << typeString[ type ] << "   " 
                 << filename.latin1() << "   "
                 << onlyDir );
@@ -456,6 +474,7 @@ void buildAgainstReadDirectory(
          }
       }
    }
+   qfout.close();
 
    {
       std::vector<DirDiffType>::const_iterator it1 = 
@@ -531,7 +550,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    FILE* fout;
    FILE* ferr;
-   XxUtil::spawnCommandWithOutput( out_args, fout, ferr );
+   XxUtil::spawnCommand( out_args, &fout, &ferr );
    if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -543,10 +562,16 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    QTextOStream errors( &_errors );
 
    // Collect stderr.
-   char buffer[BUFSIZ+1];
-   while ( fgets( buffer, BUFSIZ, ferr ) != 0 ) {
-      errors << buffer << endl;
+   QFile qferr;
+   qferr.open( IO_ReadOnly, ferr );
+   {
+      QTextStream errorss( &qferr );
+      QString errstr = errorss.read();
+      if ( !errstr.isNull() ) {
+         errors << errstr << endl;
+      }
    }
+   qferr.close();
    ::fclose( ferr );
 
    // Note: for now we don't support recursive diffs built against a directory.
@@ -665,6 +690,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    }
 
    // Saved error text.
+   errors << flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off

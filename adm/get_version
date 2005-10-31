@@ -1,11 +1,12 @@
 #!/bin/sh
+#
+# $Id: get_version 348 2001-11-06 06:50:46Z blais $
+#
 
-MAJOR=`egrep ^XXDIFF_MAJOR_VERSION configure.in | sed -e 's/[^=]*=//'`
-MINOR=`egrep ^XXDIFF_MINOR_VERSION configure.in | sed -e 's/[^=]*=//'`
-MICRO=`egrep ^XXDIFF_MICRO_VERSION configure.in | sed -e 's/[^=]*=//'`
-
-if [ -z "$MICRO" ]; then
-	echo $MAJOR.$MINOR
-else
-	echo $MAJOR.$MINOR.$MICRO
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
 fi
+
+grep XX_VERSION src/version.h | egrep -v debug | sed -e 's/[^"]*"//;s/".*//'
+

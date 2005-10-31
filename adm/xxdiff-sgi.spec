@@ -17,11 +17,6 @@ product xxdiff
 			default
 			exp xxdiff.man.relnotes
 		endsubsys
-		subsys manpages
-			id "Man Pages"
-			default
-			exp xxdiff.man.manpages
-		endsubsys
 		subsys test
 			id "Testing files"
 			exp xxdiff.man.test

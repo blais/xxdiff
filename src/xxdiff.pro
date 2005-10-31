@@ -1,6 +1,7 @@
+# -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 302 2001-10-23 05:14:10Z blais $
-# $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+# $Id: xxdiff.pro 345 2001-11-06 02:20:49Z blais $
+# $Date: 2001-11-05 21:20:49 -0500 (Mon, 05 Nov 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -23,8 +24,8 @@
 # Generate with xxdiff.t template, as `tmake -t xxdiff.t xxdiff.pro > Makefile'
 #
 
-TEMPLATE = app
-CONFIG = release qt warn_on
+TEMPLATE = xxdiff
+CONFIG = debug qt warn_on
 
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
@@ -64,31 +65,43 @@ irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,/usr/freeware/lib32
 
 linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
 
+# debugging memory problems
+#linux-g++:TMAKE_CXXFLAGS += -fcheck-memory-usage
+#linux-g++:TMAKE_LIBS += -lmpatrol -lbfd -liberty
+
+#
+# solaris-cc
+#
+
+solaris-cc:TMAKE_CXXFLAGS += -DCOMPILER_SUNWSPRO
+
+
 # Add diff files to link against directly
 DIFFUTILS_DIR = ../diffutils-2.7
 
-TMAKE_LIBS +=  \
-	$$DIFFUTILS_DIR/analyze.o \
-	$$DIFFUTILS_DIR/cmpbuf.o \
-	$$DIFFUTILS_DIR/dir.o \
-	$$DIFFUTILS_DIR/io.o \
-	$$DIFFUTILS_DIR/util.o \
-	$$DIFFUTILS_DIR/context.o \
-	$$DIFFUTILS_DIR/ed.o \
-	$$DIFFUTILS_DIR/ifdef.o \
-	$$DIFFUTILS_DIR/normal.o \
-	$$DIFFUTILS_DIR/side.o \
-	$$DIFFUTILS_DIR/fnmatch.o \
-	$$DIFFUTILS_DIR/regex.o \
-	$$DIFFUTILS_DIR/version.o \
-	$$DIFFUTILS_DIR/diff.o \
-	$$DIFFUTILS_DIR/diff3.o
+# TMAKE_LIBS +=  \
+# 	$$DIFFUTILS_DIR/analyze.o \
+# 	$$DIFFUTILS_DIR/cmpbuf.o \
+# 	$$DIFFUTILS_DIR/dir.o \
+# 	$$DIFFUTILS_DIR/io.o \
+# 	$$DIFFUTILS_DIR/util.o \
+# 	$$DIFFUTILS_DIR/context.o \
+# 	$$DIFFUTILS_DIR/ed.o \
+# 	$$DIFFUTILS_DIR/ifdef.o \
+# 	$$DIFFUTILS_DIR/normal.o \
+# 	$$DIFFUTILS_DIR/side.o \
+# 	$$DIFFUTILS_DIR/fnmatch.o \
+# 	$$DIFFUTILS_DIR/regex.o \
+# 	$$DIFFUTILS_DIR/version.o \
+# 	$$DIFFUTILS_DIR/diff.o \
+# 	$$DIFFUTILS_DIR/diff3.o
 
 HEADERS = \
 	optionsDialog.h \
 	searchDialog.h \
 	app.h \
 	app.inline.h \
+	cmdline.h \
 	suicideMessageBox.h \
 	defs.h \
 	types.h \
@@ -117,12 +130,15 @@ HEADERS = \
 	lineNumbers.h \
 	util.h \
 	markersFileDialog.h \
-	getopt.h
+	getopt.h \
+	diffutils.h \
+	diffutils_hack.h
 
 SOURCES = \
 	optionsDialog.cpp \
 	searchDialog.cpp \
 	app.cpp \
+	cmdline.cpp \
 	suicideMessageBox.cpp \
 	main.cpp \
 	overview.cpp \
@@ -143,17 +159,19 @@ SOURCES = \
 	accelUtil.cpp \
 	resParser.cpp \
 	markersFileDialog.cpp \
-	diffutils.cpp \
 	getopt.c \
 	getopt1.c
+
+#	diffutils.cpp \
 
 INTERFACES = \
 	markersWidgetBase.ui \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
 
-TARGET		= xxdiff
+TARGET = xxdiff
 
 #DEPENDPATH=../../include
 
 #REQUIRES=large-config
+

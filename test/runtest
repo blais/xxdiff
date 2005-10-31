@@ -1,0 +1,31 @@
+#!/bin/sh
+
+XXDIFF=../src/xxdiff
+
+#------------------------------
+# print out help
+
+echo "Print out help 
+$XXDIFF --help
+
+
+#------------------------------
+# print out HTML documentation
+
+$XXDIFF --help-html
+
+
+
+
+
+
+#------------------------------
+# specify cmdline resourcep
+
+
+todo
+
+
+
+
+$XXDIFF --list-resources > should be able to read it after

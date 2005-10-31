@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: text.cpp 340 2001-11-05 07:34:53Z blais $
+ * $Date: 2001-11-05 02:34:53 -0500 (Mon, 05 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -49,7 +49,69 @@
 #define snprintf _snprintf
 #endif
 
+
+//#define XX_DEBUG_TEXT  1
+
+
+#ifndef XX_DEBUG_TEXT
+#define XX_RED_RECT(x,y,w,h) x, y, w, h
+#define XX_RED_WIDTH(w) w
+#else
+#define XX_RED_RECT(x,y,w,h) x+1, y+1, w-2, h-2
+#define XX_RED_WIDTH(w) w+2
+#endif
+
+
 XX_NAMESPACE_BEGIN
+
+/*==============================================================================
+ * LOCAL DECLARATIONS
+ *============================================================================*/
+
+/*----- constants -----*/
+
+const int xch_search_delta = 100;
+const int xch_draw_delta = 100;
+
+//------------------------------------------------------------------------------
+//
+inline void rentxt(
+   QPainter&           p,
+   const char*         renderedText,
+   int&                xch,
+   const int           xend,
+   int&                xpx,
+   const int           width,
+   const int           y,
+   const QFontMetrics& fm
+)
+{
+   QRect brect;
+   while ( xch < xend ) {
+      int rlen = xch_draw_delta;
+      if ( (xch + rlen) > xend ) {
+         rlen = xend - xch;
+      }
+      
+      QString str;
+      str.setLatin1( renderedText + xch, rlen );
+      int nw = fm.width( str, rlen );
+
+      p.drawText(
+         XX_RED_RECT( xpx, y, width - xpx, fm.lineSpacing() ),
+         Qt::AlignLeft | Qt::AlignTop, 
+         str, rlen,
+         &brect
+      );
+
+      xpx += nw; // XX_RED_WIDTH( brect.width() );
+      xch += rlen;
+      
+      if ( xpx > width ) {
+         break;
+      }
+   }
+}
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -74,7 +136,11 @@ XxText::XxText(
 {
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
+#ifndef XX_DEBUG_TEXT
    setBackgroundMode( NoBackground );
+#else
+   setBackgroundColor( Qt::black );
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -94,6 +160,10 @@ QSizePolicy XxText::sizePolicy() const
 //
 void XxText::drawContents( QPainter* pp )
 {
+   // Note: if only QPainter had a way to draw text which is not a QString, or
+   // if there was a way to allocate a QString with shallow copy of non-unicode
+   // text, this would be much faster.
+
    //XX_TRACE( "painting!" );
 
    // QPainter p;
@@ -102,8 +172,9 @@ void XxText::drawContents( QPainter* pp )
    QRect rect = contentsRect();
 
    // We want 1:1 pixel/coord ratio.
+   QPoint offset = rect.topLeft();
    p.setViewport( rect );
-   rect.moveBy( -rect.x(), -rect.y() );
+   rect.moveBy( -offset.x(), -offset.y() );
    p.setWindow( rect );
    const int w = rect.width();
    const int h = rect.height();
@@ -129,8 +200,7 @@ void XxText::drawContents( QPainter* pp )
    uint horizontalPos = _app->getHorizontalPos();
    uint tabWidth = resources.getTabWidth();
 
-
-   // Should we set the clip region?
+   // The painter's clip region is already set (verified).
 
    // Font.
    p.setFont( resources.getFontText() );
@@ -149,7 +219,10 @@ void XxText::drawContents( QPainter* pp )
       ! diffs->isDirectoryDiff();
 
    const int x = 0 - horizontalPos;
+
    int y = 0;
+   p.setBackgroundMode( OpaqueMode );
+
    for ( uint ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
 
       // Get line to display.
@@ -166,8 +239,6 @@ void XxText::drawContents( QPainter* pp )
       QColor bcolor;
       QColor fcolor;
       resources.getRegionColor( idtype, bcolor, fcolor );
-      QBrush brush( bcolor );
-      p.setPen( fcolor );
 
       // Render text.
       XxFln fline = line.getLineNo( _no );
@@ -175,24 +246,52 @@ void XxText::drawContents( QPainter* pp )
          uint length;
          const char* lineText = file->getTextLine( fline, length );
          
+         const int bhd = 0;
          int lhd = line.getLeftHdiffPos( _no );
-         int rhd = line.getRightHdiffPos( _no );
-
-         int rlength;
+         int rhd = line.getRightHdiffPos( _no ); // unfixed rhd
+         int ehd;
          const char* renderedText = file->renderTextWithTabs( 
-            lineText, length, tabWidth, rlength, lhd, rhd
+            lineText, length, tabWidth, ehd, lhd, rhd
          );
+         rhd += 1; // fix up rhd
 
-         if ( hori && 
+         // Loop to find an character reasonably close before the beginning of
+         // the visible window in x.
+         QString chunk;
+         int xch = bhd;
+         int xpx = x;
+         int xend = ehd;
+         while ( xch < xend ) {
+            int rlen = xch_search_delta;
+            if ( (xch + rlen) > xend ) {
+               rlen = xend - xch;
+            }
+
+            chunk.setLatin1( renderedText + xch, rlen );
+            QRect brect = fm.boundingRect( 
+               -128, -128, 8192, 2048, 
+               Qt::AlignLeft | Qt::AlignTop | Qt::SingleLine,
+               chunk, rlen
+            );
+
+            if ( (xpx + brect.width()) > 0 ) {
+               break;
+            }
+            xpx += brect.width();
+            xch += rlen;
+         }
+
+         QBrush fillerBrush( bcolor );
+
+         if ( hori &&
+              line.hasHorizontalDiffs( _no ) &&
               ( line.getType() == XxLine::DIFF_1 ||
                 line.getType() == XxLine::DIFF_2 ||
                 line.getType() == XxLine::DIFF_3 ||
                 line.getType() == XxLine::DIFF_ALL ||
                 line.getType() == XxLine::DIFFDEL_1 ||
                 line.getType() == XxLine::DIFFDEL_2 ||
-                line.getType() == XxLine::DIFFDEL_3
-              ) && 
-              line.hasHorizontalDiffs( _no ) ) {
+                line.getType() == XxLine::DIFFDEL_3 ) ) {
 
             //
             // Render with horizontal diffs.
@@ -200,78 +299,90 @@ void XxText::drawContents( QPainter* pp )
             QColor bcolorSup;
             QColor fcolorSup;
             resources.getRegionColor( idtypeSup, bcolorSup, fcolorSup );
-            QBrush brushSup( bcolorSup );
 
             // Pre-part.
             p.setPen( fcolorSup );
-            int lx = x;
-            int prelen = lhd;
-            XX_CHECK( prelen >= 0 );
-            if ( prelen > 0 ) {
-               QString prestr;
-               if ( prelen > 0 ) {
-                  prestr.setLatin1( renderedText, prelen );
-               }
-               int prewidth = fm.width( prestr, prelen );
-               p.fillRect( lx, y, prewidth, fm.lineSpacing(), brushSup );
-               p.drawText( lx, y + fm.ascent(), prestr, lhd );
-               lx += prewidth;
+            p.setBackgroundColor( bcolorSup );
+            rentxt(
+               p, renderedText,
+               xch, lhd,
+               xpx,
+               w, y, fm
+            );
+            if ( xpx > w ) {
+               continue;
             }
 
             // Mid-part.
             p.setPen( fcolor );
-            int midlen = rhd - lhd + 1;
-            XX_CHECK( prelen >= 0 );
-            if ( midlen > 0 ) {
-               QString midstr;
-               if ( midlen > 0 ) {
-                  midstr.setLatin1( renderedText + lhd, midlen );
-               }
-               int midwidth = fm.width( midstr, midlen );
-               p.fillRect( lx, y, midwidth, fm.lineSpacing(), brush );
-               p.drawText( lx, y + fm.ascent(), midstr, midlen );
-               lx += midwidth;
+            p.setBackgroundColor( bcolor );
+            rentxt(
+               p, renderedText,
+               xch, rhd,
+               xpx,
+               w, y, fm
+            );
+            if ( xpx > w ) {
+               continue;
             }
 
             // Post-part.
             p.setPen( fcolorSup );
-            int postlen = rlength - rhd - 1;
-            XX_CHECK( prelen >= 0 );
-            if ( postlen > 0 ) {
-               QString poststr;
-               if ( postlen > 0 ) {
-                  poststr.setLatin1( renderedText + rhd + 1, postlen );
-               }
-               int postwidth = fm.width( poststr, postlen );
-               p.fillRect( lx, y, postwidth, fm.lineSpacing(), brushSup );
-               p.drawText( lx, y + fm.ascent(), poststr, postlen );
-               lx += postwidth;
-           }
+            p.setBackgroundColor( bcolorSup );
+            rentxt(
+               p, renderedText,
+               xch, ehd,
+               xpx,
+               w, y, fm
+            );
+            if ( xpx > w ) {
+               continue;
+            }
 
-            // Filler part.
-            int fillerwidth = w - lx;
-            p.fillRect( lx, y, fillerwidth, fm.lineSpacing(), brushSup );
+            fillerBrush.setColor( bcolorSup );
          }
          else {
+
             //
             // Render without horizontal diffs.
             //            
-            QString str( renderedText );
 
-            p.fillRect( 0, y, w, fm.lineSpacing(), brush );
-            p.drawText( x, y + fm.ascent(), str );
+            p.setPen( fcolor );
+            p.setBackgroundColor( bcolor );
+            rentxt(
+               p, renderedText,
+               xch, ehd,
+               xpx,
+               w, y, fm
+            );
+            if ( xpx > w ) {
+               continue;
+            }
+         }
+         
+         // Filler part.
+         int fillerwidth = w - xpx;
+         if ( fillerwidth > 0 ) {
+            p.fillRect(
+               XX_RED_RECT( xpx, y, fillerwidth, fm.lineSpacing() ),
+               fillerBrush
+            );
          }
       }
       else {
          // The line is empty, just fill in the background.
-         p.fillRect( 0, y, w, fm.lineSpacing(), brush );
+         QBrush backBrush( bcolor );
+         p.fillRect(
+            XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
+            backBrush
+         );
       }
    }
+   p.setBackgroundMode( TransparentMode );
 
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
-      QColor backgroundColor = 
-         resources.getColor( COLOR_BACKGROUND );
+      QColor backgroundColor = resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( 0, y, w, h - y, brush );
    }
@@ -294,8 +405,7 @@ void XxText::drawContents( QPainter* pp )
       uint cpos = resources.getVerticalLinePos();
       int posx = cpos * fm.maxWidth() - horizontalPos;
 
-      QColor vlineColor =
-         resources.getColor( COLOR_VERTICAL_LINE );
+      QColor vlineColor = resources.getColor( COLOR_VERTICAL_LINE );
       p.setPen( vlineColor );
       p.drawLine( posx, 0, posx, h );
    }
@@ -327,7 +437,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    QString clipboardFormat = resources.getClipboardFormat();
    QString filename = buffer->getDisplayName();
 
-   const QFont& font = _app->getResources().getFontText();
+   const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
    XxDln dlineno = event->y() / fm.lineSpacing();
    XxDln lineno = _app->getTopLine() + dlineno;
@@ -469,6 +579,34 @@ void XxText::mouseReleaseEvent( QMouseEvent* /*event*/ )
 {
    // Release grab in all case. It won't hurt.
    _grab = false;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxText::mouseDoubleClickEvent( QMouseEvent* event )
+{
+   // Find the line.
+   XxDiffs* diffs = _app->getDiffs();
+   const XxResources& resources = _app->getResources();
+   if ( diffs == 0 ) {
+      return;
+   }
+
+   const QFont& font = resources.getFontText();
+   QFontMetrics fm( font );
+   XxDln dlineno = event->y() / fm.lineSpacing();
+   XxDln lineno = _app->getTopLine() + dlineno;
+   // Check for click out of valid region.
+   if ( lineno > XxDln(diffs->getNbLines()) ) {
+      return;
+   }
+
+   if ( event->button() == LeftButton ) {
+      if ( diffs->isDirectoryDiff() ) {
+         // The cursor is moved by the previous normal clicks.
+         _app->diffFilesAtCursor();
+      }
+   }
 }
 
 //------------------------------------------------------------------------------

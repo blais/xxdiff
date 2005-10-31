@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 1.13
+Version: 2.0
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
@@ -9,7 +9,7 @@ URL: http://xxdiff.sourceforge.net
 Packager: Martin Blais <blais@iro.umontreal.ca>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: qt
-BuildRequires: qt-devel
+BuildRequires: qt-devel tmake
 
 %description
 xxdiff is a graphical browser for viewing the differences between two
@@ -25,19 +25,16 @@ if [ -z "$QTDIR" ]; then
 	. /etc/profile.d/qt.sh
 fi
 
-# Redo automoc before compiling because 'make dist' ignores automoc.
-perl ./automoc -v
-%configure
+cd src
+tmake xxdiff.pro > Makefile
 make
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 mkdir -p ${RPM_BUILD_ROOT}/usr/X11R6/bin
-mkdir -p ${RPM_BUILD_ROOT}/usr/X11R6/man/man1
 
 install -c -m 755 -s src/xxdiff ${RPM_BUILD_ROOT}/usr/X11R6/bin/
-install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/
 
 %clean
 [ "${RPM_BUILD_ROOT}" != "/" ] && rm -rf ${RPM_BUILD_ROOT}
@@ -48,10 +45,12 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/
 %doc CHANGES
 
 /usr/X11R6/bin/xxdiff
-/usr/X11R6/man/man1/xxdiff.1*
 
 
 %changelog
+* Sun Nov 5 2001 Martin Blais <blais@discreet.com>
+- Made it work with tmake.
+
 * Tue Jul 24 2001 Martin Blais <blais@discreet.com>
 - added defattr field, thanks to Mirko Zeibig for suggestion.
 

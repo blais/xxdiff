@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 300 2001-10-23 03:45:33Z blais $
- * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
+ * $Id: resources.h 314 2001-10-29 00:06:19Z blais $
+ * $Date: 2001-10-28 19:06:19 -0500 (Sun, 28 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -90,7 +90,6 @@ enum XxBoolOpt {
 enum XxShowOpt {
    SHOW_TOOLBAR,
    SHOW_LINE_NUMBERS,
-   SHOW_MARKERS,
    SHOW_VERTICAL_LINE,
    SHOW_OVERVIEW,
    SHOW_FILENAMES,
@@ -197,6 +196,14 @@ enum XxAccel {
 enum XxColor {
    COLOR_SAME,
 
+   COLOR_INSERT,              // A in A--, -A-, --A blocks.
+   COLOR_INSERT_BLANK,        // - in A--, -A-, --A blocks.
+                                       
+   COLOR_DIFF_ALL,            // A,B or C in ABC blocks.
+   COLOR_DIFF_ALL_SUP,        // (shadowed)
+   COLOR_DIFF_ALL_ONLY,       // (when other is blank)
+   COLOR_DIFF_ALL_NONLY,      // (when blank)
+
    COLOR_DIFF_ONE,            // B in BAA, ABA, AAB blocks.
    COLOR_DIFF_ONE_SUP,        // (shadowed)
    COLOR_DIFF_ONE_ONLY,       // (when other is blank)
@@ -209,14 +216,6 @@ enum XxColor {
    COLOR_DELETE,              // A in -AA, A-A, AA- blocks.
    COLOR_DELETE_BLANK,        // - in -AA, A-A, AA- blocks.
                                        
-   COLOR_INSERT,              // A in A--, -A-, --A blocks.
-   COLOR_INSERT_BLANK,        // - in A--, -A-, --A blocks.
-                                       
-   COLOR_DIFF_ALL,            // A,B or C in ABC blocks.
-   COLOR_DIFF_ALL_SUP,        // (shadowed)
-   COLOR_DIFF_ALL_ONLY,       // (when other is blank)
-   COLOR_DIFF_ALL_NONLY,      // (when blank)
-
    COLOR_DIFFDEL,             // A and B in -AB, A-B, AB- blocks.
    COLOR_DIFFDEL_SUP,         // (shadowed)
    COLOR_DIFFDEL_ONLY,        // (when other is blank)
@@ -316,7 +315,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor, makes a resources object with default values.
-   XxResources();
+   XxResources( bool original );
 
    // Destructor.
    virtual ~XxResources();
@@ -464,6 +463,11 @@ public:
    void setClipboardFormat( const QString& format );
    // </group>
 
+   /*----- static member functions -----*/
+
+   // Compare fonts.
+   static bool compareFonts( const QFont& f1, const QFont& f2 );
+
 signals:
 
    /*----- member functions -----*/
@@ -483,6 +487,9 @@ private:
 
    // Initialization with default values.
    void initialize();
+
+   // Initialization with default values like the original xdiff.
+   void initializeOriginalXdiff();
 
    /*----- data members -----*/
 

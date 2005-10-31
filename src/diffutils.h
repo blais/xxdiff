@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffutils.h 259 2001-10-08 05:02:31Z blais $
- * $Date: 2001-10-08 01:02:31 -0400 (Mon, 08 Oct 2001) $
+ * $Id: diffutils.h 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -75,9 +75,9 @@ private:
 
    /*----- data members -----*/
 
-   QString       _output;
-   QByteArray    _outputB;
-   QTextIStream* _istream;
+   QString      _output;
+   QByteArray   _outputB;
+   QTextStream* _istream;
 
 };
 

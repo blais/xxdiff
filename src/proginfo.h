@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: proginfo.h 302 2001-10-23 05:14:10Z blais $
- * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+ * $Id: proginfo.h 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -30,7 +30,11 @@
 //
 // Version number.
 //
-#define XX_VERSION 	"1.15"
+#ifdef XX_DEBUG
+#define XX_VERSION 	"(debug version $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $)"
+#else
+#define XX_VERSION 	"1.16"
+#endif
 
 #endif
 

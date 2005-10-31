@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 294 2001-10-21 07:27:43Z blais $
- * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
+ * $Id: exceptions.cpp 308 2001-10-24 05:00:40Z blais $
+ * $Date: 2001-10-24 01:00:40 -0400 (Wed, 24 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -86,15 +86,21 @@ XxUsageError::XxUsageError(
    std::domain_error( "Usage error." ),
    _benine( benine )
 {
-   if ( version == false ) {
-      QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
-      oss << endl;
+   if ( version == true ) {
+      // Overwrite base class msg.
+      QTextStream oss( &_msg, IO_WriteOnly );
+      XxHelp::dumpVersion( oss );
+   }
+   else if ( msg.isEmpty() ) {
+      // Overwrite base class msg.
+      QTextStream oss( &_msg, IO_WriteOnly );
       XxHelp::dumpUsage( oss );
    }
    else {
-      // Overwrite base class msg.
-      QTextStream oss( &_msg, IO_WriteOnly );
-      XxHelp::dumpVersion( oss );      
+      // Don't base class msg.
+      QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+      oss << endl;
+      XxHelp::dumpUsage( oss );
    }
 }
 

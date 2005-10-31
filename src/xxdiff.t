@@ -1,3 +1,4 @@
+# -*- mode: Makefile -*-
 #############################################################################
 #!
 #! This is a tmake template for building Unix applications.
@@ -34,3 +35,14 @@ $(YACCOUTC) $(YACCOUTH): $(YACCIN) $(LEXOUT)
 
 $(PARSOBJ): $(YACCOUTC) $(LEXOUT)
 
+
+
+#-------------------------------------------------------------------------------
+# support for documentation transformation
+
+.SUFFIXES: .qml
+
+.qml.h: 
+	sed -e 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
+
+help.o: doc.h

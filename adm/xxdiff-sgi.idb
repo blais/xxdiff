@@ -4,5 +4,4 @@ f 0644 root sys usr/local/doc/xxdiff/README README xxdiff.man.relnotes
 f 0644 root sys usr/local/doc/xxdiff/test/mine src/mine xxdiff.man.test
 f 0644 root sys usr/local/doc/xxdiff/test/older src/older xxdiff.man.test
 f 0644 root sys usr/local/doc/xxdiff/test/yours src/yours xxdiff.man.test
-f 0644 root sys usr/local/man/man1/xxdiff.1 src/xxdiff.1 xxdiff.man.manpages
 f 0644 root sys usr/local/relnotes/xxdiff/CHANGES CHANGES xxdiff.man.relnotes

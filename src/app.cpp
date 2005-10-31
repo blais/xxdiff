@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 302 2001-10-23 05:14:10Z blais $
- * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+ * $Id: app.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -24,8 +24,8 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <main.h>
 #include <app.h>
+#include <cmdline.h>
 #include <exceptions.h>
 #include <overview.h>
 #include <text.h>
@@ -44,8 +44,6 @@
 #include <searchDialog.h>
 #include <markersFileDialog.h>
 #include <resParser.h>
-
-#include <getopt.h>
 
 #include <qmainwindow.h>
 #include <qpopupmenu.h>
@@ -71,6 +69,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #include <stdlib.h>
 #include <fcntl.h>
@@ -113,7 +112,6 @@ namespace {
 enum MenuIds {
    ID_ToggleToolbar,
    ID_ToggleLineNumbers,
-   ID_ToggleShowMarkers,
    ID_ToggleVerticalLine,
    ID_ToggleOverview,
    ID_ToggleShowFilenames,
@@ -385,9 +383,10 @@ QSocketNotifier* XxApp::_socketNotifier = 0;
 
 //------------------------------------------------------------------------------
 //
-XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
+XxApp::XxApp( int argc, char** argv, const XxCmdline& cmdline ) :
    QApplication( argc, argv ),
    _isUICreated( false ),
+   _returnValue( 0 ),
    _diffErrorsMsgBox( 0 ),
    _searchDialog( 0 ),
    _optionsDialog( 0 ),
@@ -398,20 +397,15 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    _displayLines( 0 ),
    _cursorLine( 0 ), // disallowed value on purpose
    _filesAreDirectories( false ),
-   _returnValue( 0 )
+   _resources( 0 ),
+   _cmdline( cmdline )
 {
-   XxResParser::initialize();
-
    _vscroll[0] = _vscroll[1] = 0;
 
-   if ( forceStyle == true ) {
+   if ( _cmdline._forceStyle == true ) {
       _style = new QSGIStyle;
       setStyle( _style );
    }
-
-   // Parse command line options.
-   // This will potentially create a string resources parser.
-   parseCommandLine( argc, argv );
 
    // Read in the resources and create resources object.
    _resources = buildResources();
@@ -422,21 +416,13 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    QString filenames[3];
    QString displayFilenames[3];
    bool isTemporary[3] = { false, false, false };
-   _nbFiles = readFileNames(
-      argc, argv, filenames, displayFilenames, isTemporary, _filesAreDirectories
+   _nbFiles = processFileNames(
+      _cmdline, filenames, displayFilenames, isTemporary, _filesAreDirectories
    );
    _nbTextWidgets = _nbFiles;
-   if ( _nbTextWidgets == 0 ) {
+   if ( _nbFiles == 0 ) {
       throw XxUsageError( XX_EXC_PARAMS );
    }
-
-#ifdef DONT_SUPPORT_DIRECTORY_DIFFS
-   if ( _filesAreDirectories == true ) {
-      // Directory diffs not yet supported.
-      throw XxUsageError( XX_EXC_PARAMS, 
-                          "Directory diffs detected, not yet supported." );
-   }
-#endif
 
    // Check for odd number of files.
    if ( _nbFiles != 0 && _nbFiles != 2 && _nbFiles != 3 ) {
@@ -456,7 +442,7 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    }
 
    QString cmd = _resources->getCommand( cmdResId );
-   XxOptionsDialog::addToCommand( cmd, _extraDiffArgs );
+   XxOptionsDialog::addToCommand( cmd, _cmdline._extraDiffArgs );
    _resources->setCommand( cmdResId, cmd );
 
    // Create the interface.
@@ -516,7 +502,9 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
    }
 
    // Call post creation actions.
-   emit postCreationAction();
+   if ( _cmdline._mergeRequested ) {
+      selectGlobalMerge();
+   }
 
    // Show the main window.
    if ( _resources->getMaximize() ) {
@@ -551,14 +539,13 @@ XxApp::~XxApp()
 
 //------------------------------------------------------------------------------
 //
-uint XxApp::readFileNames( 
-   int     argc, 
-   char**  argv,
+uint XxApp::processFileNames(
+   const XxCmdline& cmdline,
    QString filenames[3],
    QString displayFilenames[3],
    bool    created[3],
    bool&   filesAreDirectories
-) const
+)
 {
    uint nbFiles = 0;
 
@@ -577,25 +564,24 @@ uint XxApp::readFileNames(
    bool stdinUsed = false;
    uint nbPathFiles = 0;
    int filePathIndex = -1;
-   for ( XxFno ii = 0; ii < 3; ++ii ) {
-      if ( argc > ii ) {
-         if ( strcmp( argv[ii], "-" ) == 0 ) {
-            if ( stdinUsed == true ) {
-               // Cannot have two filenames from stdin.
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            stdinUsed = true;
-            isDirectory[ii] = false;
+   for ( XxFno ii = 0; ii < cmdline._nbFilenames; ++ii ) {
+      if ( cmdline._filenames[ii] == "-" ) {
+         if ( stdinUsed == true ) {
+            // Cannot have two filenames from stdin.
+            throw XxUsageError( XX_EXC_PARAMS );
          }
-         else {
-            isDirectory[ii] = XxUtil::isDirectory( argv[ii] );
-            if ( ! isDirectory[ii] ) {
-               filePathIndex = ii;
-               nbPathFiles++;
-            }
-         }
-         nbFiles++;
+         stdinUsed = true;
+         isDirectory[ii] = false;
       }
+      else {
+         QFileInfo finfo( cmdline._filenames[ii] );
+         isDirectory[ii] = finfo.isDir();
+         if ( ! isDirectory[ii] ) {
+            filePathIndex = ii;
+            nbPathFiles++;
+         }
+      }
+      nbFiles++;
    }
 
    if ( stdinUsed == true && nbPathFiles == 0 ) {
@@ -614,53 +600,55 @@ uint XxApp::readFileNames(
    QString bn;
    if ( !filesAreDirectories && nbPathFiles < nbFiles ) {
       XX_ASSERT( filePathIndex != -1 );
-      bn = XxUtil::baseName( argv[ filePathIndex ] );
+      bn = XxUtil::baseName( cmdline._filenames[ filePathIndex ] );
    }
 
    bool stdinCopied = false;
-   for ( XxFno iii = 0; iii < 3; ++iii ) {
-      if ( argc > iii ) {
-         XX_ASSERT( argv[iii] );
-
-         if ( strcmp( argv[iii], "-" ) == 0 ) {
-            XX_ASSERT( stdinCopied == false );
-            stdinCopied = true;
+   for ( XxFno iii = 0; iii < cmdline._nbFilenames; ++iii ) {
+      if ( cmdline._filenames[iii] == "-" ) {
+         XX_ASSERT( stdinCopied == false );
+         stdinCopied = true;
             
-            displayFilenames[iii] = _stdinFilename;
-            char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
-            int tfd = mkstemp( temporaryFilename );
-            FILE *fout;
-            if ( ( fout = fdopen( tfd, "w") ) == NULL ) {
-               throw XxIoError( XX_EXC_PARAMS, 
-                                "Error opening temporary file." );
-            }
+         displayFilenames[iii] = cmdline._stdinFilename;
+         char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
+         int tfd = mkstemp( temporaryFilename );
+         FILE *fout;
+         if ( ( fout = fdopen( tfd, "w") ) == NULL ) {
+            throw XxIoError( XX_EXC_PARAMS, 
+                             "Error opening temporary file." );
+         }
    
-            filenames[iii] = temporaryFilename;
-            created[iii] = true;
-            XxUtil::copyToFile( stdin, fout );
+         filenames[iii] = temporaryFilename;
+         created[iii] = true;
+         XxUtil::copyToFile( stdin, fout );
 
-            if ( fclose( fout ) != 0 ) {
-               throw XxIoError( XX_EXC_PARAMS,
-                                "Error closing temporary file." );
-            }
-         }
-         else {
-            QString fname = argv[iii];
-            if ( !filesAreDirectories && isDirectory[iii] == true ) {
-               // Append basename to directory.
-               fname.append( "/" );
-               XX_ASSERT( !bn.isEmpty() );
-               fname.append( bn );
-            }
-            displayFilenames[iii] = fname;
-            filenames[iii] = fname;
-            bool isdir;
-            XxUtil::testFile( filenames[iii], false, isdir );
-         }
+         // Important comment: unfortunately we cannot use the unlink() trick
+         // here since we will call the subordinate diff on this file, so it
+         // needs to be visible in the directory.  Perhaps we could relink it
+         // just before calling the subordinate diff and then unlinking it right
+         // after.  Something to think about.
 
-         if ( ! _userFilenames[iii].isEmpty() ) {
-            displayFilenames[iii] = _userFilenames[iii];
+         if ( fclose( fout ) != 0 ) {
+            throw XxIoError( XX_EXC_PARAMS,
+                             "Error closing temporary file." );
          }
+      }
+      else {
+         QString fname = cmdline._filenames[iii];
+         if ( !filesAreDirectories && isDirectory[iii] == true ) {
+            // Append basename to directory.
+            fname.append( "/" );
+            XX_ASSERT( !bn.isEmpty() );
+            fname.append( bn );
+         }
+         displayFilenames[iii] = fname;
+         filenames[iii] = fname;
+         bool isdir;
+         XxUtil::testFile( filenames[iii], false, isdir );
+      }
+
+      if ( ! cmdline._userFilenames[iii].isEmpty() ) {
+         displayFilenames[iii] = cmdline._userFilenames[iii];
       }
    }
 
@@ -769,8 +757,7 @@ void XxApp::createUI( uint nbTextWidgets )
    a->connectItem( a->insertItem(Key_Right), this, SLOT(scrollRight()) ); 
    a->connectItem( a->insertItem(Key_Left), this, SLOT(scrollLeft()) ); 
 
-   a->connectItem( a->insertItem(Key_Delete), 
-                   this, SLOT(selectRegionNeither()) ); 
+   a->connectItem( a->insertItem(Key_Delete), this, SLOT(selectRegionNeither()) ); 
 
    // Make some connections.
    connect( this, SIGNAL(cursorChanged(int)), this, SLOT(repaintTexts()) );
@@ -855,16 +842,6 @@ QToolBar* XxApp::createToolbar()
       this, SLOT(search()), toolbar 
    );
       
-   QPixmap pm_search_forward( 
-      const_cast<const char**>( search_forward_xpm )
-   );
-   new QToolButton( 
-      pm_search_forward,
-      "Search forward", 
-      "Search forward", 
-      this, SLOT(searchForward()), toolbar 
-   );
-      
    QPixmap pm_search_backward( 
       const_cast<const char**>( search_backward_xpm )
    );
@@ -873,6 +850,16 @@ QToolBar* XxApp::createToolbar()
       "Search backward", 
       "Search backward", 
       this, SLOT(searchBackward()), toolbar 
+   );
+      
+   QPixmap pm_search_forward( 
+      const_cast<const char**>( search_forward_xpm )
+   );
+   new QToolButton( 
+      pm_search_forward,
+      "Search forward", 
+      "Search forward", 
+      this, SLOT(searchForward()), toolbar 
    );
       
    if ( _filesAreDirectories == false ) {
@@ -1051,8 +1038,8 @@ void XxApp::createMenus()
    fileMenu->insertSeparator();
 
    fileMenu->insertItem( 
-      "Exit", this, SLOT(quit()), 
-      _resources->getAccelerator( ACCEL_EXIT ) 
+      "Exit", this, SLOT(quit()),
+      _resources->getAccelerator( ACCEL_EXIT )
    );
 
    //---------------------------------------------------------------------------
@@ -1436,11 +1423,6 @@ void XxApp::createMenus()
       "Toggle line numbers", this, SLOT(toggleLineNumbers()),
       _resources->getAccelerator( ACCEL_TOGGLE_LINE_NUMBERS )
    );
-   _menuids[ ID_ToggleShowMarkers ] = _displayMenu->insertItem( 
-      "Toggle show markers", this, SLOT(toggleShowMarkers()),
-      _resources->getAccelerator( ACCEL_TOGGLE_MARKERS )
-   );
-   _displayMenu->setItemEnabled( _menuids[ ID_ToggleShowMarkers ], false );
 
 
    if ( _filesAreDirectories == false && _nbFiles == 3 ) {
@@ -1499,7 +1481,7 @@ void XxApp::createMenus()
    // Help menu
    QPopupMenu* helpMenu = new QPopupMenu;
    helpMenu->insertItem( 
-      "Man page...", this, SLOT(helpManPage()),
+      "User's manual...", this, SLOT(helpManPage()),
       _resources->getAccelerator( ACCEL_HELP_MAN_PAGE )
    );
    helpMenu->insertItem( 
@@ -1676,13 +1658,13 @@ bool XxApp::processDiff()
             _diffs = tmp;
             XX_ASSERT( _diffs.get() != 0 );
          }
-         catch ( const std::exception& ex ) {
+         catch ( const XxError& ex ) {
             QString str;
             QTextOStream oss( &str );
             oss << "Error executing \"" 
                 << _resources->getCommand( CMD_DIFF_FILES_2 )
                 << "\" command, couldn't build diffs:" << endl
-                << ex.what() << endl;
+                << ex.getMsg() << endl;
             outputDiffErrors( str );
             return false;
          }
@@ -1711,13 +1693,13 @@ bool XxApp::processDiff()
             _diffs = tmp;
             XX_ASSERT( _diffs.get() != 0 );
          }
-         catch ( const std::exception& ex ) {
+         catch ( const XxError& ex ) {
             QString str;
             QTextOStream oss( &str );
             oss << "Error executing \"" 
                 << _resources->getCommand( CMD_DIFF_FILES_3 )
                 << "\" command, couldn't build diffs:" << endl
-                << ex.what() << endl;
+                << ex.getMsg() << endl;
             outputDiffErrors( str );
             return false;
          }
@@ -1770,13 +1752,13 @@ bool XxApp::processDiff()
          _diffs = tmp;
          XX_ASSERT( _diffs.get() != 0 );
       }
-      catch ( const std::exception& ex ) {
+      catch ( const XxError& ex ) {
          QString str;
          QTextOStream oss( &str );
          oss << "Error executing \"" 
              << dirdiff_command
              << "\" command, couldn't build diffs:" << endl
-             << ex.what() << endl;
+             << ex.getMsg() << endl;
          outputDiffErrors( str );
          return false;
       }
@@ -1816,7 +1798,6 @@ bool XxApp::processDiff()
 
       // Note: this should also be done, but more efficiently for each loaded
       // file separately.
-      _textWidth = computeTextWidth();
       adjustScrollbars( true );
    }
 
@@ -1825,166 +1806,13 @@ bool XxApp::processDiff()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::parseCommandLine( int& argc, char**& argv )
-{
-   // The command-line parsing has to be carried out before the resource
-   // building because some of the command-line options affect the way resources
-   // are built up (e.g. --no-rcfile).  So command-line options that should
-   // supersede resources and explicit resources specified on the command-line
-   // are stored in the _cmdlineResources.
-
-   // Initialize cmdline-related variables.
-   _userFilenames[0] = "";
-   _userFilenames[1] = "";
-   _userFilenames[2] = "";
-   _stdinFilename = "(stdin)";
-   _useRcfile = true;
-   _extraDiffArgs = "";
-   _sepDiff = false;
-
-   int optionIndex = 0; 
-   struct option longOptions[] = { 
-      { "help", 0, 0, 'h' }, 
-      { "version", 0, 0, 'v' }, 
-      { "no-rcfile", 0, 0, 'n' }, 
-      { "list-resources", 0, 0, 'l' }, 
-      { "exit-on-same", 0, 0, 'D' }, 
-      { "ignore-whitespace", 0, 0, 'w' }, 
-      { "ignore-trailing-blanks", 0, 0, 'b' }, 
-      { "ignore-case", 0, 0, 'i' }, 
-      { "merge", 0, 0, 'm' }, 
-      { "title1", 1, 0, '1' }, 
-      { "title2", 1, 0, '2' }, 
-      { "title3", 1, 0, '3' },
-      { "titlein", 1, 0, 'N' }, // This is kept for xdiff compatibility only.
-      { "resource", 1, 0, 'R' },
-      { "recursive", 0, 0, 'r' },
-      { "as-text", 0, 0, 'a' },
-      { "args", 1, 0, 'A' },
-      { 0, 0, 0, 0 }
-   }; 
-   
-   // Do the parsing.
-   while ( true ) {
-      int c = getopt_long( argc, argv, "hvDwbimrN:aA:", longOptions,
-                           &optionIndex );
-      if ( c == -1 ) {
-         break;
-      }
-              
-      switch ( c ) {
-         case 'h':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, true );
-
-         case 'v':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, true, true );
-
-         case 'n':
-            _useRcfile = false;
-            break;
-
-         case 'l':
-            // This lists the default resources, not the ones parsed from the
-            // rcfile or command-line.
-            XxResParser::listResources( std::cout );
-            ::exit( 0 );
-            break;
-
-         case 'D': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
-            oss << XxResParser::getBoolOptName( BOOL_EXIT_ON_SAME )
-                << ": true" << endl;
-         } break;
-
-         case 'r': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
-            oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
-                << ": true" << endl;
-         } break;
-
-         case 'w':
-         case 'b':
-         case 'i':
-         case 'a':
-            char optionString[4];
-            optionString[0] = ' ';
-            optionString[1] = '-';
-            optionString[2] = c;
-            optionString[3] = 0;
-            _extraDiffArgs.append( optionString );
-            break;
-
-         case 'A':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _extraDiffArgs.append( optarg );
-            break;
-
-         case 'm':
-            connect( this, SIGNAL(postCreationAction()),
-                     this, SLOT(selectGlobalMerge()) );
-            break;
-
-         case '1':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _userFilenames[0] = optarg;
-            break;
-
-         case '2':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _userFilenames[1] = optarg;
-            break;
-
-         case '3':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _userFilenames[2] = optarg;
-            break;
-
-         case 'N':
-            if ( !optarg ) {
-               throw XxUsageError( XX_EXC_PARAMS );
-            }
-            _stdinFilename = optarg;
-            break;
-
-         case 'R': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
-            oss << optarg << endl << flush;
-         } break;
-
-         case 0:
-            throw XxInternalError( XX_EXC_PARAMS );
-
-         case ':':
-         case '?':
-            throw XxUsageError( XX_EXC_PARAMS );
-            
-         default:
-            throw XxUsageError( XX_EXC_PARAMS );
-      }
-   }
-
-   argc -= optind;
-   argv += optind;
-}
-
-
-//------------------------------------------------------------------------------
-//
 XxResources* XxApp::buildResources() const
 {
-   XxResources* resources = new XxResources;
+   XxResources* resources = new XxResources( _cmdline._originalXdiff );
    XxResParser resParser;
 
    // Note: the UI hasn't been built at this point.
-   if ( _useRcfile == true ) {
+   if ( _cmdline._useRcfile == true ) {
       try {
          QString rcfilename = XxResParser::getRcFilename();
          resParser.parse( rcfilename, *resources );
@@ -1996,9 +1824,9 @@ XxResources* XxApp::buildResources() const
       }
    }
 
-   if ( !_cmdlineResources.isEmpty() ) {
+   if ( !_cmdline._cmdlineResources.isEmpty() ) {
       try {
-         QTextIStream cmdlineStream( _cmdlineResources );
+         QTextIStream cmdlineStream( _cmdline._cmdlineResources );
          resParser.parse( cmdlineStream, *resources );
       }
       catch ( const XxIoError& ioerr ) {
@@ -2037,7 +1865,17 @@ uint XxApp::computeTextWidth() const
 //
 uint XxApp::getTextWidth() const
 {
+   if ( _textWidth == 0 ) {
+      _textWidth = computeTextWidth();
+   }
    return _textWidth;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::invalidateTextWidth()
+{
+   _textWidth = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -2104,7 +1942,7 @@ void XxApp::adjustScrollbars( bool force )
       _displayWidth = displayWidth;
 
       // Leave a pixel margin to the right of text.
-      uint textWidth = _textWidth + 16; // 10 pixels. right margin.
+      uint textWidth = getTextWidth() + 16; // 10 pixels. right margin.
       if ( textWidth <= _displayWidth ) {
          _hscroll->setRange( 0, 0 );
          _hscroll->hide();
@@ -2444,7 +2282,7 @@ void XxApp::saveToFile( const QString& filename, const bool ask )
       
       outfile.close();
       if ( outfile.status() != IO_Ok ) {
-         throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
+         throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
       }
    }
    catch ( const XxIoError& ioerr ) {
@@ -2542,12 +2380,20 @@ void XxApp::editFile( const QString& filename )
    const char** args;
    XxUtil::splitArgs( command, args );
 
-   if ( XxUtil::spawnCommand( args, handlerSIGCHLD ) == false ) {
-      QString text( "There has been an error spawning the editor." );
+   try {
+      XxUtil::spawnCommand( args, handlerSIGCHLD );
+   }
+   catch ( const XxIoError& ioerr ) {
+      QString text;
+      {
+         QTextOStream oss( &text );
+         oss << "There has been an error spawning the editor:" 
+             << ioerr.getMsg() << endl << flush;
+      }
       QMessageBox* box = new XxSuicideMessageBox( 
          _mainWindow, "Error.", text, QMessageBox::Warning 
       );
-      box->show();         
+      box->show();
    }
 
    XxUtil::freeArgs( args );
@@ -3102,7 +2948,22 @@ void XxApp::diffFilesAtCursor()
       const char** args;
       XxUtil::splitArgs( command, args );
 
-      XxUtil::spawnCommand( args );
+      try { 
+         XxUtil::spawnCommand( args );
+      }
+      catch ( const XxIoError& ioerr ) {
+         QString text;
+         {
+            QTextOStream oss( &text );
+            oss << "There has been an error spawning diff program:" 
+                << ioerr.getMsg() << endl << flush;
+         }
+         QMessageBox* box = new XxSuicideMessageBox( 
+            _mainWindow, "Error.", text, QMessageBox::Warning 
+         );
+         box->show();
+      }
+
       XxUtil::freeArgs( args );
    }
 }
@@ -3159,8 +3020,8 @@ void XxApp::copyFile( XxFno nnno ) const
    else {
       filedst = _files[nodst]->getBufferAtLine( fline );
 
-      struct stat buf;
-      if ( stat( filedst.latin1(), &buf ) == 0 ) {
+      QFileInfo finfo( filedst );
+      if ( finfo.exists() ) {
          int resp = QMessageBox::warning( 
             _mainWindow, "xxdiff", "File exists, overwrite?",
             "Ok", "Cancel", QString::null, 0, 1
@@ -3554,7 +3415,6 @@ void XxApp::setTabWidth( const int newTabWidth )
 {
    _resources->setTabWidth( newTabWidth );
 
-   _textWidth = computeTextWidth();
    _displayWidth = 0; // This is a hack to force adjustment of hscrollbar.
    adjustScrollbars();
    synchronizeUI();
@@ -3780,14 +3640,6 @@ void XxApp::adjustLineNumbers()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::toggleShowMarkers()
-{
-   _resources->toggleShowOpt( SHOW_MARKERS );
-   synchronizeUI();
-}
-
-//------------------------------------------------------------------------------
-//
 void XxApp::toggleVerticalLine()
 {
    _resources->toggleShowOpt( SHOW_VERTICAL_LINE );
@@ -3919,13 +3771,31 @@ void XxApp::helpManPage()
 //
 void XxApp::helpGenInitFile()
 {
+   // Generate it into a string to check if there are some contents.
+   QString outstr;
+   {
+      // Save to the stream the differences with the default resources.
+      QTextStream outs( &outstr, IO_WriteOnly );
+      std::auto_ptr<XxResources> defres(
+         new XxResources( _cmdline._originalXdiff )
+      );
+      XxResParser::genInitFile( *_resources, *defres, outs );
+   }
+   if ( outstr.isEmpty() ) {
+      QMessageBox::warning( 
+         _mainWindow, "xxdiff",
+         "There is nothing to write as init file\n(nothing has been changed).",
+         "Ok"
+      );
+      return;
+   }
+   // Ok, there is something to write, get filename and save to file.
+
    QString f;
-   f = QFileDialog::getSaveFileName( 
-      QString( "xxdiffrc" ),
-      QString::null,
-      _mainWindow,
-      "xxdiff save sample"
-   );
+   f = QFileDialog::getSaveFileName( QString( "xxdiffrc" ),
+                                     QString::null,
+                                     _mainWindow,
+                                     "xxdiff save sample" );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
       return;
@@ -3947,19 +3817,21 @@ void XxApp::helpGenInitFile()
    
    // Open a file.
    try {
-      std::ofstream outfile( f.latin1() );
-      if ( outfile.fail() == true ) {
+      QFile outfile( f );
+      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
+      if ( !succ ) {
          throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
       }
       
-      // Save to the file the differences with the default resources.
-      XxResources* defres = new XxResources;
-      XxResParser::genInitFile( *_resources, *defres, outfile );
-      delete defres;
-      
+      // Save to the file.
+      {
+         QTextStream osstream( &outfile );
+         osstream << outstr;
+      }
+
       outfile.close();
-      if ( outfile.fail() == true ) {
-         throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
+      if ( outfile.status() != IO_Ok ) {
+         throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
       }
    }
    catch ( const XxIoError& ioerr ) {
@@ -4080,10 +3952,6 @@ void XxApp::synchronizeUI()
    _displayMenu->setItemChecked( 
       _menuids[ ID_ToggleLineNumbers ], 
       _resources->getShowOpt( SHOW_LINE_NUMBERS )
-   );
-   _displayMenu->setItemChecked( 
-      _menuids[ ID_ToggleShowMarkers ], 
-      _resources->getShowOpt( SHOW_MARKERS )
    );
 
    if ( _filesAreDirectories == false && _nbFiles == 3 ) {

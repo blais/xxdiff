@@ -1,23 +1,31 @@
 #!/bin/sh
-
-# Package for source release for nightly transfer.
-VERSION=`tools/get_version`
-echo "Making source distribution";
-
-# Normally this is what should be used, but this fucks up what the automoc
-# generates.
 #
-#    make dist
-#    mv xxdiff-$VERSION.tar.gz ../xxdiff-$VERSION.src.tar.gz
+# $Id: release_src 348 2001-11-06 06:50:46Z blais $
+#
 
-make clean
-make distclean
-rm -f config.cache config.status
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
 
-bn=`basename $PWD`
-dn=`dirname $PWD`
-tarfilename="xxdiff-$VERSION.src.tar.gz"
-cd $dn
-cp -R $bn xxdiff-$VERSION
-rm -f $tarfilename
-tar zcvf $tarfilename xxdiff-$VERSION
+# Package for source release.
+echo "Getting version"
+VERSION=`tools/get_version`
+UVERSION=`echo $VERSION | sed -e 's/\./_/g'`
+echo "Version $VERSION, Release tag $UVERSION"
+
+echo "Creating temporary space to extract source"
+TMP=xxdiff-tmp
+
+cd .. && mkdir $TMP && cd $TMP
+
+echo "Exporting source from CVS"
+CVS_RSH=ssh
+cvs -z3 -d:ext:bor.iro.umontreal.ca:/u/blais/cvsroot \
+   export -d xxdiff-$VERSION -r xxdiff_$UVERSION xxdiff
+
+echo "Compressing source into archive"
+tar zcvf xxdiff-${VERSION}.tar.gz xxdiff-${VERSION}
+
+echo "Cleaning up"
+cd .. && rm -rf $TMP

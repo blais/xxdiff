@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 302 2001-10-23 05:14:10Z blais $
- * $Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
+ * $Id: buffer.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -60,6 +60,25 @@ const char* strnchr( const char* s, int c, const char* end )
    return 0;
 }
 
+//------------------------------------------------------------------------------
+//
+const char* strnstr( const char* haystack, const uint n, const char* needle ) 
+{
+   const char* p = haystack;
+   const char* pe = p + n - ::strlen( needle );
+   while ( p < pe ) {
+      while ( *p != *needle && p < pe ) { ++p; }
+      const char* pp = p;
+      const char* nn = needle;
+      while ( (*pp == *nn) && (*nn != 0) ) { ++pp; ++nn; }
+      if ( *nn == 0 ) {
+         return p;
+      }
+      ++p;
+   }
+   return 0;
+}
+
 }
 
 XX_NAMESPACE_BEGIN
@@ -107,16 +126,16 @@ XxBuffer::XxBuffer(
    XX_ASSERT( !filename.isEmpty() );
 
    // Stat the file.
-   struct stat ss;
-   if ( stat( _name.latin1(), &ss ) == -1 ) {
+   QFileInfo finfo( _name );
+   if ( !finfo.exists() ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
 
-   if ( ! S_ISDIR( ss.st_mode ) ) {
-      loadFile( ss );
+   if ( finfo.isDir() ) {
+      loadDirectory();
    }
    else {
-      loadDirectory( ss );
+      loadFile( finfo );
    }
 
    init();
@@ -134,7 +153,7 @@ void XxBuffer::init()
 //
 XxBuffer::~XxBuffer()
 {
-   delete _buffer;
+   delete[] _buffer;
 
    // Delete the temporary file if asked for.
    if ( _temporary == true ) {
@@ -148,10 +167,10 @@ XxBuffer::~XxBuffer()
 
 //------------------------------------------------------------------------------
 //
-void XxBuffer::loadFile( struct stat& ss )
+void XxBuffer::loadFile( const QFileInfo& finfo )
 {
    // Find out the file size.
-   _bufferSize = ss.st_size;
+   _bufferSize = finfo.size();
 
    // Allocate buffer.
    // add one for potential added newline.
@@ -188,7 +207,7 @@ void XxBuffer::loadFile( struct stat& ss )
 
 //------------------------------------------------------------------------------
 //
-void XxBuffer::loadDirectory( struct stat& /*ss*/ )
+void XxBuffer::loadDirectory()
 {
    QDir dir( _name );
    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::System );
@@ -325,7 +344,9 @@ uint XxBuffer::computeTextWidth( const QFont& font, const uint tabWidth )
       QString str( renderedText );
 
       QRect rect = fm.boundingRect( str );
-      longest = std::max( longest, (uint)rect.width() );
+      if ( static_cast<uint>( rect.width() ) > longest ) {
+         longest = static_cast<uint>( rect.width() );
+      }
    }
    return longest;
 }
@@ -450,17 +471,12 @@ const QString& XxBuffer::renderLineNumber(
 //
 bool XxBuffer::searchLine( const XxFln lineno, const QString& searchText ) const
 {
-   // Note: this is not thread-safe because we're modifying the text buffer
-   // temporarily.  Implement your own strnstr without copying.
    bool found = false;
    uint len;
-   char* text = const_cast<char*>( getTextLine( lineno, len ) );
-   char endchar = text[len];
-   text[len] = '\0';
-   if ( ::strstr( text, searchText.latin1() ) != 0 ) {
+   const char* text = getTextLine( lineno, len );
+   if ( strnstr( text, len, searchText.latin1() ) != 0 ) {
       found = true;
    }
-   text[len] = endchar;
    return found;
 }
 

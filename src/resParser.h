@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.h 300 2001-10-23 03:45:33Z blais $
- * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
+ * $Id: resParser.h 345 2001-11-06 02:20:49Z blais $
+ * $Date: 2001-11-05 21:20:49 -0500 (Mon, 05 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -82,17 +82,17 @@ public:
    static void genInitFile(
       const XxResources& res1,
       const XxResources& res2,
-      std::ostream&      os
+      QTextStream&       os
    );
 
    // Print out the resource list, default values and documentation.
-   static void listResources( std::ostream& );
+   static void listResources( QTextStream& );
+
+   // Returns resource reference help, formatted with qml.
+   static QString getResourceRef();
 
    // Special tags for cmdline resources.
    static QString getBoolOptName( XxBoolOpt bo  );
-
-   // Compare fonts.
-   static bool compareFonts( const QFont& f1, const QFont& f2 );
 
    /*----- member functions -----*/
 
@@ -103,7 +103,7 @@ public:
    void parse( const QString& filename, XxResources& resources );
 
    // Run with stream into given resources.
-   void parse( QTextIStream& is, XxResources& resources );
+   void parse( QTextStream& is, XxResources& resources );
 
    // Destructor.
    virtual ~XxResParser();

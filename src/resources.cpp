@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 295 2001-10-21 18:39:14Z blais $
- * $Date: 2001-10-21 14:39:14 -0400 (Sun, 21 Oct 2001) $
+ * $Id: resources.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -51,14 +51,33 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-XxResources::XxResources()
+XxResources::XxResources( bool original )
 {
-   initialize();
+   if ( !original ) {
+      initialize();
+   }
+   else {
+      initializeOriginalXdiff();
+   }
 }
 
 //------------------------------------------------------------------------------
 //
 void XxResources::initialize()
+{
+   initializeOriginalXdiff();
+
+   _boolOpts[ BOOL_HORIZONTAL_DIFFS ] = true;
+   _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = false;
+   _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = true;
+
+   _showOpts[ SHOW_OVERVIEW ] = true;
+   _showOpts[ SHOW_FILENAMES ] = true;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::initializeOriginalXdiff()
 {
    // Just like xdiff.
    _preferredGeometry = QRect( -1, -1, 1200, 600 );
@@ -207,7 +226,6 @@ void XxResources::initialize()
    // Defaults just like xdiff, pretty plain.
    _showOpts[ SHOW_TOOLBAR ] = false;
    _showOpts[ SHOW_LINE_NUMBERS ] = false;
-   _showOpts[ SHOW_MARKERS ] = false;
    _showOpts[ SHOW_VERTICAL_LINE ] = false;
    _showOpts[ SHOW_OVERVIEW ] = true;
    _showOpts[ SHOW_FILENAMES ] = false;
@@ -290,8 +308,10 @@ void XxResources::setMaximize( bool fs )
 bool XxResources::setAccelerator( XxAccel accel, const QString& val )
 {
    int accelval;
-   if ( XxAccelUtil::read( val, accelval ) ) {
-      _accelerators[ int(accel) ] = accelval;
+   if ( XxAccelUtil::read( val, accelval ) == true ) {
+      int iaccel( accel );
+      XX_CHECK( iaccel < int(ACCEL_LAST) );
+      _accelerators[ iaccel ] = accelval;
       emit changed();
       return true;
    }
@@ -573,6 +593,16 @@ void XxResources::setIgnoreFile( XxIgnoreFile ignoreFile )
 {
    _ignoreFile = ignoreFile;
    emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxResources::compareFonts( const QFont& f1, const QFont& f2 )
+{
+   if ( f1.rawMode() || f2.rawMode() ) {
+      return f1.rawName() == f2.rawName();
+   }
+   return f1 == f2;
 }
 
 XX_NAMESPACE_END

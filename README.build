@@ -8,27 +8,14 @@ Building from source:
 ------------------------------
 
 #
-# (1) compile the hacked diffutils objects
+# compile xxdiff itself
 #
 
-# ignore the link errors, they're normal, but all objects should compile cleanly
-
-
-cd xxdiff/diffutils
-./configure
-make -k
-
-
-
-#
-# (2) compile xxdiff itself
-#
-
-# You'll need g++-2.96 or higher, because of the STL that comes with it (the STL
-# that comes with 2.95.x is not sufficient).
-#
 # We use tmake, you'll need it, install the latest version if you can.
 # http://www.trolltech.com
+#
+# If you try to compile under a Sun machine, you'll need GNU make.  Don't waste
+# your time with Sun's make.
 
 
 cd xxdiff/src
@@ -100,6 +87,8 @@ inst -f xxdiff-<version>.mips.tardist
 
 My release process:
 ------------------------------
+
+0) make sure the tmake makefile is a release and not debug tmake.
 
 1) build
 make dist (problem with autoconf 2.50, fix bug by hand $$/ to $$d/)

@@ -2,73 +2,164 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 302 2001-10-23 05:14:10Z blais $
+# $Id: CHANGES 348 2001-11-06 06:50:46Z blais $
 #
 
-ADVICE TO THE NORMAL CUSTOMER:  we are currently doing major renovations,
+ADVICE TO THE CUSTOMER:  we are currently doing major renovations,
 please come back later, or stick with the latest stable release--1.13.
---$Date: 2001-10-23 01:14:10 -0400 (Tue, 23 Oct 2001) $
-  
-
+I'm down to writing documentation and packaging, I'll release after that is
+nice and clean.
+--$Date: 2001-11-06 01:50:46 -0500 (Tue, 06 Nov 2001) $
 
 Features remaining todo for 2.0 release:
 ------------------------------
 
-   - make sure the pangrams are different
+   * try mips build stripped and release, to see if it works now.
+     if it does, fix tools/release_bin
 
-   - put help for clipboard text format strings  on label tooltip
+   * setup list of features to try for release criteria (regression tests)
 
-   - make sure we don't require X connection to parse resources or cmdline args.
+   * update all /tools dir.
 
-   - change permissions checking to use QFileInfo instead of access and friends.
-     S_IF and access()
-    Example: 
-    QFileInfo fi( "/tmp/tonsils" );
-    if ( fi.permission( QFileInfo::WriteUser | QFileInfo::ReadGroup ) )
-        qWarning( "Tonsils can be changed by me, and the group can read them.");
-    if ( fi.permission( QFileInfo::WriteGroup | QFileInfo::WriteOther ) )
-        qWarning( "Danger! Tonsils can be changed by the group or others!" );
+   * announce: web site, fm, bero, qt, discreet, cervisia, wincvs, etc.
 
-   - XxResources::initializeXdiff() or initialize()
-     with cmdline switch to support original xdiff look, e.g. --xdiff
-     by default should have all the xxdiff goodies
+   * web site: add documentation, remove xxscripts, add emacs trick to start xxdiff automatically on previous file
 
-   - diff one perhaps should be renamed... sure enough, more documentation 
-     should be given for these, diffall is what is used normally...
+    add translate sscript, remove xxscripts
 
-   - apply display box resets horizontal diffs...
-     options dialog has to update on resources changes...
-     ... figure out something with a second copy of the resources object.
-
-   - finish nice bitmaps for 2.0 release!!!
-
-   - review contents of app.h and resources.h and recategorize app.h stuff.
-
-   - use rich text for help, write single help file source in richetxt (html)
-
-   - fix rpm packaging for tmake, fix distribution script
-
-   - resources doc: a file, that is made into a string, can be output
-     for usage (--list-resources) and is in online documentation, etc.
-
-   - don't open X connection for parsing resources and command line.
-
-   - indicator for unselected regions remaining (above in overview area)
-
-   - document resources
-
-   - accumulate parser errors to a stream, then print it out, potentially.
-
-   - add more documentation to specific colors.
-
-   - for options dialog, on synchronize() we should really only update the
-     controls which haven't been changed.  how do we do that?  perhaps have it
-     work on a different resources object?
-
+   * update root README
 
 
 
 Current development version:
+------------------------------
+
+
+
+------------------------------
+
+***NOT YET RELEASED*** Version 2.0: (stable)
+
+   Changes since 1.13:  the focus of this release is an internal rewrite for
+   stability, portability and code sanity before embarking on a series of new
+   features.  There are not many user-visible changes, but you should switch
+   anyway, for stability.
+
+   Summary:
+
+   * ALL logged bugs have been fixed, including some nasty ones.  xxdiff is now
+     more stable than ever, has been purified.
+
+   * Removed internal dependency on std::string, we are now using QString
+     everywhere internally.  Much less STL dependency now.  This should improve
+     portability considerably (it was ported again to Solaris).
+
+   * The resources system was rewritten completely, including the parser, which
+     now defines its own little resources language.  Parsing the resources file
+     should be much more efficient that it was.  The resources file format has
+     changed.  Also, by default xxdiff will now turn on its cool unique
+     features as they appear.  The output of --list-resources should now be
+     parsable directly.  Xrm resources support has been removed.
+
+   * User-visible changes: toolbar buttons have been reorganized slightly and
+     bitmap are now nice and final.  Color legend is now integrated in the
+     options dialog.  You can now customize fonts from the options dialog.  The
+     options dialog has been reorganized.  You can now maximized the geometry
+     from the resources.  Cheesy logo added.  Error messages are now better.
+
+   * Full documentation is now included with xxdiff and will be online.
+
+   * Commands that don't require the display don't attempt to open a display
+     connection anymore.
+
+   * Build system has changed, we are now using tmake.
+
+   * The text area rendering code has been rewritten entirely.  Rendering very
+     very long lines should now work correctly.
+
+   * The code was prepared for an upcoming Windows port tentative.
+
+
+
+------------------------------
+
+Version 1.16: (pre-release)
+
+   * Added documentation table of contents.
+   * Fixed output of resources into HTML with HTML-able tags (XxHelp::xmlize()).
+   * Removed all stat() calls, replaced by QFileInfo.
+   * Removed useless XxUtil::isDirectory() code bloat.
+   * Fixed new bug with QTextStream going out of scope with a closed (f)stream.
+   * Used mpatrol and -check-memory-? to try to locate the problem with short
+     filenames and setting accelerator 0.
+   * Purified xxdiff on IRIX.  It's clean.  Qt has lots of UMRs though, but no
+     leaks.  This did not turn out the problem we see under Linux.
+   * Updated the spec files.
+   * Fixed rpm packaging for tmake, fixed distribution script.
+   * Implemented double-click feature for directory diffs for version 2.0
+     (thanks to sourceforge user sgaskins).
+   * Closed all remaining bugs
+   * Fixed for Solaris 2.8 compilation.  It works!
+   * Updated getopt versions.
+   * Addressed changes for Solaris 2.8 compilation.
+   * Checked if xxdiff can indeed handle one DOS file vs. one UNIX file
+     =-> add a FAQ section in doc and put this answer there
+     thx to yves@dastous.org
+   * Reversed search fwd and bwd buttons (they're now like the others).
+   * Fixed bug in toggling recursive dir diff from options dialog.
+   * Fixed bug in toggling ignore file changes in dir diff options dialog.
+   * Rewrote documentation entirely.
+   * Implemented resources ref. output in documentation.
+   * Removed dumpUsage and change by the contents of man.h as well.
+   * Added html-help command, will finish implementation tomorrow.
+   * Using rich text for help, write single help file source in richetxt (qml).
+   * Figured out something for documentation.
+   * Generated usage in both formatted plain text and qml as well.
+   * Changed man transformation into a single big string.
+   * Wrote self-documenting cmdline options system.
+   * Added xxdiff_translate_resources script to tools.
+   * Moved archive in its own CVS module and renamed xxdiff-doc xxdiff-web.
+   * Added HTML documentation, still need to finish and polish it.
+   * Removed linking to internal diffs linkage before release
+     (internal diffs to be done after 2.0).
+   * Changed tmake spec so we don't have to specify xxdiff.t
+   * Fixed bug with horizontal resizing on font change.
+   * Fixed diff3 parsing which had just been broken.
+   * Fixed non-thread-safe searchLine method (implement strnstr).
+   * Horizontal optimization of the text drawing (lots of optim.).
+     Still not sure if it ends up being faster.
+   * More work on optimizing text drawing (horizontal characters).
+   * Fixed drawing bugs with text.cpp.
+   * Removed BUFSIZ in diff output parsing.
+   * Major optimization to text widget: text drawing should be much faster now.
+   * Finished documenting resources
+   * Re-ordered colors.
+   * reviewed contents of app.h and resources.h and recategorize app.h stuff.
+   * Turned on some xxdiff goodies by default, so we added a --orig-xxdiff
+     cmdline switch for the romantics.  By default, xxdiff should enable the
+     cool features it has.
+   * change permissions checking to use QFileInfo instead of access and friends.
+   * util.cpp: implemented one spawn in terms of the other
+   * Removed show_markers feature which was never implemented (and probably
+     never will be).
+   * Added documentation.
+   * Cleaned up requirement for display connection in XxCmdline::listResources.
+   * Disabled edit button for widgets for which it is irrelevant.
+   * Made sure we don't require X connection to parse resources or cmdline args,
+     except for those requiring it (i.e. --list-resources, for color and font
+     conversions).
+   * Fixed terrible bug where the silent msg handler would remove Qt warning
+     about not being able to connect to the display.
+     Removed the silent msg suppressor thingy, we don't need it anymore.
+   * Made sure the pangrams are different in options dialog.
+   * For gen.init.file, we now check for empty file before saving.
+   * Added BOOLKWD_BASE constant token.
+   * Fixed bug with listResources, and moved to Qt streams.
+   * Fixed bug with gen.init.file.  If you start xxdiff and just gen.init.file
+     directly, you should output an empty file.
+   * Finally finished nice bitmaps for toolbar buttons.
+
+
 ------------------------------
 
 Version 1.15: (development snapshot)
@@ -940,6 +1031,62 @@ Wishlist/ToDo todo TODO list:
 After 2.0:
 ------------------------------
 
+   * put all the resources text as what's this in the options dialog
+
+   * for certain fonts, the horizontal is not drawn completely without the
+     fillrect
+
+   * make it able to read in a patch and apply it, without the second file
+
+   * make it able to output a patch
+
+   * make the text area a drop site for files, so i could implement a little
+     drag browser for CVS versions
+
+
+   * optimize parsing the diff outputs, this big series of if-else is
+     inefficient, and also is what breaks the diff3 output parsing mentioned
+     above
+
+
+
+   * sync options dialog
+     * for options dialog, on synchronize() we should really only update the
+       controls which haven't been changed.  how do we do that?  perhaps have it
+       work on a different resources object?
+
+     * apply display box resets horizontal diffs...
+       options dialog has to update on resources changes...
+       ... figure out something with a second copy of the resources object.
+
+
+
+   - add 'B' option in cmdline.cpp
+
+   - implement indicator for unselected regions remaining
+     (above in overview area)
+
+   - ignore horizontal whitespace option should make same lines 'same' color.
+     (i.e. if there are only whitespace differences, really ignore it!)
+
+   - implement this together with per-hunk ws ignore, using the same concept.
+
+
+
+   - format error messages better, exceptions getting rendered funnily, not very
+     nice
+
+   - implement remerge option!  for files with CVS conflicts!
+
+   - per-hunk ignore diffs
+
+   - implement xxcvs update !!!!!
+
+   - highlight search results
+
+   - while selecting the colors, implement a color picker so you could select a
+     color in the text view
+
   todo: perhaps send bug for the trolls:
   - QString.setLatin1( txt, 0 ); doesn't initialize to a null string.
 
@@ -959,12 +1106,6 @@ After 2.0:
 
    - port to windoze using mingw32 and publish executable
 
-  -  show vertical line: advertise to toxik group after 2.0 comes out
-
-
-
-
-
 
  - ignore horizontal whitespace is buggy, it doesn't ignore two separate
    whitespace changes
@@ -974,6 +1115,8 @@ After 2.0:
    re-indentation and such)
 
  - builder for patches
+
+ - add support for wheel events
 
  - drag sb overview
 
@@ -1372,7 +1515,6 @@ perhaps features:
 
 
 (parsing)
-   * exlpain how CRLF vs LF works in documentation
    * brightnessHistogramTestWinNTdbg.expect core dumps! check it out.
    * Detect unified diffs and throw on it, the user might specify such an 
      erroneous command;
@@ -1445,6 +1587,33 @@ perhaps features:
    * If arbitrary moving of regions is allowed, add a "reorder" command. Easy 
      to do, because we keep the original line nos even if we move stuff around;
    * editing facilities as in ediff (belley)?
+
+
+   Documentation:
+       1) invocation options
+       2) user's manual
+       3) resource reference
+
+     (1) must be printable without html
+     ... could be a <pre> block
+
+     We need:
+       a) output of (1) in plain text for usage printout
+       b1) output of (1), (2) and (3) in qml
+       b2) output of (1), (2) and (3) in html
+       c) ref strings for (3)
+       d) (1) and a little more for man page output
+
+     Solutions:
+       * We don't produce a man page (d), nix that, there's web documentation.
+       * (1) is stored as a constant string in code. It can be used to produce
+         (a).
+       * (2) is stored as a constant string in code, so it can be used within
+         the program to produce (b1).  There is also an option to produce (b2)
+         from the running program, so that will be our documentation with the
+         resource documentation embedded in it.
+
+
 
 KNOWN BUGS
 ------------------------------

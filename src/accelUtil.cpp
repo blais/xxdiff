@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: accelUtil.cpp 294 2001-10-21 07:27:43Z blais $
- * $Date: 2001-10-21 03:27:43 -0400 (Sun, 21 Oct 2001) $
+ * $Id: accelUtil.cpp 334 2001-11-03 21:20:16Z blais $
+ * $Date: 2001-11-03 16:20:16 -0500 (Sat, 03 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -46,7 +46,7 @@ struct KeyPair {
    int         _code;
 };
 
-// The following list must be kept sorted.
+// The following list must be kept sorted in the source code.
 const KeyPair keycodes[] = {
    { "(", Qt::Key_ParenLeft },
    { ")", Qt::Key_ParenRight },

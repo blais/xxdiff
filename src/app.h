@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 300 2001-10-23 03:45:33Z blais $
- * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
+ * $Id: app.h 322 2001-10-31 00:28:50Z blais $
+ * $Date: 2001-10-30 19:28:50 -0500 (Tue, 30 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -76,6 +76,7 @@ XX_NAMESPACE_BEGIN
  * FORWARD DECLARATIONS
  *============================================================================*/
 
+class XxCmdline;
 class XxOverview;
 class XxLineNumbers;
 class XxText;
@@ -105,7 +106,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxApp( int argc, char** argv, bool forceStyle = false );
+   XxApp( int argc, char** argv, const XxCmdline& );
 
    // Destructor.
    virtual ~XxApp();
@@ -194,6 +195,8 @@ public:
    // computeTextWidth().
    uint getTextWidth() const;
 
+   // Forces recomputation of the text width.
+   void invalidateTextWidth();
 
 public slots:
 
@@ -295,7 +298,6 @@ public slots:
    void toggleToolbar();
    void toggleLineNumbers();
    void adjustLineNumbers();
-   void toggleShowMarkers();
    void toggleVerticalLine();
    void toggleOverview();
    void toggleShowFilenames();
@@ -313,7 +315,6 @@ public slots:
    
 signals:
 
-   void postCreationAction();
    void cursorChanged( int cursorLine );
    void scrolled( int topLine );
 
@@ -326,23 +327,9 @@ private:
 
    /*----- member functions -----*/
 
-   // Reads the file arguments, returns the number of files to be read, creates
-   // temporary files if necessary (from stdin).
-   uint readFileNames( 
-      int     argc, 
-      char**  argv,
-      QString filenames[3],
-      QString displayFilenames[3],
-      bool    created[3],
-      bool&   directories
-   ) const;
-
    // Creates a new resources object and parses the rcfile and cmdline
    // resources.
    XxResources* buildResources() const;
-
-   // Parse command line options and removes the recognized ones.
-   void parseCommandLine( int& argc, char**& argv );
 
    // Reads in a file.
    void readFile( 
@@ -415,14 +402,30 @@ private:
 
    /*----- static member functions -----*/
 
+   // Reads the file arguments, returns the number of files to be read, creates
+   // temporary files if necessary (from stdin).
+   static uint processFileNames( 
+      const XxCmdline& cmdline,
+      QString          filenames[3],
+      QString          displayFilenames[3],
+      bool             created[3],
+      bool&            directories
+   );
+
    // SIGCHLD handler for editor.
    static void handlerSIGCHLD( int );
 
+   /*----- static data members -----*/
+
+   static int              _sockfd;
+   static QSocketNotifier* _socketNotifier;
 
    /*----- data members -----*/
 
    // UI widgets.
    bool                    _isUICreated;
+   int                     _returnValue;
+
    QStyle*                 _style;
    QMainWindow*            _mainWindow;
    QMessageBox*            _diffErrorsMsgBox;
@@ -444,36 +447,25 @@ private:
    QScrollBar*             _vscroll[2];
    QScrollBar*             _hscroll;
    QFont                   _font;
-   uint                    _textWidth;
+   mutable uint            _textWidth;
    uint                    _displayWidth;  // Last value cached. 
    uint                    _displayHeight; // Last value cached.
    XxDln                   _displayLines;
    XxDln                   _cursorLine;
                                 	
+   //
+   // Real data.
+   //
    int                     _nbFiles;
    int                     _nbTextWidgets;
    std::auto_ptr<XxBuffer> _files[3];
    std::auto_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;
                                 	
-   // Resources.
    XxResources*            _resources;
 
-   // Cmdline-related variables.
-   int                     _returnValue;
-   QString                 _userFilenames[3];
-   QString                 _stdinFilename;
-
-   bool                    _useRcfile;
-   QString                 _extraDiffArgs;
-   bool                    _sepDiff;
-   QByteArray              _cmdlineResources;
-
-
-   /*----- static data members -----*/
-
-   static int              _sockfd;
-   static QSocketNotifier* _socketNotifier;
+   // Data from parsing the cmdline.
+   const XxCmdline&        _cmdline;
 
 };
 

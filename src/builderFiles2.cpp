@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: builderFiles2.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -32,6 +32,7 @@
 
 #include <qstring.h>
 #include <qtextstream.h>
+#include <qfile.h>
 
 #include <stdexcept>
 #include <stdio.h>
@@ -60,61 +61,62 @@ XX_NAMESPACE_USING
 //------------------------------------------------------------------------------
 //
 bool parseDiffLine( 
-   XxLine::Type& type,
-   const char*   buf, 
-   XxFln&        f1n1, 
-   XxFln&        f1n2, 
-   XxFln&        f2n1, 
-   XxFln&        f2n2 
+   XxLine::Type&  type,
+   const QString& line,
+   XxFln&         f1n1, 
+   XxFln&         f1n2, 
+   XxFln&         f2n1, 
+   XxFln&         f2n2 
 )
 {
    /* 
     * this code taken from "ediff.c" by David MacKenzie, a published,
     * uncopyrighted program to translate diff output into plain English 
     */ 
+   const char* buf = line.latin1();
 
    bool error = true;
    if ( ( buf[0] == '<' ) || ( buf[0] == '>' ) || ( buf[0] == '-' ) ) {
       type = XxLine::SAME;
       error = false;
    }
-   else if ( sscanf( buf, "%d,%dc%d,%d\n", &f1n1, &f1n2, &f2n1, &f2n2 ) == 4 ) {
+   else if ( sscanf( buf, "%d,%dc%d,%d", &f1n1, &f1n2, &f2n1, &f2n2 ) == 4 ) {
       type = XxLine::DIFF_ALL;
       error = false;
    }
-   else if ( sscanf( buf, "%d,%dc%d\n", &f1n1, &f1n2, &f2n1) == 3 ) {
+   else if ( sscanf( buf, "%d,%dc%d", &f1n1, &f1n2, &f2n1) == 3 ) {
       f2n2 = f2n1;
       type = XxLine::DIFF_ALL;
       error = false;
    }
-   else if ( sscanf( buf, "%dc%d,%d\n", &f1n1, &f2n1, &f2n2 ) == 3 ) {
+   else if ( sscanf( buf, "%dc%d,%d", &f1n1, &f2n1, &f2n2 ) == 3 ) {
       f1n2 = f1n1;
       type = XxLine::DIFF_ALL;
       error = false;
    }
-   else if ( sscanf( buf, "%dc%d\n", &f1n1, &f2n1 ) == 2 ) {
+   else if ( sscanf( buf, "%dc%d", &f1n1, &f2n1 ) == 2 ) {
       f2n2 = f2n1;
       f1n2 = f1n1;
       type = XxLine::DIFF_ALL;
       error = false;
    }
-   else if ( sscanf( buf, "%d,%dd%d\n", &f1n1, &f1n2, &f2n1 ) == 3 ) {
+   else if ( sscanf( buf, "%d,%dd%d", &f1n1, &f1n2, &f2n1 ) == 3 ) {
       f2n2 = f2n1;
       type = XxLine::INSERT_1;
       error = false;
    }
-   else if ( sscanf( buf, "%dd%d\n", &f1n1, &f2n1 ) == 2 ) {
+   else if ( sscanf( buf, "%dd%d", &f1n1, &f2n1 ) == 2 ) {
       f2n2 = f2n1;
       f1n2 = f1n1;
       type = XxLine::INSERT_1;
       error = false;
    }
-   else if ( sscanf( buf, "%da%d,%d\n", &f1n1, &f2n1, &f2n2 ) == 3 ) {
+   else if ( sscanf( buf, "%da%d,%d", &f1n1, &f2n1, &f2n2 ) == 3 ) {
       f1n2 = f1n1;
       type = XxLine::INSERT_2;
       error = false;
    }
-   else if ( sscanf( buf, "%da%d\n", &f1n1, &f2n1 ) == 2 ) {
+   else if ( sscanf( buf, "%da%d", &f1n1, &f2n1 ) == 2 ) {
       f1n2 = f1n1;
       f2n2 = f2n1;
       type = XxLine::INSERT_2;
@@ -206,22 +208,22 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    const uint     nbLines2
 )
 {
-/*#define INTERNAL*/
+//#define XX_INTERNAL_DIFFS
 
    QString cmd = command;
    cmd += QString(" ") + path1;
    cmd += QString(" ") + path2;
    const char** out_args;
-#ifndef INTERNAL
+#ifndef XX_INTERNAL_DIFFS
    XxUtil::splitArgs( cmd, out_args );
 #else
    int argc = XxUtil::splitArgs( cmd, out_args );
 #endif
 
-#ifndef INTERNAL
+#ifndef XX_INTERNAL_DIFFS
    FILE* fout;
    FILE* ferr;
-   XxUtil::spawnCommandWithOutput( out_args, fout, ferr );
+   XxUtil::spawnCommand( out_args, &fout, &ferr );
    if ( fout == 0 || ferr == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -235,13 +237,17 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    XxFln fline1 = 1;
    XxFln fline2 = 1;
 
+   QFile qfout;
+   qfout.open( IO_ReadOnly, fout );
+   QTextStream outputs( &qfout );
+
    QTextOStream errors( &_errors );
-   char buffer[BUFSIZ+1];
    XxFln f1n1, f1n2, f2n1, f2n2;
 
    while ( true ) {
-#ifndef INTERNAL
-      if ( fgets( buffer, BUFSIZ, fout ) == 0 ) {
+#ifndef XX_INTERNAL_DIFFS
+      QString line = outputs.readLine();
+      if ( line.isNull() ) {
          break;
       }
 #else
@@ -249,13 +255,13 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
       if ( line.isNull() ) {
          break;
       }
-      ::snprintf( buffer, BUFSIZ, "%s", line.latin1() ); // FIXME change
 #endif
+
       XxLine::Type type;
-      if ( parseDiffLine( type, buffer, f1n1, f1n2, f2n1, f2n2 ) == true ) {
+      if ( parseDiffLine( type, line, f1n1, f1n2, f2n1, f2n2 ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
          errors << "Diff error:" << endl;
-         errors << buffer << endl;
+         errors << line << endl;
          continue;
       }
 
@@ -354,18 +360,27 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
       }
    }
+   qfout.close();
 
    // Collect stderr.
-   while ( fgets( buffer, BUFSIZ, ferr ) != 0 ) {
-      errors << buffer << endl;
+   QFile qferr;
+   qferr.open( IO_ReadOnly, ferr );
+   {
+      QTextStream errorss( &qferr );
+      QString errstr = errorss.read();
+      if ( !errstr.isNull() ) {
+         errors << errstr << endl;
+      }
    }
+   qferr.close();
 
    // Saved error text.
+   errors << flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
-#ifndef INTERNAL
+#ifndef XX_INTERNAL_DIFFS
       int stat_loc;
       if ( wait( &stat_loc ) == -1 ) {
          throw XxIoError( XX_EXC_PARAMS );
@@ -374,19 +389,19 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 #else
       _status = 2;
 #endif
-      throw XxIoError( XX_EXC_PARAMS, _errors );
+      throw XxError( XX_EXC_PARAMS, _errors );
    }
 
    // Add final ignore region if present.
    uint nbRemainingLines = nbLines1 + 1 - fline1;
    if ( nbRemainingLines != nbLines2 + 1 - fline2 ) {
-      throw XxIoError( XX_EXC_PARAMS );
+      throw XxError( XX_EXC_PARAMS, _errors );
    }
    if ( nbRemainingLines > 0 ) { 
       createIgnoreBlock( fline1, fline2, nbRemainingLines );
    }
 
-#ifndef INTERNAL
+#ifndef XX_INTERNAL_DIFFS
    int stat_loc;
    if ( wait( &stat_loc ) == -1 ) {
       throw XxIoError( XX_EXC_PARAMS );
@@ -396,7 +411,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    _status = 2;
 #endif
 
-#ifndef INTERNAL
+#ifndef XX_INTERNAL_DIFFS
    ::fclose( fout );
    ::fclose( ferr );
 #else

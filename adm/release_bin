@@ -1,32 +1,45 @@
 #!/bin/sh
 #
-# $Id: release_bin 192 2001-06-05 01:13:39Z blais $
+# $Id: release_bin 348 2001-11-06 06:50:46Z blais $
 #
+
+if [ ! -d "tools" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
 
 # Package for simple binary release.
 VERSION=`tools/get_version`
-echo "Making binary release version $VERSION";
+echo "Making binary release version $VERSION"
 
-PEXT="i386";
-if [ "$PLAT" = "mips-sgi-irix6.5" ]; then
-    PEXT="mips";
-fi
+PLAT=`tools/config.guess`
+case $PLAT in
+        *sparc*)
+        PEXT=sparc ;;
 
+        *mips*)
+        PEXT=mips ;;
+
+        *linux*)
+        PEXT=i386 ;;
+esac
+    
 PDIR=xxdiff-$VERSION.$PEXT
 ROOT=..
 
 mkdir $ROOT/$PDIR
 cp src/xxdiff $ROOT/$PDIR
 
-# for some reason stripping on IRIX doesn't work as of 1.6.2
-# we link using the stripping option -s instead.
-if [ "$PLAT" != "mips-sgi-irix6.5" ]; then
-    strip $ROOT/$PDIR/xxdiff
-fi
+# # for some reason stripping on IRIX doesn't work as of 1.6.2
+# # we link using the stripping option -s instead.
+# if [ "$PLAT" != "mips-sgi-irix6.5" ]; then
+strip $ROOT/$PDIR/xxdiff
+# fi
+# let's try it without.  you'll find out soon.
 
 cp README $ROOT/$PDIR
 cp CHANGES $ROOT/$PDIR
-cp src/xxdiff.1 $ROOT/$PDIR
-cd $ROOT
+
+cd ..
 tar zcvf $PDIR.tar.gz $PDIR
 rm -rf $PDIR

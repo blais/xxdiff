@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffutils.cpp 296 2001-10-22 05:58:27Z blais $
- * $Date: 2001-10-22 01:58:27 -0400 (Mon, 22 Oct 2001) $
+ * $Id: diffutils.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -250,7 +250,7 @@ void XxDiffutils::diff_fun(
    oss_cout << flush;
    oss_cerr << flush;
    _outputB = qs_cout /*+ qs_cerr*/;
-   _istream = new QTextIStream( _outputB );
+   _istream = new QTextStream( _outputB, IO_ReadOnly );
 }
 
 //------------------------------------------------------------------------------

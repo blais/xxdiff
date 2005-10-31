@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 291 2001-10-20 22:15:00Z blais $
- * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
+ * $Id: help.cpp 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,8 +28,12 @@
 #include <help.h>
 #include <line.h>
 #include <resources.h>
+#include <cmdline.h>
+#include <resParser.h>
 
-#include <man.h>
+namespace XX_NAMESPACE_PREFIX { namespace Manual {
+#include <doc.h>
+}}
 
 #include <qdialog.h>
 #include <qmessagebox.h>
@@ -37,11 +41,12 @@
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qpalette.h>
-#include <qtextview.h>
+#include <qtextbrowser.h>
 #include <qscrollview.h>
 
 #include <iostream>
 #include <stdio.h>
+#include <string.h>
 
 // Pixmaps.
 #include "pixmaps/xxdiff.xpm"
@@ -53,6 +58,7 @@
 namespace {
 
 /*----- variables -----*/
+
 const QString whatsThisStrings[] = {
 
    //  VSCROLL
@@ -88,7 +94,118 @@ const QString whatsThisStrings[] = {
 
 };
 
+//------------------------------------------------------------------------------
+//
+QString formatOptionsPlain(
+   const XxCmdline::Option* options,
+   const int                nbOptions,
+   const unsigned int       width = 80
+)
+{
+   QString outs;
+   QTextOStream oss( &outs );
 
+   // Compute maximum width of long-option.
+   int maxw = 0;
+   int ii;
+   for ( ii = 0; ii < nbOptions; ++ii ) {
+      int len = 2;
+      if ( options[ii]._shortname != 0 ) {
+         len += 4; // "-o, "
+      }
+      len += 2 + ::strlen( options[ii]._longname ); // "--opt"
+      if ( options[ii]._has_arg ) {
+         len += 6; // " <arg>"
+      }
+      if ( len > maxw ) {
+         maxw = len;
+      }
+   }
+
+   unsigned int startw = maxw + 2;
+   XX_CHECK( startw < width );
+
+   for ( ii = 0; ii < nbOptions; ++ii ) {
+      // Output option name.
+      int len = 2;
+      oss << "  ";
+      if ( options[ii]._shortname != 0 ) {
+         oss << "-" << options[ii]._shortname << ", ";
+         len += 4;
+      }
+      len += 2 + ::strlen( options[ii]._longname );
+      oss << "--" << options[ii]._longname;
+      if ( options[ii]._has_arg ) {
+         oss << " <arg>";
+         len += 6;
+      }
+      for ( unsigned int iii = len; iii < startw; ++iii ) { oss << " "; }
+
+      // Output formatted help.
+      {
+         QString helpstr( options[ii]._help );
+         QTextIStream iss( &helpstr );
+         QString word;
+         int cch = startw;
+         while ( !iss.atEnd() ) {
+            iss >> word;
+
+            // prevent infinite loop
+            XX_ASSERT( ( startw + word.length() + 1 ) < width ); 
+
+            if ( ( cch + word.length() + 1 ) >= width ) {
+               oss << endl;
+               for ( unsigned int iii = 0; iii < startw; ++iii ) { oss << " "; }
+               cch = startw;
+            }
+            oss << word << " ";
+            cch += word.length() + 1;
+         }
+      }
+      oss << endl << endl;
+   }
+   return outs;
+}
+
+
+//------------------------------------------------------------------------------
+//
+QString formatOptionsQml(
+   const XxCmdline::Option* options,
+   const int                nbOptions
+)
+{
+   QString outs;
+   QTextOStream oss( &outs );
+
+   oss << "<table cellpadding=5>" << endl << endl;
+   for ( int ii = 0; ii < nbOptions; ++ii ) {
+      oss << "<tr width=20%>" << endl;
+
+      // Output option name.
+      oss << "<td><tt>";
+      if ( options[ii]._shortname != 0 ) {
+         oss << "-" << options[ii]._shortname << ", ";
+      }
+      oss << "--" << options[ii]._longname;
+      if ( options[ii]._has_arg ) {
+         oss << " &lt;arg&gt;";
+      }
+      oss << "</tt></td>" << endl;
+
+
+      // Output formatted help.
+      oss << "<td>" << endl;
+      oss << options[ii]._help << endl;
+      oss << "</td>" << endl;
+
+      oss << "</tr>" << endl << endl;
+   }
+   oss << "</table>" << endl << endl;
+   oss << flush;
+   
+   return outs;
+}
 
 /*==============================================================================
  * LOCAL CLASS XxAboutDialog
@@ -147,23 +264,20 @@ public:
    // See base class.
    virtual void accept();
 
-   // Returns a newly allocated block of text containing the manual page text.
-   // Ownership is passed to the caller (you must delete).
-   static QString getManualText( const QString& command = QString::null );
-
 };
 
 
 //------------------------------------------------------------------------------
 //
-XxManPageDialog::XxManPageDialog( 
+XxManPageDialog::XxManPageDialog(
    QWidget*       parent, 
    const QString& text
 ) :
    QDialog( parent )
 {
    QVBoxLayout* toplay = new QVBoxLayout( this );
-   QTextView* tv = new QTextView( text, QString::null, this, "name" );
+   QTextBrowser* tv = new QTextBrowser( this, "name" );
+   tv->setText( text, QString::null );
    tv->setMinimumSize( 500, 700 );
    toplay->addWidget( tv );
    
@@ -181,13 +295,6 @@ void XxManPageDialog::accept()
    delete this;
 }
 
-//------------------------------------------------------------------------------
-//
-QString XxManPageDialog::getManualText( const QString& /*command*/ )
-{
-   return QString(manText);
-}
-
 }
 
 XX_NAMESPACE_BEGIN
@@ -202,6 +309,107 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
+const QString& XxHelp::getWhatsThisText( WhatsThisTextType type )
+{
+   return whatsThisStrings[ type ];
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxHelp::getVersion()
+{
+   return QString( XX_VERSION );
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxHelp::getUsage( bool plain )
+{
+   int nbOptions;
+   XxCmdline::Option* options = XxCmdline::getOptionList( nbOptions );
+
+   QString usage;
+   if ( plain ) {
+      {
+         QTextOStream oss( &usage );
+         oss << "Usage:" << endl
+             << "  xxdiff [OPTIONS] file1 file2 [file3]" << endl
+             << endl
+             << "  where any specified file can be `-' for stdin." << endl
+             << "  Filenames can be either 2 directories, or 3 files." << endl
+             << endl
+             << "Options:" << endl
+             << endl;
+      }
+
+      usage += formatOptionsPlain( options, nbOptions );
+   }
+   else {
+      usage += formatOptionsQml( options, nbOptions );
+   }
+   return usage;
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxHelp::getManual()
+{
+   QString srcManual( XX_NAMESPACE_PREFIX :: Manual :: text );
+   QString manual;
+   int idx = 0;
+
+   // Fill in the invocation section.
+   QString vertag( "<version>" );
+   int idxver = srcManual.find( vertag, idx );
+   if ( idxver != -1 ) {
+      manual += srcManual.mid( idx, idxver );
+      manual += getVersion();
+      idx = idxver + vertag.length();
+   }
+
+   // Fill in the invocation section.
+   QString invtag( "<invocation>" );
+   int idxinv = srcManual.find( invtag, idx );
+   if ( idxinv != -1 ) {
+      manual += srcManual.mid( idx, idxinv - idx );
+      manual += getUsage( false );
+      idx = idxinv + invtag.length();
+   }
+
+   // Fill in the resource reference section.
+   QString restag( "<resourceref>" );
+   int idxres = srcManual.find( restag, idx );
+   if ( idxres != -1 ) {
+      manual += srcManual.mid( idx, idxres - idx );
+      manual += XxResParser::getResourceRef();
+      idx = idxres + restag.length();
+   }
+
+   // Add rest of documentation.
+   manual += srcManual.mid( idx );
+
+   return manual;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxHelp::dumpVersion( QTextStream& os )
+{
+   os << "xxdiff --- version " << getVersion();
+#ifdef XX_DEBUG
+   os << " (debug)";
+#endif
+}
+
+//------------------------------------------------------------------------------
+//
+void XxHelp::dumpUsage( QTextStream& os )
+{
+   os << getUsage( true );
+}
+
+//------------------------------------------------------------------------------
+//
 QDialog* XxHelp::getAboutDialog( QWidget* parent )
 {
    QString text;
@@ -212,7 +420,7 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
        << endl
        << "Author: Martin Blais <blais@iro.umontreal.ca>" << endl
        << "Home page: http://xxdiff.sourceforge.net" << endl
-       << "Version: " << XX_VERSION << endl;
+       << "Version: " << getVersion() << endl;
    QDialog* box = new XxAboutDialog( parent, text );
    return box;
 }
@@ -221,90 +429,35 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
 //
 QDialog* XxHelp::getManPageDialog( QWidget* parent )
 {
-   QString manualText = XxManPageDialog::getManualText();
-   if ( !manualText.isEmpty() ) {
-      QDialog* box = new XxManPageDialog( parent, manualText );
-      return box;
+   QString docstr;
+   {
+      QTextOStream oss( &docstr );
+      oss << "<qt title=\"xxdiff documentation\">" << endl
+          << getManual() << endl
+          << "</qt" << endl;
    }
-   return 0;
+   QDialog* box = new XxManPageDialog( parent, docstr );
+   return box;
 }
 
 //------------------------------------------------------------------------------
 //
-const QString& XxHelp::getWhatsThisText( WhatsThisTextType type )
+QString XxHelp::xmlize( const QString& in )
 {
-   return whatsThisStrings[ type ];
-}
-
-//------------------------------------------------------------------------------
-//
-void XxHelp::dumpUsage( QTextStream& os )
-{
-   os << 
-"Usage: \n\
-   xxdiff [OPTION] <file1> <file2> [<file3>]\n\
-	where <fileX> can be - for stdin.\n\
-        Filenames can be either 2 directories, or 3 files.\n\
-\n\
-Options: \n\
-   -h, --help                  Show this help message.\n\
-   -v, --version               Show the program version and compilation \n\
-                               options.\n\
-";
-   os << "\
-       --no-rcfile             Don't query rcfile resources (.xxdiffrc).\n\
-";
-   os << "\
-       --list-resources        Lists all the supported resources and default \n\
-                               values.\n\
-       --resource=<str>        Pass on string <str> to resource parser.\n\
-                               Resources given in this manner on the command\n\
-                               line supersede other resource mechanisms.\n\
-                               One can specify multiple resource settings by\n\
-                               repeating this option.\n\
-       --title<X>=<str>        Display <str> instead of filename in \n\
-                               filename label <X>, where <X> is 1, 2 or 3 \n\
-                               for left, middle or right file.\n\
-   -N<str>, --titlein=<str>    Display <str> instead of filename given \n\
-                               in stdin.\n\
-   -D, --exit-on-same          If there are no differences then exit quietly\n\
-                               with exit code of 0.\n\
-   -A<str>, --args=<str>       Pass on arguments in <str> to the subordinate\n\
-                               diff program.\n\
-\n\
-   Options passed on diff program as GNU diff options:\n\
-\n\
-   -i, --ignore-case           Passed on to diff(1). \n\
-                               Consider upper- and lower-case to be the same.\n\
-   -w, --ignore-all-space      Passed on to diff(1). \n\
-                               Ignore all white space.\n\
-   -b, --ignore-space-change   Passed on to diff(1).\n\
-                               Ignore changes in the amount of white space.\n\
-                               when comparing the two files.\n\
-   -a, --as-text               Passed on to diff(1).\n\
-                               Treat all files as text and compare them\n\
-                               line-by-line, even if they do not seem to be\n\
-                               text.\n\
-   -r, --recursive             Passed on to diff(1).\n\
-                               This is only meaningful for directory diffs.\n\
-\n\
-";
-}
-
-//------------------------------------------------------------------------------
-//
-void XxHelp::dumpVersion( QTextStream& os )
-{
-   os << "xxdiff - version " << XX_VERSION << endl;
-   os << "Compile options:";
-#ifdef XX_DEBUG
-   os << " debug";
-#endif
-#ifdef XX_LINKSTATIC
-   os << " linkstatic";
-#endif
-   os << " rcfile";
-   os << "." << endl;
+   const char* inc = in.latin1();
+   QString out;
+   for ( unsigned int ii = 0; ii < in.length(); ++ii ) {
+      if ( inc[ii] == '<' ) {
+         out.append( "&lt;" );
+      }
+      else if ( inc[ii] == '>' ) {
+         out.append( "&gt;" );
+      }
+      else {
+         out.append( inc[ii] );
+      }
+   }
+   return out;
 }
 
 XX_NAMESPACE_END

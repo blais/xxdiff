@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 300 2001-10-23 03:45:33Z blais $
- * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
+ * $Id: optionsDialog.cpp 338 2001-11-05 05:37:35Z blais $
+ * $Date: 2001-11-05 00:37:35 -0500 (Mon, 05 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -107,13 +107,13 @@ private:
    /*----- data members -----*/
 
    const XxResources* _resources;
-   XxColor            _color;
 
 public: // let the dialog access all of this
 
    /*----- data members -----*/
 
    // Current state.
+   const XxColor      _color;
    bool               _modified;
    QColor             _foreColor;
    QColor             _backColor;
@@ -157,23 +157,23 @@ int XxColoredItem::height( const QListBox* /*lb*/ ) const
 
 //------------------------------------------------------------------------------
 //
-void XxColoredItem::paint( QPainter* pp )
+void XxColoredItem::paint( QPainter* ppainter )
 {
-   QPainter& p = *pp;
-   const int w = p.window().width();
+   QPainter& pp = *ppainter;
+   const int w = pp.window().width();
 
    // Font.
-   p.setFont( _resources->getFontText() );
-   QFontMetrics fm = p.fontMetrics();
+   pp.setFont( _resources->getFontText() );
+   QFontMetrics fm = pp.fontMetrics();
 
    // Don't draw background of chars since we'll draw first.
-   p.setBackgroundMode( Qt::TransparentMode );
+   pp.setBackgroundMode( Qt::TransparentMode );
 
    QBrush brush( _backColor );
-   p.setPen( _foreColor );
+   pp.setPen( _foreColor );
 
-   p.fillRect( 0, 0, w, fm.height() + 2, brush );
-   p.drawText( 10, 1 + fm.ascent(), text() );
+   pp.fillRect( 0, 0, w, fm.height() + 2, brush );
+   pp.drawText( 10, 1 + fm.ascent(), text() );
 }
 
 }
@@ -312,14 +312,20 @@ void XxOptionsDialog::show()
 {
    // Set random pangram for font widgets.
    const unsigned int max = sizeof(pangrams)/sizeof(const char*);
+
    const unsigned int rn1 = 
       static_cast<unsigned int>( rand()/float(RAND_MAX) * max );
-   _labelFontApp->setText( pangrams[rn1] );
+   unsigned int rn2;
+   while ( 1 ) { // choose different pangrams
+      rn2 = static_cast<unsigned int>( rand()/float(RAND_MAX) * max );
+      if ( rn2 != rn1 ) {
+         break;
+      }
+   }
 
-   const unsigned int rn2 = 
-      static_cast<unsigned int>( rand()/float(RAND_MAX) * max );
+   _labelFontApp->setText( pangrams[rn1] );
    _labelFontText->setText( pangrams[rn2] );
-   
+
    synchronize();
    BaseClass::show();
 }
@@ -516,8 +522,12 @@ void XxOptionsDialog::onApply()
       _lineeditCommandDirsRecursive->text()
    );
 
-   resources.setBoolOpt( BOOL_DIRDIFF_RECURSIVE, 
-                          _checkboxRecursive->isChecked() );
+   if ( resources.getBoolOpt( BOOL_DIRDIFF_RECURSIVE ) !=
+        _checkboxRecursive->isChecked() ) {
+      resources.setBoolOpt( BOOL_DIRDIFF_RECURSIVE, 
+                            _checkboxRecursive->isChecked() );
+      redoDiff = true;
+   }
                           
    //---------------------------------------------------------------------------
    // Display
@@ -551,9 +561,10 @@ void XxOptionsDialog::onApply()
       XxIgnoreFile(_comboIgnoreFile->currentItem())
    );
 
-   resources.setBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES, 
-                          _checkboxIgnoreFileChanges->isChecked() );
-   if ( _checkboxIgnoreFileChanges->isChecked() == true ) {
+   if ( resources.getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES ) !=
+        _checkboxIgnoreFileChanges->isChecked() == true ) {
+      resources.setBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES, 
+                            _checkboxIgnoreFileChanges->isChecked() );
       redoDiff = true;
    }
 
@@ -566,14 +577,16 @@ void XxOptionsDialog::onApply()
       resources.setClipboardFormat( newClipboardFormat );
    }
 
-   if ( !XxResParser::compareFonts( _fontApp,
+   if ( !XxResources::compareFonts( _fontApp,
                                          resources.getFontApp() ) ) {
       resources.setFontApp( _fontApp );
       _app->setFont( _fontApp, true );
    }
-   if ( !XxResParser::compareFonts( _fontText,
+   if ( !XxResources::compareFonts( _fontText,
                                          resources.getFontText() ) ) {
       resources.setFontText( _fontText );
+      _app->invalidateTextWidth();
+      _app->adjustScrollbars( true );
       _app->adjustLineNumbers();
    }
 
@@ -751,6 +764,12 @@ void XxOptionsDialog::listboxColors( const QString& )
    _labelEditFore->update();
    _labelEditBack->update();
 
+   _buttonEditFore->setEnabled(
+      !( coli->_color == COLOR_BACKGROUND || 
+         coli->_color == COLOR_CURSOR ||
+         coli->_color == COLOR_VERTICAL_LINE )
+   );
+
    QString desc = XxResParser::getColorDescription( XxColor(idx) );
    _labelDescription->setText( desc );
 }
@@ -766,7 +785,7 @@ void XxOptionsDialog::editFontApp()
       QFontDialog::getFont( &ok, resources.getFontApp(), this, "font_dialog" );
    if ( ok ) {
       if ( 
-         !XxResParser::compareFonts( newFont, resources.getFontApp() )
+         !XxResources::compareFonts( newFont, resources.getFontApp() )
       ) {
          _fontApp = newFont;
          _labelFontApp->setFont( _fontApp );
@@ -786,7 +805,7 @@ void XxOptionsDialog::editFontText()
       QFontDialog::getFont( &ok, resources.getFontText(), this, "font_dialog" );
    if ( ok ) {
       if ( 
-         !XxResParser::compareFonts( newFont, resources.getFontText() )
+         !XxResources::compareFonts( newFont, resources.getFontText() )
       ) {
          _fontText = newFont;
          _labelFontText->setFont( _fontText );

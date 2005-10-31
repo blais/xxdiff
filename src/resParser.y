@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.y 300 2001-10-23 03:45:33Z blais $
- * $Date: 2001-10-22 23:45:33 -0400 (Mon, 22 Oct 2001) $
+ * $Id: resParser.y 306 2001-10-24 03:00:43Z blais $
+ * $Date: 2001-10-23 23:00:43 -0400 (Tue, 23 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -24,6 +24,9 @@
 #include <qstring.h>
 
 #define RESOURCES  ( static_cast<XxResources*>(resources) )
+
+#define BOOLKWD_BASE                 1000
+
 
 /* define out second declaration because we're including the files. */
 #if 0
@@ -54,6 +57,7 @@
 %token       COLOR
 %token <num>   COLORNAME BACK FORE
 
+/* see BOOLKWD_BASE above */
 %token <num> EXIT_ON_SAME                 1000
 %token <num> HORIZONTAL_DIFFS             1001
 %token <num> IGNORE_HORIZONTAL_WS         1002
@@ -183,9 +187,7 @@ colorbf         : BACK
 boolopt		: boolkwd COLON BOOLEAN
 		{
                    /*printf( "==> boolopt %d: %d\n", $1, $3 );*/
-                   RESOURCES->setBoolOpt(
-                      XxBoolOpt( boolMap[ $1 - 1000 ] ), $3
-                   );
+                   RESOURCES->setBoolOpt( boolMap[ $1 - BOOLKWD_BASE ], $3 );
                 }
 		;
 

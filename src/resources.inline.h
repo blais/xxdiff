@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 295 2001-10-21 18:39:14Z blais $
- * $Date: 2001-10-21 14:39:14 -0400 (Sun, 21 Oct 2001) $
+ * $Id: resources.inline.h 305 2001-10-24 00:53:14Z blais $
+ * $Date: 2001-10-23 20:53:14 -0400 (Tue, 23 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -122,6 +122,7 @@ inline const QColor& XxResources::getColor(
 //
 inline bool XxResources::getBoolOpt( const XxBoolOpt opt ) const
 {
+   XX_ASSERT( 0 <= opt && opt < BOOL_LAST );
    return _boolOpts[ int(opt) ];
 }
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.h 291 2001-10-20 22:15:00Z blais $
- * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
+ * $Id: buffer.h 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -45,11 +45,6 @@
 #define INCL_STD_IOSFWD
 #endif
 
-#ifndef INCL_STD_STAT
-#include <sys/stat.h>
-#define INCL_STD_STAT
-#endif
-
 #ifndef INCL_QT_QSTRING
 #include <qstring.h>
 #define INCL_QT_QSTRING
@@ -65,6 +60,7 @@
  *============================================================================*/
 
 class QFont;
+class QFileInfo;
 
 XX_NAMESPACE_BEGIN
 
@@ -181,8 +177,8 @@ private:
    void init();
 
    // Load the file in the buffer.
-   void loadFile( struct stat& );
-   void loadDirectory( struct stat& );
+   void loadFile( const QFileInfo& );
+   void loadDirectory();
 
    // Process the buffer to remove the carriage returns. Do this before
    // indexing!

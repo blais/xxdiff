@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.h 291 2001-10-20 22:15:00Z blais $
- * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
+ * $Id: help.h 341 2001-11-05 08:40:28Z blais $
+ * $Date: 2001-11-05 03:40:28 -0500 (Mon, 05 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -82,25 +82,52 @@ public:
 
    /*----- static member functions -----*/
 
-   // Creates a new, self-destructive about dialog.  Just show it.
-   static QDialog* getAboutDialog( QWidget* parent = 0 );
-
-   // Creates a new, self-destructive man page dialog.  Just show it.
-   static QDialog* getManPageDialog(
-      QWidget*     parent = 0
-   );
+   // Returns help strings.
+   // <group>
 
    // Returns the help text for specific widgets.
    static const QString& getWhatsThisText( WhatsThisTextType type );
 
-   // Print out usage message.
-   static void dumpUsage( QTextStream& );
+   // Returns version string.
+   static QString getVersion();
 
-   // Print out version message.
-   static void dumpVersion( QTextStream& );
+   // Returns usage text. If `plain' is set to true, filter out formatting tags.
+   static QString getUsage( bool plain = false );
+
+   // Returns user's manual, formatted in qml.
+   static QString getManual();
+
+   // </group>
+
+
+   // Prints out info.
+   // <group>
+
+   // Print out version information.
+   static void dumpVersion( QTextStream& os );
+
+   // Print out usage information.
+   static void dumpUsage( QTextStream& os );
+
+   // </group>
+
+
+   // Creates dialogs.
+   // <group>
+
+   // Creates a new, self-destructive about dialog.  Just show it.
+   static QDialog* getAboutDialog( QWidget* parent = 0 );
+
+   // Creates a new, self-destructive man page dialog.  Just show it.
+   static QDialog* getManPageDialog( QWidget* parent = 0 );
+
+   // </group>
+
+
+   // Utility function to XMLize output of resources.
+   static QString xmlize( const QString& in );
 
 };
-
 
 XX_NAMESPACE_END
 

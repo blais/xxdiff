@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 298 2001-10-23 03:18:14Z blais $
- * $Date: 2001-10-22 23:18:14 -0400 (Mon, 22 Oct 2001) $
+ * $Id: util.h 347 2001-11-06 06:30:32Z blais $
+ * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -14,7 +14,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
-nn * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
@@ -66,9 +66,6 @@ public:
 
    /*----- static member functions -----*/
 
-   // Return true if the file is a directory.
-   static bool isDirectory( const QString& filename );
-
    // Copy a stream to a file.
    static void copyToFile( FILE* fin, FILE* fout );
 
@@ -93,19 +90,20 @@ public:
    static bool isAsciiText( const QString& filename );
 
    // Run a program with command line arguments and two pathname arguments via
-   // fork/exec and forget about it. Returns true on success.
-   static bool spawnCommand( 
+   // fork/exec and return file descriptors into which standard output and
+   // standard error have been redirected.
+   //
+   // If you don't want the pipes, let outf and/or errf be null.
+   static void spawnCommand( 
       const char** argv,
+      FILE** outf,
+      FILE** errf,
       void (*sigChldHandler)(int) = 0
    );
 
-   // Run a program with command line arguments and two pathname arguments via
-   // fork/exec and return file descriptors into which standard output and
-   // standard error have been redirected.
-   static void spawnCommandWithOutput( 
+   // Convenience for above method, without output.
+   static void spawnCommand( 
       const char** argv,
-      FILE*& outf,
-      FILE*& errf,
       void (*sigChldHandler)(int) = 0
    );
 
