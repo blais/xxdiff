@@ -167,6 +167,10 @@ public:
       bool             newest = false
    );
 
+   // Convert QDateTime to time_t.  This is required only for compatibility with
+   // older versions of Qt.
+   static unsigned int toTime_t( const QDateTime& t );
+
 };
 
 

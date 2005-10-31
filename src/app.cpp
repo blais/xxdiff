@@ -616,11 +616,7 @@ uint XxApp::processFileNames(
          displayFilenames[iii] = cmdline._stdinFilename;
          isTemporary[iii] = true;
          newest = true;
-#if (QT_VERSION >= 0x030000)
-         newTime = QDateTime::currentDateTime().toTime_t();
-#else
-         newTime = 0; // Not supported with qt2.
-#endif
+         newTime = XxUtil::toTime_t( QDateTime::currentDateTime() );
       }
       else {
          QString fname = cmdline._filenames[iii];
@@ -635,14 +631,10 @@ uint XxApp::processFileNames(
          filenames[iii] = fname;
          bool isdir;
          XxUtil::testFile( filenames[iii], fileInfos[iii], false, isdir );
-#if (QT_VERSION >= 0x030000)
-         if ( fileInfos[iii].lastModified().toTime_t() > newTime ) {
-             newTime = fileInfos[iii].lastModified().toTime_t();
+         if ( XxUtil::toTime_t( fileInfos[iii].lastModified() ) > newTime ) {
+             newTime = XxUtil::toTime_t( fileInfos[iii].lastModified() );
              newest = iii;
          }
-#else
-         newTime = 0; // Not supported with qt2.
-#endif
       }
    }
 

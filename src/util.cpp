@@ -176,6 +176,12 @@ void formatPrintFunc(
    bool             newest
 )
 {
+#if (QT_VERSION >= 0x030000)
+#define DATEFORMAT Qt::ISODate
+#else
+#define DATEFORMAT 
+#endif
+
    switch ( m ) {
 
       case 'q': { // - Print 'NEWEST' if this is the most recently modified
@@ -264,11 +270,10 @@ void formatPrintFunc(
          target.append( tmp );
       } break;
 
-#if (QT_VERSION >= 0x030000)
       case 'X': { // - Time of last access as seconds since Epoch
          strcat( pformat, "d" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.lastRead().toTime_t() );
+         tmp.sprintf( pformat, XxUtil::toTime_t( qfi.lastRead() ) );
          target.append( tmp );
       } break;
 
@@ -278,14 +283,14 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastRead().toString( Qt::ISODate ).ascii() );
+                      qfi.lastRead().toString( DATEFORMAT ).ascii() );
          target.append( tmp );
       } break;
 
       case 'Y': { // - Time of last modification as seconds since Epoch
          strcat( pformat, "d" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.lastModified().toTime_t() );
+         tmp.sprintf( pformat, XxUtil::toTime_t( qfi.lastModified() ) );
          target.append( tmp );
       } break;
 
@@ -295,10 +300,9 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastModified().toString( Qt::ISODate ).ascii() );
+                      qfi.lastModified().toString( DATEFORMAT ).ascii() );
          target.append( tmp );
       } break;
-#endif
 
       default: {
          throw XxUsageError(
@@ -313,11 +317,7 @@ void formatPrintFunc(
 //
 void formatPrintFunc(
    QString& target,
-#if (QT_VERSION >= 0x030000)
    char*    pformat,
-#else
-   char*    /*pformat*/, // avoid warning
-#endif
    char     m,
    bool     newest
 )
@@ -371,11 +371,11 @@ void formatPrintFunc(
          target.append( "X" );
       } break;
 
-#if (QT_VERSION >= 0x030000)
       case 'X': { // - Time of last access as seconds since Epoch
          strcat( pformat, "d" );
          QString tmp;
-         tmp.sprintf( pformat, ( QDateTime::currentDateTime() ).toTime_t() );
+         tmp.sprintf( pformat, 
+                      XxUtil::toTime_t( QDateTime::currentDateTime() ) );
          target.append( tmp );
       } break;
 
@@ -386,8 +386,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString(
-               Qt::ISODate ).ascii()
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).ascii()
          );
          target.append( tmp );
       } break;
@@ -395,7 +394,8 @@ void formatPrintFunc(
       case 'Y': { // - Time of last modification as seconds since Epoch
          strcat( pformat, "d" );
          QString tmp;
-         tmp.sprintf( pformat, ( QDateTime::currentDateTime() ).toTime_t() );
+         tmp.sprintf( pformat, 
+                      XxUtil::toTime_t( QDateTime::currentDateTime() ) );
          target.append( tmp );
       } break;
 
@@ -406,11 +406,9 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString(
-               Qt::ISODate ).ascii() );
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).ascii() );
          target.append( tmp );
       } break;
-#endif
 
       default: {
          throw XxUsageError(
@@ -996,6 +994,23 @@ bool XxUtil::formatFilename(
    free( format );
    free( dest );
    return true;
+}
+
+//------------------------------------------------------------------------------
+//
+unsigned int XxUtil::toTime_t( 
+#if (QT_VERSION >= 0x030100)
+   const QDateTime& t
+#else
+   const QDateTime& /*t*/
+#endif
+)
+{
+#if (QT_VERSION >= 0x030100)
+   return t.toTime_t();
+#else
+   return 0; // Note: we could hack something by hand.
+#endif
 }
 
 XX_NAMESPACE_END

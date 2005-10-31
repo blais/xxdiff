@@ -49,7 +49,7 @@ XX_NAMESPACE_BEGIN
 
 // <summary> utiilty for translating accelerators </summary>
 
-// Note: we hope that this shouldn't be a necessity when we move to Qt-3.0.
+// Note: we hope that this shouldn't be a necessity when we move to Qt-3.
 //
 // This is implemented because Qt-2.x's QAccel::stringToKey() dumps core and
 // doesn't do an appropriate job.

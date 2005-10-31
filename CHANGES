@@ -2,6 +2,17 @@
 CHANGES: xxdiff
 ===============
 
+Version 3.0.1: (minor bug fixes)
+--------------------------------
+
+* Factored out the toTime_t problem, fixed other problems with qt2.
+* Applied patch from Oron Peled <oron at actcom.co.il> for missing toTime_t
+  under qt-3.0 (and not just qt-2.x as I was thinking).  This should make it
+  work under RedHat-8.0.
+* Made xxdiff-find-grep-sed run diff again on merged decision, to reflect in the
+  output log what lines actually have been merged.
+
+
 Version 3.0: (minor features and stability release)
 ---------------------------------------------------
 

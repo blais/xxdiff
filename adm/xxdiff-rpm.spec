@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 3.0
+Version: 3.0.1
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
@@ -35,7 +35,8 @@ if ! grep -q 'define.*QT_VERSION.*0x03' ${QTDIR}/include/qglobal.h ; then
 fi
 
 make
-./xxdiff --help-html > xxdiff-doc.html
+cd ..
+bin/xxdiff --help-html > xxdiff-doc.html
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -43,7 +44,7 @@ make
 mkdir -p ${RPM_BUILD_ROOT}/usr/X11R6/bin
 mkdir -p ${RPM_BUILD_ROOT}/usr/X11R6/man/man1
 
-install -c -m 755 -s src/xxdiff ${RPM_BUILD_ROOT}/usr/X11R6/bin/
+install -c -m 755 -s bin/xxdiff ${RPM_BUILD_ROOT}/usr/X11R6/bin/
 install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 
 %clean
@@ -53,13 +54,19 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 %defattr(-,root, root)
 %doc README
 %doc CHANGES
-%doc src/xxdiff-doc.html
+%doc xxdiff-doc.html
 
 /usr/X11R6/bin/xxdiff
 /usr/X11R6/man/man1/xxdiff.1*
 
 
 %changelog
+* Sun Jan 25 2004 Martin Blais <blais@furius.ca>
+- released 3.0.1 for fixes for RedHat-8.0.
+
+* Fri Jan 23 2004 Andre Costa <acosta@ar.microlink.com.br>
+- fixed wrong relative paths
+
 * Wed Jan 21 2004 Martin Blais <blais@furius.ca>
 - released 3.0. Did not test this spec file, I do run RedHat anymore.
 
