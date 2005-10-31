@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: diffs.h 158 2001-05-28 02:17:42Z blais $
+ * $Date: 2001-05-27 22:17:42 -0400 (Sun, 27 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -225,9 +225,9 @@ public:
    bool save( 
       std::ostream&                  os, 
       const std::auto_ptr<XxBuffer>* files,
-      bool                           useConditionals,
-      const std::string&             conditional1,
-      const std::string&             conditional2
+      const bool                     useConditionals,
+      const bool                     removeEmptyConditionals,
+      const std::string              conditionals[3]
    ) const;
 
    // Save selected lines with an appropriate prefix.  Returns true if there

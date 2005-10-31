@@ -23,7 +23,7 @@ fi
 
 cp README $ROOT/$PDIR
 cp CHANGES $ROOT/$PDIR
-cp src/xxdiff.man $ROOT/$PDIR
+cp src/xxdiff.1 $ROOT/$PDIR
 cd $ROOT
 tar zcvf $PDIR.tar.gz $PDIR
 rm -rf $PDIR

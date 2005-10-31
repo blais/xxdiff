@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: app.h 162 2001-05-28 18:32:02Z blais $
+ * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -294,7 +294,9 @@ public slots:
    void mergedView();
    void toggleToolbar();
    void toggleLineNumbers();
+   void adjustLineNumbers();
    void toggleShowMarkers();
+   void toggleVerticalLine();
    void toggleOverview();
    void toggleShowFilenames();
    void toggleHorizontalDiffs();

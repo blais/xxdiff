@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: buffer.cpp 160 2001-05-28 14:39:15Z blais $
+ * $Date: 2001-05-28 10:39:15 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -398,13 +398,13 @@ uint XxBuffer::computeLineNumbersWidth( const QFont& font ) const
 {
    QFontMetrics fm( font );
    char lnFormat[32];
-   sprintf( lnFormat, "%%%dd", getNbDigits() );
+   ::snprintf( lnFormat, sizeof(lnFormat), "%%%dd", getNbDigits() );
 
    uint longest = 0;
    int nbLines = getNbLines();
    char buffer[12];
    for ( int ii = 1; ii <= nbLines; ++ii ) {
-      sprintf( buffer, lnFormat, ii );
+      ::snprintf( buffer, sizeof(buffer), lnFormat, ii );
       QString str( buffer );
 
       QRect rect = fm.boundingRect( str, str.length() );
@@ -504,7 +504,7 @@ const char* XxBuffer::renderLineNumber(
    const char* format
 )
 {
-   sprintf( _lnBuffer, format, lineNumber );
+   ::snprintf( _lnBuffer, sizeof(_lnBuffer), format, lineNumber );
    return _lnBuffer;
 }
 

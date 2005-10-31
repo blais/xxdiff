@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: markers.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: markers.cpp 158 2001-05-28 02:17:42Z blais $
+ * $Date: 2001-05-27 22:17:42 -0400 (Sun, 27 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -36,6 +36,7 @@
 #include <qlineedit.h>
 #include <qbuttongroup.h>
 #include <qlabel.h>
+#include <qcheckbox.h>
 
 XX_NAMESPACE_BEGIN
 
@@ -62,8 +63,8 @@ XxMarkersWidget::XxMarkersWidget(
             this, SLOT( onConditionals() ) );
 
    if ( ! threeWay ) {
-      _lineeditConditional2->hide();
-      _labelConditional2->hide();
+      _lineeditConditional3->hide();
+      _labelConditional3->hide();
    }
 
    _buttongroup->setButton( _buttongroup->id( _checkboxConflicts ) );
@@ -78,6 +79,9 @@ void XxMarkersWidget::onConflicts()
    _labelConditional1->setEnabled( false );
    _lineeditConditional2->setEnabled( false );
    _labelConditional2->setEnabled( false );
+   _lineeditConditional3->setEnabled( false );
+   _labelConditional3->setEnabled( false );
+   _removeEmptyConditionals->setEnabled( false );
 }
 
 //------------------------------------------------------------------------------
@@ -88,13 +92,23 @@ void XxMarkersWidget::onConditionals()
    _labelConditional1->setEnabled( true );
    _lineeditConditional2->setEnabled( true );
    _labelConditional2->setEnabled( true );
+   _lineeditConditional3->setEnabled( true );
+   _labelConditional3->setEnabled( true );
+   _removeEmptyConditionals->setEnabled( true );
 }
 
 //------------------------------------------------------------------------------
 //
-bool XxMarkersWidget::isUseConditionals() const
+bool XxMarkersWidget::useConditionals() const
 {
    return _checkboxConditionals->isChecked();
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxMarkersWidget::removeEmptyConditionals() const
+{
+   return _removeEmptyConditionals->isChecked();
 }
 
 //------------------------------------------------------------------------------
@@ -109,6 +123,13 @@ QString XxMarkersWidget::getConditionalVariable1() const
 QString XxMarkersWidget::getConditionalVariable2() const
 {
    return _lineeditConditional2->text();
+}
+
+//------------------------------------------------------------------------------
+//
+QString XxMarkersWidget::getConditionalVariable3() const
+{
+   return _lineeditConditional3->text();
 }
 
 
@@ -140,8 +161,8 @@ QString XxMarkersFileDialog::getSaveFileName(
    QWidget*       parent,
    bool           threeWay,
    bool&          useConditionals,
-   std::string&   conditionalVariable1,
-   std::string&   conditionalVariable2
+   bool&          removeEmptyConditionals,
+   std::string    conditionals[3]
 )
 {
    // From Qt's source code:
@@ -181,11 +202,14 @@ QString XxMarkersFileDialog::getSaveFileName(
    }
 
    //XxMarkersWidget* markers = dlg->getMarkersWidget();
-   useConditionals = dlg->_markersWidget->isUseConditionals();
+   useConditionals = dlg->_markersWidget->useConditionals();
    if ( useConditionals == true ) {
-      conditionalVariable1 = dlg->_markersWidget->getConditionalVariable1();
-      conditionalVariable2 = dlg->_markersWidget->getConditionalVariable2();
+      conditionals[0] = dlg->_markersWidget->getConditionalVariable1();
+      conditionals[1] = dlg->_markersWidget->getConditionalVariable2();
+      conditionals[2] = dlg->_markersWidget->getConditionalVariable3();
    }
+
+   removeEmptyConditionals = dlg->_markersWidget->removeEmptyConditionals();
 
    delete dlg;
 

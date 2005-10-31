@@ -4,8 +4,8 @@ MAJOR=`egrep ^XXDIFF_MAJOR_VERSION configure.in | sed -e 's/[^=]*=//'`
 MINOR=`egrep ^XXDIFF_MINOR_VERSION configure.in | sed -e 's/[^=]*=//'`
 MICRO=`egrep ^XXDIFF_MICRO_VERSION configure.in | sed -e 's/[^=]*=//'`
 
-if [ "$MICRO" = "0" ]; then
-	echo $MAJOR.$MINOR
-else
+#if [ "$MICRO" = "0" ]; then
+#	echo $MAJOR.$MINOR
+#else
 	echo $MAJOR.$MINOR.$MICRO
-fi
+#fi

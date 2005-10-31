@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>562</width>
-            <height>269</height>
+            <width>537</width>
+            <height>253</height>
         </rect>
     </property>
     <property stdset="1">
@@ -35,19 +35,19 @@
                 <cstring>TextLabel1_2</cstring>
             </property>
             <property stdset="1">
+                <name>font</name>
+                <font>
+                    <family>helvetica</family>
+                    <pointsize>14</pointsize>
+                </font>
+            </property>
+            <property stdset="1">
                 <name>text</name>
                 <string>Some regions were found that are still UNSELECTED.</string>
             </property>
             <property stdset="1">
                 <name>alignment</name>
                 <set>AlignCenter</set>
-            </property>
-            <property stdset="1">
-                <name>font</name>
-                <font>
-                    <family>helvetica</family>
-                    <pointsize>14</pointsize>
-                </font>
             </property>
             <property>
                 <name>hAlign</name>
@@ -84,15 +84,43 @@
                     </property>
                 </widget>
                 <widget>
-                    <class>QRadioButton</class>
+                    <class>QLayoutWidget</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>_checkboxConditionals</cstring>
+                        <cstring>Layout3</cstring>
                     </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Save with conditionals</string>
-                    </property>
+                    <hbox>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget>
+                            <class>QRadioButton</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>_checkboxConditionals</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Save with conditionals</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QCheckBox</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>_removeEmptyConditionals</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Remove empty conditionals</string>
+                            </property>
+                        </widget>
+                    </hbox>
                 </widget>
                 <widget>
                     <class>QLayoutWidget</class>
@@ -168,6 +196,45 @@
                             <property stdset="1">
                                 <name>text</name>
                                 <string>FILE2</string>
+                            </property>
+                        </widget>
+                    </hbox>
+                </widget>
+                <widget>
+                    <class>QLayoutWidget</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Layout13_2_2</cstring>
+                    </property>
+                    <hbox>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>_labelConditional3</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Conditional variable:</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>_lineeditConditional3</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>FILE3</string>
                             </property>
                         </widget>
                     </hbox>

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: optionsDialog.h 161 2001-05-28 14:47:52Z blais $
+ * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -154,6 +154,7 @@ public slots:
    void spinboxTabWidth( int );
    void checkboxIgnoreFileChanges( int );
    void checkboxCutAndPasteAnnotations( int );
+   void checkboxDrawVerticalLine( int );
 
    //---------------------------------------------------------------------------
    // Colors

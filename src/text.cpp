@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: text.cpp 165 2001-05-29 17:26:38Z blais $
+ * $Date: 2001-05-29 13:26:38 -0400 (Tue, 29 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -193,14 +193,14 @@ void XxText::drawContents( QPainter* pp )
                resources->getLineColorType( line, _no, true );
             resources->getRegionColor( dtype, bcolorSup, fcolorSup );
             QBrush brushSup( bcolorSup );
-            p.setPen( fcolorSup );
 
             // Pre-part.
+            p.setPen( fcolorSup );
             int lx = x;
             int prelen = lhd;
             XX_CHECK( prelen >= 0 );
             if ( prelen > 0 ) {
-               QString prestr( renderedText );
+               QString prestr = QString( renderedText );
                int prewidth = fm.width( prestr, prelen );
                p.fillRect( lx, y, prewidth, fm.lineSpacing(), brushSup );
                p.drawText( lx, y + fm.ascent(), prestr, lhd );
@@ -208,10 +208,11 @@ void XxText::drawContents( QPainter* pp )
             }
 
             // Mid-part.
+            p.setPen( fcolor );
             int midlen = rhd - lhd + 1;
             XX_CHECK( prelen >= 0 );
             if ( midlen > 0 ) {
-               QString midstr( renderedText + lhd );
+               QString midstr = QString( renderedText + lhd );
                int midwidth = fm.width( midstr, midlen );
                p.fillRect( lx, y, midwidth, fm.lineSpacing(), brush );
                p.drawText( lx, y + fm.ascent(), midstr, midlen );
@@ -219,10 +220,11 @@ void XxText::drawContents( QPainter* pp )
             }
 
             // Post-part.
+            p.setPen( fcolorSup );
             int postlen = rlength - rhd - 1;
             XX_CHECK( prelen >= 0 );
             if ( postlen > 0 ) {
-               QString poststr( renderedText + rhd + 1 );
+               QString poststr = QString( renderedText + rhd + 1 );
                int postwidth = fm.width( poststr, postlen );
                p.fillRect( lx, y, postwidth, fm.lineSpacing(), brushSup );
                p.drawText( lx, y + fm.ascent(), poststr, postlen );
@@ -237,7 +239,7 @@ void XxText::drawContents( QPainter* pp )
             //
             // Render without horizontal diffs.
             //            
-            QString str( renderedText );
+            QString str = QString( renderedText );
 
             p.fillRect( 0, y, w, fm.lineSpacing(), brush );            
             p.drawText( x, y + fm.ascent(), str );
@@ -267,6 +269,18 @@ void XxText::drawContents( QPainter* pp )
       p.setPen( cursorColor );
       y = relLine * fm.lineSpacing() - 1;
       p.drawRect( 0, y, w, fm.lineSpacing() + 2 );
+   }
+
+   // Draw vertical line.
+   if ( resources->getBoolOpt( XxResources::SHOW_VERTICAL_LINE ) ) {
+
+      uint cpos = resources->getVerticalLinePos();
+      int posx = cpos * fm.maxWidth() - horizontalPos;
+
+      QColor vlineColor =
+         resources->getColor( XxResources::COLOR_VERTICAL_LINE );
+      p.setPen( vlineColor );
+      p.drawLine( posx, 0, posx, h );
    }
 
    // p.end();

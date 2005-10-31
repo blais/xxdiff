@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: util.h 162 2001-05-28 18:32:02Z blais $
+ * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -69,7 +69,11 @@ public:
 
    // Conduct some tests to determine if the input file is suitable for
    // processing by our program.  Return true on success.
-   static bool testFile( const char* filename, bool& isDirectory );
+   static bool testFile(
+      const char* filename,
+      const bool  testAscii,
+      bool&       isDirectory
+   );
 
    // Quick heuristic to test whether a file's contents are ascii text
    static bool isAsciiText( const char *filename );

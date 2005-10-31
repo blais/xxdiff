@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: builderDirs2.cpp 162 2001-05-28 18:32:02Z blais $
+ * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -64,7 +64,7 @@ enum DirDiffType {
 };
 
 #ifdef LOCAL_TRACE
-char* typeString[4] = { 
+char* typeString[5] = { 
    "IDENTICAL", "DIFFER", "ONLY_IN", "UNKNOWN", "COMMON_SUBDIR"
 };
 #endif
@@ -373,7 +373,7 @@ void buildSolelyFromOutput(
       }
 
 #ifdef LOCAL_TRACE
-      std::cout << buffer << std::endl;
+      std::cout << buffer;
       std::cout << typeString[ type ] << "   " 
                 << filename << "   "
                 << onlyDir << std::endl;
@@ -456,7 +456,7 @@ void buildAgainstReadDirectory(
       }
 
 #ifdef LOCAL_TRACE
-      std::cout << buffer << std::endl;
+      std::cout << buffer;
       std::cout << typeString[ type ] << "   " 
                 << filename << "   "
                 << onlyDir << std::endl;

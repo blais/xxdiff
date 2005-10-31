@@ -12,8 +12,6 @@ LDFLAGS += @LDFLAGS@ -L$(QTDIR)/lib
 
 SUFFIXES += .ui
 
-UIC=$(QTDIR)/bin/uic
-
 UIDESIGNER_FILES_IMPL = \
 	 optionsDialogBase.ui \
 	 searchDialogBase.ui

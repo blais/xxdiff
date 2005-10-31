@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: lineNumbers.cpp 160 2001-05-28 14:39:15Z blais $
+ * $Date: 2001-05-28 10:39:15 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -119,7 +119,7 @@ void XxLineNumbers::drawContents( QPainter* pp )
       std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
 
    char lnFormat[16];
-   sprintf( lnFormat, "%%%dd", _app->getMaxDigits() );
+   ::snprintf( lnFormat, sizeof(lnFormat), "%%%dd", _app->getMaxDigits() );
 
    const int x = 0;
    int y = 0;

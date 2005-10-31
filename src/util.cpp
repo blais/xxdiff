@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: util.cpp 163 2001-05-28 21:28:37Z blais $
+ * $Date: 2001-05-28 17:28:37 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -168,7 +168,11 @@ int XxUtil::copyFile( const char* src, const char* dest )
 
 //------------------------------------------------------------------------------
 //
-bool XxUtil::testFile( const char* filename, bool& isDirectory )
+bool XxUtil::testFile(
+   const char* filename,
+   const bool  testAscii,
+   bool&       isDirectory
+)
 {
    struct stat buf;
    
@@ -200,10 +204,12 @@ bool XxUtil::testFile( const char* filename, bool& isDirectory )
    }
    
    // Make sure file is not binary, we don't handle binary files.
-   if ( !isAsciiText( filename ) ) {
-      std::ostringstream oss;
-      oss << "Error: file is not a text file";
-      throw new XxIoError( oss.str().c_str() );
+   if ( testAscii ) {
+      if ( !isAsciiText( filename ) ) {
+         std::ostringstream oss;
+         oss << "Error: file is not a text file";
+         throw new XxIoError( oss.str().c_str() );
+      }
    }
 
    return true;
@@ -263,15 +269,15 @@ bool XxUtil::spawnCommand(
       default: {
          if ( sigaction != 0 ) {
             XX_TRACE( "Installing SIGCHLD handler." );
-//              sigset_t spm_o;
-//              sigprocmask( SIG_NOP, 0, &spm_o );
-//              XX_TRACE( "is SIGCHLD member=" << sigismember( &spm_o, SIGCHLD ) );
 
-//              sigemptyset( &spm_o );
-//              sigaddset( &spm_o, SIGCHLD );
-//              sigprocmask( SIG_BLOCK, &spm_o, 0 );
-// FIXME remove
-
+            // sigset_t spm_o;
+            // sigprocmask( SIG_NOP, 0, &spm_o );
+            // XX_TRACE( "is SIGCHLD member=" << 
+            //           sigismember( &spm_o, SIGCHLD ) );
+            // sigemptyset( &spm_o );
+            // sigaddset( &spm_o, SIGCHLD );
+            // sigprocmask( SIG_BLOCK, &spm_o, 0 );
+ 
             //
             // Register a SIGCHLD handler.
             //

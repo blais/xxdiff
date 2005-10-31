@@ -2,8 +2,33 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 144 2001-05-24 04:21:42Z blais $
+# $Id: CHANGES 173 2001-05-31 04:03:39Z blais $
 #
+
+Current development version:
+
+
+
+<<<
+
+   * Fixed spec file (thx to Peder Stray peder@linpro.no).
+
+------------------------------
+
+Version 1.11:
+
+   * Release.
+   * Fixed small symbol rcfile parsing problem
+     (added symbols for full font spec)
+   * Fixed --args with directory diffs (was not working).
+   * Implemented vertical line for characters-per-line.
+   * Applied OpenBSD security patches to strcpy/sprintf (thanks to Dan Weeks).
+   * Added vertical line resources only.
+   * Toggle line numbers and toggle show markers is now under 'display' menu.
+     (bug #233520)
+   * Implemented 'remove empty conditionals' for save as w/ conditionals.
+   * Changed cpp conditionals default format.
+   * Fix for Mandrake compilation in configure.in (finding uic).
 
 ------------------------------
 
@@ -696,15 +721,38 @@ Version 1.0:
 Wishlist/ToDo list:
 ------------------------------
 
+ - implement indicator for "remaining unselected regions"
+
+ - configurable annotations (and remove filename)
+   - filename
+   - file number (1,2,3)
+   - line number
+   - line contents
+
+ - optimize resource loading, perhaps put directly in grammar
+   - do timings to find out if it is a problem right now
+
+ - mv xxct to xxcleartool and implement using distutils
+ - separate cvs stuff from xxcvs into cvslib, use distutils
+
+ - accept a patch file / make a patch file instead of just "save"
+
+ - cvs and clearcase: write interface/protocol scripts
+   - implement annotations query on top of that!!!
+
+ - configure.in: QTDIR/lib path.  Try compiling from root user under linux box.
+
  - cvs unmerge:
+
    1) build the two diffs using a single file, and a single file storage, to
-      save memory
+      save memory (and avoid having to build two files), also be able to do it
+      with ifdefs
+
    2) build it in xxcvs
+
 
  - also add 'remove' to copy file menu, when appropriate, to make it
    symmetrical.
-
- - !!! - save with ifdefs shouldn't put #else on empty regions.
 
  - link with GNU diff, script to modify the source code
 
@@ -714,6 +762,10 @@ Wishlist/ToDo list:
 
  - highlight search results (added over, markers)
 
+ - I want mouse-drag with third button.
+
+
+
 gijsbert dinner:
 
  - can we get two pipes to read from, stdin and another?
@@ -721,16 +773,18 @@ gijsbert dinner:
 
  - unlink the temporary files right away
 
+
 tmp files:
+
  - catch signal to delete tmp files?
+
  - can I use a named pipe instead?  would that be better?
    does it just delete itself once it's done?
+
  - hey, I can delete the tmp files right after I called GNU diff!
    what am I doing right now?
 
-
  - advertise xxcvs on freshmeat
-
 
 
 linking with GNU diff:
@@ -747,13 +801,11 @@ mark "options" clearly as GNU diff options, so that there is no confusion.
 cool idea: add a command to be run to automatically load the said file in emacs,
 e.g. click on title bar and send an emacsclient command.
 
-I want mouse-drag with third button.
-
 Also, in 3-way diff, it would be nice to be able to ignore one file and to diff
 only the two other ones without restarting, with keeping the three files. You
 could do this with just changing the colors, and the next/previous methods.
 
-links directly with GNU diff
+link directly with GNU diff
 
 
 
@@ -775,9 +827,8 @@ links directly with GNU diff
    is the same except for some whitespace.
 
  - toolbar buttons brokne under octane
+
  - edit color dialog broken under octane2
-
-
 
 
   * try to avoid loading Qt library in case of option -D specified, for faster
@@ -902,6 +953,7 @@ links directly with GNU diff
  | 
  | 
 
+
 CM support:
 
 
@@ -913,10 +965,6 @@ automate CHANGES file update using CVS on xxdiff.sourceforge.net
 
    * add dialog that does "guided" "select next and get the hell out".
      or just make that really clear in the toolbar buttons.
-
-qt email list: question about CM
-
-   * perhaps the "save selected only" option should be in the markers dialog?
 
 bug fixes:
 
@@ -942,7 +990,6 @@ new features:
    * Remove useless dialogs in dialog.h
 
    * Provide some lame editing feature, people want it anyway.
-   * low-hanging fruit: saving with ifdefs.
    * option: instead of saving merged file, save as a patch to be applied
      (save the two files in temps and run a diff on them).
 

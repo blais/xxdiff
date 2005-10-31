@@ -7,7 +7,7 @@ Author: Martin Blais <blais@iro.umontreal.ca>
 To build from source:
 ------------------------------
 
-# Run automoc
+# Run automoc (you'll get a link error if you forget this).
 perl ./automoc
 
 # Configure for platform
@@ -28,6 +28,17 @@ To build from redhat srpm:
 # Standard procedure: cp pristine sources and run automated build.
 cp xxdiff-<version>.tar.gz /usr/src/redhat/SOURCES
 rpm -ba xxdiff/spec/xxdiff-<version>.spec
+
+
+
+
+Compile warnings:
+------------------------------
+You might get some of the following warnings, due to a bug in libstdc++:
+
+In file included from stringResParser.cpp:35:
+/usr/include/g++-3/sstream: In method `int stringbuf::sync ()':
+/usr/include/g++-3/sstream:171: warning: comparison between signed and unsigned integer expressions
 
 
 

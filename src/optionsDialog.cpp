@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: optionsDialog.cpp 161 2001-05-28 14:47:52Z blais $
+ * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -173,8 +173,12 @@ XxOptionsDialog::XxOptionsDialog(
             this, SLOT( checkboxHideCarriageReturns(int) ) );
    connect( _spinboxTabWidth, SIGNAL( valueChanged(int) ), 
             this, SLOT( spinboxTabWidth(int) ) );
+   connect( _checkboxDrawVerticalLine, SIGNAL( stateChanged(int) ), 
+            this, SLOT( checkboxDrawVerticalLine(int) ) );
+
    connect( _checkboxIgnoreFileChanges, SIGNAL( stateChanged(int) ), 
             this, SLOT( checkboxIgnoreFileChanges(int) ) );
+
    connect( _checkboxCutAndPasteAnnotations, SIGNAL( stateChanged(int) ), 
             this, SLOT( checkboxCutAndPasteAnnotations(int) ) );
 
@@ -307,9 +311,14 @@ void XxOptionsDialog::synchronize()
 
    _spinboxTabWidth->setValue( resources->getTabWidth() );
 
+   _checkboxDrawVerticalLine->setChecked(
+      resources->getBoolOpt( XxResources::SHOW_VERTICAL_LINE )
+   );
+
    _checkboxIgnoreFileChanges->setChecked(
       resources->getBoolOpt( XxResources::DIRDIFF_IGNORE_FILE_CHANGES )
    );
+
    _checkboxCutAndPasteAnnotations->setChecked(
       resources->getBoolOpt( XxResources::CUT_AND_PASTE_ANNOTATIONS )
    );
@@ -400,6 +409,12 @@ void XxOptionsDialog::onApply()
                           _checkboxHideCarriageReturns->isChecked() );
 
    resources->setTabWidth( _spinboxTabWidth->value() );
+
+   resources->setBoolOpt( XxResources::SHOW_VERTICAL_LINE, 
+                          _checkboxDrawVerticalLine->isChecked() );
+
+   resources->setVerticalLinePos( _spinboxVlinePos->value() );
+
 
    resources->setBoolOpt( XxResources::DIRDIFF_IGNORE_FILE_CHANGES, 
                           _checkboxIgnoreFileChanges->isChecked() );
@@ -605,6 +620,13 @@ void XxOptionsDialog::checkboxIgnoreFileChanges( int state )
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::checkboxCutAndPasteAnnotations( int state )
+{
+   // nop.
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOptionsDialog::checkboxDrawVerticalLine( int state )
 {
    // nop.
 }

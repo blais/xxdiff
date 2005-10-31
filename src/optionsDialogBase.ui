@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>574</width>
-            <height>386</height>
+            <width>554</width>
+            <height>397</height>
         </rect>
     </property>
     <property stdset="1">
@@ -40,6 +40,10 @@
             </property>
             <widget>
                 <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>Widget2</cstring>
+                </property>
                 <attribute>
                     <name>title</name>
                     <string>Files 2-way diff</string>
@@ -162,12 +166,12 @@
                                             <cstring>_checkboxIgnoreBlankLines</cstring>
                                         </property>
                                         <property stdset="1">
-                                            <name>text</name>
-                                            <string>Ignore blank lines</string>
-                                        </property>
-                                        <property stdset="1">
                                             <name>enabled</name>
                                             <bool>false</bool>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Ignore blank lines</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -232,6 +236,10 @@
             </widget>
             <widget>
                 <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>Widget3</cstring>
+                </property>
                 <attribute>
                     <name>title</name>
                     <string>Files 3-way diff</string>
@@ -286,15 +294,6 @@
                             <cstring>Spacer1</cstring>
                         </property>
                         <property stdset="1">
-                            <name>geometry</name>
-                            <rect>
-                                <x>38</x>
-                                <y>44</y>
-                                <width>20</width>
-                                <height>1</height>
-                            </rect>
-                        </property>
-                        <property stdset="1">
                             <name>orientation</name>
                             <enum>Vertical</enum>
                         </property>
@@ -302,11 +301,22 @@
                             <name>sizeType</name>
                             <enum>Expanding</enum>
                         </property>
+                        <property>
+                            <name>sizeHint</name>
+                            <size>
+                                <width>20</width>
+                                <height>20</height>
+                            </size>
+                        </property>
                     </spacer>
                 </vbox>
             </widget>
             <widget>
                 <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>Widget4</cstring>
+                </property>
                 <attribute>
                     <name>title</name>
                     <string>Directory diff</string>
@@ -425,6 +435,10 @@
             </widget>
             <widget>
                 <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>Widget5</cstring>
+                </property>
                 <attribute>
                     <name>title</name>
                     <string>Display options</string>
@@ -538,12 +552,12 @@
                                                     <cstring>_spinboxTabWidth</cstring>
                                                 </property>
                                                 <property stdset="1">
-                                                    <name>minValue</name>
-                                                    <number>1</number>
-                                                </property>
-                                                <property stdset="1">
                                                     <name>maxValue</name>
                                                     <number>48</number>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>minValue</name>
+                                                    <number>1</number>
                                                 </property>
                                                 <property stdset="1">
                                                     <name>value</name>
@@ -556,13 +570,83 @@
                                                     <cstring>Spacer1_2</cstring>
                                                 </property>
                                                 <property stdset="1">
-                                                    <name>geometry</name>
-                                                    <rect>
-                                                        <x>136</x>
-                                                        <y>3</y>
-                                                        <width>74</width>
+                                                    <name>orientation</name>
+                                                    <enum>Horizontal</enum>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>sizeType</name>
+                                                    <enum>Expanding</enum>
+                                                </property>
+                                                <property>
+                                                    <name>sizeHint</name>
+                                                    <size>
+                                                        <width>20</width>
                                                         <height>20</height>
-                                                    </rect>
+                                                    </size>
+                                                </property>
+                                            </spacer>
+                                        </hbox>
+                                    </widget>
+                                    <widget>
+                                        <class>QCheckBox</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>_checkboxDrawVerticalLine</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Draw vertical line</string>
+                                        </property>
+                                    </widget>
+                                    <widget>
+                                        <class>QLayoutWidget</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>Layout23_2</cstring>
+                                        </property>
+                                        <hbox>
+                                            <property stdset="1">
+                                                <name>margin</name>
+                                                <number>0</number>
+                                            </property>
+                                            <property stdset="1">
+                                                <name>spacing</name>
+                                                <number>6</number>
+                                            </property>
+                                            <widget>
+                                                <class>QLabel</class>
+                                                <property stdset="1">
+                                                    <name>name</name>
+                                                    <cstring>_vlinePosLabel</cstring>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>text</name>
+                                                    <string>Vertical line pos:</string>
+                                                </property>
+                                            </widget>
+                                            <widget>
+                                                <class>QSpinBox</class>
+                                                <property stdset="1">
+                                                    <name>name</name>
+                                                    <cstring>_spinboxVlinePos</cstring>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>maxValue</name>
+                                                    <number>512</number>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>minValue</name>
+                                                    <number>1</number>
+                                                </property>
+                                                <property stdset="1">
+                                                    <name>value</name>
+                                                    <number>80</number>
+                                                </property>
+                                            </widget>
+                                            <spacer>
+                                                <property>
+                                                    <name>name</name>
+                                                    <cstring>Spacer1_2_2</cstring>
                                                 </property>
                                                 <property stdset="1">
                                                     <name>orientation</name>
@@ -571,6 +655,13 @@
                                                 <property stdset="1">
                                                     <name>sizeType</name>
                                                     <enum>Expanding</enum>
+                                                </property>
+                                                <property>
+                                                    <name>sizeHint</name>
+                                                    <size>
+                                                        <width>20</width>
+                                                        <height>20</height>
+                                                    </size>
                                                 </property>
                                             </spacer>
                                         </hbox>
@@ -628,21 +719,19 @@
                                                     <cstring>Spacer2</cstring>
                                                 </property>
                                                 <property stdset="1">
-                                                    <name>geometry</name>
-                                                    <rect>
-                                                        <x>156</x>
-                                                        <y>1</y>
-                                                        <width>1</width>
-                                                        <height>20</height>
-                                                    </rect>
-                                                </property>
-                                                <property stdset="1">
                                                     <name>orientation</name>
                                                     <enum>Horizontal</enum>
                                                 </property>
                                                 <property stdset="1">
                                                     <name>sizeType</name>
                                                     <enum>Expanding</enum>
+                                                </property>
+                                                <property>
+                                                    <name>sizeHint</name>
+                                                    <size>
+                                                        <width>20</width>
+                                                        <height>20</height>
+                                                    </size>
                                                 </property>
                                             </spacer>
                                         </hbox>
@@ -687,6 +776,10 @@
             </widget>
             <widget>
                 <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>Widget6</cstring>
+                </property>
                 <attribute>
                     <name>title</name>
                     <string>Colors</string>
@@ -755,12 +848,15 @@
                                             <cstring>_labelColor</cstring>
                                         </property>
                                         <property stdset="1">
-                                            <name>text</name>
-                                            <string></string>
+                                            <name>sizePolicy</name>
+                                            <sizepolicy>
+                                                <hsizetype>1</hsizetype>
+                                                <vsizetype>3</vsizetype>
+                                            </sizepolicy>
                                         </property>
                                         <property stdset="1">
-                                            <name>alignment</name>
-                                            <set>AlignCenter</set>
+                                            <name>cursor</name>
+                                            <cursor>0</cursor>
                                         </property>
                                         <property stdset="1">
                                             <name>frameShape</name>
@@ -783,19 +879,16 @@
                                             <number>4</number>
                                         </property>
                                         <property stdset="1">
+                                            <name>text</name>
+                                            <string></string>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>alignment</name>
+                                            <set>AlignCenter</set>
+                                        </property>
+                                        <property stdset="1">
                                             <name>indent</name>
                                             <number>-1</number>
-                                        </property>
-                                        <property stdset="1">
-                                            <name>cursor</name>
-                                            <cursor>0</cursor>
-                                        </property>
-                                        <property stdset="1">
-                                            <name>sizePolicy</name>
-                                            <sizepolicy>
-                                                <hsizetype>1</hsizetype>
-                                                <vsizetype>3</vsizetype>
-                                            </sizepolicy>
                                         </property>
                                         <property>
                                             <name>hAlign</name>
@@ -822,21 +915,19 @@
                                                     <cstring>Spacer1_3</cstring>
                                                 </property>
                                                 <property stdset="1">
-                                                    <name>geometry</name>
-                                                    <rect>
-                                                        <x>1</x>
-                                                        <y>8</y>
-                                                        <width>1</width>
-                                                        <height>20</height>
-                                                    </rect>
-                                                </property>
-                                                <property stdset="1">
                                                     <name>orientation</name>
                                                     <enum>Horizontal</enum>
                                                 </property>
                                                 <property stdset="1">
                                                     <name>sizeType</name>
                                                     <enum>Expanding</enum>
+                                                </property>
+                                                <property>
+                                                    <name>sizeHint</name>
+                                                    <size>
+                                                        <width>20</width>
+                                                        <height>20</height>
+                                                    </size>
                                                 </property>
                                             </spacer>
                                             <widget>
@@ -863,15 +954,15 @@
                             <cstring>GroupBox21</cstring>
                         </property>
                         <property stdset="1">
-                            <name>title</name>
-                            <string>Description</string>
-                        </property>
-                        <property stdset="1">
                             <name>minimumSize</name>
                             <size>
                                 <width>0</width>
                                 <height>100</height>
                             </size>
+                        </property>
+                        <property stdset="1">
+                            <name>title</name>
+                            <string>Description</string>
                         </property>
                         <vbox>
                             <property stdset="1">
@@ -915,21 +1006,19 @@
                         <cstring>Horizontal Spacing2</cstring>
                     </property>
                     <property stdset="1">
-                        <name>geometry</name>
-                        <rect>
-                            <x>1</x>
-                            <y>8</y>
-                            <width>224</width>
-                            <height>20</height>
-                        </rect>
-                    </property>
-                    <property stdset="1">
                         <name>orientation</name>
                         <enum>Horizontal</enum>
                     </property>
                     <property stdset="1">
                         <name>sizeType</name>
                         <enum>Expanding</enum>
+                    </property>
+                    <property>
+                        <name>sizeHint</name>
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
                     </property>
                 </spacer>
                 <widget>

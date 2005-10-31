@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: app.cpp 162 2001-05-28 18:32:02Z blais $
+ * $Date: 2001-05-28 14:32:02 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -118,6 +118,7 @@ enum MenuIds {
    ID_ToggleToolbar,
    ID_ToggleLineNumbers,
    ID_ToggleShowMarkers,
+   ID_ToggleVerticalLine,
    ID_ToggleOverview,
    ID_ToggleShowFilenames,
    ID_ToggleHorizontalDiffs,
@@ -458,9 +459,15 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
 
    // Add extra diff arguments.
    XX_ASSERT( _resources != 0 );
-   XxResources::Resource cmdResId = _nbFiles == 2 ? 
-      XxResources::COMMAND_DIFF_FILES_2 : 
-      XxResources::COMMAND_DIFF_FILES_3;
+   XxResources::Resource cmdResId;
+   if ( _filesAreDirectories == false ) {
+      cmdResId = _nbFiles == 2 ? 
+         XxResources::COMMAND_DIFF_FILES_2 : 
+         XxResources::COMMAND_DIFF_FILES_3;
+   }
+   else {
+      cmdResId = XxResources::COMMAND_DIFF_DIRECTORIES;
+   }
 
    std::string cmd = _resources->getCommand( cmdResId );
    XxOptionsDialog::addToCommand( cmd, _extraDiffArgs.c_str() );
@@ -492,6 +499,9 @@ XxApp::XxApp( int argc, char** argv, bool forceStyle ) :
          _diffs->initializeHorizontalDiffs( getFiles() );
       }
    }
+
+   // Resize and show/hide line numbers.
+   adjustLineNumbers();
 
    // Sets the title bar.
    if ( _nbFiles == 2 ) {
@@ -649,7 +659,7 @@ uint XxApp::readFileNames(
             displayFilenames[ii] = fname;
             filenames[ii] = fname;
             bool isdir;
-            XxUtil::testFile( filenames[ii].c_str(), isdir );
+            XxUtil::testFile( filenames[ii].c_str(), false, isdir );
          }
 
          if ( ! _userFilenames[ii].empty() ) {
@@ -1373,6 +1383,11 @@ void XxApp::createMenus()
          "Hide carriage returns", this, SLOT(hideCarriageReturns()),
          _resources->getAccelerator( XxResources::ACCEL_HIDE_CR )
       );
+
+      _menuids[ ID_ToggleVerticalLine ] = _displayMenu->insertItem( 
+         "Draw vertical line", this, SLOT(toggleVerticalLine()),
+         _resources->getAccelerator( XxResources::ACCEL_TOGGLE_VERTICAL_LINE )
+      );
    }
    else {
       _menuids[ ID_ToggleDirDiffsIgnoreFileChanges ] = _displayMenu->insertItem(
@@ -1410,6 +1425,18 @@ void XxApp::createMenus()
       );
    }
 
+   _displayMenu->insertSeparator();
+   _menuids[ ID_ToggleLineNumbers ] = _displayMenu->insertItem( 
+      "Toggle line numbers", this, SLOT(toggleLineNumbers()),
+      _resources->getAccelerator( XxResources::ACCEL_TOGGLE_LINE_NUMBERS )
+   );
+   _menuids[ ID_ToggleShowMarkers ] = _displayMenu->insertItem( 
+      "Toggle show markers", this, SLOT(toggleShowMarkers()),
+      _resources->getAccelerator( XxResources::ACCEL_TOGGLE_MARKERS )
+   );
+   _displayMenu->setItemEnabled( _menuids[ ID_ToggleShowMarkers ], false );
+
+
    _displayMenu->setCheckable( true );
 
    //---------------------------------------------------------------------------
@@ -1428,15 +1455,6 @@ void XxApp::createMenus()
       SLOT(toggleToolbar()),
       _resources->getAccelerator( XxResources::ACCEL_TOGGLE_TOOLBAR )
    );
-   _menuids[ ID_ToggleLineNumbers ] = _windowsMenu->insertItem( 
-      "Toggle line numbers", this, SLOT(toggleLineNumbers()),
-      _resources->getAccelerator( XxResources::ACCEL_TOGGLE_LINE_NUMBERS )
-   );
-   _menuids[ ID_ToggleShowMarkers ] = _windowsMenu->insertItem( 
-      "Toggle show markers", this, SLOT(toggleShowMarkers()),
-      _resources->getAccelerator( XxResources::ACCEL_TOGGLE_MARKERS )
-   );
-   _windowsMenu->setItemEnabled( _menuids[ ID_ToggleShowMarkers ], false );
    _menuids[ ID_ToggleOverview ] = _windowsMenu->insertItem( 
       "Toggle overview", this, SLOT(toggleOverview()),
       _resources->getAccelerator( XxResources::ACCEL_TOGGLE_OVERVIEW )
@@ -1615,7 +1633,7 @@ bool XxApp::processDiff()
       disconnect( _diffs.get() );
    }
    _diffs.release();
-     
+
    // 
    // Run the diff command
    //
@@ -2351,13 +2369,16 @@ void XxApp::saveToFile( const char* filename, const bool ask )
    
    QString f;
    bool useConditionals = false;
-   std::string conditionalVar1, conditionalVar2;
+   bool removeEmptyConditionals = false;
+   std::string conditionals[3];
    if ( !allSelected ) {
 
       f = XxMarkersFileDialog::getSaveFileName( 
          cleanname, QString::null, _mainWindow,
          _nbFiles == 3,
-         useConditionals, conditionalVar1, conditionalVar2
+         useConditionals, 
+         removeEmptyConditionals,
+         conditionals
       );
       if ( f.isEmpty() ) {
          // The user cancelled the dialog.
@@ -2404,7 +2425,8 @@ void XxApp::saveToFile( const char* filename, const bool ask )
       
       // Save to the file.
       _diffs->save( outfile, getFiles(), 
-                    useConditionals, conditionalVar1, conditionalVar2 );
+                    useConditionals, removeEmptyConditionals,
+                    conditionals );
       
       outfile.close();
       if ( outfile.fail() == true ) {
@@ -2455,7 +2477,7 @@ void XxApp::editFile( const char* filename )
       size_t size;
       /* Bind a name to the socket.   */
       name.sun_family = AF_FILE;
-      strcpy( name.sun_path, "/tmp/xxdiff_socket" );
+      ::strncpy( name.sun_path, "/tmp/xxdiff_socket", sizeof(name.sun_path) );
 
       /* The size of the address is
          the offset of the start of the filename,
@@ -2559,7 +2581,7 @@ void XxApp::openFile( const XxFno no )
    }
    else {
       bool isDirectory;
-      XxUtil::testFile( f.ascii(), isDirectory );
+      XxUtil::testFile( f.ascii(), false, isDirectory );
       if ( isDirectory == true ) {
          QString text( "Cannot open a new directory" );
          QMessageBox* box = new XxSuicideMessageBox( 
@@ -3616,7 +3638,24 @@ void XxApp::toggleToolbar()
 void XxApp::toggleLineNumbers()
 {
    _resources->toggleBoolOpt( XxResources::SHOW_LINE_NUMBERS );
-   
+
+   adjustLineNumbers();
+
+   synchronizeUI();
+
+   // Let the resizing occur, process all events, for when adjustScrollbars gets
+   // called the sizes have been updated.  Yes, this is a horrible hack but it
+   // works (unless your window takes >50 secs. to resize).
+   processEvents( 50 );
+
+   adjustScrollbars( true );
+   repaintTexts();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::adjustLineNumbers()
+{
    if ( _resources->getBoolOpt( XxResources::SHOW_LINE_NUMBERS ) ) {
       // Compute the maximum line numbers width.  This has to be the same for
       // all the texts, in order to have a consistent horizontal scrollbar.
@@ -3639,16 +3678,6 @@ void XxApp::toggleLineNumbers()
          _lineNumbers[ii]->hide();
       }
    }
-
-   synchronizeUI();
-
-   // Let the resizing occur, process all events, for when adjustScrollbars gets
-   // called the sizes have been updated.  Yes, this is a horrible hack but it
-   // works (unless your window takes >50 secs. to resize).
-   processEvents( 50 );
-
-   adjustScrollbars( true );
-   repaintTexts();
 }
 
 //------------------------------------------------------------------------------
@@ -3656,6 +3685,16 @@ void XxApp::toggleLineNumbers()
 void XxApp::toggleShowMarkers()
 {
    _resources->toggleBoolOpt( XxResources::SHOW_MARKERS );
+   synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::toggleVerticalLine()
+{
+   _resources->toggleBoolOpt( XxResources::SHOW_VERTICAL_LINE );
+   repaintTexts();
+   synchronizeUI();
 }
 
 //------------------------------------------------------------------------------
@@ -3878,6 +3917,10 @@ void XxApp::synchronizeUI()
          _menuids[ ID_ToggleHideCarriageReturns ],
          _resources->getBoolOpt( XxResources::HIDE_CR )
       );
+      _displayMenu->setItemChecked( 
+         _menuids[ ID_ToggleVerticalLine ],
+         _resources->getBoolOpt( XxResources::SHOW_VERTICAL_LINE )
+      );
    }
    else {
       _displayMenu->setItemChecked( 
@@ -3898,15 +3941,20 @@ void XxApp::synchronizeUI()
       _displayMenu->setItemChecked( _menuids[ ID_TabsAtEight ], tabWidth == 8 );
    }
 
+   _displayMenu->setItemChecked( 
+      _menuids[ ID_ToggleLineNumbers ], 
+      _resources->getBoolOpt( XxResources::SHOW_LINE_NUMBERS )
+   );
+   _displayMenu->setItemChecked( 
+      _menuids[ ID_ToggleShowMarkers ], 
+      _resources->getBoolOpt( XxResources::SHOW_MARKERS )
+   );
+
    //---------------------------------------------------------------------------
 
    _windowsMenu->setItemChecked( 
       _menuids[ ID_ToggleToolbar ], 
       _resources->getBoolOpt( XxResources::SHOW_TOOLBAR )
-   );
-   _windowsMenu->setItemChecked( 
-      _menuids[ ID_ToggleLineNumbers ], 
-      _resources->getBoolOpt( XxResources::SHOW_LINE_NUMBERS )
    );
    _windowsMenu->setItemChecked( 
       _menuids[ ID_ToggleOverview ],

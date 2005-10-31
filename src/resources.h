@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: resources.h 161 2001-05-28 14:47:52Z blais $
+ * $Date: 2001-05-28 10:47:52 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -170,6 +170,7 @@ public:
       ACCEL_TOGGLE_TOOLBAR,
       ACCEL_TOGGLE_LINE_NUMBERS,
       ACCEL_TOGGLE_MARKERS,
+      ACCEL_TOGGLE_VERTICAL_LINE,
       ACCEL_TOGGLE_OVERVIEW,
       ACCEL_TOGGLE_SHOW_FILENAMES,
       ACCEL_TOGGLE_HORIZONTAL_DIFFS,
@@ -261,6 +262,7 @@ public:
       // Other colors.
       COLOR_BACKGROUND,
       COLOR_CURSOR,
+      COLOR_VERTICAL_LINE,
 
       COLOR_LAST, // Not a real resource.
 
@@ -276,6 +278,7 @@ public:
       SHOW_TOOLBAR,
       SHOW_LINE_NUMBERS,
       SHOW_MARKERS,
+      SHOW_VERTICAL_LINE,
       SHOW_OVERVIEW,
       SHOW_FILENAMES,
       HORIZONTAL_DIFFS,
@@ -315,7 +318,7 @@ public:
       TAG_FIRST,
       TAG_CONFLICT_SEPARATOR = TAG_FIRST,
       TAG_CONFLICT_END,
-      TAG_CONDITIONAL_IFDEF,
+      TAG_CONDITIONAL_IF,
       TAG_CONDITIONAL_ELSEIF,
       TAG_CONDITIONAL_ELSE,
       TAG_CONDITIONAL_ENDIF,
@@ -325,6 +328,7 @@ public:
       TAB_WIDTH,
       OVERVIEW_FILE_WIDTH,
       OVERVIEW_SEP_WIDTH,
+      VERTICAL_LINE_POS,
 
       RESOURCE_LAST
    };
@@ -407,6 +411,9 @@ public:
 
    uint getOverviewFileWidth() const;
    uint getOverviewSepWidth() const;
+
+   uint getVerticalLinePos() const;
+   void setVerticalLinePos( uint );
    // </group>
 
    // Get text tags for conflictual regions.
@@ -485,6 +492,7 @@ private:
    std::string  _commandOptions[ CMDOPT_LAST - CMDOPT_FIRST ];
    uint		_overviewFileWidth;
    uint		_overviewSepWidth;
+   uint		_verticalLinePos;
    std::string  _tags[ TAG_LAST - TAG_FIRST ];
 
 };

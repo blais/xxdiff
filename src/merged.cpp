@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: merged.cpp 163 2001-05-28 21:28:37Z blais $
+ * $Date: 2001-05-28 17:28:37 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -45,8 +45,6 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <iostream> // FIXME remove
-
 
 XX_NAMESPACE_BEGIN
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: resources.cpp 159 2001-05-28 02:34:04Z blais $
+ * $Date: 2001-05-27 22:34:04 -0400 (Sun, 27 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -523,6 +523,10 @@ const nameDoc mapStrings[
      "accel.toggleMarkers",
      "Accelerator for ``toggle markers'' command."
    },
+   { XxResources::ACCEL_TOGGLE_VERTICAL_LINE,
+     "accel.toggleVerticalLine",
+     "Accelerator for ``toggle vertical line'' command."
+   },
    { XxResources::ACCEL_TOGGLE_OVERVIEW,
      "accel.toggleOverview",
      "Accelerator for ``toggle overview'' command."
@@ -837,6 +841,10 @@ const nameDoc mapStrings[
      "color.cursor",
      "Cursor color."
    },
+   { XxResources::COLOR_VERTICAL_LINE,
+     "color.verticalLine",
+     "Color of alignment vertical line."
+   },
    { XxResources::COLOR_LAST, "", "" },
 
    //---------------------------------------------------------------------------
@@ -867,6 +875,10 @@ const nameDoc mapStrings[
    { XxResources::SHOW_MARKERS,
      "windows.showMarkers",
      "If this resource is true, show markers (currently not implemented)."
+   },
+   { XxResources::SHOW_VERTICAL_LINE,
+     "windows.showVerticalLine",
+     "If this resource is true, show vertical line."
    },
    { XxResources::SHOW_OVERVIEW,
      "windows.showOverview",
@@ -996,7 +1008,7 @@ const nameDoc mapStrings[
      "tag.conflict.end",
      "Text stub to append to conflict hunks when saving unselected regions."
    },
-   { XxResources::TAG_CONDITIONAL_IFDEF,
+   { XxResources::TAG_CONDITIONAL_IF,
      "tag.conditional.ifdef",
      "Text stub for ifdef conditional marker when saving unselected regions."
    },
@@ -1028,6 +1040,10 @@ const nameDoc mapStrings[
    { XxResources::OVERVIEW_SEP_WIDTH,
      "overviewSepWidth",
      "Width (in pixels) of separation between files in the overview area."
+   },
+   { XxResources::VERTICAL_LINE_POS,
+     "verticalLinePosition",
+     "Horizontal position of vertical line (in characters)."
    }
 
 };
@@ -1218,6 +1234,7 @@ XxDefaultsParser::XxDefaultsParser()
 
    _map[ XxResources::COLOR_BACKGROUND ] = "#40616a"; // FIXME find the name!
    _map[ XxResources::COLOR_CURSOR ] = "white";
+   _map[ XxResources::COLOR_VERTICAL_LINE ] = "red";
 
    //---------------------------------------------------------------------------
 
@@ -1262,13 +1279,15 @@ XxDefaultsParser::XxDefaultsParser()
 
    _map[ XxResources::TAG_CONFLICT_SEPARATOR ] = ">>>>>>>>>>>>>>>>>>>> File %d";
    _map[ XxResources::TAG_CONFLICT_END ] = "<<<<<<<<<<<<<<<<<<<<";
-   _map[ XxResources::TAG_CONDITIONAL_IFDEF ] = "#ifdef %s";
+   _map[ XxResources::TAG_CONDITIONAL_IF ] = "#if defined( %s )";
    _map[ XxResources::TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
-   _map[ XxResources::TAG_CONDITIONAL_ELSE ] = "#else /* %s */";
-   _map[ XxResources::TAG_CONDITIONAL_ENDIF ] = "#endif /* %s */";
+   _map[ XxResources::TAG_CONDITIONAL_ELSE ] = "#else";
+   _map[ XxResources::TAG_CONDITIONAL_ENDIF ] = "#endif";
 
    _map[ XxResources::OVERVIEW_FILE_WIDTH ] = "20";
    _map[ XxResources::OVERVIEW_SEP_WIDTH ] = "14";
+   _map[ XxResources::VERTICAL_LINE_POS ] = "80";
+
 }
 
 //------------------------------------------------------------------------------
@@ -1668,6 +1687,9 @@ void XxResources::parse( XxResourcesParser& parser )
    }
    if ( query( parser, OVERVIEW_SEP_WIDTH, val ) ) {
       _overviewSepWidth = atoi( val.c_str() );
+   }
+   if ( query( parser, VERTICAL_LINE_POS, val ) ) {
+      _verticalLinePos = atoi( val.c_str() );
    }
    
 }   
@@ -2117,6 +2139,18 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       }
       if ( ofw != _overviewSepWidth ) {
          writeDocAttrib( this, os, OVERVIEW_SEP_WIDTH );
+         os << _overviewSepWidth;
+         os << endl << endl;
+      }
+   }
+
+   {
+      uint ofw = 0;
+      if ( query( defaults, VERTICAL_LINE_POS, val ) ) {
+         ofw = atoi( val.c_str() );
+      }
+      if ( ofw != _overviewSepWidth ) {
+         writeDocAttrib( this, os, VERTICAL_LINE_POS );
          os << _overviewSepWidth;
          os << endl << endl;
       }

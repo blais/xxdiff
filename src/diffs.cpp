@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 142 2001-05-22 07:48:13Z blais $
- * $Date: 2001-05-22 03:48:13 -0400 (Tue, 22 May 2001) $
+ * $Id: diffs.cpp 160 2001-05-28 14:39:15Z blais $
+ * $Date: 2001-05-28 10:39:15 -0400 (Mon, 28 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,7 +31,8 @@
 #include <list>
 #include <algorithm>
 #include <iostream>
-#include <stdio.h>
+#include <sstream>
+#include <stdio.h> // Should be cstdio but SGI doesn't support it.
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -41,11 +42,11 @@ namespace {
 
 //------------------------------------------------------------------------------
 //
-void outputLine(
-   std::ostream&                os,
+int outputLine(
+   std::ostream&                  os,
    const std::auto_ptr<XxBuffer>* files,
-   const XxLine&                line,
-   int                          no
+   const XxLine&                  line,
+   int                            no
 )
 {
    int fline = line.getLineNo( no );
@@ -57,7 +58,9 @@ void outputLine(
 
       os.write( text, len );
       os.put( '\n' );
+      return 1;
    }
+   return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -76,26 +79,26 @@ std::string buildTag(
 {
    char buf[ 1024 ];
    char buf2[ 1024 ];
-   ::strcpy( buf, tag );
+   ::strncpy( buf, tag, sizeof(buf) );
    
    // FIXME this could lead to a bug.
 
    if ( useNumber ) {
-      ::strcpy( buf2, buf );
-      ::sprintf( buf, buf2, number );
+      ::strncpy( buf2, buf, sizeof(buf2) );
+      ::snprintf( buf, sizeof(buf), buf2, number );
    }
    if ( useString ) {
-      ::strcpy( buf2, buf );
+      ::strncpy( buf2, buf, sizeof(buf2) );
       if ( useConditionals ) {
          if ( nbFiles == 3 && ( number == 1 || number == 2 ) ) {
-            ::sprintf( buf, buf2, conditional2.c_str() );
+            ::snprintf( buf, sizeof(buf), buf2, conditional2.c_str() );
          }
          else {
-            ::sprintf( buf, buf2, conditional1.c_str() );
+            ::snprintf( buf, sizeof(buf), buf2, conditional1.c_str() );
          }
       }
       else {
-         ::sprintf( buf, buf2, file->getDisplayName() );
+         ::snprintf( buf, sizeof(buf), buf2, file->getDisplayName() );
       }
    }
 
@@ -692,9 +695,9 @@ bool XxDiffs::isAllSelected() const
 bool XxDiffs::save( 
    std::ostream&                  os, 
    const std::auto_ptr<XxBuffer>* files,
-   bool                           useConditionals,
-   const std::string&             conditional1,
-   const std::string&             conditional2
+   const bool                     useConditionals,
+   const bool                     removeEmptyConditionals,
+   const std::string              conditionals[3]
 ) const
 {
    XX_ASSERT( files != 0 );
@@ -711,65 +714,24 @@ bool XxDiffs::save(
       tags[nbFiles] = resources->getTag( XxResources::TAG_CONFLICT_END );
    }
    else {
-      tags[0] = resources->getTag( XxResources::TAG_CONDITIONAL_IFDEF );
-      if ( nbFiles == 2 ) {
-         tags[1] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSE );
-         tags[2] = resources->getTag( XxResources::TAG_CONDITIONAL_ENDIF );
-      }
-      else {
-         tags[1] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSEIF );
-         tags[2] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSE );
-         tags[3] = resources->getTag( XxResources::TAG_CONDITIONAL_ENDIF );
-      }
+      tags[0] = resources->getTag( XxResources::TAG_CONDITIONAL_IF );
+      tags[1] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSEIF );
+      tags[2] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSE );
+      tags[3] = resources->getTag( XxResources::TAG_CONDITIONAL_ENDIF );
    }
 
    for ( int ii = 0; ii < nbFiles; ++ii ) {
       std::string::size_type pos = tags[ii].find( "%d" );
       if ( pos != std::string::npos ) {
          char buf[12];
-         ::sprintf( buf, "%d", ii+1 );
+         ::snprintf( buf, sizeof(buf), "%d", ii+1 );
          tags[ii].replace( pos, 2, buf );
       }
 
-      if ( useConditionals == false ) {
+      if ( ! useConditionals ) {
          pos = tags[ii].find( "%s" );
          if ( pos != std::string::npos ) {
             tags[ii].replace( pos, 2, files[ii]->getDisplayName() );
-         }
-      }
-   }
-
-   if ( useConditionals == true ) {
-      std::string::size_type pos = tags[0].find( "%s" );
-      if ( pos != std::string::npos ) {
-         tags[0].replace( pos, 2, conditional1 );
-      }
-
-      if ( nbFiles == 2 ) {
-         pos = tags[1].find( "%s" );
-         if ( pos != std::string::npos ) {
-            tags[1].replace( pos, 2, conditional1 );
-         }
-
-         pos = tags[2].find( "%s" );
-         if ( pos != std::string::npos ) {
-            tags[2].replace( pos, 2, conditional1 );
-         }
-      }
-      else {
-         pos = tags[1].find( "%s" );
-         if ( pos != std::string::npos ) {
-            tags[1].replace( pos, 2, conditional2 );
-         }
-
-         pos = tags[2].find( "%s" );
-         if ( pos != std::string::npos ) {
-            tags[2].replace( pos, 2, conditional2 );
-         }
-
-         pos = tags[3].find( "%s" );
-         if ( pos != std::string::npos ) {
-            tags[3].replace( pos, 2, conditional1 );
          }
       }
    }
@@ -783,6 +745,8 @@ bool XxDiffs::save(
    uint unselBegin = 0;
    uint unselEnd;
    uint ii;
+   char sbuf[1024];
+   enum State { IF = 0, ELSIF = 1, ELSE = 2 };
    for ( ii = 1; ii <= _lines.size(); ++ii ) {
       const XxLine& line = getLine( ii );
 
@@ -795,19 +759,43 @@ bool XxDiffs::save(
             // Output the unselected portion.
             unselEnd = ii;
             XX_ASSERT( unselEnd - unselBegin > 0 );
+            int state = IF;
             for ( uint f = 0; f < 3; ++f ) {
                if ( files[f].get() != 0 ) {
 
-                  os << tags[f] << std::endl;
+                  // Note: I know this is lame, but SGI STL doesn't support
+                  // formatted output from ostream.
+                  ::snprintf( sbuf, 1024,
+                            tags[state].c_str(), 
+                            conditionals[f].c_str() );
+                  std::ostringstream oss;
+                  oss << sbuf << std::endl;
 
+                  int nbOutlines = 0;
                   for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
                      const XxLine& cline = getLine( iii );
-                     outputLine( os, files, cline, f );
+                     nbOutlines += outputLine( oss, files, cline, f );
                   }
+
+                  if ( removeEmptyConditionals && nbOutlines == 0 ) {
+                     continue;
+                  }
+
+                  if ( useConditionals ) {
+                     switch ( state ) {
+                        case IF: state = ELSIF; break;
+                        case ELSIF: /* stay as ELSIF */ break;
+                        case ELSE: break;
+                     }
+                  }
+                  else {
+                     ++state;
+                  }
+                  os << oss.str();
                }
             }
 
-            os << tags[nbFiles] << std::endl;
+            os << tags[3] << std::endl;
 
             insideUnsel = false;
          }

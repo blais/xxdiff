@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: markers.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: markers.h 158 2001-05-28 02:17:42Z blais $
+ * $Date: 2001-05-27 22:17:42 -0400 (Sun, 27 May 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -72,9 +72,11 @@ public:
 
    // Queries.
    // <group>
-   bool isUseConditionals() const;
+   bool useConditionals() const;
+   bool removeEmptyConditionals() const;
    QString getConditionalVariable1() const;
    QString getConditionalVariable2() const;
+   QString getConditionalVariable3() const;
    // </group>
 
 
@@ -124,8 +126,8 @@ public:
       QWidget*       parent,
       bool           threeWay,
       bool&          useConditionals,
-      std::string&   conditionalVariable1,
-      std::string&   conditionalVariable2
+      bool&          removeEmptyConditionals,
+      std::string    conditionals[3]
    );
 
 private:
