@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.cpp 401 2001-11-22 07:00:27Z blais $
- * $Date: 2001-11-22 02:00:27 -0500 (Thu, 22 Nov 2001) $
+ * $Id: cmdline.cpp 417 2001-11-26 23:06:52Z blais $
+ * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -143,7 +143,7 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "Automatically select regions that would end up being selected by "
      "an automatic merge."
    }, 
-#if 0 // FIXME do this soon.
+#if 0 // do this soon.
    { "conflict", 'C', false, 'C', 
      "Invoke on a single file with CVS merge conflicts, splitting the "
      "conflicts into two files for display.  If this is specified, only a "
@@ -193,7 +193,7 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "Ignore changes in case; consider upper- and lower-case to be the same."
    }, 
 
-#ifdef FIXME // Ignore blank lines... make this work eventually (see TODO file).
+#if 0 // Ignore blank lines... make this work eventually (see TODO file).
    { "ignore-blank-lines", 'B', false, 'B', 
      "Option passed to 2-files diff(1). "
      "Ignore changes that just insert or delete blank lines."

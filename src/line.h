@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 397 2001-11-22 03:36:14Z blais $
- * $Date: 2001-11-21 22:36:14 -0500 (Wed, 21 Nov 2001) $
+ * $Id: line.h 417 2001-11-26 23:06:52Z blais $
+ * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -119,6 +119,9 @@ public:
 
    // Default constructor, initialize to an invalid line.
    XxLine();
+
+   // Copy constructor.
+   XxLine( const XxLine& copy );
 
    // Constructor (3-way).
    // For DIFF regions who have one side blank just specify -1 for that side.

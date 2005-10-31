@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 390 2001-11-19 17:24:09Z blais $
- * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
+ * $Id: diffs.cpp 422 2001-11-28 23:41:31Z blais $
+ * $Date: 2001-11-28 18:41:31 -0500 (Wed, 28 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1261,8 +1261,10 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    }
 
    // Erase old lines.
-   std::vector<XxLine>::iterator istart = & getLineNC( lstart.front() );
-   std::vector<XxLine>::iterator iend = & getLineNC( lend.back() );
+   std::vector<XxLine>::iterator istart = _lines.begin();
+   istart += lstart.front() - 1;
+   std::vector<XxLine>::iterator iend = _lines.begin();
+   iend += lend.back() - 1;
    _lines.erase( istart, iend + 1 );
    _lines.insert( istart, newLines.begin(), newLines.end() );
 
@@ -1343,101 +1345,148 @@ void XxDiffs::splitTwoRegions(
 
 //------------------------------------------------------------------------------
 //
-void XxDiffs::merge()
+void XxDiffs::merge( uint nbFiles )
 {
    if ( _isDirectoryDiff ) {
       return;
    }
+   else if ( nbFiles == 2 ) {
+      // In 2-way diffs, the algorithm is simple: select insert side of all
+      // inserts/deletes, and leave unselected the change regions.
 
-   /*
-    * Digested diff3 docs:
-    *
-    * There are two types of reported hunks by the merge feature:
-    *
-    *   `conflict': where only OLDER differs.
-    *   `overlaps': where all three files differ.
-    *
-    * In all cases, where we don't select a change, we select MINE (SEL1).
-    * diff3 options, those must be used along with the -m (--merge) option:
-    *   -e : `selects' conflicts and overlaps
-    *   -3 : `selects' conflicts only
-    *   -x : `selects' overlaps only
-    *   -A : `selects' conflict, overlaps and merged changes
-    *
-    *   -E and -X : versions of -e and -x that produce less output when not
-    *               using the -m option.
-    *
-    * So our algorithm is simple, two choices:
-    *
-    *  1) first select SEL1 globally, then spawn diff3 -m, with the appropriate
-    *  option, find all the edits and unselect the reported edits.  Upside: we
-    *  don't perform _any_ algorithmic work.  Downside: we need to write a new
-    *  parser because the output of diff3 -m is an ed script.
-    *
-    *  2) do it by hand and work through all the lines, selecting lines as
-    *  below:
-    *
-    *                  diff3-m    diff3-m-e  diff3-m-3  diff3-m-x  xxdiff
-    * AAA (SAME)       UNSELECTED UNSELECTED UNSELECTED UNSELECTED UNSELECTED
-    * BAA (DIFF_1)     SEL1       SEL1       SEL1       SEL1       SEL1
-    * ABA (DIFF_2)     conflict   SEL1/3     SEL1/3     SEL1/3     SEL1/3
-    * AAB (DIFF_3)     SEL3       SEL3       SEL3       SEL1       SEL3
-    * -AA (DELETE_1)   SEL1       SEL1       SEL1       SEL1       SEL1
-    * A-A (DELETE_2)   conflict   SEL1/3     SEL1/3     SEL1/3     SEL1/3
-    * AA- (DELETE_3)   SEL3       SEL3       SEL3       SEL1       SEL3
-    * A-- (INSERT_1)   SEL1       SEL1       SEL1       SEL1       SEL1
-    * -A- (INSERT_2)   conflict   SEL1/3     SEL1/3     SEL1/3     SEL1/3
-    * --A (INSERT_3)   SEL3       SEL3       SEL3       SEL1       SEL3
-    * ABC (DIFF_ALL)   overlap    SEL3       SEL1       SEL3       UNSELECTED
-    * AB- (DIFFDEL_1)  overlap    SEL3       SEL1       SEL3       UNSELECTED
-    * A-B (DIFFDEL_2)  overlap    SEL3       SEL1       SEL3       UNSELECTED
-    * -AB (DIFFDEL_3)  overlap    SEL3       SEL1       SEL3       UNSELECTED
-    *
-    * This is way simpler to implement and more efficient.
-    *
-    */
+      for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+         XxLine& line = getLineNC( ii );
+         switch ( line.getType() ) {
+            // Ignored lines.
+            case XxLine::SAME:
+            case XxLine::DIRECTORIES:
+            case XxLine::DIFF_1:
+            case XxLine::DIFF_2:
+            case XxLine::DELETE_1:
+            case XxLine::DELETE_2:
+            case XxLine::DIFF_3:
+            case XxLine::DELETE_3:
+            case XxLine::INSERT_3:
+            case XxLine::DIFFDEL_1:
+            case XxLine::DIFFDEL_2:
+            case XxLine::DIFFDEL_3: {
+               // Leave as is unselected.
+            } break;
 
-   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
-      XxLine& line = getLineNC( ii );
-      switch ( line.getType() ) {
-         // Ignored lines.
-         case XxLine::SAME:
-         case XxLine::DIRECTORIES: {
-            // Leave unselected.
-         } break;
+            // Left insert.
+            case XxLine::INSERT_1: {
+               line.setSelection( XxLine::SEL1 );
+            } break;
 
-         // Unambiguous lines.
-         case XxLine::DIFF_1:
-         case XxLine::DIFF_2:
-         case XxLine::DELETE_1:
-         case XxLine::DELETE_2:
-         case XxLine::INSERT_1:
-         case XxLine::INSERT_2: {
-            line.setSelection( XxLine::SEL1 );
-         } break;
+            // Right insert.
+            case XxLine::INSERT_2: {
+               line.setSelection( XxLine::SEL2 );
+            } break;
 
-         // Conflicts.
-         case XxLine::DIFF_3:
-         case XxLine::DELETE_3:
-         case XxLine::INSERT_3: {
-            line.setSelection( XxLine::SEL3 );
-         } break;
+            // Overlaps.
+            case XxLine::DIFF_ALL: {
+               line.setSelection( XxLine::UNSELECTED );
+            } break;
 
-         // Overlaps.
-         case XxLine::DIFF_ALL:
-         case XxLine::DIFFDEL_1:
-         case XxLine::DIFFDEL_2:
-         case XxLine::DIFFDEL_3: {
-            line.setSelection( XxLine::UNSELECTED );
-         } break;
-
-         default: {
-            XX_CHECK( false );
+            default: {
+               XX_CHECK( false );
+            }
          }
       }
+      _dirty = true;
+   }
+   else if ( nbFiles == 3 ) {
+
+      /*
+       * Digested diff3 docs:
+       *
+       * There are two types of reported hunks by the merge feature:
+       *
+       *   `conflict': where only OLDER differs.
+       *   `overlaps': where all three files differ.
+       *
+       * In all cases, where we don't select a change, we select MINE (SEL1).
+       * diff3 options, those must be used along with the -m (--merge) option:
+       *   -e : `selects' conflicts and overlaps
+       *   -3 : `selects' conflicts only
+       *   -x : `selects' overlaps only
+       *   -A : `selects' conflict, overlaps and merged changes
+       *
+       *   -E and -X : versions of -e and -x that produce less output when not
+       *               using the -m option.
+       *
+       * So our algorithm is simple, two choices:
+       *
+       *  1) first select SEL1 globally, then spawn diff3 -m, with the appropriate
+       *  option, find all the edits and unselect the reported edits.  Upside: we
+       *  don't perform _any_ algorithmic work.  Downside: we need to write a new
+       *  parser because the output of diff3 -m is an ed script.
+       *
+       *  2) do it by hand and work through all the lines, selecting lines as
+       *  below:
+       *
+       *                  diff3-m    diff3-m-e  diff3-m-3  diff3-m-x  xxdiff
+       * AAA (SAME)       UNSELECTED UNSELECTED UNSELECTED UNSELECTED UNSELECTED
+       * BAA (DIFF_1)     SEL1       SEL1       SEL1       SEL1       SEL1
+       * ABA (DIFF_2)     conflict   SEL1/3     SEL1/3     SEL1/3     SEL1/3
+       * AAB (DIFF_3)     SEL3       SEL3       SEL3       SEL1       SEL3
+       * -AA (DELETE_1)   SEL1       SEL1       SEL1       SEL1       SEL1
+       * A-A (DELETE_2)   conflict   SEL1/3     SEL1/3     SEL1/3     SEL1/3
+       * AA- (DELETE_3)   SEL3       SEL3       SEL3       SEL1       SEL3
+       * A-- (INSERT_1)   SEL1       SEL1       SEL1       SEL1       SEL1
+       * -A- (INSERT_2)   conflict   SEL1/3     SEL1/3     SEL1/3     SEL1/3
+       * --A (INSERT_3)   SEL3       SEL3       SEL3       SEL1       SEL3
+       * ABC (DIFF_ALL)   overlap    SEL3       SEL1       SEL3       UNSELECTED
+       * AB- (DIFFDEL_1)  overlap    SEL3       SEL1       SEL3       UNSELECTED
+       * A-B (DIFFDEL_2)  overlap    SEL3       SEL1       SEL3       UNSELECTED
+       * -AB (DIFFDEL_3)  overlap    SEL3       SEL1       SEL3       UNSELECTED
+       *
+       * This is way simpler to implement and more efficient.
+       *
+       */
+
+      for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+         XxLine& line = getLineNC( ii );
+         switch ( line.getType() ) {
+            // Ignored lines.
+            case XxLine::SAME:
+            case XxLine::DIRECTORIES: {
+               // Leave unselected.
+            } break;
+
+            // Unambiguous lines.
+            case XxLine::DIFF_1:
+            case XxLine::DIFF_2:
+            case XxLine::DELETE_1:
+            case XxLine::DELETE_2:
+            case XxLine::INSERT_1:
+            case XxLine::INSERT_2: {
+               line.setSelection( XxLine::SEL1 );
+            } break;
+
+            // Conflicts.
+            case XxLine::DIFF_3:
+            case XxLine::DELETE_3:
+            case XxLine::INSERT_3: {
+               line.setSelection( XxLine::SEL3 );
+            } break;
+
+            // Overlaps.
+            case XxLine::DIFF_ALL:
+            case XxLine::DIFFDEL_1:
+            case XxLine::DIFFDEL_2:
+            case XxLine::DIFFDEL_3: {
+               line.setSelection( XxLine::UNSELECTED );
+            } break;
+
+            default: {
+               XX_CHECK( false );
+            }
+         }
+      }
+      _dirty = true;
    }
 
-   _dirty = true;
    emit changed();
 }
 

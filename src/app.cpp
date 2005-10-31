@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 398 2001-11-22 05:46:18Z blais $
- * $Date: 2001-11-22 00:46:18 -0500 (Thu, 22 Nov 2001) $
+ * $Id: app.cpp 423 2001-11-29 05:32:12Z blais $
+ * $Date: 2001-11-29 00:32:12 -0500 (Thu, 29 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -65,6 +65,8 @@
 #include <qtoolbutton.h>
 #include <qtextstream.h>
 #include <qfile.h>
+#include <qsplitter.h>
+#include <qvaluelist.h>
 
 #include <exception>
 #include <fstream>
@@ -102,6 +104,11 @@
 #include "pixmaps/select_region_unselect.xpm"
 #include "pixmaps/split_swap_join.xpm"
 #include "pixmaps/diff_files.xpm"
+#include "pixmaps/save_as_left.xpm"
+#include "pixmaps/save_as_middle.xpm"
+#include "pixmaps/save_as_right.xpm"
+#include "pixmaps/save_as_merged.xpm"
+#include "pixmaps/save_as.xpm"
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -110,6 +117,8 @@
 namespace {
 
 enum MenuIds {
+   ID_TogglePaneMergedView,
+   ID_TogglePopupMergedView,
    ID_ToggleToolbar,
    ID_ToggleLineNumbers,
    ID_ToggleVerticalLine,
@@ -390,9 +399,10 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _isUICreated( false ),
    _returnValue( 0 ),
    _diffErrorsMsgBox( 0 ),
+   _paneMergedView( 0 ),
+   _popupMergedView( 0 ),
    _searchDialog( 0 ),
    _optionsDialog( 0 ),
-   _mergedWindow( 0 ),
    _textWidth( 0 ),
    _displayWidth( 0 ),
    _displayHeight( 0 ),
@@ -669,48 +679,79 @@ void XxApp::createUI( uint nbTextWidgets )
 {
    XX_ASSERT( _resources != 0 );
 
+   //
+   // Create widgets.
+   //
+
    _mainWindow = new XxMainWindow( this, 0, "xxdiff main window" );
 
-   //
-   // Create widgets
+   // Central widget.
    //
    _centralWidget = new QWidget( _mainWindow );
-   QHBoxLayout* topLayout = new QHBoxLayout( _centralWidget );
+   QHBoxLayout* topLayout =
+      new QHBoxLayout( _centralWidget, 0, -1, "topLayout" );
 
-   QVBoxLayout* textAndSbLayout = new QVBoxLayout( topLayout );
-   QHBoxLayout* textLayout = new QHBoxLayout( textAndSbLayout );
+   // Pane merged widget.
+   //
+   _splitter = new QSplitter( _centralWidget, "splitter" );
+   _splitter->setOrientation( Qt::Vertical );
+         
+   topLayout->addWidget( _splitter );
+
+   _paneMergedView = new XxMergedFrame( this, _splitter, "paneMergedView" );
+   if ( !_resources->getShowOpt( SHOW_PANE_MERGED_VIEW ) ) {
+      _paneMergedView->hide();
+   }
+
+   // Texts widget (texts).
+   //
+   _textsWidget = new QWidget( _splitter, "textsWidget" );
+
+   // Adjust splitter (after we've create two children for it to contain).
+   uint smpp = _resources->getShowPaneMergedViewPercent();
+   QValueList<int> vl;
+   vl.append( smpp );
+   vl.append( 100 - smpp );
+   _splitter->setSizes( vl );
+
+
+   QVBoxLayout* textAndSbLayout =
+      new QVBoxLayout( _textsWidget, 0, -1, "textAndSbLayout" );
+   QHBoxLayout* textLayout =
+      new QHBoxLayout( textAndSbLayout, -1, "textLayout" );
 
    QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
 
    for ( uint ii = 0; ii < nbTextWidgets; ++ii ) { 
       if ( ii == 1 ) {
-         _vscroll[0] = new QScrollBar( _centralWidget );
+         _vscroll[0] = new QScrollBar( _textsWidget, "vscroll[0]" );
          _vscroll[0]->setFixedWidth( 20 );
          textLayout->addWidget( _vscroll[0] );
          connect( _vscroll[0], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll(int)) );
       }
       if ( ii == 2 ) {
-         _vscroll[1] = new QScrollBar( _centralWidget );
+         _vscroll[1] = new QScrollBar( _textsWidget, "vscroll[1]" );
          _vscroll[1]->setFixedWidth( 20 );
          textLayout->addWidget( _vscroll[1] );
          connect( _vscroll[1], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll2(int)) );
       }
 
-      QVBoxLayout* layout = new QVBoxLayout( textLayout );
+      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1, "layout" );
       //textLayout->setStretchFactor( layout, 1 ); useless to make equal
 
       // Create filename and line number labels.
-      QHBoxLayout* fnLayout = new QHBoxLayout( layout );
-      _filenameLabel[ii] = new XxCopyLabel( _centralWidget );
+      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1, "fnLayout" );
+      _filenameLabel[ii] = new XxCopyLabel( _textsWidget );
       _filenameLabel[ii]->setFont( smaller );
       _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _filenameLabel[ii]->setMinimumWidth( 1 );
       _filenameLabel[ii]->setLineWidth( 2 );
 
-      _lineNumberLabel[ii] = new QLabel( "9999", _centralWidget );
+      _lineNumberLabel[ii] =
+         new QLabel( "9999", _textsWidget, "lineNumberLabel" );
       _lineNumberLabel[ii]->setAlignment( AlignCenter );
       _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _lineNumberLabel[ii]->setLineWidth( 2 );
@@ -725,27 +766,32 @@ void XxApp::createUI( uint nbTextWidgets )
       fnLayout->addWidget( _lineNumberLabel[ii], 1 );
 
       // Create linenumbers widget and text widget.
-      fnLayout = new QHBoxLayout( layout );
-      _text[ii] = new XxText( this, ii, _centralWidget );
-      _lineNumbers[ii] = new XxLineNumbers( this, ii, _centralWidget );
+      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1, "fnLayout2" );
+      _text[ii] = new XxText( this, ii, _textsWidget, "text" );
+      _lineNumbers[ii] =
+         new XxLineNumbers( this, ii, _textsWidget, "lineNumbers" );
 
-      fnLayout->addWidget( _lineNumbers[ii] );
-      fnLayout->addWidget( _text[ii] );
+      fnLayout2->addWidget( _lineNumbers[ii] );
+      fnLayout2->addWidget( _text[ii] );
    }
 
-   _hscroll = new QScrollBar( Qt::Horizontal, _centralWidget );
+   _hscroll = new QScrollBar( Qt::Horizontal, _textsWidget, "hscroll" );
    _hscroll->setFixedHeight( 20 );
    connect( _hscroll, SIGNAL(valueChanged(int)), 
             this, SLOT(horizontalScroll(int)) );
    textAndSbLayout->addWidget( _hscroll );
 
-   _overview = new XxOverview( this, _centralWidget, "overview_area" );
+   // Overview area.
+   //
+   _overview = new XxOverview( this, _centralWidget, "overview" );
    if ( _resources->getShowOpt( SHOW_OVERVIEW ) == false ) {
       _overview->hide();
    }
    topLayout->addWidget( _overview );
 
+   //
    // Create menus.
+   //
    createMenus();
 
    // Add some extra accelerators.
@@ -781,6 +827,11 @@ void XxApp::createUI( uint nbTextWidgets )
       _toolbar->hide();
    }
 
+   // Create popup merged view upon startup if asked for.
+   if ( _resources->getShowOpt( SHOW_POPUP_MERGED_VIEW ) ) {
+      togglePopupMergedView();
+   }
+
    //
    // Show it!
    //
@@ -798,6 +849,60 @@ QToolBar* XxApp::createToolbar()
    QToolBar* toolbar = new QToolBar( "Tools", _mainWindow );
    //QToolButton* tb;
    
+   QPixmap pm_save_as_left( 
+      const_cast<const char**>( save_as_left_xpm )
+   );
+   new QToolButton( 
+      pm_save_as_left, 
+      "Save as left", 
+      "Save as left", 
+      this, SLOT(saveAsLeft()), toolbar 
+   );
+
+   if ( _nbFiles == 3 ) {
+      QPixmap pm_save_as_middle(
+         const_cast<const char**>( save_as_middle_xpm )
+      );
+      new QToolButton( 
+         pm_save_as_middle, 
+         "Save as middle", 
+         "Save as middle", 
+         this, SLOT(saveAsMiddle()), toolbar 
+      );
+   }
+
+   QPixmap pm_save_as_right( 
+      const_cast<const char**>( save_as_right_xpm )
+   );
+   new QToolButton( 
+      pm_save_as_right, 
+      "Save as right", 
+      "Save as right", 
+      this, SLOT(saveAsRight()), toolbar 
+   );
+
+   QPixmap pm_save_as_merged( 
+      const_cast<const char**>( save_as_merged_xpm )
+   );
+   new QToolButton( 
+      pm_save_as_merged, 
+      "Save as merged", 
+      "Save as merged", 
+      this, SLOT(saveAsMerged()), toolbar 
+   );
+
+   QPixmap pm_save_as( 
+      const_cast<const char**>( save_as_xpm )
+   );
+   new QToolButton( 
+      pm_save_as,
+      "Save as ...", 
+      "Save as ...", 
+      this, SLOT(saveAs()), toolbar 
+   );
+
+   toolbar->addSeparator();
+
    QPixmap pm_previous_unselected_difference( 
       const_cast<const char**>( previous_unselected_difference_xpm )
    );
@@ -1014,6 +1119,10 @@ void XxApp::createMenus()
    fileMenu->insertItem( 
       "Save as right", this, SLOT(saveAsRight()), 
       _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT ) 
+   );
+   fileMenu->insertItem( 
+      "Save as merged", this, SLOT(saveAsMerged()), 
+      _resources->getAccelerator( ACCEL_SAVE_AS_MERGED ) 
    );
    fileMenu->insertItem( 
       "Save as...", this, SLOT(saveAs()), 
@@ -1477,9 +1586,13 @@ void XxApp::createMenus()
    // Windows menu
    _windowsMenu = new QPopupMenu;
    if ( _filesAreDirectories == false ) {
-      _windowsMenu->insertItem( 
-         "Merged view...", this, SLOT(mergedView()),
-         _resources->getAccelerator( ACCEL_MERGED_VIEW )
+      _menuids[ ID_TogglePaneMergedView ] = _windowsMenu->insertItem( 
+         "Toggle pane merged view", this, SLOT(togglePaneMergedView()),
+         _resources->getAccelerator( ACCEL_TOGGLE_PANE_MERGED_VIEW )
+      );
+      _menuids[ ID_TogglePopupMergedView ] = _windowsMenu->insertItem( 
+         "Toggle popup merged view", this, SLOT(togglePopupMergedView()),
+         _resources->getAccelerator( ACCEL_TOGGLE_POPUP_MERGED_VIEW )
       );
       _windowsMenu->insertSeparator();
    }
@@ -1688,6 +1801,7 @@ bool XxApp::processDiff()
                 << "\" command, couldn't build diffs:" << endl
                 << ex.getMsg() << endl;
             outputDiffErrors( str );
+            _returnValue = builder.getStatus();
             return false;
          }
       
@@ -1723,6 +1837,7 @@ bool XxApp::processDiff()
                 << "\" command, couldn't build diffs:" << endl
                 << ex.getMsg() << endl;
             outputDiffErrors( str );
+            _returnValue = builder.getStatus();
             return false;
          }
       
@@ -1782,6 +1897,7 @@ bool XxApp::processDiff()
              << "\" command, couldn't build diffs:" << endl
              << ex.getMsg() << endl;
          outputDiffErrors( str );
+         _returnValue = builder.getStatus();
          return false;
       }
       
@@ -2192,8 +2308,11 @@ void XxApp::repaintTexts()
    if ( _overview->isVisible() ) {
       _overview->update();
    }
-   if ( _mergedWindow != 0 && _mergedWindow->isVisible() ) {
-      _mergedWindow->update();
+   if ( _popupMergedView != 0 && _popupMergedView->isVisible() ) {
+      _popupMergedView->update();
+   }
+   if ( _paneMergedView != 0 && _paneMergedView->isVisible() ) {
+      _paneMergedView->update();
    }
 }
 
@@ -2615,6 +2734,14 @@ void XxApp::saveAsRight()
          saveToFile( file->getName(), false );
       }
    }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::saveAsMerged()
+{
+   // FIXME not implemented yet
+   throw XxUsageError( XX_EXC_PARAMS, "Not yet implemented." );
 }
 
 //------------------------------------------------------------------------------
@@ -3279,7 +3406,7 @@ void XxApp::selectGlobalUnselectedNeither()
 void XxApp::selectGlobalMerge()
 {
    if ( _diffs.get() != 0 ) {
-      _diffs->merge();
+      _diffs->merge( _nbFiles );
    }
 }
 
@@ -3567,27 +3694,56 @@ void XxApp::setQuality( XxQuality quality )
 
 //------------------------------------------------------------------------------
 //
-void XxApp::mergedView()
+void XxApp::togglePaneMergedView()
 {
    if ( _nbFiles == 0 || _diffs.get() == 0 ) {
       return;
    }
 
-   // Popup merged view.
-   if ( _mergedWindow == 0 ) {
-      _mergedWindow = new XxMergedWindow(
+   if ( _paneMergedView->isVisible() == false ) {
+      _paneMergedView->show();
+   }
+   else {
+      _paneMergedView->hide();
+   }
+
+   synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::togglePopupMergedView()
+{
+   if ( _nbFiles == 0 || _diffs.get() == 0 ) {
+      return;
+   }
+
+   // Create popup merge view if it does not exist.
+   if ( _popupMergedView == 0 ) {
+      _popupMergedView = new XxMergedWindow(
          this, _mainWindow, "xxdiff merged window"
       );
    }
-   if ( _mergedWindow->isVisible() == false ) {
+
+   // Show it or hide it.
+   if ( _popupMergedView->isVisible() == false ) {
+      // Popup merged view.
+
       // Resize the merged window to have the same size as the text widgets.
       int mh = _mainWindow->menuBar()->height();
-      int sw = _vscroll[0]->width();
+      int sw = _vscroll[0]->width(); 
       int sh = _hscroll->height();
-      _mergedWindow->resize( QSize( _text[0]->width() + sw,
+      _popupMergedView->resize( QSize( _text[0]->width() + sw,
                                     _text[0]->height() + mh + sh ) );
+      _popupMergedView->show();
    }
-   _mergedWindow->show();
+   else {
+      // Hide merged view.
+
+      _popupMergedView->hide();
+   }
+
+   synchronizeUI();
 }
 
 //------------------------------------------------------------------------------
@@ -4012,6 +4168,14 @@ void XxApp::synchronizeUI()
 
    //---------------------------------------------------------------------------
 
+   _windowsMenu->setItemChecked( 
+      _menuids[ ID_TogglePaneMergedView ], 
+      ( _paneMergedView != 0 && _paneMergedView->isVisible() )
+   );
+   _windowsMenu->setItemChecked( 
+      _menuids[ ID_TogglePopupMergedView ], 
+      ( _popupMergedView != 0 && _popupMergedView->isVisible() )
+   );
    _windowsMenu->setItemChecked( 
       _menuids[ ID_ToggleToolbar ], 
       _resources->getShowOpt( SHOW_TOOLBAR )

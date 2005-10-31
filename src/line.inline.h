@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.inline.h 374 2001-11-11 07:58:01Z blais $
- * $Date: 2001-11-11 02:58:01 -0500 (Sun, 11 Nov 2001) $
+ * $Id: line.inline.h 417 2001-11-26 23:06:52Z blais $
+ * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -47,6 +47,19 @@ inline XxLine::XxLine() :
    for ( int ii = 0; ii < 3; ++ii ) {
       _lineNo[ii] = -1;
       _hordiffs[ii] = 0;
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+inline XxLine::XxLine( const XxLine& copy )
+{
+   _type = copy._type;
+   _selection = copy._selection;
+   _hunkId = copy._hunkId;
+   for ( int ii = 0; ii < 3; ++ii ) {
+      _lineNo[ii] = copy._lineNo[ii];
+      _hordiffs[ii] = 0; // Don't copy pointers.
    }
 }
 

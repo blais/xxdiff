@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 390 2001-11-19 17:24:09Z blais $
- * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
+ * $Id: resources.inline.h 411 2001-11-23 01:58:55Z blais $
+ * $Date: 2001-11-22 20:58:55 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -161,7 +161,6 @@ inline uint XxResources::getOverviewFileWidth() const
    return _overviewFileWidth;
 }
 
-
 //------------------------------------------------------------------------------
 //
 inline uint XxResources::getOverviewSepWidth() const
@@ -202,6 +201,13 @@ inline uint XxResources::getHordiffMax() const
 inline uint XxResources::getHordiffContext() const
 {
    return _hordiffContext;
+}
+
+//------------------------------------------------------------------------------
+//
+inline uint XxResources::getShowPaneMergedViewPercent() const
+{
+   return _showPaneMergedViewPercent;
 }
 
 //------------------------------------------------------------------------------

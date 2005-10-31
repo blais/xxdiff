@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 400 2001-11-22 06:40:53Z blais $
- * $Date: 2001-11-22 01:40:53 -0500 (Thu, 22 Nov 2001) $
+ * $Id: resParser.cpp 412 2001-11-23 16:46:21Z blais $
+ * $Date: 2001-11-23 11:46:21 -0500 (Fri, 23 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -87,8 +87,8 @@ view." },
      "Font to use for diff text view." },
 
    { "Show", SHOW, 
-     "Set of options to determine if some ui display is visible or not upon \
-startup." },
+     "Set of options to determine if some UI display element is visible or not \
+upon startup." },
 
    { "Command", COMMAND, 
      "Commands to use to generate diffs.  xxdiff is only an interface to \
@@ -155,7 +155,11 @@ common characters, skip the horizontal hunk and display it as a changed \
 region.  This resource is very useful to remove the cases where few \
 characters align, resulting in many small horizontal hunks, which can be \
 quite confusing.  Usually a value of 5 gives enough horizontal context for \
-the eye to figure out what happenened." }
+the eye to figure out what happenened." },
+
+   { "ShowPaneMergedViewPercent", SHOW_PANE_MERGED_VIEW_PERCENT, 
+     "Initial vertical percentage size, between 0 and 100, of the pane merged \
+view on startup." }
 
 };
 
@@ -290,7 +294,8 @@ StringToken accelList[] = {
    { "QualityNormal", ACCEL_QUALITY_NORMAL, 0 },
    { "QualityFastest", ACCEL_QUALITY_FASTEST, 0 },
    { "QualityHighest", ACCEL_QUALITY_HIGHEST, 0 },
-   { "MergedView", ACCEL_MERGED_VIEW, 0 },
+   { "TogglePaneMergedView", ACCEL_TOGGLE_PANE_MERGED_VIEW, 0 },
+   { "TogglePopupMergedView", ACCEL_TOGGLE_POPUP_MERGED_VIEW, 0 },
    { "ToggleToolbar", ACCEL_TOGGLE_TOOLBAR, 0 },
    { "ToggleLineNumbers", ACCEL_TOGGLE_LINE_NUMBERS, 0 },
    { "ToggleMarkers", ACCEL_TOGGLE_MARKERS, 0 },
@@ -438,7 +443,13 @@ StringToken showList[] = {
      "Show toolbar on startup." },
 
    { "Filenames", SHOW_FILENAMES, 
-     "Show toolbar on startup." }
+     "Show toolbar on startup." },
+
+   { "PaneMergedView", SHOW_PANE_MERGED_VIEW,
+     "Show pane merged view on startup." },
+
+   { "PopupMergedView", SHOW_POPUP_MERGED_VIEW,
+     "Show popup merged view on startup." }
 };
 
 StringToken tagList[] = {
@@ -1081,6 +1092,12 @@ void XxResParser::genInitFile(
          << res1.getHordiffContext() << endl;
    }
 
+   if ( res1.getShowPaneMergedViewPercent() !=
+        res2.getShowPaneMergedViewPercent() ) {
+      os << searchTokenName( STPARAM(kwdList), SHOW_PANE_MERGED_VIEW_PERCENT )
+         << ": " << res1.getShowPaneMergedViewPercent() << endl;
+   }
+
    // Ignore file not saved (cannot be read).
 }
 
@@ -1208,6 +1225,9 @@ void XxResParser::listResources( QTextStream& os )
    os << searchTokenName( STPARAM(kwdList), HORDIFF_CONTEXT ) << ": "
       << res.getHordiffContext() << endl;
    
+   os << searchTokenName( STPARAM(kwdList), SHOW_PANE_MERGED_VIEW_PERCENT )
+      << ": " << res.getShowPaneMergedViewPercent() << endl;
+
    // Ignore file not saved (cannot be read).
 }   
 
@@ -1518,6 +1538,17 @@ QString XxResParser::getResourceRef()
       const StringToken* tok = searchToken( STPARAM(kwdList),
                                             HORDIFF_CONTEXT );
       os << tok->_name << ": " << res.getHordiffContext() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok =
+         searchToken( STPARAM(kwdList), SHOW_PANE_MERGED_VIEW_PERCENT );
+      os << tok->_name << ": " << res.getShowPaneMergedViewPercent() << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;

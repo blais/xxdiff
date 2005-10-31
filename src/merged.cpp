@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 374 2001-11-11 07:58:01Z blais $
- * $Date: 2001-11-11 02:58:01 -0500 (Sun, 11 Nov 2001) $
+ * $Id: merged.cpp 419 2001-11-27 02:14:11Z blais $
+ * $Date: 2001-11-26 21:14:11 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -76,17 +76,19 @@ XxMergedText::XxMergedText(
 
    const XxDiffs* diffs = _app->getDiffs();
    if ( diffs != 0 ) {
-      // FIXME what to do on rediff, when the diffs object changes?
+      // Note: what to do on rediff, when the diffs object changes?
       connect( diffs, SIGNAL(changed()), this, SLOT(adjustVertically()) );
    }
 }
 
+// OK ----- This is the same as XxText.
 //------------------------------------------------------------------------------
 //
 XxMergedText::~XxMergedText()
 {
 }
 
+// OK ----- This is the same as XxText.
 //------------------------------------------------------------------------------
 //
 QSizePolicy XxMergedText::sizePolicy() const
@@ -100,11 +102,13 @@ void XxMergedText::drawContents( QPainter* pp )
 {
    //XX_TRACE( "painting!" );
 
+// OK ----- This is the same as XxText.
    // QPainter p;
    // p.begin( this );
    QPainter& p = *pp;
    QRect rect = contentsRect();
 
+// OK ----- This is the same as XxText.
    // We want 1:1 pixel/coord ratio.
    p.setViewport( rect );
    rect.moveBy( -rect.x(), -rect.y() );
@@ -112,17 +116,19 @@ void XxMergedText::drawContents( QPainter* pp )
    int w = rect.width();
    int h = rect.height();
 
+// NOT ---- This is different from XxText.
    XxBuffer* file[3];
    for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
       file[ii] = _app->getBuffer( ii );
    }
+// OK ----- This is the same as XxText.
    const XxDiffs* diffs = _app->getDiffs();
    const XxResources& resources = _app->getResources();
 
+// OK ----- This is the same as XxText.
    // If it is empty, erase the whole widget with blank color.
    if ( diffs == 0 ) {
-      QColor backgroundColor = 
-         resources.getColor( COLOR_BACKGROUND );
+      QColor backgroundColor = resources.getColor( COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
@@ -287,7 +293,11 @@ void XxMergedText::verticalScroll( int )
 //
 void XxMergedText::horizontalScroll( int )
 {
-   // FIXME todo fix adjustment correctly.
+   // Note: todo fix adjustment correctly.
+   // Hide it when necessary. 
+   // We need to implement this one like for the other text views.
+   // Perhaps we can derive this widget from the text view widget?
+   // They should definitely share some commonalities.
    update();
 }
 
@@ -370,7 +380,7 @@ void XxMergedText::mousePressEvent( QMouseEvent* event )
          _grabDeltaLineNo = dlineno;
    }
 
-   // FIXME todo: clicking in the merged view should also map the cursor in the
+   // Note: Todo: clicking in the merged view should also map the cursor in the
    // main view.
 }
 
@@ -459,7 +469,7 @@ XxMergedFrame::XxMergedFrame(
             _merged, SLOT(horizontalScroll(int)) );
 
    // Track application's scrolling window.
-   connect( app, SIGNAL(cursorChanged(int)), 
+   connect( app, SIGNAL(cursorChanged(int)),
             this, SLOT(appCursorChanged(int)) );
    connect( app, SIGNAL(scrolled(int)), this, SLOT(appScrolled(int)) );
 }
@@ -483,7 +493,9 @@ QScrollBar* XxMergedFrame::getVerticalScrollbar()
 void XxMergedFrame::update()
 {
    BaseClass::update();
-   _merged->update();
+   _merged->update();  // We need this (verified Mon Nov 26 21:12:10 EST 2001),
+                       // otherwise the merged view does not update when the
+                       // cursor does not change but the selection changes.
 }
 
 //------------------------------------------------------------------------------
@@ -523,7 +535,8 @@ XxMergedWindow::XxMergedWindow(
    QWidget*    parent, 
    const char* name 
 ) :
-   BaseClass( parent, name )
+   BaseClass( parent, name ),
+   _app( app )
 {
    const XxResources& resources = app->getResources();
 
@@ -547,7 +560,23 @@ XxMergedWindow::XxMergedWindow(
 void XxMergedWindow::update()
 {
    BaseClass::update();
-   _frame->update();
+   _frame->update(); // FIXME do we really need this?
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::show()
+{
+   BaseClass::show();
+   // Nop for now.
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::hide()
+{
+   BaseClass::hide();
+   _app->synchronizeUI();
 }
 
 XX_NAMESPACE_END

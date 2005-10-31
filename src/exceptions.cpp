@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 398 2001-11-22 05:46:18Z blais $
- * $Date: 2001-11-22 00:46:18 -0500 (Thu, 22 Nov 2001) $
+ * $Id: exceptions.cpp 411 2001-11-23 01:58:55Z blais $
+ * $Date: 2001-11-22 20:58:55 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,18 +28,27 @@
 #include <cmdline.h>
 #include <help.h>
 
+#include <qtextstream.h>
+
 #include <iostream>
 #include <string.h> // strerror
 #include <stdlib.h>
 #include <errno.h>
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
  *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+void issueWarning( const QString& str )
+{
+   // Send it to stderr.
+   QTextStream oss_cerr( stderr, IO_WriteOnly );
+   oss_cerr << "Warning: " << str << endl;
+}
 
 /*==============================================================================
  * CLASS XxError

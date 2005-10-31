@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.inline.h 291 2001-10-20 22:15:00Z blais $
- * $Date: 2001-10-20 18:15:00 -0400 (Sat, 20 Oct 2001) $
+ * $Id: app.inline.h 416 2001-11-26 06:14:44Z blais $
+ * $Date: 2001-11-26 01:14:44 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -148,12 +148,14 @@ inline XxDln XxApp::getBottomLine() const
    if ( _diffs.get() == 0 ) {
       return 0;
    }
-   return std::min( 
+   int botline = std::min( 
       getTopLine() /* top line */
       + (getNbDisplayLines() - 1) /* to bottom line */
       - 1, /* don't allow cursor on half-displayed line */
       int(_diffs->getNbLines())
    );
+   return std::max( botline, 1 ); // treat special case where display is one
+                                  // line high.
 }
 
 //------------------------------------------------------------------------------

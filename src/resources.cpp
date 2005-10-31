@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 400 2001-11-22 06:40:53Z blais $
- * $Date: 2001-11-22 01:40:53 -0500 (Thu, 22 Nov 2001) $
+ * $Id: resources.cpp 417 2001-11-26 23:06:52Z blais $
+ * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,6 +28,7 @@
 #include <accelUtil.h>
 #include <resources.h>
 #include <optionsDialog.h>
+#include <exceptions.h>
 
 #include <qcolor.h>
 #include <qaccel.h>
@@ -140,7 +141,7 @@ void XxResources::initializeOriginalXdiff()
    _accelerators[ ACCEL_TABS_AT_3 ] = Qt::Key_3;
    _accelerators[ ACCEL_TABS_AT_4 ] = Qt::Key_4;
    _accelerators[ ACCEL_TABS_AT_8 ] = Qt::Key_8;
-   _accelerators[ ACCEL_MERGED_VIEW ] = Qt::ALT | Qt::Key_Y;
+   _accelerators[ ACCEL_TOGGLE_PANE_MERGED_VIEW ] = Qt::ALT | Qt::Key_Y;
    _accelerators[ ACCEL_TOGGLE_LINE_NUMBERS ] = Qt::ALT | Qt::Key_L;
    _accelerators[ ACCEL_TOGGLE_MARKERS ] = Qt::ALT | Qt::Key_M;
    _accelerators[ ACCEL_TOGGLE_OVERVIEW ] = Qt::ALT | Qt::Key_O;
@@ -234,6 +235,8 @@ void XxResources::initializeOriginalXdiff()
    //---------------------------------------------------------------------------
 
    // Defaults just like xdiff, pretty plain.
+   _showOpts[ SHOW_PANE_MERGED_VIEW ] = false;
+   _showOpts[ SHOW_POPUP_MERGED_VIEW ] = false;
    _showOpts[ SHOW_TOOLBAR ] = false;
    _showOpts[ SHOW_LINE_NUMBERS ] = false;
    _showOpts[ SHOW_VERTICAL_LINE ] = false;
@@ -257,7 +260,7 @@ void XxResources::initializeOriginalXdiff()
       _commands[ CMD_EDIT ].setLatin1( editor );
    }
    else {
-      _commands[ CMD_EDIT ] = "vi";
+      _commands[ CMD_EDIT ] = "xterm -e vi";
    }
 
    //---------------------------------------------------------------------------
@@ -308,6 +311,9 @@ void XxResources::initializeOriginalXdiff()
    _hordiffContext = 5;
    updateHordiffBuffers();
 
+   //---------------------------------------------------------------------------
+
+   _showPaneMergedViewPercent = 40;
 }
 
 //------------------------------------------------------------------------------
@@ -665,6 +671,18 @@ void XxResources::setHordiffContext( uint hordiffContext )
 {
    _hordiffContext = hordiffContext;
    updateHordiffBuffers();
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setShowPaneMergedViewPercent( uint p )
+{
+   _showPaneMergedViewPercent = p;
+   if ( p > 100 ) {
+      issueWarning( "Maximum pane merged view percent is 100" );
+      p = 100;
+   }
    emit changed();
 }
 

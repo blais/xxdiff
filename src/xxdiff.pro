@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 405 2001-11-22 17:51:48Z blais $
-# $Date: 2001-11-22 12:51:48 -0500 (Thu, 22 Nov 2001) $
+# $Id: xxdiff.pro 423 2001-11-29 05:32:12Z blais $
+# $Date: 2001-11-29 00:32:12 -0500 (Thu, 29 Nov 2001) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -25,7 +25,7 @@
 #
 
 TEMPLATE = xxdiff
-CONFIG = release qt warn_on
+CONFIG = debug qt warn_on
 
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
@@ -38,7 +38,7 @@ INCLUDEPATH += .
 
 LEXYACC  = resParser
 LEXYACC_OBJ  = $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
-TMAKE_CLEAN += $$LEXYACC_OBJ
+TMAKE_CLEAN += $$LEXYACC_OBJ doc.h
 
 
 #
@@ -137,6 +137,7 @@ HEADERS = \
 	resources.inline.h \
 	accelUtil.h \
 	text.h \
+	central.h \
 	merged.h \
 	lineNumbers.h \
 	util.h \
@@ -156,6 +157,7 @@ SOURCES = \
 	main.cpp \
 	overview.cpp \
 	text.cpp \
+	central.cpp \
 	merged.cpp \
 	lineNumbers.cpp \
 	util.cpp \

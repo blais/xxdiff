@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 375 2001-11-12 22:57:03Z blais $
- * $Date: 2001-11-12 17:57:03 -0500 (Mon, 12 Nov 2001) $
+ * $Id: app.h 422 2001-11-28 23:41:31Z blais $
+ * $Date: 2001-11-28 18:41:31 -0500 (Wed, 28 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -69,6 +69,7 @@ class QDialog;
 class QSocketNotifier;
 class QToolBar;
 class QMessageBox;
+class QSplitter;
 
 XX_NAMESPACE_BEGIN
 
@@ -80,6 +81,7 @@ class XxCmdline;
 class XxOverview;
 class XxLineNumbers;
 class XxText;
+class XxMergedFrame;
 class XxMergedWindow;
 class XxDiffs;
 class XxBuffer;
@@ -229,6 +231,7 @@ public slots:
    void saveAsLeft();
    void saveAsMiddle();
    void saveAsRight();
+   void saveAsMerged();
    void saveAs();
    void saveSelectedOnly();
    void editLeft();
@@ -294,7 +297,8 @@ public slots:
    void qualityNormal();
    void qualityFastest();
    void qualityHighest();
-   void mergedView();
+   void togglePaneMergedView();
+   void togglePopupMergedView();
    void toggleToolbar();
    void toggleLineNumbers();
    void adjustLineNumbers();
@@ -433,6 +437,10 @@ private:
    QMainWindow*            _mainWindow;
    QMessageBox*            _diffErrorsMsgBox;
    QWidget*                _centralWidget;
+   QSplitter*              _splitter;
+   XxMergedFrame*          _paneMergedView;
+   XxMergedWindow*         _popupMergedView;
+   QWidget*                _textsWidget;
    QPopupMenu*             _viewPopup;
    QPopupMenu*             _optionsMenu;
    QPopupMenu*             _displayMenu;
@@ -446,7 +454,6 @@ private:
    QLabel*                 _lineNumberLabel[3];
    XxLineNumbers*          _lineNumbers[3];
    XxText*                 _text[3];
-   XxMergedWindow*         _mergedWindow;
    QToolBar*               _toolbar;
    QScrollBar*             _vscroll[2];
    QScrollBar*             _hscroll;

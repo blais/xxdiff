@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 390 2001-11-19 17:24:09Z blais $
- * $Date: 2001-11-19 12:24:09 -0500 (Mon, 19 Nov 2001) $
+ * $Id: resources.h 422 2001-11-28 23:41:31Z blais $
+ * $Date: 2001-11-28 18:41:31 -0500 (Wed, 28 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -92,6 +92,8 @@ enum XxShowOpt {
    SHOW_VERTICAL_LINE,
    SHOW_OVERVIEW,
    SHOW_FILENAMES,
+   SHOW_PANE_MERGED_VIEW,
+   SHOW_POPUP_MERGED_VIEW,
    SHOW_LAST // Not a real resource
 };
 
@@ -104,6 +106,7 @@ enum XxAccel {
    ACCEL_SAVE_AS_LEFT,
    ACCEL_SAVE_AS_MIDDLE,
    ACCEL_SAVE_AS_RIGHT,
+   ACCEL_SAVE_AS_MERGED,
    ACCEL_SAVE_AS,
    ACCEL_SAVE_SELECTED_ONLY,
    ACCEL_EDIT_LEFT,
@@ -169,7 +172,8 @@ enum XxAccel {
    ACCEL_QUALITY_NORMAL,
    ACCEL_QUALITY_FASTEST,
    ACCEL_QUALITY_HIGHEST,
-   ACCEL_MERGED_VIEW,
+   ACCEL_TOGGLE_PANE_MERGED_VIEW,
+   ACCEL_TOGGLE_POPUP_MERGED_VIEW,
    ACCEL_TOGGLE_TOOLBAR,
    ACCEL_TOGGLE_LINE_NUMBERS,
    ACCEL_TOGGLE_MARKERS,
@@ -495,6 +499,14 @@ public:
    void setHordiffContext( uint );
    // </group>
 
+   // Percentage (between 0 and 100) of the merged pane upon startup.
+   // <group>
+   uint getShowPaneMergedViewPercent() const;
+   void setShowPaneMergedViewPercent( uint );
+   // </group>
+
+
+
    // Return a table for the dynamic programming algorithm, if the maximum size
    // of the table allows it.  If not, then return 0.
    int* getDynProgTable( const uint htx, const uint hty ) const;
@@ -567,6 +579,7 @@ private:
    XxHordiff    _hordiffType;
    uint         _hordiffMax;
    uint         _hordiffContext;
+   uint         _showPaneMergedViewPercent;
 
    // Dynamic programming table used for horizontal diffs computation.
    // <group>

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.inline.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: diffs.inline.h 413 2001-11-23 23:19:44Z blais $
+ * $Date: 2001-11-23 18:19:44 -0500 (Fri, 23 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -43,6 +43,10 @@ inline uint XxDiffs::getNbLines() const
 //
 inline const XxLine& XxDiffs::getLine( const XxDln lineno ) const
 {
+   if ( !( lineno > 0 && lineno <= XxDln(_lines.size()) ) ) {
+      XX_TRACE( lineno );
+   }
+
    XX_ASSERT( lineno > 0 && lineno <= XxDln(_lines.size()) );
    return _lines[ lineno - 1 ];
 }

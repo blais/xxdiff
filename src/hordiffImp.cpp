@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: hordiffImp.cpp 406 2001-11-22 17:56:10Z blais $
- * $Date: 2001-11-22 12:56:10 -0500 (Thu, 22 Nov 2001) $
+ * $Id: hordiffImp.cpp 417 2001-11-26 23:06:52Z blais $
+ * $Date: 2001-11-26 18:06:52 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -232,10 +232,18 @@ void XxHordiffImp::boundsHordiff2(
 
    // Normalize.
    for ( int ii = 0; ii < 2; ++ii ) {
-      if ( righthd[ii] != -1 ) {
+      if ( !( lefthd[ii] == -1 && righthd[ii] == -1 ) ) {
          righthd[ii]++; // +1 because righthd is the last char.
       }
    }
+   
+// #define XX_LOCAL_BOUNDS_DEBUG
+#ifdef XX_LOCAL_BOUNDS_DEBUG
+   using namespace std;
+   for ( int ii = 0; ii < 2; ++ii ) {
+      cerr << ii << " : " << lefthd[ii] << " " << righthd[ii] << endl;
+   }
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -375,14 +383,16 @@ void XxHordiffImp::multipleHordiffs2(
    const int          righthd1
 )
 {
+//#define XX_LOCAL_HDIFF_DEBUG
+#ifdef XX_LOCAL_HDIFF_DEBUG
    using namespace std;
+#endif
 
    int len0 = righthd0 - lefthd0;
    text0 += lefthd0-1; // we set to -1 because our table starts at -1
    int len1 = righthd1 - lefthd1;
    text1 += lefthd1-1;
 
-//#define XX_LOCAL_HDIFF_DEBUG
 #ifdef XX_LOCAL_HDIFF_DEBUG
    {
       QCString s1( text0 + 1, len0+1 );

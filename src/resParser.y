@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.y 399 2001-11-22 06:19:13Z blais $
- * $Date: 2001-11-22 01:19:13 -0500 (Thu, 22 Nov 2001) $
+ * $Id: resParser.y 411 2001-11-23 01:58:55Z blais $
+ * $Date: 2001-11-22 20:58:55 -0500 (Thu, 22 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -104,6 +104,8 @@
 %token <num> HORDIFF_MAX
 %token <num> HORDIFF_CONTEXT
 
+%token <num> SHOW_PANE_MERGED_VIEW_PERCENT
+
 /* typed rules */
 %type <num> colorbf
 %type <num> boolkwd
@@ -138,6 +140,7 @@ stmt		: error '\n'
 		| hordiff_type
 		| hordiff_max
 		| hordiff_context
+		| show_pane_merged_view_percent
 		;
 
 prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
@@ -315,6 +318,13 @@ hordiff_context : HORDIFF_CONTEXT COLON NUMBER
 		{
                    /*printf( "==> hordiff context: %d\n", $3 );*/
                    RESOURCES->setHordiffContext( $3 );
+                }
+		;
+
+show_pane_merged_view_percent : SHOW_PANE_MERGED_VIEW_PERCENT COLON NUMBER
+		{
+                   /*printf( "==> show pane merged view percent: %d\n", $3 );*/
+                   RESOURCES->setShowPaneMergedViewPercent( $3 );
                 }
 		;
 

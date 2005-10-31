@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.h 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: merged.h 416 2001-11-26 06:14:44Z blais $
+ * $Date: 2001-11-26 01:14:44 -0500 (Mon, 26 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -225,16 +225,21 @@ public:
    );
 
    // See base class.
+   // <group>
    virtual void update();
+   virtual void show();
+   virtual void hide();
+   // </group>
+
 
 private:
 
    /*----- data members -----*/
 
    XxMergedFrame* _frame;
+   XxApp*         _app;
 
 };
-
 
 XX_NAMESPACE_END
 
