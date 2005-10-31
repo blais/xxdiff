@@ -1,5 +1,5 @@
 /******************************************************************************\
- * $Id: dialogs.cpp 32 2000-09-21 20:39:55Z  $
+ * $Id: suicideMessageBox.h 32 2000-09-21 20:39:55Z  $
  * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
@@ -20,17 +20,53 @@
  *
  *****************************************************************************/
 
+#ifndef INCL_XXDIFF_SUICIDEMESSAGEBOX
+#define INCL_XXDIFF_SUICIDEMESSAGEBOX
+
 /*==============================================================================
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <dialogs.h>
+#ifndef INCL_XXDIFF_DEFS
+#include <defs.h>
+#endif
 
-XX_NAMESPACE_BEGIN
-using namespace std;
+#ifndef INCL_QT_QMESSAGEBOX
+#include <qmessagebox.h>
+#define INCL_QT_QMESSAGEBOX
+#endif
 
 /*==============================================================================
- * PUBLIC FUNCTIONS
+ * FORWARD DECLARATIONS
  *============================================================================*/
 
+XX_NAMESPACE_BEGIN
+
+/*==============================================================================
+ * LOCAL CLASS XxSuicideMessageBox
+ *============================================================================*/
+
+// <summary> simple non-modal dialog that cares after itself </summary>
+
+class XxSuicideMessageBox : public QMessageBox {
+
+public:
+
+   /*----- member functions -----*/
+
+   // Constructor.
+   XxSuicideMessageBox( 
+      QWidget*       parent,
+      const QString& caption, 
+      const QString& text, 
+      Icon           icon 
+   );
+
+   // See base class.
+   virtual void done( int r );
+
+};
+
 XX_NAMESPACE_END
+
+#endif

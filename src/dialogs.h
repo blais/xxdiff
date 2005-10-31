@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: dialogs.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: dialogs.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -36,92 +36,11 @@
 #define INCL_QT_QDIALOG
 #endif
 
-
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
-
-class QLineEdit;
-
 
 XX_NAMESPACE_BEGIN
-
-
-/*==============================================================================
- * FORWARD DECLARATIONS
- *============================================================================*/
-
-class XxApp;
-
-
-/*==============================================================================
- * CLASS XxSearchDialog
- *============================================================================*/
-
-// <summary> simple non-modal dialog that cares after itself </summary>
-
-class XxSearchDialog : public QDialog {
-
-   Q_OBJECT
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxSearchDialog( XxApp* app, QWidget* parent );
-
-public slots:
-
-   /*----- member functions -----*/
-
-   void onSearch();
-   void onCancel();
-
-private:
-
-   /*----- data members -----*/
-
-   XxApp* 	_app;
-   QLineEdit* 	_e;
-
-};
-
-/*==============================================================================
- * CLASS XxTabWidthDialog
- *============================================================================*/
-
-// <summary> dialog to change tab width </summary>
-
-class XxTabWidthDialog : public QDialog {
-
-   Q_OBJECT
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxTabWidthDialog( XxApp* app, QWidget* parent );
-
-   // See base class.
-   virtual void show();
-
-public slots:
-
-   /*----- member functions -----*/
-
-   void onSet();
-   void onClose();
-
-private:
-
-   /*----- data members -----*/
-
-   XxApp* 	_app;
-   QLineEdit* 	_e;
-
-};
 
 
 XX_NAMESPACE_END

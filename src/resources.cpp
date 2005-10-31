@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: resources.cpp 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -314,9 +314,13 @@ const nameDoc mapStrings[
      "accel.redoDiff",
      "Accelerator for ``redo diff'' command."
    },
-   { XxResources::ACCEL_DIFF_ARGUMENTS,
-     "accel.diffArguments",
-     "Accelerator for ``diff arguments'' command."
+   { XxResources::ACCEL_EDIT_DIFF_OPTIONS,
+     "accel.editDiffOptions",
+     "Accelerator for ``edit diff options'' command."
+   }, 
+   { XxResources::ACCEL_EDIT_DISPLAY_OPTIONS,
+     "accel.editDisplayOptions",
+     "Accelerator for ``edit display options'' command."
    },
    { XxResources::ACCEL_DIFF_FILES_AT_CURSOR,
      "accel.diffFilesAtCursor",
@@ -442,9 +446,9 @@ const nameDoc mapStrings[
      "accel.selectLineUnselect",
      "Accelerator for ``unselect line'' command."
    },
-   { XxResources::ACCEL_SET_TAB_WIDTH,
-     "accel.setTabWidth",
-     "Accelerator for ``set tab width'' command."
+   { XxResources::ACCEL_TABS_AT_3,
+     "accel.tabsAt3",
+     "Accelerator for ``set tabs at 3'' command."
    },
    { XxResources::ACCEL_TABS_AT_4,
      "accel.tabsAt4",
@@ -558,12 +562,12 @@ const nameDoc mapStrings[
 
    //---------------------------------------------------------------------------
    { XxResources::COLOR_BACK_SAME,
-     "color.same.Back",
-     "Background color for A in AAA hunk."
+     "color.same.back",
+     "Background color for A in an AA (2-way) or AAA (3-way) hunk."
    },
    { XxResources::COLOR_FORE_SAME,
      "color.same.fore",
-     "Foreground color for A in AAA hunk."
+     "Foreground color for A in AAA block."
    },
    { XxResources::COLOR_BACK_DIFF_ONE,
      "color.diffOne.back",
@@ -649,52 +653,52 @@ const nameDoc mapStrings[
                                       
    { XxResources::COLOR_BACK_INSERT,
      "color.insert.back",
-     "Background color for A in A--, -A-, --A blocks."
+     "Background color for A in A-, -A, A--, -A-, --A blocks."
    },
    { XxResources::COLOR_FORE_INSERT,
      "color.insert.fore",
-     "Foreground color for A in A--, -A-, --A blocks."
+     "Foreground color for A in A-, -A, A--, -A-, --A blocks."
    },
    { XxResources::COLOR_BACK_INSERT_BLANK,
      "color.insertBlank.back",
-     "Background color for - in A--, -A-, --A blocks."
+     "Background color for - in A-, -A, A--, -A-, --A blocks."
    },
    { XxResources::COLOR_FORE_INSERT_BLANK,
      "color.insertBlank.fore",
-     "Foreground color for - in A--, -A-, --A blocks."
+     "Foreground color for - in A-, -A, A--, -A-, --A blocks."
    },
                                       
    { XxResources::COLOR_BACK_DIFF_ALL,
      "color.diffAll.back",
-     "Background color for A,B or C in ABC blocks."
+     "Background color for A,B or C in AB or ABC blocks."
    },
    { XxResources::COLOR_FORE_DIFF_ALL,
      "color.diffAll.fore",
-     "Foreground color for A,B or C in ABC blocks."
+     "Foreground color for A,B or C in AB or ABC blocks."
    },
    { XxResources::COLOR_BACK_DIFF_ALL_SUP,
      "color.diffAllSup.back",
-     "Background color for A,B or C in ABC blocks (shadowed)."
+     "Background color for A,B or C in AB or ABC blocks (shadowed)."
    },
    { XxResources::COLOR_FORE_DIFF_ALL_SUP,
      "color.diffAllSup.fore",
-     "Foreground color for A,B or C in ABC blocks (shadowed)."
+     "Foreground color for A,B or C in AB or ABC blocks (shadowed)."
    },
    { XxResources::COLOR_BACK_DIFF_ALL_ONLY,
      "color.diffAllOnly.back",
-     "Background color for A,B or C in ABC blocks (when other is blank)."
+     "Background color for A,B or C in AB or ABC blocks (when other is blank)."
    },
    { XxResources::COLOR_FORE_DIFF_ALL_ONLY,
      "color.diffAllOnly.fore",
-     "Foreground color for A,B or C in ABC blocks (when other is blank)."
+     "Foreground color for A,B or C in AB or ABC blocks (when other is blank)."
    },
    { XxResources::COLOR_BACK_DIFF_ALL_NONLY,
      "color.diffAllNonly.back",
-     "Background color for A,B or C in ABC blocks (when blank)."
+     "Background color for A,B or C in AB or ABC blocks (when blank)."
    },
    { XxResources::COLOR_FORE_DIFF_ALL_NONLY,
      "color.diffAllNonly.fore",
-     "Foreground color for A,B or C in ABC blocks (when blank)."
+     "Foreground color for A,B or C in AB or ABC blocks (when blank)."
    },
                                       
    { XxResources::COLOR_BACK_DIFFDEL,
@@ -959,6 +963,35 @@ const nameDoc mapStrings[
 
    //---------------------------------------------------------------------------
 
+   { XxResources::TAG_CONFLICT_SEPARATOR,
+     "tag.conflict.separator",
+     "Text stub to prepend to conflict hunks when saving unselected regions."
+   },
+   { XxResources::TAG_CONFLICT_END,
+     "tag.conflict.end",
+     "Text stub to append to conflict hunks when saving unselected regions."
+   },
+   { XxResources::TAG_CONDITIONAL_IFDEF,
+     "tag.conditional.ifdef",
+     "Text stub for ifdef conditional marker when saving unselected regions."
+   },
+   { XxResources::TAG_CONDITIONAL_ELSEIF,
+     "tag.conditional.elseif",
+     "Text stub for elseif conditional marker when saving unselected regions."
+     "This will be used for 3-way diffs only."
+   },
+   { XxResources::TAG_CONDITIONAL_ELSE,
+     "tag.conditional.else",
+     "Text stub for else conditional marker when saving unselected regions."
+   },
+   { XxResources::TAG_CONDITIONAL_ENDIF,
+     "tag.conditional.endif",
+     "Text stub for endif conditional marker when saving unselected regions."
+   },
+   { XxResources::TAG_LAST, "", "" },
+
+   //---------------------------------------------------------------------------
+
    { XxResources::TAB_WIDTH,
      "tabWidth",
      "Width (in characters) of tabs."
@@ -970,14 +1003,6 @@ const nameDoc mapStrings[
    { XxResources::OVERVIEW_SEP_WIDTH,
      "overviewSepWidth",
      "Width (in pixels) of separation between files in the overview area."
-   },
-   { XxResources::UNMERGED_SEPARATOR_TAG,
-     "unmergedSeparatorTag",
-     "Text stub to prepend to unmerged hunks when saving unselected regions."
-   },
-   { XxResources::UNMERGED_END_TAG,
-     "unmergedEndTag",
-     "Text stub to append to unmerged hunks when saving unselected regions."
    }
 
 };
@@ -1065,7 +1090,7 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::ACCEL_SELECT_LINE_RIGHT ] = "Shift+K"; 
    _map[ XxResources::ACCEL_SELECT_LINE_NEITHER ] = "Shift+Y";
    _map[ XxResources::ACCEL_SELECT_LINE_UNSELECT ] = "Shift+U";
-   _map[ XxResources::ACCEL_SET_TAB_WIDTH ] = "Alt+T";
+   _map[ XxResources::ACCEL_TABS_AT_3 ] = "3";
    _map[ XxResources::ACCEL_TABS_AT_4 ] = "4";
    _map[ XxResources::ACCEL_TABS_AT_8 ] = "8";
    _map[ XxResources::ACCEL_MERGED_VIEW ] = "Alt+Y";
@@ -1206,10 +1231,15 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::CMDOPT_FILES_QUALITY_FASTEST ] = "-d";
    _map[ XxResources::CMDOPT_FILES_QUALITY_HIGHEST ] = "-H";
 
+   _map[ XxResources::TAG_CONFLICT_SEPARATOR ] = ">>>>>>>>>>>>>>>>>>>> File %d";
+   _map[ XxResources::TAG_CONFLICT_END ] = "<<<<<<<<<<<<<<<<<<<<";
+   _map[ XxResources::TAG_CONDITIONAL_IFDEF ] = "#ifdef %s";
+   _map[ XxResources::TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
+   _map[ XxResources::TAG_CONDITIONAL_ELSE ] = "#else /* %s */";
+   _map[ XxResources::TAG_CONDITIONAL_ENDIF ] = "#endif /* %s */";
+
    _map[ XxResources::OVERVIEW_FILE_WIDTH ] = "20";
    _map[ XxResources::OVERVIEW_SEP_WIDTH ] = "14";
-   _map[ XxResources::UNMERGED_SEPARATOR_TAG ] = ">>>>>>>>>>>>>>>>>>>> File %d";
-   _map[ XxResources::UNMERGED_END_TAG ] = "<<<<<<<<<<<<<<<<<<<<";
 }
 
 //------------------------------------------------------------------------------
@@ -1427,8 +1457,8 @@ void writeDocAttrib(
    XxResources::Resource res
 )
 {
-   const char* name = resources->getResourceName( res );
-   const char* doc = resources->getResourceDoc( res );
+   const char* name = XxResources::getResourceName( res );
+   const char* doc = XxResources::getResourceDoc( res );
    os << std::endl;
    os << "# " << doc << std::endl;
    os << name << " : ";
@@ -1436,9 +1466,7 @@ void writeDocAttrib(
 
 }
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -1489,7 +1517,7 @@ XxResources::XxResources()
 
 //------------------------------------------------------------------------------
 //
-const char* XxResources::getResourceName( Resource res ) const
+const char* XxResources::getResourceName( Resource res )
 {
    XX_CHECK( int( RESOURCE_FIRST ) <= res && res <= int( RESOURCE_LAST ) );
    return mapStrings[ int( res ) ]._name;
@@ -1497,10 +1525,24 @@ const char* XxResources::getResourceName( Resource res ) const
 
 //------------------------------------------------------------------------------
 //
-const char* XxResources::getResourceDoc( Resource res ) const
+const char* XxResources::getResourceDoc( Resource res )
 {
    XX_CHECK( int( RESOURCE_FIRST ) <= res && res <= int( RESOURCE_LAST ) );
    return mapStrings[ int( res ) ]._doc;
+}
+
+//------------------------------------------------------------------------------
+//
+XxResources::Resource XxResources::getResourceId( const char* resname )
+{
+   int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
+   for ( int ii = 0; ii < nbres; ++ii ) {
+      if ( ::strcmp( mapStrings[ XxResources::Resource( ii ) ]._name, 
+                     resname ) == 0 ) {
+         return XxResources::Resource( XxResources::RESOURCE_FIRST + ii );
+      }
+   }
+   return RESOURCE_LAST;
 }
 
 //------------------------------------------------------------------------------
@@ -1512,7 +1554,8 @@ bool XxResources::checkResourcesDoc() const
    int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
    for ( int ii = 0; ii < nbres; ++ii ) {
       if ( mapStrings[ XxResources::Resource( ii ) ]._res != ii ) {
-         os << "Error in resource " << ii << std::endl;
+         os << "Error in resource " << ii << " : " 
+            << mapStrings[ XxResources::Resource( ii ) ]._name << std::endl;
       }
    }
    return err;
@@ -1585,17 +1628,17 @@ void XxResources::parse( XxResourcesParser& parser )
       }
    }
 
+   for ( int ii = 0; ii < TAG_LAST - TAG_FIRST; ++ii ) {
+      if ( query( parser, Resource(ii + TAG_FIRST), val ) ) {
+         _tags[ ii ] = val;
+      }
+   }
+
    if ( query( parser, OVERVIEW_FILE_WIDTH, val ) ) {
       _overviewFileWidth = atoi( val.c_str() );
    }
    if ( query( parser, OVERVIEW_SEP_WIDTH, val ) ) {
       _overviewSepWidth = atoi( val.c_str() );
-   }
-   if ( query( parser, UNMERGED_SEPARATOR_TAG, val ) ) {
-      _unmergedSeparatorTag = val;
-   }
-   if ( query( parser, UNMERGED_END_TAG, val ) ) {
-      _unmergedEndTag = val;
    }
    
 }   
@@ -1698,6 +1741,28 @@ void XxResources::setCommandOption(
 
    setCommand( cmdId, cmd.c_str() );
 }
+
+//------------------------------------------------------------------------------
+//
+const char* XxResources::getTag( Resource cmdId ) const
+{
+   int id = int( cmdId ) - int( TAG_FIRST );
+   XX_CHECK( id < int(TAG_LAST) - int(TAG_FIRST) );
+   return _tags[ id ].c_str();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setColor(
+   const Resource resource,
+   const QColor&  color
+)
+{
+   int i = int(resource) - int(COLOR_FIRST);
+   XX_CHECK( i < int(COLOR_LAST) - int(COLOR_FIRST) );
+   _colors[ i ] = color;
+}
+
 
 //------------------------------------------------------------------------------
 //
@@ -1975,6 +2040,15 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       }
    }
 
+   for ( int ii = 0; ii < TAG_LAST - TAG_FIRST; ++ii ) {
+      query( defaults, Resource(ii + TAG_FIRST), val );
+      if ( val != _tags[ ii ] ) {
+         writeDocAttrib( this, os, Resource(ii + TAG_FIRST) );
+         os << _tags[ ii ];
+         os << endl << endl;
+      }
+   }
+
    {
       uint ofw = 0;
       if ( query( defaults, OVERVIEW_FILE_WIDTH, val ) ) {
@@ -1999,25 +2073,6 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       }
    }
 
-   {
-      std::string val;
-      query( defaults, UNMERGED_SEPARATOR_TAG, val );
-      if ( _unmergedSeparatorTag != val ) {
-         writeDocAttrib( this, os, UNMERGED_SEPARATOR_TAG );
-         os << _unmergedSeparatorTag;
-         os << endl << endl;
-      }
-   }
-
-   {
-      std::string val;
-      query( defaults, UNMERGED_END_TAG, val );
-      if ( _unmergedEndTag != val ) {
-         writeDocAttrib( this, os, UNMERGED_END_TAG );
-         os << _unmergedEndTag;
-         os << endl << endl;
-      }
-   }
 }   
 
 //------------------------------------------------------------------------------

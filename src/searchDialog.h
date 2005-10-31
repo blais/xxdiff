@@ -1,5 +1,5 @@
 /******************************************************************************\
- * $Id: dialogs.cpp 32 2000-09-21 20:39:55Z  $
+ * $Id: searchDialog.h 32 2000-09-21 20:39:55Z  $
  * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
@@ -20,17 +20,69 @@
  *
  *****************************************************************************/
 
+#ifndef INCL_XXDIFF_SEARCHDIALOG
+#define INCL_XXDIFF_SEARCHDIALOG
+
 /*==============================================================================
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <dialogs.h>
+#ifndef INCL_XXDIFF_DEFS
+#include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_RESOURCES
+#include <resources.h>
+#endif
+
+#ifndef INCL_SEARCHDIALOGBASE
+#include <searchDialogBase.h>
+#define INCL_SEARCHDIALOGBASE
+#endif
 
 XX_NAMESPACE_BEGIN
-using namespace std;
 
 /*==============================================================================
- * PUBLIC FUNCTIONS
+ * FORWARD DECLARATIONS
  *============================================================================*/
 
+class XxApp;
+
+/*==============================================================================
+ * CLASS XxSearchDialog
+ *============================================================================*/
+
+// <summary> dialog for diff search </summary>
+
+class XxSearchDialog : public XxSearchDialogBase {
+
+   Q_OBJECT
+
+   /*----- types and enumerations -----*/
+
+   typedef XxSearchDialogBase BaseClass;
+
+public:
+
+   /*----- member functions -----*/
+
+   // Constructor.
+   XxSearchDialog( XxApp* app, QWidget* parent );
+
+public slots:
+
+   /*----- member functions -----*/
+
+   void onApply();
+
+private:
+
+   /*----- data members -----*/
+
+   XxApp* _app;
+
+};
+
 XX_NAMESPACE_END
+
+#endif

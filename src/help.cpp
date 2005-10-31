@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: help.cpp 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -477,6 +477,8 @@ Options: \n\
    -b, --ignore-space-change   Passed on to diff(1).\n\
                                Ignore changes in the amount of white space.\n\
                                when comparing the two files.\n\
+   -r, --recursive             Passed on to diff(1).\n\
+                               This is only meaningful for directory diffs.\n\
        --resource=<string>     Pass on string to resource parser.\n\
                                Resources given in this manner on the command\n\
                                line supersede other resource mechanisms.\n\
@@ -517,16 +519,14 @@ void XxHelp::dumpVersion( std::ostream& os )
 //
 void XxHelp::dumpResources( std::ostream& os )
 {
-   const XxResources* resources = XxResources::getInstance();
-
    int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
    for ( int ii = 0; ii < nbres; ++ii ) {
       const char* doc =
-         resources->getResourceDoc( XxResources::Resource( ii ) );
+         XxResources::getResourceDoc( XxResources::Resource( ii ) );
       if ( doc != 0 ) {
          if ( strcmp( doc, "()" ) != 0 ) {
             os << doc << std::endl;
-            os << resources->getResourceName( XxResources::Resource( ii ) );
+            os << XxResources::getResourceName( XxResources::Resource( ii ) );
             os << std::endl << std::endl;
          }
       }

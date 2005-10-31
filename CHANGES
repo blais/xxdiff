@@ -1,6 +1,35 @@
 CHANGES for xxdiff
 ------------------------------
 
+Version 1.8.1:
+
+   * Started using CVS and ChangeLog actively, so releases now should contain
+     more stuff in them.
+   * made errors dialog pop in front of main window, not behind
+   * separated suicide message box
+   * removed tabwidth dialog
+   * finished display options dialog.
+   * added display options in options dialog, and made switch
+     automatically from menu invocation to correct tab
+   * fiddled with secondary merge window a bit. using qsplitter
+     doesn't work well, so nix it.
+   * Horizontal scrollbar now hides when not necessary.
+   * made color selection dialog work.
+   * Separate merged view classes.
+   * Fixed usage message output of exception caught.
+   * implemented simple ifdef markers output. still have to become selective on
+     this output (i.e. don't output empty regions).
+   * added new resources for text tags.
+   * Small changes in markers file dialog.
+   * removed warning about unselected regions when saving, use markers dialog
+     instead.
+   * implemented file dialog with markers selection for unselected regions.
+   * brand new search dialog, muchos better than the last one.
+   * renamed _GCC to _GNU.
+   * changed the way the GNU compiler is recognized.
+   * resources.h: static methods to get res names.
+   * app.cpp: removed hardcoded resource names.
+
 ------------------------------
 
 Version 1.8:
@@ -607,8 +636,19 @@ Wishlist/ToDo list:
 ------------------------------
 
 
+
+   * redo diff clears selections!  can we do something about it?
+
+
+automate CHANGES file update using CVS on xxdiff.sourceforge.net
+
+
+   * add dialog that does "guided" "select next and get the hell out".
+     or just make that really clear in the toolbar buttons.
+
 qt email list: question about CM
 
+   * perhaps the "save selected only" option should be in the markers dialog?
 
 bug fixes:
 
@@ -622,17 +662,17 @@ bug fixes:
 
    * check out += problem in Makefile.in, with CPPFLAGS
 
-
 new features:
 
-   * cmdline option to select whether dirdiff should be recursive or not
+   * add "show merged view on startup" resource
+
+   * search using regexp
 
    * Allow selection of text, as in an editor, just for cut-n-paste purpose.
    * dirdiff full path name cut-n-paste option
    * Add display options dialog with colors, remove color legend, remove tab 
      width dialog, one big dialog with all display options
 
-   * Do nicer search dialog as well, designer-based
    * Remove useless dialogs in dialog.h
 
    * Provide some lame editing feature, people want it anyway.
@@ -642,8 +682,6 @@ new features:
 
    * Show symlinks, date and size of files in directory diffs
    * Add an icon somewhere to show if a directory diff or a simple file diff
-
-   * Horizontal scrollbar should disappear when not necessary.
 
    * We need to link to GNU diff directly for the following reason: to avoid
      the temporary files, when capturing stdin, 
@@ -665,6 +703,8 @@ new features:
 
 perhaps features:
 
+   * Highlight search results.
+
    * Perhaps change parser to read options as "category.blabla: value"
    * Add exclude option to diff options
    * Cleanup similar callbacks in XxApp.
@@ -682,9 +722,6 @@ perhaps features:
 
    * urgent bugs: ignore whitespace crashes, any two files (mcguffm)
      ==> can't reproduce.
-
-   * urgent: make sure the errors dialog pops in front of the main window.
-     ==> do at DL, where cleardiff returns some errors on belley's files.
 
    * merged view: add different colors for different selected sides
 
@@ -729,19 +766,17 @@ perhaps features:
    * xxdiff --version tries to open the display, we don't want that.
    * finish in context help
    * Allow dragging like a scrollbar in the overview area (like in mgdiff);
-   * Automatically hide horizontal scrollbar if not needed;
    * it would be nice to be able to select both sides of a hunk for making 
      merge comments... but thru which UI do we do this?
    * Separate XxLine::DisplayType of resources... it does not make sense anymore
    * Implement motion bindings in the merged view too.
 
 (resources)
-   * do a resource parser that takes resources from the command line!
-   * default opts for diff args
-     (ignore white space, ignore case, etc.), do that in resources file text
-     and should parse string also to detect them
    * generate sample.xxdiffrc file at runtime with an help option,
      default resources should be commented, added ones uncommented.
+
+   * add a cmdline option to select which xxdiffrc to use, I guess it is 
+     already possible by running XXDIFFRC=... xxdiff ...
 
 (make, compile, release process)
    * fix release_src script for IRIX specifics
@@ -793,7 +828,6 @@ perhaps features:
 (new features)
    * add case sensitivity to search feature
    * rename "regions" to "hunks" and use GNU diff terminology from texinfo
-   * void XxApp::toggleOverview()?  set resources.
    * open left/right on an empty xxdiff should allow to open! 
      supporting one file only.  (on startup AND on an open diff) this can be
      done easily by specifying the "other" file as an empty file and running
@@ -802,7 +836,7 @@ perhaps features:
      lines) allow larger selection (smarter key down/up processing)
    * Drag-select for selecting multiple lines on button 2;
    * add option for confirmation when some regions are selected (for gijsbert)
-   * add an option for splitting all CHANGE regions automatically
+   * add an option for splitting all CHANGE regions automatically (buh?)
    * add an option to display context format diffs into its own widget, like 
      for the line numbers.
    * allow insertion of marker lines
@@ -857,3 +891,4 @@ KNOWN BUGS
 ------------------------------
 
    * Using diff option "-B" with xxdiff doesn't work for now.
+

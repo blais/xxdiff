@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: overview.cpp 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -107,7 +107,8 @@ void XxOverview::drawContents( QPainter* pp )
    const XxResources* resources = XxResources::getInstance();
 
    // If it is empty, erase the whole widget with blank color.
-   QColor backgroundColor = resources->getBackgroundColor();
+   QColor backgroundColor = 
+      resources->getColor( XxResources::COLOR_BACKGROUND );
    if ( nbFiles == 0 || diffs == 0 ) {
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
@@ -238,7 +239,7 @@ void XxOverview::drawContents( QPainter* pp )
    int topline = _app->getTopLine();
    int bottomline = _app->getBottomLine();
    const int visRegionBorder = 6;
-   QColor cursorColor = resources->getCursorColor();
+   QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
    for ( ii = 0; ii < nbFiles; ++ii ) {
       bool aempty;
       float curfline;

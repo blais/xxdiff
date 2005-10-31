@@ -1,5 +1,5 @@
 /******************************************************************************\
- * $Id: main.cpp 32 2000-09-21 20:39:55Z  $
+ * $Id: searchDialog.cpp 32 2000-09-21 20:39:55Z  $
  * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
@@ -24,80 +24,52 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <main.h>
+#include <searchDialog.h>
+#include <resources.h>
+#include <diffs.h>
 #include <app.h>
-#include <exceptions.h>
 
-#include <exception>
-#include <iostream>
+#include <qlineedit.h>
+#include <qpushbutton.h>
 
+XX_NAMESPACE_BEGIN
 
 /*==============================================================================
- * LOCAL DECLARATIONS
+ * PUBLIC FUNCTIONS
  *============================================================================*/
 
-namespace {
+/*==============================================================================
+ * CLASS XxSearchDialog
+ *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-void silentMsgHandler( QtMsgType type, const char *msg )
+XxSearchDialog::XxSearchDialog( 
+   XxApp*   app,
+   QWidget* parent
+) :
+   BaseClass( parent ),
+   _app( app )
 {
-   switch ( type ) {
-      case QtFatalMsg: {
-         std::cerr << "Fatal: " << msg << std::endl;
-      } break;
+   // Make connections.
+   connect( _buttonApply, SIGNAL( clicked() ),
+            this, SLOT( onApply() ) );
 
-      case QtDebugMsg:
-      case QtWarningMsg: {
-      }
-   }
+   connect( _buttonNext, SIGNAL( clicked() ),
+            _app, SLOT( searchForward() ) );
+   connect( _buttonPrevious, SIGNAL( clicked() ),
+            _app, SLOT( searchBackward() ) );
 }
-
-const char* exceptionPreface = "xxdiff: exception caught: ";
-
-}
-
-
-/*==============================================================================
- * MAIN
- *============================================================================*/
-
-XX_NAMESPACE_USING
-
-extern char** environ;
-
 
 //------------------------------------------------------------------------------
 //
-int main( int argc, char** argv, char** envp ) 
+void XxSearchDialog::onApply()
 {
-   environ = envp;
-#ifndef XX_DEBUG
-   // Shut up!
-   qInstallMsgHandler( silentMsgHandler );
-#endif
-
-   int retval = 2; // errors.
-   try {
-      XxApp app( argc, argv );
-      app.exec();
-      retval = app.getReturnValue();
+   XxDiffs* diffs = _app->getDiffs();
+   const char* searchText = _lineeditSearchString->text().ascii();
+   if ( diffs != 0 && searchText != 0 ) {
+      diffs->search( searchText, _app->getNbFiles(), _app->getFiles() );
    }
-   catch ( XxUsageError* ex ) {
-      std::cerr << ex->what() << std::endl;
-      delete ex;
-   }
-   catch ( std::exception* ex ) {
-      std::cerr << exceptionPreface << ex->what() << std::endl;
-      delete ex;
-   }
-   catch ( const char* ex ) {
-      std::cerr << exceptionPreface << ex << std::endl;
-      delete[] ex;
-   }
-   catch ( ... ) {
-      std::cerr << exceptionPreface << "unspecified internal error."
-                << std::endl;
-   }
-   return retval;
 }
+
+XX_NAMESPACE_END

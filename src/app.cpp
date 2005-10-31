@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: app.cpp 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,7 +41,10 @@
 #include <diffs.h>
 #include <buffer.h>
 #include <resources.h>
+#include <suicideMessageBox.h>
 #include <optionsDialog.h>
+#include <searchDialog.h>
+#include <markersFileDialog.h>
 #include <dialogs.h>
 #include <stringResParser.h>
 #ifdef XX_USE_XRM
@@ -132,6 +135,7 @@ enum MenuIds {
    ID_ToggleQualityNormal,
    ID_ToggleQualityFastest,
    ID_ToggleQualityHighest,
+   ID_TabsAtThree,
    ID_TabsAtFour,
    ID_TabsAtEight
 };
@@ -181,50 +185,6 @@ XxMainWindow::XxMainWindow(
    QMainWindow( parent, name, f ),
    _app( app )
 {}
-
-
-/*==============================================================================
- * LOCAL CLASS XxSuicideMessageBox
- *============================================================================*/
-
-// <summary> simple non-modal dialog that cares after itself </summary>
-
-class XxSuicideMessageBox : public QMessageBox {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxSuicideMessageBox( 
-      QWidget*       parent,
-      const QString& caption, 
-      const QString& text, 
-      Icon           icon 
-   );
-
-   // See base class.
-   virtual void done( int r );
-
-};
-
-//------------------------------------------------------------------------------
-//
-XxSuicideMessageBox::XxSuicideMessageBox( 
-   QWidget*       parent,
-   const QString& caption, 
-   const QString& text, 
-   Icon           icon 
-) :
-   QMessageBox( caption, text, icon, 1, 0, 0, parent, 0, false )
-{}
-
-//------------------------------------------------------------------------------
-//
-void XxSuicideMessageBox::done( int r )
-{
-   delete this;
-}
 
 /*==============================================================================
  * LOCAL CLASS XxCopyLabelTip
@@ -427,7 +387,6 @@ XxApp::XxApp( int argc, char** argv ) :
    _isUICreated( false ),
    _searchDialog( 0 ),
    _optionsDialog( 0 ),
-   _tabWidthDialog( 0 ),
    _mergedWindow( 0 ),
    _textWidth( 0 ),
    _displayWidth( 0 ),
@@ -436,7 +395,8 @@ XxApp::XxApp( int argc, char** argv ) :
    _cursorLine( 0 ), // disallowed value on purpose
    _filesAreDirectories( false ),
    _returnValue( 0 ),
-   _stringResParser( 0 )
+   _stringResParser( 0 ),
+   _diffErrorsMsgBox( 0 )
 {
    _vscroll[0] = _vscroll[1] = 0;
 
@@ -556,6 +516,11 @@ XxApp::XxApp( int argc, char** argv ) :
    // flickering, but there's nothing we can do about it.
    if ( psize.topLeft() != QPoint( -1, -1 ) ) {
       _mainWindow->move( psize.topLeft() );
+   }
+
+   if ( _diffErrorsMsgBox != 0 ) {
+      _diffErrorsMsgBox->show();
+      _diffErrorsMsgBox = 0; // forget about it, it'll get sad and suicide.
    }
 }
 
@@ -1295,8 +1260,8 @@ void XxApp::createMenus()
    _optionsMenu = new QPopupMenu;
 
    _optionsMenu->insertItem( 
-      "Edit options...", this, SLOT(editOptions()), 
-      _resources->getAccelerator( XxResources::ACCEL_DIFF_ARGUMENTS ) 
+      "Edit diff options...", this, SLOT(editDiffOptions()), 
+      _resources->getAccelerator( XxResources::ACCEL_EDIT_DIFF_OPTIONS ) 
    );
 
    if ( _filesAreDirectories == false ) {
@@ -1357,6 +1322,12 @@ void XxApp::createMenus()
 
    _displayMenu = new QPopupMenu;
 
+   _displayMenu->insertItem( 
+      "Edit display options...", this, SLOT(editDisplayOptions()), 
+      _resources->getAccelerator( XxResources::ACCEL_EDIT_DISPLAY_OPTIONS ) 
+   );
+   _displayMenu->insertSeparator();
+
    if ( _filesAreDirectories == false ) {
       _menuids[ ID_ToggleHorizontalDiffs ] = _displayMenu->insertItem( 
          "Horizontal diffs", this, SLOT(toggleHorizontalDiffs()),
@@ -1399,9 +1370,9 @@ void XxApp::createMenus()
 
       _displayMenu->insertSeparator();
       
-      _displayMenu->insertItem( 
-         "Set tab width...", this, SLOT(setTabWidth()),
-         _resources->getAccelerator( XxResources::ACCEL_SET_TAB_WIDTH )
+      _menuids[ ID_TabsAtThree ] = _displayMenu->insertItem( 
+         "Tabs at 3", this, SLOT(tabsAt3()),
+         _resources->getAccelerator( XxResources::ACCEL_TABS_AT_3 )
       );
       _menuids[ ID_TabsAtFour ] = _displayMenu->insertItem( 
          "Tabs at 4", this, SLOT(tabsAt4()),
@@ -1804,7 +1775,7 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
       { "help", 0, 0, 'h' }, 
       { "version", 0, 0, 'v' }, 
       { "no-xrm", 0, 0, 'x' }, 
-      { "no-rcfile", 0, 0, 'r' }, 
+      { "no-rcfile", 0, 0, 'n' }, 
       { "list-resources", 0, 0, 'l' }, 
       { "exit-on-same", 0, 0, 'D' }, 
       { "ignore-whitespace", 0, 0, 'w' }, 
@@ -1816,12 +1787,14 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
       { "title3", 1, 0, '3' },
       { "titlein", 1, 0, 'N' }, // This is kept for xdiff compatibility only.
       { "resource", 1, 0, 'R' },
+      { "recursive", 0, 0, 'r' },
       { 0, 0, 0, 0 }
    }; 
    
    // Do the parsing.
    while ( true ) {
-      int c = getopt_long( argc, argv, "hvDwbimN:", longOptions, &optionIndex );
+      int c = getopt_long( argc, argv, "hvDwbimrN:", longOptions,
+                           &optionIndex );
       if ( c == -1 ) {
          break;
       }
@@ -1837,7 +1810,7 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
             _useXrm = false;
             break;
 
-         case 'r':
+         case 'n':
             _useRcfile = false;
             break;
 
@@ -1848,12 +1821,29 @@ void XxApp::parseCommandLine( int& argc, char**& argv )
             ::exit( 0 );
             break;
 
-         case 'D':
+         case 'D': {
             if ( _stringResParser == 0 ) {
                _stringResParser = new XxStringResParser; 
             }
-            _stringResParser->addString( std::string("exitOnSame:true") );
-            break;
+            std::string res( 
+               XxResources::getResourceName( XxResources::EXIT_ON_SAME )
+            );
+            res.append( ":true" );
+
+            _stringResParser->addString( res );
+         } break;
+
+         case 'r': {
+            if ( _stringResParser == 0 ) {
+               _stringResParser = new XxStringResParser; 
+            }
+            std::string res( 
+               XxResources::getResourceName( XxResources::DIRDIFF_RECURSIVE ) 
+            );
+            res.append( ":true" );
+            _stringResParser->addString( res );
+         } break;
+
 
          case 'w':
          case 'b':
@@ -1960,13 +1950,12 @@ void XxApp::parseCommandLineResources()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::outputDiffErrors( const char* errors ) const
+void XxApp::outputDiffErrors( const char* errors )
 {
    QString text( errors );
-   QMessageBox* box = new XxSuicideMessageBox( 
+   _diffErrorsMsgBox = new XxSuicideMessageBox( 
       _mainWindow, "Diff errors.", text, QMessageBox::Warning 
    );
-   box->show();
 }
 
 //------------------------------------------------------------------------------
@@ -2033,10 +2022,12 @@ void XxApp::adjustScrollbars( bool force )
       uint textWidth = _textWidth + 16; // 10 pixels. right margin.
       if ( textWidth <= _displayWidth ) {
          _hscroll->setRange( 0, 0 );
+         _hscroll->hide();
       }
       else {
          _hscroll->setSteps( 1, _displayWidth );
          _hscroll->setRange( 0, textWidth - _displayWidth );
+         _hscroll->show();
       }
 
       if ( int( textWidth - _displayWidth ) < _hscroll->value() ) {
@@ -2239,10 +2230,6 @@ void XxApp::updateLineNumberLabels( int cursorLine )
       for ( int ii = 0; ii < _nbFiles; ++ii ) {
          bool aempty;
 
-//           cursorLine = 
-//              std::max( getTopLine(), std::min( getBottomLine(), cursorLine ) );
-// FIXME remove
-
          int fline = _diffs->getFileLine( ii, cursorLine, aempty );
          _lineNumberLabel[ii]->setNum( fline );
       }
@@ -2281,37 +2268,35 @@ void XxApp::saveToFile( const char* filename, const bool ask )
    }
 
    // Check if there are some unselected regions remaining.
-   if ( !_diffs->isAllSelected() ) {
+   bool allSelected = _diffs->isAllSelected();
+   if ( !allSelected ) {
       
       // Bring the user to the first unselected region.
       int nextNo = _diffs->findNextUnselected( 0 );
       XX_ASSERT( nextNo != -1 );
       setCursorLine( nextNo );
       setCenterLine( nextNo );
-
-      // Pop a dialog.
-      using namespace std;
-      ostringstream oss;
-      oss << "This region is still unselected.  " 
-          << "There are still some unselected regions remaining..." 
-          << endl
-          << "Save anyway, marking unselected regions as merge conflicts?"
-          << ends;
-      QString text( oss.str().c_str() );
-
-      int resp = QMessageBox::warning( 
-         _mainWindow, "xxdiff", text,
-         "Ok", "Cancel", QString::null, 0, 1
-      );
-      if ( resp == 1 ) {
-         // User has canceled.
-         return;
-      }
-      // Continue anyway.
    }
 
    QString f;
-   if ( ask == true ) {
+   bool useConditionals = false;
+   std::string conditionalVar1, conditionalVar2;
+   if ( !allSelected ) {
+
+      f = XxMarkersFileDialog::getSaveFileName( 
+         QString( filename ), QString::null, _mainWindow,
+         _nbFiles == 3,
+         useConditionals, conditionalVar1, conditionalVar2
+      );
+      if ( f.isEmpty() ) {
+         // The user cancelled the dialog.
+         return;
+      }
+
+      // FIXME todo implement conditionals output and resources.
+
+   }
+   else if ( ask == true || !allSelected ) {
       f = QFileDialog::getSaveFileName( 
          QString( filename ), QString::null, _mainWindow
       );
@@ -2347,7 +2332,8 @@ void XxApp::saveToFile( const char* filename, const bool ask )
       }
       
       // Save to the file.
-      _diffs->save( outfile, getFiles() );
+      _diffs->save( outfile, getFiles(), 
+                    useConditionals, conditionalVar1, conditionalVar2 );
       
       outfile.close();
       if ( outfile.fail() == true ) {
@@ -2998,12 +2984,25 @@ void XxApp::redoDiff()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::editOptions()
+void XxApp::editDiffOptions()
 { 
    // Popup name and arguments box.
    if ( _optionsDialog == 0 ) {
       _optionsDialog = new XxOptionsDialog( this, _mainWindow );
    }
+   _optionsDialog->selectDiffOptions();
+   _optionsDialog->show();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::editDisplayOptions()
+{ 
+   // Popup name and arguments box.
+   if ( _optionsDialog == 0 ) {
+      _optionsDialog = new XxOptionsDialog( this, _mainWindow );
+   }
+   _optionsDialog->selectDisplayOptions();
    _optionsDialog->show();
 }
 
@@ -3344,17 +3343,6 @@ void XxApp::selectLineUnselect()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::setTabWidth()
-{
-   // Create search dialog if non-existent.
-   if ( _tabWidthDialog == 0 ) {
-      _tabWidthDialog = new XxTabWidthDialog( this, _mainWindow );
-   }
-   _tabWidthDialog->show();
-}
-
-//------------------------------------------------------------------------------
-//
 void XxApp::setTabWidth( const int newTabWidth )
 {
    _resources->setTabWidth( newTabWidth );
@@ -3364,6 +3352,14 @@ void XxApp::setTabWidth( const int newTabWidth )
    adjustScrollbars();
    synchronizeUI();
    repaintTexts();   
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::tabsAt3()
+{
+   setTabWidth( 3 );
+   synchronizeUI();
 }
 
 //------------------------------------------------------------------------------

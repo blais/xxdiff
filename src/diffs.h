@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: diffs.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -204,10 +204,13 @@ public:
    bool isAllSelected() const;
 
    // Save merged with selected regions.  If there are still some unselected
-   // regions it will return false.
+   // regions it will return false but save anyway.
    bool save( 
-      std::ostream&                os, 
-      const std::auto_ptr<XxBuffer>* files
+      std::ostream&                  os, 
+      const std::auto_ptr<XxBuffer>* files,
+      bool                           useConditionals,
+      const std::string&             conditional1,
+      const std::string&             conditional2
    ) const;
 
    // Save selected lines with an appropriate prefix.  Returns true if there
@@ -221,8 +224,8 @@ public:
    // diff lines where the text appears in either, and for each diff line, in
    // which file the line is found.
    void search( 
-      const char*                  searchText,
-      const int                    nbFiles,
+      const char*                    searchText,
+      const int                      nbFiles,
       const std::auto_ptr<XxBuffer>* files
    );
 
@@ -286,7 +289,6 @@ private:
    void validateLineNumbers() const;
 
    /*----- data members -----*/
-
 
    // list of line descriptors
    std::vector< XxLine >    _lines;

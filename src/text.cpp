@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: text.cpp 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -108,7 +108,8 @@ void XxText::drawContents( QPainter* pp )
 
    // If it is empty, erase the whole widget with blank color.
    if ( file == 0 || diffs == 0 ) {
-      QColor backgroundColor = resources->getBackgroundColor();
+      QColor backgroundColor = 
+         resources->getColor( XxResources::COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
@@ -250,7 +251,8 @@ void XxText::drawContents( QPainter* pp )
 
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
-      QColor backgroundColor = resources->getBackgroundColor();
+      QColor backgroundColor = 
+         resources->getColor( XxResources::COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( 0, y, w, h - y, brush );
    }
@@ -261,7 +263,7 @@ void XxText::drawContents( QPainter* pp )
       uint cursorLine = _app->getCursorLine();
       int relLine = cursorLine - topLine;
       
-      QColor cursorColor = resources->getCursorColor();
+      QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
       p.setPen( cursorColor );
       y = relLine * fm.lineSpacing() - 1;
       p.drawRect( 0, y, w, fm.lineSpacing() + 2 );

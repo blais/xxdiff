@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: resources.inline.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -80,16 +80,11 @@ inline void XxResources::getRegionColor(
 
 //------------------------------------------------------------------------------
 //
-inline const QColor& XxResources::getBackgroundColor() const
+inline const QColor& XxResources::getColor( const Resource resource ) const
 {
-   return _colors[ int(COLOR_BACKGROUND) - int(COLOR_FIRST) ];
-}
-
-//------------------------------------------------------------------------------
-//
-inline const QColor& XxResources::getCursorColor() const
-{
-   return _colors[ int(COLOR_CURSOR) - int(COLOR_FIRST) ];
+   int i = int(resource) - int(COLOR_FIRST);
+   XX_CHECK( i < int(COLOR_LAST) - int(COLOR_FIRST) );
+   return _colors[ i ];
 }
 
 //------------------------------------------------------------------------------
@@ -148,20 +143,6 @@ inline uint XxResources::getOverviewFileWidth() const
 inline uint XxResources::getOverviewSepWidth() const
 {
    return _overviewSepWidth;
-}
-
-//------------------------------------------------------------------------------
-//
-inline const char* XxResources::getUnmergedSeparatorTag() const
-{
-   return _unmergedSeparatorTag.c_str();
-}
-
-//------------------------------------------------------------------------------
-//
-inline const char* XxResources::getUnmergedEndTag() const
-{
-   return _unmergedEndTag.c_str();
 }
 
 XX_NAMESPACE_END

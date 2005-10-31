@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: optionsDialog.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -75,6 +75,12 @@ public:
    // Asks the dialog to synchronize itself.
    void synchronize();
 
+   // Selects a particular tab. 
+   // <group>
+   void selectDiffOptions();
+   void selectDisplayOptions();
+   // </group>
+
    /*----- static member functions -----*/
 
    // Methods to manipulate command strings.
@@ -120,18 +126,51 @@ public slots:
    void onApply();
    void onClose();
 
-   void checkboxIgnoreTrailingBlanks(int);
-   void checkboxIgnoreWhitespace(int);
-   void checkboxIgnoreCase(int);
-   void checkboxIgnoreBlankLines(int);
-   void radiobuttonQualityNormal(int);
-   void radiobuttonQualityFastest(int);
-   void radiobuttonQualityHighest(int);
-   void checkboxRecursive(int);
+   //---------------------------------------------------------------------------
+   // Files 2
+
+   void checkboxIgnoreTrailingBlanks( int );
+   void checkboxIgnoreWhitespace( int );
+   void checkboxIgnoreCase( int );
+   void checkboxIgnoreBlankLines( int );
+   void radiobuttonQualityNormal( int );
+   void radiobuttonQualityFastest( int );
+   void radiobuttonQualityHighest( int );
+
+   //---------------------------------------------------------------------------
+   // Files 3
+
+   //---------------------------------------------------------------------------
+   // Directories
+
+   void checkboxRecursive( int );
+
+   //---------------------------------------------------------------------------
+   // Display
+
+   void checkboxHorizontalDiffs( int );
+   void checkboxIgnoreHorizontalWhitespace( int );
+   void checkboxHideCarriageReturns( int );
+   void spinboxTabWidth( int );
+   void checkboxIgnoreFileChanges( int );
+   void checkboxCutAndPasteAnnotations( int );
+
+   //---------------------------------------------------------------------------
+   // Colors
+
+   void listboxColors( const QString& );
+   void editColor();
+
 
 private:
 
+   /*----- types and enumerationse -----*/
+
+   typedef std::map< int, QColor > ColorModMap;
+
    /*----- member functions -----*/
+
+   int getDiffPageIndex() const;
 
    void setFileDiffOptions(
       XxResources::Resource cmdOptionId,
@@ -142,9 +181,16 @@ private:
       XxResources::Quality quality
    ) const;
 
+   bool maybeSetCommand( 
+      XxResources::Resource commandId,
+      const char*           commandString
+   );
+
+
    /*----- data members -----*/
 
-   XxApp* _app;
+   XxApp*      _app;
+   ColorModMap _colorModMap;
 
 };
 

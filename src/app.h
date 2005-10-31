@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: app.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -59,7 +59,6 @@
 #define INCL_STD_LIST
 #endif
 
-
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
@@ -70,10 +69,9 @@ class QLabel;
 class QDialog;
 class QSocketNotifier;
 class QToolBar;
-
+class QMessageBox;
 
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * FORWARD DECLARATIONS
@@ -88,7 +86,7 @@ class XxBuffer;
 class XxResources;
 class XxOptionsDialog;
 class XxStringResParser;
-
+class XxSearchDialog;
 
 /*==============================================================================
  * CLASS XxApp
@@ -246,7 +244,8 @@ public slots:
    void cursorTop();
    void cursorBottom();
    void redoDiff();
-   void editOptions();
+   void editDiffOptions();
+   void editDisplayOptions();
    void diffFilesAtCursor();
    void nextDifference();
    void previousDifference();
@@ -277,7 +276,7 @@ public slots:
    void selectLineRight();
    void selectLineNeither();
    void selectLineUnselect();
-   void setTabWidth();
+   void tabsAt3();
    void tabsAt4();
    void tabsAt8();
    void ignoreTrailing();
@@ -367,7 +366,7 @@ private:
    // </group>
 
    // Output diff errors.
-   void outputDiffErrors( const char* errors ) const;
+   void outputDiffErrors( const char* errors );
 
    // Compute the number of pixels of the longest line.
    uint computeTextWidth() const;
@@ -415,6 +414,7 @@ private:
    bool                    _isUICreated;
    QStyle*                 _style;
    QMainWindow*            _mainWindow;
+   QMessageBox*		   _diffErrorsMsgBox;
    QWidget*                _centralWidget;
    QPopupMenu*             _viewPopup;
    QPopupMenu*             _optionsMenu;
@@ -422,9 +422,8 @@ private:
    QPopupMenu*             _windowsMenu;
    int 			   _menuids[ MAX_MENUIDS ];
    XxOverview*             _overview;
-   QDialog*                _searchDialog;
+   XxSearchDialog*         _searchDialog;
    XxOptionsDialog*        _optionsDialog;
-   QDialog*                _tabWidthDialog;
    QLabel*                 _filenameLabel[3];
    QLabel*                 _lineNumberLabel[3];
    XxLineNumbers*          _lineNumbers[3];

@@ -1,0 +1,14 @@
+*.lex.c
+*.y.h
+*.y.c
+*.moc.cpp
+.xvpics
+.libs
+.deps
+*Base.h
+*Base.cpp
+Makefile
+Makefile.in
+man.h
+xxdiff
+ii_files

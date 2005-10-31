@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/defs.h)
-AM_INIT_AUTOMAKE(xxdiff,1.8)
+AM_INIT_AUTOMAKE(xxdiff,1.8.1)
 AM_PROG_LIBTOOL
 
 dnl According to doc, this is required for compiler-specific behaviour but it
@@ -44,7 +44,7 @@ dnl Automake does not let us have GNU make conditionals inside Makefile.am
 dnl so we've got to use automake conditionals instead, which have to be 
 dnl declared here.
 dnl 
-AM_CONDITIONAL(IS_COMPILER_GCC, test x$CXX = xg++)
+AM_CONDITIONAL(IS_COMPILER_GNU, test x$GXX = xyes)
 
 AM_CONDITIONAL(IS_COMPILER_MIPSPRO,
 test x$build_alias = xmips-sgi-irix6.5)

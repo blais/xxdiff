@@ -1,7 +1,7 @@
 /******************************************************************************\
- * $Id: diffs.cpp 2 2000-09-15 02:19:22Z blais $
+ * $Id: diffs.cpp 32 2000-09-21 20:39:55Z  $
 
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -59,6 +59,48 @@ void outputLine(
       os.write( text, len );
       os.put( '\n' );
    }
+}
+
+//------------------------------------------------------------------------------
+//
+std::string buildTag( 
+   const char*                    tag,
+   int                            nbFiles,
+   int                            number,
+   bool                           useNumber, 
+   bool                           useString,
+   bool                           useConditionals,
+   const std::string&             conditional1,
+   const std::string&             conditional2,
+   const std::auto_ptr<XxBuffer>& file
+)
+{
+   char buf[ 1024 ];
+   char buf2[ 1024 ];
+   ::strcpy( buf, tag );
+   
+   // FIXME this could lead to a bug.
+
+   if ( useNumber ) {
+      ::strcpy( buf2, buf );
+      ::sprintf( buf, buf2, number );
+   }
+   if ( useString ) {
+      ::strcpy( buf2, buf );
+      if ( useConditionals ) {
+         if ( nbFiles == 3 && ( number == 1 || number == 2 ) ) {
+            ::sprintf( buf, buf2, conditional2 );
+         }
+         else {
+            ::sprintf( buf, buf2, conditional1 );
+         }
+      }
+      else {
+         ::sprintf( buf, buf2, file->getDisplayName() );
+      }
+   }
+
+   return std::string( buf );
 }
 
 }
@@ -607,18 +649,94 @@ bool XxDiffs::isAllSelected() const
 
 //------------------------------------------------------------------------------
 //
-bool XxDiffs::save(
-   std::ostream&                os,
-   const std::auto_ptr<XxBuffer>* files
+bool XxDiffs::save( 
+   std::ostream&                  os, 
+   const std::auto_ptr<XxBuffer>* files,
+   bool                           useConditionals,
+   const std::string&             conditional1,
+   const std::string&             conditional2
 ) const
 {
    XX_ASSERT( files != 0 );
    XX_ASSERT( files[0].get() != 0 );
    XX_ASSERT( files[1].get() != 0 );
+   int nbFiles = files[2].get() != 0 ? 3 : 2;
 
    const XxResources* resources = XxResources::getInstance();
-   const char* separatorTag = resources->getUnmergedSeparatorTag();
-   const char* endTag = resources->getUnmergedEndTag();
+   std::string tags[4];
+   if ( useConditionals == false ) {
+      for ( int ii = 0; ii < nbFiles; ++ii ) {
+         tags[ii] = resources->getTag( XxResources::TAG_CONFLICT_SEPARATOR );
+      }
+      tags[nbFiles] = resources->getTag( XxResources::TAG_CONFLICT_END );
+   }
+   else {
+      tags[0] = resources->getTag( XxResources::TAG_CONDITIONAL_IFDEF );
+      if ( nbFiles == 2 ) {
+         tags[1] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSE );
+         tags[2] = resources->getTag( XxResources::TAG_CONDITIONAL_ENDIF );
+      }
+      else {
+         tags[1] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSEIF );
+         tags[2] = resources->getTag( XxResources::TAG_CONDITIONAL_ELSE );
+         tags[3] = resources->getTag( XxResources::TAG_CONDITIONAL_ENDIF );
+      }
+   }
+
+   for ( int ii = 0; ii < nbFiles; ++ii ) {
+      std::string::size_type pos = tags[ii].find( "%d" );
+      if ( pos != std::string::npos ) {
+         char buf[12];
+         ::sprintf( buf, "%d", ii+1 );
+         tags[ii].replace( pos, 2, buf );
+      }
+
+      if ( useConditionals == false ) {
+         pos = tags[ii].find( "%s" );
+         if ( pos != std::string::npos ) {
+            tags[ii].replace( pos, 2, files[ii]->getDisplayName() );
+         }
+      }
+   }
+
+   if ( useConditionals == true ) {
+      std::string::size_type pos = tags[0].find( "%s" );
+      if ( pos != std::string::npos ) {
+         tags[0].replace( pos, 2, conditional1 );
+      }
+
+      if ( nbFiles == 2 ) {
+         pos = tags[1].find( "%s" );
+         if ( pos != std::string::npos ) {
+            tags[1].replace( pos, 2, conditional1 );
+         }
+
+         pos = tags[2].find( "%s" );
+         if ( pos != std::string::npos ) {
+            tags[2].replace( pos, 2, conditional1 );
+         }
+      }
+      else {
+         pos = tags[1].find( "%s" );
+         if ( pos != std::string::npos ) {
+            tags[1].replace( pos, 2, conditional2 );
+         }
+
+         pos = tags[2].find( "%s" );
+         if ( pos != std::string::npos ) {
+            tags[2].replace( pos, 2, conditional2 );
+         }
+
+         pos = tags[3].find( "%s" );
+         if ( pos != std::string::npos ) {
+            tags[3].replace( pos, 2, conditional1 );
+         }
+      }
+   }
+
+   for ( int ii = 0; ii < nbFiles+1; ++ii ) {
+      XX_TRACE( tags[ii] );
+   }
 
    bool foundUnsel = false;
    bool insideUnsel = false;
@@ -639,16 +757,17 @@ bool XxDiffs::save(
             XX_ASSERT( unselEnd - unselBegin > 0 );
             for ( uint f = 0; f < 3; ++f ) {
                if ( files[f].get() != 0 ) {
-                  char buf[1024];
-                  sprintf( buf, separatorTag, f );
-                  os << buf << std::endl;
+
+                  os << tags[f] << std::endl;
+
                   for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
                      const XxLine& cline = getLine( iii );
                      outputLine( os, files, cline, f );
                   }
                }
             }
-            os << endTag << std::endl;
+
+            os << tags[nbFiles] << std::endl;
 
             insideUnsel = false;
          }
@@ -680,16 +799,17 @@ bool XxDiffs::save(
       XX_ASSERT( unselEnd - unselBegin > 0 );
       for ( uint f = 0; f < 3; ++f ) {
          if ( files[f].get() != 0 ) {
-            char buf[1024];
-            sprintf( buf, separatorTag, f );
-            os << buf << std::endl;
+
+            os << tags[f] << std::endl;
+
             for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
                const XxLine& cline = getLine( iii );
                outputLine( os, files, cline, f );
             }
          }
       }
-      os << endTag << std::endl;
+
+      os << tags[nbFiles] << std::endl;
 
       insideUnsel = false;
    }

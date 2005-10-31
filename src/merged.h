@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: merged.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,6 +41,10 @@
 #define INCL_QT_QFRAME
 #endif
 
+#ifndef INCL_QT_QWIDGET
+#include <qwidget.h>
+#define INCL_QT_QWIDGET
+#endif
 
 /*==============================================================================
  * FORWARD DECLARATIONS
@@ -48,86 +52,45 @@
 
 class QScrollBar;
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
 class XxApp;
-class XxMerged;
-
-
-/*==============================================================================
- * CLASS XxMergedWindow
- *============================================================================*/
-
-// <summary> the main window of the merged view </summary>
-
-class XxMergedWindow : public QMainWindow {
-
-   Q_OBJECT
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxMergedWindow( 
-      XxApp*          app, 
-      QWidget*        parent = 0,
-      const char*     name = 0 
-   );
-
-   // Access to the scrollbars.
-   QScrollBar* getHorizontalScrollbar();
-   QScrollBar* getVerticalScrollbar();
-
-   // See base class.
-   virtual void update();
-
-public slots:
-
-   void appCursorChanged( int );
-   void appScrolled( int );
-
-private:
-
-   /*----- data members -----*/
-
-   XxMerged*   _merged;
-   QScrollBar* _vscroll;
-   QScrollBar* _hscroll;
-
-};
-
+class XxMergedText;
+class XxMergedFrame;
+class XxMergedWindow;
 
 /*==============================================================================
- * CLASS XxMerged
+ * CLASS XxMergedText
  *============================================================================*/
 
 // <summary> a text widget that displays the merged diffs </summary>
 
-class XxMerged : public QFrame {
+class XxMergedText : public QFrame {
 
    Q_OBJECT
+
+   /*----- types and enumerations -----*/
+
+   typedef QFrame BaseClass;
 
 public:
 
    /*----- member functions -----*/
 
    // Constructor.
-   XxMerged( 
-      XxMergedWindow* main, 
-      XxApp*          app, 
+   XxMergedText( 
+      XxMergedFrame*  main,
+      XxApp*          app,
       QWidget*        parent = 0,
-      const char*     name = 0 
+      const char*     name = 0
    );
 
    // Destructor.
-   virtual ~XxMerged();
+   virtual ~XxMergedText();
 
    // See base class.
    // Override to expand.
@@ -175,13 +138,93 @@ private:
 
    /*----- data members -----*/
 
-   XxMergedWindow* _main;
-   XxApp*          _app;
-   uint            _nbDisplayLines;
-   int             _topLine;
-   bool            _grab;
-   int             _grabTopLine;
-   int             _grabDeltaLineNo;
+   XxMergedFrame* _main;
+   XxApp*         _app;
+   uint           _nbDisplayLines;
+   int            _topLine;
+   bool           _grab;
+   int            _grabTopLine;
+   int            _grabDeltaLineNo;
+
+};
+
+/*==============================================================================
+ * CLASS XxMergedFrame
+ *============================================================================*/
+
+// <summary> merged text with scrollbars </summary>
+
+class XxMergedFrame : public QWidget {
+
+   Q_OBJECT
+
+   /*----- types and enumerations -----*/
+
+   typedef QWidget BaseClass;
+
+public:
+
+   /*----- member functions -----*/
+
+   // Constructor.
+   XxMergedFrame( 
+      XxApp*      app, 
+      QWidget*    parent = 0,
+      const char* name = 0 
+   );
+
+   // Access to the scrollbars.
+   QScrollBar* getHorizontalScrollbar();
+   QScrollBar* getVerticalScrollbar();
+
+   // See base class.
+   virtual void update();
+
+public slots:
+
+   void appCursorChanged( int );
+   void appScrolled( int );
+
+private:
+
+   /*----- data members -----*/
+
+   XxMergedText* _merged;
+   QScrollBar*   _vscroll;
+   QScrollBar*   _hscroll;
+
+};
+
+/*==============================================================================
+ * CLASS XxMergedWindow
+ *============================================================================*/
+
+// <summary> a main window with merged frame inside, and menus </summary>
+
+class XxMergedWindow : public QMainWindow {
+
+   Q_OBJECT
+
+   /*----- types and enumerations -----*/
+
+   typedef QMainWindow BaseClass;
+
+public:
+
+   /*----- member functions -----*/
+
+   // Constructor.
+   XxMergedWindow( 
+      XxApp*          app, 
+      QWidget*        parent = 0,
+      const char*     name = 0 
+   );
+
+private:
+
+   /*----- data members -----*/
+
+   XxMergedFrame* _frame;
 
 };
 

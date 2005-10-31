@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: merged.cpp 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -55,122 +55,18 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 /*==============================================================================
- * CLASS XxMergedWindow
+ * CLASS XxMergedText
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxMergedWindow::XxMergedWindow( 
-   XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+XxMergedText::XxMergedText( 
+   XxMergedFrame* main, 
+   XxApp*         app, 
+   QWidget*       parent, 
+   const char*    name 
 ) :
-   QMainWindow( parent, name )
-{
-   const XxResources* resources = XxResources::getInstance();
-
-   QPopupMenu* menu = new QPopupMenu;
-   menu->insertItem( 
-      "Close", this, SLOT(hide()),
-      resources->getAccelerator( XxResources::ACCEL_MERGED_CLOSE )
-   );
-
-   QMenuBar* m = menuBar();
-   m->setSeparator( QMenuBar::InWindowsStyle );
-   m->insertItem( "W&indow", menu );
-
-
-   QWidget* centralWidget = new QWidget( this );
-   QVBoxLayout* vlayout = new QVBoxLayout( centralWidget );
-   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
-
-   _merged = new XxMerged( this, app, centralWidget );
-   hlayout->addWidget( _merged );
-
-   _vscroll = new QScrollBar( centralWidget );
-   _vscroll->setFixedWidth( 20 );
-   hlayout->addWidget( _vscroll );
-
-   _hscroll = new QScrollBar( Qt::Horizontal, centralWidget );
-   _hscroll->setFixedHeight( 20 );
-
-   vlayout->addWidget( _hscroll );
-
-   connect( _vscroll, SIGNAL(valueChanged(int)),
-            _merged, SLOT(verticalScroll(int)) );
-   connect( _hscroll, SIGNAL(valueChanged(int)),
-            _merged, SLOT(horizontalScroll(int)) );
-
-   // Track application's scrolling window.
-   connect( app, SIGNAL(cursorChanged(int)), 
-            this, SLOT(appCursorChanged(int)) );
-   connect( app, SIGNAL(scrolled(int)), this, SLOT(appScrolled(int)) );
-
-   setCentralWidget( centralWidget );
-}
-
-//------------------------------------------------------------------------------
-//
-QScrollBar* XxMergedWindow::getHorizontalScrollbar()
-{
-   return _hscroll;
-}
-
-//------------------------------------------------------------------------------
-//
-QScrollBar* XxMergedWindow::getVerticalScrollbar()
-{
-   return _vscroll;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxMergedWindow::update()
-{
-   QMainWindow::update();
-   _merged->update();
-}
-
-//------------------------------------------------------------------------------
-//
-void XxMergedWindow::appCursorChanged( int cursorLine )
-{
-   // When cursor changes, try to track it at the center line of the merged
-   // view.  Important note: this will try to set as the center line what SHOULD
-   // be the center line if the diffs were all expanded.  Thus the region where
-   // the cursor would show up in the merged view will most of the time be
-   // higher than the center, but never above the top of the window.  This is a
-   // good heuristic, since it allows you to see more of the region when
-   // collapsing/expanding (IOW if the merged view was really centered that
-   // wouldn't be very good because the top half wouldn't be very useful (you do
-   // need some though, for context).  If you don't understand all this shtuff,
-   // just think that this is why the merged view isn't really centered on the
-   // cursor.
-   _merged->setCenterLine( cursorLine );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxMergedWindow::appScrolled( int topLine )
-{
-   // Use this to track the top line of the application.
-   // _merged->setTopLine( topLine );
-}
-
-
-/*==============================================================================
- * CLASS XxMerged
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-XxMerged::XxMerged( 
-   XxMergedWindow* main, 
-   XxApp*          app, 
-   QWidget*        parent, 
-   const char*     name 
-) :
-   QFrame( parent, name, WResizeNoErase ),
+   BaseClass( parent, name, WResizeNoErase ),
    _main( main ),
    _app( app ),
    _topLine( 1 ),
@@ -189,20 +85,20 @@ XxMerged::XxMerged(
 
 //------------------------------------------------------------------------------
 //
-XxMerged::~XxMerged()
+XxMergedText::~XxMergedText()
 {
 }
 
 //------------------------------------------------------------------------------
 //
-QSizePolicy XxMerged::sizePolicy() const
+QSizePolicy XxMergedText::sizePolicy() const
 {
    return QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::drawContents( QPainter* pp )
+void XxMergedText::drawContents( QPainter* pp )
 {
    //XX_TRACE( "painting!" );
 
@@ -227,7 +123,8 @@ void XxMerged::drawContents( QPainter* pp )
 
    // If it is empty, erase the whole widget with blank color.
    if ( diffs == 0 ) {
-      QColor backgroundColor = resources->getBackgroundColor();
+      QColor backgroundColor = 
+         resources->getColor( XxResources::COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
@@ -355,7 +252,8 @@ void XxMerged::drawContents( QPainter* pp )
       
       // Draw line cursor.
       if ( curLine == cursorLine ) {
-         QColor cursorColor = resources->getCursorColor();
+         QColor cursorColor = 
+            resources->getColor( XxResources::COLOR_CURSOR );
          p.setPen( cursorColor );
          p.drawRect( 0, prevy, w, y - prevy );
       }
@@ -365,7 +263,8 @@ void XxMerged::drawContents( QPainter* pp )
 
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
-      QColor backgroundColor = resources->getBackgroundColor();
+      QColor backgroundColor = 
+         resources->getColor( XxResources::COLOR_BACKGROUND );
       QBrush brush( backgroundColor );
       p.fillRect( x, y, w, h - y, brush );
    }
@@ -375,14 +274,14 @@ void XxMerged::drawContents( QPainter* pp )
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::verticalScroll( int )
+void XxMergedText::verticalScroll( int )
 {
    update();
 }
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::horizontalScroll( int )
+void XxMergedText::horizontalScroll( int )
 {
    // FIXME todo fix adjustment correctly.
    update();
@@ -390,7 +289,7 @@ void XxMerged::horizontalScroll( int )
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::adjustVertically()
+void XxMergedText::adjustVertically()
 {
    // Adjust vertical scrollbar.
    uint topLine = getTopLine();
@@ -416,14 +315,14 @@ void XxMerged::adjustVertically()
 
 //------------------------------------------------------------------------------
 //
-uint XxMerged::getTopLine() const
+uint XxMergedText::getTopLine() const
 {
    return _main->getVerticalScrollbar()->value() + 1;
 }
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::setTopLine( uint lineNo ) const
+void XxMergedText::setTopLine( uint lineNo ) const
 {
    const XxDiffs* diffs = _app->getDiffs();
 
@@ -442,7 +341,7 @@ void XxMerged::setTopLine( uint lineNo ) const
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::setCenterLine( uint lineNo )
+void XxMergedText::setCenterLine( uint lineNo )
 {
    const XxDiffs* diffs = _app->getDiffs();
    uint newTopLine = diffs->moveBackwardsVisibleLines(
@@ -453,7 +352,7 @@ void XxMerged::setCenterLine( uint lineNo )
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::mousePressEvent( QMouseEvent* event )
+void XxMergedText::mousePressEvent( QMouseEvent* event )
 {
    const QFont& font = _app->getFont();
    QFontMetrics fm( font );
@@ -473,7 +372,7 @@ void XxMerged::mousePressEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::mouseMoveEvent( QMouseEvent* event )
+void XxMergedText::mouseMoveEvent( QMouseEvent* event )
 {
    if ( _grab ) {
       const QFont& font = _app->getFont();
@@ -485,7 +384,7 @@ void XxMerged::mouseMoveEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::mouseReleaseEvent( QMouseEvent* event )
+void XxMergedText::mouseReleaseEvent( QMouseEvent* event )
 {
    // Release grab in all case. It won't hurt.
    _grab = false;
@@ -493,7 +392,7 @@ void XxMerged::mouseReleaseEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxMerged::resizeEvent( QResizeEvent* ev )
+void XxMergedText::resizeEvent( QResizeEvent* ev )
 {
    // Compute nb. display lines.
    const QFont& font = _app->getFont();
@@ -520,6 +419,125 @@ void XxMerged::resizeEvent( QResizeEvent* ev )
    }
 
    adjustVertically();
+}
+
+/*==============================================================================
+ * CLASS XxMergedFrame
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxMergedFrame::XxMergedFrame( 
+   XxApp*      app, 
+   QWidget*    parent, 
+   const char* name 
+) :
+   BaseClass( parent, name )
+{
+   const XxResources* resources = XxResources::getInstance();
+
+   QVBoxLayout* vlayout = new QVBoxLayout( this );
+   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+
+   _merged = new XxMergedText( this, app, this );
+   hlayout->addWidget( _merged );
+
+   _vscroll = new QScrollBar( this );
+   _vscroll->setFixedWidth( 20 );
+   hlayout->addWidget( _vscroll );
+
+   _hscroll = new QScrollBar( Qt::Horizontal, this );
+   _hscroll->setFixedHeight( 20 );
+
+   vlayout->addWidget( _hscroll );
+
+   connect( _vscroll, SIGNAL(valueChanged(int)),
+            _merged, SLOT(verticalScroll(int)) );
+   connect( _hscroll, SIGNAL(valueChanged(int)),
+            _merged, SLOT(horizontalScroll(int)) );
+
+   // Track application's scrolling window.
+   connect( app, SIGNAL(cursorChanged(int)), 
+            this, SLOT(appCursorChanged(int)) );
+   connect( app, SIGNAL(scrolled(int)), this, SLOT(appScrolled(int)) );
+}
+
+//------------------------------------------------------------------------------
+//
+QScrollBar* XxMergedFrame::getHorizontalScrollbar()
+{
+   return _hscroll;
+}
+
+//------------------------------------------------------------------------------
+//
+QScrollBar* XxMergedFrame::getVerticalScrollbar()
+{
+   return _vscroll;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedFrame::update()
+{
+   BaseClass::update();
+   _merged->update();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedFrame::appCursorChanged( int cursorLine )
+{
+   // When cursor changes, try to track it at the center line of the merged
+   // view.  Important note: this will try to set as the center line what SHOULD
+   // be the center line if the diffs were all expanded.  Thus the region where
+   // the cursor would show up in the merged view will most of the time be
+   // higher than the center, but never above the top of the window.  This is a
+   // good heuristic, since it allows you to see more of the region when
+   // collapsing/expanding (IOW if the merged view was really centered that
+   // wouldn't be very good because the top half wouldn't be very useful (you do
+   // need some though, for context).  If you don't understand all this shtuff,
+   // just think that this is why the merged view isn't really centered on the
+   // cursor.
+   _merged->setCenterLine( cursorLine );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedFrame::appScrolled( int topLine )
+{
+   // Use this to track the top line of the application.
+   // _merged->setTopLine( topLine );
+}
+
+/*==============================================================================
+ * CLASS XxMergedWindow
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxMergedWindow::XxMergedWindow( 
+   XxApp*      app, 
+   QWidget*    parent, 
+   const char* name 
+) :
+   BaseClass( parent, name )
+{
+   const XxResources* resources = XxResources::getInstance();
+
+   QPopupMenu* menu = new QPopupMenu;
+   menu->insertItem( 
+      "Close", this, SLOT(hide()),
+      resources->getAccelerator( XxResources::ACCEL_MERGED_CLOSE )
+   );
+
+   QMenuBar* m = menuBar();
+   m->setSeparator( QMenuBar::InWindowsStyle );
+   m->insertItem( "W&indow", menu );
+
+   _frame = new XxMergedFrame( app, this, "merged_frame" );
+
+   setCentralWidget( _frame );
 }
 
 XX_NAMESPACE_END

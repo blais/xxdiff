@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 2 2000-09-15 02:19:22Z blais $
- * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ * $Id: resources.h 32 2000-09-21 20:39:55Z  $
+ * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -119,7 +119,8 @@ public:
       ACCEL_CURSOR_TOP,
       ACCEL_CURSOR_BOTTOM,
       ACCEL_REDO_DIFF,
-      ACCEL_DIFF_ARGUMENTS,
+      ACCEL_EDIT_DIFF_OPTIONS,
+      ACCEL_EDIT_DISPLAY_OPTIONS,
       ACCEL_DIFF_FILES_AT_CURSOR, 
       ACCEL_NEXT_DIFFERENCE, 
       ACCEL_PREVIOUS_DIFFERENCE, 
@@ -150,7 +151,7 @@ public:
       ACCEL_SELECT_LINE_RIGHT, 
       ACCEL_SELECT_LINE_NEITHER,
       ACCEL_SELECT_LINE_UNSELECT,
-      ACCEL_SET_TAB_WIDTH,
+      ACCEL_TABS_AT_3,
       ACCEL_TABS_AT_4,
       ACCEL_TABS_AT_8,
       ACCEL_IGNORE_TRAILING,
@@ -304,13 +305,20 @@ public:
       CMDOPT_FILES_QUALITY_HIGHEST,
       CMDOPT_LAST, // Not a real resource.
 
+      // Blips of text to tag regions in output files.
+      TAG_FIRST,
+      TAG_CONFLICT_SEPARATOR = TAG_FIRST,
+      TAG_CONFLICT_END,
+      TAG_CONDITIONAL_IFDEF,
+      TAG_CONDITIONAL_ELSEIF,
+      TAG_CONDITIONAL_ELSE,
+      TAG_CONDITIONAL_ENDIF,
+      TAG_LAST, // Not a real resource.
+
       // Other options.
       TAB_WIDTH,
       OVERVIEW_FILE_WIDTH,
       OVERVIEW_SEP_WIDTH,
-      UNMERGED_SEPARATOR_TAG,
-      UNMERGED_END_TAG,
-
 
       RESOURCE_LAST
    };
@@ -325,13 +333,6 @@ public:
 
    // Parses available resources in a resource builder.
    void parse( XxResourcesParser& );
-
-   //
-   // Resource definition/documentation.
-   //
-   // <group>
-   const char* getResourceName( Resource ) const;
-   const char* getResourceDoc( Resource ) const;
 
    // Checks validity of the documentation of resources.
    bool checkResourcesDoc() const;
@@ -371,12 +372,11 @@ public:
       QColor&  foreground
    ) const;
 
-   // Provide resource: the background color, that default greenish color that
-   // appears in all of SGI's CaseVision tools.
-   const QColor& getBackgroundColor() const;
-
-   // Provide resource: the line cursor color.
-   const QColor& getCursorColor() const;
+   // Get/set a specific color.
+   // <group>
+   const QColor& getColor( const Resource ) const;
+   void setColor( const Resource, const QColor& );
+   // </group>
 
    // Provide resource: boolean options.
    // <group>
@@ -401,11 +401,8 @@ public:
    uint getOverviewSepWidth() const;
    // </group>
 
-   // Get format strings for unmerged regions.
-   // <group>
-   const char* getUnmergedSeparatorTag() const;
-   const char* getUnmergedEndTag() const;
-   // </group>
+   // Get text tags for conflictual regions.
+   const char* getTag( Resource ) const;
 
    // Convenience methods for setting the quality options in the commands. Note
    // that these methods don't change the commands in the resources, they modify
@@ -432,6 +429,20 @@ public:
 
    // Print out the resource list, default values and documentation.
    void listResources( std::ostream& ) const;
+
+
+   /*----- static member functions -----*/
+
+   //
+   // Resource definition/documentation.
+   //
+   // <group>
+   static const char* getResourceName( Resource );
+   static const char* getResourceDoc( Resource );
+   // </group>
+
+   // Lookup resource by name. This is a slow, linear procedure.
+   static XxResources::Resource getResourceId( const char* resname );
 
 private:
 
@@ -465,8 +476,7 @@ private:
    std::string  _commandOptions[ CMDOPT_LAST - CMDOPT_FIRST ];
    uint		_overviewFileWidth;
    uint		_overviewSepWidth;
-   std::string  _unmergedSeparatorTag;
-   std::string  _unmergedEndTag;
+   std::string  _tags[ TAG_LAST - TAG_FIRST ];
 
 };
 

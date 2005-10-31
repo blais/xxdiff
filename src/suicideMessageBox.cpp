@@ -1,5 +1,5 @@
 /******************************************************************************\
- * $Id: main.cpp 32 2000-09-21 20:39:55Z  $
+ * $Id: suicideMessageBox.cpp 32 2000-09-21 20:39:55Z  $
  * $Date: 2000-09-21 16:39:55 -0400 (Thu, 21 Sep 2000) $
  *
  * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
@@ -24,80 +24,34 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <main.h>
-#include <app.h>
-#include <exceptions.h>
+#include <suicideMessageBox.h>
 
-#include <exception>
-#include <iostream>
-
+XX_NAMESPACE_BEGIN
 
 /*==============================================================================
- * LOCAL DECLARATIONS
+ * PUBLIC FUNCTIONS
  *============================================================================*/
 
-namespace {
+/*==============================================================================
+ * CLASS XxSuicideMessageBox
+ *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-void silentMsgHandler( QtMsgType type, const char *msg )
-{
-   switch ( type ) {
-      case QtFatalMsg: {
-         std::cerr << "Fatal: " << msg << std::endl;
-      } break;
-
-      case QtDebugMsg:
-      case QtWarningMsg: {
-      }
-   }
-}
-
-const char* exceptionPreface = "xxdiff: exception caught: ";
-
-}
-
-
-/*==============================================================================
- * MAIN
- *============================================================================*/
-
-XX_NAMESPACE_USING
-
-extern char** environ;
-
+XxSuicideMessageBox::XxSuicideMessageBox( 
+   QWidget*       parent,
+   const QString& caption, 
+   const QString& text, 
+   Icon           icon 
+) :
+   QMessageBox( caption, text, icon, 1, 0, 0, parent, 0, false )
+{}
 
 //------------------------------------------------------------------------------
 //
-int main( int argc, char** argv, char** envp ) 
+void XxSuicideMessageBox::done( int r )
 {
-   environ = envp;
-#ifndef XX_DEBUG
-   // Shut up!
-   qInstallMsgHandler( silentMsgHandler );
-#endif
-
-   int retval = 2; // errors.
-   try {
-      XxApp app( argc, argv );
-      app.exec();
-      retval = app.getReturnValue();
-   }
-   catch ( XxUsageError* ex ) {
-      std::cerr << ex->what() << std::endl;
-      delete ex;
-   }
-   catch ( std::exception* ex ) {
-      std::cerr << exceptionPreface << ex->what() << std::endl;
-      delete ex;
-   }
-   catch ( const char* ex ) {
-      std::cerr << exceptionPreface << ex << std::endl;
-      delete[] ex;
-   }
-   catch ( ... ) {
-      std::cerr << exceptionPreface << "unspecified internal error."
-                << std::endl;
-   }
-   return retval;
+   delete this;
 }
+
+XX_NAMESPACE_END

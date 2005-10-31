@@ -4,7 +4,6 @@
 bin_PROGRAMS = xxdiff
 
 
-
 ################################################################################
 # designer dialogs
 
@@ -12,11 +11,23 @@ SUFFIXES += .ui
 
 UIC=$(QTDIR)/bin/uic
 
-UIDESIGNER_FILES = optionsDialogBase.ui
+UIDESIGNER_FILES_IMPL = \
+	optionsDialogBase.ui \
+	searchDialogBase.ui
 
-UIDESIGNER_MYHEADERS = $(UIDESIGNER_FILES:.ui=.h)
+UIDESIGNER_FILES_NOIMPL = \
+	markersWidgetBase.ui
 
-UIDESIGNER_MYSOURCES = $(UIDESIGNER_FILES:.ui=.cpp)
+UIDESIGNER_FILES = $(UIDESIGNER_FILES_IMPL) $(UIDESIGNER_FILES_NOIMPL)
+
+UIDESIGNER_GENHEADERS = $(UIDESIGNER_FILES:.ui=.h)
+UIDESIGNER_GENSOURCES = $(UIDESIGNER_FILES:.ui=.cpp)
+
+$(UIDESIGNER_GENHEADERS) : $(UIDESIGNER_FILES)
+$(UIDESIGNER_GENSOURCES) : $(UIDESIGNER_FILES)
+
+UIDESIGNER_MYHEADERS = $(UIDESIGNER_FILES_IMPL:Base.ui=.cpp)
+UIDESIGNER_MYSOURCES = $(UIDESIGNER_FILES_IMPL:Base.ui=.cpp)
 
 .ui.h:
 	$(UIC) $< -o $@
@@ -43,6 +54,7 @@ endif
 
 xxdiff_SOURCES = \
 	app.cpp \
+	suicideMessageBox.cpp \
 	dialogs.cpp \
 	main.cpp \
 	overview.cpp \
@@ -63,8 +75,9 @@ xxdiff_SOURCES = \
 	xrmParser.cpp \
 	stringResParser.cpp \
 	rcfileParser.cpp \
+	$(UIDESIGNER_GENSOURCES) \
 	$(UIDESIGNER_MYSOURCES) \
-	optionsDialog.cpp \
+	markersFileDialog.cpp \
 	getopt.c \
 	getopt1.c
 
@@ -73,6 +86,7 @@ xxdiff_SOURCES = \
 noinst_HEADERS = \
 	app.h \
 	app.inline.h \
+	suicideMessageBox.h \
 	dialogs.h \
 	defs.h \
 	diffs.h \
@@ -100,13 +114,14 @@ noinst_HEADERS = \
 	lineNumbers.h \
 	util.h \
 	xrmParser.h \
+	$(UIDESIGNER_GENHEADERS) \
 	$(UIDESIGNER_MYHEADERS) \
-	optionsDialog.h \
+	markersFileDialog.h \
 	getopt.h
 
 BUILT_SOURCES =	man.h \
-		$(UIDESIGNER_MYHEADERS) \
-		$(UIDESIGNER_MYSOURCES)
+		$(UIDESIGNER_GENHEADERS) \
+		$(UIDESIGNER_GENSOURCES)
 
 
 # FIXME automoc fails when I try to optionally not compile the parser files.
@@ -270,21 +285,21 @@ CXXFLAGS += $(COMPILER_COMPAQCXX_CXXFLAGS)
 ################################################################################
 # gcc options and STLport
 
-if IS_COMPILER_GCC
+if IS_COMPILER_GNU
 
 #
 # for compiler
 #
-COMPILER_GCC_CXXFLAGS += -Wall -DCOMPILER_GNU
+COMPILER_GNU_CXXFLAGS += -Wall -DCOMPILER_GNU
 
 #
 # for STLport
 #
-COMPILER_GCC_CXXFLAGS += -nostdinc++ -I/usr/include/stlport
-COMPILER_GCC_CXXFLAGS += -D__SGI_STL_OWN_IOSTREAMS
-#COMPILER_GCC_CXXFLAGS += -D__STL_USE_OWN_NAMESPACE
+COMPILER_GNU_CXXFLAGS += -nostdinc++ -I/usr/include/stlport
+COMPILER_GNU_CXXFLAGS += -D__SGI_STL_OWN_IOSTREAMS
+#COMPILER_GNU_CXXFLAGS += -D__STL_USE_OWN_NAMESPACE
 
-COMPILER_GCC_LIBS += -Wl,-Bstatic -lstlport_gcc -Wl,-Bdynamic
+COMPILER_GNU_LIBS += -Wl,-Bstatic -lstlport_gcc -Wl,-Bdynamic
 
 endif
 
@@ -303,14 +318,14 @@ endif
 # cancel's its definition under IRIX, which is needed, so define it in both
 # cases.
 
-if IS_COMPILER_GCC
+if IS_COMPILER_GNU
 CXXLD=$(CC)
 else
 CXXLD=$(CXX)
 endif
 
-CXXFLAGS += $(COMPILER_GCC_CXXFLAGS)
-LIBS += $(COMPILER_GCC_LIBS)
+CXXFLAGS += $(COMPILER_GNU_CXXFLAGS)
+LIBS += $(COMPILER_GNU_LIBS)
 
 
 ################################################################################
