@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: defs.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: defs.h 253 2001-10-05 01:28:29Z blais $
+ * $Date: 2001-10-04 21:28:29 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -40,13 +40,11 @@ typedef unsigned int 	uint;
 #define XX_VERSION 	VERSION
 
 
-//
 // Note: disable the namespaces for now because the moc cannot deal with this.
 // We could circumvent the problem by including moc-generated output but then we
 // couldn't use the automoc script.
-//
-// Note: this is now specified with configure feature --disable-namespaces
-// #define XX_USE_NAMESPACE
+#undef XX_USE_NAMESPACE
+
 #ifdef XX_USE_NAMESPACE
 
 #define XX_NAMESPACE_BEGIN		namespace Xxdiff {
@@ -82,13 +80,6 @@ typedef unsigned int 	uint;
 
 
 //
-// Determines if we allow using Xrm resources.
-//
-// Note: this is now specified with configure feature --disable-xrm
-//#define XX_USE_XRM
-
-
-//
 // Determines if we allow using Rcfile resources.
 //
 // Note: this is now specified with configure feature --disable-rcfile
@@ -106,20 +97,15 @@ typedef unsigned int 	uint;
 #define INCL_STD_IOSTREAM
 #endif
 
-#define XX_ASSERT(x)	if ( !(x) ) \
-  	{ throw new XxInternalError( XX_INTERROR_PARAMS ); }
 
 #define XX_CHECK(x)	if ( !(x) ) \
-  	{ throw new XxInternalError( XX_INTERROR_PARAMS ); }
+  	{ throw XxInternalError( XX_EXC_PARAMS ); }
 
 #define XX_TRACE(x)		std::cout << x << std::endl;
 
 #define XX_TRACE_COMPILE(x)	x
 
 #else
-
-#define XX_ASSERT(x)	if ( !(x) ) \
-	{ throw new XxInternalError( XX_INTERROR_PARAMS ); }
 
 #define XX_CHECK(x)
 
@@ -129,9 +115,20 @@ typedef unsigned int 	uint;
 
 #endif
 
+#define XX_ASSERT(x)	if ( !(x) ) \
+  	{ throw XxInternalError( XX_EXC_PARAMS ); }
+
+#define XX_ABORT()	\
+  	{ throw XxInternalError( XX_EXC_PARAMS ); }
+
+
 #ifndef INCL_XXDIFF_EXCEPTIONS
 #include <exceptions.h>
 #endif
 
+#ifdef WINDOWS
+#include <winfixes/winfixes.h>
+#endif
 
 #endif
+

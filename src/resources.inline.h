@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 178 2001-06-02 01:26:38Z blais $
- * $Date: 2001-06-01 21:26:38 -0400 (Fri, 01 Jun 2001) $
+ * $Id: resources.inline.h 242 2001-10-01 21:11:40Z blais $
+ * $Date: 2001-10-01 17:11:40 -0400 (Mon, 01 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -162,14 +162,14 @@ inline uint XxResources::getVerticalLinePos() const
 
 //------------------------------------------------------------------------------
 //
-inline const std::string& XxResources::getClipboardTextFormat() const
+inline const QString& XxResources::getClipboardTextFormat() const
 {
    return _clipboardTextFormat;
 }
 
 //------------------------------------------------------------------------------
 //
-inline void XxResources::setClipboardTextFormat( const std::string& format )
+inline void XxResources::setClipboardTextFormat( const QString& format )
 {
    _clipboardTextFormat = format;
 }

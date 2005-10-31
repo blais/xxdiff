@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: markers.h 211 2001-07-07 19:41:03Z blais $
- * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
+ * $Id: markers.h 236 2001-09-30 20:01:48Z blais $
+ * $Date: 2001-09-30 16:01:48 -0400 (Sun, 30 Sep 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -128,7 +128,7 @@ public:
       bool           threeWay,
       bool&          useConditionals,
       bool&          removeEmptyConditionals,
-      std::string    conditionals[3]
+      QString        conditionals[3]
    );
 
 private:

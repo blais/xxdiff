@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: stringResParser.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: stringResParser.h 245 2001-10-03 19:45:40Z blais $
+ * $Date: 2001-10-03 15:45:40 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,11 +33,6 @@
 
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
-#endif
-
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
 #endif
 
 #ifndef INCL_STD_MAP
@@ -74,25 +69,26 @@ public:
    // Otherwise return true and fills in the value string.
    virtual bool query( 
       XxResources::Resource resource,
-      const char*           name,
-      std::string&          value
+      const QString&        name,
+      QString&              value
    );
 
    // Add a new string to the resources parser.
    void addString(
-      const std::string& str
+      const QString& str
    );
 
 private:
 
    /*----- types and enumerations -----*/
 
-   typedef std::map< std::string, ResValue, Rltstr > ResourceMap;
+   typedef std::map< QString, ResValue, Rltstr > ResourceMap;
 
    /*----- data members -----*/
 
-   ResourceMap 	_resources;
-   std::string	_valueText;
+   ResourceMap _resources;
+   QString     _valueText;
+
 };
 
 

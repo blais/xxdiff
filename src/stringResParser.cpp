@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: stringResParser.cpp 211 2001-07-07 19:41:03Z blais $
- * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
+ * $Id: stringResParser.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -32,7 +32,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -59,7 +58,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor from a resource string.
-   XxStringResError( const std::string& res );
+   XxStringResError( const QString& res );
 
    // Destructor.
    virtual ~XxStringResError() XX_THROW_NOTHING;
@@ -71,17 +70,16 @@ private:
 
    /*----- data members -----*/
 
-   std::string _msg;
+   QString _msg;
 
 };
 
 //------------------------------------------------------------------------------
 //
-XxStringResError::XxStringResError( const std::string& res )
+XxStringResError::XxStringResError( const QString& res )
 {
-   std::ostringstream oss;
-   oss << "Error parsing string \"" << res << "\"" << std::endl << std::ends;
-   _msg = oss.str();
+   QTextOStream oss( &_msg );
+   oss << "Error parsing string \"" << res << "\"" << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -93,23 +91,7 @@ XxStringResError::~XxStringResError() XX_THROW_NOTHING
 //
 const char* XxStringResError::what() const XX_THROW_NOTHING
 {
-   return _msg.c_str();
-}
-
-/*==============================================================================
- * LOCAL FUNCTIONS
- *============================================================================*/
-
-//------------------------------------------------------------------------------
-//
-std::string removeWhitespace( const std::string& s )
-{
-   using namespace std;
-
-   // Removes prepending and trailing whitespace characters.
-   string::size_type bpos = s.find_first_not_of( " \t" );
-   string::size_type epos = s.find_last_not_of( " \t" );
-   return s.substr( bpos, epos - bpos + 1 );
+   return _msg.latin1();
 }
 
 }
@@ -153,16 +135,18 @@ XxStringResParser::~XxStringResParser()
 //------------------------------------------------------------------------------
 //
 void XxStringResParser::addString(
-   const std::string& str
+   const QString& str
 )
 {
-   using namespace std;
-   string::size_type pos = str.find( ':' );
-   if ( pos == string::npos ) {
-      throw new XxStringResError( str );
+   typedef int PosType;
+   const PosType notfound = -1;
+
+   PosType pos = str.find( ':' );
+   if ( pos == notfound ) {
+      throw XxStringResError( str );
    }
-   string resname = removeWhitespace( str.substr( 0, pos ) );
-   string resvalue = removeWhitespace( str.substr( pos + 1 ) );
+   QString resname = str.mid( 0, pos ).stripWhiteSpace();
+   QString resvalue = str.mid( pos + 1 ).stripWhiteSpace();
 
    ResValue& rv = _resources[ resname ];
    rv._value = resvalue;
@@ -172,9 +156,9 @@ void XxStringResParser::addString(
 //------------------------------------------------------------------------------
 //
 bool XxStringResParser::query( 
-   XxResources::Resource resource,
-   const char*           name,
-   std::string&          value
+   XxResources::Resource /*resource*/,
+   const QString&        name,
+   QString&              value
 )
 {
    ResourceMap::iterator iter = _resources.find( name );

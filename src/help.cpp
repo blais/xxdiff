@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: help.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,6 +28,9 @@
 #include <line.h>
 #include <resources.h>
 
+/* always disable... this was useless and is now obsolete */
+#undef XX_USE_RUNTIME_HELP
+
 #ifndef XX_USE_RUNTIME_HELP
 #include <man.h>
 #endif
@@ -41,7 +44,6 @@
 #include <qtextview.h>
 #include <qscrollview.h>
 
-#include <sstream>
 #include <iostream>
 #include <stdio.h>
 
@@ -53,8 +55,7 @@
 namespace {
 
 /*----- variables -----*/
-
-const char* whatsThisStrings[] = {
+const QString whatsThisStrings[] = {
 
    //  VSCROLL
    "This is the vertical scrollbar used to navigate the files.",
@@ -152,10 +153,10 @@ private:
 
    // Creates a label.
    QLabel* createLabel( 
-      const char* text, 
-      QColor& fore,
-      QColor& back,
-      const QFont& font
+      const QString& text, 
+      QColor&        fore,
+      QColor&        back,
+      const QFont&   font
    );
 
 };
@@ -260,13 +261,13 @@ XxColorLegend::XxColorLegend(
 //------------------------------------------------------------------------------
 //
 QLabel* XxColorLegend::createLabel( 
-   const char* text, 
-   QColor& fore,
-   QColor& back,
-   const QFont& font
+   const QString& text, 
+   QColor&        fore,
+   QColor&        back,
+   const QFont&   font
 ) 
 {
-   QLabel* l = new QLabel( QString(text), this );
+   QLabel* l = new QLabel( text, this );
    QColorGroup g;
    g.setColor( QColorGroup::Foreground, fore );
    g.setColor( QColorGroup::Background, back );
@@ -306,7 +307,7 @@ public:
 
    // Returns a newly allocated block of text containing the manual page text.
    // Ownership is passed to the caller (you must delete).
-   static char* getManualText( const char* command );
+   static QString getManualText( const QString& command );
 
 };
 
@@ -314,7 +315,7 @@ public:
 //------------------------------------------------------------------------------
 //
 XxManPageDialog::XxManPageDialog( 
-   QWidget* parent, 
+   QWidget*       parent, 
    const QString& text
 ) :
    QDialog( parent )
@@ -340,10 +341,15 @@ void XxManPageDialog::accept()
 
 //------------------------------------------------------------------------------
 //
-char* XxManPageDialog::getManualText( const char* command )
+#ifndef XX_USE_RUNTIME_HELP
+QString XxManPageDialog::getManualText( const QString& /*command*/ )
 {
-#ifdef XX_USE_RUNTIME_HELP
-   XX_ASSERT( command != 0 );
+   return QString(manText);
+}
+#else
+QString XxManPageDialog::getManualText( const QString& command )
+{
+   XX_ASSERT( !command.isEmpty() );
 
    // This code fetched from mgdiff.
    FILE* f;
@@ -351,7 +357,7 @@ char* XxManPageDialog::getManualText( const char* command )
    int size, bytes;
    char buffer[BUFSIZ];
    
-   if ( ( f = popen( command, "r" ) ) == 0 ) {
+   if ( ( f = popen( command.latin1(), "r" ) ) == 0 ) {
       return 0;
    }
    
@@ -371,17 +377,12 @@ char* XxManPageDialog::getManualText( const char* command )
    
    pclose( f );
    return retval;
-#else
-   return manText;
+}
 #endif
-}
 
 }
-
 
 XX_NAMESPACE_BEGIN
-using namespace std;
-
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -395,15 +396,15 @@ using namespace std;
 //
 QDialog* XxHelp::getAboutDialog( QWidget* parent )
 {
-   ostringstream oss;
+   QString text;
+   QTextOStream oss( &text );
    oss << "xxdiff" << endl 
        << endl
        << "A graphical file comparator and merge tool." << endl
        << endl
        << "Author: Martin Blais <blais@iro.umontreal.ca>" << endl
        << "Home page: http://xxdiff.sourceforge.net" << endl
-       << "Version: " << XX_VERSION << endl << ends;
-   QString text( oss.str().c_str() );
+       << "Version: " << XX_VERSION << endl;
    QDialog* box = new XxAboutDialog( parent, text );
    return box;
 }
@@ -421,14 +422,10 @@ QDialog* XxHelp::getColorLegend( QWidget* parent )
 QDialog* XxHelp::getManPageDialog( QWidget* parent )
 {
    const XxResources* resources = XxResources::getInstance();
-   const char* command = resources->getCommand( XxResources::COMMAND_MANUAL );
-   char* manualText = XxManPageDialog::getManualText( command );
-   if ( manualText != 0 ) {
-      QString text( manualText );
-      QDialog* box = new XxManPageDialog( parent, text );
-#ifdef XX_USE_RUNTIME_HELP
-      free( manualText );
-#endif
+   const QString command = resources->getCommand( XxResources::COMMAND_MANUAL );
+   QString manualText = XxManPageDialog::getManualText( command );
+   if ( !manualText.isEmpty() ) {
+      QDialog* box = new XxManPageDialog( parent, manualText );
       return box;
    }
    return 0;
@@ -436,14 +433,14 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
 
 //------------------------------------------------------------------------------
 //
-const char* XxHelp::getWhatsThisText( WhatsThisTextType type )
+const QString& XxHelp::getWhatsThisText( WhatsThisTextType type )
 {
    return whatsThisStrings[ type ];
 }
 
 //------------------------------------------------------------------------------
 //
-void XxHelp::dumpUsage( std::ostream& os )
+void XxHelp::dumpUsage( QTextStream& os )
 {
    os << 
 "Usage: \n\
@@ -456,11 +453,6 @@ Options: \n\
    -v, --version               Show the program version and compilation \n\
                                options.\n\
 ";
-#ifdef XX_USE_XRM
-   os << "\
-       --no-xrm                Don't query X resources.\n\
-";
-#endif
 #ifdef XX_USE_RCFILE
    os << "\
        --no-rcfile             Don't query rcfile resources (.xxdiffrc).\n\
@@ -505,7 +497,7 @@ Options: \n\
 
 //------------------------------------------------------------------------------
 //
-void XxHelp::dumpVersion( std::ostream& os )
+void XxHelp::dumpVersion( QTextStream& os )
 {
    os << "xxdiff - version " << XX_VERSION << endl;
    os << "Compile options:";
@@ -514,9 +506,6 @@ void XxHelp::dumpVersion( std::ostream& os )
 #endif
 #ifdef XX_LINKSTATIC
    os << " linkstatic";
-#endif
-#ifdef XX_USE_XRM
-   os << " xrm";
 #endif
 #ifdef XX_USE_RCFILE
    os << " rcfile";
@@ -535,18 +524,16 @@ void XxHelp::dumpVersion( std::ostream& os )
 
 //------------------------------------------------------------------------------
 //
-void XxHelp::dumpResources( std::ostream& os )
+void XxHelp::dumpResources( QTextStream& os )
 {
    int nbres = int( XxResources::RESOURCE_LAST - XxResources::RESOURCE_FIRST );
    for ( int ii = 0; ii < nbres; ++ii ) {
-      const char* doc =
+      const QString doc =
          XxResources::getResourceDoc( XxResources::Resource( ii ) );
-      if ( doc != 0 ) {
-         if ( strcmp( doc, "()" ) != 0 ) {
-            os << doc << std::endl;
-            os << XxResources::getResourceName( XxResources::Resource( ii ) );
-            os << std::endl << std::endl;
-         }
+      if ( doc == "()" ) {
+         os << doc << endl;
+         os << XxResources::getResourceName( XxResources::Resource( ii ) );
+         os << endl << endl;
       }
    }   
 }

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builder.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: builder.h 243 2001-10-02 06:44:22Z blais $
+ * $Date: 2001-10-02 02:44:22 -0400 (Tue, 02 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -40,11 +40,6 @@
 #define INCL_STD_MEMORY
 #endif
 
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
-#endif
-
 #ifndef INCL_STD_STDIO
 #include <stdio.h>
 #define INCL_STD_STDIO
@@ -75,7 +70,7 @@ public:
    // Returns the error text that occurred on the last process.
    // <group>
    bool hasErrors() const;
-   const char* getErrors() const;
+   const QString& getErrors() const;
    // </group>
 
    // Returns the status of the diff command.
@@ -87,8 +82,8 @@ protected:
 
    /*----- data members -----*/
 
-   std::string         _errors;
-   int                 _status;
+   QString _errors;
+   int     _status;
 
 };
 

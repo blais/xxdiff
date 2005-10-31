@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 186 2001-06-04 20:16:12Z blais $
- * $Date: 2001-06-04 16:16:12 -0400 (Mon, 04 Jun 2001) $
+ * $Id: optionsDialog.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,46 +41,9 @@
 #include <qcolordialog.h>
 #include <qlabel.h>
 #include <qcombobox.h>
+#include <qstring.h>
 
 #include <map>
-
-/*==============================================================================
- * LOCAL DECLARATIONS
- *============================================================================*/
-
-namespace {
-
-//------------------------------------------------------------------------------
-//
-void tidyUpSpace( std::string& command )
-{
-   // Remove the extra spaces, leaving exactly one space between each option.
-   using namespace std;
-
-   string::size_type bpos = string::npos;
-   std::string outcommand;
-   for ( string::iterator iter = command.begin();
-         iter != command.end();
-         ++iter ) {
-
-      if ( *iter == ' ' || *iter == '\t' ) {
-         if ( bpos == string::npos ) {
-            bpos = iter - command.begin();
-         }
-      }
-      else {
-         if ( bpos != string::npos ) {
-            bpos = string::npos;
-            outcommand.append( " ", 1 );
-         }
-         outcommand.append( &( *iter ), 1 );
-      }
-   }
-
-   command = outcommand;
-}
-
-}
 
 XX_NAMESPACE_BEGIN
 
@@ -263,7 +226,7 @@ void XxOptionsDialog::synchronize()
                                   XxResources::CMDOPT_FILES_IGNORE_BLANK_LINES )
    );
 
-   const std::string& rcmd = resources->getCommand( cmdResId );
+   QString rcmd = resources->getCommand( cmdResId );
    XxResources::Quality quality = resources->getQuality( rcmd );
    _radiobuttonQualityNormal->setChecked( 
       quality == XxResources::QUALITY_NORMAL 
@@ -330,7 +293,7 @@ void XxOptionsDialog::synchronize()
    );
 
    _lineeditClipboardTextFormat->setText(
-      QString( resources->getClipboardTextFormat().c_str() )
+      resources->getClipboardTextFormat()
    );
 
    //---------------------------------------------------------------------------
@@ -371,7 +334,7 @@ void XxOptionsDialog::onApply()
    // First set resources, then redodiff.
    redoDiff |= maybeSetCommand( 
       XxResources::COMMAND_DIFF_FILES_2,
-      _lineeditCommandFiles2->text().ascii() 
+      _lineeditCommandFiles2->text() 
    );
 
    //---------------------------------------------------------------------------
@@ -379,7 +342,7 @@ void XxOptionsDialog::onApply()
 
    redoDiff |= maybeSetCommand( 
       XxResources::COMMAND_DIFF_FILES_3,
-      _lineeditCommandFiles3->text().ascii() 
+      _lineeditCommandFiles3->text()
    );
 
    //---------------------------------------------------------------------------
@@ -387,11 +350,11 @@ void XxOptionsDialog::onApply()
 
    redoDiff |= maybeSetCommand( 
       XxResources::COMMAND_DIFF_DIRECTORIES,
-      _lineeditCommandDirs->text().ascii() 
+      _lineeditCommandDirs->text()
    );
    redoDiff |= maybeSetCommand( 
       XxResources::COMMAND_DIFF_DIRECTORIES_REC,
-      _lineeditCommandDirsRecursive->text().ascii() 
+      _lineeditCommandDirsRecursive->text()
    );
 
    resources->setBoolOpt( XxResources::DIRDIFF_RECURSIVE, 
@@ -438,9 +401,9 @@ void XxOptionsDialog::onApply()
    resources->setBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT, 
                           _checkboxFormatClipboardText->isChecked() );
 
-   std::string oldClipboardFormat = resources->getClipboardTextFormat();
-   const char* newClipboardFormat = _lineeditCommandFiles2->text().ascii();
-   if ( ::strcmp( newClipboardFormat, oldClipboardFormat.c_str() ) != 0 ) {
+   QString oldClipboardFormat = resources->getClipboardTextFormat();
+   QString newClipboardFormat = _lineeditClipboardTextFormat->text();
+   if ( newClipboardFormat != oldClipboardFormat ) {
       resources->setClipboardTextFormat( newClipboardFormat );
    }
 
@@ -530,9 +493,9 @@ void XxOptionsDialog::setFileDiffOptions(
    else {
       le = _lineeditCommandFiles3;
    }
-   std::string cmd( le->text().ascii() );
+   QString cmd = le->text();
    
-   const char* opt = resources->getCommandOption( cmdOptionId );
+   const QString opt = resources->getCommandOption( cmdOptionId );
 
    if ( state == true ) {
       XxOptionsDialog::addToCommand( cmd, opt );
@@ -541,7 +504,7 @@ void XxOptionsDialog::setFileDiffOptions(
       XxOptionsDialog::removeFromCommand( cmd, opt );
    }
 
-   le->setText( QString( cmd.c_str() ) );
+   le->setText( cmd );
 }
 
 //------------------------------------------------------------------------------
@@ -587,65 +550,65 @@ void XxOptionsDialog::setFileDiffQuality(
    else {
       le = _lineeditCommandFiles3;
    }
-   std::string cmd( le->text().ascii() );
+   QString cmd = le->text();
    
    resources->setQuality( cmd, quality );
 
-   le->setText( QString( cmd.c_str() ) );
+   le->setText( cmd );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxRecursive( int state )
+void XxOptionsDialog::checkboxRecursive( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxHorizontalDiffs( int state )
+void XxOptionsDialog::checkboxHorizontalDiffs( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxIgnoreHorizontalWhitespace( int state )
+void XxOptionsDialog::checkboxIgnoreHorizontalWhitespace( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxHideCarriageReturns( int state )
+void XxOptionsDialog::checkboxHideCarriageReturns( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::spinboxTabWidth( int state )
+void XxOptionsDialog::spinboxTabWidth( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxIgnoreFileChanges( int state )
+void XxOptionsDialog::checkboxIgnoreFileChanges( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxFormatClipboardText( int state )
+void XxOptionsDialog::checkboxFormatClipboardText( int /*state*/ )
 {
    // nop.
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::checkboxDrawVerticalLine( int state )
+void XxOptionsDialog::checkboxDrawVerticalLine( int /*state*/ )
 {
    // nop.
 }
@@ -665,7 +628,7 @@ void XxOptionsDialog::listboxColors( const QString& colorString )
    XX_CHECK( resources );
 
    XxResources::Resource colorId = 
-      XxResources::getResourceId( colorString.ascii() );
+      XxResources::getResourceId( colorString );
    
    QColor color = resources->getColor( colorId );
    _labelColor->setBackgroundColor( color );
@@ -683,7 +646,7 @@ void XxOptionsDialog::editColor()
 
    QString colorString = _listboxColors->currentText();
    XxResources::Resource colorId = 
-      XxResources::getResourceId( colorString.ascii() );
+      XxResources::getResourceId( colorString );
 
    QColor curColor;
    ColorModMap::const_iterator iter = _colorModMap.find( colorId );
@@ -706,68 +669,56 @@ void XxOptionsDialog::editColor()
 //------------------------------------------------------------------------------
 //
 bool XxOptionsDialog::isInCommand(
-   const std::string& command,
-   const char*        option
+   const QString& command,
+   const QString& option
 )
 {
-   using namespace std;
-
-   string::size_type xpos = command.find( option );
-   if ( xpos != string::npos ) {
-      return true;
-   }
-   return false;
+   return command.find( option ) != -1;
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::addToCommand(
-   std::string& command,
-   const char*  option
+   QString&       command,
+   const QString& option
 )
 {
-   using namespace std;
-
    // Look for option in command, if not found, add it to command.
-   string::size_type pos = command.find( option );
-   if ( pos == string::npos ) {
+   int pos = command.find( option );
+   if ( pos == -1 ) {
       command.append( " " );
       command.append( option );
    }
-
-   tidyUpSpace( command );
+   command = command.simplifyWhiteSpace();
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::removeFromCommand( 
-   std::string& command,
-   const char*  option
+   QString&       command,
+   const QString& option
 )
 {
-   using namespace std;
-
    // Look for option in command, if found, remove it from command.
-   string::size_type pos = command.find( option );
-   if ( pos != string::npos ) {
-      command.erase( pos, ::strlen( option ) );
+   int pos = command.find( option );
+   if ( pos != -1 ) {
+      command.remove( pos, option.length() );
    }
-
-   tidyUpSpace( command );
+   command = command.simplifyWhiteSpace();
 }
 
 //------------------------------------------------------------------------------
 //
 int XxOptionsDialog::isInCommand(
-   const std::string& command,
-   const char*        option1,
-   const char*        option2,
-   const char*        option3
+   const QString& command,
+   const QString& option1,
+   const QString& option2,
+   const QString& option3
 )
 {
-   int l1 = ::strlen( option1 );
-   int l2 = ::strlen( option2 );
-   int l3 = ::strlen( option3 );
+   int l1 = option1.length();
+   int l2 = option2.length();
+   int l3 = option3.length();
 
    bool f1 = l1 > 0 && XxOptionsDialog::isInCommand( command, option1 );
    bool f2 = l2 > 0 && XxOptionsDialog::isInCommand( command, option2 );
@@ -802,15 +753,15 @@ int XxOptionsDialog::isInCommand(
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::setOneOfInCommand(
-   std::string& command,
-   const char*  optionNew,
-   const char*  optionOther1,
-   const char*  optionOther2
+   QString&       command,
+   const QString& optionNew,
+   const QString& optionOther1,
+   const QString& optionOther2
 )
 {
-   int lNew = ::strlen( optionNew );
-   int lOther1 = ::strlen( optionOther1 );
-   int lOther2 = ::strlen( optionOther2 );
+   int lNew = optionNew.length();
+   int lOther1 = optionOther1.length();
+   int lOther2 = optionOther2.length();
 
    if ( lOther1 > 0 ) {
       XxOptionsDialog::removeFromCommand( command, optionOther1 );
@@ -828,14 +779,13 @@ void XxOptionsDialog::setOneOfInCommand(
 //
 bool XxOptionsDialog::maybeSetCommand( 
    XxResources::Resource commandId,
-   const char*           commandString
+   const QString&        commandString
 )
 {
    XxResources* resources = _app->getResourcesNC();
    XX_CHECK( resources );
 
-   const char* command = resources->getCommand( commandId );
-   if ( ::strcmp( command, commandString ) != 0 ) {
+   if ( resources->getCommand( commandId ) == commandString ) {
       resources->setCommand( commandId, commandString );
       return true;
    }
@@ -843,3 +793,4 @@ bool XxOptionsDialog::maybeSetCommand(
 }
 
 XX_NAMESPACE_END
+

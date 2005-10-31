@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.cpp 163 2001-05-28 21:28:37Z blais $
- * $Date: 2001-05-28 17:28:37 -0400 (Mon, 28 May 2001) $
+ * $Id: merged.cpp 243 2001-10-02 06:44:22Z blais $
+ * $Date: 2001-10-02 02:44:22 -0400 (Tue, 02 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -217,7 +217,9 @@ void XxMergedText::drawContents( QPainter* pp )
 
             QColor bcolor;
             QColor fcolor;
-            XxResources::Resource res = XxResources::COLOR_BACKGROUND; // warning
+            XxResources::Resource res = XxResources::COLOR_BACKGROUND;
+            // warning
+
             switch ( no ) {
                case 0: res = XxResources::COLOR_BACK_MERGED_DECIDED_1; break;
                case 1: res = XxResources::COLOR_BACK_MERGED_DECIDED_2; break;
@@ -393,7 +395,7 @@ void XxMergedText::mouseMoveEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxMergedText::mouseReleaseEvent( QMouseEvent* event )
+void XxMergedText::mouseReleaseEvent( QMouseEvent* /*event*/ )
 {
    // Release grab in all case. It won't hurt.
    _grab = false;
@@ -401,7 +403,7 @@ void XxMergedText::mouseReleaseEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxMergedText::resizeEvent( QResizeEvent* ev )
+void XxMergedText::resizeEvent( QResizeEvent* /*ev*/ )
 {
    // Compute nb. display lines.
    const QFont& font = _app->getFont();
@@ -511,7 +513,7 @@ void XxMergedFrame::appCursorChanged( int cursorLine )
 
 //------------------------------------------------------------------------------
 //
-void XxMergedFrame::appScrolled( int topLine )
+void XxMergedFrame::appScrolled( int /*topLine*/ )
 {
    // Use this to track the top line of the application.
    // _merged->setTopLine( topLine );

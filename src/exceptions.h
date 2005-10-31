@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: exceptions.h 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,19 +31,63 @@
 #include <defs.h>
 #endif
 
+#ifndef INCL_QT_QSTRING
+#include <qstring.h>
+#define INCL_QT_QSTRING
+#endif
+
+#ifndef INCL_QT_QTEXTSTREAM
+#include <qtextstream.h>
+#define INCL_QT_QTEXTSTREAM
+#endif
+
 #ifndef INCL_STD_EXCEPTION
 #include <exception>
 #define INCL_STD_EXCEPTION
 #endif
 
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
+#ifndef INCL_STD_STDEXCEPT
+#include <stdexcept>
+#define INCL_STD_STDEXCEPT
 #endif
-
 
 XX_NAMESPACE_BEGIN
 
+/*==============================================================================
+ * PUBLIC DECLARATIONS
+ *============================================================================*/
+
+#define XX_EXC_PARAMS	__FILE__, __LINE__
+#define XX_EXC_PARAMS_DECL(file,line)  const QString& file, const int line
+
+/*==============================================================================
+ * CLASS XxError
+ *============================================================================*/
+
+// <summary> Base class for all xxdiff exceptions/errors </summary>
+
+class XxError {
+
+public:
+
+   /*----- member functions -----*/
+
+   XxError( 
+      XX_EXC_PARAMS_DECL(file,line),
+      const QString& msg = QString::null 
+   );
+   virtual ~XxError() XX_THROW_NOTHING;
+
+   // See base class.
+   virtual const QString& getMsg() const XX_THROW_NOTHING;
+
+protected:
+
+   /*----- data members -----*/
+
+   QString _msg;
+
+};
 
 /*==============================================================================
  * CLASS XxUsageError
@@ -52,7 +96,8 @@ XX_NAMESPACE_BEGIN
 // <summary> This class is used to indicate a usage error, and also to print out
 // the version message </summary>
 
-class XxUsageError : public std::exception {
+class XxUsageError : public XxError, 
+                     public std::domain_error {
 
 public:
 
@@ -61,12 +106,11 @@ public:
    // Constructor.  Benine indicates if this exception should return a nice
    // error code.  Version indicates if this exception should spew out the
    // version messages instead of the usage.
-   XxUsageError( bool benine = false, bool version = false );
-   virtual ~XxUsageError() XX_THROW_NOTHING;
-
-
-   // See base class.
-   virtual const char* what() const XX_THROW_NOTHING;
+   XxUsageError( 
+      XX_EXC_PARAMS_DECL(file,line),
+      bool benine = false,
+      bool version = false 
+   );
 
    // Returns true if this is a benine exception.
    bool isBenine() const;
@@ -75,8 +119,7 @@ private:
 
    /*----- data members -----*/
 
-   bool		_benine;
-   std::string	_msg;
+   bool    _benine;
 
 };
 
@@ -85,33 +128,20 @@ private:
  * CLASS XxIoError
  *============================================================================*/
 
-class XxIoError : public std::exception {
+class XxIoError : public XxError,
+                  public std::runtime_error {
 
 public:
 
    /*----- member functions -----*/
 
-   // Constructor from current errno.
-   XxIoError();
-
    // Constructor with a string.
-   XxIoError( const char* msg );
-
-   // Destructor.
-   virtual ~XxIoError() XX_THROW_NOTHING;
-
-   // See base class.
-   virtual const char* what() const XX_THROW_NOTHING;
-
-
-private:
-
-   /*----- data members -----*/
-
-   std::string _msg;
+   XxIoError( 
+      XX_EXC_PARAMS_DECL(file,line),
+      const QString& msg = QString::null // use errno string only.
+   );
 
 };
-
 
 /*==============================================================================
  * CLASS XxInternalError
@@ -119,28 +149,17 @@ private:
 
 // <summary> an internal error that has been detected </summary>
 
-#define XX_INTERROR_PARAMS	__FILE__, __LINE__
-
-class XxInternalError : public std::exception {
+class XxInternalError : public XxError,
+                        public std::runtime_error {
 
 public:
 
    /*----- member functions -----*/
 
    // Constructor.  Use above macro to fill in the parameters.
-   XxInternalError( const char*, int );
-
-   // Destructor.
-   virtual ~XxInternalError() XX_THROW_NOTHING;
-
-   // See base class.
-   virtual const char* what() const XX_THROW_NOTHING;
-
-private:
-
-   /*----- data members -----*/
-
-   std::string _msg;
+   XxInternalError( 
+      XX_EXC_PARAMS_DECL(file,line)
+   );
 
 };
 
@@ -148,3 +167,4 @@ private:
 XX_NAMESPACE_END
 
 #endif
+

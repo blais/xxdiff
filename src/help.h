@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: help.h 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -96,16 +96,16 @@ public:
    );
 
    // Returns the help text for specific widgets.
-   static const char* getWhatsThisText( WhatsThisTextType type );
+   static const QString& getWhatsThisText( WhatsThisTextType type );
 
    // Print out usage message.
-   static void dumpUsage( std::ostream& );
+   static void dumpUsage( QTextStream& );
 
    // Print out version message.
-   static void dumpVersion( std::ostream& );
+   static void dumpVersion( QTextStream& );
 
    // Print out the resources and associated documentation.
-   static void dumpResources( std::ostream& );
+   static void dumpResources( QTextStream& );
 
 };
 
@@ -113,3 +113,4 @@ public:
 XX_NAMESPACE_END
 
 #endif
+

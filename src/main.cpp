@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: main.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: main.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -66,7 +66,6 @@ XX_NAMESPACE_USING
 
 extern char** environ;
 
-
 //------------------------------------------------------------------------------
 //
 int main( int argc, char** argv, char** envp ) 
@@ -92,17 +91,14 @@ int main( int argc, char** argv, char** envp )
       app.exec();
       retval = app.getReturnValue();
    }
-   catch ( XxUsageError* ex ) {
-      std::cerr << ex->what() << std::endl;
-      delete ex;
+   catch ( const XxError& ex ) {
+      std::cerr << ex.getMsg() << std::endl;
    }
-   catch ( std::exception* ex ) {
-      std::cerr << exceptionPreface << ex->what() << std::endl;
-      delete ex;
+   catch ( const std::exception& ex ) {
+      std::cerr << ex.what() << std::endl;
    }
    catch ( const char* ex ) {
-      std::cerr << exceptionPreface << ex << std::endl;
-      delete[] ex;
+      std::cerr << ex << std::endl;
    }
    catch ( ... ) {
       std::cerr << exceptionPreface << "unspecified internal error."

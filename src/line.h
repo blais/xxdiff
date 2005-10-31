@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 183 2001-06-04 05:08:52Z blais $
- * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
+ * $Id: line.h 244 2001-10-02 22:20:54Z blais $
+ * $Date: 2001-10-02 18:20:54 -0400 (Tue, 02 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -33,6 +33,11 @@
 
 #ifndef INCL_XXDIFF_TYPES
 #include <types.h>
+#endif
+
+#ifndef INCL_QT_QSTRING
+#include <qstring.h>
+#define INCL_QT_QSTRING
 #endif
 
 
@@ -189,8 +194,8 @@ public:
 
    // Debugging output functions.
    // <group>
-   static std::string mapToString( Type type );
-   static std::string mapToString( Selection selection );
+   static QString mapToString( Type type );
+   static QString mapToString( Selection selection );
    // </group>
 
    // Maps a line type to a file no, when possible. Returns -1 if none makes

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 206 2001-06-14 23:17:58Z blais $
- * $Date: 2001-06-14 19:17:58 -0400 (Thu, 14 Jun 2001) $
+ * $Id: line.cpp 244 2001-10-02 22:20:54Z blais $
+ * $Date: 2001-10-02 18:20:54 -0400 (Tue, 02 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,7 +28,6 @@
 
 #include <iostream>
 #include <ctype.h>
-#include <string>
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -717,16 +716,17 @@ XxLine XxLine::getPromoted( Type promoteType ) const
 
 //------------------------------------------------------------------------------
 //
-std::string XxLine::mapToString( Type type )
+QString XxLine::mapToString( Type type )
 {
-   return std::string( typeString[ type ] );
+   return QString( typeString[ type ] );
 }
 
 //------------------------------------------------------------------------------
 //
-std::string XxLine::mapToString( Selection sel )
+QString XxLine::mapToString( Selection sel )
 {
-   return std::string( selectionString[ sel ] );
+   return QString( selectionString[ sel ] );
 }
 
 XX_NAMESPACE_END
+

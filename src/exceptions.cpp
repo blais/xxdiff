@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: exceptions.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: exceptions.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,14 +28,12 @@
 #include <help.h>
 
 #include <iostream>
-#include <sstream>
-#include <string.h>
+#include <string.h> // strerror
 #include <stdlib.h>
 #include <errno.h>
 
 
 XX_NAMESPACE_BEGIN
-using namespace std;
 
 
 /*==============================================================================
@@ -43,35 +41,60 @@ using namespace std;
  *============================================================================*/
 
 /*==============================================================================
+ * CLASS XxError
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxError::XxError( 
+   XX_EXC_PARAMS_DECL(file,line),
+   const QString& msg
+)
+{
+   QTextOStream oss( &_msg );
+   oss << "Xxdiff error (" << file << ":" << line << "): ";
+   if ( !msg.isEmpty() ) {
+      oss << msg;
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+XxError::~XxError() XX_THROW_NOTHING
+{}
+
+//------------------------------------------------------------------------------
+//
+const QString& XxError::getMsg() const XX_THROW_NOTHING
+{
+   return _msg;
+}
+
+/*==============================================================================
  * CLASS XxUsageError
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxUsageError::XxUsageError( bool benine, bool version ) :
+XxUsageError::XxUsageError( 
+   XX_EXC_PARAMS_DECL(file,line),
+   bool benine,
+   bool version
+) :
+   XxError( file, line ),
+   std::domain_error( "Usage error." ),
    _benine( benine )
 {
-   ostringstream oss;
    if ( version == false ) {
+      QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+      oss << endl;
       XxHelp::dumpUsage( oss );
    }
    else {
+      // Overwrite base class msg.
+      QTextStream oss( &_msg, IO_WriteOnly );
       XxHelp::dumpVersion( oss );      
    }
-   oss << ends;
-   _msg = oss.str();
-}
-
-//------------------------------------------------------------------------------
-//
-XxUsageError::~XxUsageError() XX_THROW_NOTHING
-{}
-
-//------------------------------------------------------------------------------
-//
-const char* XxUsageError::what() const XX_THROW_NOTHING
-{
-   return _msg.c_str();
 }
 
 //------------------------------------------------------------------------------
@@ -81,39 +104,23 @@ bool XxUsageError::isBenine() const
    return _benine;
 }
 
-
 /*==============================================================================
  * CLASS XxIoError
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxIoError::XxIoError()
+XxIoError::XxIoError( 
+   XX_EXC_PARAMS_DECL(file,line),
+   const QString& msg 
+) :
+   XxError( file, line, msg ),
+   std::runtime_error( strerror( errno ) )
 {
-   std::ostringstream oss;
-   oss << "System error: " << strerror( errno ) << endl << ends;
-   _msg = oss.str();
+   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   oss << endl;
+   oss << "IO error... " << strerror( errno );
 }
-
-//------------------------------------------------------------------------------
-//
-XxIoError::XxIoError( const char* msg )
-{
-   _msg = msg;
-}
-
-//------------------------------------------------------------------------------
-//
-XxIoError::~XxIoError() XX_THROW_NOTHING
-{}
-
-//------------------------------------------------------------------------------
-//
-const char* XxIoError::what() const XX_THROW_NOTHING
-{
-   return _msg.c_str();
-}
-
 
 /*==============================================================================
  * CLASS XxInternalError
@@ -121,33 +128,22 @@ const char* XxIoError::what() const XX_THROW_NOTHING
 
 //------------------------------------------------------------------------------
 //
-XxInternalError::XxInternalError( const char* file, int line )
+XxInternalError::XxInternalError( 
+   XX_EXC_PARAMS_DECL(file,line)
+) :
+   XxError( file, line ),
+   std::runtime_error( "Internal error." )
 {
-   ostringstream oss;
-   oss << "Internal error at: "
-       << "  file=" << file 
-       << "  line=" << line << std::endl;
-   oss << std::endl;
-   oss << "There has been an internal error within xxdiff." << std::endl
-       << "To report bugs, please use the sourceforge bug tracker" << std::endl
-       << "at http://sourceforge.net/tracker/?group_id=2198" << std::endl
-       << "and log the above information above and if possible," << std::endl
-       << "the files that caused the error, and as much detail as" << std::endl
-       << "you can to reproduce the error." << std::endl;
-   _msg = oss.str();
-}
-
-//------------------------------------------------------------------------------
-//
-XxInternalError::~XxInternalError() XX_THROW_NOTHING
-{}
-
-//------------------------------------------------------------------------------
-//
-const char* XxInternalError::what() const XX_THROW_NOTHING
-{
-
-   return _msg.c_str();
+   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   oss << endl;
+   oss << "Internal error." << endl << endl;
+   oss << "There has been an internal error within xxdiff." << endl
+       << "To report bugs, please use the sourceforge bug tracker" << endl
+       << "at http://sourceforge.net/tracker/?group_id=2198" << endl
+       << "and log the above information above and if possible," << endl
+       << "the files that caused the error, and as much detail as" << endl
+       << "you can to reproduce the error.";
+   oss << endl; // for extra space
 }
 
 XX_NAMESPACE_END

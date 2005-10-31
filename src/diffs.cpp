@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 202 2001-06-08 16:04:58Z blais $
- * $Date: 2001-06-08 12:04:58 -0400 (Fri, 08 Jun 2001) $
+ * $Id: diffs.cpp 251 2001-10-04 20:00:25Z blais $
+ * $Date: 2001-10-04 16:00:25 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -61,48 +61,6 @@ int outputLine(
       return 1;
    }
    return 0;
-}
-
-//------------------------------------------------------------------------------
-//
-std::string buildTag( 
-   const char*                    tag,
-   int                            nbFiles,
-   int                            number,
-   bool                           useNumber, 
-   bool                           useString,
-   bool                           useConditionals,
-   const std::string&             conditional1,
-   const std::string&             conditional2,
-   const std::auto_ptr<XxBuffer>& file
-)
-{
-   char buf[ 1024 ];
-   char buf2[ 1024 ];
-   ::strncpy( buf, tag, sizeof(buf) );
-   
-   // FIXME this could lead to a bug.
-
-   if ( useNumber ) {
-      ::strncpy( buf2, buf, sizeof(buf2) );
-      ::snprintf( buf, sizeof(buf), buf2, number );
-   }
-   if ( useString ) {
-      ::strncpy( buf2, buf, sizeof(buf2) );
-      if ( useConditionals ) {
-         if ( nbFiles == 3 && ( number == 1 || number == 2 ) ) {
-            ::snprintf( buf, sizeof(buf), buf2, conditional2.c_str() );
-         }
-         else {
-            ::snprintf( buf, sizeof(buf), buf2, conditional1.c_str() );
-         }
-      }
-      else {
-         ::snprintf( buf, sizeof(buf), buf2, file->getDisplayName() );
-      }
-   }
-
-   return std::string( buf );
 }
 
 }
@@ -700,7 +658,7 @@ bool XxDiffs::save(
    const std::auto_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
-   const std::string              conditionals[3]
+   const QString                  conditionals[3]
 ) const
 {
    XX_ASSERT( files != 0 );
@@ -709,7 +667,7 @@ bool XxDiffs::save(
    int nbFiles = files[2].get() != 0 ? 3 : 2;
 
    const XxResources* resources = XxResources::getInstance();
-   std::string tags[4];
+   QString tags[4];
    if ( useConditionals == false ) {
       for ( int ii = 0; ii < nbFiles; ++ii ) {
          tags[ii] = resources->getTag( XxResources::TAG_CONFLICT_SEPARATOR );
@@ -724,23 +682,21 @@ bool XxDiffs::save(
    }
 
    for ( int ii = 0; ii < nbFiles; ++ii ) {
-      std::string::size_type pos = tags[ii].find( "%d" );
-      if ( pos != std::string::npos ) {
-         char buf[12];
-         ::snprintf( buf, sizeof(buf), "%d", ii+1 );
-         tags[ii].replace( pos, 2, buf );
+      int pos = tags[ii].find( "%d" );
+      if ( pos != -1 ) {
+         tags[ii].replace( pos, 2, QString::number( ii+1 ) );
       }
 
       if ( ! useConditionals ) {
          pos = tags[ii].find( "%s" );
-         if ( pos != std::string::npos ) {
+         if ( pos != -1 ) {
             tags[ii].replace( pos, 2, files[ii]->getDisplayName() );
          }
       }
    }
 
    for ( int ii = 0; ii < nbFiles+1; ++ii ) {
-      XX_TRACE( tags[ii] );
+      XX_TRACE( tags[ii].latin1() );
    }
 
    bool foundUnsel = false;
@@ -748,7 +704,6 @@ bool XxDiffs::save(
    uint unselBegin = 0;
    uint unselEnd;
    uint ii;
-   char sbuf[1024];
    enum State { IF = 0, ELSIF = 1, ELSE = 2 };
    for ( ii = 1; ii <= _lines.size(); ++ii ) {
       const XxLine& line = getLine( ii );
@@ -768,11 +723,12 @@ bool XxDiffs::save(
 
                   // Note: I know this is lame, but SGI STL doesn't support
                   // formatted output from ostream.
-                  ::snprintf( sbuf, 1024,
-                            tags[state].c_str(), 
-                            conditionals[f].c_str() );
+                  QString cond;
+                  cond.sprintf( tags[state].latin1(),
+                                conditionals[f].latin1() );
+
                   std::ostringstream oss;
-                  oss << sbuf << std::endl;
+                  oss << cond.latin1() << endl;
 
                   int nbOutlines = 0;
                   for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
@@ -895,8 +851,8 @@ bool XxDiffs::saveSelectedOnly(
 //------------------------------------------------------------------------------
 //
 void XxDiffs::search(
-   const char*                  searchText,
-   const int                    nbFiles,
+   const QString&                 searchText,
+   const int                      nbFiles,
    const std::auto_ptr<XxBuffer>* files
 )
 {

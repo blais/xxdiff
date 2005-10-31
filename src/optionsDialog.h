@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.h 186 2001-06-04 20:16:12Z blais $
- * $Date: 2001-06-04 16:16:12 -0400 (Mon, 04 Jun 2001) $
+ * $Id: optionsDialog.h 246 2001-10-04 00:32:54Z blais $
+ * $Date: 2001-10-03 20:32:54 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -86,17 +86,17 @@ public:
    // Methods to manipulate command strings.
    // <group>
    static bool isInCommand(
-      const std::string& command,
-      const char*        option
+      const QString& command,
+      const QString& option
    );
 
    static void addToCommand(
-      std::string& command,
-      const char*  option
+      QString&       command,
+      const QString& option
    );
    static void removeFromCommand( 
-      std::string& command,
-      const char*  option
+      QString&       command,
+      const QString& option
    );
 
    // Look for one of three options. If found, return 1, 2 or 3. If neither is
@@ -104,18 +104,18 @@ public:
    // none of the non-empty options is found, return the index of the empty
    // string option.
    static int isInCommand(
-      const std::string& command,
-      const char*        option1,
-      const char*        option2,
-      const char*        option3
+      const QString& command,
+      const QString& option1,
+      const QString& option2,
+      const QString& option3
    );
 
    // Set one option among three. One of the options may be the empty string.
    static void setOneOfInCommand(
-      std::string& command,
-      const char*  optionNew,
-      const char*  optionOther1,
-      const char*  optionOther2
+      QString&       command,
+      const QString& optionNew,
+      const QString& optionOther1,
+      const QString& optionOther2
    );
    // </group>
 
@@ -185,7 +185,7 @@ private:
 
    bool maybeSetCommand( 
       XxResources::Resource commandId,
-      const char*           commandString
+      const QString&        commandString
    );
 
 

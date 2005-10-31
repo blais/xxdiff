@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: builderFiles2.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -28,21 +28,26 @@
 #include <exceptions.h>
 #include <diffs.h>
 #include <util.h>
+#include <diffutils.h>
+
+#include <qstring.h>
+#include <qtextstream.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sstream>
 #include <unistd.h>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/wait.h>
 
-//#define LOCAL_TRACE
+#define LOCAL_TRACE
 #ifdef LOCAL_TRACE
 #define XX_LOCAL_TRACE(x) XX_TRACE(x)
 #else
 #define XX_LOCAL_TRACE(x)
 #endif
+
+#include <memory>
 
 namespace {
 XX_NAMESPACE_USING
@@ -151,7 +156,7 @@ private:
 
    /*----- data members -----*/
 
-   std::string _msg;
+   QString _msg;
 
 };
 
@@ -163,9 +168,8 @@ private:
 //
 XxParseDiffError::XxParseDiffError()
 {
-   std::ostringstream oss;
-   oss << "Error parsing diff output." << std::ends;
-   _msg = oss.str();
+   QTextOStream oss( &_msg );
+   oss << "Error parsing diff output." << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -179,11 +183,10 @@ XxParseDiffError::XxParseDiffError(
    const XxFln f2n2 
 )
 {
-   std::ostringstream oss;
+   QTextOStream oss( &_msg );
    oss << "Error parsing diff output: file1:" 
        << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: " 
-       << fline2 << " (" << f2n1 << "," << f2n2 << ")" << std::endl;
-   _msg = oss.str();
+       << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -195,9 +198,8 @@ XxParseDiffError::~XxParseDiffError() XX_THROW_NOTHING
 //
 const char* XxParseDiffError::what() const XX_THROW_NOTHING
 {
-   return _msg.c_str();
+   return _msg.latin1();
 }
-
 
 }
 
@@ -214,8 +216,9 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-XxBuilderFiles2::XxBuilderFiles2() :
-   XxBuilder()
+XxBuilderFiles2::XxBuilderFiles2( bool useInternalDiff ) :
+   XxBuilder(),
+   _useInternalDiff( useInternalDiff )
 {}
 
 //------------------------------------------------------------------------------
@@ -223,45 +226,67 @@ XxBuilderFiles2::XxBuilderFiles2() :
 XxBuilderFiles2::~XxBuilderFiles2()
 {}
 
-
 //------------------------------------------------------------------------------
 //
 std::auto_ptr<XxDiffs> XxBuilderFiles2::process( 
-   const char* command,
-   const char* path1,
-   const uint  nbLines1,
-   const char* path2,
-   const uint  nbLines2
+   const QString& command,
+   const QString& path1,
+   const uint     nbLines1,
+   const QString& path2,
+   const uint     nbLines2
 )
 {
-   const char* args[3];
-   args[0] = path1;
-   args[1] = path2;
-   args[2] = 0;
-   FILE* fp = XxUtil::spawnCommandWithOutput( command, args );
+   QString cmd = command;
+   cmd += QString(" ") + path1;
+   cmd += QString(" ") + path2;
+   const char** out_args;
+   int argc = XxUtil::splitArgs( cmd, out_args );
+
+//#define INTERNAL
+
+#ifndef INTERNAL
+   (void)argc;
+   FILE* fp = XxUtil::spawnCommandWithOutput( out_args );
    if ( fp == 0 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
+#else
+   std::auto_ptr<XxDiffutils> diffutils( new XxDiffutils );
+   diffutils->diff( argc, const_cast<char**>(out_args) );
+#endif
+   XxUtil::freeArgs( out_args );
 
    _curHunk = 0;
    XxFln fline1 = 1;
    XxFln fline2 = 1;
 
-   std::ostringstream errors;
+   QTextOStream errors( &_errors );
    char buffer[BUFSIZ+1];
    XxFln f1n1, f1n2, f2n1, f2n2;
-   while ( fgets( buffer, BUFSIZ, fp ) != 0 ) {
+
+   while ( true ) {
+#ifndef INTERNAL
+      if ( fgets( buffer, BUFSIZ, fp ) == 0 ) {
+         break;
+      }
+#else
+      QString line = diffutils->readLine();
+      if ( line.isNull() ) {
+         break;
+      }
+      ::snprintf( buffer, BUFSIZ, "%s", line.latin1() ); // FIXME change
+#endif
       XxLine::Type type;
       if ( parseDiffLine( type, buffer, f1n1, f1n2, f2n1, f2n2 ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
-         errors << "Diff error:" << std::endl;
-         errors << buffer << std::endl;
+         errors << "Diff error:" << endl;
+         errors << buffer << endl;
          continue;
       }
 
       switch ( type ) {
          case XxLine::INSERT_1: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ) );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -282,7 +307,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::INSERT_2: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ) );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -303,7 +328,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::DIFF_ALL: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ) );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -312,7 +337,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
             // line changes (-B)!  Disabled.
             //
 	    // if ( (f1n1 - fline1) != (f2n1 - fline2) ) {
-            //    throw new XxParseDiffError( 
+            //    throw XxParseDiffError( 
             //       fline1, fline2, f1n1, f1n2, f2n1, f2n2 
             //    );
             // }
@@ -336,7 +361,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::SAME: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ) );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
          } break;
 
          case XxLine::DIFF_1:
@@ -355,34 +380,50 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
       }
    }
 
-   // Save error text.
-   _errors = errors.str();
+   // Saved error text.
    XX_LOCAL_TRACE( "Errors" << _errors );
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
+#ifndef INTERNAL
       int stat_loc;
       if ( wait( &stat_loc ) == -1 ) {
-         throw new XxIoError;
+         throw XxIoError( XX_EXC_PARAMS );
       }
       _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-      throw new XxIoError;
+#else
+      _status = 2;
+#endif
+      throw XxIoError( XX_EXC_PARAMS, _errors );
    }
 
    // Add final ignore region if present.
    uint nbRemainingLines = nbLines1 + 1 - fline1;
    if ( nbRemainingLines != nbLines2 + 1 - fline2 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
    if ( nbRemainingLines > 0 ) { 
       createIgnoreBlock( fline1, fline2, nbRemainingLines );
    }
 
+#ifndef INTERNAL
    int stat_loc;
    if ( wait( &stat_loc ) == -1 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
    _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
+#else
+   _status = 2;
+#endif
+
+#ifndef INTERNAL
+   if ( fp ) {
+      ::fclose( fp );
+   }
+#else
+   std::auto_ptr<XxDiffutils> null( 0 );
+   diffutils = null;
+#endif
 
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;

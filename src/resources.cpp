@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 193 2001-06-05 20:29:44Z blais $
- * $Date: 2001-06-05 16:29:44 -0400 (Tue, 05 Jun 2001) $
+ * $Id: resources.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -35,7 +35,7 @@
 #include <qapplication.h> // to get desktop
 
 #include <iostream>
-#include <string.h>
+#include <string.h> // ::strcmp
 #include <stdio.h>
 
 
@@ -49,8 +49,8 @@ XX_NAMESPACE_USING
 /*----- variables -----*/
 
 struct KeyPair {
-   std::string _name;
-   int	       _code;
+   QString _name;
+   int     _code;
 };
 
 // Important note: those key definitions which are substring of other have to be
@@ -502,6 +502,10 @@ const nameDoc mapStrings[
    { XxResources::ACCEL_DIRDIFF_RECURSIVE,
      "accel.dirDiffRecursive",
      "Accelerator for ``toggle recursive directory diffs'' command."
+   },
+   { XxResources::ACCEL_USE_INTERNAL_DIFF,
+     "accel.useInternalDiff",
+     "Accelerator for ``toggle use internal diff'' command."
    },
    { XxResources::ACCEL_QUALITY_NORMAL,
      "accel.qualityNormal",
@@ -967,6 +971,11 @@ const nameDoc mapStrings[
      "dirDiff.recursive",
      "Determines whether directory diffs are recursive or not."
    },
+   { XxResources::USE_INTERNAL_DIFF,
+     "dirDiff.useInternalDiff",
+     "Determines whether we use the internal GNU diff code or"
+     "an external diff program."
+   },
    { XxResources::BOOL_LAST, "", "" },
 
    //---------------------------------------------------------------------------
@@ -1106,8 +1115,8 @@ public:
    // Otherwise return true and fills in the value string.
    virtual bool query( 
       XxResources::Resource res,
-      const char*           name,
-      std::string&          value
+      const QString&        name,
+      QString&              value
    );
 
 private:
@@ -1291,6 +1300,7 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::DIRDIFF_IGNORE_FILE_CHANGES ] = "false";
    _map[ XxResources::DIRDIFF_BUILD_FROM_OUTPUT ] = "true";
    _map[ XxResources::DIRDIFF_RECURSIVE ] = "false";
+   _map[ XxResources::USE_INTERNAL_DIFF ] = "true";
    _map[ XxResources::TAB_WIDTH ] = "8";
 
    _map[ XxResources::COMMAND_DIFF_FILES_2 ] = "diff";
@@ -1338,15 +1348,15 @@ XxDefaultsParser::~XxDefaultsParser()
 //
 bool XxDefaultsParser::query( 
    XxResources::Resource res,
-   const char*           /*name*/,
-   std::string&          value
+   const QString&        /*name*/,
+   QString&              value
 )
 {
    const char* cres = _map[ int(res) ];
    if ( cres == 0 ) {
       return false;
    }
-   value = cres;
+   value.setLatin1( cres );
    return true;
 }
 
@@ -1357,7 +1367,7 @@ bool XxDefaultsParser::query(
 
 //------------------------------------------------------------------------------
 //
-bool readGeometry( const std::string& val, QRect& geometry )
+bool readGeometry( const QString& val, QRect& geometry )
 {
    QWidget* desktop = QApplication::desktop();
    XX_ASSERT( desktop != 0 );
@@ -1370,23 +1380,24 @@ bool readGeometry( const std::string& val, QRect& geometry )
    int t = -1;
    int w = -1;
    int h = -1;
-   if ( sscanf( val.c_str(), "%dx%d+%d+%d", &w, &h, &l, &t ) == 4 ) {
+   const char* vchar = val.latin1();
+   if ( sscanf( vchar, "%dx%d+%d+%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( l, t, w, h );
       return true;
    }
-   if ( sscanf( val.c_str(), "%dx%d-%d+%d", &w, &h, &l, &t ) == 4 ) {
+   if ( sscanf( vchar, "%dx%d-%d+%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( dsize.width()-l-w, t, w, h );
       return true;
    }
-   if ( sscanf( val.c_str(), "%dx%d+%d-%d", &w, &h, &l, &t ) == 4 ) {
+   if ( sscanf( vchar, "%dx%d+%d-%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( l, dsize.height()-t-h, w, h );
       return true;
    }
-   if ( sscanf( val.c_str(), "%dx%d-%d-%d", &w, &h, &l, &t ) == 4 ) {
+   if ( sscanf( vchar, "%dx%d-%d-%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( dsize.width()-l-w, dsize.height()-t-h, w, h );
       return true;
    }
-   else if ( sscanf( val.c_str(), "%dx%d", &w, &h ) == 2 ) {
+   else if ( sscanf( vchar, "%dx%d", &w, &h ) == 2 ) {
       geometry = QRect( -1, -1, w, h );
       return true;
    }
@@ -1403,7 +1414,7 @@ void writeGeometry( std::ostream& os, const QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
-bool readBoolean( const std::string& val, bool& mybool )
+bool readBoolean( const QString& val, bool& mybool )
 {
    // Reads in a value.  Returns true if successful, false if the resource was
    // not the specified type and left untouched.
@@ -1428,12 +1439,10 @@ void writeBoolean( std::ostream& os, const bool mybool )
 
 //------------------------------------------------------------------------------
 //
-bool readAccelerator( const std::string& val, int& accel )
+bool readAccelerator( const QString& val, int& accel )
 {
    // Reads in a value.  Returns true if successful, false if the resource was
    // not the specified type and left untouched.
-
-   using namespace std;
 
    // I wish I could use QAccel::stringToKey, but it's broken.  The Qt docs say:
    //
@@ -1443,55 +1452,39 @@ bool readAccelerator( const std::string& val, int& accel )
    //
    // So we do this by hand.  This should really just be provided by Qt.
    
-   if ( val.empty() ) {
+   if ( val.isEmpty() ) {
       return 0;
    }
 
    // Remove whitespace.
-   string::size_type bpos = val.find_first_not_of( " \t" );
-   if ( bpos == string::npos ) {
-      bpos = 0;
-   }
-   string::size_type epos = val.find_last_not_of( " \t" );
-   if ( epos == string::npos ) {
-      epos = val.length()-1;
-   }
-
-   string cval( val, bpos, epos - bpos + 1 );
-
-   // Turn string into lowercase.
-   string::size_type len = cval.length();
-   char* c_str = const_cast<char*>( cval.c_str() );
-   const int offset = 'a' - 'A';
-   for ( string::size_type ii = 0; ii < len; ++ii ) {
-      if ( c_str[ii] >= 'A' && c_str[ii] <= 'Z' ) {
-         c_str[ii] += offset;
-      }
-   }
+   QString cval = val.stripWhiteSpace().lower();
 
    // Read modifier, if present.
+   const int notfound = -1;
    int modifier = 0;
-   if ( cval.find( "alt" ) != string::npos || 
-        cval.find( "meta" ) != string::npos ) {
+   if ( cval.find( "alt" ) != notfound || 
+        cval.find( "meta" ) != notfound ) {
       modifier |= Qt::ALT;
    }
-   if ( cval.find( "ctrl" ) != string::npos || 
-        cval.find( "control" ) != string::npos ) {
+   if ( cval.find( "ctrl" ) != notfound || 
+        cval.find( "control" ) != notfound ) {
       modifier |= Qt::CTRL;
    }
-   if ( cval.find( "shift" ) != string::npos ) {
+   if ( cval.find( "shift" ) != notfound ) {
       modifier |= Qt::SHIFT;
    }
 
    // Read non-modifier.
-   string::size_type xpos = cval.find_last_of( "-+" );
-   if ( xpos == string::npos ) {
+   int fomin = cval.findRev( '-' );
+   int foplus = cval.findRev( '+' );
+   int xpos = (fomin > foplus) ? fomin : foplus;
+   if ( xpos == notfound ) {
       xpos = 0;
    }
 
    int key = 0;
    for ( uint ii = 0; ii < sizeof(keycodes); ++ii ) {
-      if ( cval.find( keycodes[ii]._name, xpos ) != string::npos ) {
+      if ( cval.find( keycodes[ii]._name, xpos ) != notfound ) {
          key = keycodes[ii]._code;
          break;
       }
@@ -1511,18 +1504,12 @@ void writeAccelerator( std::ostream& os, int accel )
 
 //------------------------------------------------------------------------------
 //
-bool readColor( const std::string& val, QColor& color )
+bool readColor( const QString& val, QColor& color )
 {
    // Reads in a value.  Returns true if successful, false if the resource was
    // not the specified type and left untouched.
 
-   using namespace std;
-
-   // Remove whitespace before and after.
-   string::size_type bpos = val.find_first_not_of( " \t" );
-   string::size_type epos = val.find_last_not_of( " \t" );
-   string cleanVal( val, bpos, epos - bpos + 1 );
-   color.setNamedColor( cleanVal.c_str() );
+   color.setNamedColor( val.stripWhiteSpace() );
    return true;
 }
 
@@ -1539,8 +1526,8 @@ void writeColor( std::ostream& os, const QColor& color )
 //------------------------------------------------------------------------------
 //
 void writeDocAttrib(
-   const XxResources* resources,
-   std::ostream& os,
+   const XxResources*    /*resources*/,
+   std::ostream&         os,
    XxResources::Resource res
 )
 {
@@ -1661,7 +1648,7 @@ XxResources::~XxResources()
 bool XxResources::query( 
    XxResourcesParser&    parser,   
    XxResources::Resource resource,
-   std::string&          value
+   QString&              value
 ) const
 {
    return parser.query( resource, mapStrings[ resource ]._name, value );
@@ -1671,7 +1658,7 @@ bool XxResources::query(
 //
 void XxResources::parse( XxResourcesParser& parser )
 {
-   std::string val;
+   QString val;
 
    if ( query( parser, PREFERRED_GEOMETRY, val ) ) {
       readGeometry( val, _preferredGeometry );
@@ -1690,10 +1677,10 @@ void XxResources::parse( XxResourcesParser& parser )
    }
 
    if ( query( parser, FONT_APP, val ) ) {
-      _fontApp.setRawName( val.c_str() );
+      _fontApp.setRawName( val );
    }
    if ( query( parser, FONT_TEXT, val ) ) {
-      _fontText.setRawName( val.c_str() );
+      _fontText.setRawName( val );
    }
 
    for ( int ii = 0; ii < BOOL_LAST - BOOL_FIRST; ++ii ) {
@@ -1703,7 +1690,7 @@ void XxResources::parse( XxResourcesParser& parser )
    }
 
    if ( query( parser, TAB_WIDTH, val ) ) {
-      _tabWidth = atoi( val.c_str() );
+      _tabWidth = atoi( val );
    }
 
    for ( int ii = 0; ii < COMMAND_LAST - COMMAND_FIRST; ++ii ) {
@@ -1725,13 +1712,13 @@ void XxResources::parse( XxResourcesParser& parser )
    }
 
    if ( query( parser, OVERVIEW_FILE_WIDTH, val ) ) {
-      _overviewFileWidth = atoi( val.c_str() );
+      _overviewFileWidth = atoi( val );
    }
    if ( query( parser, OVERVIEW_SEP_WIDTH, val ) ) {
-      _overviewSepWidth = atoi( val.c_str() );
+      _overviewSepWidth = atoi( val );
    }
    if ( query( parser, VERTICAL_LINE_POS, val ) ) {
-      _verticalLinePos = atoi( val.c_str() );
+      _verticalLinePos = atoi( val );
    }
    if ( query( parser, CLIPBOARD_TEXT_FORMAT, val ) ) {
       _clipboardTextFormat = val;
@@ -1741,34 +1728,34 @@ void XxResources::parse( XxResourcesParser& parser )
 
 //------------------------------------------------------------------------------
 //
-const char* XxResources::getCommand( Resource cmdId ) const
+const QString& XxResources::getCommand( Resource cmdId ) const
 {
    int id = int( cmdId ) - int( COMMAND_FIRST );
    XX_CHECK( id < int(COMMAND_LAST) - int(COMMAND_FIRST) );
-   return _commands[ id ].c_str();
+   return _commands[ id ];
 }
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setCommand( Resource cmdId, const char* t ) 
+void XxResources::setCommand( Resource cmdId, const QString& t ) 
 {
    int id = int( cmdId ) - int( COMMAND_FIRST );
    XX_CHECK( id < int(COMMAND_LAST) - int(COMMAND_FIRST) );
-   _commands[ id ].assign( t );
+   _commands[ id ] = t;
 }
 
 //------------------------------------------------------------------------------
 //
-const char* XxResources::getCommandOption( Resource cmdId ) const
+const QString& XxResources::getCommandOption( Resource cmdId ) const
 {
    int id = int( cmdId ) - int( CMDOPT_FIRST );
    XX_CHECK( id < int(CMDOPT_LAST) - int(CMDOPT_FIRST) );
-   return _commandOptions[ id ].c_str();
+   return _commandOptions[ id ];
 }
 
 //------------------------------------------------------------------------------
 //
-XxResources::Quality XxResources::getQuality( const std::string& command ) const
+XxResources::Quality XxResources::getQuality( const QString& command ) const
 {
    switch ( XxOptionsDialog::isInCommand( 
       command,
@@ -1788,11 +1775,11 @@ XxResources::Quality XxResources::getQuality( const std::string& command ) const
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setQuality( std::string& command, Quality quality ) const
+void XxResources::setQuality( QString& command, Quality quality ) const
 {
-   const char* opt1 = getCommandOption( CMDOPT_FILES_QUALITY_NORMAL );
-   const char* opt2 = getCommandOption( CMDOPT_FILES_QUALITY_FASTEST );
-   const char* opt3 = getCommandOption( CMDOPT_FILES_QUALITY_HIGHEST );
+   QString opt1 = getCommandOption( CMDOPT_FILES_QUALITY_NORMAL );
+   QString opt2 = getCommandOption( CMDOPT_FILES_QUALITY_FASTEST );
+   QString opt3 = getCommandOption( CMDOPT_FILES_QUALITY_HIGHEST );
 
    switch ( quality ) {
       case QUALITY_NORMAL: {
@@ -1811,8 +1798,8 @@ void XxResources::setQuality( std::string& command, Quality quality ) const
 //
 bool XxResources::isCommandOption( Resource cmdId, Resource cmdOptionId ) const
 {
-   const char* cmd = getCommand( cmdId );
-   const char* opt = getCommandOption( cmdOptionId );
+   QString cmd = getCommand( cmdId );
+   QString opt = getCommandOption( cmdOptionId );
 
    return XxOptionsDialog::isInCommand( cmd, opt );
 }
@@ -1825,8 +1812,8 @@ void XxResources::setCommandOption(
    bool     setit
 )
 {
-   std::string cmd = getCommand( cmdId );
-   const char* opt = getCommandOption( cmdOptionId );
+   QString cmd = getCommand( cmdId );
+   QString opt = getCommandOption( cmdOptionId );
 
    if ( setit == true ) {
       XxOptionsDialog::addToCommand( cmd, opt );
@@ -1835,7 +1822,7 @@ void XxResources::setCommandOption(
       XxOptionsDialog::removeFromCommand( cmd, opt );
    }
 
-   setCommand( cmdId, cmd.c_str() );
+   setCommand( cmdId, cmd );
 }
 
 //------------------------------------------------------------------------------
@@ -1845,8 +1832,8 @@ void XxResources::toggleCommandOption(
    Resource cmdOptionId
 )
 {
-   std::string cmd = getCommand( cmdId );
-   const char* opt = getCommandOption( cmdOptionId );
+   QString cmd = getCommand( cmdId );
+   QString opt = getCommandOption( cmdOptionId );
 
    if ( ! XxOptionsDialog::isInCommand( cmd, opt ) ) {
       XxOptionsDialog::addToCommand( cmd, opt );
@@ -1855,16 +1842,16 @@ void XxResources::toggleCommandOption(
       XxOptionsDialog::removeFromCommand( cmd, opt );
    }
 
-   setCommand( cmdId, cmd.c_str() );
+   setCommand( cmdId, cmd );
 }
 
 //------------------------------------------------------------------------------
 //
-const char* XxResources::getTag( Resource cmdId ) const
+const QString& XxResources::getTag( Resource cmdId ) const
 {
    int id = int( cmdId ) - int( TAG_FIRST );
    XX_CHECK( id < int(TAG_LAST) - int(TAG_FIRST) );
-   return _tags[ id ].c_str();
+   return _tags[ id ];
 }
 
 //------------------------------------------------------------------------------
@@ -2098,9 +2085,7 @@ void XxResources::getLineColorTypeStd(
 //
 void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
 {
-   using namespace std;
-
-   std::string val;
+   QString val;
    XxDefaultsParser defaults;
 
    QRect curGeometry = app->getMainWindowGeometry();
@@ -2111,7 +2096,7 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
    if ( curGeometry != defGeometry ) {
       writeDocAttrib( this, os, PREFERRED_GEOMETRY );
       writeGeometry( os, curGeometry );
-      os << endl << endl;
+      os << std::endl << std::endl;
    }
 
    for ( int ii = 0; ii < ACCEL_LAST - ACCEL_FIRST; ++ii ) {
@@ -2122,7 +2107,7 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( accel != _accelerators[ ii ] ) { 
          writeDocAttrib( this, os, Resource(ii + ACCEL_FIRST) );
          writeAccelerator( os, _accelerators[ ii ] );
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
@@ -2134,14 +2119,14 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( color != _colors[ ii ] ) {
          writeDocAttrib( this, os, Resource(ii + COLOR_FIRST) );
          writeColor( os, _colors[ ii ] );
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
    {
       QFont dfont;
       if ( query( defaults, FONT_APP, val ) ) {
-         dfont.setRawName( val.c_str() );
+         dfont.setRawName( val );
       }
       if ( dfont != _fontApp ) {
          writeDocAttrib( this, os, FONT_APP );
@@ -2152,12 +2137,12 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
    {
       QFont dfont;
       if ( query( defaults, FONT_TEXT, val ) ) {
-         dfont.setRawName( val.c_str() );
+         dfont.setRawName( val );
       }
       if ( dfont != _fontText ) {
          writeDocAttrib( this, os, FONT_TEXT );
          os << _fontText.rawName();
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
@@ -2169,19 +2154,19 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( dbool != _boolOpts[ ii ] ) {
          writeDocAttrib( this, os, Resource(ii + BOOL_FIRST) );
          writeBoolean( os, _boolOpts[ ii ] );
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
    uint dtw = 8;
    if ( query( defaults, TAB_WIDTH, val ) ) {
-      dtw = atoi( val.c_str() );
+      dtw = atoi( val );
    }
 
    if ( dtw != _tabWidth ) {
       writeDocAttrib( this, os, TAB_WIDTH );
       os << _tabWidth;
-      os << endl << endl;
+      os << std::endl << std::endl;
    }
 
    for ( int ii = 0; ii < COMMAND_LAST - COMMAND_FIRST; ++ii ) {
@@ -2189,7 +2174,7 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( val != _commands[ ii ] ) {
          writeDocAttrib( this, os, Resource(ii + COMMAND_FIRST) );
          os << _commands[ ii ];
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
@@ -2198,7 +2183,7 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( val != _commandOptions[ ii ] ) {
          writeDocAttrib( this, os, Resource(ii + CMDOPT_FIRST) );
          os << _commandOptions[ ii ];
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
@@ -2207,43 +2192,43 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( val != _tags[ ii ] ) {
          writeDocAttrib( this, os, Resource(ii + TAG_FIRST) );
          os << _tags[ ii ];
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
    {
       uint ofw = 0;
       if ( query( defaults, OVERVIEW_FILE_WIDTH, val ) ) {
-         ofw = atoi( val.c_str() );
+         ofw = atoi( val );
       }
       if ( ofw != _overviewFileWidth ) {
          writeDocAttrib( this, os, OVERVIEW_FILE_WIDTH );
          os << _overviewFileWidth;
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
    {
       uint ofw = 0;
       if ( query( defaults, OVERVIEW_SEP_WIDTH, val ) ) {
-         ofw = atoi( val.c_str() );
+         ofw = atoi( val );
       }
       if ( ofw != _overviewSepWidth ) {
          writeDocAttrib( this, os, OVERVIEW_SEP_WIDTH );
          os << _overviewSepWidth;
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
    {
       uint ofw = 0;
       if ( query( defaults, VERTICAL_LINE_POS, val ) ) {
-         ofw = atoi( val.c_str() );
+         ofw = atoi( val );
       }
       if ( ofw != _overviewSepWidth ) {
          writeDocAttrib( this, os, VERTICAL_LINE_POS );
          os << _overviewSepWidth;
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
@@ -2252,7 +2237,7 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
       if ( val != _clipboardTextFormat ) {
          writeDocAttrib( this, os, CLIPBOARD_TEXT_FORMAT );
          os << _clipboardTextFormat;
-         os << endl << endl;
+         os << std::endl << std::endl;
       }
    }
 
@@ -2262,15 +2247,13 @@ void XxResources::genInitFile( const XxApp* app, std::ostream& os ) const
 //
 void XxResources::listResources( std::ostream& os ) const
 {
-   using namespace std;
-
    XxDefaultsParser defaults;
    
-   std::string val;
+   QString val;
    for ( int ii = RESOURCE_FIRST; ii < RESOURCE_LAST; ++ii ) {
       if ( query( defaults, Resource(ii), val ) ) {
          writeDocAttrib( this, os, Resource(ii) );
-         os << val << endl << endl;
+         os << val.latin1() << std::endl << std::endl;
       }
    }
 }   
@@ -2285,5 +2268,5 @@ XxResourcesParser::~XxResourcesParser()
 {
 }
 
-
 XX_NAMESPACE_END
+

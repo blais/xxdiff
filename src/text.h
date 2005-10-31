@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.h 175 2001-05-31 05:51:54Z blais $
- * $Date: 2001-05-31 01:51:54 -0400 (Thu, 31 May 2001) $
+ * $Id: text.h 242 2001-10-01 21:11:40Z blais $
+ * $Date: 2001-10-01 17:11:40 -0400 (Mon, 01 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -88,16 +88,6 @@ public:
    // Returns the width of pixels that can display text.
    uint getDisplayWidth() const;
 
-   /*----- static member functions -----*/
-
-   static std::string formatClipboardLine(
-      const std::string& clipboardFormat,
-      const XxFno        fileno,
-      const XxFln        lineno,
-      const std::string& filename,
-      const std::string& lineContents
-   );
-
 protected:
 
    /*----- member functions -----*/
@@ -111,6 +101,16 @@ protected:
    // </group>
 
 private:
+
+   /*----- static member functions -----*/
+
+   static QString formatClipboardLine(
+      const QString& clipboardFormat,
+      const XxFno    fileno,
+      const XxFln    lineno,
+      const QString& filename,
+      const QString& lineContents
+   );
 
    /*----- data members -----*/
 

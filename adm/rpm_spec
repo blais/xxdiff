@@ -25,6 +25,7 @@ install -s -m 755 -o 0 -g 0 xxdiff /usr/X11R6/bin/xxdiff
 install -m 644 -o 0 -g 0 xxdiff.man /usr/X11R6/man/man1/xxdiff.1
 
 %files
+%defattr(-,root, root)
 %doc README
 %doc CHANGES
 

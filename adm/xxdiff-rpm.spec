@@ -40,9 +40,10 @@ install -c -m 755 -s src/xxdiff ${RPM_BUILD_ROOT}/usr/X11R6/bin/
 install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/
 
 %clean
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+[ "${RPM_BUILD_ROOT}" != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
+%defattr(-,root, root)
 %doc README
 %doc CHANGES
 
@@ -51,6 +52,9 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/
 
 
 %changelog
+* Tue Jul 24 2001 Martin Blais <blais@discreet.com>
+- added defattr field, thanks to Mirko Zeibig for suggestion.
+
 * Thu Jun  7 2001 Martin Blais <blais@discreet.com> 1.13
 - released 1.13
 

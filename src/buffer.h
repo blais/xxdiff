@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: buffer.h 248 2001-10-04 05:07:08Z blais $
+ * $Date: 2001-10-04 01:07:08 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -35,11 +35,6 @@
 #include <types.h>
 #endif
 
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
-#endif
-
 #ifndef INCL_STD_VECTOR
 #include <vector>
 #define INCL_STD_VECTOR
@@ -55,15 +50,23 @@
 #define INCL_STD_STAT
 #endif
 
+#ifndef INCL_QT_QSTRING
+#include <qstring.h>
+#define INCL_QT_QSTRING
+#endif
+
+#ifndef INCL_QT_QSTRINGLIST
+#include <qstringlist.h>
+#define INCL_QT_QSTRINGLIST
+#endif
+
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
 class QFont;
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * CLASS XxBuffer
@@ -81,28 +84,28 @@ public:
 
    // Passive constructor, will not build buffer contents.
    XxBuffer(
-      const bool  passiveDummy, // ignored
-      const char* filename, 
-      const char* displayFilename
+      const bool     passiveDummy, // ignored
+      const QString& filename, 
+      const QString& displayFilename
    );
 
    // Constructor.  This will load the file in memory and index the beginnings
    // of each line.
    XxBuffer( 
-      const char* filename, 
-      const char* displayFilename,
-      const bool  hideCR = true,
-      const bool  deleteFile = false
+      const QString& filename, 
+      const QString& displayFilename,
+      const bool     hideCR = true,
+      const bool     deleteFile = false
    );
 
    // Destructor.
    virtual ~XxBuffer();
 
    // Get file name.
-   const char* getName() const;
+   const QString& getName() const;
 
    // Get display filename.
-   const char* getDisplayName() const;
+   const QString& getDisplayName() const;
 
    // Returns true if this file is stored as a temporary file.
    bool isTemporary() const;
@@ -143,13 +146,13 @@ public:
    uint getNbDigits() const;
 
    // Renders the line number.  See renderTextWithTabs.
-   const char* renderLineNumber( 
-      const XxFln lineNumber,
-      const char* format
+   const QString& renderLineNumber( 
+      const XxFln    lineNumber,
+      const QString& format
    );
 
    // Searches the specified line for the specified search text.
-   bool searchLine( const XxFln lineno, const char* searchText ) const;
+   bool searchLine( const XxFln lineno, const QString& searchText ) const;
 
    // Debug output.
    std::ostream& dump( std::ostream& ) const;
@@ -159,14 +162,14 @@ public:
 
    // Returns a list of the directory files if this is a buffer representing a
    // directory.
-   const std::vector<const char*>& getDirectoryEntries() const;
+   const QStringList& getDirectoryEntries() const;
 
    // Sets the directory entries and creates and indexes the buffer with them.
-   void setDirectoryEntries( const std::vector<const char*>& directoryEntries );
+   void setDirectoryEntries( const QStringList& directoryEntries );
 
    // If this is a buffer containing a directory (i.e. a list of files), return
    // the full path of the filename at line lineno.
-   std::string getFileAtLine( 
+   QString getFileAtLine( 
       const XxFln lineno
    ) const;
 
@@ -190,20 +193,18 @@ private:
 
    /*----- data members -----*/
 
-   std::string              _name;
-   std::string              _displayName;
-   bool                     _hiddenCR;
-   bool                     _temporary;
-   char*                    _buffer;
-   uint                     _bufferSize;
-   std::vector<int>         _index;
-   char*                    _renderBuffer;
-   int                      _renderBufferSize;
-   char                     _lnBuffer[12];
+   QString          _name;
+   QString          _displayName;
+   bool             _hiddenCR;
+   bool             _temporary;
+   char*            _buffer;
+   uint             _bufferSize;
+   std::vector<int> _index;
+   char*            _renderBuffer;
+   int              _renderBufferSize;
+   QString          _lnBuffer;
 
-   // Note: we explicitly avoid instantiating a std::vector<string> because that
-   // instantiation increases the size of our executable file considerably.
-   std::vector<const char*> _directoryEntries;
+   QStringList      _directoryEntries;
 
 };
 

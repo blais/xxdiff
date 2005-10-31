@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: xrmParser.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: diffutils.h 240 2001-10-01 19:26:49Z blais $
+ * $Date: 2001-10-01 15:26:49 -0400 (Mon, 01 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -20,71 +20,63 @@
  *
  *****************************************************************************/
 
-#ifndef INCL_XXDIFF_XRMPARSER
-#define INCL_XXDIFF_XRMPARSER
-
-#ifdef XX_USE_XRM
-
+#ifndef INCL_XXDIFF_DIFFUTILS
+#define INCL_XXDIFF_DIFFUTILS
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#ifndef INCL_XXDIFF_RESOURCES
-#include <resources.h>
-#endif
-
 #ifndef INCL_XXDIFF_DEFS
 #include <defs.h>
 #endif
 
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
+#ifndef INCL_QT_QSTRING
+#include <qstring.h>
+#define INCL_QT_QSTRING
 #endif
-
 
 XX_NAMESPACE_BEGIN
 
-
 /*==============================================================================
- * CLASS XxXrmParser
+ * CLASS XxDiffutils
  *============================================================================*/
 
-// <summary> abstract interface for resource parsers </summary>
+// <summary> interface class to diffutils compiled against xxdiff </summary>
 
-class XxXrmParser : public XxResourcesParser {
+class XxDiffutils {
 
 public:
 
    /*----- member functions -----*/
 
-   // Constructor.  This will create a database from various sources, and parse
-   // and remove the relevant arguments from the given command line.
-   XxXrmParser( 
-      void*       display,
-      const char* appClassName, 
-      int&        argc, 
-      char**      argv
-   );
+   XxDiffutils();
+   virtual ~XxDiffutils();
 
-   // Destructor.
-   virtual ~XxXrmParser();
+   // Run diff.
+   void diff( int argc, char** out_args );
 
-   // Query the database for the named resource.  Returns false is not present.
-   // Otherwise return true and fills in the value string.
-   virtual bool query( 
-      XxResources::Resource resource,
-      const char*           name,
-      std::string&          value
-   );
+   // Run diff3.
+   void diff3( int argc, char** out_args );
 
+   // Reads a line.  A null string will be returned on EOF.
+   QString readLine();
+
+   
 private:
+
+   /*----- member functions -----*/
+
+   void diff_fun( 
+      int argc,
+      char** out_args, 
+      int(*main)(int, char**) 
+   );
 
    /*----- data members -----*/
 
-   std::string		_className;
-   void*		_database;
+   QString       _output;
+   QTextIStream* _istream;
 
 };
 
@@ -93,4 +85,3 @@ XX_NAMESPACE_END
 
 #endif
 
-#endif

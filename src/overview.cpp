@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 211 2001-07-07 19:41:03Z blais $
- * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
+ * $Id: overview.cpp 226 2001-09-25 20:40:41Z blais $
+ * $Date: 2001-09-25 16:40:41 -0400 (Tue, 25 Sep 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -425,7 +425,8 @@ void XxOverview::resizeEvent( QResizeEvent* e )
    
    const int visRegionBorder = int( 0.25 * fileWidth );
    int cx = 0;
-   for ( uint ii = 0; ii < nbFiles; ++ii ) {
+   uint ii;
+   for ( ii = 0; ii < nbFiles; ++ii ) {
       _fileL[ii] = cx;
       cx += fileWidth;
       _fileR[ii] = cx;
@@ -443,7 +444,6 @@ void XxOverview::resizeEvent( QResizeEvent* e )
    XxBuffer* files[3];
    XxFln flines[3];
    XxFln maxlines = 0;
-   uint ii;
    for ( ii = 0; ii < nbFiles; ++ii ) {
       files[ii] = _app->getFile( ii );
       XX_ASSERT( files[ii] != 0 );

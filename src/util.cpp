@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 210 2001-06-27 01:57:08Z blais $
- * $Date: 2001-06-26 21:57:08 -0400 (Tue, 26 Jun 2001) $
+ * $Id: util.cpp 252 2001-10-05 00:33:42Z blais $
+ * $Date: 2001-10-04 20:33:42 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,14 +31,28 @@
 #include <qstring.h>
 #include <qtextstream.h>
 
-#include <sstream>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/time.h>
+
+#ifndef WINDOWS
+#  include <sys/wait.h>
+#  include <sys/time.h>
+#  include <unistd.h>
+#  include <libgen.h>
+#else
+#  include <io.h>
+#  include <time.h>
+#  include <winsock.h>
+
+#define popen _popen
+#define pclose _pclose
+#define access _access
+#define R_OK 04
+
+#endif
+
 #include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
@@ -49,71 +63,47 @@
 
 namespace {
 
-
-//------------------------------------------------------------------------------
-//
-const char** splitArgs( 
-   const char* command,
-   const char* args[]
+bool installSigChldHandler(
+   void (*sigChldHandler)(int)
 )
 {
-   /* 
-    * split up args passed in into an argument vector for the execvp
-    * system call.  this works for an unlimited number of arguments,
-    * but fails to do any quote processing.  arguments with embedded
-    * spaces will break this.
-    */
-   
-   int argc = 0;
-   const int BLOCKSIZE = 10;
-   int count = BLOCKSIZE;
-   const char** argv = (const char**) malloc( sizeof(char*) * count );
-   
-   // Make a copy of the args string because strtok is broken under
-   // Linux, it modifies the first argument (see BUGS section in man
-   // page of strtok).
-   char* cargs = strdup( command );
-         
-   char* ptr;
-   for ( ptr = strtok( cargs, " \t" ); 
-         ptr; 
-         ptr = strtok( 0, " \t" ) ) {
-            
-      if ( argc >= count ) {
-         count += BLOCKSIZE;
-         argv = (const char**) realloc( argv, sizeof(char*) * count );
-      }
-            
-      argv[argc++] = strdup( ptr );
-   }
-   free( cargs );
-         
-   const char** pargs = args;
-   while ( *pargs != 0 ) {
-      if ( argc >= count ) {
-         count += BLOCKSIZE;
-         argv = (const char**) realloc( argv, sizeof(char*) * count );
-      }
+// Disabled crud that doesn't work (it works only the first time, the second
+// time around the handler is called immediately upon setting up the handler).
+#if 0 
+   XX_ASSERT( sigChldHandler != 0 );
 
-      argv[argc++] = *pargs;
-      pargs++;
-   }
-   argv[argc++] = 0;
+   XX_TRACE( "Installing SIGCHLD handler." );
 
-//#define ANAL_DEBUGGING
-#ifdef ANAL_DEBUGGING
-   std::ofstream ofs( "/tmp/diff_args" );
-   ofs << " ARGS ------------------------------" << std::endl;
-   const char** ppargs = argv;
-   while ( *ppargs != 0 ) {
-      ofs << *ppargs << std::endl;
-      ++ppargs;
+   // sigset_t spm_o;
+   // sigprocmask( SIG_NOP, 0, &spm_o );
+   // XX_TRACE( "is SIGCHLD member=" << 
+   //           sigismember( &spm_o, SIGCHLD ) );
+   // sigemptyset( &spm_o );
+   // sigaddset( &spm_o, SIGCHLD );
+   // sigprocmask( SIG_BLOCK, &spm_o, 0 );
+   
+   //
+   // Register a SIGCHLD handler.
+   //
+   // Note: under IRIX (untested with others), SA_NOCLDWAIT will not
+   // allow a redo diff to work. I don't know why.
+   
+   struct sigaction sa;
+   sa.sa_flags = /*SA_SIGINFO | */SA_RESTART | 
+      SA_RESETHAND | SA_NOCLDWAIT | SA_NOCLDSTOP;
+   sa.sa_handler = sigChldHandler;
+   sigset_t ss;
+   sigemptyset( &ss );
+   sa.sa_mask = ss;
+   //sa.sa_sigaction = 0; don't clear sa_sigaction for nothing...
+   // sa_handler and sa_sigaction may be sharing an union.
+   if ( ::sigaction( SIGCHLD, &sa, 0 ) != 0 ) {
+      // Ignore error.
+      XX_TRACE( "Error calling sigaction." );
+      return false;
    }
-   ofs << " -----------------------------------" << std::endl;
-   ofs.close();
 #endif
-
-   return argv;
+   return true;
 }
 
 }
@@ -126,15 +116,16 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-bool XxUtil::isDirectory( const char* filename )
+bool XxUtil::isDirectory( const QString& filename )
 {
    struct stat buf;
-   if ( stat( filename, &buf ) != 0 ) {
-      std::ostringstream oss;
-      oss << "Cannot stat file: " << filename << std::ends;
-      throw new XxIoError( oss.str().c_str() );
+   if ( stat( filename.latin1(), &buf ) != 0 ) {
+      QString os;
+      QTextOStream oss( &os );
+      oss << "Cannot open file: " << filename;
+      throw XxIoError( XX_EXC_PARAMS, os );
    }
-   return S_ISDIR( buf.st_mode );
+   return ((buf.st_mode&S_IFMT) == S_IFDIR);
 }
 
 
@@ -151,67 +142,66 @@ void XxUtil::copyToFile( FILE* fin, FILE* fout )
    }
    if ( ferror( fin ) || ferror( fout ) ) {
       fclose(fout);
-      throw new XxIoError( "Error writing temporary file." );
+      throw XxIoError( XX_EXC_PARAMS, "Error writing temporary file." );
    }
 }
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::copyFile( const char* src, const char* dest )
+int XxUtil::copyFile( const QString& src, const QString& dest )
 {
-   // std::cout << "Copying file " << src << " to " << dest << std::endl;
-   using namespace std;
+   QString cmd = QString("cp ") + src + QString(" ") + dest;
 
-   string cmd = string( "cp " ) + 
-      string( src ) + string( " "  ) + string( dest );
-
-   FILE* f = popen( cmd.c_str(), "r" );
+   FILE* f = popen( cmd.latin1(), "r" );
    int r = pclose( f );
    return r;
 }
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::removeFile( const char* src )
+int XxUtil::removeFile( const QString& src )
 {
-   XX_ASSERT( src != 0 );
-   return unlink( src );
+   XX_ASSERT( !src.isEmpty() );
+   return unlink( src.latin1() );
 }
 
 //------------------------------------------------------------------------------
 //
 bool XxUtil::testFile(
-   const char* filename,
-   const bool  testAscii,
-   bool&       isDirectory
+   const QString& filename,
+   const bool     testAscii,
+   bool&          isDirectory
 )
 {
    struct stat buf;
    
    // Check for access.
-   if ( access( filename, R_OK ) != 0 ) {
+   if ( access( filename.latin1(), R_OK ) != 0 ) {
       QString s;
       QTextOStream oss( & s );
       oss << "Cannot access file: " << filename;
-      throw new XxIoError( s.latin1() );
+      throw XxIoError( XX_EXC_PARAMS, s );
    }
 
    // Stat file.
-   if ( stat( filename, &buf ) != 0 ) {
-      std::ostringstream oss;
-      oss << "Cannot open file: " << filename << std::ends;
-      throw new XxIoError( oss.str().c_str() );
+   if ( stat( filename.latin1(), &buf ) != 0 ) {
+      QString os;
+      QTextOStream oss( &os );
+      oss << "Cannot open file: " << filename;
+      throw XxIoError( XX_EXC_PARAMS, os );
    }
 
    // Check if file is a regular file or a directory.  
-   if ( !( S_ISREG( buf.st_mode ) || S_ISDIR( buf.st_mode ) ) ) {
-      std::ostringstream oss;
+   if ( !( ((buf.st_mode&S_IFMT) == S_IFREG) || 
+           ((buf.st_mode&S_IFMT) == S_IFDIR) ) ) {
+      QString os;
+      QTextOStream oss( &os );
       oss << "Error: not an ordinary file or a directory";
-      throw new XxIoError( oss.str().c_str() );
+      throw XxIoError( XX_EXC_PARAMS, os );
    }
 
    // If file is a directory.
-   if ( S_ISDIR( buf.st_mode ) ) {
+   if ( ((buf.st_mode&S_IFMT) == S_IFDIR) ) {
       isDirectory = true;
       return true;
    }
@@ -219,9 +209,10 @@ bool XxUtil::testFile(
    // Make sure file is not binary, we don't handle binary files.
    if ( testAscii ) {
       if ( !isAsciiText( filename ) ) {
-         std::ostringstream oss;
+         QString os;
+         QTextOStream oss( &os );
          oss << "Error: file is not a text file";
-         throw new XxIoError( oss.str().c_str() );
+         throw XxIoError( XX_EXC_PARAMS, os );
       }
    }
 
@@ -230,12 +221,12 @@ bool XxUtil::testFile(
 
 //------------------------------------------------------------------------------
 //
-bool XxUtil::isAsciiText( const char *filename )
+bool XxUtil::isAsciiText( const QString& filename )
 {
    int fd, bytes, i;
    char buffer[1024];
    
-   fd = open( filename, O_RDONLY );
+   fd = open( filename.latin1(), O_RDONLY );
    bytes = read( fd, (void *)buffer, 1024 );
    close( fd );
    
@@ -255,17 +246,16 @@ bool XxUtil::isAsciiText( const char *filename )
 //------------------------------------------------------------------------------
 //
 bool XxUtil::spawnCommand( 
-   const char* command,
-   const char* args[],
+   const char** argv,
    void (*sigChldHandler)(int)
 )
 {
-   XX_ASSERT( command != 0 );
+   XX_ASSERT( argv );
+
+#ifndef WINDOWS
 
    switch ( fork() ) {
       case 0: { // the child
-
-         const char** argv = splitArgs( command, args );
 
          if ( execvp( argv[0], (char**)argv ) == -1 ) {
             exit( 1 );
@@ -276,43 +266,18 @@ bool XxUtil::spawnCommand(
       } break;
       
       case -1: { // fork error
-         throw new XxIoError;
+         throw XxIoError( XX_EXC_PARAMS );
       }
 
       default: {
-         if ( sigChldHandler != 0 ) {
-            XX_TRACE( "Installing SIGCHLD handler." );
-
-            // sigset_t spm_o;
-            // sigprocmask( SIG_NOP, 0, &spm_o );
-            // XX_TRACE( "is SIGCHLD member=" << 
-            //           sigismember( &spm_o, SIGCHLD ) );
-            // sigemptyset( &spm_o );
-            // sigaddset( &spm_o, SIGCHLD );
-            // sigprocmask( SIG_BLOCK, &spm_o, 0 );
- 
-            //
-            // Register a SIGCHLD handler.
-            //
-            // Note: under IRIX (untested with others), SA_NOCLDWAIT will not
-            // allow a redo diff to work. I don't know why.
-
-            struct sigaction sa;
-            sa.sa_flags = SA_SIGINFO | SA_RESETHAND /*| SA_NOCLDWAIT*/;
-            sa.sa_handler = sigChldHandler;
-            sigset_t ss;
-            sigemptyset( &ss );
-            sa.sa_mask = ss;
-            //sa.sa_sigaction = 0; don't clear sa_sigaction for nothing...
-            // sa_handler and sa_sigaction may be sharing an union.
-            if ( ::sigaction( SIGCHLD, &sa, 0 ) != 0 ) {
-               // Ignore error.
-               XX_TRACE( "Error calling sigaction." );
+         if ( sigChldHandler ) {
+            if ( installSigChldHandler( sigChldHandler ) == false ) {
                return false;
             }
          }
       }
    }
+#endif
    
    // The parent. Return. Forget about it.
    return true;
@@ -320,17 +285,19 @@ bool XxUtil::spawnCommand(
 
 //------------------------------------------------------------------------------
 //
-FILE* XxUtil::spawnCommandWithOutput( 
-   const char* command,
-   const char* args[]
+FILE* XxUtil::spawnCommandWithOutput(
+   const char** argv,
+   void (*sigChldHandler)(int)
 )
 {
-   XX_ASSERT( command != 0 );
+   XX_ASSERT( argv );
+
+#ifndef WINDOWS
 
    // Open the pipe.
    int pipe_fds[2];
    if ( pipe( pipe_fds ) == -1 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
 
    switch ( fork() ) {
@@ -341,18 +308,16 @@ FILE* XxUtil::spawnCommandWithOutput(
           */
          close( fileno( stdout ) );
          if ( dup( pipe_fds[1] ) == -1 ) {
-            throw new XxIoError;
+            throw XxIoError( XX_EXC_PARAMS );
          }
          close( fileno( stderr ) );
          if ( dup( pipe_fds[1] ) == -1 ) {
-            throw new XxIoError;
+            throw XxIoError( XX_EXC_PARAMS );
          }
 
          close( pipe_fds[0] );
 
-         const char** argv = splitArgs( command, args );
-
-         if ( execvp( argv[0], (char**)argv ) == -1 ) {
+         if ( execvp( argv[0], const_cast<char**>(argv) ) == -1 ) {
             exit( 1 );
          }
 
@@ -361,10 +326,16 @@ FILE* XxUtil::spawnCommandWithOutput(
       } break;
       
       case -1: { // fork error
-         throw new XxIoError;
+         throw XxIoError( XX_EXC_PARAMS );
       }
 
       default: { // the parent
+
+         if ( sigChldHandler ) {
+            if ( installSigChldHandler( sigChldHandler ) == false ) {
+               return false;
+            }
+         }
 
          /* 
           * we must close this in the parent or else the close of the 
@@ -379,6 +350,7 @@ FILE* XxUtil::spawnCommandWithOutput(
          return fdopen( pipe_fds[0], "r" );
       }
    }
+#endif
 
    // Not reached.
    return 0;
@@ -386,12 +358,14 @@ FILE* XxUtil::spawnCommandWithOutput(
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::interruptibleSystem( const char* command )
+int XxUtil::interruptibleSystem( const QString& command )
 {
    // This is code for an interruptible system() call as shown as suggested in
    // GNU libc/Linux system(3) man page.
 
-   if ( command == 0 ) {
+#ifndef WINDOWS
+
+   if ( command.isEmpty() ) {
       return 1;
    }
    int pid = fork();
@@ -402,7 +376,7 @@ int XxUtil::interruptibleSystem( const char* command )
       char* argv[4];
       argv[0] = "sh";
       argv[1] = "-c";
-      argv[2] = (char*)command;
+      argv[2] = const_cast<char*>( command.latin1() );
       argv[3] = 0;
       execve( "/bin/sh", argv, environ );
       exit( 127 );
@@ -418,6 +392,7 @@ int XxUtil::interruptibleSystem( const char* command )
          return status;
       }
    } while(1);
+#endif
    return -1;
 }
 
@@ -425,10 +400,14 @@ int XxUtil::interruptibleSystem( const char* command )
 //
 long XxUtil::getCurrentTime()
 {
+#ifndef WINDOWS
    struct timeval tv;
    struct timezone tz;
    gettimeofday( &tv, &tz );
    return long( ( tv.tv_sec % 100 ) * 1e6 + tv.tv_usec );
+#else
+   return long( timeGetTime() );
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -442,15 +421,112 @@ void XxUtil::printTime( std::ostream& os, long time )
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::TESTQTSTREAMS() const
+QString XxUtil::baseName( const QString& str )
 {
-   QString s;
-   QTextOStream oss( & s );
-   oss << "Cannot access file: " << "gugu";
+#ifndef WINDOWS
+   QString bn( ::basename( const_cast<char*>( str.latin1() ) ) );
+   return bn;
+#else
+   const DWORD BUFFER_LEN = 1024;
+   char  buffer[BUFFER_LEN];
+   char* name;
+   
+   if ( ::GetFullPathName( str.latin1(),
+                           BUFFER_LEN,
+                           buffer,
+                           &name ) == 0 ) {
+      throw XxInternalError( XX_EXC_PARAMS );
+   }
 
-   std::cout << s.latin1();
+   if ( name == 0 ) {
+      return QString();
+   }
 
+   return QString( name );
+#endif
+}
 
+//------------------------------------------------------------------------------
+//
+int XxUtil::splitArgs( 
+   const QString& command,
+   const char**&  out_args
+)
+{
+   /* 
+    * split up args passed in into an argument vector for the execvp
+    * system call.  this works for an unlimited number of arguments,
+    * but fails to do any quote processing.  arguments with embedded
+    * spaces will break this.
+    */
+   
+   int argc = 0;
+   const int BLOCKSIZE = 10;
+   int count = BLOCKSIZE;
+   const char** argv = (const char**) malloc( sizeof(char*) * count );
+   
+   // Make a copy of the args string because strtok is broken under
+   // Linux, it modifies the first argument (see BUGS section in man
+   // page of strtok).
+   char* cargs = strdup( command.latin1() );
+         
+   char* ptr;
+   for ( ptr = strtok( cargs, " \t" ); 
+         ptr; 
+         ptr = strtok( 0, " \t" ) ) {
+            
+      if ( argc >= count ) {
+         count += BLOCKSIZE;
+         argv = (const char**) realloc( argv, sizeof(char*) * count );
+      }
+            
+      argv[argc++] = strdup( ptr );
+   }
+   free( cargs );
+         
+#if 0
+// FIXME remove
+   const char** pargs = args;
+   while ( *pargs != 0 ) {
+      if ( argc >= count ) {
+         count += BLOCKSIZE;
+         argv = (const char**) realloc( argv, sizeof(char*) * count );
+      }
+
+      argv[argc++] = *pargs;
+      pargs++;
+   }
+#endif
+   argv[argc] = 0;
+
+//#define ANAL_DEBUGGING
+#ifdef ANAL_DEBUGGING
+   std::ofstream ofs( "/tmp/diff_args" );
+   ofs << " ARGS ------------------------------" << std::endl;
+   const char** ppargs = argv;
+   while ( *ppargs != 0 ) {
+      ofs << *ppargs << std::endl;
+      ++ppargs;
+   }
+   ofs << " -----------------------------------" << std::endl;
+   ofs.close();
+#endif
+
+   out_args = argv;
+   return argc;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxUtil::freeArgs( const char**& out_args )
+{
+   if ( out_args ) {
+      for ( const char** dargv = out_args; *dargv; ++dargv ) {
+         free( const_cast<char*>( *dargv ) );
+      }
+      free( out_args );
+      out_args = 0; // reset it, just in case.
+   }
 }
 
 XX_NAMESPACE_END

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 212 2001-07-09 20:43:50Z blais $
- * $Date: 2001-07-09 16:43:50 -0400 (Mon, 09 Jul 2001) $
+ * $Id: text.cpp 247 2001-10-04 01:01:13Z blais $
+ * $Date: 2001-10-03 21:01:13 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -42,6 +42,11 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <iostream>
+
+#ifdef WINDOWS
+#define snprintf _snprintf
+#endif
 
 XX_NAMESPACE_BEGIN
 
@@ -199,7 +204,8 @@ void XxText::drawContents( QPainter* pp )
             int prelen = lhd;
             XX_CHECK( prelen >= 0 );
             if ( prelen > 0 ) {
-               QString prestr = QString( renderedText );
+               QString prestr;
+               prestr.setLatin1( renderedText, prelen );
                int prewidth = fm.width( prestr, prelen );
                p.fillRect( lx, y, prewidth, fm.lineSpacing(), brushSup );
                p.drawText( lx, y + fm.ascent(), prestr, lhd );
@@ -211,7 +217,8 @@ void XxText::drawContents( QPainter* pp )
             int midlen = rhd - lhd + 1;
             XX_CHECK( prelen >= 0 );
             if ( midlen > 0 ) {
-               QString midstr = QString( renderedText + lhd );
+               QString midstr;
+               midstr.setLatin1( renderedText + lhd, midlen );
                int midwidth = fm.width( midstr, midlen );
                p.fillRect( lx, y, midwidth, fm.lineSpacing(), brush );
                p.drawText( lx, y + fm.ascent(), midstr, midlen );
@@ -223,7 +230,8 @@ void XxText::drawContents( QPainter* pp )
             int postlen = rlength - rhd - 1;
             XX_CHECK( prelen >= 0 );
             if ( postlen > 0 ) {
-               QString poststr = QString( renderedText + rhd + 1 );
+               QString poststr;
+               poststr.setLatin1( renderedText + rhd + 1, postlen );
                int postwidth = fm.width( poststr, postlen );
                p.fillRect( lx, y, postwidth, fm.lineSpacing(), brushSup );
                p.drawText( lx, y + fm.ascent(), poststr, postlen );
@@ -238,7 +246,7 @@ void XxText::drawContents( QPainter* pp )
             //
             // Render without horizontal diffs.
             //            
-            QString str = QString( renderedText );
+            QString str( renderedText );
 
             p.fillRect( 0, y, w, fm.lineSpacing(), brush );            
             p.drawText( x, y + fm.ascent(), str );
@@ -306,8 +314,8 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   const std::string& clipboardFormat = resources->getClipboardTextFormat();
-   std::string filename( buffer->getDisplayName() );
+   QString clipboardFormat = resources->getClipboardTextFormat();
+   QString filename = buffer->getDisplayName();
 
    const QFont& font = _app->getFont();
    QFontMetrics fm( font );
@@ -360,17 +368,17 @@ void XxText::mousePressEvent( QMouseEvent* event )
             uint len;
             const char* text = buffer->getTextLine( fline, len );
             if ( text != 0 ) {
-               std::string adt( text, len );
-               if ( resources->getBoolOpt(
-                  XxResources::FORMAT_CLIPBOARD_TEXT
-               ) == true ) {
-                  std::string forline = formatClipboardLine( 
+               QString adt;
+               adt.setLatin1( text, len );
+               if ( resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
+                    == true ) {
+                  QString forline = formatClipboardLine( 
                      clipboardFormat, _no, fline, filename, adt
                   );
-                  textCopy += QString(forline.c_str());
+                  textCopy += forline;
                }
                else {
-                  textCopy += QString(adt.c_str());
+                  textCopy += adt;
                }
                textCopy += QString("\n");
             }
@@ -402,17 +410,17 @@ void XxText::mousePressEvent( QMouseEvent* event )
             uint len;
             const char* text = buffer->getTextLine( fline, len );
             if ( text != 0 ) {
-               std::string adt( text, len );
-               if ( resources->getBoolOpt(
-                  XxResources::FORMAT_CLIPBOARD_TEXT
-               ) == true ) {
-                  std::string forline = formatClipboardLine( 
+               QString adt;
+               adt.setLatin1( text, len );
+               if ( resources->getBoolOpt( XxResources::FORMAT_CLIPBOARD_TEXT )
+                    == true ) {
+                  QString forline = formatClipboardLine( 
                      clipboardFormat, _no, fline, filename, adt
                   );
-                  textCopy += QString(forline.c_str());
+                  textCopy += forline;
                }
                else {
-                  textCopy += QString(adt.c_str());
+                  textCopy += adt;
                }
                textCopy += QString("\n");
             }
@@ -443,7 +451,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
 
 //------------------------------------------------------------------------------
 //
-void XxText::mouseReleaseEvent( QMouseEvent* event )
+void XxText::mouseReleaseEvent( QMouseEvent* /*event*/ )
 {
    // Release grab in all case. It won't hurt.
    _grab = false;
@@ -469,46 +477,51 @@ uint XxText::getDisplayWidth() const
 
 //------------------------------------------------------------------------------
 //
-std::string XxText::formatClipboardLine(
-   const std::string& clipboardFormat,
-   const XxFno        fileno,
-   const XxFln        lineno,
-   const std::string& filename,
-   const std::string& lineContents
+QString XxText::formatClipboardLine(
+   const QString& clipboardFormat,
+   const XxFno    fileno,
+   const XxFln    lineno,
+   const QString& filename,
+   const QString& lineContents
 )
 {
-   std::string forline = clipboardFormat;
+   QString forline = clipboardFormat;
    
-   std::string::size_type pos = 0;
+   typedef int PosType;
+   PosType notfound = -1;
+
+   PosType pos = 0;
 
    // Fileno.
    while ( 1 ) {
-      std::string::size_type spos = forline.find( "%N", pos );
-      if ( spos == std::string::npos ) {
+      PosType spos = forline.find( "%N", pos );
+      if ( spos == notfound ) {
          break;
       }
-      char buf[12];
-      ::snprintf( buf, sizeof(buf), "%d", fileno );
+      QString buf;
+      buf.sprintf( "%d", fileno );
       forline.replace( spos, 2, buf );
-      pos += spos + ::strlen( buf );
+      pos = spos + buf.length();
    }
 
    // Lineno.
+   pos = 0;
    while ( 1 ) {
-      std::string::size_type spos = forline.find( "%L", pos );
-      if ( spos == std::string::npos ) {
+      PosType spos = forline.find( "%L", pos );
+      if ( spos == notfound ) {
          break;
       }
-      char buf[12];
-      ::snprintf( buf, sizeof(buf), "%d", lineno );
+      QString buf;
+      buf.sprintf( "%d", lineno );
       forline.replace( spos, 2, buf );
-      pos += spos + ::strlen( buf );
+      pos = spos + buf.length();
    }
 
    // Filename.
+   pos = 0;
    while ( 1 ) {
-      std::string::size_type spos = forline.find( "%F", pos );
-      if ( spos == std::string::npos ) {
+      PosType spos = forline.find( "%F", pos );
+      if ( spos == notfound ) {
          break;
       }
       forline.replace( spos, 2, filename );
@@ -516,9 +529,10 @@ std::string XxText::formatClipboardLine(
    }
 
    // Line contents.
+   pos = 0;
    while ( 1 ) {
-      std::string::size_type spos = forline.find( "%s", pos );
-      if ( spos == std::string::npos ) {
+      PosType spos = forline.find( "%s", pos );
+      if ( spos == notfound ) {
          break;
       }
       forline.replace( spos, 2, lineContents );
@@ -529,3 +543,4 @@ std::string XxText::formatClipboardLine(
 }
 
 XX_NAMESPACE_END
+

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 183 2001-06-04 05:08:52Z blais $
- * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
+ * $Id: resources.h 246 2001-10-04 00:32:54Z blais $
+ * $Date: 2001-10-03 20:32:54 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -48,11 +48,6 @@
 #ifndef INCL_QT_QRECT
 #include <qrect.h>
 #define INCL_QT_QFONT
-#endif
-
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
 #endif
 
 #ifndef INCL_STD_MAP
@@ -165,6 +160,7 @@ public:
       ACCEL_HIDE_CR,
       ACCEL_DIRDIFF_IGNORE_FILE_CHANGES,
       ACCEL_DIRDIFF_RECURSIVE,
+      ACCEL_USE_INTERNAL_DIFF,
       ACCEL_QUALITY_NORMAL,
       ACCEL_QUALITY_FASTEST,
       ACCEL_QUALITY_HIGHEST,
@@ -300,6 +296,7 @@ public:
       DIRDIFF_IGNORE_FILE_CHANGES,
       DIRDIFF_BUILD_FROM_OUTPUT,
       DIRDIFF_RECURSIVE,
+      USE_INTERNAL_DIFF,
       BOOL_LAST, // Not a real resource.
 
       // Command lines.
@@ -430,9 +427,9 @@ public:
    //
    // cmdId must be between COMMAND_FIRST and COMMAND_LAST.
    // <group>
-   const char* getCommand( Resource cmdId ) const;
-   const char* getCommandOption( Resource cmdId ) const;
-   void setCommand( Resource cmdId, const char* );
+   const QString& getCommand( Resource cmdId ) const;
+   const QString& getCommandOption( Resource cmdId ) const;
+   void setCommand( Resource cmdId, const QString& );
    // </group>
 
    uint getOverviewFileWidth() const;
@@ -443,7 +440,7 @@ public:
    // </group>
 
    // Get text tags for conflictual regions.
-   const char* getTag( Resource ) const;
+   const QString& getTag( Resource ) const;
 
    // Convenience methods for setting the quality options in the commands. Note
    // that these methods don't change the commands in the resources, they modify
@@ -454,8 +451,8 @@ public:
       QUALITY_HIGHEST
    };
    // <group>
-   Quality getQuality( const std::string& command ) const;
-   void setQuality( std::string& command, Quality quality ) const;
+   Quality getQuality( const QString& command ) const;
+   void setQuality( QString& command, Quality quality ) const;
    // </group>
 
    // Convenience methods for getting/setting an option into a specific command.
@@ -467,8 +464,8 @@ public:
 
    // Get/set clipboard format string.
    // <group>
-   const std::string& getClipboardTextFormat() const;
-   void setClipboardTextFormat( const std::string& format );
+   const QString& getClipboardTextFormat() const;
+   void setClipboardTextFormat( const QString& format );
    // </group>
 
    // Print out the modified resources and associated documentation as a
@@ -505,7 +502,7 @@ private:
    bool query( 
       XxResourcesParser&    parser,   
       XxResources::Resource resource,
-      std::string&          value
+      QString&              value
    ) const;
 
    // Implementations of the line color type algorithms.
@@ -536,13 +533,13 @@ private:
    QColor      _colors[ COLOR_LAST - COLOR_FIRST ];
    bool        _boolOpts[ BOOL_LAST - BOOL_FIRST ];
    uint        _tabWidth;
-   std::string _commands[ COMMAND_LAST - COMMAND_FIRST ];
-   std::string _commandOptions[ CMDOPT_LAST - CMDOPT_FIRST ];
+   QString     _commands[ COMMAND_LAST - COMMAND_FIRST ];
+   QString     _commandOptions[ CMDOPT_LAST - CMDOPT_FIRST ];
    uint        _overviewFileWidth;
    uint        _overviewSepWidth;
    uint        _verticalLinePos;
-   std::string _tags[ TAG_LAST - TAG_FIRST ];
-   std::string _clipboardTextFormat;
+   QString     _tags[ TAG_LAST - TAG_FIRST ];
+   QString     _clipboardTextFormat;
    IgnoreFile  _ignoreFile;
 
 };
@@ -568,8 +565,8 @@ public:
    // Otherwise return true and fills in the value string.
    virtual bool query( 
       XxResources::Resource resource,
-      const char*           name,
-      std::string&          value
+      const QString&        name,
+      QString&              value
    ) = 0;
 
 protected:
@@ -578,12 +575,12 @@ protected:
    
    // Useful storage types for subclasses.
    struct ResValue {
-      std::string _value;
-      bool        _used;
+      QString _value;
+      bool    _used;
    };
 
    struct Rltstr {
-      bool operator()( const std::string& s1, const std::string& s2 ) const
+      bool operator()( const QString& s1, const QString& s2 ) const
       {
          return s1 < s2;
       }
@@ -597,3 +594,4 @@ XX_NAMESPACE_END
 #include <resources.inline.h>
 
 #endif
+

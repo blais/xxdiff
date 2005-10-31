@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 178 2001-06-02 01:26:38Z blais $
- * $Date: 2001-06-01 21:26:38 -0400 (Fri, 01 Jun 2001) $
+ * $Id: app.h 247 2001-10-04 01:01:13Z blais $
+ * $Date: 2001-10-03 21:01:13 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -47,11 +47,6 @@
 #ifndef INCL_STD_MEMORY
 #include <memory>
 #define INCL_STD_MEMORY
-#endif
-
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
 #endif
 
 #ifndef INCL_STD_LIST
@@ -333,15 +328,15 @@ private:
    // Reads the file arguments, returns the number of files to be read, creates
    // temporary files if necessary (from stdin).
    uint readFileNames( 
-      int 		argc, 
-      char** 		argv,
-      std::string 	filenames[3],
-      std::string 	displayFilenames[3],
-      bool		created[3],
-      bool&		directories
+      int     argc, 
+      char**  argv,
+      QString filenames[3],
+      QString displayFilenames[3],
+      bool    created[3],
+      bool&   directories
    ) const;
 
-   // Parse Xrm and/or rc file and removes the recognized ones.
+   // Parse rc file and removes the recognized ones.
    void buildResources();
 
    // Parse command line options and removes the recognized ones.
@@ -352,10 +347,10 @@ private:
 
    // Reads in a file.
    void readFile( 
-      const XxFno no, 
-      const char* filename,
-      const char* displayFilename,
-      bool        isTemporary = false
+      const XxFno    no, 
+      const QString& filename,
+      const QString& displayFilename,
+      bool           isTemporary = false
    );
 
    // Re-reads a file.
@@ -377,7 +372,7 @@ private:
    // </group>
 
    // Output diff errors.
-   void outputDiffErrors( const char* errors );
+   void outputDiffErrors( const QString& errors );
 
    // Compute the number of pixels of the longest line.
    uint computeTextWidth() const;
@@ -388,11 +383,11 @@ private:
 
    // Tries to save the selected contents to the specified filename.  If ask is
    // true, ask the user for the filename (and use filename as default value).
-   void saveToFile( const char* filename, const bool ask );
+   void saveToFile( const QString& filename, const bool ask );
 
    // Edits the said file, and add signal handler to catch children exit, and
    // notify.
-   void editFile( const char* filename );
+   void editFile( const QString& filename );
 
    // Reopen file at no and rebuild diffs and update and all.
    void openFile( const XxFno no );
@@ -431,13 +426,13 @@ private:
    bool                    _isUICreated;
    QStyle*                 _style;
    QMainWindow*            _mainWindow;
-   QMessageBox*		   _diffErrorsMsgBox;
+   QMessageBox*            _diffErrorsMsgBox;
    QWidget*                _centralWidget;
    QPopupMenu*             _viewPopup;
    QPopupMenu*             _optionsMenu;
    QPopupMenu*             _displayMenu;
    QPopupMenu*             _windowsMenu;
-   int 			   _menuids[ MAX_MENUIDS ];
+   int                     _menuids[ MAX_MENUIDS ];
    XxOverview*             _overview;
    XxSearchDialog*         _searchDialog;
    XxOptionsDialog*        _optionsDialog;
@@ -467,12 +462,11 @@ private:
 
    // Cmdline-related variables.
    int                     _returnValue;
-   std::string             _userFilenames[3];
-   std::string             _stdinFilename;
+   QString                 _userFilenames[3];
+   QString                 _stdinFilename;
    XxStringResParser*      _stringResParser;
-   bool                    _useXrm;
    bool                    _useRcfile;
-   std::string             _extraDiffArgs;
+   QString                 _extraDiffArgs;
    bool                    _sepDiff;
 
    /*----- static data members -----*/

@@ -1,6 +1,6 @@
 dnl
-dnl $Id: configure.in 217 2001-07-11 18:38:29Z  $
-dnl $Date: 2001-07-11 14:38:29 -0400 (Wed, 11 Jul 2001) $
+dnl $Id: configure.in 255 2001-10-06 19:19:36Z  $
+dnl $Date: 2001-10-06 15:19:36 -0400 (Sat, 06 Oct 2001) $
 dnl
 dnl Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
 dnl
@@ -131,53 +131,6 @@ AC_MSG_RESULT([xxdiff option: linking dynamically to STLport and Qt.])])
 
 AM_CONDITIONAL(LINKSTATIC, test x$linkstatic = xtrue)
 
-
-dnl
-dnl xrm resources
-dnl
-AC_ARG_ENABLE(xrm,
-[  --enable-xrm            enable X resource manager support],
-AC_MSG_RESULT([xxdiff option: compiling with X resource manager.])
-AC_DEFINE(XX_USE_XRM),
-AC_MSG_RESULT([xxdiff option: compiling without X resource manager.])
-)
-
-AM_CONDITIONAL(XRM_RESOURCES, test x$xrm = xtrue)
-
-
-dnl
-dnl rcfile resources
-dnl
-AC_ARG_ENABLE(no_rcfile,
-[  --enable-no-rcfile      disables rcfile (~/.xxdiffrc) resources],
-AC_MSG_RESULT([xxdiff option: compiling without rcfile resources.]),
-AC_MSG_RESULT([xxdiff option: compiling with rcfile resources.])
-AC_DEFINE(XX_USE_RCFILE)
-)
-
-AM_CONDITIONAL(RCFILE_RESOURCES, test x$no_rcfile = xfalse)
-
-
-dnl
-dnl use of namespace
-dnl
-AC_ARG_ENABLE(namespace,
-[  --enable-namespace      enable the use of a clean namespace],
-AC_MSG_RESULT([xxdiff option: compiling with namespace.])
-AC_DEFINE(XX_USE_NAMESPACE),
-AC_MSG_RESULT([xxdiff option: compiling without namespace.])
-)
-
-
-dnl
-dnl inline vs. runtime help
-dnl
-AC_ARG_ENABLE(runtimehelp,
-[  --enable-runtimehelp    enable the runtime query for the man page],
-AC_MSG_RESULT([xxdiff option: compiling with runtime help.])
-AC_DEFINE(XX_USE_RUNTIME_HELP),
-AC_MSG_RESULT([xxdiff option: compiling with inline help.])
-)
 
 dnl
 dnl use STLport or libstdc++

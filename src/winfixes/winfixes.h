@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builder.inline.h 243 2001-10-02 06:44:22Z blais $
- * $Date: 2001-10-02 02:44:22 -0400 (Tue, 02 Oct 2001) $
+ * $Id: winfixes.h 226 2001-09-25 20:40:41Z blais $
+ * $Date: 2001-09-25 16:40:41 -0400 (Tue, 25 Sep 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -20,34 +20,30 @@
  *
  *****************************************************************************/
 
+#ifndef INCL_XXDIFF_WINFIXES
+#define INCL_XXDIFF_WINFIXES
 
-XX_NAMESPACE_BEGIN
-
-
-/*==============================================================================
- * CLASS XxBuilder
- *============================================================================*/
-
-//------------------------------------------------------------------------------
 //
-inline bool XxBuilder::hasErrors() const
-{
-   return !_errors.isEmpty();
+// This is REALLY lame, we should use std::min and std::max, but we have to
+// start portnig to Windoom at some point.
+//
+namespace std {
+
+#ifdef min
+#undef min
+#undef max
+#endif
+
+template <class T>
+T min( const T& a, const T& b ) {
+   if ( a < b ) { return a; } else { return b; }
 }
 
-//------------------------------------------------------------------------------
-//
-inline const QString& XxBuilder::getErrors() const
-{
-   return _errors;
+template <class T>
+T max( const T& a, const T& b ) {
+   if ( a > b ) { return a; } else { return b; }
 }
 
-//------------------------------------------------------------------------------
-//
-inline int XxBuilder::getStatus() const
-{
-   return _status;
 }
 
-
-XX_NAMESPACE_END
+#endif

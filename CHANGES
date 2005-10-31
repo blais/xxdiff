@@ -2,10 +2,56 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 216 2001-07-11 18:38:29Z blais $
+# $Id: CHANGES 254 2001-10-06 19:19:36Z blais $
 #
 
 Current development version:
+
+  Current tasks:
+    - port to windoze using mingw32 and publish executable
+
+
+------------------------------
+
+Version 1.14:
+
+   * We're pretty much (almost) std::string-free at this point.
+     I haven't addressed the many bug requests yet.
+   * Disabled buggy socket notification for editor subprocess.
+   * cleaned up all exceptions that takes strings:
+     - unified code for taking strings in base class
+     - all exceptions now takes special arguments
+   * Big QString unification takeover (over std::string):
+     - removed using namespace std where not needed
+     - reviewed all uses of c_str() and latin1()
+     - grepped for std::string in all of code, make sure none remains
+     - cleaned up some more strings business
+     - removed all string.h where I could
+     - ostream cleanup, use the Qt versions where you can do.
+   * fixed bug with clipboard text format widget
+   * removed as much std::string as was possible, moved all to QString
+   * Much more strings cleanup.
+   * Remove useless Xrm resources support.
+   * Removed silly configuration from configure.in.
+     We use tmake now anyway.
+   * Removed runtime help option b.s.
+   * Fixed it under IRIX, made both diff and diff3 available.
+   * Managed to get linked GNU diff output and diffs under Linux, still
+     broken under IRIX.
+   * More strings cleanup, not done yet.
+   * Finally linked together GNU diff and xxdiff, now working on supporting
+     internal diffs without fork to external program.
+   * Fixed error msg on [442465]
+   * Removed throw new calls [463709]
+   * More work in no process hack.
+   * Simple hack for diffutils to link with xxdiff.
+   * Moved to tmake in preparation for Windows port.
+     Tmake is simple and nice, although less portable.
+     I always hated the autoconf/automake mess anyway.
+     I'll move to Jam files eventually, that could be even nicer.
+   * More work for Windows port, what a pain in the butt it is.
+   * Just started Windows port using the non-commercial Qt for Windows.
+     (2001-09-24 22:00:15 blais)
 
 ------------------------------
 
@@ -760,6 +806,111 @@ Version 1.0:
 
 Wishlist/ToDo todo TODO list:
 ------------------------------
+
+
+
+
+
+
+
+Martin,
+
+I would like to contribute a small patch that warns the user during a 'copy
+to' or 'save as' operation if the destination file is read-only (owner
+doesn't have write permission).
+I have been bitten by this several times as I use xxdiff to merge changes
+into a file that has been 'chmod -w' by CVS.   When I would select all my
+differences from each file and then do a 'Save as (left/right)', I wouldn't
+see any error popup telling me that the save could not be performed.
+Also, I was confused by the wording of the menu for copying files from left
+to/from right.  So I changed one word "on" to the word "to".
+
+In thinking about this for a few more minutes, I can imagine that my patch
+is not totally robust.  For example, what if the owner doesn't have write
+permission, but the group/world does have write permission and you are in
+the proper group...  Maybe you can think of a better way to check for the
+user's ability to write to a file.  Anyway, here is my patch for your
+consideration:
+
+# diff -u xxdiff-1.13/src/app.cpp xxdiff-1.13.wsg/src/app.cpp
+--- xxdiff-1.13/src/app.cpp   Sat Jul  7 15:41:03 2001
++++ xxdiff-1.13.wsg/src/app.cpp    Thu Aug 23 09:56:46 2001
+@@ -1116,11 +1116,11 @@
+          _resources->getAccelerator(
+XxResources::ACCEL_DIFF_FILES_AT_CURSOR )
+       );
+       _menuids[ ID_View_CopyLeftToRight ] = viewMenu->insertItem(
+-         "Copy left file on right", this, SLOT(copyFileLeftToRight()),
++         "Copy left file to right", this, SLOT(copyFileLeftToRight()),
+          _resources->getAccelerator( XxResources::ACCEL_COPY_LEFT_TO_RIGHT
+)
+       );
+       _menuids[ ID_View_CopyRightToLeft ] = viewMenu->insertItem(
+-         "Copy right file on left", this, SLOT(copyFileRightToLeft()),
++         "Copy right file to left", this, SLOT(copyFileRightToLeft()),
+          _resources->getAccelerator( XxResources::ACCEL_COPY_RIGHT_TO_LEFT
+)
+       );
+       _menuids[ ID_View_RemoveLeft ] = viewMenu->insertItem(
+@@ -2448,6 +2448,14 @@
+    // Check for file existence.
+    QFileInfo finfo( f );
+    if ( finfo.exists() ) {
++      struct stat buf;
++      if ( stat( filename, &buf ) == 0  && (buf.st_mode & S_IWUSR) == 0 )
+{
++         QMessageBox* box = new XxSuicideMessageBox(
++            _mainWindow, "Error.", "Error -- You don't have write
+permission to target file.", QMessageBox::Warning
++         );
++         box->show();
++         return;
++      }
+       int resp = QMessageBox::warning(
+          _mainWindow, "xxdiff", "File exists, overwrite?",
+          "Ok", "Cancel", QString::null, 0, 1
+@@ -3167,6 +3175,13 @@
+
+       struct stat buf;
+       if ( stat( filedst.c_str(), &buf ) == 0 ) {
++         if ( (buf.st_mode & S_IWUSR) == 0 ) {
++            QMessageBox* box = new XxSuicideMessageBox(
++               _mainWindow, "Error.", "Error -- You don't have write
+permission to target file.", QMessageBox::Warning
++            );
++            box->show();
++            return;
++         }
+          int resp = QMessageBox::warning(
+             _mainWindow, "xxdiff", "File exists, overwrite?",
+             "Ok", "Cancel", QString::null, 0, 1
+
+
+
+PS> I have had some trouble in the past getting e-mail to go through to
+your iro.umontreal.ca account.  So I am shotgunning with all the possible
+addresses that I could find for you this time around. :)
+
+-------------------------------------------
+W. Scott Gaskins
+(919) 543-9863
+sgaskins@us.ibm.com
+IBM Bldg062/C215
+P.O. Box 12195 - YM6A/062
+3039 Cornwallis Rd
+RTP, NC 27709
+
+
+
+
+
+
+
+
+
+
+
+ - port to Windows using the Qt Non-commercial license
 
  - autoconf: rename configure.in to configure.ac when autoconf-2.50 becomes
    ubiquitous; 

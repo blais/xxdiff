@@ -6,28 +6,48 @@ Author: Martin Blais <blais@iro.umontreal.ca>
 
 Building from source:
 ------------------------------
+
+#
+# (1) compile the hacked diffutils objects
+#
+
+# ignore the link errors, they're normal, but all objects should compile cleanly
+
+
+cd xxdiff/diffutils
+./configure
+make -k
+
+
+#
+# (2) compile xxdiff itself
+#
+
 # You'll need g++-2.96 or higher, because of the STL that comes with it (the STL
 # that comes with 2.95.x is not sufficient).
+#
+# We use tmake, you'll need it, install the latest version if you can.
+# http://www.trolltech.com
 
-# Run automoc (you'll get a link error if you forget this).
-perl ./automoc
 
-# Configure for platform
-./configure
+cd xxdiff/src
+tmake -t xxdiff.t xxdiff.pro > Makefile
+
 
 # Compile
 make
 
+
 # Installling by hand.
 su - 
-cp src/xxdiff /usr/X11R6/bin
+install xxdiff/src/xxdiff /usr/X11R6/bin
 
 
 
 #
 # Compile warnings
 #
-You might get some of the following warnings, due to a bug in libstdc++ that
+You could get some of the following warnings, due to a bug in libstdc++ that
 comes with 2.96:
 
 In file included from stringResParser.cpp:35:
@@ -67,8 +87,9 @@ In the ports tree.
 
 SGI packaging:
 ------------------------------
-./configure ; make ; tools/release_dist
+make ; tools/release_dist
 #To install the SGI package you'll need fw_qt and it's prerequisites.
+
 
 # Installing from tardist package.
 inst -f xxdiff-<version>.mips.tardist

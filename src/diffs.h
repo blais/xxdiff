@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 202 2001-06-08 16:04:58Z blais $
- * $Date: 2001-06-08 12:04:58 -0400 (Fri, 08 Jun 2001) $
+ * $Id: diffs.h 245 2001-10-03 19:45:40Z blais $
+ * $Date: 2001-10-03 15:45:40 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -227,7 +227,7 @@ public:
       const std::auto_ptr<XxBuffer>* files,
       const bool                     useConditionals,
       const bool                     removeEmptyConditionals,
-      const std::string              conditionals[3]
+      const QString                  conditionals[3]
    ) const;
 
    // Save selected lines with an appropriate prefix.  Returns true if there
@@ -241,7 +241,7 @@ public:
    // diff lines where the text appears in either, and for each diff line, in
    // which file the line is found.
    void search( 
-      const char*                    searchText,
+      const QString&                 searchText,
       const int                      nbFiles,
       const std::auto_ptr<XxBuffer>* files
    );

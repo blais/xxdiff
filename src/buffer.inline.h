@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.inline.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: buffer.inline.h 243 2001-10-02 06:44:22Z blais $
+ * $Date: 2001-10-02 02:44:22 -0400 (Tue, 02 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,16 +34,16 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-inline const char* XxBuffer::getName() const
+inline const QString& XxBuffer::getName() const
 {
-   return _name.c_str();
+   return _name;
 }
 
 //------------------------------------------------------------------------------
 //
-inline const char* XxBuffer::getDisplayName() const
+inline const QString& XxBuffer::getDisplayName() const
 {
-   return _displayName.c_str();
+   return _displayName;
 }
 
 //------------------------------------------------------------------------------

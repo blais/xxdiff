@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: searchDialog.cpp 140 2001-05-22 07:30:19Z blais $
- * $Date: 2001-05-22 03:30:19 -0400 (Tue, 22 May 2001) $
+ * $Id: searchDialog.cpp 246 2001-10-04 00:32:54Z blais $
+ * $Date: 2001-10-03 20:32:54 -0400 (Wed, 03 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -70,8 +70,8 @@ XxSearchDialog::XxSearchDialog(
 void XxSearchDialog::onApply()
 {
    XxDiffs* diffs = _app->getDiffs();
-   const char* searchText = _lineeditSearchString->text().ascii();
-   if ( diffs != 0 && searchText != 0 ) {
+   const QString searchText = _lineeditSearchString->text();
+   if ( diffs != 0 && !searchText.isEmpty() ) {
       diffs->search( searchText, _app->getNbFiles(), _app->getFiles() );
    }
 }
@@ -80,8 +80,8 @@ void XxSearchDialog::onApply()
 //
 void XxSearchDialog::onGotoLine()
 {
-   const char* glinetext = _lineeditGotoLine->text().ascii();
-   int gline = atoi( glinetext );
+   bool ok;
+   int gline = _lineeditGotoLine->text().toInt( &ok );
    
    static int ind[3] = { 0, 2, 1 };
    XX_ASSERT( _comboGotoWhichFile->currentItem() < 3 );
@@ -96,3 +96,4 @@ void XxSearchDialog::onGotoLine()
 }
 
 XX_NAMESPACE_END
+

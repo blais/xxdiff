@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 181 2001-06-04 01:23:53Z blais $
- * $Date: 2001-06-03 21:23:53 -0400 (Sun, 03 Jun 2001) $
+ * $Id: lineNumbers.cpp 234 2001-09-30 19:44:09Z blais $
+ * $Date: 2001-09-30 15:44:09 -0400 (Sun, 30 Sep 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -118,8 +118,8 @@ void XxLineNumbers::drawContents( QPainter* pp )
    uint nbLines = 
       std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
 
-   char lnFormat[16];
-   ::snprintf( lnFormat, sizeof(lnFormat), "%%%dd", _app->getMaxDigits() );
+   QString lnFormat;
+   lnFormat.sprintf( "%%%dd", _app->getMaxDigits() );
 
    const int x = 0;
    int y = 0;
@@ -140,10 +140,9 @@ void XxLineNumbers::drawContents( QPainter* pp )
       int fline = line.getLineNo( _no );
       if ( fline != -1 ) {
 
-         const char* renderedNums = file->renderLineNumber( fline, lnFormat );
-         QString str( renderedNums );
-         
-         p.drawText( x, y + fm.ascent(), str );
+         const QString& renderedNums =
+            file->renderLineNumber( fline, lnFormat );
+         p.drawText( x, y + fm.ascent(), renderedNums );
       }
    }
 

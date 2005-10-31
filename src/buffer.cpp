@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 160 2001-05-28 14:39:15Z blais $
- * $Date: 2001-05-28 10:39:15 -0400 (Mon, 28 May 2001) $
+ * $Id: buffer.cpp 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -32,7 +32,7 @@
 #include <qrect.h>
 
 #include <iostream>
-#include <string>
+#include <string.h>
 #include <algorithm>
 #include <unistd.h>
 #include <stdio.h>
@@ -76,15 +76,6 @@ const char* strnchr( const char* s, int c, const char* end )
    return 0;
 }
 
-
-//------------------------------------------------------------------------------
-//
-bool compareStrings( const char* s1, const char* s2 ) 
-{
-   XX_CHECK( s1 != 0 && s2 != 0 );
-   return ::strcmp( s1, s2 ) < 0;
-}
-
 }
 
 
@@ -102,9 +93,9 @@ XX_NAMESPACE_BEGIN
 //------------------------------------------------------------------------------
 //
 XxBuffer::XxBuffer( 
-   const bool  passiveDummy, // ignored
-   const char* filename, 
-   const char* displayFilename
+   const bool     /*passiveDummy*/, // ignored
+   const QString& filename, 
+   const QString& displayFilename
 ) :
    _name( filename ),
    _displayName( displayFilename ),
@@ -120,10 +111,10 @@ XxBuffer::XxBuffer(
 //------------------------------------------------------------------------------
 //
 XxBuffer::XxBuffer( 
-   const char* filename, 
-   const char* displayFilename,
-   const bool  hideCR,
-   const bool  deleteFile
+   const QString& filename, 
+   const QString& displayFilename,
+   const bool     hideCR,
+   const bool     deleteFile
 ) :
    _name( filename ),
    _displayName( displayFilename ),
@@ -131,12 +122,12 @@ XxBuffer::XxBuffer(
    _temporary( deleteFile ),
    _buffer( 0 )
 {
-   XX_ASSERT( filename != 0 );
+   XX_ASSERT( !filename.isEmpty() );
 
    // Stat the file.
    struct stat ss;
-   if ( stat( _name.c_str(), &ss ) == -1 ) {
-      throw new XxIoError;
+   if ( stat( _name.latin1(), &ss ) == -1 ) {
+      throw XxIoError( XX_EXC_PARAMS );
    }
 
    if ( ! S_ISDIR( ss.st_mode ) ) {
@@ -165,18 +156,11 @@ XxBuffer::~XxBuffer()
 
    // Delete the temporary file if asked for.
    if ( _temporary == true ) {
-      unlink( _name.c_str() );
+      unlink( _name.latin1() );
    }
 
    if ( _renderBuffer != 0 ) {
       free( _renderBuffer );
-   }
-
-   // Cleanup string of directory entries.
-   for ( uint ii = 0; ii < _directoryEntries.size(); ++ii ) {
-      if ( _directoryEntries[ii] != 0 ) {
-         delete[] _directoryEntries[ii];
-      }
    }
 }
 
@@ -192,17 +176,17 @@ void XxBuffer::loadFile( struct stat& ss )
    _buffer = new char[ _bufferSize + 1 ];
 
    // Read file into buffer.
-   FILE* fp = fopen( _name.c_str(), "r" );
+   FILE* fp = fopen( _name.latin1(), "r" );
    if ( fp == 0 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
 
    if ( fread( _buffer, 1, _bufferSize, fp ) != _bufferSize ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
 
    if ( fclose( fp ) != 0 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
 
    // Add a final newline if there isn't one.  This will simplify indexing.
@@ -222,17 +206,16 @@ void XxBuffer::loadFile( struct stat& ss )
 
 //------------------------------------------------------------------------------
 //
-void XxBuffer::loadDirectory( struct stat& ss )
+void XxBuffer::loadDirectory( struct stat& /*ss*/ )
 {
    register struct dirent* next;
-   using namespace std;
 
-   std::vector<const char*> directoryEntries;
+   QStringList directoryEntries;
 
    /* Open the directory and check for errors.  */
-   register DIR* reading = opendir( _name.c_str() );
+   register DIR* reading = opendir( _name.latin1() );
    if ( !reading ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
    
    /* Read the directory entries, and insert the subfiles
@@ -247,47 +230,43 @@ void XxBuffer::loadDirectory( struct stat& ss )
          continue;
       }
          
-      char* newString = new char[ d_size + 1 ];
-      ::strncpy( newString, d_name, d_size );
-      newString[ d_size ] = 0;
+      QString newString;
+      newString.setLatin1( d_name, d_size );
 
-      XX_CHECK( newString != 0 && d_name != 0 && d_size > 0 );
-      directoryEntries.push_back( newString );
+      XX_CHECK( d_name != 0 && d_size > 0 );
+      directoryEntries.append( newString );
    }
    if ( errno ) {
       int e = errno;
       closedir( reading );
       errno = e;
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
 #if CLOSEDIR_VOID
    closedir( reading );
 #else
    if ( closedir( reading ) != 0 ) {
-      throw new XxIoError;
+      throw XxIoError( XX_EXC_PARAMS );
    }
 #endif
 
-   std::sort(
-      directoryEntries.begin(),
-      directoryEntries.end(),
-      compareStrings
-   );
-
+   directoryEntries.sort();
    setDirectoryEntries( directoryEntries );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxBuffer::setDirectoryEntries( 
-   const std::vector<const char*>& directoryEntries 
+   const QStringList& directoryEntries 
 )
 {
    _directoryEntries = directoryEntries;
 
    _bufferSize = 0;
-   for ( uint ii = 0; ii < _directoryEntries.size(); ++ii ) {
-      _bufferSize += ::strlen( _directoryEntries[ii] ) + 1;
+   for ( QStringList::Iterator it = _directoryEntries.begin(); 
+         it != _directoryEntries.end();
+         ++it ) {
+      _bufferSize += (*it).length() + 1;
    }
 
    // Allocate buffer.
@@ -295,9 +274,11 @@ void XxBuffer::setDirectoryEntries(
    _buffer = new char[ _bufferSize + 1 ];
    
    char* bufferPtr = _buffer;
-   for ( uint ii = 0; ii < _directoryEntries.size(); ++ii ) {
-      int len = ::strlen( _directoryEntries[ii] );
-      ::strncpy( bufferPtr, _directoryEntries[ii], len );
+   for ( QStringList::Iterator it = _directoryEntries.begin(); 
+         it != _directoryEntries.end();
+         ++it ) {
+      int len = (*it).length();
+      ::strncpy( bufferPtr, (*it).latin1(), len );
       bufferPtr[len] = '\n';
       bufferPtr += len + 1;
    }
@@ -499,25 +480,27 @@ uint XxBuffer::getNbDigits() const
 
 //------------------------------------------------------------------------------
 //
-const char* XxBuffer::renderLineNumber( 
-   const XxFln lineNumber,
-   const char* format
+const QString& XxBuffer::renderLineNumber( 
+   const XxFln    lineNumber,
+   const QString& format
 )
 {
-   ::snprintf( _lnBuffer, sizeof(_lnBuffer), format, lineNumber );
+   _lnBuffer.sprintf( format, lineNumber );
    return _lnBuffer;
 }
 
 //------------------------------------------------------------------------------
 //
-bool XxBuffer::searchLine( const XxFln lineno, const char* searchText ) const
+bool XxBuffer::searchLine( const XxFln lineno, const QString& searchText ) const
 {
+   // FIXME this is not thread-safe because we're modifying the text buffer
+   // temporarily.  Implement your own strnstr without copying.
    bool found = false;
    uint len;
    char* text = const_cast<char*>( getTextLine( lineno, len ) );
    char endchar = text[len];
    text[len] = '\0';
-   if ( strstr( text, searchText ) != 0 ) {
+   if ( ::strstr( text, searchText.latin1() ) != 0 ) {
       found = true;
    }
    text[len] = endchar;
@@ -528,28 +511,30 @@ bool XxBuffer::searchLine( const XxFln lineno, const char* searchText ) const
 //
 bool XxBuffer::isDirectory() const
 {
-   return _directoryEntries.size() > 0;
+   return !_directoryEntries.isEmpty();
 }
 
 //------------------------------------------------------------------------------
 //
-const std::vector<const char*>& XxBuffer::getDirectoryEntries() const
+const QStringList& XxBuffer::getDirectoryEntries() const
 {
    return _directoryEntries;
 }
 
 //------------------------------------------------------------------------------
 //
-std::string XxBuffer::getFileAtLine( 
+QString XxBuffer::getFileAtLine( 
    const XxFln lineno
 ) const
 {
-   std::string filename( _name );
-   if ( filename[ filename.length()-1 ] != '/' ) {
+   QString filename = _name;
+   if ( filename.constref( filename.length()-1 ) != '/' ) {
       filename.append( "/" );
    }
    
-   XX_ASSERT( lineno - 1 < XxFln(_directoryEntries.size()) );
+   XX_CHECK( lineno - 1 < XxFln(_directoryEntries.count()) );
+
+   // Note: QStringList O(n) lookup.
    filename.append( _directoryEntries[ lineno - 1 ] );
    return filename;
 }

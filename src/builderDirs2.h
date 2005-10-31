@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: builderDirs2.h 250 2001-10-04 19:56:59Z blais $
+ * $Date: 2001-10-04 15:56:59 -0400 (Thu, 04 Oct 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -44,11 +44,6 @@
 #define INCL_STD_MEMORY
 #endif
 
-#ifndef INCL_STD_STRING
-#include <string>
-#define INCL_STD_STRING
-#endif
-
 #ifndef INCL_STD_STDIO
 #include <stdio.h>
 #define INCL_STD_STDIO
@@ -90,11 +85,11 @@ public:
    // newly allocated XxDiffs object.  However, there might be warnings, so you
    // may want to check hasErrors() if you want to display those.
    std::auto_ptr<XxDiffs> process(
-      const char* command,
-      const char* path1,
-      XxBuffer*   buffer1,
-      const char* path2,
-      XxBuffer*   buffer2
+      const QString& command,
+      const QString& path1,
+      XxBuffer*      buffer1,
+      const QString& path2,
+      XxBuffer*      buffer2
    );
 
 private:
