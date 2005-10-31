@@ -1,0 +1,559 @@
+
+
+                                   xxdiff
+
+This is the home page of xxdiff, a graphical file comparator and merge tool.
+
+   * News, changes and wishlist
+   * Download
+   * Requirements
+   * Screenshots
+   * Documentation
+   * FAQ
+
+----------------------------------------------------------------------------
+Requirements
+
+NEWS: As of version 1.1, you don't need libstdc++-3 anymore. xxdiff now uses
+STLport and comes statically linked to both STLport and Qt-2.0.2.  That
+should ease distribution.
+
+
+For running xxdiff (download the binary, tar.gz or .rpm if available):
+
+   * A diff program (for example, GNU diffutils at
+     ftp://prep.ai.mit.edu/pub/gnu).
+
+Note: xxdiff does not run on windows, but could be easily ported to.  If
+you're interested in doing this leave the author a note, I'll provide
+directions.
+
+
+For compiling xxdiff (download the source):
+
+xxdiff has been written in relatively recent ANSI C++, you will most likely
+need a very recent compiler to deal with it, and a good STL library.  I use
+STLport under Linux.  xxdiff is known to compile with egcs-2.95.2 and SGI
+MIPSpro 7.3.1.1m.  It uses the libtool/automake/autoconf (./configure)
+famility of tools so it should be relatively easy to compile on other
+platforms.
+
+   * An STL library:
+        o under Linux: STLport (note: you will NOT be able to compile it
+          using libstdc++)
+        o under IRIX:  the SGI STL library as of compiler MIPSpro 7.3.
+   * A recent C++ compiler:
+        o under Linux: egcs-2.95.1 or higher
+        o under IRIX: MIPSpro 7.3 or higher
+
+----------------------------------------------------------------------------
+Screenshots
+
+   * A shot at version 1.0 of the original xdiff
+   * A shot at xxdiff on start-up, with the same files
+   * A shot at xxdiff 1.2, and one with annotations
+
+----------------------------------------------------------------------------
+Documentation
+
+There are three sources of documentation/help for xxdiff:
+
+   * The simple man page that comes with it (available through the `help'
+     menu or if properly installed on your system by running `man xxdiff');
+   * On context help, by using the related help menu item;
+   * Web documentation.
+
+----------------------------------------------------------------------------
+xxdiff FAQ
+
+-What is xxdiff?
+
+xxdiff is a file comparator and merge tool.  It is an open-source
+replacement for Rudy Wortel's xdiff which comes with SGI machines (which was
+itself inspired by SGI's gdiff).  The aim for version 1.0 of xxdiff was to
+contain most of the features that are present in xdiff-1.0, and to be
+compatible on the command line (e.g. for code review scripts that have been
+written with xdiff in mind).
+
+-What would I use such a program for?
+
+xxdiff can be used to graphically display differences between two
+(eventually three) files.  It can also be used to merge two files together,
+by allowing the user to select regions and save the results of the
+selection.  It is also an aid in code reviewing, as it allows a reviewer to
+look at the pieces of changed code and save selected portions of the code to
+an editor to make comments (horizontal diffs make reviewing much easier,
+especially for a long list of files).
+
+-Why another graphical diff viewer?  Did you look at other similar programs?
+
+From the author: I wanted to add features to xdiff.  I had found mgdiff,
+which I wasted some time modifying to some extent to have the same features
+as xdiff but the licensing prevents me from distributing it as GNU GPL,
+which I think is important.  Plus that old C code was getting out of hand so
+a nice C++ rewrite was in order.  All the other free graphical diff programs
+were either missing some features or were tied to a desktop environment, or
+were in unstable shape. xxdiff is desktop agnostic, it will run anywhere
+that Qt and GNU diff do, as long as you can compile ANSI C++.
+
+The following other visual diff programs were evaluated before deciding to
+produce xxdiff:
+
+   * xdiff, on SGI machines (the original)
+   * xcleardiff (with ClearCase)
+   * mgdiff
+   * kdiff  (the KDE desktop visual diff program)
+   * gtkdiff  (the Gnome visual diff program)
+   * tkdiff  (a visual diff program using tcl/tk)
+   * emacs ediff
+   * mxdiff-1.1
+   * windiff
+
+I have also since then seen the following:
+
+   * jdiff
+   * Sun's FileMerge
+
+Update!  There is a new closed-source version of the original xdiff by Rudy
+Wortel at http://reality.sgi.com/rudy/xdiff/ .  xdiff contains some of the
+functionality on the wishlist of xxdiff (you might want to give it a try).
+However since from version 1.1 xxdiff has departed from the feature set of
+xdiff.  Some differences are:
+
+   * xdiff has been added editing features. xxdiff will not become an
+     editor--for emacs is just irreplaceable--but there will be features to
+     allow tagging of conflictual regions when saving.  You can then go edit
+     your file with your favorite program.  This is IMO a better way to deal
+     with rare conflicts.  See web documentation for more details;
+   * xdiff can merge up to 5 files simulataneously.  xxdiff will not support
+     more than 3 files (three-way diffs).  I find there is usually not
+     enough screen space for this to be really useful, and that it is not
+     necessary to merge all the files simulataneously (it is complex enough
+     for a user to merge three files efficiently).  Besides it is generally
+     much easier to merge a series of revisions incrementally, and there is
+     no commandline diff program that I know of that does more than three
+     (probably for the same reason).
+
+-Will you integrate the new features of later versions of xdiff into xxdiff?
+
+Partly yes, partly no.  There will be new features added to xxdiff, some of
+which are similar to the ones in xdiff-3.4, most not (see notes above).
+They only match at version 1.0 (respectively).
+
+-What are the licensing terms for xxdiff?
+
+xxdiff is freely distributed under the GNU General Public License.
+
+-Where can I get xxdiff?
+
+You can get it at http://xxdiff.sourceforge.net, which is the official home
+page of xxdiff.
+
+-What is the latest version of xxdiff?
+
+See CHANGES file at http://xxdiff.sourceforge.net/download/CHANGES.
+
+-What platforms does it work on?
+
+xxdiff is has been developed and is known to compile and work under the
+following platforms:
+
+   * Linux (RedHat-6.0 distribution)
+        o compiler: egcs-2.95.1
+        o STL: libstdc++-3
+        o Qt version: 2.0.2
+   * SGI IRIX 6.5
+        o compiler: MIPSpro 7.3
+        o STL: SGI STL (the one that comes with 7.3.1)
+        o Qt version: 2.0.2
+
+If you succesfully compile xxdiff on other platforms, send me a binary and
+I'll distribute it on the home page.  If you have problems compiling xxdiff,
+make sure you have a very recent C++ compiler and a very recent STL library
+(try STLport http://www.stlport.org).
+
+-What algorithm does xxdiff use?
+
+xxdiff spawns a diff command and parses the results from it.  You can choose
+your favorite diff program via the resources (eventually from the command
+line too).  It doesn't require  GNU diff specifically, it works fine with
+SGI diff for example.
+
+-Why are the key bindings different than those of xdiff?
+
+Many of the very common emacs bindings default in xxdiff.  Some of those
+were in conflict with the ones that xdiff provides.
+
+-Can I customize the keys? How do I do this?
+
+Although this program is built on the Qt toolkit (http://www.troll.no) which
+does not provide a resources/preferences mechanism, some resources are
+supported independently.
+
+   * Xresources (through the display (Xrm), .Xdefaults or an
+     app-defaults/Xxdiff file) were first implemented.  However, the
+     binaries I distribute now do not include it, because I'd rather have
+     everyone use the rcfile resources;
+   * rcfile resources (~/.xxdiffrc or specified by XXDIFFRC environment
+     variable) are the preferred way of customizing xxdiff.
+
+It made it very easy in the code to support other types of resources, such
+as gnome- or kde-specific resources.  I'll get to it some day.
+
+-Can xxdiff deal with directory diffs?
+-Does xxdiff support three-way diffs?
+
+Not yet, but those features are definitely on the wishlist.
+
+-What features of xxdiff are new since version 1.0?
+
+See CHANGES file for more details.
+
+   * A view of the merged file (merged view);
+   * Automatic addition of annotation on cut-n-paste (for merge comments);
+   * Horizontal diffs;
+   * More customization dialogs;
+   * The way in which splitting a region is done is more flexible: you can
+     unsplit, and the order of splitting can be changed;
+   * Global selection of unselected regions only;
+   * Display of filenames and current line number (like mgdiff);
+   * Color legend (like mgdiff);
+   * There is an extra color for blank lines in regions that are different.
+     By default these lines are the same color as for differing lines (like
+     xdiff);
+   * The "save selected only" feature;
+   * Clicking on a region puts it in the cut buffers for cut-n-paste;
+   * Pressing Control and clicking deletes both regions.
+
+-xxdiff crashed on me... where do I submit a bug report?
+
+Bug reports should be submitted to the author at
+blais@users.sourceforge.net, preferably with "xxdiff bug report" in the
+subject line, and with as much info as you can to allow the author to
+reproduce the bug (if you can, providing the diff'ed files could help a lot
+too).  You can also use the web-based bug tracking system at the SourceForge
+xxdiff project page at http://sourceforge.net/project/?group_id=2198.
+
+-Is there a mailing-list for new releases?
+
+Yes.  You can subscribe/unsubscribe and access an archive at
+
+http://lists.sourceforge.net/mailman/listinfo/xxdiff-announce
+
+-Who is to blame for xxdiff?
+
+The author is Martin Blais <blais@iro.umontreal.ca>.
+
+-I want to contribute... where do I start?
+
+Well, look at the wishlist, and contact the author, we can organize
+something (maybe the feature you really really want is already implemented
+in his local directory and he just hasn't had time to put it in here yet,
+although he'll try to update the site as often as possible, that can still
+happen).
+----------------------------------------------------------------------------
+
+
+
+                            xxdiff documentation
+
+This documentation is intended as a tutorial to introduce the features of
+xxdiff while showing how to use it to perform certain tasks, rather than a
+full feature-by-feature documentation (most features should be obvious
+enough anyway).  This document will reflect the latest developer version of
+xxdiff and may document features not yet available in the latest released
+version.
+
+   * Reviewing file revisions;
+   * Merging files;
+   * Merging three files;
+   * Making comments on file revisions (``merge-police'' or ``merge-cop'');
+   * Looking at the merged output;
+   * Using xxdiff as a short-lived application;
+   * Customizing xxdiff
+
+Reviewing file revisions
+
+Invocation
+
+xxdiff can be used to visualize chnges between file revisions.  Just call
+xxdiff with the desired filenames, i.e.:
+
+     xxdiff <filename1> <filename2>
+
+or from stdin
+
+     cat <filename1> | xxdiff - <filename2>
+
+A window that looks somewhat like this should appear.  It shows the two
+files side-by-side, color coded by regions.  Each of these regions are
+called "hunks".  Here are the types of hunks:
+
+   * IGNORE hunks (pale grey): regions of text which are the same in all
+     files;
+   * CHANGE hunks (yellow): regions whose text is not the same.  There is
+     text in both files, not necessarily the same number of lines.  Notice
+     that in the case where the texts don't have the same number of lines
+     some lines are added to align the regions vertically.  These lines are
+     only added for display purposes (toggling the line numbers will clearly
+     highlight that). These blank filling lines can be made more obvious by
+     customizing the colors of the regions.
+   * INSERT_LEFT (DELETE) or INSERT_RIGHT (green/dark grey): regions which
+     have text only in one file.  If these are file revisions, you could say
+     that text has been either added or deleted.
+
+Note that each CHANGE or INSERT hunk is always separated by an IGNORE hunk
+(if it was not the case, then two different contiguous hunks would
+necessarily get merged into a single CHANGE hunk).
+
+The overview area
+
+To the right of the window there is a pictorial representation of the whole
+set of files, using the same color codes as the main text areas.  This area
+is meant to give an overview of where the changes are over the whole file
+length, and what portion the text areas are displaying.
+
+Moving around
+
+xxdiff supports a subset of the emacs bindings, as well and the standard
+keys found on AT keyboards (PgUp, PgDown, arrow keys, Home, End).  These
+are:
+
+   * Ctrl-v, Alt-v: scroll up/down
+   * Ctrl-n, Ctrl-p: move cursor one line up/down
+   * Home, End: move cursor to beginning/end of files
+   * n, p: move to next/previous diff hunk
+   * b, o: mov the next/previous unselected diff hunk
+
+Using the third mouse button also brings a popup menu to navigate between
+hunks.
+
+Searching
+
+Searching is invoked with Ctrl-s.  Type your search query and press enter,
+and you can then navigate the matches using Ctrl-f and Ctrl-b.  Searching
+will occur in all files simulateneously.  The match locations are indicated
+in the overview area as white diamonds.
+
+Horizontal diffs
+
+xxdiff can display horizontal markers to highlight where the differences
+start and end on a single line.  This is obviously only valid for CHANGE
+lines, where there is text on both sides. Those are great for bringing out
+small differences, e.g. a comma that was added to a file.
+
+The algorithm that highlights the horizontal diffs can be stated quite
+simply: from the beginning (end) of the two lines, find the first character
+that differs and set that as the marker.  There will eventually be more
+interesting horizontal diffs algorithms added to xxdiff.
+
+Options
+
+There are a few options available from the "option" menu:
+
+   * You can toggle the display of line numbers;
+   * You can toggle the display of the overview area;
+   * You can toggle the display of filenames over the text areas on and
+     off.  However note that if your window manager can display titlebars
+     the titlebar for the window should have been set to the two filenames;
+   * You can toggle horizontal diffs display on and off (some people may
+     find it too distracting);
+   * You can toggle cut-and-paste annotations on and off.  Setting this
+     option to true will add the filename and line numbers to the clipboard
+     when copying hunks (see section on making comments).
+
+The tab width can be set to an arbitrary value using the tab dialog.
+Pressing "4" or "8" is are shortcuts for quickly changing the tab setting.
+
+See customization section on how to have these options be set by default.
+
+Redoing the diffs
+
+If a file has been changed and there is need to recompute the diffs, invoke
+the "redo diff" command from the edit menu.  The arguments used with the
+surrogate diff command can be changed by using the dialog provided by the
+"diff arguments" command.  One can also replace a loaded file with a
+different one by using the "open" commands from the "file" menu.
+
+Merging files
+
+To merge files, the user has to decide for each diff hunk which file has the
+desired content for the merged output.  This is carried out with the
+selection commands described below.
+
+Making selections
+
+Clicking on a diff hunk with the first button on either side selects that
+side for the whole diff hunk.  Shift-clicking will remove the selection and
+hunk and Ctrl-clicking will select neither side (both sides will be marked
+as deleted).  Selected sides of hunks are colored pink by default.
+
+To select individual lines, use the second mouse button.  The same Shift-
+and Ctrl- modifiers apply.
+
+To select regions using the keyboard you can use the "h", "j", "k" and "u"
+keys.  This can be used efficiently with the "n" and "p" keys to move
+between regions.  Shift- selection will select lines and Ctrl-Alt- selection
+will perform global selections.  The "global" menu also has commands to
+select all unselected regions to something.
+
+Selecting lines from both sides
+
+Selecting both sides of a CHANGE region can be done by splitting it in two
+and then applying appropriate selections to each new hunk independently.
+Invoking the "split/swap/merge" command by pressing "s" while the cursor is
+on a diff hunk will first split the hunk.  Invoking it again will swap the
+order of the regions.  Invoking it one more time will merge back the two
+contiguous regions together.  If selections are compatible they will be kept
+throughout this process.
+
+Saving the merged output
+
+To save the merged file, use the "file" menu save commands.  "save as left"
+and "save as right" commands are shortcuts for selecting the output
+filename.  The "save selected only" command will save an annotated list of
+selected diff hunks only (see section on making comments).
+
+Trying to save while some regions are still unselected will bring the cursor
+to the first unselected region and ask confirmation to save with unselected
+region pending.  This will insure that the user has made all the required
+decisions before saving and that no text will be forgotten.
+
+If the user specifies to save anyway, file contents from all files will be
+included for unselected regions, with appropriate markers similar to those
+added by the UNIX "merge" command or the cvs update process.  This is needed
+when it is impossible to make appropriate merge decisions with the limited
+editing capabilities of xxdiff.  You can then open the incompletely merged
+file with your favorite editor and look for the markers to resolve the
+conflict.
+
+Merging all diffs sequentially
+
+Some people like to merge files within a guided process, where the visual
+diff program asks for a merge decision for each conflictual hunk one-by-one
+and then asks for a filename to use for saving the merged output.  For
+example, that is now ClearCase's xcleardiff works when querying the user to
+resolve conflicts.
+
+Implementing this scheme requires the users's attention and his decision
+before he can do anything else. While the author believes that such an
+approach is similar with the way many Windows programs require immediate
+user's attention and should be avoided if possible, a completely equivalent
+mechanism is provided for those users desiring this feature: specialized
+"select XXX and next" commands are provided (accessed as Ctrl- selection
+commands), that apply a selection decision to a hunk and automatically moves
+to the next unselected diff hunk for the next action.  These specialized
+commands wrap around the file if they reach the end.  If all the decisions
+have been made when invoking the last of those commands the user will be
+prompted for a filename.
+
+The advantage of this mechanism is that the user can interrupt the process
+at any time to go observe other parts of the file and perform other tasks,
+i.e. there is no special "mode" and is more inline with the philosophy of
+leaving the user in control of the process.
+
+Making comments on file revisions (``merge-police'' or ``merge-cop'')
+
+Selecting a hunk or a line puts the selected text (only the selected side)
+in the clipboard for cut-and-paste action.  If the "cut-and-paste
+annotation" option is true, the filename where the text comes from and line
+numbers will be added to the hunk contents.  This feature is very useful
+when making merge review comments and needing to insert some code in
+explanation text.
+
+If the filename labels are displayed, clicking on those will put the
+filenames in the clipboard to.  This can be useful when using ClearCase
+revisions, which often have very long p-names.
+
+Merging three files
+
+This feature is not yet supported (coming soon).
+
+Looking at the merged output
+
+It is possible to visualize the merged output file in a dedicated window by
+invoking the "merged view" command from the "options" menu.  This view will
+scroll to match the main display.  Unselected regions are shown in this view
+with oblique lines ("in construction" style), and merge decisions are softly
+highlighted with a slightly different shade of grey.  This output allows one
+to review the merge decisions before saving the file to output.
+
+xxdiff is not a file editor
+
+There has been a conscious decision not to develop xxdiff into a
+full-features editing program.  Sometimes it could be handy to be able to
+edit a few lines of a difficult conflict.  However, that is a task best left
+to your own favorite editing program.  Besides, there are enough lame
+editors out there anyway, the author felt making another one should be
+avoided.
+
+Note: there might eventually be a command to spawn an editor to perform
+modifications and then resume merging differences.
+
+Using xxdiff as a short-lived application
+
+xxdiff has not been designed to be used over multiple sets of files over the
+course of one execution--that is, it has been built with the idea that you
+would launch it over a set of two or three files, use it (merge-policing or
+merging and saving the files), then exit, rather than open new files again
+using the `file' menu features.  The `file' menu features are provided as a
+convenience, it can sometimes be useful to change one of the files during
+one execution.  xxdiff will typically be called from the command line from a
+loop over a set of files, or by a script.
+
+That is the reason why you can't open xxdiff with just one file.  It is just
+not useful this way.  However, this would be simple enough to do and this
+feature will be added (for those who would like to use it like that).
+
+Customizing xxdiff
+
+An extendable resource mechanism is implemented in xxdiff.  At first, X
+resources support (Xrm) were implemented since the Qt toolkit does not
+provide a more general resources mechanism itself.  Then, an rcfile
+mechanism was implemented which is now the preferred way of customizing
+xxdiff (distributed binaries will now by default only support this
+mechanism).
+
+When invoking xxdiff, the program checks for the value of the environment
+variable XXDIFFRC or, if not present, the file ~/.xxdiffrc in the user's
+home directory.  This file can contain
+
+<resource name>: <value>\n
+
+pairs to customize specific options.  Lines starting with # will be ignored
+as comments.  For a complete description of resources there will soon be an
+option to generate a sample rcfile automatically, along with inline
+documentation (I'd like to be able to document it in a single place since
+I'm adding a lot of those).  If you're into it, check out the source code in
+file resources.cpp for a list of options.
+
+Compilation options
+
+Type ./configure --help to consult the specific compilation options that
+xxdiff provides.
+
+Invoking xxdiff with the -v option will output the compilation options that
+this binary was built with, e.g.:
+
+racunalnik:~$ xxdiff -v
+xxdiff - version 1.2
+Compile options: linkstatic xrm rcfile.
+
+Here are those options:
+  --enable-debug         turn on debugging
+  --enable-linkstatic    restricts linking to static STLport and Qt libs
+  --enable-xrm           enable X resource manager support
+  --enable-rcfile        enable rcfile (i.e. ~/.xxdiffrc) resources
+  --enable-namespace     enable the use of a clean namespace
+  --enable-runtimehelp   enable the runtime query for the man page
+
+Installable distributed binaries should be compiled with the following
+options only:
+
+./configure --enable-linkstatic --enable-rcfile
+
+----------------------------------------------------------------------------
+
+Author: blais@users.sourceforge.net
+Official version at http://xxdiff.sourceforge.net/documentation.html
+

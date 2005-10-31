@@ -1,0 +1,146 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src/defs.h)
+AM_INIT_AUTOMAKE(xxdiff,1.8)
+AM_PROG_LIBTOOL
+
+dnl According to doc, this is required for compiler-specific behaviour but it
+dnl seems to work without anyway.
+dnl AC_CANONICAL_SYSTEM
+
+AC_PROG_MAKE_SET
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_PROG_YACC
+AM_PROG_LEX
+
+AC_PATH_QT_MOC
+
+dnl Checks for libraries +
+dnl Checks for C compiler flags that X needs and the X linker flags
+AC_PATH_XTRA
+CFLAGS="$CFLAGS $X_CFLAGS"
+LDFLAGS="$LDFLAGS $X_LIBS"
+dnl AC_SUBST(LDFLAGS)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_HEADER_DIRENT
+AC_HEADER_STAT
+AC_TYPE_SIGNAL
+dnl AC_REPLACE_GNU_GETOPT
+
+AC_CHECK_HEADERS(limits.h unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for library functions.
+AC_CHECK_FUNCS(strdup strerror strstr)
+
+
+dnl
+dnl Automake does not let us have GNU make conditionals inside Makefile.am
+dnl so we've got to use automake conditionals instead, which have to be 
+dnl declared here.
+dnl 
+AM_CONDITIONAL(IS_COMPILER_GCC, test x$CXX = xg++)
+
+AM_CONDITIONAL(IS_COMPILER_MIPSPRO,
+test x$build_alias = xmips-sgi-irix6.5)
+
+AM_CONDITIONAL(IS_COMPILER_SUNWSPRO,
+test x$build_alias = xsparc-sun-solaris2.8)
+
+AM_CONDITIONAL(IS_COMPILER_COMPAQCXX,
+echo $build_alias | grep -q '\-osf' && $CXX -V | grep -q Compaq)
+
+dnl
+dnl xxdiff options
+dnl
+
+dnl
+dnl debug option
+dnl
+AC_ARG_ENABLE(debug,
+[  --enable-debug          turn on debugging],
+[case "${enableval}" in
+yes) debug=true ;;
+no)  debug=false ;;
+*) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+esac
+AC_MSG_RESULT([xxdiff option: debugging is on.])
+AC_DEFINE(XX_DEBUG)],
+[debug=false
+AC_MSG_RESULT([xxdiff option: debugging is off.])])
+
+AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
+
+
+dnl
+dnl static vs. dynamic linking
+dnl
+AC_ARG_ENABLE(linkstatic,
+[  --enable-linkstatic     restricts linking to static STLport and Qt libs],
+[case "${enableval}" in
+yes) linkstatic=true ;;
+no)  linkstatic=false ;;
+*) AC_MSG_ERROR(bad value ${enableval} for --enable-linkstatic) ;;
+esac
+AC_MSG_RESULT([xxdiff option: linking statically to STLport and Qt.])]
+AC_DEFINE(XX_LINKSTATIC),
+[linkstatic=false
+AC_MSG_RESULT([xxdiff option: linking dynamically to STLport and Qt.])])
+
+AM_CONDITIONAL(LINKSTATIC, test x$linkstatic = xtrue)
+
+
+dnl
+dnl xrm resources
+dnl
+AC_ARG_ENABLE(xrm,
+[  --enable-xrm            enable X resource manager support],
+AC_MSG_RESULT([xxdiff option: compiling with X resource manager.])
+AC_DEFINE(XX_USE_XRM),
+AC_MSG_RESULT([xxdiff option: compiling without X resource manager.])
+)
+
+AM_CONDITIONAL(XRM_RESOURCES, test x$xrm = xtrue)
+
+
+dnl
+dnl rcfile resources
+dnl
+AC_ARG_ENABLE(no_rcfile,
+[  --enable-no-rcfile      disables rcfile (~/.xxdiffrc) resources],
+AC_MSG_RESULT([xxdiff option: compiling without rcfile resources.]),
+AC_MSG_RESULT([xxdiff option: compiling with rcfile resources.])
+AC_DEFINE(XX_USE_RCFILE)
+)
+
+AM_CONDITIONAL(RCFILE_RESOURCES, test x$no_rcfile = xfalse)
+
+
+dnl
+dnl use of namespace
+dnl
+AC_ARG_ENABLE(namespace,
+[  --enable-namespace      enable the use of a clean namespace],
+AC_MSG_RESULT([xxdiff option: compiling with namespace.])
+AC_DEFINE(XX_USE_NAMESPACE),
+AC_MSG_RESULT([xxdiff option: compiling without namespace.])
+)
+
+
+dnl
+dnl inline vs. runtime help
+dnl
+AC_ARG_ENABLE(runtimehelp,
+[  --enable-runtimehelp    enable the runtime query for the man page],
+AC_MSG_RESULT([xxdiff option: compiling with runtime help.])
+AC_DEFINE(XX_USE_RUNTIME_HELP),
+AC_MSG_RESULT([xxdiff option: compiling with inline help.])
+)
+
+
+AC_OUTPUT(Makefile src/Makefile)

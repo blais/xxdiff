@@ -1,0 +1,525 @@
+/******************************************************************************\
+ * $Id: merged.cpp 2 2000-09-15 02:19:22Z blais $
+ * $Date: 2000-09-14 22:19:22 -0400 (Thu, 14 Sep 2000) $
+ *
+ * Copyright (C) 1999, 2000  Martin Blais <blais@iro.umontreal.ca>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *****************************************************************************/
+
+/*==============================================================================
+ * EXTERNAL DECLARATIONS
+ *============================================================================*/
+
+#include <merged.h>
+#include <text.h>
+#include <app.h>
+#include <resources.h>
+#include <diffs.h>
+#include <buffer.h>
+
+#include <qscrollview.h>
+#include <qpainter.h>
+#include <qbrush.h>
+#include <qpen.h>
+#include <qcolor.h>
+#include <qpopupmenu.h>
+#include <qmenubar.h>
+#include <qlayout.h>
+
+#include <qapplication.h>
+#include <qclipboard.h>
+
+#include <math.h>
+#include <stdio.h>
+#include <iostream> // FIXME remove
+
+
+XX_NAMESPACE_BEGIN
+
+/*==============================================================================
+ * PUBLIC FUNCTIONS
+ *============================================================================*/
+
+/*==============================================================================
+ * CLASS XxMergedWindow
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxMergedWindow::XxMergedWindow( 
+   XxApp*      app, 
+   QWidget*    parent, 
+   const char* name 
+) :
+   QMainWindow( parent, name )
+{
+   const XxResources* resources = XxResources::getInstance();
+
+   QPopupMenu* menu = new QPopupMenu;
+   menu->insertItem( 
+      "Close", this, SLOT(hide()),
+      resources->getAccelerator( XxResources::ACCEL_MERGED_CLOSE )
+   );
+
+   QMenuBar* m = menuBar();
+   m->setSeparator( QMenuBar::InWindowsStyle );
+   m->insertItem( "W&indow", menu );
+
+
+   QWidget* centralWidget = new QWidget( this );
+   QVBoxLayout* vlayout = new QVBoxLayout( centralWidget );
+   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+
+   _merged = new XxMerged( this, app, centralWidget );
+   hlayout->addWidget( _merged );
+
+   _vscroll = new QScrollBar( centralWidget );
+   _vscroll->setFixedWidth( 20 );
+   hlayout->addWidget( _vscroll );
+
+   _hscroll = new QScrollBar( Qt::Horizontal, centralWidget );
+   _hscroll->setFixedHeight( 20 );
+
+   vlayout->addWidget( _hscroll );
+
+   connect( _vscroll, SIGNAL(valueChanged(int)),
+            _merged, SLOT(verticalScroll(int)) );
+   connect( _hscroll, SIGNAL(valueChanged(int)),
+            _merged, SLOT(horizontalScroll(int)) );
+
+   // Track application's scrolling window.
+   connect( app, SIGNAL(cursorChanged(int)), 
+            this, SLOT(appCursorChanged(int)) );
+   connect( app, SIGNAL(scrolled(int)), this, SLOT(appScrolled(int)) );
+
+   setCentralWidget( centralWidget );
+}
+
+//------------------------------------------------------------------------------
+//
+QScrollBar* XxMergedWindow::getHorizontalScrollbar()
+{
+   return _hscroll;
+}
+
+//------------------------------------------------------------------------------
+//
+QScrollBar* XxMergedWindow::getVerticalScrollbar()
+{
+   return _vscroll;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::update()
+{
+   QMainWindow::update();
+   _merged->update();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::appCursorChanged( int cursorLine )
+{
+   // When cursor changes, try to track it at the center line of the merged
+   // view.  Important note: this will try to set as the center line what SHOULD
+   // be the center line if the diffs were all expanded.  Thus the region where
+   // the cursor would show up in the merged view will most of the time be
+   // higher than the center, but never above the top of the window.  This is a
+   // good heuristic, since it allows you to see more of the region when
+   // collapsing/expanding (IOW if the merged view was really centered that
+   // wouldn't be very good because the top half wouldn't be very useful (you do
+   // need some though, for context).  If you don't understand all this shtuff,
+   // just think that this is why the merged view isn't really centered on the
+   // cursor.
+   _merged->setCenterLine( cursorLine );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::appScrolled( int topLine )
+{
+   // Use this to track the top line of the application.
+   // _merged->setTopLine( topLine );
+}
+
+
+/*==============================================================================
+ * CLASS XxMerged
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxMerged::XxMerged( 
+   XxMergedWindow* main, 
+   XxApp*          app, 
+   QWidget*        parent, 
+   const char*     name 
+) :
+   QFrame( parent, name, WResizeNoErase ),
+   _main( main ),
+   _app( app ),
+   _topLine( 1 ),
+   _grab( false )
+{
+   setFrameStyle( QFrame::Panel | QFrame::Sunken );
+   setLineWidth( 2 );
+   setBackgroundMode( NoBackground );
+
+   const XxDiffs* diffs = _app->getDiffs();
+   if ( diffs != 0 ) {
+      // FIXME what to do on rediff, when the diffs object changes?
+      connect( diffs, SIGNAL(changed()), this, SLOT(adjustVertically()) );
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+XxMerged::~XxMerged()
+{
+}
+
+//------------------------------------------------------------------------------
+//
+QSizePolicy XxMerged::sizePolicy() const
+{
+   return QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::drawContents( QPainter* pp )
+{
+   //XX_TRACE( "painting!" );
+
+   // QPainter p;
+   // p.begin( this );
+   QPainter& p = *pp;
+   QRect rect = contentsRect();
+
+   // We want 1:1 pixel/coord ratio.
+   p.setViewport( rect );
+   rect.moveBy( -rect.x(), -rect.y() );
+   p.setWindow( rect );
+   int w = rect.width();
+   int h = rect.height();
+
+   XxBuffer* file[3];
+   for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
+      file[ii] = _app->getFile( ii );
+   }
+   const XxDiffs* diffs = _app->getDiffs();
+   const XxResources* resources = XxResources::getInstance();
+
+   // If it is empty, erase the whole widget with blank color.
+   if ( diffs == 0 ) {
+      QColor backgroundColor = resources->getBackgroundColor();
+      QBrush brush( backgroundColor );
+      p.fillRect( rect, brush );
+
+      p.end();
+      return;
+   }
+
+   //
+   // Draw appropriate content.
+   //
+   uint topLine = getTopLine();
+   uint cursorLine = _app->getCursorLine();
+   uint horizontalPos = _main->getHorizontalScrollbar()->value();
+   uint tabWidth = resources->getTabWidth();
+
+   // Should we set the clip region?
+
+   // Font.
+   p.setFont( _app->getFont() );
+   QFontMetrics fm = p.fontMetrics();
+
+   // Don't draw background of chars since we'll draw first.
+   p.setBackgroundMode( TransparentMode );
+   QPen pen;
+
+   // uint displayLines = _nbDisplayLines;
+
+   const int x = 0 - horizontalPos;
+   int prevy = 0;
+   int y = 0;
+   uint nbLines = 0;
+   uint curLine = topLine;
+   bool prevKnown = true;
+   int prevfline = -1;
+   while ( y <= h && curLine <= diffs->getNbLines() ) {
+      
+      // Get line to display.
+      const XxLine& line = diffs->getLine( curLine );
+
+      int no, fline;
+      bool known = line.getSelectedText( no, fline );
+      if ( known == true ) {
+         if ( fline != -1 ) {
+
+            // Set background and foreground colors.
+            QColor bcolor;
+            QColor fcolor;
+            if ( line.getType() == XxLine::SAME ) {
+               resources->getRegionColor(
+                  XxResources::COLOR_BACK_SAME, bcolor, fcolor
+               );
+            }
+            else {
+               resources->getRegionColor(
+                  XxResources::COLOR_BACK_MERGED_DECIDED, bcolor, fcolor
+               );
+            }
+            QBrush brush( bcolor );
+            p.setPen( fcolor );
+            
+            uint length;
+            const char* lineText = file[no]->getTextLine( fline, length );
+            
+            int lhd = line.getLeftHdiffPos( no ); // useless
+            int rhd = line.getRightHdiffPos( no ); // useless
+            
+            int rlength;
+            const char* renderedText = file[no]->renderTextWithTabs( 
+               lineText, length, tabWidth, rlength, lhd, rhd
+            );
+            
+            //
+            // Render without horizontal diffs.
+            //
+            QString str( renderedText );
+            
+            p.fillRect( 0, y, w, fm.lineSpacing(), brush );
+            p.drawText( x, y + fm.ascent(), str );
+            
+            prevy = y;
+            y += fm.lineSpacing();
+            nbLines++;
+         }
+         else if ( prevfline != -1 ) {
+
+            QColor bcolor;
+            QColor fcolor;
+            resources->getRegionColor(
+               XxResources::COLOR_BACK_MERGED_DECIDED, bcolor, fcolor
+            );
+            QBrush brush( bcolor );
+            p.setPen( fcolor );
+
+            p.fillRect( 0, y, w, HEIGHT_DELETED_REGION, brush );
+
+            prevy = y;
+            y += HEIGHT_DELETED_REGION;
+         }
+      }
+      prevfline = fline;
+
+      // Detect changes and insert marker.
+      if ( prevKnown != known && known == false ) {
+         
+         QColor bcolor;
+         QColor fcolor;
+         resources->getRegionColor(
+            XxResources::COLOR_BACK_MERGED_UNDECIDED, bcolor, fcolor
+         );
+         QBrush brush( bcolor );
+         p.setPen( fcolor );
+
+         int hch = fm.lineSpacing();
+         p.fillRect( 0, y, w, hch, brush );
+
+         brush.setColor( fcolor );
+         brush.setStyle( QBrush::BDiagPattern );
+         p.fillRect( 0, y, w, hch, brush );
+
+         prevy = y;
+         y += hch;
+         nbLines++;
+      }
+      prevKnown = known;
+      
+      // Draw line cursor.
+      if ( curLine == cursorLine ) {
+         QColor cursorColor = resources->getCursorColor();
+         p.setPen( cursorColor );
+         p.drawRect( 0, prevy, w, y - prevy );
+      }
+
+      curLine++;
+   }
+
+   // Fill in at the bottom if necessary (at end of text).
+   if ( y < h ) {
+      QColor backgroundColor = resources->getBackgroundColor();
+      QBrush brush( backgroundColor );
+      p.fillRect( x, y, w, h - y, brush );
+   }
+
+   // p.end();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::verticalScroll( int )
+{
+   update();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::horizontalScroll( int )
+{
+   // FIXME todo fix adjustment correctly.
+   update();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::adjustVertically()
+{
+   // Adjust vertical scrollbar.
+   uint topLine = getTopLine();
+
+   const XxDiffs* diffs = _app->getDiffs();
+   QScrollBar* vscroll = _main->getVerticalScrollbar();
+   if ( diffs == 0 ) {
+      vscroll->setRange( 0,0 );
+   }
+   else {
+      uint safetyMargin = 4;
+      // Leave some extra space for a screenful of alternating ignore and
+      // deleted markers.
+      
+      uint maxLine = diffs->moveBackwardsVisibleLines(
+         diffs->getNbLines(), _nbDisplayLines, 1
+      );
+      vscroll->setRange( 0, maxLine + safetyMargin );
+   }
+
+   setTopLine( topLine );
+}
+
+//------------------------------------------------------------------------------
+//
+uint XxMerged::getTopLine() const
+{
+   return _main->getVerticalScrollbar()->value() + 1;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::setTopLine( uint lineNo ) const
+{
+   const XxDiffs* diffs = _app->getDiffs();
+
+   uint validLine = std::max(
+      (uint)1,
+      std::min( diffs->getNbLines(), lineNo )
+   );
+   
+   uint maxLine = diffs->moveBackwardsVisibleLines(
+      diffs->getNbLines(), _nbDisplayLines, 1
+   );
+   uint displayableLine = 
+      std::min( validLine, std::max( (uint)1, maxLine ) );
+   _main->getVerticalScrollbar()->setValue( displayableLine - 1 );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::setCenterLine( uint lineNo )
+{
+   const XxDiffs* diffs = _app->getDiffs();
+   uint newTopLine = diffs->moveBackwardsVisibleLines(
+      lineNo, _nbDisplayLines / 2, 1
+   );
+   setTopLine( newTopLine );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::mousePressEvent( QMouseEvent* event )
+{
+   const QFont& font = _app->getFont();
+   QFontMetrics fm( font );
+   uint dlineno = event->y() / fm.lineSpacing();
+
+   // Activate popup in third button.
+   if ( event->button() == RightButton &&
+        event->state() & ControlButton ) {
+         _grab = true;
+         _grabTopLine = getTopLine();
+         _grabDeltaLineNo = dlineno;
+   }
+
+   // FIXME todo: clicking in the merged view should also map the cursor in the
+   // main view.
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::mouseMoveEvent( QMouseEvent* event )
+{
+   if ( _grab ) {
+      const QFont& font = _app->getFont();
+      QFontMetrics fm( font );
+      int dlineno = event->y() / fm.lineSpacing();
+      setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::mouseReleaseEvent( QMouseEvent* event )
+{
+   // Release grab in all case. It won't hurt.
+   _grab = false;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMerged::resizeEvent( QResizeEvent* ev )
+{
+   // Compute nb. display lines.
+   const QFont& font = _app->getFont();
+   QFontMetrics fm( font );
+   _nbDisplayLines = contentsRect().height() / fm.lineSpacing() + 1;
+
+   // Adjust horizontal scrollbar.
+   int textWidth = _app->getTextWidth();
+
+   // Leave a pixel margin to the right of text.
+   textWidth += 4; // 4 pixels.
+   QScrollBar* hscroll = _main->getHorizontalScrollbar();
+   if ( textWidth <= width() ) {
+      hscroll->setRange( 0, 0 );
+   }
+   else {
+      hscroll->setSteps( 1, width() );
+      hscroll->setRange( 0, textWidth - width() );
+   }
+   
+   if ( int( textWidth - width() ) < hscroll->value() ) {
+      hscroll->setValue( textWidth - width() );
+      // Note: this will indirectly trigger a redraw.
+   }
+
+   adjustVertically();
+}
+
+XX_NAMESPACE_END

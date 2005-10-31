@@ -1,0 +1,88 @@
+
+
+The effort to bring Linux to Intel's next-generation
+Itanium chip moved forward today with the arrival of
+critical programming tools, another key step for the
+upstart operating system.
+
+Linux distributor Red Hat today released the crucial
+software--called a "compiler"--that translates
+programs into instructions that can be understood by
+Intel's upcoming 64-bit Itanium chip. The move comes
+at a time when a similar development effort between
+Sun Microsystems and Intel has turned into an ugly
+spat.
+
+This is text inserted in file b.
+
+Itanium is the first member of a new class of more
+powerful processors from the chipmaker. Hardware
+maker SGI said it will release its compiler as well,
+promising that its version will result in faster
+programs.
+
+Relatively few Itanium computers exist, because the
+chip is still available only in prototype form. But
+the arrival of compilers is important. It will enable
+the worldwide group of programmers who collectively
+develop Linux to take the first steps in making sure
+the open-source OS and all its components work on
+Itanium machines. With the compilers, developers will
+This is text that will be deleted in file c.
+be able to start testing software drivers for
+countless network cards, hard disk arrays, video
+systems and other essential hardware components.
+
+This is text that will be deleted in file a.
+Linux, a clone of the Unix operating system and
+competitor to Windows, is growing increasingly
+important in Itanium plans. Intel has invested in
+Linux companies such as Red Hat, SuSE, TurboLinux and
+VA Linux Systems, and now Dell Computer is warming to
+Linux in favor of proprietary versions of the Unix
+OS.
+
+This is the different text we were talking about in 
+file a.
+
+"The proprietary Unix world is giving way to the
+open-standards world," said Carl Everett, senior vice
+president of Dell's personal systems group, in an
+interview yesterday.
+
+Earlier this month, chagned a coalition of companies released
+the first version of Linux for Itanium, code-named
+Trillian.
+
+The SGI and Red Hat compilers will be released as
+open source, meaning that anyone may modify the
+workings of the software. Both packages will be
+released under the Gnu General Public License, which
+means theoretically that the two compilers could be
+merged.
+
+Compilers are a critical ingredient for the Itanium
+chip. Much of the performance gain that's expected
+from Itanium will only become a reality if compilers
+can line up instructions in just the right way so
+that the chip can operate efficiently. And compilers
+also are an essential tool for getting higher-level
+software, such as databases or e-commerce software,
+to work on the new chip.
+
+"For this architecture, you really need a great
+compiler," said HP's David Mosberger in an interview
+earlier this month.  Mosberger has been working on
+Linux for Intel's upcoming chip families for two
+years.
+
+Mosberger said Linux compilers work about as well as
+other compilers, but that there's "a lot of head room
+to optimize them better in the future."
+
+The Linux news comes as Sun has run into trouble
+bringing its Solaris operating system to the new
+chips. Intel said it will offer only minimal help to
+Sun because Sun wasn't doing enough to encourage
+software companies to use Intel chips instead of
+Sun's own UltraSparc chips.

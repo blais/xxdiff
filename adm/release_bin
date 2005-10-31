@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Package for simple binary release.
+VERSION=`grep AM_INIT_AUTOMAKE configure.in | sed -e 's/[^0-9]*\([.0-9]*\).*/\1/'`
+echo "Making binary release version $VERSION";
+
+PEXT="i386";
+if [ "$PLAT" = "mips-sgi-irix6.5" ]; then
+    PEXT="mips";
+fi
+
+PDIR=xxdiff-$VERSION.$PEXT
+ROOT=..
+
+mkdir $ROOT/$PDIR
+cp src/xxdiff $ROOT/$PDIR
+
+# for some reason stripping on IRIX doesn't work as of 1.6.2
+# we link using the stripping option -s instead.
+if [ "$PLAT" != "mips-sgi-irix6.5" ]; then
+    strip $ROOT/$PDIR/xxdiff
+fi
+
+cp README $ROOT/$PDIR
+cp CHANGES $ROOT/$PDIR
+cp src/xxdiff.man $ROOT/$PDIR
+cd $ROOT
+tar zcvf $PDIR.tar.gz $PDIR
+rm -rf $PDIR

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Package for source release or nightly transfer.
+VERSION=`grep AM_INIT_AUTOMAKE configure.in | sed -e 's/[^0-9]*\([.0-9]*\).*/\1/'`
+echo "Making source release version $VERSION";
+
+echo "Making clean"
+make -k maintainer-clean
+find . -name core -print -exec rm -f {} \;
+find . -name \.nfs\* -print -exec rm -f {} \;
+
+echo "Making tar file"
+bn=`basename $PWD`
+dn=`dirname $PWD`
+tarfilename="$bn-$VERSION.`date +%Y-%m-%d.%Hh%M`.tar.gz"
+cd $dn
+rm $tarfilename
+tar zcvf $tarfilename $bn
+
+if [ "$1" = "-p" ]; then 
+    if [ "$SITE" = "discreet" ]; then
+	pgp -c $tarfilename
+    else
+	pgpe -c $tarfilename
+    fi
+    rm -f $tarfilename
+fi
