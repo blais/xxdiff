@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.cpp 338 2001-11-05 05:37:35Z blais $
- * $Date: 2001-11-05 00:37:35 -0500 (Mon, 05 Nov 2001) $
+ * $Id: cmdline.cpp 369 2001-11-11 03:03:41Z  $
+ * $Date: 2001-11-10 22:03:41 -0500 (Sat, 10 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -336,9 +336,27 @@ bool XxCmdline::parseCommandLine( int& argc, char**& argv )
       }
    }
 
-   // Read filenames.
+   // Count number of filenames specified on the cmdline.
    _nbFilenames = argc - optind;
-   for ( int ii = 0; ii < _nbFilenames; ++ii ) {
+
+
+   // Check if there are too many.
+   if ( _nbFilenames > 3 ) {
+      QString msg;
+      {
+         QTextOStream oss( &msg );
+         oss << "extra arguments: \"";
+         for ( int ii = 3; ii < _nbFilenames; ++ii ) {
+            oss << " " << argv[ optind + ii ];
+         }
+         oss << "\"" << endl;
+      }
+      throw XxUsageError( XX_EXC_PARAMS, msg );
+   }
+
+   // Read filenames.
+   int ii;
+   for ( ii = 0; ii < _nbFilenames; ++ii ) {
       _filenames[ ii ].setLatin1( argv[ optind + ii ] );
       _filenames[ ii ] = _filenames[ ii ].stripWhiteSpace();
    }

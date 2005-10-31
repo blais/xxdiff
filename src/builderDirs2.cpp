@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 347 2001-11-06 06:30:32Z blais $
- * $Date: 2001-11-06 01:30:32 -0500 (Tue, 06 Nov 2001) $
+ * $Id: builderDirs2.cpp 369 2001-11-11 03:03:41Z  $
+ * $Date: 2001-11-10 22:03:41 -0500 (Sat, 10 Nov 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -181,10 +181,8 @@ bool parseDiffLine(
 
       // Note: need to remove \n
       QString bname;
-      int mlen = ::strlen( colonPtr + 2 ) - 1;
-      if ( mlen > 0 ) {
-         bname.setLatin1( colonPtr + 2, mlen );
-      }
+      bname.setLatin1( colonPtr + 2 );
+
       filename += bname;
       type = ONLY_IN;
       error = false;
@@ -561,19 +559,6 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    QTextOStream errors( &_errors );
 
-   // Collect stderr.
-   QFile qferr;
-   qferr.open( IO_ReadOnly, ferr );
-   {
-      QTextStream errorss( &qferr );
-      QString errstr = errorss.read();
-      if ( !errstr.isNull() ) {
-         errors << errstr << endl;
-      }
-   }
-   qferr.close();
-   ::fclose( ferr );
-
    // Note: for now we don't support recursive diffs built against a directory.
    if ( _buildSolelyFromOutput || _isDiffRecursive ) {
       buildSolelyFromOutput(
@@ -688,6 +673,19 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
          cline.setHunkId( curHunk );
       }
    }
+
+   // Collect stderr.
+   QFile qferr;
+   qferr.open( IO_ReadOnly, ferr );
+   {
+      QTextStream errorss( &qferr );
+      QString errstr = errorss.read();
+      if ( !errstr.isNull() ) {
+         errors << errstr << endl;
+      }
+   }
+   qferr.close();
+   ::fclose( ferr );
 
    // Saved error text.
    errors << flush;

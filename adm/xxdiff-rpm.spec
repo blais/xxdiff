@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 2.0
+Version: 2.0.2
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
