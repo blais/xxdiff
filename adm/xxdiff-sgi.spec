@@ -30,7 +30,7 @@ product xxdiff
 
 	image sw
 		id "Software"
-		version 2071
+		version 2072
 		order 9999
 		subsys base
 			id "Base Software"

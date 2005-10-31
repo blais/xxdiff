@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 589 2002-08-06 19:59:54Z blais $
+# $Id: TODO 600 2002-08-09 02:33:21Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -35,6 +35,8 @@ Goals for 4.0 stable release:
 
 --------------------------------------------------------------------------------
 Tasks: current tasks
+
+   * Add Accel.Quit alias for Accel.Exit
 
    * xxdiff --version now results in the following error msg from Qt:
       Mutex destroy failure: Device or resource busy

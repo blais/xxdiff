@@ -2,18 +2,23 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 595 2002-08-07 19:51:21Z blais $
+# $Id: CHANGES 601 2002-08-09 20:18:42Z blais $
 #
 
 Current development release
 ------------------------------
 
+Version 2.7.2: (minor bug fixes)
+------------------------------
+
+   * Removed forgotten debug trace.
+
+
 Version 2.7.1: (minor bug fixes)
 ------------------------------
 
-   * Fixed bug with rendering per-hunk ignore whitespace with directory diffs.
-
-
+   * Fixed minor color bug with rendering per-hunk ignore whitespace with
+     directory diffs.
 
 
 Version 2.7: (minor features)

@@ -1742,8 +1742,6 @@ void XxDiffs::computeIgnoreDisplay(
    const std::auto_ptr<XxBuffer>* files
 )
 {
-   std::cerr << "XxDiffs::computeIgnoreDisplay" << std::endl;
-
    XxDln lineNo = 1;
    while ( 1 ) {
       lineNo = findNextDifference( lineNo );
