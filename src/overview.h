@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: overview.h 439 2001-12-03 05:17:26Z blais $
- * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,6 +79,13 @@ public:
 
    // Override to expand.
    virtual QSizePolicy sizePolicy() const;
+
+   // Recomputes the vertical extents, either because the widget size has
+   // changed or the file lengths may have changed.
+   void updateVerticalExtents();
+
+   // See base class.
+   virtual void update();
 
 protected:
 

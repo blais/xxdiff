@@ -8,7 +8,7 @@ If you're reading this page from the web, note that you can also access this
 document from the Help menu of xxdiff.
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
+<!-- ======================================================================= -->
 <h2>Table of Contents</h2>
 
 <ul>
@@ -30,14 +30,15 @@ document from the Help menu of xxdiff.
 <li><a href="#history">Project history</a></li>
 </ul>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="introduction">
+<!-- ======================================================================= -->
+<a name="introduction"></a>
 <h2>Introduction</h2>
 
 <p>
 xxdiff is a <i>graphical file and directories comparison and merge
 tool</i>. This program is an essential software development tool that can be
 used to
+</p>
 <ul>
 <li> visualize the differences between files or directories;
 <li> merge files with differences, resolving conflicts and saving output to a
@@ -45,7 +46,6 @@ new file or patch;
 <li> assist file changes reviewing and comment production (e.g. approving source
 code changes before they get merged into a source tree).
 </ul>
-</p>
 
 <p>
 xxdiff doesn't itself compute the differences between files, it just displays
@@ -59,16 +59,16 @@ built on top of text tools. There are already many good tools to perform diffs,
 so there's no need to rewrite them.
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="invocation">
+<!-- ======================================================================= -->
+<a name="invocation"></a>
 <h2>Invocation</h2>
 
 <p>
 Usage:
+</p>
 <blockquote><tt>
 xxdiff [OPTIONS] &lt;file1&gt; &lt;file2&gt; [&lt;file3&gt;]
 </tt></blockquote>
-</p>
 
 <p>
 You can specify either two files (two-way diff), three files (three-way diff),
@@ -80,22 +80,22 @@ You can also specify a mix of regular files and directories.  If at least one of
 the paths specified on the cmdline is a regular file, all other paths that are
 directories will have the basename of the regular filename appended to them.
 For example, if you specify:
+</p>
 <blockquote><tt>
 xxdiff dir1/bn1 dir2/bn2 dir3
 </tt></blockquote>
 
 xxdiff will be run on <tt>dir1/bn1</tt>, <tt>dir2/bn2</tt>, and
 <tt>dir3/bn1</tt>.
-</p>
 
 <p>
 xxdiff can accept one of its inputs from stdin. You must replace the relevant
 filename by '<tt>-</tt>' (a dash) to instruct xxdiff to use stdin for that file,
 e.g.
+</p>
 <blockquote><tt>
 cat file2 | sort | xxdiff file1 - file3
 </tt></blockquote>
-</p>
 
 <p>
 If all the file paths are directories, a directory diff is invoked.  Note that
@@ -107,7 +107,7 @@ If the "unmerge" option is given, then xxdiff can only be invoked with a single
 file containing the conflicts.
 </p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Return Value</h3>
 
 <p>
@@ -115,8 +115,8 @@ xxdiff returns the same values that diff(1) or diff3(1) return. See the
 respective man pages of those utilities for details.
 
 
-<!-- ---------------------------------------- -->
-<a name="options">
+<!-- ======================================================================= -->
+<a name="options"></a>
 <h3>Command-line Options</h3>
 
 <invocation>
@@ -130,7 +130,7 @@ conventions for command-line options.
 </p>
 
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Using xxdiff as a short-lived application</h3>
     
 <p>
@@ -144,15 +144,15 @@ reason why you can't open xxdiff with just one file.  It is just not useful that
 way.
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="general">
+<!-- ======================================================================= -->
+<a name="general"></a>
 <h2>General operation</h2>
 
 <p>
 This section describes general features and operation of xxdiff.
 </p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>The text area</h3>
 
 <p>
@@ -225,6 +225,7 @@ the standard keys found on AT keyboards (PgUp, PgDown, arrow keys, Home, End).
 
 <p>
 Default bindings include:
+</p>
 <ul>
 <li>Ctrl-V, Alt-V: scroll up/down;</li>
 <li>Ctrl-N, Ctrl-P: move cursor one line up/down;</li>
@@ -232,6 +233,7 @@ Default bindings include:
 <li>N, P: move to next/previous diff hunk;</li>
 <li>B, O: mov the next/previous <b>unselected</b> diff hunk.</li>
 </ul>
+<p>
 Explore the menus to find out about the other default bindings.  You can
 customize all the key bindings using the resources.
 </p>
@@ -290,13 +292,14 @@ different one by using the "open" commands from the "file" menu.
 </p>
 
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Other UI elements</h3>
 
 <p>
 The following other UI elements can be optionally hidden or displayed from the
 Windows menu or Display menu (use the resource file to display or hide them on
 startup):
+</p>
 <ul>
 
 <li>
@@ -340,19 +343,20 @@ regions (see section on <a href="#mergedview">merged view</a> below).
 </li>
 
 </ul>
-</p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="compfiles2">
+<!-- ======================================================================= -->
+<a name="compfiles2"></a>
 <h2>Comparing two files</h2>
 
 <p>
 When invoking xxdiff with two files, we normally think of an old and a new file,
 where
+</p>
 <blockquote><tt>
 xxdiff old new
 </tt></blockquote>
 
+<p>
 The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.
 </p>
@@ -361,12 +365,14 @@ different order will result in regions being assigned the same colors.
 
 <p>
 The following hunk types can appear when comparing two files:
+</p>
 <ul>
 <li> <b>Same</b>: no change in that region;</li>
 <li> <b>Insert</b>: text has been added to the new file;</li>
 <li> <b>Delete</b>: text has been deleted from the new file;</li>
 <li> <b>Diff</b>: text has changed between the files.</li>
 </ul>
+<p>
 Note that each Diff or Insert hunk is always separated by a Same hunk (if it was
 not the case, then two different contiguous hunks would necessarily get merged
 into a single Diff hunk).
@@ -387,8 +393,8 @@ convenience.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="compfiles3">
+<!-- ======================================================================= -->
+<a name="compfiles3"></a>
 <h2>Comparing three files</h2>
 
 <p>
@@ -396,10 +402,12 @@ When invoking xxdiff with three files, we think of an ancestor file, a "mine"
 file, which the current user has been working on, and a "yours" file which
 someone else has merged in the main tree.  They are normally specified in the
 following order:
+</p>
 <blockquote><tt>
 xxdiff mine older yours
 </tt></blockquote>
 
+<p>
 The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.
 </p>
@@ -408,6 +416,7 @@ different order will result in regions being assigned the same colors.
 
 <p>
 The following hunk types can appear when comparing two files:
+</p>
 <ul>
 <li> <b>Same</b>: no change in that region;</li>
 <li> <b>Insert</b>: text has been added one of the files;</li>
@@ -418,7 +427,6 @@ other files are the same.</li>
 <li> <b>DiffDel</b>: text is different in two files and is absent in the
 third.</li>
 </ul>
-</p>
 
 <h3>Ignoring one file</h3>
 
@@ -431,17 +439,19 @@ ignored file will be displayed as grayed out.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="compdirs2">
+<!-- ======================================================================= -->
+<a name="compdirs2"></a>
 <h2>Comparing two directories</h2>
 
 <p>
 When invoking xxdiff with two directories, we normally think of an old and a new
 directory, where
+</p>
 <blockquote><tt>
 xxdiff olddir newdir
 </tt></blockquote>
 
+<p>
 The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.
 </p>
@@ -450,6 +460,7 @@ different order will result in regions being assigned the same colors.
 
 <p>
 The following hunk types can appear when comparing two directories:
+</p>
 <ul>
 <li> <b>Same</b>: files are present in both directories and have no
 differences;</li>
@@ -460,7 +471,6 @@ differences;</li>
 <li> <b>Directories</b>: directories are present in both directories but we
 don't know if they differ;</li>
 </ul>
-</p>
 
 <h3>Options</h3>
 
@@ -489,8 +499,8 @@ You can also copy and remove files from that menu, see
 <a href="#merging">merging</a> section for details.
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="merging">
+<!-- ======================================================================= -->
+<a name="merging"></a>
 <h2>Merging files and resolving conflicts</h2>
 
 <p>
@@ -514,7 +524,7 @@ this decision on a line-by-line basis, and can decide to keep both sides as
 well, in any order.  xxdiff then allows the user to save the resulting file.
 </p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Selecting regions</h3>
 
 <p>
@@ -522,12 +532,12 @@ Selecting a diff hunk can be carried out by clicking on it.  The colors update
 to display which side is selected for output. You can select individual lines
 with the second button.  There are three types of selection that you can carry
 out:
+</p>
 <ul>
 <li>select clicked file;</li>
 <li>select no file (take the decision that nothing will be output);</li>
 <li>leave the line/hunk unselected.</li>
 </ul>
-</p>
 
 <p>
 If you want to select more than one side, you have to invoke the split-swap-join
@@ -538,7 +548,7 @@ the different ordering possibilities, and finally joining the regions again
 (preserving selections where it is possible).
 </p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Saving the resulting file</h3>
 
 <p>
@@ -552,6 +562,7 @@ can be specified through the resources file or the command line.
 If some regions are left unselected, the save
 dialog will have some widgets that allows you to decide how you want to save the
 unselected hunks:
+</p>
 <ul>
 <li><b>Save as merge conflicts:</b> save all sides, separating them with merge
 conflict markers similar to those inserted by CVS;</li>
@@ -560,6 +571,7 @@ conflict markers similar to those inserted by CVS;</li>
 pre-processor directives, so that you could then use a #define directive to have
 one set of changes or another be active if compiling.</li>
 </ul>
+<p>
 The markers and pre-processor directives can be customized through the resources
 file.
 </p>
@@ -577,8 +589,20 @@ You could also decide to save only the selected regions, from the File menu.
 This can be useful for making comments when reviewing merges.
 </p>
 
+<h4>Forcing merged file output</h4>
 
-<!-- ---------------------------------------- -->
+<p>
+xxdiff is often used for merging conflicts, replacing some of the tools that are
+provided with popular configuration management systems. Sometime it is
+"required" that the conflict resolution tool output the merged file. To that
+extent, xxdiff has a special command-line switch to address that need:
+output-on-exit. If specified, the merged-filename will be automatically saved
+when xxdiff exits. If there are remaining conflicts when exiting, a popup will
+ask how to deal with them.
+</p>
+
+
+<!-- ======================================================================= -->
 <h3>Rapid, sequential merge conflict resolution</h3>
 
 <p>
@@ -595,7 +619,7 @@ automatically move the cursor to the next unselected region.  If there are no
 more unselected regions, the save dialog is brought up automatically.
 </p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Automatic merge</h3>
 
 <p>
@@ -630,7 +654,7 @@ user must save before exiting xxdiff (exiting will prompt for save filename).
 </p>
 
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Merging directories</h3>
 
 <p>
@@ -641,8 +665,8 @@ This can be invoked from the popup menu in the text area.
 </p>
 
 
-<!-- ---------------------------------------- -->
-<a name="mergedview">
+<!-- ======================================================================= -->
+<a name="mergedview"></a>
 <h3>Merged view</h3>
 
 <p>
@@ -660,8 +684,8 @@ decisions before commiting the file to output.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="review">
+<!-- ======================================================================= -->
+<a name="review"></a>
 <h2>Merge review features</h2>
 
 <p>
@@ -682,13 +706,13 @@ be format the line contents before they are copied to the clipboard, to make
 them distinct from the merge comments.  This can be enabled using the "format
 clipboard text" option.  The clipboard format is a string that contains format
 specifiers similar to printf.  The following specifiers are allowed:
+</p>
 <ul>
 <li><b>%N</b>: file line (0 is leftmost file);</li>
 <li><b>%L</b>: line number;</li>
 <li><b>%F</b>: filename;</li>
 <li><b>%s</b>: line contents.</li>
 </ul>
-</p>
 
 <p>
 Also note that clicking on the filename labels will put the filenames in the
@@ -697,8 +721,8 @@ ClearCase revision files, which often have very long p-names.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="unmerge">
+<!-- ======================================================================= -->
+<a name="unmerge"></a>
 <h2>Unmerging merge conflicts</h2>
 
 <p>
@@ -718,17 +742,15 @@ branch changes in the regions that conflict. CVS inserts text markers such as
 the following to indicate the conflictual regions:
 </p>
 
-<p>
 <pre>
   Some merged text.
-  >>>>>>>> MYFILE
+  &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; MYFILE
   I added this.
   ========
   This line added in main branch.
-  <<<<<<<< 1.1
+  &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; 1.1
   Some finetext.
 </pre>
-</p>
 
 <p>
 Then, the user is notified of the conflictual files, and has to go inspect the
@@ -766,8 +788,8 @@ command-line argument to let it know you want the file split in three.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="editing">
+<!-- ======================================================================= -->
+<a name="editing"></a>
 <h2>Editing files</h2>
 
 <p>
@@ -785,8 +807,8 @@ changed.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="customization">
+<!-- ======================================================================= -->
+<a name="customization"></a>
 <h2>Customization using resource file</h2>
 
 <p>
@@ -800,9 +822,11 @@ variable XXDIFFRC), and reads that file for resource definition.
 <p>
 The format of the resource file is a fairly simple list of colon-separated
 resource name/value pairs, one per line:
+</p>
 <blockquote><tt>
 resourceName: "value"
 </tt></blockquote>
+<p>
 Any text after "#" on a line is considered a comment and ignored.
 </p>
 
@@ -821,12 +845,12 @@ command-line option (see <a href="#options">options section</a>).
 <p>
 Trick: you can use different resources files by invoking xxdiff like this in
 most shells:
+</p>
 <blockquote><tt>
 XXDIFFRC=myrcfile xxdiff file1 file2
 </tt></blockquote>
-</p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Automatic generation of the resource file</h3>
 
 <p>
@@ -836,8 +860,8 @@ used to "save" the current customizable options.
 </p>
 
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="resources">
+<!-- ======================================================================= -->
+<a name="resources"></a>
 <h2>Resource reference</h2>
 
 <p>
@@ -847,11 +871,11 @@ customizable resources in this version of xxdiff.
 
 <resourceref>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="faq">
+<!-- ======================================================================= -->
+<a name="faq"></a>
 <h2>Frequently Asked Questions (FAQ)</h2>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>Can I diff files with CRLF DOS characters in them?</h3>
 
 <p>
@@ -860,7 +884,7 @@ whitespace option to GNU diff, which will work, even if only one of the files
 has the DOS characters in it.
 </p>
 
-<!-- ---------------------------------------- -->
+<!-- ======================================================================= -->
 <h3>How do I make xxdiff display the revision number of a file?</h3>
 
 <p>
@@ -869,8 +893,8 @@ however, you can set it to display an arbitrary string, which could include your
 current revision number.
 </p>
 
-<!-- ---------------------------------------- -->
-<h3>xxdiff fails with an undefined symbol</h3>
+<!-- ======================================================================= -->
+<h3>xxdiff fails with an undefined symbol, what do I do?</h3>
 
 More precisely, xxdiff fails with the following error:
 <pre>
@@ -883,8 +907,8 @@ You are most likely running nuder Linux RedHat-6.2 and you need to upgrade your
 Qt library.
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="author">
+<!-- ======================================================================= -->
+<a name="author"></a>
 <h2>Author</h2>
 
 <p>
@@ -893,8 +917,8 @@ This program has been written from scratch and is being actively maintained by
 (<a href="mailto:blais@iro.umontreal.ca">blais@iro.umontreal.ca</a>).
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="bugs">
+<!-- ======================================================================= -->
+<a name="bugs"></a>
 <h2>Reporting bugs</h2>
       
 <p>
@@ -906,8 +930,8 @@ email about xxdiff bugs.  Please use this bug tracking system, it is extremely
 fast and simple to use.
 </p>
 
-<!-- ----------------------------------------------------------------------- -->
-<a name="history">
+<!-- ======================================================================= -->
+<a name="history"></a>
 <h2>Project history</h2>
 
 <p>

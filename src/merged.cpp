@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: merged.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,14 +146,13 @@ XxMergedWindow::XxMergedWindow(
 {
    const XxResources& resources = app->getResources();
 
-   QPopupMenu* menu = new QPopupMenu;
+   QkPopupMenu* menu = new QkPopupMenu;
    menu->insertItem( 
       "Close", this, SLOT(hide()),
       resources.getAccelerator( ACCEL_MERGED_CLOSE )
    );
 
-   QMenuBar* m = menuBar();
-   m->setSeparator( QMenuBar::InWindowsStyle );
+   QkMenuBar* m = menuBar();
    m->insertItem( "W&indow", menu );
 
    _frame = new XxMergedFrame( app, this, "merged_frame" );

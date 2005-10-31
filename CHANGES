@@ -2,11 +2,114 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 532 2002-02-27 02:46:54Z blais $
+# $Id: CHANGES 581 2002-06-11 10:25:10Z blais $
 #
+
+Version 2.6: (major features and minor bug fixes)
+------------------------------
+
+This release finally introduces support for the ignore-blank-lines feature of
+GNU diff, as well a new feature to force the production of merged files if
+desired. The port to Qt-3 has been completed and xxdiff can now be compiled
+conditionally with KDE support (thanks to Trevor Harmon). Many minor bug fixes
+are included as well.
+
+Important note: qt3 is now required. 2.6 will not compile with qt2, due to
+differences in the UI designer files between qt versions. Such is life.
+
 
 Current development version
 ------------------------------
+
+(Per-hunk Ignore Whitespace)
+
+   * Implemented of the ignore-display feature in preparation for per-hunk
+     ignore feature.
+
+(Style Resource)
+
+   * Add a new resource: Style, so that users can specify the tooklit style via
+     .xxdiffrc.  Cmdline specification of style still takes precedence.
+
+(Force merged file production)
+
+   * Moved markersFileDialog.* to markers.*
+   * When using --output-on-exit, don't bother the user about overwriting
+     existing files for the merged output file for Perforce users (thx to Philip
+     Quiney <phil.quiney at radiantnetworks.co.uk>
+   * Made sure that closing window should invoke the last hooks and remains in
+     the application, and closing subsequent windows, with --output-on-exit the
+     user is really forced to save a file.
+   * Introduced XxMarkersDialog, a dialog that contains just the markers, and
+     not the file dialog either. This one is used for --output-on-exit and could
+     eventually be used in the save as left/middle/right/merged dialogs, if I
+     didn't want the convenience of being able to change the name right there.
+   * Finished implementing feature to force the user to produce a merged file.
+
+(Tools)
+
+   * Added emacs editing settings somewhere in the tools subdir for contributors
+     to peruse.
+
+(KDE Port)
+
+   * Fixed KDE color dialog bug, when canceling color it was getting set anyway.
+   * Modified KDE code slightly.
+   * Applied KDE patch contributed by Trevor Harmon <trevor at vocaro.com>.
+
+(Ignore Blank Lines)
+
+   * Enabled the options dialog option for ignore blank lines.
+   * Implemented working heuristic to match lines when ignore-blank-lines is
+     on. We check for empty lines that try to match the non-empty lines. I'm
+     pretty convinced that this should work in all cases, but although all my
+     tests seem to work, I will validate this over the next few weeks and only
+     release if all goes well. This should conclude the long-waited support for
+     ignore-blank-lines, which improves considerably the quality of diff output
+     in many cases.
+   * Implemented display of ignored blank lines in SAME regions. This pretty
+     much makes it work.  I'll have to do some more testing before I release.
+   * Started experimenting with diff output parser support for ignore blank
+     lines. It works, but I want to make it somehow display the blank lines
+     (just not as a diff).
+   * Re-enabled tentatively ignore-blank-lines option to start testing it how we
+     could support it.
+
+(Text Rendering Bug)
+
+   * Reverted to drawing the background rectangle color by hand.
+   * Looked at it, added some debugging code.
+
+(Misc)
+
+   * Fixed bug with geometry parsing [566678] [566682].
+   * Fixed typo in documentation [566684]
+   * Fixed bug with copy file expansion by quoting files
+   * Fixed bug with overview area not updating its vertical extents on redo diff.
+     [533659] "rediff:no length update in overview area"
+   * Investigated false-assert reported bug about saving as merge conflicts.
+   * Removed using Id and Date in file headers... it makes diffs for nothing.
+   * Fixed clipboard bug that now occured with qt3, we put the selection into
+     the "mouse", whatever that means.
+   * Fixed bug with not running exit hooks when closing through winmgr.
+   * Added DTD header for HTML output and validated HTML output of documentation
+     using wdg validator.
+
+(Pane Merged View)
+
+   * Started investigating vertical scrollbar problem with paned merged
+     view. We'll need a pixel scrollbar I think.
+
+(Port to Qt-3.0)
+
+   * Font rendering has finally all been fixed.
+   * Fixed default font, but I'm not able to get the same with the Qt way of
+     specifying fonts.
+   * Text font label went really large with funny font description in options
+     dialog, with certain fonts only. Bug fixed by Trevor Harmon.
+   * Fixed missing include file for Qregexp.
+   * Fixed overview area layout fixed size.
+
 
 Version 2.5: (major features)
 ------------------------------
@@ -114,6 +217,7 @@ Version 2.3: (minor features and major bug fixes)
 
 (Port to Gcc-3.0)
 
+   * Compiled with gcc3.1 (did not link).
    * Linked with qt-2.3.2 compiled with gcc3 and it works.
    * Ported all objects to compile with gcc-3.0.2.
    

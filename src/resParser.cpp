@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: resParser.cpp 532 2002-02-27 02:46:54Z blais $
- * $Date: 2002-02-26 21:46:54 -0500 (Tue, 26 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,11 +35,15 @@
 #define INCL_RESPARSER_Y
 #endif
 
+#include <kdeSupport.h>
+
 #include <qaccel.h>
 #include <qapplication.h>
 #include <qfont.h>
 #include <qfile.h>
 #include <qfileinfo.h>
+#include <qstring.h>
+#include <qstylefactory.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -49,6 +53,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -70,6 +75,10 @@ StringToken kwdList[] = {
    { "Geometry", PREFGEOMETRY,
      "Preferred geometry upon initialization.  Format is the same a X geometry \
 specification, plus you can also use `Maximize' to maximize on startup" },
+
+   { "Style", STYLE,
+     "Preferred Qt style, see Qt documentation for more details. The style can
+otherwise be specified through command-line arguments." },
 
    { "Accel", ACCEL,
    "Accelerators for most functionality. The name of the accelerator should be \
@@ -203,7 +212,7 @@ deletions." },
    { "DirDiffBuildSolelyFromOutput", DIRDIFF_BUILD_FROM_OUTPUT, 
      "In directory diffs, building diffs only from output, not checking \
 against actual directory contents.  This is a self-verification feature \
-only, and unless you're doing developemnt you should leave this to default \
+only, and unless you're doing development you should leave this to default \
 (true)." },
 
    { "DirDiffRecursive", DIRDIFF_RECURSIVE,
@@ -344,6 +353,9 @@ StringToken colorList[] = {
 
    { "Same", COLOR_SAME,
      " Identical text " },
+   { "SameBlank", COLOR_SAME_BLANK,
+     " Identical text (blank side, for filler lines when ignore-blank-lines "
+     "is enabled) " },
 
    { "Insert", COLOR_INSERT,
      " Insert text (side with text) " },
@@ -396,6 +408,15 @@ StringToken colorList[] = {
      " Selected text " },
    { "SelectedSup", COLOR_SELECTED_SUP,
      " Selected text (shadowed) " },
+
+   { "IgnoreDisplay", COLOR_IGNORE_DISPLAY,
+     " Ignored for display purposes " },
+   { "IgnoreDisplaySup", COLOR_IGNORE_DISPLAY_SUP,
+     " Ignored for display purposes (shadowed) " },
+   { "IgnoreDisplayOnly", COLOR_IGNORE_DISPLAY_ONLY,
+     " Ignored for display purposes (only text on lines) " },
+   { "IgnoreDisplayNonly", COLOR_IGNORE_DISPLAY_NONLY,
+     " Ignored for display purposes (blank side) " },
                                       
    { "Deleted", COLOR_DELETED,
      " Deleted text " },
@@ -595,13 +616,13 @@ const char* searchTokenName(
 //
 bool readGeometry( const QString& val, QRect& geometry )
 {
-   QWidget* desktop = QApplication::desktop();
+   QWidget* desktop = QkApplication::desktop();
    XX_ASSERT( desktop != 0 );
    QSize dsize = desktop->size();
 
    // Reads in a value.  Returns true if successful, false if the resource was
    // not the specified type and left untouched.
-
+   
    int l = -1;
    int t = -1;
    int w = -1;
@@ -619,12 +640,34 @@ bool readGeometry( const QString& val, QRect& geometry )
    else if ( sscanf( vchar, "%dx%d-%d-%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( dsize.width()-l-w, dsize.height()-t-h, w, h );
    }
+   else if ( sscanf( vchar, "+%d+%d", &l, &t ) == 2 ) {
+      QRect defGeom = XxResources::getDefaultGeometry();
+      geometry = QRect( l, t, defGeom.width(), defGeom.height() );
+   }
+   else if ( sscanf( vchar, "-%d+%d", &l, &t ) == 2 ) {
+      QRect defGeom = XxResources::getDefaultGeometry();
+      w = defGeom.width();
+      geometry = QRect( dsize.width()-l-w, t, defGeom.width(), defGeom.height() );
+   }
+   else if ( sscanf( vchar, "+%d-%d", &l, &t ) == 2 ) {
+      QRect defGeom = XxResources::getDefaultGeometry();
+      h = defGeom.height();
+      geometry = QRect( l, dsize.height()-t-h, defGeom.width(), defGeom.height() );
+   }
+   else if ( sscanf( vchar, "-%d-%d", &l, &t ) == 2 ) {
+      QRect defGeom = XxResources::getDefaultGeometry();
+      w = defGeom.width();
+      h = defGeom.height();
+      geometry = QRect( dsize.width()-l-w, dsize.height()-t-h, 
+                        defGeom.width(), defGeom.height() );
+   }
    else if ( sscanf( vchar, "%dx%d", &w, &h ) == 2 ) {
       geometry = QRect( -1, -1, w, h );
    }
    else {
       return false;
    }
+
    if ( w <= 0 ) {
       geometry = QRect( 0, geometry.top(), dsize.width(), geometry.height() );
    }
@@ -997,6 +1040,12 @@ void XxResParser::genInitFile(
    // Perhaps we should change the default init geometry here to use the actual
    // application geometry.
 
+   QString styleKey = res1.getStyleKey();
+   if ( styleKey != res2.getStyleKey() ) {
+      os << searchTokenName( STPARAM(kwdList), STYLE ) 
+         << ": \"" << styleKey << "\"" << endl;
+   }
+
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
    const char* accelStr = searchTokenName( STPARAM(kwdList), ACCEL );
    for ( ii = 0; ii < nbaccel; ++ii ) {
@@ -1175,6 +1224,9 @@ void XxResParser::listResources( QTextStream& os )
    os << searchTokenName( STPARAM(kwdList), PREFGEOMETRY ) << ": "
       << formatGeometry( res.getPreferredGeometry() ) << endl;
 
+   os << searchTokenName( STPARAM(kwdList), STYLE ) 
+      << ": \"" << res.getStyleKey() << "\"" << endl;
+
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
    const char* accelStr = searchTokenName( STPARAM(kwdList), ACCEL );
    for ( ii = 0; ii < nbaccel; ++ii ) {
@@ -1320,6 +1372,16 @@ QString XxResParser::getResourceRef()
       const StringToken* tok = searchToken( STPARAM(kwdList), PREFGEOMETRY );
       os << tok->_name << ": "
          << formatGeometry( res.getPreferredGeometry() ) << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), STYLE );
+      os << tok->_name << ": \"" << res.getStyleKey() << "\"" << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;

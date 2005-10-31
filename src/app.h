@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: app.h 498 2002-02-11 02:25:21Z blais $
- * $Date: 2002-02-10 21:25:21 -0500 (Sun, 10 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,10 @@
 #include <resParser.h>
 #endif
 
+#ifndef INCL_XXDIFF_KDESUPPORT
+#include <kdeSupport.h>
+#endif
+
 #ifndef INCL_QT_QAPPLICATION
 #include <qapplication.h>
 #define INCL_QT_QAPPLICATION
@@ -62,13 +66,10 @@
  * FORWARD DECLARATIONS
  *============================================================================*/
 
-class QMainWindow;
 class QSocketNotifier;
-class QToolBar;
 class QMessageBox;
 class QSplitter;
 class QLabel;
-class QPopupMenu;
 
 XX_NAMESPACE_BEGIN
 
@@ -95,7 +96,7 @@ class XxCentralFrame;
 
 // <summary> The main application </summary>
 
-class XxApp : public QApplication {
+class XxApp : public QkApplication {
 
    Q_OBJECT
 
@@ -156,7 +157,7 @@ public:
    QRect getMainWindowGeometry() const;
 
    // Returns a reference on the view popup menu.
-   QPopupMenu* getViewPopup( const XxLine& line ) const;
+   QkPopupMenu* getViewPopup( const XxLine& line ) const;
 
    // Returns the return value to send back to caller.
    int getReturnValue() const;
@@ -173,6 +174,9 @@ public:
 
    // Forces recomputation of the text width.
    void invalidateTextWidth();
+
+   // Overloaded exit method.
+   virtual void exit( int retcode = 0 );
 
 public slots:
 
@@ -325,7 +329,7 @@ private:
    void createUI();
    void createOnContextHelp();
    void createMenus();
-   QToolBar* createToolbar();
+   QkToolBar* createToolbar();
    // </group>
 
    // Output diff errors.
@@ -336,7 +340,14 @@ private:
    
    // Tries to save the selected contents to the specified filename.  If ask is
    // true, ask the user for the filename (and use filename as default value).
-   void saveToFile( const QString& filename, const bool ask );
+   //
+   // Returns true if succesfully saved, false if cancelled.
+   bool saveToFile(
+      const QString& filename,
+      const bool     ask,
+      const bool     noCancel = false,
+      const bool     overwrite = false
+   );
 
    // Edits the said file, and add signal handler to catch children exit, and
    // notify.
@@ -398,24 +409,24 @@ private:
    int                     _returnValue;
 
    QStyle*                 _style;
-   QMainWindow*            _mainWindow;
+   QkMainWindow*           _mainWindow;
    QMessageBox*            _diffErrorsMsgBox;
    QSplitter*              _splitter;
    XxMergedFrame*          _paneMergedView;
    XxMergedWindow*         _popupMergedView;
    XxCentralFrame*         _central;
-   QPopupMenu*             _viewPopup;
-   QPopupMenu*             _optionsMenu;
-   QPopupMenu*             _displayMenu;
-   QPopupMenu*             _hordiffMenu;
-   QPopupMenu*             _windowsMenu;
+   QkPopupMenu*            _viewPopup;
+   QkPopupMenu*            _optionsMenu;
+   QkPopupMenu*            _displayMenu;
+   QkPopupMenu*            _hordiffMenu;
+   QkPopupMenu*            _windowsMenu;
    int                     _menuids[ MAX_MENUIDS ];
    QWidget*                _overviewArea;
    QLabel*                 _remUnselView;
    XxOverview*             _overview;
    XxSearchDialog*         _searchDialog;
    XxOptionsDialog*        _optionsDialog;
-   QToolBar*               _toolbar;
+   QkToolBar*              _toolbar;
    mutable uint            _textWidth;
    XxDln                   _cursorLine;
                                 	
@@ -439,4 +450,3 @@ XX_NAMESPACE_END
 #include <app.inline.h>
 
 #endif
-

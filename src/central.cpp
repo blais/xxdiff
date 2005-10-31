@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: central.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,14 +87,12 @@ XxCentralFrame::XxCentralFrame(
    for ( uint ii = 0; ii < nbTextWidgets; ++ii ) {
       if ( ii == 1 ) {
          _vscroll[0] = new QScrollBar( this, "vscroll[0]" );
-         _vscroll[0]->setFixedWidth( 20 );
          textLayout->addWidget( _vscroll[0] );
          connect( _vscroll[0], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll(int)) );
       }
       if ( ii == 2 ) {
          _vscroll[1] = new QScrollBar( this, "vscroll[1]" );
-         _vscroll[1]->setFixedWidth( 20 );
          textLayout->addWidget( _vscroll[1] );
          connect( _vscroll[1], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll2(int)) );
@@ -133,7 +131,6 @@ XxCentralFrame::XxCentralFrame(
    }
 
    _hscroll = new QScrollBar( Qt::Horizontal, this, "hscroll" );
-   _hscroll->setFixedHeight( 20 );
    connect( _hscroll, SIGNAL(valueChanged(int)),
             this, SLOT(horizontalScroll(int)) );
 

@@ -1,0 +1,153 @@
+#!/usr/bin/env python2
+#
+# $Source$
+# $Id: xxcvs.old 576 2002-06-03 15:08:07Z blais $
+#
+# Copyright (c) 2002, Martin Blais. All rights reserved.
+#
+
+"""Interface to CVS and xxdiff.
+
+This script is also used as a test for the CVS python library.
+
+Usage:
+------------------------------
+  xxcvs [<global options>] <subcmd> [<subcmd options>] <args> ...
+
+"""
+
+
+__version__ = "$Revision: 576 $"
+__author__ = "Martin Blais <blais@iro.umontreal.ca>"
+
+#===============================================================================
+# EXTERNAL DECLARATIONS
+#===============================================================================
+
+import sys, os, shutil
+import re, string
+import getpass
+
+from os.path import exists, basename, dirname, isdir, isfile
+from os.path import join as joinpath
+from string import join
+
+import parse_opts
+import cvs
+
+from pprint import PrettyPrinter
+pprint = PrettyPrinter().pprint
+
+
+#===============================================================================
+# LOCAL DECLARATIONS
+#===============================================================================
+
+#===============================================================================
+# CLASS Error
+#===============================================================================
+
+class Error:
+    """Exception class for this module."""
+
+    def __init__(self, msg):
+        self.msg = msg
+    def __repr__(self):
+        return repr(self.msg)
+    def __str__(self):
+        return str(self.msg)
+
+#===============================================================================
+# CLASS CmdStatus
+#===============================================================================
+
+class CmdStatus:
+
+    name = ['status']
+    optmap = [
+        ('tags', 'v', "Include tags" ),
+        ('recursive', 'R', "Recursive" )
+        ]
+
+    def __init__( self ):
+        self.fmt = "%-50s %-12s %-16s %s"
+
+    def execute( self, subargs ):
+        if len(subargs) > 1 or ( len(subargs) == 1 and os.path.isdir(subargs[0]) ):
+            mstatii = cvs.MultipleStatii(subargs,
+                                        self.opts.tags,
+                                        self.opts.recursive)
+            while 1:
+                status = mstatii.next()
+                if not status:
+                    break
+                print self.fmt % (status.filename, status.workingRev(), \
+                                  status.stickyTag(), status.statusStr())
+
+        elif len(subargs) == 1:
+            status = cvs.Status(subargs[0], self.opts.tags)
+            print self.fmt % (status.filename, status.workingRev(), \
+                              status.stickyTag(), status.statusStr())
+
+
+#===============================================================================
+# CLASS CmdLog
+#===============================================================================
+
+class CmdLog:
+
+    name = ['log']
+    optmap = []
+
+    def execute( self, subargs ):
+        for f in subargs:
+            log = cvs.Log(f)
+            print f
+            print "------------------------------"
+            print log
+
+#===============================================================================
+# CLASS CmdRootPath
+#===============================================================================
+
+class CmdRootPath:
+
+    name = ['rootpath']
+    optmap = []
+
+    def execute( self, subargs ):
+        print cvs.getRootPath()
+
+#===============================================================================
+# MAIN
+#===============================================================================
+
+try:
+    goptmap = [
+        ('verbose', 'V', "Verbose mode (useful for debugging)." ),
+        ('debug', None, "Full-on debug mode, including CVS commands." ),
+        ]
+        
+    # Declare subcommands
+    subcmds = [ 
+        CmdStatus(),
+        CmdLog(),
+        CmdRootPath()
+        ]
+    
+    (gopts, subcmd, subargs) = parse_opts.parse_options_subcmds( goptmap, subcmds )
+    
+    if gopts.debug:
+        gopts.verbose = 1
+        cvs.trace = 1
+
+    subcmd.opts = gopts
+    subcmd.execute( subargs )
+
+except Error, e:
+    print 'Error:', e
+
+except cvs.Error, e:
+    print 'CVS Error:', e
+    if gopts.debug:
+        raise

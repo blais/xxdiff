@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: text.cpp 519 2002-02-23 17:43:56Z blais $
- * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 #include <resources.h>
 #include <diffs.h>
 #include <buffer.h>
+
+#include <kdeSupport.h>
 
 #include <qpainter.h>
 #include <qnamespace.h>
@@ -86,6 +88,30 @@ const int xch_draw_delta = 100;
 enum SkipType { SK_NOSKIP = 0, SK_UNSEL = 1, SK_NEITHER = 2, SK_EMPTY = 3 };
 
 
+bool flag = 0;
+
+#ifdef XX_DEBUG
+//------------------------------------------------------------------------------
+//
+void traceFontMetrics( const QFontMetrics& fm )
+{
+   XX_TRACE( "QFontMetrics" );
+   XX_TRACE( "------------------------------" );
+   XX_TRACE( "ascent " << fm.ascent() );
+   XX_TRACE( "descent " << fm.descent() );
+   XX_TRACE( "height " << fm.height() );
+   XX_TRACE( "leading " << fm.leading() );
+   XX_TRACE( "lineSpacing " << fm.lineSpacing() );
+   XX_TRACE( "minLeftBearing " << fm.minLeftBearing() );
+   XX_TRACE( "minRightBearing " << fm.minRightBearing() );
+   XX_TRACE( "maxWidth " << fm.maxWidth() );
+   XX_TRACE( "underlinePos " << fm.underlinePos() );
+   XX_TRACE( "strikeOutPos " << fm.strikeOutPos() );
+   XX_TRACE( "lineWidth " << fm.lineWidth() );
+   XX_TRACE( "------------------------------" );
+}
+#endif
+
 //------------------------------------------------------------------------------
 //
 inline void rentxt(
@@ -111,12 +137,46 @@ inline void rentxt(
       str.setLatin1( renderedText + xch, rlen );
       int nw = fm.width( str, rlen );
 
+#ifndef XX_DRAWTEXT_DRAWS_BACKGROUND
+      p.eraseRect( 
+         XX_RED_RECT( xpx, y, nw, fm.lineSpacing() )
+      );
+#endif
+
       p.drawText(
          XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() ),
          Qt::AlignLeft | Qt::AlignTop, 
          str, rlen,
          &brect
       );
+
+#if 0 
+#ifdef XX_DEBUG
+      {
+         QRect borect = fm.boundingRect( str, rlen );
+         QSize bsize = fm.size( Qt::SingleLine, str, rlen );
+         XX_TRACE( "AHAHAH "
+                   << borect.height() << " "
+                   << bsize.height() << " "
+                   << brect.height() << " "
+                   << fm.lineSpacing() );
+      }
+#endif
+#endif
+
+#ifdef XX_DEBUG
+      // FIXME remove
+      if ( flag ) {
+         QPen pushPen = p.pen();
+         QPen stipplePen = pushPen;
+         stipplePen.setStyle( Qt::DashLine );
+         p.setPen( stipplePen );
+         p.drawRect(
+            XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() )
+         );
+         p.setPen( pushPen );
+      }
+#endif
       
       xpx += XX_RED_WIDTH( nw ); // XX_RED_WIDTH( brect.width() );
       xch += rlen;
@@ -156,11 +216,18 @@ XxText::XxText(
 {
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
-#ifndef XX_DEBUG_TEXT
-   setBackgroundMode( NoBackground );
+#ifdef XX_DEBUG_TEXT
+   setBackgroundColor( Qt::red );
 #else
-   setBackgroundColor( Qt::black );
+   setBackgroundMode( NoBackground );
 #endif
+
+   // Initialize clipboard to use mouse selection.
+   //
+   // We do this multiple times for nothing, but I'd rather have it here
+   // localized where it is implemented. This doesn't hurt.
+   QClipboard *cb = QkApplication::clipboard();
+   cb->setSelectionMode( true );
 }
 
 //------------------------------------------------------------------------------
@@ -237,20 +304,28 @@ void XxText::drawContents( QPainter* pp )
    // Font.
    p.setFont( resources.getFontText() );
    QFontMetrics fm = p.fontMetrics();
+#ifdef XX_DEBUG_TEXT
+   traceFontMetrics( fm );
+#endif
 
    const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
 
+
+   // Make this OpaqueMode if the text drawing is to take care of the
+   // backgrounds.
+#ifdef XX_DRAWTEXT_DRAWS_BACKGROUND
+   p.setBackgroundMode( Qt::OpaqueMode );
+#else
    // Don't draw background of chars since we'll draw first.
    p.setBackgroundMode( Qt::TransparentMode );
+#endif
    QPen pen;
 
    bool hori =
       ( resources.getHordiffType() != HD_NONE ) && !diffs->isDirectoryDiff();
 
    const int x = 0 - horizontalPos;
-
    int y = 0;
-   p.setBackgroundMode( OpaqueMode );
 
    int* hbuffer0;
    int* hbuffer1;
@@ -433,6 +508,8 @@ void XxText::drawContents( QPainter* pp )
 
             XX_CHECK( rlen > 0 ); // always true, because xch < xend
             chunk.setLatin1( renderedText + xch, rlen );
+            // FIXME check somehow that this actually corresponds to the
+            // rendered measure.
             QRect brect = fm.boundingRect( 
                -128, -128, 8192, 2048, 
                Qt::AlignLeft | Qt::AlignTop | Qt::SingleLine,
@@ -577,7 +654,7 @@ void XxText::drawContents( QPainter* pp )
         !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
-      p.drawRect( 0, cursorY1 - 1, w, cursorY2 - cursorY1 + 1 );
+      p.drawRect( 0, cursorY1 - 1, w, cursorY2 - cursorY1 + 2 );
    }
 
    // Draw vertical line.
@@ -632,11 +709,20 @@ void XxText::mousePressEvent( QMouseEvent* event )
       }
       else {
          const XxLine& line = diffs->getLine( lineno );
-         QPopupMenu* popup = _app->getViewPopup( line );
+         QkPopupMenu* popup = _app->getViewPopup( line );
          popup->popup( event->globalPos() );
          return;
       }
    }
+
+   // Interactive toggling of debug drawing structures.
+#ifdef XX_DEBUG
+   if ( event->button() == MidButton ) {
+      if ( event->state() & ControlButton ) {
+         flag = !flag;
+      }
+   }
+#endif
 
    if ( isMerged() ) {
       return;
@@ -741,7 +827,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       }
    }
 
-   QClipboard *cb = QApplication::clipboard();
+   QClipboard *cb = QkApplication::clipboard();
    cb->setText( textCopy );
 
    if ( event->button() == LeftButton || 

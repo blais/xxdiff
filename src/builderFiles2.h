@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: builderFiles2.h 525 2002-02-25 00:17:30Z blais $
- * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,6 +100,15 @@ private:
       XxFln fline1,
       XxFln fline2,
       uint  fsize
+   );
+
+   void createIgnoreBlock(
+      XxFln           fline1,
+      uint            fsize1,
+      XxFln           fline2,
+      uint            fsize2,
+      const XxBuffer& buffer1,
+      const XxBuffer& buffer2
    );
 
    void createChangeBlock( 

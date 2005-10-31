@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: cmdline.h 527 2002-02-25 06:57:14Z blais $
- * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,6 +132,7 @@ private:
    // Nb.files to unmerge into.
    int           _unmergeNbFiles;
 
+   bool          _outputOnExit;
 
    /*----- static data members -----*/
 
@@ -149,4 +150,3 @@ private:
 XX_NAMESPACE_END
 
 #endif
-

@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: builderFiles2.cpp 525 2002-02-25 00:17:30Z blais $
- * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,11 @@
 #include <sys/types.h>
 
 //#define LOCAL_TRACE
+
+//
+// FIXME was not done with ignore-blank-lines support 2002-05-14
+//
+
 #ifdef LOCAL_TRACE
 #define XX_LOCAL_TRACE(x) XX_TRACE(x)
 #else
@@ -134,6 +139,18 @@ bool parseDiffLine(
    }
 
    return error;
+}
+
+//------------------------------------------------------------------------------
+//
+inline bool isAllSpace( const char* text, const unsigned int len )
+{
+   for ( unsigned int ii = 0; ii < len; ++ii ) {
+      if ( !isspace( text[ii] ) ) {
+         return false;
+      }
+   }
+   return true;
 }
 
 #ifndef NO_PARSE_DIFF_ERROR // Not needed for now.
@@ -291,13 +308,22 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
 	    if ( f1n1 != fline1 ) {
+#if 0 
                XxFln fsize = f1n1 - fline1;
-
                createIgnoreBlock( 
                   fline1, fline2, fsize 
                );
                fline1 += fsize;
                fline2 += fsize;
+#else
+               XxFln fsize1 = f1n1 - fline1;
+               XxFln fsize2 = f2n1 - fline2 + 1;
+               createIgnoreBlock( 
+                  fline1, fsize1, fline2, fsize2, buffer1, buffer2 
+               );
+               fline1 += fsize1;
+               fline2 += fsize2;
+#endif
             }
 
             int fsize = f1n2 - f1n1 + 1;
@@ -312,13 +338,22 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
 	    if ( f2n1 != fline2 ) {
+#if 0 
                int fsize = f2n1 - fline2;
-
                createIgnoreBlock( 
                   fline1, fline2, fsize 
                );
                fline1 += fsize;
                fline2 += fsize;
+#else
+               XxFln fsize1 = f1n1 - fline1 + 1;
+               XxFln fsize2 = f2n1 - fline2;
+               createIgnoreBlock( 
+                  fline1, fsize1, fline2, fsize2, buffer1, buffer2 
+               );
+               fline1 += fsize1;
+               fline2 += fsize2;
+#endif
             }
 
             int fsize = f2n2 - f2n1 + 1;
@@ -343,13 +378,22 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
             // }
 
 	    if ( f1n1 != fline1 ) {
+#if 0 
                int fsize = f1n1 - fline1;
-
                createIgnoreBlock( 
                   fline1, fline2, fsize 
                );
                fline1 += fsize;
                fline2 += fsize;
+#else
+               XxFln fsize1 = f1n1 - fline1;
+               XxFln fsize2 = f2n1 - fline2;
+               createIgnoreBlock( 
+                  fline1, fsize1, fline2, fsize2, buffer1, buffer2 
+               );
+               fline1 += fsize1;
+               fline2 += fsize2;
+#endif
             }
 
             int fsize1 = f1n2 - f1n1 + 1;
@@ -418,12 +462,21 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    }
 
    // Add final ignore region if present.
-   uint nbRemainingLines = buffer1.getNbLines() + 1 - fline1;
-   if ( nbRemainingLines != buffer2.getNbLines() + 1 - fline2 ) {
+   uint nbRemainingLines1 = buffer1.getNbLines() + 1 - fline1;
+   uint nbRemainingLines2 = buffer2.getNbLines() + 1 - fline2;
+#if 0 
+   if ( nbRemainingLines1 != nbRemainingLines2 ) {
       throw XxError( XX_EXC_PARAMS, _errors );
    }
-   if ( nbRemainingLines > 0 ) { 
+#endif
+   if ( nbRemainingLines1 > 0 || nbRemainingLines2 > 0 ) { 
+#if 0 
       createIgnoreBlock( fline1, fline2, nbRemainingLines );
+#else
+      createIgnoreBlock( fline1, buffer1.getNbLines() + 1 - fline1,
+                         fline2, buffer2.getNbLines() + 1 - fline2,
+                         buffer1, buffer2 );
+#endif
    }
 
 #if !defined(XX_INTERNAL_DIFFS) && !defined(WINDOWS)
@@ -450,7 +503,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createIgnoreBlock( 
+void XxBuilderFiles2::createIgnoreBlock(
    XxFln fline1,
    XxFln fline2,
    uint  fsize
@@ -461,6 +514,112 @@ void XxBuilderFiles2::createIgnoreBlock(
       line.setHunkId( _curHunk );
       addLine( line );
    }
+   _curHunk++;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxBuilderFiles2::createIgnoreBlock(
+   XxFln           fline1,
+   uint            fsize1,
+   XxFln           fline2,
+   uint            fsize2,
+   const XxBuffer& buffer1,
+   const XxBuffer& buffer2
+)
+{
+   // The following code asserts that there are always the same number of
+   // non-all-whitespace lines on each side. This is the assumption that allows
+   // us to run the heuristic below for matching lines.
+#ifdef XX_DEBUG
+   // Vectors of non-empty lines.
+   std::vector<XxFln> lines1;
+   lines1.reserve( fsize1 );
+   std::vector<XxFln> lines2;
+   lines2.reserve( fsize2 );
+
+   // Build arrays of indices to non-empty lines.
+   uint ii;
+   for ( ii = 0; ii < fsize1; ++ii ) {
+      XxFln no = fline1 + ii;
+      uint len;
+      const char* text = buffer1.getTextLine( no, len );
+      if ( !isAllSpace( text, len ) ) {
+         lines1.push_back( no );
+      }
+   }
+   for ( ii = 0; ii < fsize2; ++ii ) {
+      XxFln no = fline2 + ii;
+      uint len;
+      const char* text = buffer2.getTextLine( no, len );
+      if ( !isAllSpace( text, len ) ) {
+         lines2.push_back( no );
+      }
+   }
+   XX_ASSERT( lines1.size() == lines2.size() );
+#endif
+
+
+   // Important note: we cannot perform the optimizatino that when the two sides
+   // have the same number of lines we'd just match them up, because it doesn't
+   // hold: there might be an equal number of blank lines on each side.
+
+
+   // When lines are either both filled or both empty, register matching lines,
+   // and otherwise register line with filler until both sides are either again
+   // both filled or empty.
+   XxFln ii1 = fline1;
+   XxFln ii2 = fline2;
+   XxFln end1 = fline1 + fsize1;
+   XxFln end2 = fline2 + fsize2;
+   /*XX_TRACE( "end1=" << end1 << "  end2=" << end2 );*/
+   while ( ii1 < end1 || ii2 < end2 ) {
+
+      uint len1, len2;
+      const char* text1 = buffer1.getTextLine( ii1, len1 );
+      const char* text2 = buffer2.getTextLine( ii2, len2 );
+      bool filled1 = !isAllSpace( text1, len1 );
+      bool filled2 = !isAllSpace( text2, len2 );
+      /*XX_TRACE( ii1 << "-" << filled1 << "=" << len1 << " " 
+                << ii2 << "-" << filled2 << "=" << len2 );*/
+
+      if ( filled1 == filled2 && ii1 < end1 && ii2 < end2 ) {
+         XxLine line( XxLine::SAME, ii1, ii2 );
+         line.setHunkId( _curHunk );
+         addLine( line );
+         ++ii1;
+         ++ii2;
+      }
+      else if ( filled2 ) {
+         XxLine line( XxLine::SAME, ii1, -1 );
+         line.setHunkId( _curHunk );
+         addLine( line );
+         ++ii1;
+      }
+      else if ( filled1 ) {
+         XxLine line( XxLine::SAME, -1, ii2 );
+         line.setHunkId( _curHunk );
+         addLine( line );
+         ++ii2;
+      }
+      else {
+         XX_CHECK( ii1 >= end1 || ii2 >= end2 );
+         if ( ii1 < end1 ) {
+            XxLine line( XxLine::SAME, ii1, -1 );
+            line.setHunkId( _curHunk );
+            addLine( line );
+            ++ii1;
+         }
+         else {
+            XxLine line( XxLine::SAME, -1, ii2 );
+            line.setHunkId( _curHunk );
+            addLine( line );
+            ++ii2;
+         }
+      }
+   }
+   XX_ASSERT( ii1 == end1 && ii2 == end2 );
+
    _curHunk++;
 }
 

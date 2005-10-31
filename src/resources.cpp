@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: resources.cpp 527 2002-02-25 06:57:14Z blais $
- * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #include <qnamespace.h>
 #include <qapplication.h> // to get desktop
 #include <qregexp.h>
+#include <qstylefactory.h>
 
 #include <iostream>
 #include <string.h> // ::strcmp
@@ -51,6 +52,8 @@ XX_NAMESPACE_BEGIN
 /*==============================================================================
  * CLASS XxResources
  *============================================================================*/
+
+QRect XxResources::_defaultGeometry( -1, -1, 1200, 600 );
 
 //------------------------------------------------------------------------------
 //
@@ -92,7 +95,8 @@ void XxResources::initialize()
 void XxResources::initializeOriginalXdiff()
 {
    // Just like xdiff.
-   _preferredGeometry = QRect( -1, -1, 1200, 600 );
+   _preferredGeometry = _defaultGeometry;
+   _styleKey = "SGI"; // Default style.
    _maximize = false;
 
    //---------------------------------------------------------------------------
@@ -158,6 +162,9 @@ void XxResources::initializeOriginalXdiff()
 
    //---------------------------------------------------------------------------
 
+#ifdef XX_KDE
+   _fontText = KGlobalSettings::fixedFont();
+#else
    // // Use a default font that looks like the one from the default SGI scheme.
    // _fontApp.setFamily( "Helvetica" );
    // _fontApp.setItalic( true ); 
@@ -169,12 +176,20 @@ void XxResources::initializeOriginalXdiff()
    // Try to set the default font to be as close as possible as that under the
    // original xdiff under SGI.
    //_fontText.setRawName( "*-clean-medium-r-normal-*-14-*" ); // XLFD warning
-   _fontText.setRawName( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
+   // _fontText.setRawName( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
+   //_fontText.setItalic( false );
+   //_fontText.setFamily( "Lucida" );
+   _fontText.setStyleHint( QFont::TypeWriter, QFont::PreferMatch );
+   _fontText.setFamily( "Lucidatypewriter" );
+   _fontText.setPointSize( 9 );
+   _fontText.setFixedPitch( true ); // FIXME this does not work, qt bug.
+#endif
 
    //---------------------------------------------------------------------------
 
    if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
       setFbColors( COLOR_SAME                   , "grey", "black" );
+      setFbColors( COLOR_SAME_BLANK             , "grey70", "black" );
       setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
       setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon3", "black" );
       setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
@@ -204,6 +219,11 @@ void XxResources::initializeOriginalXdiff()
       setFbColors( COLOR_SELECTED               , "plum", "black" );
       setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
                                                 
+      setFbColors( COLOR_IGNORE_DISPLAY         , "grey", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey70", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey70", "black" );
+
       setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
       setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
                                                 
@@ -267,7 +287,7 @@ void XxResources::initializeOriginalXdiff()
 #ifndef WINDOWS
    _commands[ CMD_DIFF_FILES_2 ] = "diff";
 #else
-   _commands[ CMD_DIFF_FILES_2 ] = "V:/cygwin/bin/diff.exe";
+   _commands[ CMD_DIFF_FILES_2 ] = "diff.exe";
 #endif
    _commands[ CMD_DIFF_FILES_3 ] = "diff3";
    _commands[ CMD_DIFF_DIRECTORIES ] = "diff -q -s";
@@ -366,6 +386,16 @@ void XxResources::setPreferredGeometry( const QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
+void XxResources::setStyleKey( const QString& styleKey )
+{
+   QStringList styles = QStyleFactory::keys();
+   XX_ASSERT( styles.find( styleKey ) != styles.end() );
+   _styleKey = styleKey;
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxResources::setMaximize( bool fs )
 {
    _maximize = fs;
@@ -457,13 +487,6 @@ void XxResources::setInitSwitch(
    const int       val
 )
 {
-   // Warn the user that ignoring blank lines is not supported for now.
-   if ( cmdId == CMDSW_FILES_IGNORE_BLANK_LINES && val > 0 ) {
-      std::cerr << "Warning: the IgnoreBlankLines option is not supported "
-                << "in this version." << std::endl;
-      return;
-   }
-
    _initSwitch[ int(cmdId) ] = val;
    emit changed();
 }

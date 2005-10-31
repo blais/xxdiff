@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: defs.h 501 2002-02-12 02:32:31Z blais $
- * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,12 @@ typedef unsigned int 	uint;
 #define XX_THROW_NOTHING  throw()
 
 #elif defined COMPILER_GNU
+
+#if __GNUC__ >= 3
+#define XX_THROW_NOTHING  throw()
+#else
 #define XX_THROW_NOTHING  __STL_NOTHROW
+#endif
 
 #elif defined COMPILER_COMPAQCXX
 #define XX_THROW_NOTHING  _RWSTD_THROW_SPEC_NULL
@@ -121,4 +126,3 @@ typedef unsigned int 	uint;
 #endif
 
 #endif
-

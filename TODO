@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 529 2002-02-25 22:52:14Z blais $
+# $Id: TODO 574 2002-05-30 13:35:29Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -18,11 +18,11 @@ Goals for 3.0 stable release:
    * Merged view pane display (***DONE in 2.2).
    * Do not use temporary files for stdin input anymore (***DONE in 2.5).
    * Finish scrollbars resizing for paned merged view.
-   * Support ignore-blank-lines (will use internal display-ignore feature)
+   * Support ignore-blank-lines (***DONE in 2.6)
    * Display-ignore related features (e.g. per-hunk ws ignore).
    * Some dirdiff improvements (exclude).
-   * Qt-3.0 port.
-   * Windows port using Qt-3.0 non-commercial license (almost done, doesn't
+   * Qt-3.0 port (**DONE in 2.6).
+   * Windows port using Qt non-commercial license (almost done, doesn't
      link).
    * Improve error recovery in rcfile parsing.
 
@@ -31,15 +31,169 @@ Goals for 3.0 stable release:
 Tasks: current tasks
 
 
+(Per-hunk Ignore Whitespace)
+
+   * Add colors and line type for display-ignored type, defaults should be close
+     to SAME color
+
+   * Ignore horizontal whitespace option should make simple SAME lines almost
+     'SAME' color.  (i.e. if there are only whitespace differences, almost
+     ignore it!)
+
+   * Implement "per-line display-ignore whitespace" (easy, check bounds of
+     result from horizontal diffs)
+
+   * "Per-hunk ignore whitespace" (ignores whitespace if a hunk's non-whitespace
+     chars are all the same... this should allow filtering out most code
+     re-indentation and such).  Newlines have to match (but you can skip some).
+
+
+
+
+(Ignore Blank Lines)
+
+   * Consider.... should we do something about ignored SAME sides when saving? I
+     mean, now we just choose side 0, but perhaps we want to give the user
+     control over that?
+
+
+(Misc)
+
+   * The cursor is not restricted by scrolling using the scrollbars anymore!!!
+
+
+
+   * Implement per-hunk ignore!!!
+
+
+
+
+   * When pasting to the clipboard, turn tabs into spaces, for much better
+     results when pasting! remember, the clipboard formatting can otherwise
+     change it.
+
+
+
+
+   * Paned view problem, the hash pattern that is drawn is not cleared before it
+     is drawn, switch workspaces with paned view and you'll see immediately.
+
+
+(Colors)
+
+   * There is no SelectedNonly color!
+
+
+(KDE Port)
+    
+   * Trevor:
+
+     By the way, I forgot about a bug in my patch. If you go to Help|User's
+     Manual and click on the "GNU website" link at the end, then a web browser
+     opens just as it should. But if you click on a local link, such as
+     "Introduction", then the web browser again opens, instead of just jumping
+     to the point in the text. Help me remember to fix this sometime.
+
+
+
+
+   * ideas from Martin Pool (mbp@samba.org)
+    >
+    >  - Quick keypresses to switch to next/prev file
+    
+    try C-n, C-p, n, p, etc. (see the menus for accelerators)
+    
+    or do you mean, a key to open the next/prev file in another diff?
+    if so, that's a good idea, i'll put it on the todo list
+    
+    >
+    >  - Single button to ignore *~, .#*, CVS, and similar garbage.  (The best
+    >    way I found was to edit the diff options.)
+    
+    i want to do that eventually, that's on the todo list as well
+
+
+
+
+
+
+   * fix this problem:
+
+   Hello Martin,
+   
+   there's someone reporting that error here:
+   
+           http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=141809
+   
+   and I do suspect it to be a Qt bug (happens on my box too btw.). I
+   searched the web a bit, but couldn't find any solution. Here's the place
+   where the error is reported btw.:
+   
+           http://www.linux.cz/lists/archive/linux/131195.html
+   
+   Does that happen on your box too? Is it a Qt problem?
+   *t
+   
+   -----------------------------------------------------------------------
+        Tomas Pospisek
+        sourcepole    -   Linux & Open Source Solutions
+        http://sourcepole.com
+        Elestastrasse 18,  7310 Bad Ragaz,  Switzerland
+        Tel:+41 (81) 330 77 13,  Fax:+41 (81) 330 77 12
+   ------------------------------------------------------------------------
+   
+
+
+
+
+
+
+   * Cool idea: tooltip when hovering over a hunk should show the diff marker
+     text. Or perhaps a popup menu could pop up the textual diff output.
+
+
+(Build)
+
+   * Try converting build system to use Jam instead of tmake.
+
+
+
+
+   * test recent changes to rendering code to see if it solves the problems with
+     qt-3 rendering.
+
+
+(Automatically-Saving Resources)
+
+   * Some ppl want to have resources saved automatically. Consider an
+     implementation.
+
+
+(Self Debugging and Error Reporting)
+
+   * Print commandline arguments when crashing with an internal error, as well
+     as resources state if possible.
+
+
+
+(Font Drawing Problem)
+
+   * Italics fonts sometimes don't draw all that they should be.
+
+
 (Memory Checking)
 
    * Run valgrind and mpatrol once again to stabilize.
+
 
 
 (Raw diff output)
 
    * Implement a window to display the raw diff output. Some people may enjoy
      this. kompare (kdiff2) has this.
+
+   * Implement a small widget that would display the current diff output chunk,
+     or perhaps put it in the tooltip.
 
 
 (Misc)
@@ -68,6 +222,17 @@ Tasks: current tasks
    * There is currently no generator of xxdiff-like output for printing. See if
      the guts of xxdiff can be reused to implement one, and if so, add an xxdiff
      feature to output to postscript or something.
+
+
+(Support for Encryption)
+
+   * Add possibility to specify a fd for an alternate input for a second
+     file. This way one can almost write a script that runs diff on two memory
+     buffers. But how does diff do it then?  Maybe that could be supported with
+     linking with the GNU diff code.
+
+
+
 
 
 
@@ -144,7 +309,7 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
 
 (Multiple Horizontal Diffs)
 
-   * Can we actually do something about 3-way horizontal diffs?
+   * Can we actually do something more about 3-way horizontal diffs?
      Compute the 2-way and then merge results?
 
    * We could remove empty horizontal regions from horizontal diffs?  They don't
@@ -193,19 +358,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
      > diff hunks of a line it would do exactly what you want, assuming that the words
      > (i.e. numbers) are separated by whitespace.  The numerical comparison will be an
      > option that you can configure in your resources.
-
-
-
-(IgnoreBlankLines)
-
-   * IgnoreBlankLines is a fundamental misfeature with xxdiff... how to deal
-     with it?  figure it out later.
-      * Check '-B' option in cmdline.cpp
-
-      * The problem is that the SAME regions might not have the same length...
-        how do we do this?  perhaps mark those regions as "display-ignore" when
-	that is implemented.
-
 
 (Bugs)
 
@@ -272,22 +424,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
      This is harmless but perhaps it would be nice to check and warn that this
      does not make sense to specify.
 
-
-(New display-ignore line type)
-
-   * Add colors and line type for display-ignored type, defaults should be close
-     to SAME color
-
-   * Ignore horizontal whitespace option should make simple SAME lines almost
-     'SAME' color.  (i.e. if there are only whitespace differences, almost
-     ignore it!)
-
-   * Implement "per-line display-ignore whitespace" (easy, check bounds of
-     result from horizontal diffs)
-
-   * "Per-hunk ignore whitespace" (ignores whitespace if a hunk's non-whitespace
-     chars are all the same... this should allow filtering out most code
-     re-indentation and such).  Newlines have to match (but you can skip some).
 
 
 (Token horizontal diffs)
@@ -455,13 +591,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
    * Check if can parse context, ed, normal, or unified diffs output, the user
      might specify such an erroneous command;
 
-
-(Force merged file production)
-
-   * Finish implementing feature to force the user to produce a merged file.
-
-   * File dialog must have its selection disabled... we want only the conflicts
-     section to show up in the worst case.
 
 
 

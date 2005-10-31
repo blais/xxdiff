@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: get_version 404 2001-11-22 07:39:59Z blais $
+# $RCSfile$
 #
 
 if [ ! -d "tools" ]; then

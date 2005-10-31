@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: accelUtil.h 468 2002-01-30 07:46:26Z blais $
- * $Date: 2002-01-30 02:46:26 -0500 (Wed, 30 Jan 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,4 +80,3 @@ public:
 XX_NAMESPACE_END
 
 #endif
-

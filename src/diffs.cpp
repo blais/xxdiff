@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: diffs.cpp 528 2002-02-25 17:08:09Z blais $
- * $Date: 2002-02-25 12:08:09 -0500 (Mon, 25 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -701,7 +701,7 @@ uint XxDiffs::countRemainingUnselected() const
    // Make sure that there are no more unselected regions.
    bool inhunk = false;
    XxHunk curHunk = 0;
-   XxLine::Type curType;
+   XxLine::Type curType = XxLine::SAME; /* just to make compiler happy */
    uint nbunsel = 0;
    for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
@@ -1678,6 +1678,78 @@ void XxDiffs::reindex(
          file3->reindex( reindexTbl );
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+//
+void XxDiffs::applyPerHunkDisplayIgnore( const int /*nbFiles*/ )
+{
+#if 0 
+   if ( nbFiles == 2 ) {
+
+      // Seek to next difference.
+      XxDln lineNo = 1;
+
+      while ( lineNo <= getNbLines() ) {
+
+         while ( lineNo <= getNbLines() ) {
+            const XxLine& line = getLine( lineNo );
+            if ( line.getType() == XxLine::DIFF_ALL ) {
+               break;
+            }
+            lineNo++;
+         }
+         
+         if ( lineNo >= getNbLines() ) {
+            break;
+         }
+
+         // Do this region.
+         XxDln regNo = lineNo;
+         
+
+
+         // Skip current region.
+         while ( lineNo <= getNbLines() ) {
+            const XxLine& line = getLine( lineNo );
+            if ( line.getType() != XxLine::DIFF_ALL ) {
+               break;
+            }
+            lineNo++;
+         }
+      }
+         
+      
+   }
+#endif
+
+#if 0 
+
+
+      if ( lineNo > getNbLines() ) {
+         return -1;
+      }
+
+
+
+   return cur;
+
+
+   int count = 0;
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+      XxLine& line = getLineNC( ii );
+
+      if ( line.getType() == XxLine::DIFF_ALL ) {
+         XX_TRACE( "sjhshds" );
+         line.setIgnoreDisplay( true );
+         ++count;
+         if ( count == 10 ) {
+            break;
+         }
+      }
+   }
+#endif
 }
 
 XX_NAMESPACE_END

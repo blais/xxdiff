@@ -1,6 +1,8 @@
 # -*- mode: Makefile -*-
 #############################################################################
 #!
+#! $RCSfile$
+#!
 #! This is a tmake template for building Unix applications.
 #!
 #$ IncludeTemplate("app.t");

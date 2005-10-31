@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: overview.cpp 517 2002-02-21 06:58:40Z blais $
- * $Date: 2002-02-21 01:58:40 -0500 (Thu, 21 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -451,6 +451,21 @@ void XxOverview::resizeEvent( QResizeEvent* e )
       _regR[ii] = _fileR[ii] - visRegionBorder;
    }
 
+   updateVerticalExtents();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOverview::update()
+{
+   updateVerticalExtents();
+   BaseClass::update();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOverview::updateVerticalExtents()
+{
    //
    // Compute top/bottom extents.
    //
@@ -459,6 +474,8 @@ void XxOverview::resizeEvent( QResizeEvent* e )
    XxBuffer* files[3];
    XxFln flines[3];
    XxFln maxlines = 0;
+   uint nbFiles = _app->getNbFiles();
+   uint ii;
    for ( ii = 0; ii < nbFiles; ++ii ) {
       files[ii] = _app->getBuffer( ii );
       XX_ASSERT( files[ii] != 0 );
@@ -475,7 +492,6 @@ void XxOverview::resizeEvent( QResizeEvent* e )
       _fileB[ii] = h - _fileT[ii];
       _fileDy[ii] = _fileB[ii] - _fileT[ii];
    }
-
 }
 
 XX_NAMESPACE_END

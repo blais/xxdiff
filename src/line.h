@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: line.h 514 2002-02-20 17:09:20Z blais $
- * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,6 +157,12 @@ public:
    void setSelection( Selection selection );
    // </group>
 
+   // Get/set ignore-display flag.
+   // <group>
+   bool getIgnoreDisplay() const;
+   void setIgnoreDisplay( const bool f );
+   // </group>
+
    // Returns the file no and line number of the selected text.  If the selected
    // text has no content, no will be set to -1.  Returns false if the content
    // is unknown, true otherwise.
@@ -253,6 +259,8 @@ private:
 
    /*----- static data members -----*/
 
+   // Table used to map types for changing colors for the "ignore one file"
+   // feature. This is not related to the ignore-display feature.
    static Type _ignoreConvertTables[ 4 ][ NB_TYPES ];
 
    /*----- data members -----*/
@@ -261,6 +269,10 @@ private:
    Type        _type;
    Selection   _selection;
    XxHunk      _hunkId; // This is used for split/swap/join.
+
+   // Note: we could join the selection and ignore-display members into a
+   // generalized "flags" member to save memory.
+   bool        _ignoreDisplay;
 
    // Horizontal diff brackets.
    const int*  _hordiffs[3];

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: build_rpm 347 2001-11-06 06:30:32Z blais $
+# $RCSfile$
 #
 
 if [ ! -f "configure.in" -o ! -f "tools/rpm_spec" ]; then

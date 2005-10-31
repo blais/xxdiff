@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: line.inline.h 514 2002-02-20 17:09:20Z blais $
- * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,8 @@ XX_NAMESPACE_BEGIN
 inline XxLine::XxLine() :
    _type( SAME ),
    _selection( NEITHER ),
-   _hunkId( -1 )
+   _hunkId( -1 ),
+   _ignoreDisplay( false )
 {
    // This is just initialization to remove UMRs in Purify.
    for ( int ii = 0; ii < 3; ++ii ) {
@@ -57,6 +58,7 @@ inline XxLine::XxLine( const XxLine& copy )
    _type = copy._type;
    _selection = copy._selection;
    _hunkId = copy._hunkId;
+   _ignoreDisplay = copy._ignoreDisplay;
 
    for ( int ii = 0; ii < 3; ++ii ) {
       _lineNo[ii] = copy._lineNo[ii];
@@ -105,6 +107,20 @@ inline void XxLine::setSelection( Selection selection )
    if ( _type != SAME ) {
       _selection = selection;
    }
+}
+
+//------------------------------------------------------------------------------
+//
+inline bool XxLine::getIgnoreDisplay() const
+{
+   return _ignoreDisplay;
+}
+
+//------------------------------------------------------------------------------
+//
+inline void XxLine::setIgnoreDisplay( const bool f )
+{
+   _ignoreDisplay = f;
 }
 
 //------------------------------------------------------------------------------

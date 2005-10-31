@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: cmdline.cpp 527 2002-02-25 06:57:14Z blais $
- * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,15 @@
 #define INCL_RESPARSER_Y
 #endif
 
+#include <kdeSupport.h>
+
 #include <qapplication.h>
 #include <qcstring.h>
 
 /*#define getopt xxdiff_getopt*/
 #include <getopt.h>
 #include <stdlib.h>
+
 
 XX_NAMESPACE_BEGIN
 
@@ -184,6 +187,11 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
    { "merged-filename", 'M', true, 'M',
      "Specifies the filename of the merged file for output."
    },
+   { "output-on-exit", 'O', false, 'O',
+     "Forces saving to the merged filename upon exit. Note: If the file exists, no "
+     "warning is given about overwriting the file. If there are unresolved conflicts, "
+     "a popup dialog will appear."
+   },
 #ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    { "force-save-merged", 'S', false, 'S',
      "Put xxdiff in a mode where it is forced to save to the merged file. "
@@ -209,13 +217,10 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "Option passed to 2-files diff(1). "
      "Ignore changes in case; consider upper- and lower-case to be the same."
    }, 
-
-#if 0 // Ignore blank lines... make this work eventually (see TODO file).
    { "ignore-blank-lines", 'B', false, 'B', 
      "Option passed to 2-files diff(1). "
      "Ignore changes that just insert or delete blank lines."
    }, 
-#endif
    { "recursive", 'r', false, 'r',
      "Option passed to 2-files diff(1). "
      "This is only meaningful for directory diffs."
@@ -259,7 +264,7 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
      "Forces the application to use a particular visual on an 8-bit display "
      "(e.g. TrueColor)."
    },
-   { "ncols", 0, true, 'O',
+   { "ncols", 0, true, 'I',
      "Limits the number of colors allocated in the color cube on a 8-bit "
      "display."
      // ", if the application is using the QApplication::ManyColor color "
@@ -294,6 +299,7 @@ XxCmdline::XxCmdline() :
    _extraDiffArgs( "" ),
    _unmerge( false ),
    _unmergeNbFiles( 2 ),
+   _outputOnExit( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -506,6 +512,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _mergedFilename = optarg;
          } break;
          
+         case 'O': {
+            _outputOnExit = true;
+         } break;
+         
          //
          // GNU diff options.
          //
@@ -513,6 +523,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'b':
          case 'i':
          case 'a':
+         case 'B':
             char optionString[4];
             optionString[0] = ' ';
             optionString[1] = '-';
@@ -555,7 +566,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'F':
          case 'L':
          case 'V':
-         case 'O':
+         case 'I':
          case 'P':
          case 'K':
          case 'T':
@@ -685,7 +696,7 @@ void XxCmdline::listResources()
 {
    // Open display connection, we need that for font and color conversions.
    int argc = 0;
-   QApplication app( argc, 0 );
+   QkApplication app( argc, 0 );
 
    // This lists the default resources, not the ones parsed from the
    // rcfile or command-line.
@@ -702,7 +713,9 @@ void XxCmdline::printHtmlHelp()
 
    {
       QTextStream os( stdout, IO_WriteOnly );
-      os << "<html>" << endl
+      os << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">"
+         << endl
+         << "<html>" << endl
          << "<head>" << endl
          << "<title>xxdiff documentation</title>" << endl
          << "</head>" << endl
@@ -721,8 +734,11 @@ void XxCmdline::printVersion()
    oss_cout << "xxdiff " << XxHelp::getVersion()
 #ifdef XX_DEBUG
             << " [debug]"
+#endif 
+#ifdef XX_KDE
+            << " [kde]"
 #endif
-            << endl;
+           << endl;
    oss_cout << QString("  (Qt: %1)").arg( qVersion() ) << endl;
    oss_cout << "  Written by Martin Blais <blais@iro.umontreal.ca>" << endl
             << flush;
@@ -773,4 +789,3 @@ int XxCmdline::searchForOption(
 }
 
 XX_NAMESPACE_END
-

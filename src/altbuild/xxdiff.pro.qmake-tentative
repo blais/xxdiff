@@ -23,28 +23,79 @@
 # Generate with xxdiff.t template, as `tmake -t xxdiff.t xxdiff.pro > Makefile'
 #
 
-TEMPLATE = xxdiff
-CONFIG = release qt warn_on
+TEMPLATE = app
+CONFIG = debug qt thread warn_on
+
+
+#===============================================================================
+# xxdiff.t 
+ 
+this all doesn't work, qmake sucks, too limited.
+
+
+# -*- mode: Makefile -*-
+#############################################################################
+#!
+#! $RCSfile$
+#!
+#! This is a tmake template for building Unix applications.
+#!
+#$ IncludeTemplate("app.t");
+
+#
+# Compute current date/time.
+#
+COMPILE_DATE=#$ Now()
+
+#-------------------------------------------------------------------------------
+# support for documentation transformation
+
+.SUFFIXES: .qml
+
+.qml.h: 
+	sed -e 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
+	echo 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' 
+
+help.o: doc.h
+help.obj: doc.h
+
+# Make the version number dependent on everything, so that we always recompile
+# this file whenever we link, thus updating that number.
+version.o: $(HEADERS) $(SOURCES) $(INTERFACES)
+version.obj: $(HEADERS) $(SOURCES) $(INTERFACES)
+
+
+#
+# Additional dependencies.
+# Note: this is lame, find a better way to do this.  The problem is that tmake
+# does note include dependencies for files it cannot find in the include path.
+#
+cmdline.o: $(YACCOUTH)
+cmdline.obj: $(YACCOUTH)
+
+#===============================================================================
+
+QMAKE_CFLAGS_RELEASE -= -fno-exceptions
+QMAKE_YACC = bison
+QMAKE_YACCFLAGS += --fixed-output-files
 
 # For KDE support, uncomment the following lines:
-#TMAKE_CFLAGS += -DXX_KDE -I/usr/include/kde
-#TMAKE_CXXFLAGS += -DXX_KDE -I/usr/include/kde
-#TMAKE_LIBS += -lkdeui -lkio -lqt-mt
+#QMAKE_CFLAGS += -DXX_KDE -I/usr/include/kde
+#QMAKE_CXXFLAGS += -DXX_KDE -I/usr/include/kde
+#QMAKE_LIBS += -lkdeui -lkio -lqt-mt
 
-debug:TMAKE_CFLAGS += -DXX_DEBUG
-debug:TMAKE_CXXFLAGS += -DXX_DEBUG
+debug:QMAKE_CFLAGS += -DXX_DEBUG
+debug:QMAKE_CXXFLAGS += -DXX_DEBUG
 
 #XX_VERSION=2.5-devel
 XX_VERSION=2.6
 
-TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
-TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
+QMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
+QMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
 
 INCLUDEPATH += .
 
-LEXYACC  = resParser
-LEXYACC_OBJ  = $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
-TMAKE_CLEAN += $$LEXYACC_OBJ doc.h
+QMAKE_CLEAN += doc.h
 
 # Needed for Windows compile?
 #REQUIRES=full-config
@@ -54,66 +105,66 @@ TMAKE_CLEAN += $$LEXYACC_OBJ doc.h
 #
 
 win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
-#win32-msvc:TMAKE_CFLAGS += -GX
-win32-msvc:TMAKE_CXXFLAGS += -GX
+#win32-msvc:QMAKE_CFLAGS += -GX
+win32-msvc:QMAKE_CXXFLAGS += -GX
 win32-msvc:INCLUDEPATH += winfixes
 
-#win32-msvc:TMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
+#win32-msvc:QMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
 
 #
 # irix-n32
 #
 
-irix-n32:TMAKE_CXXFLAGS += -woff 1375,1424,3201,1209,1110 -LANG:std
-irix-n32:TMAKE_CXXFLAGS += -DCOMPILER_MIPSPRO
+irix-n32:QMAKE_CXXFLAGS += -woff 1375,1424,3201,1209,1110 -LANG:std
+irix-n32:QMAKE_CXXFLAGS += -DCOMPILER_MIPSPRO
 
 # always disable full warnings for C code.
-irix-n32:TMAKE_CFLAGS_WARN_ON =
-irix-n32:TMAKE_CC = cc
-irix-n32:TMAKE_CFLAGS = $$TMAKE_CXXFLAGS
+irix-n32:QMAKE_CFLAGS_WARN_ON =
+irix-n32:QMAKE_CC = cc
+irix-n32:QMAKE_CFLAGS = $$QMAKE_CXXFLAGS
 
-irix-n32:TMAKE_MOC = ${QTDIR}/bin/moc
+irix-n32:QMAKE_MOC = ${QTDIR}/bin/moc
 
-irix-n32:TMAKE_LIBS += -lC -lCio -lm
-irix-n32:TMAKE_LIBDIR_QT = $(QTDIR)/lib32
-irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib32
+irix-n32:QMAKE_LIBS += -lC -lCio -lm
+irix-n32:QMAKE_LIBDIR_QT = $(QTDIR)/lib32
+irix-n32:QMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib32
 
-irix-n32:TMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
+irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 
 
 #
 # linux-g++
 #
 
-linux-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+linux-g++:QMAKE_CXXFLAGS += -DCOMPILER_GNU
 
 # debugging memory problems
-#linux-g++:TMAKE_CXXFLAGS += -fcheck-memory-usage
-#linux-g++:TMAKE_LIBS += -lmpatrol -lbfd -liberty
+#linux-g++:QMAKE_CXXFLAGS += -fcheck-memory-usage
+#linux-g++:QMAKE_LIBS += -lmpatrol -lbfd -liberty
 
 #
 # solaris-cc
 #
 
-solaris-cc:TMAKE_CXXFLAGS += -DCOMPILER_SUNWSPRO
+solaris-cc:QMAKE_CXXFLAGS += -DCOMPILER_SUNWSPRO
 
 #
 # aix-xlc
 #
 
-aix-xlc:TMAKE_CXXFLAGS += -DCOMPILER_AIXXLC
+aix-xlc:QMAKE_CXXFLAGS += -DCOMPILER_AIXXLC
 
 #
 # osf1-g++
 #
 
-osf1-g++:TMAKE_CXXFLAGS += -DCOMPILER_GNU
+osf1-g++:QMAKE_CXXFLAGS += -DCOMPILER_GNU
 
 
 # Add diff files to link against directly
 DIFFUTILS_DIR = ../diffutils-2.7
 
-# TMAKE_LIBS +=  \
+# QMAKE_LIBS +=  \
 # 	$$DIFFUTILS_DIR/analyze.o \
 # 	$$DIFFUTILS_DIR/cmpbuf.o \
 # 	$$DIFFUTILS_DIR/dir.o \
@@ -215,6 +266,14 @@ INTERFACES = \
 	markersWidgetBase.ui \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
+
+LEXSOURCES = resParser.l
+
+YACCSOURCES = resParser.y
+
+resParser.o: resParser_lex.cpp
+
+
 
 TARGET = xxdiff
 

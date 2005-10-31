@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_mips_tardist 490 2002-02-07 23:39:07Z blais $
+# $RCSfile$
 #
 
 if [ ! -d "tools" ]; then

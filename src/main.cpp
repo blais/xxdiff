@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: main.cpp 501 2002-02-12 02:32:31Z blais $
- * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,13 +70,14 @@ int main( int argc, char** argv, char** envp )
          int qtargc;
          char** qtargv;
          cmdline.getQtOptions( qtargc, qtargv );
-
-         // Create application and connect.
+         
+	 // Create application and connect.
          XxApp app( qtargc, qtargv, cmdline );
-
-         // Run event loop.
+         
+	 // Run event loop.
          app.exec();
-         retval = app.getReturnValue();
+         
+	 retval = app.getReturnValue();
       }
       else {
          retval = 0;

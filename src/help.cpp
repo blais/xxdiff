@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: help.cpp 501 2002-02-12 02:32:31Z blais $
- * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 #include <resources.h>
 #include <cmdline.h>
 #include <resParser.h>
+
+#include <kdeSupport.h>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
 #ifndef WINDOWS
@@ -185,12 +187,12 @@ QString formatOptionsQml(
    QString outs;
    QTextOStream oss( &outs );
 
-   oss << "<table cellpadding=5 width=100%>" << endl << endl;
+   oss << "<table cellpadding=5 width=\"100%\">" << endl << endl;
    for ( int ii = 0; ii < nbOptions; ++ii ) {
       oss << "<tr>" << endl;
 
       // Output option name.
-      oss << "<td width=30%><tt>";
+      oss << "<td width=\"30%\"><tt>";
       oss << "--" << options[ii]._longname;
       if ( options[ii]._shortname != 0 ) {
          oss << ", -" << options[ii]._shortname;
@@ -220,14 +222,22 @@ QString formatOptionsQml(
 
 // <summary> the about dialog </summary>
 
+#ifdef XX_KDE
+class XxAboutDialog : public KAboutApplication {
+#else
 class XxAboutDialog : public QMessageBox {
+#endif
 
 public:
 
    /*----- member functions -----*/
 
    // Constructor.
+#ifdef XX_KDE
+   XxAboutDialog( QWidget* parent, const KAboutData* aboutData );   
+#else   
    XxAboutDialog( QWidget* parent, QString& text );
+#endif
 
    // See base class.
    virtual void done( int r );
@@ -236,6 +246,16 @@ public:
 
 //------------------------------------------------------------------------------
 //
+
+#ifdef XX_KDE
+
+XxAboutDialog::XxAboutDialog( QWidget* parent, const KAboutData* aboutData ) :
+   KAboutApplication(aboutData, parent)
+{
+}
+
+#else
+
 XxAboutDialog::XxAboutDialog( QWidget* parent, QString& text ) :
    QMessageBox( 
       "About xxdiff.", text, QMessageBox::Information, 
@@ -245,6 +265,8 @@ XxAboutDialog::XxAboutDialog( QWidget* parent, QString& text ) :
    QPixmap pm_xxdiff_logo( const_cast<const char**>( xxdiff_xpm ) );
    setIconPixmap( pm_xxdiff_logo );
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 //
@@ -283,12 +305,12 @@ XxManPageDialog::XxManPageDialog(
    QDialog( parent )
 {
    QVBoxLayout* toplay = new QVBoxLayout( this );
-   QTextBrowser* tv = new QTextBrowser( this, "name" );
+   QkTextBrowser* tv = new QkTextBrowser( this, "name" );
    tv->setText( text, QString::null );
    tv->setMinimumSize( 500, 700 );
    toplay->addWidget( tv );
    
-   QPushButton* b1 = new QPushButton( "Close", this );
+   QkPushButton* b1 = new QkPushButton( "Close", this );
    b1->setDefault( true );
    toplay->addWidget( b1 );
    connect( b1, SIGNAL(clicked()), this, SLOT(accept()) );
@@ -457,16 +479,46 @@ QString XxHelp::getManual()
 //
 QDialog* XxHelp::getAboutDialog( QWidget* parent )
 {
+#ifdef XX_KDE
+   
+   KAboutData* aboutData = new KAboutData(
+      xx_name,
+      xx_name,
+      xx_version,
+      xx_description,
+      KAboutData::License_GPL_V2,
+      xx_copyright,
+      NULL,
+      xx_homepage,
+      xx_bugs_email);
+
+   aboutData->addAuthor(
+      "Martin Blais",
+      "Original author, core developer, and maintainer",
+      "blais@iro.umontreal.ca",
+      "http://www.iro.umontreal.ca/~blais/");
+   aboutData->addAuthor("Trevor Harmon", "KDE port", "trevor@vocaro.com");
+   
+   QDialog* box = new XxAboutDialog( parent, aboutData );
+
+   delete aboutData;
+   
+#else
+   
    QString text;
    QTextOStream oss( &text );
-   oss << "xxdiff" << endl 
+   oss << xx_name << endl 
        << endl
-       << "A graphical file comparator and merge tool." << endl
+       << xx_description << endl
        << endl
        << "Author: Martin Blais <blais@iro.umontreal.ca>" << endl
-       << "Home page: http://xxdiff.sourceforge.net" << endl
+       << xx_homepage << endl
        << "Version: " << getVersion() << endl;
+
    QDialog* box = new XxAboutDialog( parent, text );
+
+#endif
+   
    return box;
 }
 

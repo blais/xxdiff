@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: resParser.l 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 
 %}
 
-geomspec	[0-9]+x[0-9]+([+-][0-9]+)?([+-][0-9]+)?
+geomspec	([0-9]+x[0-9]+)?([+-][0-9]+)?([+-][0-9]+)?
 string		\"([^"]|\\.)*\"
 number		[0-9]+
 id              [a-zA-Z][a-zA-Z0-9]*
@@ -70,6 +70,7 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    }
    else {
       ::strncpy( lexerBuffer, yytext, len );
+      lexerBuffer[ len ] = 0;
    }
    yylval->str = lexerBuffer;
    BEGIN(INITIAL);

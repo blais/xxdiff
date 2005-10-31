@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: scrollView.cpp 501 2002-02-12 02:32:31Z blais $
- * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -195,13 +195,21 @@ uint XxScrollView::getHorizontalPos() const
 //
 void XxScrollView::adjustScrollbars()
 {
-   //
-   // Horizontal scrollbar.
-   //
-
    // Compute the maximum of the text widths here, because the text widths may
    // vary depending on the varying widths of the lineNumbers widget.
    QSize displaySize = computeDisplaySize();
+
+   adjustHorizontalScrollbars( displaySize );
+   adjustVerticalScrollbars( displaySize );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxScrollView::adjustHorizontalScrollbars( const QSize& displaySize )
+{
+   //
+   // Horizontal scrollbar.
+   //
 
    uint displayWidth = displaySize.width();
    uint textWidth = _app->getTextWidth();
@@ -229,7 +237,12 @@ void XxScrollView::adjustScrollbars()
          // Note: this will indirectly trigger a redraw.
       }
    }
+}
 
+//------------------------------------------------------------------------------
+//
+void XxScrollView::adjustVerticalScrollbars( const QSize& displaySize )
+{
    //
    // Vertical scrollbar.
    //

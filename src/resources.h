@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: resources.h 527 2002-02-25 06:57:14Z blais $
- * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -205,6 +205,7 @@ enum XxAccel {
 // Colors.
 enum XxColor {
    COLOR_SAME,
+   COLOR_SAME_BLANK,           // (when blank side, from ignore-blank-lines)
 
    COLOR_INSERT,               // A in A--, -A-, --A blocks.
    COLOR_INSERT_BLANK,         // - in A--, -A-, --A blocks.
@@ -235,6 +236,11 @@ enum XxColor {
    COLOR_SELECTED,             // selected text.
    COLOR_SELECTED_SUP,         // (shadowed)
                                
+   COLOR_IGNORE_DISPLAY,       // ignored for display purposes.
+   COLOR_IGNORE_DISPLAY_SUP,   // (shadowed)
+   COLOR_IGNORE_DISPLAY_ONLY,  // (when other is blank)
+   COLOR_IGNORE_DISPLAY_NONLY, // (when blank)
+
    COLOR_DELETED,              // deleted text.
    COLOR_DELETED_SUP,          // (shadowed)
                                
@@ -351,11 +357,18 @@ public:
    // Preferred geometry (on startup).
    // <group>
    // Returns false on failure to parse string.
+   static const QRect& getDefaultGeometry();
    const QRect& getPreferredGeometry() const;
    void setPreferredGeometry( const QRect& );
 
    bool getMaximize() const;
    void setMaximize( bool fs );
+   // </group>
+
+   // Style key (identifying string).
+   // <group>
+   const QString& getStyleKey() const;
+   void setStyleKey( const QString& );
    // </group>
 
    // Accelerators.
@@ -576,6 +589,7 @@ private:
    /*----- data members -----*/
 
    QRect        _preferredGeometry;
+   QString      _styleKey;
    bool         _maximize;
    int          _accelerators[ ACCEL_LAST ];
    QFont        _fontApp;
@@ -611,6 +625,10 @@ private:
    char*        _hdLineBuf0;
    char*        _hdLineBuf1;
    // </group>
+
+   /*----- static data members -----*/
+
+   static QRect _defaultGeometry;
 
 };
 

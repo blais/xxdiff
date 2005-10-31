@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: markers.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <markersFileDialog.h>
+#include <markers.h>
 
 #include <qfiledialog.h>
 #include <qurloperator.h>
@@ -37,6 +37,9 @@
 #include <qbuttongroup.h>
 #include <qlabel.h>
 #include <qcheckbox.h>
+
+#include <qlayout.h>
+#include <qpushbutton.h>
 
 XX_NAMESPACE_BEGIN
 
@@ -132,6 +135,107 @@ QString XxMarkersWidget::getConditionalVariable3() const
    return _lineeditConditional3->text();
 }
 
+/*==============================================================================
+ * CLASS XxMarkersDialog
+ *============================================================================*/
+
+//------------------------------------------------------------------------------
+//
+XxMarkersDialog::XxMarkersDialog(
+   QWidget*    parent,
+   const char* name,
+   const bool  threeWay
+) :
+   BaseClass( parent, name, true )
+{
+   QVBoxLayout* vlayout;
+   QHBoxLayout* hlayout;
+
+   //resize( 627, 262 ); 
+   //setCaption( trUtf8( "Form1" ) );
+   vlayout = new QVBoxLayout( this, 11, 6, "vlayout"); 
+
+   _markersWidget = new XxMarkersWidget( this, threeWay );
+   vlayout->addWidget( _markersWidget );
+
+   hlayout = new QHBoxLayout( 0, 0, 6, "hlayout");
+   QSpacerItem* spacer =
+      new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
+   hlayout->addItem( spacer );
+
+   _buttonOk = new QPushButton( this, "_buttonOk" );
+   _buttonOk->setText( trUtf8( "Ok" ) );
+   _buttonOk->setDefault( TRUE );
+   hlayout->addWidget( _buttonOk );
+   QSpacerItem* spacer_2 =
+      new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
+   hlayout->addItem( spacer_2 );
+
+   _buttonCancel = new QPushButton( this, "_buttonCancel" );
+   _buttonCancel->setText( trUtf8( "Cancel" ) );
+   hlayout->addWidget( _buttonCancel );
+   QSpacerItem* spacer_3 =
+      new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
+   hlayout->addItem( spacer_3 );
+   vlayout->addLayout( hlayout );
+
+   QObject::connect( _buttonOk, SIGNAL(clicked()), this, SLOT(accept()) );
+   QObject::connect( _buttonCancel, SIGNAL(clicked()), this, SLOT(reject()) );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMarkersDialog::disableCancel()
+{
+   _buttonCancel->setEnabled( false );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMarkersDialog::reject()
+{
+   if ( _buttonCancel->isEnabled() ) {
+      BaseClass::reject();
+   }
+   // else noop.
+}
+
+//------------------------------------------------------------------------------
+//
+bool XxMarkersDialog::getMarkers(
+   QWidget*    parent,
+   const char* name,
+   bool        threeWay,
+   bool&       useConditionals,
+   bool&       removeEmptyConditionals,
+   QString     conditionals[3],
+   bool        noCancel
+)
+{
+   bool result = false;
+
+   XxMarkersDialog* dlg = new XxMarkersDialog( parent, name, threeWay );
+   if ( noCancel ) {
+      dlg->disableCancel();
+   }
+
+   if ( dlg->exec() == QDialog::Accepted || noCancel ) {
+      result = true;
+   }
+
+   useConditionals = dlg->_markersWidget->useConditionals();
+   if ( useConditionals == true ) {
+      conditionals[0] = dlg->_markersWidget->getConditionalVariable1();
+      conditionals[1] = dlg->_markersWidget->getConditionalVariable2();
+      conditionals[2] = dlg->_markersWidget->getConditionalVariable3();
+   }
+      
+   removeEmptyConditionals = dlg->_markersWidget->removeEmptyConditionals();
+
+   delete dlg;
+
+   return result;
+}
 
 /*==============================================================================
  * CLASS XxMarkersFileDialog

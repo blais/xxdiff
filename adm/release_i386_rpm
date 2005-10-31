@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_i386_rpm 495 2002-02-09 20:48:11Z blais $
+# $RCSfile$
 #
 
 if [ ! -d "tools" ]; then

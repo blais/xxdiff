@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: merged.h 525 2002-02-25 00:17:30Z blais $
- * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,10 @@
 
 #ifndef INCL_XXDIFF_SCROLLVIEW
 #include <scrollView.h>
+#endif
+
+#ifndef INCL_XXDIFF_KDESUPPORT
+#include <kdeSupport.h>
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
@@ -123,13 +127,13 @@ private:
 
 // <summary> a main window with merged frame inside, and menus </summary>
 
-class XxMergedWindow : public QMainWindow {
+class XxMergedWindow : public QkMainWindow {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef QMainWindow BaseClass;
+   typedef QkMainWindow BaseClass;
 
 public:
 

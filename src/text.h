@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: text.h 450 2001-12-08 01:15:24Z blais $
- * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,4 +134,3 @@ private:
 XX_NAMESPACE_END
 
 #endif
-

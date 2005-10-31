@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: util.cpp 525 2002-02-25 00:17:30Z blais $
- * $Date: 2002-02-24 19:17:30 -0500 (Sun, 24 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ void XxUtil::copyToFile( FILE* fin, FILE* fout )
 //
 int XxUtil::copyFile( const QString& src, const QString& dest )
 {
-   QString cmd = QString("cp ") + src + QString(" ") + dest;
+   QString cmd = QString("cp '") + src + QString("' '") + dest + QString("'");
 
    FILE* f = popen( cmd.latin1(), "r" );
    int r = pclose( f );
@@ -159,7 +159,7 @@ int XxUtil::removeFile( const QString& src )
 //
 bool XxUtil::testFile(
    const QString& filename,
-   const bool     testAscii,
+   bool     testAscii,
    bool&          isDirectory
 )
 {
@@ -211,8 +211,8 @@ bool XxUtil::isAsciiText( const QString& filename )
    bytes = read( fd, (void *)buffer, 1024 );
    close( fd );
    
-   // Here's our current looser definition of an ascii file: on the file line of
-   // the file there must not be any non-ascii character.
+   // Here's our current looser definition of an ascii file: on the first line
+   // of the file there must not be any non-ascii character.
    for ( i = 0; i < bytes; i++ ) {
       if ( buffer[i] == '\n' ) {
          break;
@@ -235,16 +235,6 @@ void XxUtil::spawnCommand(
 )
 {
    XX_ASSERT( argv );
-
-/*#define DEBUG_TRACE_COMMAND*/
-#ifdef DEBUG_TRACE_COMMAND
-   QString command;
-   const char** arg;
-   for ( arg = argv; *arg != 0; ++arg ) {
-      command += QString(*arg) + QString(" ");
-   }
-   XX_TRACE( "Command: " << command.latin1() );
-#endif   
 
 #ifndef WINDOWS
    
@@ -386,6 +376,13 @@ void XxUtil::spawnCommand(
 
 #else
 
+   QString command;
+   const char** arg;
+   for ( arg = argv; *arg != 0; ++arg ) {
+      command += QString(*arg) + QString(" ");
+   }
+   XX_TRACE( "Command: " << command.latin1() );
+
 //    /*
 //     * N**xed up version with Windows calls. Consider yourself lucky if this
 //     * works even just once.
@@ -405,6 +402,7 @@ void XxUtil::spawnCommand(
 //    }
 
    FILE* outputf;
+   FILE* errorf;
    
    /*
     * Run command so that it writes its output to a pipe. Open this pipe with
@@ -413,6 +411,7 @@ void XxUtil::spawnCommand(
    if( (outputf = popen( command.latin1(), "rt" )) == NULL ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
+   errorf = stderr;
 
 #if 0 
    /* 
@@ -428,7 +427,7 @@ void XxUtil::spawnCommand(
 
    /* Close pipe and print return value of outputf. */
    *outf = outputf;
-   *errf = 0;
+   *errf = errorf;
 //   printf( "\nProcess returned %d\n", pclose( outputf ) );
 // FIXME todo, check result value as well
 

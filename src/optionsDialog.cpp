@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: optionsDialog.cpp 476 2002-02-05 08:14:20Z blais $
- * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@
 #include <resources.h>
 #include <diffs.h>
 #include <app.h>
+
+#include <kdeSupport.h>
 
 #include <qtabwidget.h>
 #include <qtextview.h>
@@ -434,11 +436,11 @@ void XxOptionsDialog::synchronize()
 
    _fontApp = resources.getFontApp();
    _labelFontApp->setFont( _fontApp );
-   _labelFontAppName->setText( _fontApp.rawName() );
+   _labelFontAppName->setText( getFontDisplayText(_fontApp) );
 
    _fontText = resources.getFontText();
    _labelFontText->setFont( _fontText );
-   _labelFontTextName->setText( _fontText.rawName() );
+   _labelFontTextName->setText( getFontDisplayText(_fontText) );
 
    //---------------------------------------------------------------------------
    // Colors
@@ -774,15 +776,23 @@ void XxOptionsDialog::editFontApp()
    const XxResources& resources = _app->getResources();
 
    bool ok;
-   QFont newFont =
+   QFont newFont;
+   
+#ifdef XX_KDE
+   newFont = resources.getFontApp();
+   ok = KFontDialog::getFont( newFont, false, this ) == QDialog::Accepted;
+#else
+   newFont =
       QFontDialog::getFont( &ok, resources.getFontApp(), this, "font_dialog" );
+#endif
+
    if ( ok ) {
       if ( 
          !XxResources::compareFonts( newFont, resources.getFontApp() )
       ) {
          _fontApp = newFont;
          _labelFontApp->setFont( _fontApp );
-         _labelFontAppName->setText( _fontApp.rawName() );
+         _labelFontAppName->setText( getFontDisplayText( _fontApp ) );
       }
    }
 }
@@ -794,15 +804,23 @@ void XxOptionsDialog::editFontText()
    const XxResources& resources = _app->getResources();
 
    bool ok;
-   QFont newFont =
+   QFont newFont;
+   
+#ifdef XX_KDE
+   newFont = resources.getFontText();
+   ok = KFontDialog::getFont( newFont, false, this ) == QDialog::Accepted;
+#else
+   newFont =
       QFontDialog::getFont( &ok, resources.getFontText(), this, "font_dialog" );
+#endif
+   
    if ( ok ) {
       if ( 
          !XxResources::compareFonts( newFont, resources.getFontText() )
       ) {
          _fontText = newFont;
          _labelFontText->setFont( _fontText );
-         _labelFontTextName->setText( _fontText.rawName() );
+         _labelFontTextName->setText( getFontDisplayText( _fontText ) );
       }
    }
 }
@@ -819,9 +837,15 @@ void XxOptionsDialog::editColorFore()
       static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
    XX_ASSERT( coli );
 
-   QColor newColor =
-      QColorDialog::getColor( coli->_foreColor, this, "color_dialog" );
-   
+#ifdef XX_KDE
+   QColor newColor = coli->_foreColor;
+   if ( KColorDialog::getColor( newColor, this ) == QDialog::Rejected ) {
+      newColor = coli->_foreColor;
+   }
+#else
+   QColor newColor = QColorDialog::getColor( coli->_foreColor, this );
+#endif
+      
    if ( newColor.isValid() && newColor != coli->_foreColor ) {
       coli->_foreColor = newColor;
       coli->_modified = true;
@@ -843,8 +867,14 @@ void XxOptionsDialog::editColorBack()
       static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
    XX_ASSERT( coli );
 
-   QColor newColor =
-      QColorDialog::getColor( coli->_backColor, this, "color_dialog" );
+#ifdef XX_KDE
+   QColor newColor = coli->_backColor;
+   if ( KColorDialog::getColor( newColor, this ) == QDialog::Rejected ) {
+      newColor = coli->_backColor;
+   }
+#else
+   QColor newColor = QColorDialog::getColor( coli->_backColor, this );
+#endif
    
    if ( newColor.isValid() && newColor != coli->_backColor ) {
       coli->_backColor = newColor;
@@ -980,5 +1010,43 @@ bool XxOptionsDialog::maybeSetCommand(
    return false;
 }
 
-XX_NAMESPACE_END
+//------------------------------------------------------------------------------
+//
+QString XxOptionsDialog::getFontDisplayText(
+      const QFont& font
+) const
+{
+   QFontInfo fontInfo( font );
+   QString displayText;
+   
+   displayText = "Font: ";
+   displayText += fontInfo.family();
+   displayText += "  Size: ";
+   displayText += QString::number( fontInfo.pointSize() );
+   displayText += "  Style: ";
+   
+   if ( !fontInfo.bold() && !fontInfo.italic() )
+   {
+      displayText += "Regular";
+   }
+   else if ( fontInfo.bold() && !fontInfo.italic() )
+   {
+      displayText += "Bold";
+   }
+   else if ( fontInfo.bold() && !fontInfo.italic() )
+   {
+      displayText += "Italic";
+   }
+   else if ( fontInfo.bold() && !fontInfo.italic() )
+   {
+      displayText += "Bold + Italic";
+   }
+   else
+   {
+      displayText += "(unknown)";
+   }
+   
+   return displayText;
+}
 
+XX_NAMESPACE_END

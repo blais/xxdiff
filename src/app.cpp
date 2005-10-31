@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: app.cpp 533 2002-02-27 03:01:18Z blais $
- * $Date: 2002-02-26 22:01:18 -0500 (Tue, 26 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@
 #include <suicideMessageBox.h>
 #include <optionsDialog.h>
 #include <searchDialog.h>
-#include <markersFileDialog.h>
+#include <markers.h>
 #include <resParser.h>
 #include <central.h>
 
@@ -53,7 +53,7 @@
 #include <qlayout.h>
 #include <qscrollbar.h>
 #include <qlabel.h>
-#include <qsgistyle.h>
+#include <qstylefactory.h>
 #include <qfont.h>
 #include <qmessagebox.h>
 #include <qfiledialog.h>
@@ -68,6 +68,11 @@
 #include <qfile.h>
 #include <qsplitter.h>
 #include <qvaluelist.h>
+#include <qregexp.h>
+
+#ifdef XX_KDE
+#include <kmessagebox.h>
+#endif
 
 #include <exception>
 #include <fstream>
@@ -165,7 +170,7 @@ enum MenuIds {
 // We keep this object around because we might eventually override some of the
 // main window methods.
 
-class XxMainWindow : public QMainWindow {
+class XxMainWindow : public QkMainWindow {
 
 public:
 
@@ -197,7 +202,7 @@ XxMainWindow::XxMainWindow(
    const char* name, 
    WFlags      f
 ) :
-   QMainWindow( parent, name, f ),
+   QkMainWindow( parent, name, f ),
    _app( app )
 {}
 
@@ -221,7 +226,11 @@ QSocketNotifier* XxApp::_socketNotifier = 0;
 //------------------------------------------------------------------------------
 //
 XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
+#ifdef XX_KDE
+   KApplication( argc, argv, "xxdiff" ),
+#else
    QApplication( argc, argv ),
+#endif
    _isUICreated( false ),
    _returnValue( 0 ),
    _diffErrorsMsgBox( 0 ),
@@ -235,18 +244,22 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _resources( 0 ),
    _cmdline( cmdline )
 {
-   // By default, if not specified, force SGI style.
-   if ( _cmdline._forceStyle == false ) {
-      _style = new QSGIStyle;
-      setStyle( _style );
-   }
-
    // Read in the resources and create resources object.
    _resources = buildResources();
 
+#ifndef XX_KDE
+   // By default, if not specified, force SGI style.
+   if ( _cmdline._forceStyle == false ) {
+      _style = QStyleFactory::create( _resources->getStyleKey() );
+      setStyle( _style );
+   }
+#endif
+   
+#ifndef XX_KDE
    if ( _cmdline._forceFont == false ) {
       setFont( _resources->getFontApp(), true );
    }
+#endif
    
    // Read in the file names.
    QString filenames[3];
@@ -618,6 +631,7 @@ void XxApp::createUI()
    _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
    _remUnselView->setAlignment( Qt::AlignCenter );
    _overview = new XxOverview( this, _central, _overviewArea, "overview" );
+   _overviewArea->setFixedWidth( _overview->width() );
 
    QVBoxLayout* overviewLayout =
       new QVBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
@@ -712,6 +726,9 @@ void XxApp::createUI()
       togglePopupMergedView();
    }
 
+   // Connect closing window to quit().
+   connect( this, SIGNAL(lastWindowClosed()), this, SLOT(quit()) );
+
    //
    // Show it!
    //
@@ -724,10 +741,13 @@ void XxApp::createUI()
 
 //------------------------------------------------------------------------------
 //
-QToolBar* XxApp::createToolbar()
+QkToolBar* XxApp::createToolbar()
 {
+#ifdef XX_KDE
+   KToolBar* toolbar = new KToolBar( _mainWindow, QMainWindow::Top );
+#else
    QToolBar* toolbar = new QToolBar( "Tools", _mainWindow );
-   //QToolButton* tb;
+#endif
    
    QPixmap pmSaveAsMerged( 
       const_cast<const char**>( save_as_merged_xpm )
@@ -969,7 +989,7 @@ void XxApp::createOnContextHelp()
 void XxApp::createMenus()
 {
    // File menu
-   QPopupMenu* fileMenu = new QPopupMenu;
+   QkPopupMenu* fileMenu = new QkPopupMenu;
    fileMenu->insertItem( 
       "Replace left file...", this, SLOT(openLeft()), 
       _resources->getAccelerator( ACCEL_OPEN_LEFT ) 
@@ -1064,7 +1084,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Edit menu
-   QPopupMenu* editMenu = new QPopupMenu;
+   QkPopupMenu* editMenu = new QkPopupMenu;
    editMenu->insertItem( 
       "Search...", this, SLOT(search()),
       _resources->getAccelerator( ACCEL_SEARCH ) 
@@ -1090,7 +1110,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // View menu
-   QPopupMenu* viewMenu = new QPopupMenu;
+   QkPopupMenu* viewMenu = new QkPopupMenu;
    if ( _filesAreDirectories == true ) {
       _menuids[ ID_View_DiffFilesAtCursor ] = viewMenu->insertItem( 
          "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
@@ -1136,7 +1156,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Global menu
-   QPopupMenu* globalMenu = new QPopupMenu;
+   QkPopupMenu* globalMenu = new QkPopupMenu;
    globalMenu->insertItem( 
       "Select left", this, SLOT(selectGlobalLeft()),
       _resources->getAccelerator( ACCEL_SELECT_GLOBAL_LEFT ) 
@@ -1197,7 +1217,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Region menu
-   QPopupMenu* regionMenu = new QPopupMenu;
+   QkPopupMenu* regionMenu = new QkPopupMenu;
    regionMenu->insertItem( 
       "Select left", this, SLOT(selectRegionLeft()),
       _resources->getAccelerator( ACCEL_SELECT_REGION_LEFT ) 
@@ -1262,7 +1282,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Line menu
-   QPopupMenu* lineMenu = new QPopupMenu;
+   QkPopupMenu* lineMenu = new QkPopupMenu;
    lineMenu->insertItem( 
       "Select left", this, SLOT(selectLineLeft()),
       _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT ) 
@@ -1289,7 +1309,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Options menu
-   _optionsMenu = new QPopupMenu;
+   _optionsMenu = new QkPopupMenu;
 
    _optionsMenu->insertItem( 
       "Edit diff options...", this, SLOT(editDiffOptions()), 
@@ -1352,7 +1372,7 @@ void XxApp::createMenus()
 
    //---------------------------------------------------------------------------
 
-   _displayMenu = new QPopupMenu;
+   _displayMenu = new QkPopupMenu;
 
    _displayMenu->insertItem( 
       "Edit display options...", this, SLOT(editDisplayOptions()), 
@@ -1364,7 +1384,7 @@ void XxApp::createMenus()
    if ( _filesAreDirectories == false ) {
 
       {
-         _hordiffMenu = new QPopupMenu;
+         _hordiffMenu = new QkPopupMenu;
       
          _menuids[ ID_Hordiff_None ] = _hordiffMenu->insertItem( 
             "None", this, SLOT(hordiffTypeNone()),
@@ -1470,7 +1490,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Windows menu
-   _windowsMenu = new QPopupMenu;
+   _windowsMenu = new QkPopupMenu;
    if ( _filesAreDirectories == false ) {
       _menuids[ ID_TogglePaneMergedView ] = _windowsMenu->insertItem( 
          "Toggle pane merged view", this, SLOT(togglePaneMergedView()),
@@ -1500,7 +1520,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Help menu
-   QPopupMenu* helpMenu = new QPopupMenu;
+   QkPopupMenu* helpMenu = new QkPopupMenu;
    helpMenu->insertItem( 
       "User's manual...", this, SLOT(helpManPage()),
       _resources->getAccelerator( ACCEL_HELP_MAN_PAGE )
@@ -1521,8 +1541,7 @@ void XxApp::createMenus()
 
    //---------------------------------------------------------------------------
 
-   QMenuBar* m = _mainWindow->menuBar();
-   m->setSeparator( QMenuBar::InWindowsStyle );
+   QkMenuBar* m = _mainWindow->menuBar();
    m->insertItem( "&File", fileMenu );
    m->insertItem( "&Edit", editMenu );
    m->insertItem( "V&iew", viewMenu );
@@ -1783,6 +1802,13 @@ bool XxApp::processDiff()
    }
 
    //
+   // Compute ignore-display algorithms on top of the diff process.
+   //
+   if ( _diffs.get() != 0 ) {
+      _diffs->applyPerHunkDisplayIgnore( _nbFiles );
+   }
+
+   //
    // Adjust UI elements
    //
    if ( _diffs.get() != 0 ) {
@@ -1795,9 +1821,11 @@ bool XxApp::processDiff()
       // number of diff lines.
       if ( ! _cmdline._unmerge ) {
          for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+#if 1  // FIXME this is not necessarily true with -B, depending on the implementation (if you display the empty lines then it should be true)
             if ( XxDln( _files[ii]->getNbLines() ) > _diffs->getNbLines() ) {
                throw XxInternalError( XX_EXC_PARAMS );
             }
+#endif
          }
       }
       
@@ -1909,7 +1937,7 @@ QRect XxApp::getMainWindowGeometry() const
 
 //------------------------------------------------------------------------------
 //
-QPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
+QkPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
 {
    if ( _filesAreDirectories == true ) {
       XxDln cursorLine = getCursorLine();
@@ -1970,10 +1998,15 @@ void XxApp::onNbLinesChanged()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::saveToFile( const QString& filename, const bool ask ) 
+bool XxApp::saveToFile(
+   const QString& filename,
+   const bool     ask,
+   const bool     noCancel,
+   const bool     overwrite
+) 
 {
    if ( _diffs.get() == 0 ) {
-      return;
+      return false;
    }
 
    // Check if there are some unselected regions remaining.
@@ -1992,53 +2025,71 @@ void XxApp::saveToFile( const QString& filename, const bool ask )
    bool useConditionals = false;
    bool removeEmptyConditionals = false;
    QString conditionals[3];
-   if ( !allSelected ) {
-
-      f = XxMarkersFileDialog::getSaveFileName( 
-         cleanname, QString::null, _mainWindow, "xxdiff save file",
-         _nbFiles == 3,
-         useConditionals, 
-         removeEmptyConditionals,
-         conditionals
-      );
-      if ( f.isEmpty() ) {
-         // The user cancelled the dialog.
-         return;
+   if ( ask == true ) {
+      if ( !allSelected ) {
+         f = XxMarkersFileDialog::getSaveFileName(
+            cleanname, QString::null, _mainWindow, "xxdiff save file",
+            _nbFiles == 3,
+            useConditionals, 
+            removeEmptyConditionals,
+            conditionals
+         );
+         if ( f.isEmpty() ) {
+            // The user cancelled the dialog.
+            return false;
+         }
       }
-   }
-   else if ( ask == true || !allSelected ) {
-      f = QFileDialog::getSaveFileName( 
-         cleanname, QString::null, _mainWindow, "xxdiff save file"
-      );
-      if ( f.isEmpty() ) {
-         // The user cancelled the dialog.
-         return;
+      else {
+         f = QkFileDialog::getSaveFileName(
+            cleanname, QString::null, _mainWindow
+         );
+         if ( f.isEmpty() ) {
+            // The user cancelled the dialog.
+            return false;
+         }
       }
    }
    else {
       f = cleanname;
+
+      if ( !allSelected ) {
+         bool res = XxMarkersDialog::getMarkers( 
+            _mainWindow, "xxdiff save file",
+            _nbFiles == 3,
+            useConditionals, 
+            removeEmptyConditionals,
+            conditionals,
+            noCancel
+         );
+         if ( !res ) {
+            // The user cancelled the dialog.
+            return false;
+         }
+      }
    }
    XX_ASSERT( !f.isEmpty() );
    
-   // Check for file existence.
-   QFileInfo finfo( f );
-   if ( finfo.exists() ) {        
-      QString msg;
-      if ( finfo.isWritable() ) {
-         msg = QString("File exists, overwrite?");
-      }
-      else {
-         msg = QString("File exists (AND IS NOT WRITABLE), overwrite?");
-      }
+   if ( !overwrite ) {
+      // Check for file existence.
+      QFileInfo finfo( f );
+      if ( finfo.exists() ) {        
+         QString msg;
+         if ( finfo.isWritable() ) {
+            msg = QString("File exists, overwrite?");
+         }
+         else {
+            msg = QString("File exists (AND IS NOT WRITABLE), overwrite?");
+         }
 
-      int resp = QMessageBox::warning( 
-         _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
-      );
-      if ( resp == 1 ) {
-         // User has canceled.
-         return;
+         int resp = QMessageBox::warning( 
+            _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
+         );
+         if ( resp == 1 ) {
+            // User has canceled.
+            return false;
+         }
+         // Continue anyway.
       }
-      // Continue anyway.
    }
    
    // Open a file.
@@ -2070,6 +2121,7 @@ void XxApp::saveToFile( const QString& filename, const bool ask )
    }
 
    _diffs->clearDirty();
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -2216,9 +2268,8 @@ void XxApp::openFile( const XxFno no )
    if ( !isTemporary[no] ) {
       startWith = filenames[no];
    }
-   QString f = QFileDialog::getOpenFileName( 
-      startWith, QString::null, _mainWindow, "xxdiff open file"
-   );
+   QString f = 
+      QkFileDialog::getOpenFileName( startWith, QString::null, _mainWindow );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
       return; 
@@ -2527,8 +2578,8 @@ void XxApp::saveSelectedOnly()
       return;
    }
 
-   QString f = QFileDialog::getSaveFileName( 
-      QString::null, QString::null, _mainWindow, "xxdiff save selected"
+   QString f = QkFileDialog::getSaveFileName(
+      QString::null, QString::null, _mainWindow
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
@@ -2612,33 +2663,63 @@ int XxApp::exec()
    if ( _dontShow ) {
       return _returnValue;
    }
-   return QApplication::exec();
+   return QkApplication::exec();
 }
 
 //------------------------------------------------------------------------------
 //
 void XxApp::quit()
 {
-   // If there are some selected regions, confirm with user (optional).
-   if ( _diffs.get() != 0 ) {
-      if ( _resources->getBoolOpt( BOOL_WARN_ABOUT_UNSAVED ) == true &&
-           _diffs->isDirty() == true &&
-           _diffs->isSomeSelected() == true ) {
-         int resp = QMessageBox::warning( 
-            _mainWindow,
-            "xxdiff",
-            "Some selections changed and unsaved, quit anyway?",
-            "Ok", "Cancel", QString::null, 0, 1
-         );
-         if ( resp == 1 ) {
-            // User has canceled.
-            return;
+   exit( _returnValue );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::exit( int retcode )
+{
+   static bool exited = false;
+   if ( exited == false ) {
+      exited = true;
+   }
+   else {
+      // Avoid lastWindowClosed() to be called again and again.
+      return;
+   }
+
+   // If an output file is request upon exiting, do it here.
+   // This can only be requested from the cmdline.
+   if ( _cmdline._outputOnExit == true ) {
+      QString mergedName = getMergedFilename();
+      if ( ! saveToFile(
+              mergedName, false, !_mainWindow->isVisible(), true
+           ) ) {
+         exited = false;
+         return; // Don't quit! Output *IS* required.
+      }
+   }
+   else {
+      // If there are some selected regions, confirm with user (optional).
+      if ( _diffs.get() != 0 ) {
+         if ( _resources->getBoolOpt( BOOL_WARN_ABOUT_UNSAVED ) == true &&
+              _diffs->isDirty() == true &&
+              _diffs->isSomeSelected() == true ) {
+            int resp = QMessageBox::warning( 
+               _mainWindow,
+               "xxdiff",
+               "Some selections changed and unsaved, quit anyway?",
+               "Ok", "Cancel", QString::null, 0, 1
+            );
+            if ( resp == 1 ) {
+               // User has canceled.
+               exited = false;
+               return;
+            }
+            // Continue anyway.
          }
-         // Continue anyway.
       }
    }
 
-   QApplication::exit( _returnValue );
+   QkApplication::exit( retcode );
 }
 
 //------------------------------------------------------------------------------
@@ -3580,10 +3661,9 @@ void XxApp::helpGenInitFile()
    // Ok, there is something to write, get filename and save to file.
 
    QString f;
-   f = QFileDialog::getSaveFileName( QString( "xxdiffrc" ),
-                                     QString::null,
-                                     _mainWindow,
-                                     "xxdiff save sample" );
+   f = QkFileDialog::getSaveFileName(
+      QString( "xxdiffrc" ), QString::null, _mainWindow
+   );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
       return;

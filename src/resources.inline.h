@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: resources.inline.h 471 2002-01-31 02:42:05Z blais $
- * $Date: 2002-01-30 21:42:05 -0500 (Wed, 30 Jan 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,23 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
+inline const QRect& XxResources::getDefaultGeometry()
+{
+   return _defaultGeometry;
+}
+
+//------------------------------------------------------------------------------
+//
 inline const QRect& XxResources::getPreferredGeometry() const
 {
    return _preferredGeometry;
+}
+
+//------------------------------------------------------------------------------
+//
+inline const QString& XxResources::getStyleKey() const
+{
+   return _styleKey;
 }
 
 //------------------------------------------------------------------------------

@@ -1,0 +1,108 @@
+# File graciously provided by <suamor at users.sourceforge.net>
+
+SOURCES	+= optionsDialog.cpp searchDialog.cpp app.cpp cmdline.cpp suicideMessageBox.cpp main.cpp overview.cpp copyLabel.cpp text.cpp scrollView.cpp central.cpp merged.cpp lineNumbers.cpp util.cpp help.cpp exceptions.cpp builder.cpp builderFiles2.cpp builderFiles3.cpp builderDirs2.cpp builderUnmerge.cpp diffs.cpp hordiffImp.cpp line.cpp buffer.cpp resources.cpp accelUtil.cpp resParser.cpp markersFileDialog.cpp getopt.c getopt1.c version.c 
+HEADERS	+= optionsDialog.h searchDialog.h app.h app.inline.h cmdline.h suicideMessageBox.h defs.h types.h diffs.h diffs.inline.h builder.h builder.inline.h builderFiles2.h builderFiles3.h builderDirs2.h builderUnmerge.h exceptions.h buffer.h buffer.inline.h help.h hordiffImp.h line.h line.inline.h main.h overview.h resParser.h resources.h resources.inline.h accelUtil.h copyLabel.h text.h scrollView.h central.h merged.h lineNumbers.h util.h markersFileDialog.h getopt.h diffutils.h diffutils_hack.h doc.qml version.h 
+
+
+#	diffutils.cpp \
+unix {
+  UI_DIR = .ui
+  MOC_DIR = .moc
+  OBJECTS_DIR = .obj
+}
+
+win32 {
+  debug {
+    CONFIG += console
+    MOC_DIR = ../DEBUG
+    OBJECTS_DIR = ../DEBUG
+  }
+  release {
+    MOC_DIR = ../RELEASE
+    OBJECTS_DIR = ../RELEASE
+  }
+}
+
+release {
+  CONFIG += release
+  DESTDIR = ../RELEASE
+}
+
+debug {
+  CONFIG += debug
+  DESTDIR = ../DEBUG
+}
+
+TRANSLATIONS = xxdiff.ts
+
+
+# Add diff files to link against directly
+DIFFUTILS_DIR = ../diffutils-2.7
+TARGET = xxdiff
+
+#YACCSOURCES=resParser.y
+#LEXSOURCES=resParser.l
+# Unused currently
+#debug:QMAKE_CFLAGS += -DXX_DEBUG
+#debug:QMAKE_CXXFLAGS += -DXX_DEBUG
+#
+#XX_VERSION=2.5
+#
+#QMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION-devel ($(COMPILE_DATE))\""
+#QMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
+#
+#LEXYACC  = resParser
+#LEXYACC_OBJ  = $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
+#QMAKE_CLEAN += $$LEXYACC_OBJ doc.h
+#
+# Needed for Windows compile?
+#REQUIRES=full-config
+#
+#
+# win32-msvc
+#
+#
+win32-msvc:DEFINES += WINDOWS HAVE_STRING_H
+#win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
+#win32-msvc:QMAKE_CFLAGS += -GX
+win32-msvc:QMAKE_CXXFLAGS += -GX
+#win32-msvc:INCLUDEPATH += winfixes
+#
+#win32-msvc:QMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
+
+#
+# linux-g++
+#
+
+#linux-g++:QMAKE_CXXFLAGS += -DCOMPILER_GNU
+
+# debugging memory problems
+#linux-g++:QMAKE_CXXFLAGS += -fcheck-memory-usage
+#linux-g++:QMAKE_LIBS += -lmpatrol -lbfd -liberty
+
+# QMAKE_LIBS +=  \
+# 	$$DIFFUTILS_DIR/analyze.o \
+# 	$$DIFFUTILS_DIR/cmpbuf.o \
+# 	$$DIFFUTILS_DIR/dir.o \
+# 	$$DIFFUTILS_DIR/io.o \
+# 	$$DIFFUTILS_DIR/util.o \
+# 	$$DIFFUTILS_DIR/context.o \
+# 	$$DIFFUTILS_DIR/ed.o \
+# 	$$DIFFUTILS_DIR/ifdef.o \
+# 	$$DIFFUTILS_DIR/normal.o \
+# 	$$DIFFUTILS_DIR/side.o \
+# 	$$DIFFUTILS_DIR/fnmatch.o \
+# 	$$DIFFUTILS_DIR/regex.o \
+# 	$$DIFFUTILS_DIR/version.o \
+# 	$$DIFFUTILS_DIR/diff.o \
+# 	$$DIFFUTILS_DIR/diff3.o
+
+#DEPENDPATH=../../include
+#REQUIRES=large-config
+FORMS	= markersWidgetBase.ui optionsDialogBase.ui searchDialogBase.ui 
+IMAGES	= pixmaps/diff_files.xpm pixmaps/diff_files.xpm pixmaps/next_difference.xpm pixmaps/next_unselected_difference.xpm pixmaps/previous_difference.xpm pixmaps/previous_unselected_difference.xpm pixmaps/save_as.xpm pixmaps/save_as_left.xpm pixmaps/save_as_merged.xpm pixmaps/save_as_middle.xpm pixmaps/save_as_right.xpm pixmaps/search.xpm pixmaps/search_backward.xpm pixmaps/search_forward.xpm pixmaps/select_region_left.xpm pixmaps/select_region_middle.xpm pixmaps/select_region_neither.xpm pixmaps/select_region_right.xpm pixmaps/select_region_unselect.xpm pixmaps/split_swap_join.xpm pixmaps/xxdiff.xpm 
+TEMPLATE	=app
+CONFIG	+= qt warn_on
+INCLUDEPATH	+= . winfixes
+DBFILE	= xxdiff.db
+LANGUAGE	= C++

@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: markers.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *
  ******************************************************************************/
 
-#ifndef INCL_XXDIFF_MARKERSFILEDIALOG
-#define INCL_XXDIFF_MARKERSFILEDIALOG
+#ifndef INCL_XXDIFF_MARKERS
+#define INCL_XXDIFF_MARKERS
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -40,6 +40,12 @@
 #include <qfiledialog.h>
 #define INCL_STD_QFILEDIALOG
 #endif
+
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class QPushButton;
 
 XX_NAMESPACE_BEGIN
 
@@ -90,10 +96,66 @@ public slots:
 };
 
 /*==============================================================================
+ * CLASS XxMarkersDialog
+ *============================================================================*/
+
+// <summary> a dialog for the markers </summary>
+
+class XxMarkersDialog : public QDialog {
+
+   Q_OBJECT
+
+   /*----- types and enumerations -----*/
+
+   typedef QDialog BaseClass;
+
+public:
+
+   /*----- member functions -----*/
+
+   // Constructor.
+   XxMarkersDialog(
+      QWidget*    parent,
+      const char* name,
+      const bool  threeWay
+   );
+
+   // Disable the cancel button.
+   void disableCancel();
+
+   // Method to override the rejection.
+   virtual void reject();
+
+   /*----- static member functions -----*/
+
+   // Run the dialog and get the markers.
+   // Returns true on success.
+   static bool getMarkers(
+      QWidget*    parent,
+      const char* name,
+      bool        threeWay,
+      bool&       useConditionals,
+      bool&       removeEmptyConditionals,
+      QString     conditionals[3],
+      bool        noCancel
+   );
+
+private:
+
+   /*----- data members -----*/
+
+   XxMarkersWidget* _markersWidget;
+   QPushButton*     _buttonOk;
+   QPushButton*     _buttonCancel;
+
+};
+
+
+/*==============================================================================
  * CLASS XxMarkersFileDialog
  *============================================================================*/
 
-// <summary> widget for diff markers </summary>
+// <summary> a file dialog with markers added to it </summary>
 
 class XxMarkersFileDialog : public QFileDialog {
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_bin 481 2002-02-07 07:42:21Z blais $
+# $RCSfile$
 #
 
 if [ ! -d "tools" ]; then

@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: line.cpp 514 2002-02-20 17:09:20Z blais $
- * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,7 +198,8 @@ XxLine::XxLine(
 ) :
    _type( type ),
    _selection( UNSELECTED ),
-   _hunkId( 0 )
+   _hunkId( 0 ),
+   _ignoreDisplay( false )
 {
    _lineNo[0] = fline0;
    _lineNo[1] = fline1;
@@ -209,7 +210,9 @@ XxLine::XxLine(
 #ifdef XX_DEBUG
    switch ( _type ) {
       case SAME:
+#if 0  // FIXME remove, this could not be with -B
          XX_ASSERT( fline0 != -1 && fline1 != -1 /*&& fline2 != -1*/ );
+#endif
          break;
       case DIFF_1:
          XX_ASSERT( fline0 != -1 || fline1 != -1 || fline2 != -1 );
@@ -264,16 +267,14 @@ std::ostream& operator << (
    const XxLine& line 
 )
 {
-   os << "Line: type=";
-   os << typeString[ int( line.getType() ) ] << "  ";
+   os << "Line: type=" << typeString[ int( line.getType() ) ] << "  ";
 
    os << line.getLineNo(0) << "  ";
    os << line.getLineNo(1) << "  ";
    os << line.getLineNo(2) << "  ";
 
-   os << "  Selection=";
-   os << selectionString[ int( line.getSelection() ) ];
-
+   os << "  Selection=" << selectionString[ int( line.getSelection() ) ];
+   os << "  IgnDisp=" << line.getIgnoreDisplay();
    return os;
 }
 
@@ -598,6 +599,7 @@ XxLine XxLine::getSplit( const XxFno no ) const
 
    newline.setSelection( _selection );
    newline.setHunkId( _hunkId );
+   newline.setIgnoreDisplay( _ignoreDisplay );
    return newline;
 }
 
@@ -662,6 +664,7 @@ XxLine XxLine::join(
    }
 
    joined.setHunkId( line1.getHunkId() );
+   joined.setIgnoreDisplay( line1.getIgnoreDisplay() && line2.getIgnoreDisplay() );
    return joined;
 }
 
@@ -717,6 +720,9 @@ XxLine XxLine::join(
       joined.setSelection( ll1.getSelection() );
    }
    joined.setHunkId( ll1.getHunkId() );
+   joined.setIgnoreDisplay( line1.getIgnoreDisplay() && 
+                            line2.getIgnoreDisplay() && 
+                            line3.getIgnoreDisplay() );
    return joined;
 }
 
@@ -727,6 +733,7 @@ XxLine XxLine::getPromoted( Type promoteType ) const
    XxLine nline( promoteType, _lineNo[0], _lineNo[1], _lineNo[2] );
    nline.setSelection( _selection );
    nline.setHunkId( _hunkId );
+   nline.setIgnoreDisplay( _ignoreDisplay );
    return nline;
 }
 
@@ -837,12 +844,21 @@ void XxLine::getLineColorTypeStd(
    }
    // else
 
+   if ( _ignoreDisplay ) {
+      dtype = COLOR_IGNORE_DISPLAY;
+      dtypeSup = COLOR_IGNORE_DISPLAY_SUP;
+      return;
+   }
+
    int lno = mapTypeToFileNo( newType );
 
    switch ( newType ) {
 
       case XxLine::SAME: {
          dtype = dtypeSup = COLOR_SAME;
+         if ( getLineNo(no) == -1 ) {
+            dtype = dtypeSup = COLOR_SAME_BLANK;
+         }
          return;
       }
 

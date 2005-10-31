@@ -1,9 +1,8 @@
 #!/bin/sh
 #
-# $Source$
-# $Id: runtest 534 2002-02-27 03:01:18Z  $
+# $RCSfile$
 #
-# Copyright (c) 2001, Martin Blais. All rights reserved.
+# Copyright (c) 2001-2002, Martin Blais. All rights reserved.
 #
 # This script is my regression tests.  Although every single time I run it i
 # feel I'm doing it for nothing, almost every single time I'll find something

@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: buffer.cpp 527 2002-02-25 06:57:14Z blais $
- * $Date: 2002-02-25 01:57:14 -0500 (Mon, 25 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -266,7 +266,11 @@ void XxBuffer::loadFile( const QFileInfo& finfo )
       throw XxIoError( XX_EXC_PARAMS );
    }
 
-   if ( fread( _buffer, 1, _bufferSize, fp ) != _bufferSize ) {
+   // Use an inegality check here, because under windows the fileinfo size we
+   // get counts the CR-LF for 2 bytes, but once read they are only in for one
+   // byte.
+   uint readBufSize = fread( _buffer, 1, _bufferSize, fp );
+   if ( readBufSize > _bufferSize ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
 

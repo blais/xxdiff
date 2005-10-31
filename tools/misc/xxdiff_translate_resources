@@ -1,7 +1,6 @@
 #!/usr/bin/env python2.1
 #******************************************************************************\
-#* $Id: xxdiff_translate_resources 348 2001-11-06 06:50:46Z blais $
-#* $Date: 2001-11-06 01:50:46 -0500 (Tue, 06 Nov 2001) $
+#* $RCSfile$
 #*
 #* Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #*
@@ -27,7 +26,7 @@ You might have to do some fixing by hand if this doesn't work.
 Use `xxdiff --list-resources' to help yourself.
 """
 
-__version__ = "$Revision: 348 $"
+__version__ = "$Revision: 565 $"
 
 #===============================================================================
 # EXTERNAL DECLARATIONS

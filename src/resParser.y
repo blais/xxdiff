@@ -1,8 +1,8 @@
+/* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
- * $Id: resParser.y 481 2002-02-07 07:42:21Z blais $
- * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
+ * $RCSfile$
  *
- * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+ * Copyright (C) 1999-2002  Martin Blais <blais@iro.umontreal.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,6 @@
  ******************************************************************************/
 
 %{
-#include <qstring.h>
-
 #define RESOURCES  ( static_cast<XxResources*>(resources) )
 
 #define BOOLKWD_BASE                 1000
@@ -50,6 +48,8 @@
 %token       PREFGEOMETRY
 %token <str>   GEOMSPEC
 %token         GEOMFULL
+
+%token       STYLE
 
 %token       ACCEL
 %token <num>   ACCELNAME
@@ -130,6 +130,7 @@ stmts		: /* Empty */
 
 stmt		: error '\n'
 		| prefgeometry
+		| style
 		| accel
 		| color
 		| boolopt
@@ -171,6 +172,23 @@ prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
                    RESOURCES->setMaximize( true );
                 }
 		;
+
+style		: STYLE COLON STRING
+		{
+                   /*printf( "==> style: %s\n", $3 );*/
+                   QStringList styles = QStyleFactory::keys();
+                   QString styleKey( $3 );
+                   if ( styles.find( styleKey ) != styles.end() ) {
+                      RESOURCES->setStyleKey( styleKey );
+                   }
+                   else {
+                      QString err = QString( "Requested style key does not exist." );
+                      err += QString( "\nValid styles are: " );
+                      err += styles.join( ", " );
+                      yyerror( err.latin1() );
+                   }
+                }
+                ;
 
 accel		: ACCEL DOT ACCELNAME COLON STRING
 		{
