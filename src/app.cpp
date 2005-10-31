@@ -2629,9 +2629,9 @@ void XxApp::onRedoDiff()
       bool succ = false; // Do nothing.
 
       // Make backup in case we need to recover.
-      std::auto_ptr<XxBuffer> backup[3];
+      XxBuffer* backup[3];
       for ( int iii = 0; iii < 3; ++iii ) {
-         backup[iii] = _files[iii];
+         backup[iii] = _files[iii].get();
       }
 
       try {
@@ -2734,9 +2734,8 @@ void XxApp::onRedoDiff()
          outputDiffErrors( ex.what() );
          
          // Recover from backup.
-         std::auto_ptr<XxBuffer> backup[3];
          for ( int iii = 0; iii < 3; ++iii ) {
-            _files[iii] = backup[iii];
+            _files[iii].reset( backup[iii] );
          }
 
          return;
