@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: util.h 485 2002-02-07 20:10:05Z blais $
+ * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,6 +34,11 @@
 #ifndef INCL_QT_QSTRING
 #include <qstring.h>
 #define INCL_QT_QSTRING
+#endif
+
+#ifndef INCL_QT_QSTRINGLIST
+#include <qstringlist.h>
+#define INCL_QT_QSTRINGLIST
 #endif
 
 #ifndef INCL_STD_STDIO
@@ -119,12 +124,17 @@ public:
 
    // Note: you have to free() out_args when you're done.
    static int splitArgs( 
-      const QString& command,
-      const char**&  out_args
+      const QString&     command,
+      const QStringList& filenames,
+      const char**&      out_args
    );
 
    // Free args allocated with splitArgs.
    static void freeArgs( const char**& out_args );
+
+   // Remove ClearCase extension to filename if it is present.
+   static QString removeClearCaseExt( const QString& );
+
 
 };
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 446 2001-12-06 06:06:31Z blais $
- * $Date: 2001-12-06 01:06:31 -0500 (Thu, 06 Dec 2001) $
+ * $Id: resources.cpp 486 2002-02-07 21:06:27Z blais $
+ * $Date: 2002-02-07 16:06:27 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -29,12 +29,14 @@
 #include <resources.h>
 #include <optionsDialog.h>
 #include <exceptions.h>
+#include <util.h>
 
 #include <qcolor.h>
 #include <qaccel.h>
 #include <qobject.h>
 #include <qnamespace.h>
 #include <qapplication.h> // to get desktop
+#include <qregexp.h>
 
 #include <iostream>
 #include <string.h> // ::strcmp
@@ -229,6 +231,8 @@ void XxResources::initializeOriginalXdiff()
    //---------------------------------------------------------------------------
 
    _boolOpts[ BOOL_EXIT_ON_SAME ] = false;
+   _boolOpts[ BOOL_EXIT_IF_NO_CONFLICTS ] = false;
+   _boolOpts[ BOOL_SELECT_MERGE ] = false;
    _boolOpts[ BOOL_IGNORE_HORIZONTAL_WS ] = true;
    _boolOpts[ BOOL_FORMAT_CLIPBOARD_TEXT ] = false;
    _boolOpts[ BOOL_IGNORE_ERRORS ] = false;
@@ -239,6 +243,9 @@ void XxResources::initializeOriginalXdiff()
    _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;
    _boolOpts[ BOOL_DIRDIFF_RECURSIVE ] = false;
    _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   _boolOpts[ BOOL_FORCE_SAVE_MERGED_FILE ] = false;
+#endif
 
    //---------------------------------------------------------------------------
 
@@ -322,6 +329,8 @@ void XxResources::initializeOriginalXdiff()
    //---------------------------------------------------------------------------
 
    _showPaneMergedViewPercent = 40;
+
+   _mergedFilename = QString("%L.merge");
 }
 
 //------------------------------------------------------------------------------
@@ -438,6 +447,13 @@ void XxResources::setInitSwitch(
    const int       val
 )
 {
+   // Warn the user that ignoring blank lines is not supported for now.
+   if ( cmdId == CMDSW_FILES_IGNORE_BLANK_LINES && val > 0 ) {
+      std::cerr << "Warning: the IgnoreBlankLines option is not supported "
+                << "in this version." << std::endl;
+      return;
+   }
+
    _initSwitch[ int(cmdId) ] = val;
    emit changed();
 }
@@ -693,6 +709,14 @@ void XxResources::setShowPaneMergedViewPercent( uint p )
       issueWarning( "Maximum pane merged view percent is 100" );
       p = 100;
    }
+   emit changed();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxResources::setMergedFilename( const QString& fn )
+{
+   _mergedFilename = fn;
    emit changed();
 }
 

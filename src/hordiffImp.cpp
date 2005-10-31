@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: hordiffImp.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: hordiffImp.cpp 469 2002-01-30 22:04:41Z blais $
+ * $Date: 2002-01-30 17:04:41 -0500 (Wed, 30 Jan 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -29,8 +29,12 @@
 
 #include <qcstring.h>
 
+#ifndef COMPILER_MIPSPRO
+#include <cctype> // isspace()
+#else
 #include <ctype.h> // isspace()
- 
+#endif
+
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================

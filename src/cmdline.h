@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: cmdline.h 476 2002-02-05 08:14:20Z blais $
+ * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -122,8 +122,8 @@ private:
    QString       _stdinFilename;
    bool          _useRcfile;
    QString       _extraDiffArgs;
+   QString       _mergedFilename;
    QByteArray    _cmdlineResources;
-   bool          _mergeRequested;
 
    int           _nbFilenames;
    QString       _filenames[3];

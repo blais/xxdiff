@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_bin 358 2001-11-07 21:23:34Z blais $
+# $Id: release_bin 481 2002-02-07 07:42:21Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -32,8 +32,11 @@ cp src/xxdiff $ROOT/$PDIR
 
 strip $ROOT/$PDIR/xxdiff
 
+cp src/xxdiff.1 $ROOT/$PDIR
 cp README $ROOT/$PDIR
 cp CHANGES $ROOT/$PDIR
+
+$ROOT/$PDIR/xxdiff --help-html > $ROOT/$PDIR/xxdiff-doc.html
 
 cd ..
 tar cvf - $PDIR | gzip > $PDIR.tar.gz

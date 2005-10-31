@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: builderFiles2.cpp 485 2002-02-07 20:10:05Z blais $
+ * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -122,7 +122,11 @@ bool parseDiffLine(
       type = XxLine::INSERT_2;
       error = false;
    }
-   // else
+   else if ( strncmp( buf, "\\ No newline at end of file", 27 ) == 0 ) {
+      type = XxLine::DIRECTORIES; /* Ignore this line. */
+      error = false;
+   }
+
    return error;
 }
 
@@ -210,15 +214,14 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 {
 //#define XX_INTERNAL_DIFFS
 
-   QString cmd = command;
-   cmd += QString(" ") + path1;
-   cmd += QString(" ") + path2;
+   QStringList filenames;
+   filenames.append( path1 );
+   filenames.append( path2 );
    const char** out_args;
-#ifndef XX_INTERNAL_DIFFS
-   XxUtil::splitArgs( cmd, out_args );
-#else
-   int argc = XxUtil::splitArgs( cmd, out_args );
+#ifdef XX_INTERNAL_DIFFS
+   int argc = 
 #endif
+   XxUtil::splitArgs( command, filenames, out_args );
 
 #ifndef XX_INTERNAL_DIFFS
    FILE* fout;
@@ -345,6 +348,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
             XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
          } break;
 
+         /* Used to ignore a line */
+         case XxLine::DIRECTORIES: {
+         } break;
+
          case XxLine::DIFF_1:
          case XxLine::DIFF_2:
          case XxLine::DIFF_3:
@@ -354,10 +361,12 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          case XxLine::INSERT_3:
          case XxLine::DIFFDEL_1:
          case XxLine::DIFFDEL_2:
-         case XxLine::DIFFDEL_3:
-         case XxLine::DIRECTORIES: {
+         case XxLine::DIFFDEL_3: {
          }
 
+         case XxLine::NB_TYPES: {
+            XX_ABORT();
+         }
       }
    }
    qfout.close();

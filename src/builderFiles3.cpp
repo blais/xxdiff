@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles3.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: builderFiles3.cpp 485 2002-02-07 20:10:05Z blais $
+ * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -285,6 +285,10 @@ bool parseDiffLine(
       checkForCompletion = true;
       error = false;
    }
+   else if ( strncmp( buf, "\\ No newline at end of file", 27 ) == 0 ) {
+      XX_LOCAL_TRACE( "recognized incomplete line marker" );
+      error = false;
+   }
    else {
       PARSE_CHECK( false );
    }
@@ -406,12 +410,12 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    const uint     nbLines3
 )
 {
-   QString cmd = command;
-   cmd += QString(" ") + path1;
-   cmd += QString(" ") + path2;
-   cmd += QString(" ") + path3;
+   QStringList filenames;
+   filenames.append( path1 );
+   filenames.append( path2 );
+   filenames.append( path3 );
    const char** out_args;
-   XxUtil::splitArgs( cmd, out_args );
+   XxUtil::splitArgs( command, filenames, out_args );
 
    FILE* fout;
    FILE* ferr;

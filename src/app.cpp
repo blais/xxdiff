@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 458 2002-01-03 02:48:38Z blais $
- * $Date: 2002-01-02 21:48:38 -0500 (Wed, 02 Jan 2002) $
+ * $Id: app.cpp 487 2002-02-07 22:10:47Z blais $
+ * $Date: 2002-02-07 17:10:47 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -330,28 +330,43 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    }
 
    // Call post creation actions before showing.
-   if ( _cmdline._mergeRequested ) {
+   if ( _resources->getBoolOpt( BOOL_SELECT_MERGE ) ) {
       selectGlobalMerge();
    }
 
-   // Resize the main window before showing it.
-   const QRect& psize = _resources->getPreferredGeometry();
-   if ( _cmdline._forceGeometry == true ) {
-      _mainWindow->show();
+   bool allSelected = true;
+   if ( _diffs.get() != 0 ) {
+      allSelected = _diffs->isAllSelected();
    }
-   else if ( _resources->getMaximize() ) {
-      _mainWindow->showMaximized();
-      // Don't make fullscreen, rather maximized.
-   }
-   else {
-      _mainWindow->resize( psize.size() );
-      _mainWindow->show();
 
-      // Note: positioning has to be done after show().  This results in some
-      // flickering, but there's nothing we can do about it, this is a Qt
-      // limitation.
-      if ( psize.topLeft() != QPoint( -1, -1 ) ) {
-         _mainWindow->move( psize.topLeft() );
+   // Determine if we should not show up.
+   _dontShow =
+      ( _resources->getBoolOpt( BOOL_EXIT_ON_SAME ) && _returnValue == 0 )
+      ||
+      ( _resources->getBoolOpt( BOOL_EXIT_IF_NO_CONFLICTS ) &&
+        allSelected == true );
+
+   if ( !_dontShow ) {
+
+      // Resize the main window before showing it.
+      const QRect& psize = _resources->getPreferredGeometry();
+      if ( _cmdline._forceGeometry == true ) {
+         _mainWindow->show();
+      }
+      else if ( _resources->getMaximize() ) {
+         _mainWindow->showMaximized();
+         // Don't make fullscreen, rather maximized.
+      }
+      else {
+         _mainWindow->resize( psize.size() );
+         _mainWindow->show();
+
+         // Note: positioning has to be done after show().  This results in some
+         // flickering, but there's nothing we can do about it, this is a Qt
+         // limitation.
+         if ( psize.topLeft() != QPoint( -1, -1 ) ) {
+            _mainWindow->move( psize.topLeft() );
+         }
       }
    }
 
@@ -360,8 +375,10 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       _diffErrorsMsgBox = 0; // forget about it, it'll get sad and suicide.
    }
 
-   // Update the widgets the first time.
-   updateWidgets();
+   if ( !_dontShow ) {
+      // Update the widgets the first time.
+      updateWidgets();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -657,95 +674,109 @@ QToolBar* XxApp::createToolbar()
    QToolBar* toolbar = new QToolBar( "Tools", _mainWindow );
    //QToolButton* tb;
    
-   QPixmap pm_save_as_left( 
+   QPixmap pmSaveAsMerged( 
+      const_cast<const char**>( save_as_merged_xpm )
+   );
+   /*QToolButton* butSaveAsMerged = */new QToolButton( 
+      pmSaveAsMerged, 
+      "Save as merged", 
+      "Save as merged", 
+      this, SLOT(saveAsMerged()), toolbar 
+   );
+
+   QPixmap pmSaveAsLeft( 
       const_cast<const char**>( save_as_left_xpm )
    );
-   new QToolButton( 
-      pm_save_as_left, 
+   /*QToolButton* butSaveAsLeft = */new QToolButton( 
+      pmSaveAsLeft, 
       "Save as left", 
       "Save as left", 
       this, SLOT(saveAsLeft()), toolbar 
    );
 
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   /*QToolButton* butSaveAsMiddle = 0;*/
+#endif
    if ( _nbFiles == 3 ) {
-      QPixmap pm_save_as_middle(
+      QPixmap pmSaveAsMiddle(
          const_cast<const char**>( save_as_middle_xpm )
       );
-      new QToolButton( 
-         pm_save_as_middle, 
+      /*butSaveAsMiddle = */new QToolButton( 
+         pmSaveAsMiddle, 
          "Save as middle", 
          "Save as middle", 
          this, SLOT(saveAsMiddle()), toolbar 
       );
    }
 
-   QPixmap pm_save_as_right( 
+   QPixmap pmSaveAsRight( 
       const_cast<const char**>( save_as_right_xpm )
    );
-   new QToolButton( 
-      pm_save_as_right, 
+   /*QToolButton* butSaveAsRight = */new QToolButton( 
+      pmSaveAsRight, 
       "Save as right", 
       "Save as right", 
       this, SLOT(saveAsRight()), toolbar 
    );
 
-   QPixmap pm_save_as_merged( 
-      const_cast<const char**>( save_as_merged_xpm )
-   );
-   new QToolButton( 
-      pm_save_as_merged, 
-      "Save as merged", 
-      "Save as merged", 
-      this, SLOT(saveAsMerged()), toolbar 
-   );
-
-   QPixmap pm_save_as( 
+   QPixmap pmSaveAs( 
       const_cast<const char**>( save_as_xpm )
    );
-   new QToolButton( 
-      pm_save_as,
+   /*QToolButton* butSaveAs = */new QToolButton( 
+      pmSaveAs,
       "Save as ...", 
       "Save as ...", 
       this, SLOT(saveAs()), toolbar 
    );
 
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
+      butSaveAsLeft->setEnabled( false );
+      if ( butSaveAsMiddle ) {
+         butSaveAsMiddle->setEnabled( false );
+      }
+      butSaveAsRight->setEnabled( false );
+      butSaveAs->setEnabled( false );
+   }
+#endif
+
    toolbar->addSeparator();
 
-   QPixmap pm_previous_unselected_difference( 
+   QPixmap pmPreviousUnselectedDifference( 
       const_cast<const char**>( previous_unselected_difference_xpm )
    );
    new QToolButton( 
-      pm_previous_unselected_difference, 
+      pmPreviousUnselectedDifference, 
       "Previous unselected difference", 
       "Previous unselected difference", 
       this, SLOT(previousUnselected()), toolbar 
    );
    
-   QPixmap pm_previous_difference( 
+   QPixmap pmPreviousDifference( 
       const_cast<const char**>( previous_difference_xpm )
    );
    new QToolButton( 
-      pm_previous_difference, 
+      pmPreviousDifference, 
       "Previous difference", 
       "Previous difference", 
       this, SLOT(previousDifference()), toolbar 
    );
 
-   QPixmap pm_next_difference( 
+   QPixmap pmNextDifference( 
       const_cast<const char**>( next_difference_xpm )
    );
    new QToolButton(
-      pm_next_difference, 
+      pmNextDifference, 
       "Next difference",
       "Next difference", 
       this, SLOT(nextDifference()), toolbar
    );
 
-   QPixmap pm_next_unselected_difference( 
+   QPixmap pmNextUnselectedDifference( 
       const_cast<const char**>( next_unselected_difference_xpm )
    );
    new QToolButton( 
-      pm_next_unselected_difference, 
+      pmNextUnselectedDifference, 
       "Next unselected difference", 
       "Next unselected difference", 
       this, SLOT(nextUnselected()), toolbar 
@@ -753,31 +784,31 @@ QToolBar* XxApp::createToolbar()
 
    toolbar->addSeparator();
 
-   QPixmap pm_search( 
+   QPixmap pmSearch( 
       const_cast<const char**>( search_xpm )
    );
    new QToolButton( 
-      pm_search, 
+      pmSearch, 
       "Search", 
       "Search", 
       this, SLOT(search()), toolbar 
    );
       
-   QPixmap pm_search_backward( 
+   QPixmap pmSearchBackward( 
       const_cast<const char**>( search_backward_xpm )
    );
    new QToolButton( 
-      pm_search_backward,
+      pmSearchBackward,
       "Search backward", 
       "Search backward", 
       this, SLOT(searchBackward()), toolbar 
    );
       
-   QPixmap pm_search_forward( 
+   QPixmap pmSearchForward( 
       const_cast<const char**>( search_forward_xpm )
    );
    new QToolButton( 
-      pm_search_forward,
+      pmSearchForward,
       "Search forward", 
       "Search forward", 
       this, SLOT(searchForward()), toolbar 
@@ -786,53 +817,53 @@ QToolBar* XxApp::createToolbar()
    if ( _filesAreDirectories == false ) {
       toolbar->addSeparator();
       
-      QPixmap pm_select_region_left( 
+      QPixmap pmSelectRegionLeft( 
          const_cast<const char**>( select_region_left_xpm )
       );
       new QToolButton( 
-         pm_select_region_left,
+         pmSelectRegionLeft,
          "Select region left", 
          "Select region left", 
          this, SLOT(selectRegionLeft()), toolbar 
       );
       
       if ( _nbFiles == 3 ) {
-         QPixmap pm_select_region_middle( 
+         QPixmap pmSelectRegionMiddle( 
             const_cast<const char**>( select_region_middle_xpm )
          );
          new QToolButton( 
-            pm_select_region_middle,
+            pmSelectRegionMiddle,
             "Select region middle", 
             "Select region middle", 
             this, SLOT(selectRegionMiddle()), toolbar 
          );
       }
 
-      QPixmap pm_select_region_right( 
+      QPixmap pmSelectRegionRight( 
          const_cast<const char**>( select_region_right_xpm )
       );
       new QToolButton( 
-         pm_select_region_right,
+         pmSelectRegionRight,
          "Select region right", 
          "Select region right", 
          this, SLOT(selectRegionRight()), toolbar 
       );
 
-      QPixmap pm_select_region_neither( 
+      QPixmap pmSelectRegionNeither( 
          const_cast<const char**>( select_region_neither_xpm )
       );
       new QToolButton( 
-         pm_select_region_neither,
+         pmSelectRegionNeither,
          "Select region neither", 
          "Select region neither", 
          this, SLOT(selectRegionNeither()), toolbar 
       );
 
-      QPixmap pm_select_region_unselect( 
+      QPixmap pmSelectRegionUnselect( 
          const_cast<const char**>( select_region_unselect_xpm )
       );
       new QToolButton( 
-         pm_select_region_unselect,
+         pmSelectRegionUnselect,
          "Unselect region", 
          "Unselect region", 
          this, SLOT(selectRegionUnselect()), toolbar 
@@ -840,11 +871,11 @@ QToolBar* XxApp::createToolbar()
 
       toolbar->addSeparator();
 
-      QPixmap pm_split_swap_join( 
+      QPixmap pmSplitSwapJoin( 
          const_cast<const char**>( split_swap_join_xpm )
       );
       new QToolButton( 
-         pm_split_swap_join,
+         pmSplitSwapJoin,
          "Split/swap/join", 
          "Split/swap/join", 
          this, SLOT(regionSplitSwapJoin()), toolbar 
@@ -853,11 +884,11 @@ QToolBar* XxApp::createToolbar()
    else {
       toolbar->addSeparator();
       
-      QPixmap pm_diff_files( 
+      QPixmap pmDiffFiles( 
          const_cast<const char**>( diff_files_xpm )
       );
       new QToolButton( 
-         pm_diff_files,
+         pmDiffFiles,
          "Diff files at cursor", 
          "Diff files at cursor", 
          this, SLOT(diffFilesAtCursor()), toolbar 
@@ -895,17 +926,23 @@ void XxApp::createMenus()
       _resources->getAccelerator( ACCEL_OPEN_RIGHT ) 
    );
    fileMenu->insertSeparator();
-   fileMenu->insertItem( 
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   int ids[5];
+#endif
+   /*ids[0] = */fileMenu->insertItem( 
       "Save as left", this, SLOT(saveAsLeft()), 
       _resources->getAccelerator( ACCEL_SAVE_AS_LEFT ) 
    );
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   ids[1] = -1;
+#endif
    if ( _nbFiles == 3 ) {
-      fileMenu->insertItem( 
+      /*ids[1] = */fileMenu->insertItem( 
          "Save as middle", this, SLOT(saveAsMiddle()), 
          _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE ) 
       );
    }
-   fileMenu->insertItem( 
+   /*ids[2] = */fileMenu->insertItem( 
       "Save as right", this, SLOT(saveAsRight()), 
       _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT ) 
    );
@@ -913,14 +950,25 @@ void XxApp::createMenus()
       "Save as merged", this, SLOT(saveAsMerged()), 
       _resources->getAccelerator( ACCEL_SAVE_AS_MERGED ) 
    );
-   fileMenu->insertItem( 
+   /*ids[3] = */fileMenu->insertItem( 
       "Save as...", this, SLOT(saveAs()), 
       _resources->getAccelerator( ACCEL_SAVE_AS ) 
    );
-   fileMenu->insertItem( 
+   /*ids[4] = */fileMenu->insertItem( 
       "Save selected only...", this, SLOT(saveSelectedOnly()), 
       _resources->getAccelerator( ACCEL_SAVE_SELECTED_ONLY ) 
    );
+   
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
+      for ( int ii = 0; ii < 5; ++ii ) {
+         if ( ids[ii] != -1 ) {
+            fileMenu->setItemEnabled( ids[ii], false );
+         }
+      }
+   }
+#endif
+
    fileMenu->insertSeparator();
    fileMenu->insertItem( 
       "Redo diff", this, SLOT(redoDiff()), 
@@ -1895,15 +1943,7 @@ void XxApp::saveToFile( const QString& filename, const bool ask )
       setCursorLine( nextNo, true );
    }
 
-   // Remove ClearCase extended syntax if it is there.
-   int bpos = filename.find( "@@" );
-   QString cleanname;
-   if ( bpos != -1 ) {
-      cleanname = filename.mid( 0, bpos );
-   }
-   else {
-      cleanname = filename;
-   }
+   QString cleanname = XxUtil::removeClearCaseExt( filename );
    
    QString f;
    bool useConditionals = false;
@@ -2071,9 +2111,10 @@ void XxApp::editFile( const QString& filename )
       );
    }
 
-   command += QString(" ") + filename;
+   QStringList filenames;
+   filenames.append( filename );
    const char** args;
-   XxUtil::splitArgs( command, args );
+   XxUtil::splitArgs( command, filenames, args );
 
    try {
       XxUtil::spawnCommand( args, handlerSIGCHLD );
@@ -2292,8 +2333,16 @@ void XxApp::saveAsRight()
 //
 void XxApp::saveAsMerged()
 {
-   XX_TRACE( "Not yet implemented." );
-   // FIXME not implemented yet
+   QString mergedName = getMergedFilename();
+   saveToFile( mergedName, false );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::saveAs()
+{
+   QString mergedName = getMergedFilename();
+   saveToFile( mergedName, true );
 }
 
 //------------------------------------------------------------------------------
@@ -2326,14 +2375,43 @@ bool XxApp::validateNeedToSave( uint no ) const
 
 //------------------------------------------------------------------------------
 //
-void XxApp::saveAs()
+QString XxApp::getMergedFilename() const
 {
-   XxBuffer* file = getBuffer( 0 );
-   QString filename;
-   if ( file != 0 && file->isTemporary() == false ) {
-      filename = file->getName();
+   QString name;
+   if ( !_cmdline._mergedFilename.isEmpty() ) {
+      name = _cmdline._mergedFilename;
    }
-   saveToFile( filename, true );
+   else {
+      name = _resources->getMergedFilename();
+   }
+
+   QString left, middle, right;
+   XxBuffer* leftbuf = getBuffer( 0 );
+   if ( leftbuf ) {
+      left = leftbuf->getDisplayName();
+   }
+   if ( _nbFiles == 2 ) {
+      XxBuffer* rightbuf = getBuffer( 1 );
+      if ( rightbuf ) {
+         right = rightbuf->getDisplayName();
+      }
+   }
+   else {
+      XxBuffer* middlebuf = getBuffer( 1 );
+      if ( middlebuf ) {
+         middle = middlebuf->getDisplayName();
+      }
+      XxBuffer* rightbuf = getBuffer( 2 );
+      if ( rightbuf ) {
+         right = rightbuf->getDisplayName();
+      }
+   }
+
+   name.replace( QRegExp("%L"), left );
+   name.replace( QRegExp("%M"), middle );
+   name.replace( QRegExp("%R"), right );
+
+   return name;
 }
 
 //------------------------------------------------------------------------------
@@ -2426,7 +2504,7 @@ void XxApp::editRight()
 //
 int XxApp::exec()
 {
-   if ( _resources->getBoolOpt( BOOL_EXIT_ON_SAME ) && _returnValue == 0 ) {
+   if ( _dontShow ) {
       return _returnValue;
    }
    return QApplication::exec();
@@ -2555,21 +2633,19 @@ void XxApp::diffFilesAtCursor()
         line.getType() == XxLine::DIRECTORIES ) {
 
       // Get filenames.
-      QString filenames[2];
+      QStringList filenames;
       for ( XxFno ii = 0; ii < 2; ++ii ) {
          bool empty;
          XxFln fline = _diffs->getBufferLine( ii, cursorLine, empty );
          XX_ASSERT( empty == false );
 
-         filenames[ii] = _files[ii]->getBufferAtLine( fline );
+         filenames.append( _files[ii]->getBufferAtLine( fline ) );
       }
 
       // Spawn a diff.
-      QString command = argv()[0] + 
-         QString(" ") + filenames[0] + 
-         QString (" ") + filenames[1];
+      QString command = argv()[0]; 
       const char** args;
-      XxUtil::splitArgs( command, args );
+      XxUtil::splitArgs( command, filenames, args );
 
       try { 
          XxUtil::spawnCommand( args );
@@ -2873,11 +2949,12 @@ void XxApp::selectGlobalUnselectedNeither()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::selectGlobalMerge()
+int XxApp::selectGlobalMerge()
 {
    if ( _diffs.get() != 0 ) {
-      _diffs->merge( _nbFiles );
+      return _diffs->merge( _nbFiles );
    }
+   return 2;
 }
 
 //------------------------------------------------------------------------------

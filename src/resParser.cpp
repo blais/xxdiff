@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 446 2001-12-06 06:06:31Z blais $
- * $Date: 2001-12-06 01:06:31 -0500 (Thu, 06 Dec 2001) $
+ * $Id: resParser.cpp 481 2002-02-07 07:42:21Z blais $
+ * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -159,13 +159,24 @@ the eye to figure out what happenened." },
 
    { "ShowPaneMergedViewPercent", SHOW_PANE_MERGED_VIEW_PERCENT, 
      "Initial vertical percentage size, between 0 and 100, of the pane merged \
-view on startup." }
+view on startup." },
+
+   { "MergedFilename", MERGED_FILENAME,
+     "Default merged filename. %L, %M, %R can be used as placeholders for \
+left, middle and right filenames repectively. Note that ClearCase suffixes \
+are stripped automatically." },
 
 };
 
 StringToken boolkwdList[] = {
    { "ExitOnSame", EXIT_ON_SAME,
      "If true, exit if both files have no differences." },
+
+   { "ExitIfNoConflicts", EXIT_IF_NO_CONFLICTS,
+     "If true, exit if after an automatic merge there are no conflicts." },
+
+   { "AutoSelectMerge", SELECT_MERGE,
+     "Pre-selected non-conflictual regions as an automatic merge would." },
 
    { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS, 
      "Ignore horizontal whitespace in horizontal diffs." },
@@ -203,11 +214,20 @@ only, and unless you're doing developemnt you should leave this to default \
      "(Not implemented) Use internal diff computation, does not spawn external \
 diff program." }
 
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   { "ForceSaveMergedFIle", FORCE_SAVE_MERGED_FILE,
+     "Put xxdiff in a mode where it is forced to save to the merged file. This \
+option is made available as a resource because it was easy but you\'ll most \
+likely want to use it rather from the command line." }
+#endif
+
 };
 
 /* Be careful: order must be the same as for token declaration. */
 XxBoolOpt boolMap[] = {
    BOOL_EXIT_ON_SAME,
+   BOOL_EXIT_IF_NO_CONFLICTS,
+   BOOL_SELECT_MERGE,
    BOOL_IGNORE_HORIZONTAL_WS,
    BOOL_FORMAT_CLIPBOARD_TEXT,
    BOOL_IGNORE_ERRORS,
@@ -218,6 +238,9 @@ XxBoolOpt boolMap[] = {
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
    BOOL_DIRDIFF_RECURSIVE,
    BOOL_USE_INTERNAL_DIFF
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   BOOL_FORCE_SAVE_MERGED_FILE
+#endif
 };
 
 StringToken accelList[] = {
@@ -1106,6 +1129,10 @@ void XxResParser::genInitFile(
          << ": " << res1.getShowPaneMergedViewPercent() << endl;
    }
 
+   if ( res1.getMergedFilename() != res2.getMergedFilename() ) {
+      os << searchTokenName( STPARAM(kwdList), MERGED_FILENAME ) << ": \""
+         << res1.getMergedFilename() << "\"" << endl;
+   }
    // Ignore file not saved (cannot be read).
 }
 
@@ -1235,6 +1262,9 @@ void XxResParser::listResources( QTextStream& os )
    
    os << searchTokenName( STPARAM(kwdList), SHOW_PANE_MERGED_VIEW_PERCENT )
       << ": " << res.getShowPaneMergedViewPercent() << endl;
+
+   os << searchTokenName( STPARAM(kwdList), MERGED_FILENAME ) << ": \""
+      << res.getMergedFilename() << "\"" << endl;
 
    // Ignore file not saved (cannot be read).
 }   
@@ -1595,6 +1625,17 @@ QString XxResParser::getResourceRef()
       const StringToken* tok =
          searchToken( STPARAM(kwdList), SHOW_PANE_MERGED_VIEW_PERCENT );
       os << tok->_name << ": " << res.getShowPaneMergedViewPercent() << endl;
+      drend( os );
+      ddbegin( os );
+      os << tok->_desc << endl;
+      ddend( os );
+   }
+
+   {
+      drbegin( os );
+      const StringToken* tok = searchToken( STPARAM(kwdList), MERGED_FILENAME );
+      QString cf = XxHelp::xmlize( res.getMergedFilename() );
+      os << tok->_name << ": \"" << cf << "\"" << endl;
       drend( os );
       ddbegin( os );
       os << tok->_desc << endl;

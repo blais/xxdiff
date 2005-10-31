@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 442 2001-12-04 07:04:06Z blais $
- * $Date: 2001-12-04 02:04:06 -0500 (Tue, 04 Dec 2001) $
+ * $Id: diffs.h 476 2002-02-05 08:14:20Z blais $
+ * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -272,7 +272,9 @@ public:
 
    // Automatically merge by performing selections on file1, assuming order
    // "mine older yours", and leaving conflicts unselected.
-   void merge( uint nbFiles );
+   //
+   // Return result as diff3 merge feature would.
+   int merge( uint nbFiles );
 
    // Check if all selections are of the specified no.  If so return true.
    bool checkSelections( const XxLine::Selection sel ) const;

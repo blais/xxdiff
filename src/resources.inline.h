@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.inline.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: resources.inline.h 471 2002-01-31 02:42:05Z blais $
+ * $Date: 2002-01-30 21:42:05 -0500 (Wed, 30 Jan 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -208,6 +208,13 @@ inline uint XxResources::getHordiffContext() const
 inline uint XxResources::getShowPaneMergedViewPercent() const
 {
    return _showPaneMergedViewPercent;
+}
+
+//------------------------------------------------------------------------------
+//
+inline const QString& XxResources::getMergedFilename() const
+{
+   return _mergedFilename;
 }
 
 //------------------------------------------------------------------------------

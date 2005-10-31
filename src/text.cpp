@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 458 2002-01-03 02:48:38Z blais $
- * $Date: 2002-01-02 21:48:38 -0500 (Wed, 02 Jan 2002) $
+ * $Id: text.cpp 482 2002-02-07 07:56:40Z blais $
+ * $Date: 2002-02-07 02:56:40 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -260,7 +260,7 @@ void XxText::drawContents( QPainter* pp )
 
    SkipType skip = SK_NOSKIP;
 
-   int py;
+   int py = -1;
    XxLine::Type prevtype;
    XxLine::Type type = XxLine::SAME;
    while ( y < h && icurline <= diffs->getNbLines() ) {

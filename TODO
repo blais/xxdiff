@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 463 2002-01-24 04:38:14Z blais $
+# $Id: TODO 487 2002-02-07 22:10:47Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -12,29 +12,28 @@
 Goals for 3.0 stable release:
 ------------------------------
 
-   * Multiple horizontal diffs support (DONE in 2.1).
+   * Multiple horizontal diffs support (***DONE in 2.1).
    * CVS unmerge conflicts feature.
-   * Save merged results feature.
+   * Save merged results feature (***DONE in 2.3).
    * Display-ignore related features (e.g. per-hunk ws ignore).
-   * Merged view pane display (DONE in 2.2).
+   * Support ignore-blank-lines (will use internal display-ignore feature)
+   * Merged view pane display (***DONE in 2.2).
    * Some dirdiff improvements (exclude).
    * Qt-3.0 port.
    * Windows port using Qt-3.0 non-commercial license.
-   * Some misc. UI improvements.
    * Make error recovery work better in rcfile parsing.
 
 
 --------------------------------------------------------------------------------
 Tasks: current tasks
 
+   * Figure out how to produce the documentation from rpm file
 
-   * Add link to TODO file as well.
 
 
-(Port to Gcc-3.0)
 
-   * Some ppl are starting to build with gcc-3.x, port it to make sure
-     it at least compiles and links.
+
+
 
 
 Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
@@ -64,6 +63,8 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
 >    getopt.c:390: warning: unused parameter `argv'
 
 
+
+
    * When the selections change the merged view horizontal scrollbars should be
      adjusted.
 
@@ -78,9 +79,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
    * Bug in next difference:  use "mine older", then n many times.
      At some point the n command does not bring you to the beginning of a new region.
 
-   * Bug: diff long files (or long and short),
-     and rendering becomes awfully slow.
-
    * Merged length in lines is incorrectly calculated.
 
    * The line number labels are not initialized properly on startup.
@@ -94,11 +92,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
 
    * Color documentation, shadowed might be "highlighted"... fix it.
 
-   * Finish implementing the merge save as feature.
-
-   * Then make the merge view a text view.  The merge view will inherit
-     rendering as well as appropriate scrollbar hiding functioning.
-
    * You need to figure some decent scrolling heuristic for the merged view to
      follow the text views, especially when they are radically different sizes.
      Right now it just follows the cursor.
@@ -107,11 +100,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
      adjust automatically.
 
    * Make rpm spec generate documentation automatically.
-
-   * Add man page installation again in 2.1.
-
-   * Extract documentation from the code and have it get updated everyday on the
-     web.
 
    * Remove uint, put standard "unsigned int" instead.
 
@@ -223,6 +211,15 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
       * Added resources for input tags for parser.
 
 
+(Improve Directory Diffs)
+
+> *  Improve the comparison options for directories. Files and Dirs
+>    should be selectively comparable for time, mode, owner,group,
+>    and raw and filterd data.
+>    I could write the backend of this part, if you like to include
+>    this ability, but I can't write the front end (gui) part.
+
+
 (Misc)
 
    * Try compiling with g++3.
@@ -276,8 +273,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
 
 (Web site)
 
-   * Add link to up-to-date TODO file.
-
    * Add emacs trick to start xxdiff automatically on previous file
 
    * Add to google direcotry!!!
@@ -300,6 +295,21 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
      * Apply display box resets horizontal diffs...
        Options dialog has to update on resources changes...
        ... figure out something with a second copy of the resources object.
+
+
+(Try using Mightnight Commander backend)
+
+> *  If xxdiff calls the vfs layer of midnight commander instead of
+>    unix filesystem functions directly, it could enter and compare
+>    even archive contents and ftp servers.
+>    The libfs-mc.so is a sub project within mc and independent
+>    of mc.
+>
+>    The required changes to the existing xxdiff code are an
+>    exchange  of the unix calls with their vsf counter parts and
+>    one initialization/shutdown call at start and program end.
+>
+>    eg:   open(..) becomes  mc_open(..),
 
 
 (Internal diffs)
@@ -436,6 +446,15 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
    * Check if can parse context, ed, normal, or unified diffs output, the user
      might specify such an erroneous command;
 
+
+(Force merged file production)
+
+   * Finish implementing feature to force the user to produce a merged file.
+
+   * File dialog must have its selection disabled... we want only the conflicts
+     section to show up in the worst case.
+
+
 
 --------------------------------------------------------------------------------
 Tasks: Merged view improvements.
@@ -554,10 +573,6 @@ Tasks: Merged view improvements.
    > I'm done with non-CM specific features (e.g. patch input 
    > and output).
    
-   * Oh, you just made me think of a new feature: invoking xxdiff with the auto
-     merge feature, and if there are no conflicts it would save silently and not
-     show up.... could be interesting.
-
 
 
 (Misc)

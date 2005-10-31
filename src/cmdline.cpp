@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: cmdline.cpp 481 2002-02-07 07:42:21Z blais $
+ * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -139,6 +139,10 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
    { "exit-on-same", 'D', false, 'D', 
      "If there are no differences then exit quietly with exit code of 0."
    }, 
+   { "exit-if-no-conflicts", 'E', false, 'E', 
+     "If there are no conflicts after making automatic merge selections, then "
+     "exit quietly with exit code of 0."
+   }, 
    { "merge", 'm', false, 'm', 
      "Automatically select regions that would end up being selected by "
      "an automatic merge."
@@ -171,9 +175,19 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "Pass on argument to the subordinate diff program."
    }, 
    { "orig-xdiff", 0, false, 'o',
-     "Used settings as close as possible to original xdiff "
+     "Use settings as close as possible to original xdiff "
      "(for the romantics longing the old days of SGI... snif snif)."
    },
+   { "merged-filename", 'M', true, 'M',
+     "Specifies the filename of the merged file for output."
+   },
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   { "force-save-merged", 'S', false, 'S',
+     "Put xxdiff in a mode where it is forced to save to the merged file. "
+     "Leaving xxdiff will save as the merged filename. Use this with care, it "
+     "is provided for specific cisconstances and can be annoying."
+   }, 
+#endif
 };
 
 //
@@ -229,7 +243,7 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
    { "geometry", 0, true, 'g',
      "Sets the client geometry of the main widget."
    }, 
-   { "font", 0, true, 'M',
+   { "font", 0, true, 'F',
      "Defines the application font (for widgets)."
    }, 
    { "textfont", 0, true, 'J',
@@ -254,7 +268,7 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
      "Causes the application to install a private color map on an 8-bit "
      "display."
    }, 
-   { "nograb", 0, false, 'S',
+   { "nograb", 0, false, 'K',
      "Tells Qt to never grab the mouse or the keyboard."
    }, 
    { "dograb", 0, false, 'T',
@@ -275,7 +289,6 @@ XxCmdline::XxCmdline() :
    _originalXdiff( false ),
    _useRcfile( true ), 
    _extraDiffArgs( "" ),
-   _mergeRequested( false ),
    _conflict( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
@@ -397,9 +410,25 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
                 << ": true" << endl;
          } break;
 
-         case 'm': {
-            _mergeRequested = true;
+         case 'E': {
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << XxResParser::getBoolOptName( BOOL_EXIT_IF_NO_CONFLICTS )
+                << ": true" << endl;
          } break;
+
+         case 'm': {
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << XxResParser::getBoolOptName( BOOL_SELECT_MERGE )
+                << ": true" << endl;
+         } break;
+
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+         case 'S': {
+            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            oss << XxResParser::getBoolOptName( BOOL_FORCE_SAVE_MERGED_FILE )
+                << ": true" << endl;
+         } break;
+#endif
 
          case 'C': {
             _conflict = true;
@@ -454,6 +483,14 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _originalXdiff = true;
          } break;
 
+         case 'M': {
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Missing argument for merged filename." );
+            }
+            _mergedFilename = optarg;
+         } break;
+         
          //
          // GNU diff options.
          //
@@ -500,12 +537,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'd':
          case 's':
          case 'g':
-         case 'M':
+         case 'F':
          case 'L':
          case 'V':
          case 'O':
          case 'P':
-         case 'S':
+         case 'K':
          case 'T':
          case 'U': {
             int oidx = searchForOption( 

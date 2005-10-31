@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderUnmerge.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: builderUnmerge.cpp 485 2002-02-07 20:10:05Z blais $
+ * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -210,15 +210,14 @@ std::auto_ptr<XxDiffs> XxBuilderConflicts::process(
 {
 //#define XX_INTERNAL_DIFFS
 
-   QString cmd = command;
-   cmd += QString(" ") + path1;
-   cmd += QString(" ") + path2;
+   QStringList filenames;
+   filenames.append( path1 );
+   filenames.append( path2 );
    const char** out_args;
-#ifndef XX_INTERNAL_DIFFS
-   XxUtil::splitArgs( cmd, out_args );
-#else
-   int argc = XxUtil::splitArgs( cmd, out_args );
+#ifdef XX_INTERNAL_DIFFS
+   int argc = 
 #endif
+   XxUtil::splitArgs( command, filenames, out_args );
 
 #ifndef XX_INTERNAL_DIFFS
    FILE* fout;

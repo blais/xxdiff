@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.h 446 2001-12-06 06:06:31Z blais $
- * $Date: 2001-12-06 01:06:31 -0500 (Thu, 06 Dec 2001) $
+ * $Id: resources.h 481 2002-02-07 07:42:21Z blais $
+ * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -72,6 +72,8 @@ class XxApp;
 // Boolean options.
 enum XxBoolOpt {
    BOOL_EXIT_ON_SAME,
+   BOOL_EXIT_IF_NO_CONFLICTS,
+   BOOL_SELECT_MERGE,
    BOOL_IGNORE_HORIZONTAL_WS,
    BOOL_FORMAT_CLIPBOARD_TEXT,
    BOOL_IGNORE_ERRORS,
@@ -82,6 +84,9 @@ enum XxBoolOpt {
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
    BOOL_DIRDIFF_RECURSIVE,
    BOOL_USE_INTERNAL_DIFF,
+#ifdef XX_ENABLE_SAVE_MERGED_FILE
+   BOOL_FORCE_SAVE_MERGED_FILE,
+#endif
    BOOL_LAST // Not a real resource.
 };
 
@@ -509,6 +514,11 @@ public:
    void setShowPaneMergedViewPercent( uint );
    // </group>
 
+   // Get/set merged filename.
+   // <group>
+   const QString& getMergedFilename() const;
+   void setMergedFilename( const QString& fn );
+   // </group>
 
 
    // Return a table for the dynamic programming algorithm, if the maximum size
@@ -584,6 +594,7 @@ private:
    uint         _hordiffMax;
    uint         _hordiffContext;
    uint         _showPaneMergedViewPercent;
+   QString      _mergedFilename;
 
    // Dynamic programming table used for horizontal diffs computation.
    // <group>

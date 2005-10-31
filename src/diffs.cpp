@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 451 2001-12-08 22:01:23Z blais $
- * $Date: 2001-12-08 17:01:23 -0500 (Sat, 08 Dec 2001) $
+ * $Id: diffs.cpp 482 2002-02-07 07:56:40Z blais $
+ * $Date: 2002-02-07 02:56:40 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -671,7 +671,7 @@ uint XxDiffs::countRemainingUnselected() const
 {
    // Make sure that there are no more unselected regions.
    bool inhunk = false;
-   XxHunk curHunk;
+   XxHunk curHunk = 0;
    XxLine::Type curType;
    uint nbunsel = 0;
    for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
@@ -1397,10 +1397,11 @@ void XxDiffs::splitTwoRegions(
 
 //------------------------------------------------------------------------------
 //
-void XxDiffs::merge( uint nbFiles )
+int XxDiffs::merge( uint nbFiles )
 {
+   int result = 0;
    if ( _isDirectoryDiff ) {
-      return;
+      return 2;
    }
    else if ( nbFiles == 2 ) {
       // In 2-way diffs, the algorithm is simple: select insert side of all
@@ -1411,7 +1412,10 @@ void XxDiffs::merge( uint nbFiles )
          switch ( line.getType() ) {
             // Ignored lines.
             case XxLine::SAME:
-            case XxLine::DIRECTORIES:
+            case XxLine::DIRECTORIES: {
+               // Leave as is unselected.
+            } break;
+
             case XxLine::DIFF_1:
             case XxLine::DIFF_2:
             case XxLine::DELETE_1:
@@ -1423,6 +1427,7 @@ void XxDiffs::merge( uint nbFiles )
             case XxLine::DIFFDEL_2:
             case XxLine::DIFFDEL_3: {
                // Leave as is unselected.
+               result = 1;
             } break;
 
             // Left insert.
@@ -1438,6 +1443,7 @@ void XxDiffs::merge( uint nbFiles )
             // Overlaps.
             case XxLine::DIFF_ALL: {
                line.setSelection( XxLine::UNSELECTED );
+               result = 1;
             } break;
 
             default: {
@@ -1469,10 +1475,11 @@ void XxDiffs::merge( uint nbFiles )
        *
        * So our algorithm is simple, two choices:
        *
-       *  1) first select SEL1 globally, then spawn diff3 -m, with the appropriate
-       *  option, find all the edits and unselect the reported edits.  Upside: we
-       *  don't perform _any_ algorithmic work.  Downside: we need to write a new
-       *  parser because the output of diff3 -m is an ed script.
+       *  1) first select SEL1 globally, then spawn diff3 -m, with the
+       *  appropriate option, find all the edits and unselect the reported
+       *  edits.  Upside: we don't perform _any_ algorithmic work.  Downside: we
+       *  need to write a new parser because the output of diff3 -m is an ed
+       *  script.
        *
        *  2) do it by hand and work through all the lines, selecting lines as
        *  below:
@@ -1529,6 +1536,7 @@ void XxDiffs::merge( uint nbFiles )
             case XxLine::DIFFDEL_2:
             case XxLine::DIFFDEL_3: {
                line.setSelection( XxLine::UNSELECTED );
+               result = 1;
             } break;
 
             default: {
@@ -1540,6 +1548,7 @@ void XxDiffs::merge( uint nbFiles )
    }
 
    emit changed();
+   return result;
 }
 
 //------------------------------------------------------------------------------

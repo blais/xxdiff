@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: accelUtil.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: accelUtil.h 468 2002-01-30 07:46:26Z blais $
+ * $Date: 2002-01-30 02:46:26 -0500 (Wed, 30 Jan 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,6 +34,11 @@
 #ifndef INCL_QT_QSTRING
 #include <qstring.h>
 #define INCL_QT_QSTRING
+#endif
+
+#ifndef INCL_STD_IOSTREAM
+#include <iostream>
+#define INCL_STD_IOSTREAM
 #endif
 
 XX_NAMESPACE_BEGIN

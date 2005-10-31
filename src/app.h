@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 443 2001-12-05 01:04:36Z blais $
- * $Date: 2001-12-04 20:04:36 -0500 (Tue, 04 Dec 2001) $
+ * $Id: app.h 487 2002-02-07 22:10:47Z blais $
+ * $Date: 2002-02-07 17:10:47 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -224,7 +224,7 @@ public slots:
    void selectGlobalUnselectedMiddle();
    void selectGlobalUnselectedRight();
    void selectGlobalUnselectedNeither();
-   void selectGlobalMerge();
+   int  selectGlobalMerge();
    void selectRegionLeft();
    void selectRegionMiddle();
    void selectRegionRight();
@@ -370,6 +370,9 @@ private:
    // Implementation of the qualityXXX() methods.
    void setQuality( XxQuality );
 
+   // Get the merged filename.
+   QString getMergedFilename() const;
+
    /*----- static member functions -----*/
 
    // Reads the file arguments, returns the number of files to be read, creates
@@ -394,6 +397,7 @@ private:
 
    // UI widgets.
    bool                    _isUICreated;
+   bool                    _dontShow;
    int                     _returnValue;
 
    QStyle*                 _style;

@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 2.2
+Version: 2.3
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
@@ -28,6 +28,7 @@ fi
 cd src
 tmake xxdiff.pro > Makefile
 make
+./xxdiff --help-html > xxdiff-doc.html
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -45,17 +46,21 @@ install -c -m 644 -o 0 -g 0 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xx
 %defattr(-,root, root)
 %doc README
 %doc CHANGES
+%doc src/xxdiff-doc.html
 
 /usr/X11R6/bin/xxdiff
 /usr/X11R6/man/man1/xxdiff.1*
 
 
 %changelog
+* Thu Feb 6 2002 Martin Blais <blais@iro.umontreal.ca>
+- added documentation generation and released 2.3.
+
 * Wed Jan 30 2002 Martin Blais <blais@iro.umontreal.ca>
 - updated version number for interim release
 
 * Sat Nov 24 2001 Martin Blais <blais@iro.umontreal.ca>
-- added generci man page install.
+- added generic man page install.
 
 * Thu Nov 22 2001 Martin Blais <blais@iro.umontreal.ca>
 - 2.1

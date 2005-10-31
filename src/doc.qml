@@ -102,6 +102,14 @@ xxdiff doesn't do three-way directory diffs.
 </p>
 
 <!-- ---------------------------------------- -->
+<h3>Return Value</h3>
+
+<p>
+xxdiff returns the same values that diff(1) or diff3(1) return. See the
+respective man pages of those utilities for details.
+
+
+<!-- ---------------------------------------- -->
 <a name="options">
 <h3>Command-line Options</h3>
 
@@ -528,8 +536,14 @@ the different ordering possibilities, and finally joining the regions again
 <h3>Saving the resulting file</h3>
 
 <p>
-The resulting file can be save under one of the input filenames, or under a new
-filename (from the File menu).  If some regions are left unselected, the save
+The resulting file can be saved under one of the input filenames, under a
+computed "merged" filename, or under a new filename (from the File menu). The
+intended "merged" filename can be built from the input filenames and it's format
+can be specified through the resources file or the command line.
+</p>
+
+<p>
+If some regions are left unselected, the save
 dialog will have some widgets that allows you to decide how you want to save the
 unselected hunks:
 <ul>
@@ -557,6 +571,7 @@ You could also decide to save only the selected regions, from the File menu.
 This can be useful for making comments when reviewing merges.
 </p>
 
+
 <!-- ---------------------------------------- -->
 <h3>Rapid, sequential merge conflict resolution</h3>
 
@@ -579,9 +594,35 @@ more unselected regions, the save dialog is brought up automatically.
 
 <p>
 By default, xxdiff doesn't perform any selections.  You can instruct xxdiff to
-perform selection of the non-conflictual regions automatically.  This can be
-specified from the command-line or from the Global menu.
+perform the initial selection of the non-conflictual regions automatically.
+This can be specified from the command-line or from the Global menu.
 </p>
+
+<p>
+Just like xxdiff can be instructed not to show up if there aren't any
+differences between the files, xxdiff can also be instructed not to show up if
+after the automatic merge there remains no conflictual regions. You can use the
+return value to find out.
+</p>
+
+<p>
+(Note that we do not want to add a feature to xxdiff to allow it to output to
+the merged file if there are no conflics, because that would amount to make
+xxdiff a non-graphical tool, while its mandate is to use such tools underneath
+and display their output. Besides, that would be the single case where xxdiff
+writes to a file without a file dialog.  You can very easily implement this from
+within a script using the return value of either diff or xxdiff.)
+</p>
+
+<h4>Requiring an output file</h4>
+
+<p>
+Sometimes we want to force the user into producing a merged output file (when
+calling xxdiff from an update script, for example). Thus there is a feature to
+put xxdiff in this mode (see resources or invocation section). In this mode, the
+user must save before exiting xxdiff (exiting will prompt for save filename).
+</p>
+
 
 <!-- ---------------------------------------- -->
 <h3>Merging directories</h3>
@@ -750,6 +791,20 @@ has the DOS characters in it.
 By default, the filenames window display the filename.  From the command-line,
 however, you can set it to display an arbitrary string, which could include your
 current revision number.
+</p>
+
+<!-- ---------------------------------------- -->
+<h3>xxdiff fails with an undefined symbol</h3>
+
+More precisely, xxdiff fails with the following error:
+<pre>
+xxdiff: error while loading shared libraries: xxdiff: undefined symbol:
+__11QSizePolicyQ211QSizePolicy8SizeTypeT1b
+</pre>
+
+<p>
+You are most likely running nuder Linux RedHat-6.2 and you need to upgrade your
+Qt library.
 </p>
 
 <!-- ----------------------------------------------------------------------- -->

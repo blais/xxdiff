@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: util.cpp 485 2002-02-07 20:10:05Z blais $
+ * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -31,6 +31,7 @@
 #include <qstring.h>
 #include <qtextstream.h>
 #include <qfileinfo.h>
+#include <qregexp.h>
 
 #include <iostream>
 #include <sys/types.h>
@@ -54,6 +55,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+
+#include <fstream>
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -408,8 +411,9 @@ void XxUtil::printTime( std::ostream& os, long time )
 //------------------------------------------------------------------------------
 //
 int XxUtil::splitArgs( 
-   const QString& command,
-   const char**&  out_args
+   const QString&     command,
+   const QStringList& filenames,
+   const char**&      out_args
 )
 {
    /* 
@@ -419,6 +423,7 @@ int XxUtil::splitArgs(
     * spaces will break this.
     */
    
+#if 0 
    int argc = 0;
    const int BLOCKSIZE = 10;
    int count = BLOCKSIZE;
@@ -444,8 +449,24 @@ int XxUtil::splitArgs(
    free( cargs );
          
    argv[argc] = 0;
+#endif
 
-//#define ANAL_DEBUGGING
+   QStringList args = QStringList::split( QRegExp( "\\s" ), command );
+   args += filenames;
+   int argc = 0;
+   const char** argv =
+      (const char**) malloc( sizeof(char*) * (args.count() + 1) );
+   for ( QStringList::Iterator it = args.begin(); 
+         it != args.end();
+         ++it ) {
+      
+      argv[argc++] = strdup( (*it).latin1() );
+   }
+   argv[argc] = 0;
+
+
+
+#define ANAL_DEBUGGING
 #ifdef ANAL_DEBUGGING
    std::ofstream ofs( "/tmp/diff_args" );
    ofs << " ARGS ------------------------------" << std::endl;
@@ -475,5 +496,20 @@ void XxUtil::freeArgs( const char**& out_args )
    }
 }
 
-XX_NAMESPACE_END
+//------------------------------------------------------------------------------
+//
+QString XxUtil::removeClearCaseExt( const QString& filename )
+{
+   // Remove ClearCase extended syntax if it is there.
+   int bpos = filename.find( "@@" );
+   QString cleanname;
+   if ( bpos != -1 ) {
+      cleanname = filename.mid( 0, bpos );
+   }
+   else {
+      cleanname = filename;
+   }
+   return cleanname;
+}
 
+XX_NAMESPACE_END

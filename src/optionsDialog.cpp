@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: optionsDialog.cpp 438 2001-12-01 20:17:36Z blais $
- * $Date: 2001-12-01 15:17:36 -0500 (Sat, 01 Dec 2001) $
+ * $Id: optionsDialog.cpp 476 2002-02-05 08:14:20Z blais $
+ * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -822,7 +822,7 @@ void XxOptionsDialog::editColorFore()
    QColor newColor =
       QColorDialog::getColor( coli->_foreColor, this, "color_dialog" );
    
-   if ( newColor != coli->_foreColor ) {
+   if ( newColor.isValid() && newColor != coli->_foreColor ) {
       coli->_foreColor = newColor;
       coli->_modified = true;
       _listboxColors->update();
@@ -846,7 +846,7 @@ void XxOptionsDialog::editColorBack()
    QColor newColor =
       QColorDialog::getColor( coli->_backColor, this, "color_dialog" );
    
-   if ( newColor != coli->_backColor ) {
+   if ( newColor.isValid() && newColor != coli->_backColor ) {
       coli->_backColor = newColor;
       coli->_modified = true;
       _listboxColors->update();

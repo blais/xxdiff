@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $Source$
-# $Id: runtest 467 2002-01-30 03:40:47Z  $
+# $Id: runtest 489 2002-02-07 22:34:39Z  $
 #
 # Copyright (c) 2001, Martin Blais. All rights reserved.
 #
@@ -11,19 +11,19 @@
 # better than nothing, and it really does help.
 #
 
-function testhdr() { 
+function testhdr { 
     clear
     echo "====================================================================="
-    echo $1
+    echo "TESTING:" $1
     echo "====================================================================="
 }
 
-function waitread() { 
+function waitread { 
     #echo "   <press enter>" && read
     read
 }
 
-function waitexit() { 
+function waitexit { 
     echo "   <exit xxdiff>"
 }
 
@@ -197,6 +197,12 @@ waitexit;
 testhdr "Empty files: 3-way with three empty files"
 
 $XXDIFF empty empty empty
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "File with incomplete line"
+
+$XXDIFF incomplete mine
 waitexit;
 
 #-------------------------------------------------------------------------------

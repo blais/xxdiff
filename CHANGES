@@ -2,19 +2,61 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 465 2002-01-30 02:30:09Z blais $
+# $Id: CHANGES 488 2002-02-07 22:34:39Z blais $
 #
-
-
-Note: xxdiff has not yet been ported to Qt-3.x. Don't bother. I'll get to it
-eventually.
-
 
 Current version/current tasks:
 ------------------------------
 
 
 
+Version 2.3: (minor features and major bug fixes)
+------------------------------
+
+(Bug Fixes)
+
+   * Fixed bug with not parsing incomplete lines (kudos go to Greg Lonnon
+     <glonnon at ridgerun dot com> for reporting it!)
+
+(Quick save merged results)
+
+   * Partially implemented feature to force the user to produce a merged file
+     and then ifdef'ed out, this will come later.
+   * Finished implementing feature, new resource to define default merged
+     filename format.
+   * Changed default filename for "save as..." to be the merged filename.
+   * Implemented exit-if-no-conflicts feature.
+   * Changed implementation of select merge to use the resource system so that
+     someone could set automatic merging to always be enabled if they wanted to.
+   * Started implementation of the force-saved-merged feature.
+
+(Port to Gcc-3.0)
+
+   * Linked with qt-2.3.2 compiled with gcc3 and it works.
+   * Ported all objects to compile with gcc-3.0.2.
+   
+(Documentation)
+
+   * Updated documentation to merged features.
+
+(Misc)
+
+   * Some changes for HP/UX compilation (thanks to Albert Chin-A-Young)
+   * Fixed bug in color dialog; pressing cancel would set the color to
+     blank. Credits to <volker_apelt at yahoo dot de> for reporting it.
+   * Fixed Debian compilation warnings reported by Tomas Pospisek 
+     <tpo at sourcepole dot ch>.
+   * Fixed implementation on EXIT_ON_SAME to really not show the window at all.
+   * Fixed bug with EXIT_ON_SAME and IGNORE_BLANK_LINES being turned on.
+   * Fixed important bug with not being able to grok files with spaces in
+     them. This was also happening for spawning subdiffs from directory diffs
+     (logged in as bug [508429].
+   * Added warning and disabled init option to ignore blank lines, because we
+     cannot support it for now.
+
+(Install and Packaging)
+
+   * Added HTML file generation and packaging.
 
 
 Version 2.2: (interim release)
@@ -233,6 +275,22 @@ command-line Qt options and formatted like KDE programs.
      There is a small delay probably due to NFS on different OS+hosts.
    * Removed basename dependency (now using QFileInfo).
    * Fixed UMRs in app.cpp menu items, Purified completely.
+
+
+Version 2.0.4: (bug-fix release)
+------------------------------
+
+We want the 2.0 branch to be absolutely stable, and not being able to parse
+rarely occuring incomplete lines is unacceptable, so this bug fix alone warrants
+this release.
+
+(Bug Fixes)
+
+   * Included bug fix for not parsing incomplete lines. The incomplete line
+     marker line inserted by diff had been overlooked in the parser and would
+     cause an error dialog and no diffs display. Incomplete lines don't occur
+     often, but this is nevertheless an important bug.
+
 
 
 Version 2.0.3: (portability release)

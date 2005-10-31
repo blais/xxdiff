@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 451 2001-12-08 22:01:23Z blais $
- * $Date: 2001-12-08 17:01:23 -0500 (Sat, 08 Dec 2001) $
+ * $Id: line.cpp 476 2002-02-05 08:14:20Z blais $
+ * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -944,6 +944,10 @@ void XxLine::getLineColorTypeStd(
       case XxLine::DIRECTORIES: {
          dtype = dtypeSup = COLOR_DIRECTORIES;
          return;
+      }
+
+      case XxLine::NB_TYPES: {
+         XX_ABORT();
       }
    }
 

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.y 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: resParser.y 481 2002-02-07 07:42:21Z blais $
+ * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -59,16 +59,21 @@
 
 /* see BOOLKWD_BASE above */
 %token <num> EXIT_ON_SAME                 1000
-%token <num> IGNORE_HORIZONTAL_WS         1001
-%token <num> FORMAT_CLIPBOARD_TEXT        1002
-%token <num> IGNORE_ERRORS                1003
-%token <num> WARN_ABOUT_UNSAVED           1004
-%token <num> DISABLE_CURSOR_DISPLAY       1005
-%token <num> HIDE_CR                      1006
-%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1007
-%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1008
-%token <num> DIRDIFF_RECURSIVE            1009
-%token <num> USE_INTERNAL_DIFF            1010
+%token <num> EXIT_IF_NO_CONFLICTS         1001
+%token <num> SELECT_MERGE                 1002
+%token <num> IGNORE_HORIZONTAL_WS         1003
+%token <num> FORMAT_CLIPBOARD_TEXT        1004
+%token <num> IGNORE_ERRORS                1005
+%token <num> WARN_ABOUT_UNSAVED           1006
+%token <num> DISABLE_CURSOR_DISPLAY       1007
+%token <num> HIDE_CR                      1008
+%token <num> DIRDIFF_IGNORE_FILE_CHANGES  1009
+%token <num> DIRDIFF_BUILD_FROM_OUTPUT    1010
+%token <num> DIRDIFF_RECURSIVE            1011
+%token <num> USE_INTERNAL_DIFF            1012
+/* XX_ENABLE_SAVE_MERGED_FILE */
+/* %token <num> FORCE_SAVE_MERGED_FILE       1013 */
+
 /* Note: check that we do not exceed maximum in resParser.cpp */
 
 %token       FONT_APP
@@ -106,6 +111,8 @@
 
 %token <num> SHOW_PANE_MERGED_VIEW_PERCENT
 
+%token <num> MERGED_FILENAME
+
 /* typed rules */
 %type <num> colorbf
 %type <num> boolkwd
@@ -141,6 +148,7 @@ stmt		: error '\n'
 		| hordiff_max
 		| hordiff_context
 		| show_pane_merged_view_percent
+		| merged_filename
 		;
 
 prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
@@ -205,6 +213,8 @@ boolopt		: boolkwd COLON BOOLEAN
 		;
 
 boolkwd		: EXIT_ON_SAME
+		| EXIT_IF_NO_CONFLICTS
+		| SELECT_MERGE
 		| IGNORE_HORIZONTAL_WS
 		| FORMAT_CLIPBOARD_TEXT
 		| IGNORE_ERRORS
@@ -216,6 +226,7 @@ boolkwd		: EXIT_ON_SAME
 		| DIRDIFF_RECURSIVE
 		| USE_INTERNAL_DIFF
 		;
+		/*| FORCE_SAVE_MERGED_FILE*/
 
 command		: COMMAND DOT COMMANDNAME COLON STRING
 		{
@@ -325,6 +336,13 @@ show_pane_merged_view_percent : SHOW_PANE_MERGED_VIEW_PERCENT COLON NUMBER
 		{
                    /*printf( "==> show pane merged view percent: %d\n", $3 );*/
                    RESOURCES->setShowPaneMergedViewPercent( $3 );
+                }
+		;
+
+merged_filename : MERGED_FILENAME COLON STRING
+		{
+                   /*printf( "==> merged filename: %s\n", $3 );*/
+                   RESOURCES->setMergedFilename( $3 );
                 }
 		;
 
