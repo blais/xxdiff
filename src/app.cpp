@@ -89,7 +89,6 @@
 #  include <sys/socket.h>
 #  include <netinet/in.h>
 #  include <unistd.h>
-#  include <libgen.h>
 #else
 #  include <io.h>
 #endif
@@ -1341,9 +1340,6 @@ void XxApp::createMenus()
          _menuids[ ID_ToggleIgnoreBlankLines ] = _optionsMenu->insertItem( 
             "Ignore blank lines", this, SLOT(ignoreBlankLines()),
             _resources->getAccelerator( ACCEL_IGNORE_BLANK_LINES )
-         );
-         _optionsMenu->setItemEnabled( 
-            _menuids[ ID_ToggleIgnoreBlankLines ], false 
          );
 
          _optionsMenu->insertSeparator();

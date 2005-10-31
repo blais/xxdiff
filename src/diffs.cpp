@@ -1748,25 +1748,38 @@ void XxDiffs::computeIgnoreDisplay(
       if ( lineNo == -1 ) {
          break;
       }
-
+      
       const XxLine& cline = getLine( lineNo );
       const XxLine::Type ctype = cline.getType();
+
+      XxFno fno0, fno1;
+      int nbDiffFiles;
       if ( nbFiles == 2 ) {
          if ( ctype != XxLine::DIFF_ALL ) {
             continue;
          }
+         nbDiffFiles = 2;  fno0 = 0;  fno1 = 1;
       }
       else { 
          XX_ASSERT( nbFiles == 3 );
          
-         if ( ctype != XxLine::DIFF_ALL && 
-              ctype != XxLine::DIFF_1 &&
-              ctype != XxLine::DIFF_2 &&
-              ctype != XxLine::DIFF_3 && 
-              ctype != XxLine::DIFFDEL_1 &&
-              ctype != XxLine::DIFFDEL_2 &&
-              ctype != XxLine::DIFFDEL_3 ) {
-            continue;
+         switch ( ctype ) {
+            case XxLine::DIFF_ALL: 
+               nbDiffFiles = 3;  fno0 = 0;  fno1 = 1; /* 2 hard-coded */ break;
+            case XxLine::DIFF_1: 
+               nbDiffFiles = 2;  fno0 = 0;  fno1 = 1; break;
+            case XxLine::DIFF_2: 
+               nbDiffFiles = 2;  fno0 = 0;  fno1 = 1; break;
+            case XxLine::DIFF_3: 
+               nbDiffFiles = 2;  fno0 = 0;  fno1 = 2; break;
+            case XxLine::DIFFDEL_1: 
+               nbDiffFiles = 2;  fno0 = 1;  fno1 = 2; break;
+            case XxLine::DIFFDEL_2: 
+               nbDiffFiles = 2;  fno0 = 0;  fno1 = 2; break;
+            case XxLine::DIFFDEL_3: 
+               nbDiffFiles = 2;  fno0 = 0;  fno1 = 1; break;
+            default:
+               continue;
          }
       }
 
@@ -1782,22 +1795,22 @@ void XxDiffs::computeIgnoreDisplay(
       char buf2[ COMPBUFSIZE ];
 
       XxDln l1 = lineNo;
-      XxFln fl1 = cline.getLineNo( 0 );
+      XxFln fl1 = cline.getLineNo( fno0 );
       uint c1 = 0;
       uint len1;
-      const char* t1 = files[0]->getTextLine( fl1, len1 );
+      const char* t1 = files[fno0]->getTextLine( fl1, len1 );
 
       XxDln l2 = lineNo;
-      XxFln fl2 = cline.getLineNo( 1 );
+      XxFln fl2 = cline.getLineNo( fno1 );
       uint c2 = 0;
       uint len2;
-      const char* t2 = files[1]->getTextLine( fl2, len2 );
+      const char* t2 = files[fno1]->getTextLine( fl2, len2 );
 
       bool different = false;
       bool done1 = false;
       bool done2 = false;
 
-      if ( nbFiles == 2 ) {
+      if ( nbDiffFiles == 2 ) {
 
          while ( !different && !done1 && !done2 ) {
 
@@ -1805,11 +1818,11 @@ void XxDiffs::computeIgnoreDisplay(
             // Fill up the non-ws comparison buffers.
             //
             int nbc1 = fillBufWithChars(
-               *this, 0, l1, c1, t1, len1, buf1, done1, *(files[0]), ctype
+               *this, fno0, l1, c1, t1, len1, buf1, done1, *(files[fno0]), ctype
             );
 
             int nbc2 = fillBufWithChars(
-               *this, 1, l2, c2, t2, len2, buf2, done2, *(files[1]), ctype
+               *this, fno1, l2, c2, t2, len2, buf2, done2, *(files[fno1]), ctype
             );
 
             //
@@ -1831,15 +1844,17 @@ void XxDiffs::computeIgnoreDisplay(
 
       }
       else {
-         XX_CHECK( nbFiles == 3 );
+         XX_CHECK( nbDiffFiles == 3 );
+
+         const XxFno fno2 = 2;
 
          char buf3[ COMPBUFSIZE ];
 
          XxDln l3 = lineNo;
-         XxFln fl3 = cline.getLineNo( 2 );
+         XxFln fl3 = cline.getLineNo( fno2 );
          uint c3 = 0;
          uint len3;
-         const char* t3 = files[2]->getTextLine( fl3, len3 );
+         const char* t3 = files[fno2]->getTextLine( fl3, len3 );
 
          bool done3 = false;
 
@@ -1849,15 +1864,15 @@ void XxDiffs::computeIgnoreDisplay(
             // Fill up the non-ws comparison buffers.
             //
             int nbc1 = fillBufWithChars(
-               *this, 0, l1, c1, t1, len1, buf1, done1, *(files[0]), ctype
+               *this, fno0, l1, c1, t1, len1, buf1, done1, *(files[fno0]), ctype
             );
 
             int nbc2 = fillBufWithChars(
-               *this, 1, l2, c2, t2, len2, buf2, done2, *(files[1]), ctype
+               *this, fno1, l2, c2, t2, len2, buf2, done2, *(files[fno1]), ctype
             );
 
             int nbc3 = fillBufWithChars(
-               *this, 2, l3, c3, t3, len3, buf3, done3, *(files[2]), ctype
+               *this, fno2, l3, c3, t3, len3, buf3, done3, *(files[fno2]), ctype
             );
 
             //

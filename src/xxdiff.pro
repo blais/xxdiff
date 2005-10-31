@@ -34,8 +34,8 @@ CONFIG = release qt warn_on
 debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
-#XX_VERSION=2.7-devel
-XX_VERSION=2.7.2
+#XX_VERSION=2.8-devel
+XX_VERSION=2.8
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
@@ -75,8 +75,8 @@ irix-n32:TMAKE_CFLAGS = $$TMAKE_CXXFLAGS
 irix-n32:TMAKE_MOC = ${QTDIR}/bin/moc
 
 irix-n32:TMAKE_LIBS += -lC -lCio -lm
-irix-n32:TMAKE_LIBDIR_QT = $(QTDIR)/lib32
-irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib32
+irix-n32:TMAKE_LIBDIR_QT = $(QTDIR)/lib
+irix-n32:TMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib
 
 irix-n32:TMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 

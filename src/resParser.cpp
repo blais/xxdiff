@@ -77,7 +77,7 @@ StringToken kwdList[] = {
 specification, plus you can also use `Maximize' to maximize on startup" },
 
    { "Style", STYLE,
-     "Preferred Qt style, see Qt documentation for more details. The style can
+     "Preferred Qt style, see Qt documentation for more details. The style can \
 otherwise be specified through command-line arguments." },
 
    { "Accel", ACCEL,

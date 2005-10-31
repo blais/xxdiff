@@ -30,14 +30,14 @@ product xxdiff
 
 	image sw
 		id "Software"
-		version 2072
+		version 2080
 		order 9999
 		subsys base
 			id "Base Software"
 			default
 			exp xxdiff.sw.base
 			prereq ( 
-				fw_qt.sw.lib 1230000000 1239999900 
+				fw_qt3.sw.lib 1230000000 1239999900 
 				eoe.sw.base 1274627340 1274627340
 			)
 		endsubsys
