@@ -24,85 +24,65 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
+#include <builderSingle.h>
+#include <diffs.h>
+#include <buffer.h>
+
+#include <qtextstream.h>
+
+#include <stdio.h>
+#include <iostream>
+
+/*==============================================================================
+ * PUBLIC FUNCTIONS
+ *============================================================================*/
 
 XX_NAMESPACE_BEGIN
 
-
 /*==============================================================================
- * CLASS XxBuffer
+ * CLASS XxBuilderSingle
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-inline bool XxBuffer::isTemporary() const
-{
-   return _temporary;
-}
+XxBuilderSingle::XxBuilderSingle() :
+   XxBuilder()
+{}
 
 //------------------------------------------------------------------------------
 //
-inline QString XxBuffer::getName() const
+XxBuilderSingle::~XxBuilderSingle()
+{}
+
+//------------------------------------------------------------------------------
+//
+std::auto_ptr<XxDiffs> XxBuilderSingle::process( const XxBuffer& buffer )
 {
-   if ( isTemporary() ) {
-      return QString("-");
+   initLines();
+
+   QTextOStream errors( &_errors );
+
+   _curHunk = 0;
+   createInsertLeftBlock( 1, buffer.getNbLines() );
+
+   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   return ap;
+}
+
+
+//------------------------------------------------------------------------------
+//
+void XxBuilderSingle::createInsertLeftBlock( 
+   XxFln fline1,
+   uint  fsize
+)
+{
+   for ( uint ii = 0; ii < fsize; ++ii ) {
+      XxLine line( XxLine::INSERT_1, fline1 + ii, -1 );
+      line.setHunkId( _curHunk );
+      addLine( line );
    }
-   return _name;
-}
-
-//------------------------------------------------------------------------------
-//
-inline const QString& XxBuffer::getDisplayName() const
-{
-   return _displayName;
-}
-
-//------------------------------------------------------------------------------
-//
-inline uint XxBuffer::getNbLines() const
-{
-   return _index.size() - 2; // See header file for description.
-}
-
-//------------------------------------------------------------------------------
-//
-inline const char* XxBuffer::getTextLine( 
-   const XxFln lineno, 
-   uint&       length 
-) const
-{
-   XX_ASSERT( 0 < lineno && lineno <= XxFln(_index.size()) );
-
-#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
-   length = _lengths[ lineno ];
-   /*XX_TRACE( length << " " << _index[ lineno ] - _index[ lineno-1 ] - 1 );*/
-   /*XX_CHECK( length == _index[ lineno ] - _index[ lineno-1 ] - 1 );*/
-#else
-   // Note: in the case where the data buffer lines are contiguous, this would
-   // also work (this is what it used to be until the unmerged feature was
-   // introduced):
-   length = _index[ lineno + 1 ] - _index[ lineno ] - 1;
-#endif
-
-   return & _buffer[ _index[ lineno ] ];
-}
-
-//------------------------------------------------------------------------------
-//
-inline XxFln XxBuffer::getDisplayLineNo( const XxFln fline ) const
-{
-   if ( _dpyLineNos.empty() ) {
-      return fline;
-   }
-   XX_ASSERT( 0 < fline && fline <= XxFln(_index.size()) );
-   return _dpyLineNos[ fline ];
-}
-
-//------------------------------------------------------------------------------
-//
-inline const char* XxBuffer::getBuffer( uint& size ) const
-{
-   size = _bufferSize;
-   return _buffer;
+   _curHunk++;
 }
 
 XX_NAMESPACE_END

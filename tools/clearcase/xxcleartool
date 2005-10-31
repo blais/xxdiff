@@ -1,0 +1,614 @@
+#!/usr/bin/env python
+#******************************************************************************\
+#* $Id: xxcleartool 459 2002-01-11 02:44:49Z blais $
+#* $Date: 2002-01-10 21:44:49 -0500 (Thu, 10 Jan 2002) $
+#*
+#* Copyright (C) 2001 Martin Blais <blais@iro.umontreal.ca>
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+
+"""Wrapper to ClearCase and xxdiff.
+
+This script forms glue around ClearCase and xxdiff. It allows one to go through
+commonly performed file comparison tasks in relation to ClearCase use. See the
+individual command descriptions to find out what it can do.
+
+If you find a task that you perform often and it is not project- or
+company-specific, send a suggestion to the author at blais@iro.umontreal.ca.
+"""
+
+__version__ = "$Revision: 459 $"
+__author__ = "Martin Blais <blais@iro.umontreal.ca>"
+__state__ = "$State$"
+# $Source$
+
+#===============================================================================
+# EXTERNAL DECLARATIONS
+#===============================================================================
+
+import sys, getopt, os.path
+import re, string
+import time
+import tempfile
+import errno
+import commands
+
+#===============================================================================
+# LOCAL DECLARATIONS
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+#
+def runDiff( cargs ):
+    xargs = string.split( gopts.xxdiffargs ) + cargs
+    run( gopts.xxdiff, xargs )
+    if not gopts.nowait:
+        os.wait()
+
+#-------------------------------------------------------------------------------
+#
+def run( program, args, stdinn = None ):
+    command = string.join( [ program ] + filter( lambda x: x, args ) )
+
+    if gopts.debug or gopts.fake:
+        print "running:", command
+    if gopts.fake:
+        return
+    try:
+        ( child_stdin, child_stdout ) = os.popen2( command )
+        if stdinn:
+            child_stdin.write( stdinn )
+        #sopts = os.P_NOWAIT
+        #os.spawnv( sopts, program, [ program ] + args )
+
+        child_stdin.close()
+        child_stdout.close()
+    except os.error, e:
+        sys.stderr.write( "Error spawning program:" + e.strerror + "\n" )
+
+#-------------------------------------------------------------------------------
+#
+def runCt( cmd ):
+    if gopts.debug or gopts.fake:
+        print "running: cleartool", cmd 
+    if gopts.fake:
+        return
+
+    out = commands.getoutput( gopts.cleartool + cmd )
+    return out
+
+#-------------------------------------------------------------------------------
+#
+def checkEqualFiles( files ):
+    """Compares filename to make sure that no two of them are the same."""
+    # FIXME todo
+    pass
+
+        
+#===============================================================================
+# CLASS CmFile
+#===============================================================================
+
+class CmFile:
+    """Class that contains information about a specific file.
+
+This class contains everything that a file is about, original pathname,
+revision, etc.
+"""
+
+    _mre = re.compile( '([^@]*)@@(.*)' )
+
+    def __init__( self, origname ):
+        self.fullname = origname
+        ( self.filename, self.rev ) = self.parseName( origname )
+        self.rev_cur = None
+        self.rev_pre = None
+        self.rev_anc = None
+        self.rev_latest = None
+        self.checkedout = None
+
+    def dump( self ):
+        print
+        print "current", self.getCurrentRevision()
+        print "previous", self.getPreviousRevision()
+        print "ancestor", self.getAncestorRevision()
+        print "mainlatest", self.getMainLatestRevision()
+        print 
+        print "fullname", self.fullname
+        print "rev", self.rev
+        print "rev_cur", self.rev_cur
+        print "rev_pre", self.rev_pre
+        print "rev_anc", self.rev_anc
+        print "rev_latest", self.rev_latest
+        print "checkedout", self.checkedout
+        print 
+    
+    def parseName( self, fname ):
+        """Parses extended names and returns a list of ( filename, revision )
+pairs."""
+        mo = CmFile._mre.match( fname )
+        if mo:
+            return mo.groups()
+        return [fname, None]
+
+    def isCheckedOut( self ):
+        self.getCurrentRevision()
+        return self.checkedout
+
+    def getCurrent( self ):
+        rev_cur = self.getCurrentRevision()
+        if rev_cur:
+            return self.filename + '@@' + rev_cur
+        return self.filename
+
+    def getCurrentRevision( self ):
+        """Gets the current revision."""
+        if not self.rev_cur:
+            out = runCt( ' describe -s ' + self.filename  )
+            mo = CmFile._mre.match( out )
+            if mo:
+                self.rev_cur = mo.group( 2 )
+                if re.compile( 'CHECKEDOUT' ).search( self.rev_cur ):
+                    self.rev_cur = None
+                    self.checkedout = 1
+        return self.rev_cur
+
+    def getPrevious( self ):
+        return self.filename + '@@' + self.getPreviousRevision()
+
+    def getPreviousRevision( self ):
+        """Gets the previous revision."""
+        if not self.rev_pre:
+            preout = runCt( ' describe -s -pre ' + self.filename )
+            self.rev_pre = preout
+        return self.rev_pre
+
+    def getAncestorRevision( self ):
+        """Gets the ancestor revision."""
+        if not self.rev_anc:
+            self.rev_anc = self.getAncestorRevisionFile( self.fullname )
+        return self.rev_anc
+
+    def getAncestorRevisionFile( self, filename ):
+        """Gets the ancestor revision of a particular file."""
+        out = runCt( ' describe -s -anc ' + \
+                     filename + ' ' + self.getMainLatestSimple() )
+        mo = CmFile._mre.match( out )
+        if mo:
+            return mo.group( 2 )
+        return None
+
+    def getAncestor( self ):
+        return self.filename + '@@' + self.getAncestorRevision()
+
+    def getMainLatestSimple( self ):
+        return self.filename + '@@/main/LATEST'
+
+    def getMainLatest( self ):
+        return self.filename + '@@' + self.getMainLatestRevision()
+
+    def getMainLatestRevision( self ):
+        """Gets the revision for the latest in the main branch."""
+        if not self.rev_latest:
+            out = runCt( ' describe -s ' + self.getMainLatestSimple() )
+            mo = CmFile._mre.match( out )
+            if mo:
+                self.rev_latest = mo.group( 2 )
+        return self.rev_latest
+
+        
+#===============================================================================
+# CLASS ExtCmdBase
+#===============================================================================
+
+class ExtCmdBase:
+
+    """Base class for command classes.
+
+    FIXME do doc."""
+    
+    def __init__( self ):
+        self.child_stdin = None
+
+    def getFiles( self, names ):
+        files = map( lambda x: CmFile(x), names )
+        return files
+        
+
+#===============================================================================
+# CLASS CmdDiff
+#===============================================================================
+
+class CmdDiff(ExtCmdBase):
+
+    """Diff files, graphically.
+
+    The diff subcommand is used simply to launch xxdiff on a set of files.
+    """
+
+    name = 'diff'
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+
+    def execute( self, args ):
+        args = self.getFiles( args )
+        runDiff( map( lambda x: x.fullname, args ) )
+
+    
+#===============================================================================
+# CLASS CmdPrevious
+#===============================================================================
+
+class CmdPrevious(ExtCmdBase):
+
+    """Diffs each file with its previous revision
+    
+    FIXME do doc.
+    """
+
+    name = 'previous'
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        
+    def execute( self, args ):
+        args = self.getFiles( args )
+        for f in args:
+            current = f.getCurrent()
+            previous = f.getPrevious()
+            if gopts.verbose:
+                print "------------------------------"
+                print "current: ", current
+                print "previous:", previous
+                print "------------------------------"
+            cargs = [ current, previous ]
+            checkEqualFiles( cargs )
+            runDiff( cargs )
+
+
+
+#===============================================================================
+# CLASS CmdBranch
+#===============================================================================
+
+class CmdBranch(ExtCmdBase):
+
+    """Diffs each file with the previous tagged revision
+    
+    FIXME do doc."""
+
+    name = 'branch'
+    optmap = []
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+
+    def execute( self, args ):
+        args = self.getFiles( args )
+        for f in args:
+            current = f.getCurrent()
+            ancestor = f.getAncestor()
+            if gopts.verbose:
+                print "------------------------------"
+                print "current: ", current
+                print "ancestor:", ancestor
+                print "------------------------------"
+
+            cargs = [ current, ancestor ]
+            checkEqualFiles( cargs )
+            runDiff( cargs )
+
+
+#===============================================================================
+# CLASS CmdMerge
+#===============================================================================
+
+class CmdMerge(ExtCmdBase):
+
+    """Diff with each ancestor
+    
+Diffs each file with its ancestor and the latest in the main
+branch, if it is different.
+
+This can be used to inspect the results of DL_fu_update at discreet.
+The options are a bit confusing. Imagine you have:
+
+     main/3
+      /    \
+   main/4  main/yourbranch/6
+
+and you run an update, getting
+
+     main/3
+      /    \
+   main/4  main/yourbranch/6
+            \
+           main/yourbranch/CHECKEDOUT
+
+Using normal mode you'll get a diff of
+  main/yourbranch/CHECKEDOUT   main/4
+
+Using the 'remerge' option will spawn a diff with
+  main/yourbranch/6   main/3   main/4
+
+Using the 'leave_merged' option will spawn a diff with
+  main/yourbranch/CHECKEDOUT   main/3   main/4
+
+Using the 'latest' option will spawn a diff with
+  main/yourbranch/CHECKEDOUT   main/yourbranch/6   main/4
+
+Use the one that suits you best.
+    """
+
+    name = 'merge'
+    optmap = [
+        ( 'remerge', 'r', "If file is still checked out, look for real ancestor and current file."),
+        ( 'leave-merged', 'm',  "If file is still checked out, leave current file as merged result." "If file is still checked out, leave current file as merged result." ),
+        ( 'latest', 'l', "If file is still checked out, don't bother showing ancestor." ),
+        ]
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+
+    def execute( self, args ):
+        args = self.getFiles( args )
+
+        s = 0
+        if self.opts.remerge: s += 1        
+        if self.opts.leave_merged: s += 1
+        if self.opts.latest: s += 1
+        if s > 1:
+            sys.stderr.write( "Cannot specify more than one mode." )
+            sys.exit( 1 )
+
+        for f in args:
+            latest = f.getMainLatest()
+
+            cargs = []
+            if f.isCheckedOut():
+                if self.opts.remerge:
+                    previous = f.getPrevious()
+                    ancestor = f.fullname + '@@' + \
+                               f.getAncestorRevisionFile( previous )
+                    cargs += [ '--merge' ]
+                    cargs += [ previous, ancestor, latest ]
+                    if gopts.verbose:
+                        print "------------------------------"
+                        print "previous: ", previous
+                        print "ancestor:", ancestor
+                        print "latest:  ", latest
+                        print "------------------------------"
+
+                elif self.opts.leave_merged:
+                    current = f.getCurrent()
+                    previous = f.getPrevious()
+                    ancestor = f.fullname + '@@' + \
+                               f.getAncestorRevisionFile( previous )
+                    cargs += [ current, ancestor, latest ]
+                    if gopts.verbose:
+                        print "------------------------------"
+                        print "current: ", current
+                        print "ancestor:", ancestor
+                        print "latest:  ", latest
+                        print "------------------------------"
+                    
+                elif self.opts.latest:
+                    current = f.getCurrent()
+                    previous = f.getPrevious()
+                    cargs += [ current, previous, latest ]
+                    if gopts.verbose:
+                        print "------------------------------"
+                        print "current: ", current
+                        print "previous:", previous
+                        print "latest:  ", latest
+                        print "------------------------------"
+                    
+                else:
+                    current = f.getCurrent()
+                    ancestor = f.getAncestor()
+                    cargs += [ current, ancestor ]
+                    if gopts.verbose:
+                        print "------------------------------"
+                        print "current: ", current
+                        print "ancestor:", ancestor
+                        print "latest:  ", latest
+                        print "------------------------------"
+
+            else:
+                current = f.getCurrent()
+                ancestor = f.getAncestor()
+                cargs += [ current, ancestor ]
+                if gopts.verbose:
+                    print "------------------------------"
+                    print "current: ", current
+                    print "ancestor:", ancestor
+                    print "latest:  ", latest
+                    print "------------------------------"
+
+            checkEqualFiles( cargs )
+            runDiff( cargs )
+
+#===============================================================================
+# CLASS CmdUpdate
+#===============================================================================
+
+class CmdUpdate(ExtCmdBase):
+
+    """Updates, with graphical merge where needed.
+
+    updates the specified files (or all hierarchy if none specified), and invoke
+    graphical diff/merge tool to resolve conflicts if any are present.
+    """
+
+    name = 'update'
+    optmap = []
+    
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        
+    def execute( self, args ):
+        args = self.getFiles( args )
+        pass
+
+
+
+
+#-------------------------------------------------------------------------------
+#
+# Standard options parsing routine with subcommands support.
+# Takes care of handling --help and --version, as well as --help for subcmd.
+#
+# Subcmd objects must have 'name', 'optmap' (optional) and a doc string
+# (optional) which is in the GvR format..
+#
+# Returns (opts, subcmd, args)
+
+import distutils.fancy_getopt as fgetopt  # getopt()
+from distutils.errors import DistutilsArgError
+
+def parse_options_subcmds( optmap, subcmds=[] ):
+
+    optmap = [
+        ( 'help', 'h', "Prints help message." ),
+        ( 'version', 'V', "Prints version." ),
+        ] + optmap
+
+    def opt_translate(opt):
+        o = opt[0]
+        if o[-1] == '=': # option takes an argument?
+            o = o[:-1]
+        return fgetopt.translate_longopt( o )
+
+    # parse global options
+    opts = fgetopt.OptionDummy( map( opt_translate, optmap ) )
+
+    parser = fgetopt.FancyGetopt( optmap )
+    try:
+        args = parser.getopt( args=sys.argv[1:], object=opts )
+    except DistutilsArgError, e:
+        print >> sys.stderr, "Argument error:", e
+        sys.exit(1)
+
+    # print version information
+    if opts.version:
+        print os.path.basename(sys.argv[0]), "--", __version__[1:-1]
+        print "Written by", __author__
+        sys.exit(1)
+
+    # print global help
+    if opts.help:
+        for i in parser.generate_help( __doc__ ):
+            print i
+        print
+        print "Available subcommands"
+        print "------------------------------"
+        for c in subcmds:
+            first_line = c.__doc__.split('\n')[0]
+            print "  %s:" % c.name, first_line
+        print
+        sys.exit(1)
+
+    # find current subcommand
+    if len(args) == 0:
+        print >> sys.stderr, "Error: no subcommand"
+        sys.exit(1)
+    try:
+        sc = None
+        for s in subcmds:
+            if s.name.startswith( args[0] ):
+                if not sc:
+                    sc = s
+                else:
+                    raise ValueError
+        if not sc:
+            raise ValueError
+    except ValueError:
+        print >> sys.stderr, "Error: invalid or ambiguous subcommand", args[0]
+        sys.exit(1)
+
+    # parse command options
+    suboptmap = [( 'help', 'h', "Prints this subcommand's help." )]
+    if getattr(sc, 'optmap', None):
+        suboptmap = sc.optmap + suboptmap
+
+    sc.opts = fgetopt.OptionDummy( map( opt_translate, suboptmap ) )
+
+    subparser = fgetopt.FancyGetopt( suboptmap )
+    try:
+        subargs = subparser.getopt( args[1:], object=sc.opts )
+    except DistutilsArgError, e:
+        print >> sys.stderr, "Argument error:", e
+        sys.exit(1)
+
+    # print command help
+    if opts.help:
+        print __doc__
+        print "Help for '" + sc.name + "' subcommand:"
+        print "------------------------------"
+        for i in subparser.generate_help( sc.__doc__ ):
+            print i
+        print
+        sys.exit(1)
+
+    return (opts, sc, subargs)
+
+
+
+#===============================================================================
+# MAIN
+#===============================================================================
+
+def main():
+
+    #
+    # options parsing
+    #
+    
+    optmap = [
+        ( 'verbose', 'v', "Verbose mode. Prints lots of stuff on stdout." ),
+        ( 'debug', 'd', "Self debugging utility (do not use)." ),
+        ( 'fake', 'n', "Print the commands that would be executed, but do not execute them." ),
+        ( 'nowait', 'w', "Don't wait after spawning child processes." ),
+        ( 'cleartool=', 'c', "Specify cleartool program location." ),
+        ( 'xxdiff=', 'g', "Specify xxdiff program location." ),
+        ( 'xxdiffargs=', 'A', "Arguments to pass directly to diff program." ),
+        ]
+    
+    # declare subcommands.
+    subcmds = [ CmdDiff(), \
+                CmdPrevious(), \
+                CmdBranch(), \
+                CmdMerge() ]
+
+    global gopts
+    (gopts, subcmd, subargs) = parse_options_subcmds( optmap, subcmds )
+
+    if not gopts.cleartool:
+        gopts.cleartool = 'cleartool'
+    if not gopts.xxdiff:
+        gopts.xxdiff = 'xxdiff'
+    if not gopts.xxdiffargs:
+        gopts.xxdiffargs = ''
+
+    # execute command
+    subcmd.execute( subargs )
+
+
+# Run main if loaded as a script
+if __name__ == "__main__":
+    main()

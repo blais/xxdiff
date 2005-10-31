@@ -97,8 +97,10 @@ XX_NAMESPACE_BEGIN
 XxBuffer::XxBuffer( 
    const bool     /*passiveDummy*/, // ignored
    const QString& filename,
-   const QString& displayFilename
+   const QString& displayFilename,
+   const char     newlineChar
 ) :
+   _newlineChar( newlineChar ),
    _name( filename ),
    _displayName( displayFilename ),
    _hiddenCR( false ),
@@ -117,8 +119,10 @@ XxBuffer::XxBuffer(
    const QString& filename,
    const QString& displayFilename,
    const bool     hideCR,
-   const bool     deleteFile
+   const bool     deleteFile,
+   const char     newlineChar
 ) :
+   _newlineChar( newlineChar ),
    _name( filename ),
    _displayName( displayFilename ),
    _hiddenCR( hideCR ),
@@ -157,6 +161,7 @@ XxBuffer::XxBuffer(
    const QString&  filename,
    const QString&  displayFilename
 ) :
+   _newlineChar( orig._newlineChar ),
    _name( filename ),
    _displayName( displayFilename ),
    _hiddenCR( orig._hiddenCR ),
@@ -230,14 +235,14 @@ void XxBuffer::loadStream( FILE* fin )
 
    // Add a final newline if there isn't one.  This will simplify indexing.
    if ( _bufferSize > 0 ) { // to support empty files.
-      if ( _buffer[ _bufferSize - 1 ] != '\n' ) {
+      if ( _buffer[ _bufferSize - 1 ] != _newlineChar ) {
 
          // Potentially reallocate the buffer to accomodate the new char.
          _buffer = static_cast<char*>(
             realloc( _buffer, _bufferSize * sizeof(char) + 1 )
          );
 
-         _buffer[ _bufferSize ] = '\n';
+         _buffer[ _bufferSize ] = _newlineChar;
          _bufferSize++;
       }
    }
@@ -280,8 +285,8 @@ void XxBuffer::loadFile( const QFileInfo& finfo )
 
    // Add a final newline if there isn't one.  This will simplify indexing.
    if ( _bufferSize > 0 ) { // to support empty files.
-      if ( _buffer[ _bufferSize - 1 ] != '\n' ) {
-         _buffer[ _bufferSize ] = '\n';
+      if ( _buffer[ _bufferSize - 1 ] != _newlineChar ) {
+         _buffer[ _bufferSize ] = _newlineChar;
          _bufferSize++;
       }
    }
@@ -343,7 +348,7 @@ void XxBuffer::setDirectoryEntries(
          ++it ) {
       int len = (*it).length();
       ::strncpy( bufferPtr, (*it).latin1(), len );
-      bufferPtr[len] = '\n';
+      bufferPtr[len] = _newlineChar;
       bufferPtr += len + 1;
    }
 
@@ -395,7 +400,7 @@ void XxBuffer::indexFile()
 #endif
 
    for ( ii = 0; ii < _bufferSize; ++ii ) {
-      if ( _buffer[ii] == '\n' ) {
+      if ( _buffer[ii] == _newlineChar ) {
          _index.push_back( ii + 1 );
 #ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
          _lengths.push_back( ii - prev );

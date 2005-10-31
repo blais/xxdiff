@@ -146,6 +146,10 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "If there are no conflicts after making automatic merge selections, then "
      "exit quietly with exit code of 0."
    }, 
+   { "single", 0, false, 'x', 
+     "Load a single file for display. This is a strange feature for those who "
+     "like the display of code with xxdiff."
+   },
    { "merge", 'm', false, 'm', 
      "Automatically select regions that would end up being selected by "
      "an automatic merge."
@@ -199,6 +203,10 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "is provided for specific cisconstances and can be annoying."
    }, 
 #endif
+   { "mac", 0, false, 'G',
+     "Split the file lines at single carriage returns instead of newlines."
+     "This should allow xxdiff working on Mac OSX."
+   },
 };
 
 //
@@ -230,6 +238,7 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "Treat all files as text and compare them "
      "line-by-line, even if they do not appear to be text."
    }, 
+#if 0 
    { "exclude", 0, true, 'e',
      "When comparing directories, ignore files and subdirectories whose "
      "basenames match pattern."
@@ -238,6 +247,7 @@ XxCmdline::Option XxCmdline::_optionsDiff[] = {
      "When comparing directories, ignore files and subdirectories whose "
      "basenames match any pattern contained in file."
    },
+#endif
 
 };
 
@@ -305,9 +315,11 @@ XxCmdline::XxCmdline() :
    _originalXdiff( false ),
    _useRcfile( true ), 
    _extraDiffArgs( "" ),
+   _single( false ),
    _unmerge( false ),
    _unmergeNbFiles( 2 ),
    _outputOnExit( false ),
+   _macNewlines( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -463,6 +475,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _unmergeNbFiles = 3;
          } break;
 
+         case 'x': {
+            _single = true;
+         } break;
+
          case '1':
             if ( !optarg ) {
                throw XxUsageError( XX_EXC_PARAMS,
@@ -522,6 +538,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          
          case 'O': {
             _outputOnExit = true;
+         } break;
+         
+         case 'G': {
+            _macNewlines = true;
          } break;
          
          //
@@ -651,8 +671,17 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    // End qt options with a marker.
    _qtOptions[ _nbQtOptions ] = 0;
 
-   int minfn = _unmerge ? 1 : 2;
-   int maxfn = _unmerge ? 1 : 3;
+   int minfn = ( _unmerge || _single ) ? 1 : 2;
+   int maxfn = ( _unmerge || _single ) ? 1 : 3;
+
+   if ( _unmerge && _single ) {
+      QString msg;
+      {
+         QTextOStream oss( &msg );
+         oss << "You cannot ask for both unmerge and single.";
+      }
+      throw XxUsageError( XX_EXC_PARAMS, msg );
+   }
 
    if ( _nbFilenames < minfn ) {
       QString msg;

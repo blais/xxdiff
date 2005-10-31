@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 624 2002-09-20 18:36:23Z blais $
+# $Id: TODO 633 2002-12-30 16:29:33Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -36,9 +36,25 @@ Goals for 4.0 stable release:
 --------------------------------------------------------------------------------
 Tasks: current tasks
 
+  * xxdiff -D that succeed leaves a mutex destroy failure message... find the bug!
+
+
+
+   2) make able to see if there are any changes at all, to do this, we'll
+      compare all chars of the buffers by hand, if there is ANY differences that
+      it is different;  check size of buffers first
+
+
+
+
+
+  * cursor is not following scrolling anymore, FIX THIS this is annoying when
+    using the keyboard
+
+
+  * change config to use XML instead, add 'xxdiff --dtd' to obtain dtd.
+
   * change key binding for variable text selection
-
-
 
   * check out bug from (wesleysmith)
 
@@ -60,6 +76,262 @@ one, with the name changed to "Save".
 
 A similar problem is seen with the "Edit ..." menu items 
 on the File menu. 
+
+
+  * bug:
+
+    with gcc-3.2, apparently.
+
+g++ -c -pipe -DCOMPILER_GNU -Wall -W -O2 -DNO_DEBUG -I. -I/usr/lib/qt3/include -o optionsDialog.o optionsDialog.cpp
+In file included from optionsDialog.cpp:27:
+optionsDialog.h:57: parse error before `{' token
+optionsDialog.h:59: virtual outside class declaration
+optionsDialog.h:59: non-member function `const char* className()' cannot have `
+   const' method qualifier
+optionsDialog.h:59: virtual outside class declaration
+optionsDialog.h:59: virtual outside class declaration
+optionsDialog.h:59: virtual outside class declaration
+optionsDialog.h:59: virtual outside class declaration
+optionsDialog.h: In function `QObject* qObject()':
+optionsDialog.h:59: invalid use of `this' in non-member function
+optionsDialog.h: At global scope:
+optionsDialog.h:59: parse error before `private'
+optionsDialog.h:63: syntax error before `;' token
+optionsDialog.h:73: destructors must be member functions
+optionsDialog.h:73: virtual outside class declaration
+optionsDialog.h:76: virtual outside class declaration
+optionsDialog.h:122: parse error before `public'
+optionsDialog.h:174: parse error before `private'
+optionsDialog.h:183: non-member function `void 
+   setFileDiffOptions(XxCommandSwitch, bool)' cannot have `const' method 
+   qualifier
+optionsDialog.h:187: non-member function `void setFileDiffQuality(XxQuality)' 
+   cannot have `const' method qualifier
+optionsDialog.h:196: non-member function `QString getFontDisplayText(const 
+   QFont&)' cannot have `const' method qualifier
+optionsDialog.h:206: parse error before `}' token
+In file included from optionsDialog.cpp:31:
+app.h:429: syntax error before `*' token
+optionsDialog.cpp:198: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In constructor `XxOptionsDialog::XxOptionsDialog(XxApp*, 
+   QWidget*)':
+optionsDialog.cpp:199: class `XxOptionsDialog' does not have any field named `
+   BaseClass'
+optionsDialog.cpp:200: class `XxOptionsDialog' does not have any field named `
+   _app'
+optionsDialog.cpp:235: `_buttonApply' undeclared (first use this function)
+optionsDialog.cpp:235: (Each undeclared identifier is reported only once for 
+   each function it appears in.)
+optionsDialog.cpp:235: `connect' undeclared (first use this function)
+optionsDialog.cpp:236: `_buttonOk' undeclared (first use this function)
+optionsDialog.cpp:241: `_checkboxIgnoreTrailingBlanks' undeclared (first use 
+   this function)
+optionsDialog.cpp:243: `_checkboxIgnoreWhitespace' undeclared (first use this 
+   function)
+optionsDialog.cpp:245: `_checkboxIgnoreCase' undeclared (first use this 
+   function)
+optionsDialog.cpp:247: `_checkboxIgnoreBlankLines' undeclared (first use this 
+   function)
+optionsDialog.cpp:250: `_radiobuttonQualityNormal' undeclared (first use this 
+   function)
+optionsDialog.cpp:252: `_radiobuttonQualityFastest' undeclared (first use this 
+   function)
+optionsDialog.cpp:254: `_radiobuttonQualityHighest' undeclared (first use this 
+   function)
+optionsDialog.cpp:266: `_editFontApp' undeclared (first use this function)
+optionsDialog.cpp:268: `_editFontText' undeclared (first use this function)
+optionsDialog.cpp:279: `_listboxColors' undeclared (first use this function)
+optionsDialog.cpp:285: `_buttonEditFore' undeclared (first use this function)
+optionsDialog.cpp:287: `_buttonEditBack' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:297: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In destructor `XxOptionsDialog::~XxOptionsDialog()':
+optionsDialog.cpp:300: `disconnect' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:306: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:314: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::show()':
+optionsDialog.cpp:328: `_labelFontApp' undeclared (first use this function)
+optionsDialog.cpp:329: `_labelFontText' undeclared (first use this function)
+optionsDialog.cpp:331: `synchronize' undeclared (first use this function)
+optionsDialog.cpp:332: `BaseClass' undeclared (first use this function)
+optionsDialog.cpp:332: parse error before `::' token
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:338: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::synchronize()':
+optionsDialog.cpp:346: `_lineeditCommandFiles2' undeclared (first use this 
+   function)
+optionsDialog.cpp:382: `_lineeditCommandFiles3' undeclared (first use this 
+   function)
+optionsDialog.cpp:389: `_lineeditCommandDirs' undeclared (first use this 
+   function)
+optionsDialog.cpp:393: `_lineeditCommandDirsRecursive' undeclared (first use 
+   this function)
+optionsDialog.cpp:399: `_checkboxRecursive' undeclared (first use this 
+   function)
+optionsDialog.cpp:406: `_comboHordiffType' undeclared (first use this function)
+optionsDialog.cpp:407: `_spinboxHordiffContext' undeclared (first use this 
+   function)
+optionsDialog.cpp:409: `_checkboxIgnoreHorizontalWhitespace' undeclared (first 
+   use this function)
+optionsDialog.cpp:412: `_checkboxHideCarriageReturns' undeclared (first use 
+   this function)
+optionsDialog.cpp:416: `_spinboxTabWidth' undeclared (first use this function)
+optionsDialog.cpp:418: `_checkboxDrawVerticalLine' undeclared (first use this 
+   function)
+optionsDialog.cpp:422: `_comboIgnoreFile' undeclared (first use this function)
+optionsDialog.cpp:425: `_checkboxIgnoreFileChanges' undeclared (first use this 
+   function)
+optionsDialog.cpp:429: `_checkboxFormatClipboardText' undeclared (first use 
+   this function)
+optionsDialog.cpp:433: `_lineeditClipboardFormat' undeclared (first use this 
+   function)
+optionsDialog.cpp:439: `_labelFontAppName' undeclared (first use this function)
+optionsDialog.cpp:443: `_labelFontTextName' undeclared (first use this 
+   function)
+optionsDialog.cpp:463: `_labelEditFore' undeclared (first use this function)
+optionsDialog.cpp:464: `_labelEditBack' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:474: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void 
+   XxOptionsDialog::selectDiffOptions()':
+optionsDialog.cpp:475: `_tabWidget' undeclared (first use this function)
+optionsDialog.cpp:475: `getDiffPageIndex' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:481: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:488: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::onApply()':
+optionsDialog.cpp:565: `_spinboxVlinePos' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:635: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::onClose()':
+optionsDialog.cpp:636: `hide' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:642: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:650: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:658: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:666: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:677: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void 
+   XxOptionsDialog::setFileDiffOptions(XxCommandSwitch, bool) const':
+optionsDialog.cpp:686: no method `XxOptionsDialog::addToCommand'
+optionsDialog.cpp:689: no method `XxOptionsDialog::removeFromCommand'
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:698: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:707: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:716: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:727: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:747: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void 
+   XxOptionsDialog::listboxColors(const QString&)':
+optionsDialog.cpp:769: `_labelDescription' undeclared (first use this function)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:775: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::editFontApp()':
+optionsDialog.cpp:786: no matching function for call to `QFontDialog::getFont(
+   bool*, const QFont&, XxOptionsDialog* const, const char[12])'
+/usr/lib/qt3/include/qfontdialog.h:70: candidates are: static QFont 
+   QFontDialog::getFont(bool*, const QFont&, QWidget* = 0, const char* = 0)
+/usr/lib/qt3/include/qfontdialog.h:71:                 static QFont 
+   QFontDialog::getFont(bool*, QWidget* = 0, const char* = 0)
+/usr/lib/qt3/include/qfontdialog.h:122:                 static QFont 
+   QFontDialog::getFont(bool*, const QFont*, QWidget* = 0, const char* = 0)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:803: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::editFontText()':
+optionsDialog.cpp:814: no matching function for call to `QFontDialog::getFont(
+   bool*, const QFont&, XxOptionsDialog* const, const char[12])'
+/usr/lib/qt3/include/qfontdialog.h:70: candidates are: static QFont 
+   QFontDialog::getFont(bool*, const QFont&, QWidget* = 0, const char* = 0)
+/usr/lib/qt3/include/qfontdialog.h:71:                 static QFont 
+   QFontDialog::getFont(bool*, QWidget* = 0, const char* = 0)
+/usr/lib/qt3/include/qfontdialog.h:122:                 static QFont 
+   QFontDialog::getFont(bool*, const QFont*, QWidget* = 0, const char* = 0)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:831: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::editColorFore()':
+optionsDialog.cpp:846: no matching function for call to `QColorDialog::getColor
+   (QColor&, XxOptionsDialog* const)'
+/usr/lib/qt3/include/qcolordialog.h:54: candidates are: static QColor 
+   QColorDialog::getColor(const QColor& = Qt::white, QWidget* = 0, const char* 
+   = 0)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:861: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void XxOptionsDialog::editColorBack()':
+optionsDialog.cpp:876: no matching function for call to `QColorDialog::getColor
+   (QColor&, XxOptionsDialog* const)'
+/usr/lib/qt3/include/qcolordialog.h:54: candidates are: static QColor 
+   QColorDialog::getColor(const QColor& = Qt::white, QWidget* = 0, const char* 
+   = 0)
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:894: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:904: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:920: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:937: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `int XxOptionsDialog::isInCommand(const 
+   QString&, const QString&, const QString&, const QString&)':
+optionsDialog.cpp:942: no method `XxOptionsDialog::isInCommand'
+optionsDialog.cpp:943: no method `XxOptionsDialog::isInCommand'
+optionsDialog.cpp:944: no method `XxOptionsDialog::isInCommand'
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:980: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp: In member function `void 
+   XxOptionsDialog::setOneOfInCommand(QString&, const QString&, const QString&, 
+   const QString&)':
+optionsDialog.cpp:986: no method `XxOptionsDialog::removeFromCommand'
+optionsDialog.cpp:989: no method `XxOptionsDialog::removeFromCommand'
+optionsDialog.cpp:993: no method `XxOptionsDialog::addToCommand'
+optionsDialog.cpp: At global scope:
+optionsDialog.cpp:1003: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.cpp:1018: invalid use of undefined type `class XxOptionsDialog'
+optionsDialog.h:57: forward declaration of `class XxOptionsDialog'
+optionsDialog.h:59: warning: `QMetaObject* staticMetaObject()' declared 
+   `static' but never defined
+optionsDialog.h:59: warning: `QString tr(const char*, const char*)' declared 
+   `static' but never defined
+optionsDialog.h:59: warning: `QString trUtf8(const char*, const char*)' 
+   declared `static' but never defined
+optionsDialog.h:91: warning: `bool isInCommand(const QString&, const QString&)' 
+   declared `static' but never defined
+optionsDialog.h:96: warning: `void addToCommand(QString&, const QString&)' 
+   declared `static' but never defined
+optionsDialog.h:100: warning: `void removeFromCommand(QString&, const QString&)
+   ' declared `static' but never defined
+optionsDialog.h:111: warning: `int isInCommand(const QString&, const QString&, 
+   const QString&, const QString&)' declared `static' but never defined
+optionsDialog.h:119: warning: `void setOneOfInCommand(QString&, const QString&, 
+   const QString&, const QString&)' declared `static' but never defined
+make: *** [optionsDialog.o] Fehler 1
+
 
 
 

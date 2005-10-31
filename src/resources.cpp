@@ -165,26 +165,31 @@ void XxResources::initializeOriginalXdiff()
    //---------------------------------------------------------------------------
 
 #ifdef XX_KDE
-   _fontText = KGlobalSettings::fixedFont();
+   if ( qApp != 0 )
+      _fontText = KGlobalSettings::fixedFont();
+   else {
 #else
-   // // Use a default font that looks like the one from the default SGI scheme.
-   // _fontApp.setFamily( "Helvetica" );
-   // _fontApp.setItalic( true ); 
-   // _fontApp.setBold( true );
+      // // Use a default font that looks like the one from the default SGI scheme.
+      // _fontApp.setFamily( "Helvetica" );
+      // _fontApp.setItalic( true ); 
+      // _fontApp.setBold( true );
 
-   // Note: using "-*-screen-bold-i-normal--*-100-*-*-*-*-iso8859-1"
-   // seems to yield the corresponding font to the SGI font under Linux.
+      // Note: using "-*-screen-bold-i-normal--*-100-*-*-*-*-iso8859-1"
+      // seems to yield the corresponding font to the SGI font under Linux.
 
-   // Try to set the default font to be as close as possible as that under the
-   // original xdiff under SGI.
-   //_fontText.setRawName( "*-clean-medium-r-normal-*-14-*" ); // XLFD warning
-   // _fontText.setRawName( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
-   //_fontText.setItalic( false );
-   //_fontText.setFamily( "Lucida" );
-   _fontText.setStyleHint( QFont::TypeWriter, QFont::PreferMatch );
-   _fontText.setFamily( "Lucidatypewriter" );
-   _fontText.setPointSize( 9 );
-   _fontText.setFixedPitch( true ); // FIXME this does not work, qt bug.
+      // Try to set the default font to be as close as possible as that under the
+      // original xdiff under SGI.
+      //_fontText.setRawName( "*-clean-medium-r-normal-*-14-*" ); // XLFD warning
+      // _fontText.setRawName( "-*-clean-medium-r-normal-*-*-140-75-75-*-*-*-*" );
+      //_fontText.setItalic( false );
+      //_fontText.setFamily( "Lucida" );
+      _fontText.setStyleHint( QFont::TypeWriter, QFont::PreferMatch );
+      _fontText.setFamily( "Lucidatypewriter" );
+      _fontText.setPointSize( 9 );
+      _fontText.setFixedPitch( true ); // FIXME this does not work, qt bug.
+#endif
+#ifdef XX_KDE
+   }
 #endif
 
    //---------------------------------------------------------------------------

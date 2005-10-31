@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 2.9.1
+Version: 2.9.2
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
@@ -8,8 +8,8 @@ Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.gz
 URL: http://xxdiff.sourceforge.net
 Packager: Martin Blais <blais@iro.umontreal.ca>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
-Requires: qt3
-BuildRequires: qt3-devel tmake
+Requires: qt
+BuildRequires: qt-devel tmake
 
 %description
 xxdiff is a graphical browser for viewing the differences between two
@@ -53,8 +53,11 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 
 
 %changelog
+* Wed Mar 17 2003 Martin Blais <blais@iro.umontreal.ca>
+- released 2.9.2.
+
 * Wed Sep 20 2002 Martin Blais <blais@iro.umontreal.ca>
-- released 2.9.
+- released 2.9.1.
 
 * Wed Sep 19 2002 Martin Blais <blais@iro.umontreal.ca>
 - released 2.9.

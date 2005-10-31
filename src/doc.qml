@@ -321,6 +321,15 @@ addition, a marker indicates the location of the line cursor.
 </li>
 
 <li>
+<b>Remaining Unselected Hunks.</b> Just above the overview area is a label that
+indicates the number of remaining unselected diff hunks between the files.  In
+addition, if that number is zero, and if the files are identical byte-for-byte,
+it display a "(=)" string next to the number, so that you can figure out quickly
+if the files have any ignored whitespace changes or not (this can be important
+during merge review).
+</li>
+
+<li>
 <b>Toolbar.</b> A toolbar that gives access to the common motion and selection
 commands.
 </li>

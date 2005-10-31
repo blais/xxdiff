@@ -24,7 +24,7 @@
 #
 
 TEMPLATE = xxdiff
-CONFIG = release qt warn_on
+CONFIG = release qt warn_on thread
 
 # For KDE support, uncomment the following lines:
 #TMAKE_CFLAGS += -DXX_KDE -I/usr/include/kde
@@ -34,8 +34,8 @@ CONFIG = release qt warn_on
 debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
-#XX_VERSION=2.9-devel
-XX_VERSION=2.9.1
+#XX_VERSION=2.9.1-devel
+XX_VERSION=2.9.2
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
@@ -153,6 +153,7 @@ HEADERS = \
 	builderFiles3.h \
 	builderDirs2.h \
 	builderUnmerge.h \
+	builderSingle.h \
 	exceptions.h \
 	buffer.h \
 	buffer.inline.h \
@@ -203,6 +204,7 @@ SOURCES = \
 	builderFiles3.cpp \
 	builderDirs2.cpp \
 	builderUnmerge.cpp \
+	builderSingle.cpp \
 	diffs.cpp \
 	hordiffImp.cpp \
 	line.cpp \

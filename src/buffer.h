@@ -87,7 +87,8 @@ public:
    XxBuffer(
       const bool     passiveDummy, // ignored
       const QString& filename, 
-      const QString& displayFilename
+      const QString& displayFilename,
+      const char     newlineChar = '\n'
    );
 
    // Constructor.  This will load the file in memory and index the beginnings
@@ -96,7 +97,8 @@ public:
       const QString& filename, 
       const QString& displayFilename,
       const bool     hideCR = true,
-      const bool     deleteFile = false
+      const bool     deleteFile = false,
+      const char     newlineChar = '\n'
    );
 
    // Constructor that can impersonate another buffer but that does not own the
@@ -193,6 +195,9 @@ public:
    // Returns the line number to display for given text line.
    XxFln getDisplayLineNo( const XxFln fline ) const;
 
+   // Returns the buffer and buffersize.
+   const char* getBuffer( uint& size ) const;
+
 private:
 
    /*----- member functions -----*/
@@ -215,6 +220,8 @@ private:
    void indexFile();
 
    /*----- data members -----*/
+
+   char               _newlineChar; // default is \010
 
    QString            _name;
    QString            _displayName;

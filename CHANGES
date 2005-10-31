@@ -2,11 +2,36 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 624 2002-09-20 18:36:23Z blais $
+# $Id: CHANGES 642 2003-03-16 06:58:30Z blais $
 #
 
-Current development release
+Current Devel Version
+#######Version 2.9.2: (minor features)
 ------------------------------
+
+   * Removed unimplemented exclude switches.
+
+   * Tested build with qt-3.1.1, it works fine.
+
+   * Incorporated fix for "--help-html" crash when compiled against KDE (thanks
+     to Andreas Pour <pour at mieterra.com>).
+
+   * Added tentative option for attempting to process Macintosh files with CR as
+     line terminator.
+
+   * Added special marker in counter for remaining unselected regions that would
+     mark when the two files are equal byte for byte; This allows the developer
+     to visualize quickly if the file has no difference if at least it contains
+     whitespace differences.
+
+   * Implemented "--single" option to allow xxdiff to open a single file.
+
+   * Double-clicking on an added or removed file in directories mode now
+     opens an xxdiff with a single file in it. This is to be used for 
+     convenience. You'd be better off using a file editor to visualize
+     single files, but some people like the consistency of looking at 
+     everything thru the same program.
+
 
 Version 2.9.1: (minor bug fixes)
 ------------------------------

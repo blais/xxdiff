@@ -28,6 +28,8 @@ Building from source:
 #   INTERFACE keyword and don't generate appropriate rules for building the .ui
 #   files). This won't work with qmake.
 #
+#   tmake can be found at http://www.trolltech.com/download/tmake.html
+#
 
 
 #

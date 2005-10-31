@@ -1,0 +1,492 @@
+#!/usr/bin/env python
+#******************************************************************************\
+#* $Source$
+#* $Id: xxcvs 184 2001-06-04 05:54:44Z blais $
+#* $Date: 2001-06-04 01:54:44 -0400 (Mon, 04 Jun 2001) $
+#*
+#* Copyright (C) 2001 Martin Blais <blais@iro.umontreal.ca>
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+
+"""Wrapper to cvs and xxdiff.
+
+This script forms glue around cvs and xxdiff. It allows one to go through
+commonly performed file comparison tasks in relation to cvs use. See the
+individual command descriptions to find out what it can do.
+
+Extended syntax for specifying filenames with revision numbers in <args> is
+<filename>@@<revision>, where revision can be a revision number or a cvs tag,
+or the keyword LATEST to specify the latest revision in the main branch. If
+the revision is not specified, it refers to the filein the user's checkout
+space.
+
+If you find a task that you perform often and it is not project- or
+company-specific, send a suggestion to the author at blais@iro.umontreal.ca.
+"""
+
+__version__ = "$Revision: 184 $"
+
+#===============================================================================
+# EXTERNAL DECLARATIONS
+#===============================================================================
+
+import sys, getopt, os.path, commands
+import re, string
+import time
+import tempfile
+import errno
+
+import quickopts
+import cvs
+
+#===============================================================================
+# LOCAL DECLARATIONS
+#===============================================================================
+
+
+#-------------------------------------------------------------------------------
+#
+def getFileContents( file ):
+    ( name, revision ) = file
+    if not revision:
+        return None
+
+    #if not Options.debug:
+    #    redir = ' 2> /dev/null'
+    #else:
+    #    redir = ' 2> /tmp/xxdiff.debug_log'
+    # Cannot redirect for now because it needs to display password prompt.
+    redir = ''
+    pipe = os.popen( gopts.cvs + ' update -p -r' + revision + ' ' + \
+                     name + redir )
+    contents = pipe.read()
+    pipe.close()
+    return contents
+
+#-------------------------------------------------------------------------------
+#
+def getFileContentsTmp( file ):
+    ( name, revision ) = file
+    if not revision:
+        return None
+
+    # open temp file.
+    tfname = tempfile.mktemp( '.xxdiff.tmp' )
+    tf = open( tfname, 'w' )
+    os.unlink( tfname )
+
+    #if not Options.debug:
+    #    redir = ' 2> /dev/null'
+    #else:
+    #    redir = ' 2> /tmp/xxdiff.debug_log'
+    # Cannot redirect for now because it needs to display password prompt.
+    redir = ''
+
+    pipe = os.popen( gopts.cvs + ' update ' + \
+                     '-p -r' + revision + ' ' + name + redir )
+    tf.write( pipe.read() )
+    pipe.close()
+    return tf
+
+
+#-------------------------------------------------------------------------------
+#
+def runDiff( cargs ):
+    xargs = string.split( gopts.xxdiffargs ) + cargs
+    run( gopts.xxdiff, xargs )
+    if not gopts.nowait:
+        os.wait()
+
+
+
+##------------------------------------------------------------------------------
+##
+#def run( program, args, stdinn ):
+#    if gopts.debug:
+#        print "running:", program, string.join( args )
+#    try:
+#        command = string.join( [ program ] + args )
+#        ( child_stdin, child_stdout ) = os.popen2( command )
+#        if stdinn:
+#            child_stdin.write( stdinn )
+#        #sopts = os.P_NOWAIT
+#        #os.spawnv( sopts, program, [ program ] + args )
+#
+#        child_stdin.close()
+#        child_stdout.close()
+#    except os.error, e:
+#        sys.stderr.write( "Error spawning program:" + e.strerror + "\n" )
+#
+
+#-------------------------------------------------------------------------------
+#
+def run( program, args, stdinn = None ):
+    command = string.join( [ program ] + filter( lambda x: x, args ) )
+
+    if gopts.debug or gopts.fake:
+        print "running:", command
+    if gopts.fake:
+        return
+    try:
+        ( child_stdin, child_stdout ) = os.popen2( command )
+        if stdinn:
+            child_stdin.write( stdinn )
+        #sopts = os.P_NOWAIT
+        #os.spawnv( sopts, program, [ program ] + args )
+
+        child_stdin.close()
+        child_stdout.close()
+    except os.error, e:
+        sys.stderr.write( "Error spawning program:" + e.strerror + "\n" )
+
+#-------------------------------------------------------------------------------
+#
+def checkEqualFiles( files ):
+    """Compares filename to make sure that no two of them are the same."""
+    # FIXME todo
+    pass
+
+
+        
+    
+#===============================================================================
+# CLASS ExtCmdBase
+#===============================================================================
+
+class ExtCmdBase(quickopts.CmdBase):
+    """Base class for command classes."""
+
+    def __init__( self ):
+        quickopts.CmdBase.__init__( self )
+        self.child_stdin = None
+        
+    def getFiles( self, names ):
+        # get files
+        for f in names:
+            ( name, revision ) = f
+            if revision:
+                if not self.child_stdin:
+                    self.child_stdin = getFileContents( f )
+                    f.append( None )
+                else:
+                    f.append( getFileContentsTmp( f ) )
+
+
+#===============================================================================
+# CLASS CmdDiff
+#===============================================================================
+
+class CmdDiff(ExtCmdBase):
+
+    """The diff subcommand is used simply to launch xxdiff on a set of files.
+    Take advantage of the handy extended syntax that this script provides."""
+
+    _name = 'diff'
+    _description = "diff files, graphically."
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+
+    def usage( self ):
+        print self.__doc__
+
+    def execute( self, args ):
+        files = map( lambda x: cvs.File(x), args )
+
+        if not args:
+            print "No arguments specified."
+            print "Type \""+ os.path.basename( sys.argv[0] ),
+            print self._name, "--help\" for more info on this command."
+            sys.exit( 1 )
+
+        fal = []
+        i = 1
+        for f in files:
+            # FIXME implement this
+            if len( f ) > 2:
+                if f[2]:
+                    fal.append( f[2] )
+                else:
+                    fal.append( '-' )
+                    fal.append( '--title' + repr(i) + '=\"' + f[0] + \
+                                ' (CVS-' + f[1] + ')\"' )
+            else:
+                fal.append( f[0] )
+                i=i+1
+        
+        runDiff( string.split( gopts.xxdiffargs ) + fal, \
+                 self.child_stdin )
+
+    
+#===============================================================================
+# CLASS CmdPrevious
+#===============================================================================
+
+class CmdPrevious(ExtCmdBase):
+
+    """(no description yet FIXME.)"""
+    
+    _name = 'previous'
+    _description = "diffs each file with its previous revision."
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        
+    def usage( self ):
+        print self.__doc__
+
+    def execute( self, args ):
+        files = map( lambda x: cvs.File(x), args )
+        for f in files:
+            # First run a status to figure out if this file is up-to-date.
+            status = f.getStatus()
+            print status
+            if status == cvs.File.UP_TO_DATE:
+                current = f.getWorkingRevision()
+                previous = f.getPreviousRevision()
+                if gopts.verbose:
+                    print "------------------------------"
+                    print "working revision (Up-to-date): ", current
+                    print "previous revision:", previous
+                    print "------------------------------"
+
+                cargs = [ current, previous ]
+                checkEqualFiles( cargs )
+                runDiff( cargs )
+
+            elif status == cvs.File.LOCALLY_MODIFIED or \
+                 status == cvs.File.NEEDS_MERGE or \
+                 status == cvs.File.FILE_HAD_CONFLICTS_ON_MERGE:
+                pass
+                # FIXME todo: diff local version against ancestor
+
+            else:
+                sys.stderr.write( \
+                    "Error: file " + f.fullname + " has status " + \
+                    cvs.File._statii[status] + "\n" )
+                sys.exit( 1 )
+
+
+#===============================================================================
+# CLASS CmdBranch
+#===============================================================================
+
+class CmdBranch(ExtCmdBase):
+
+    """FIXME no description yet"""
+    
+    _name = 'branch'
+    _description = "diffs each file with the previous tagged revision."
+
+    def usage( self ):
+        print self.__doc__
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+
+    # FIXME todo
+
+
+#===============================================================================
+# CLASS CmdMerge
+#===============================================================================
+
+class CmdMerge(ExtCmdBase):
+
+    """ Diffs each file with its ancestor and the latest in the main branch, if
+it is different. Diff hunks that can be resolved are automatically selected."""
+
+
+    _name = 'merge'
+    _description = "diff with each ancestor"
+
+    def usage( self ):
+        print self.__doc__
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        
+    def execute( self, args ):
+        # FIXME todo
+        # Note: I've got this code already done in xxct for ccase
+        pass
+
+#===============================================================================
+# CLASS CmdConflict
+#===============================================================================
+
+class CmdConflict(ExtCmdBase):
+
+    """ Takes a file that has been merged with conflicts and splits files
+according to the conflicts into two or three individual files and invokes diff
+on those. This allows one to resolve the already updated merge conflicts with
+xxdiff. If there was only two files in conflict, you can also specify an
+ancestor file to include in the graphical diff.  """
+
+    _name = 'conflict'
+    _description = "diff by splitting merge conflicts"
+
+    def usage( self ):
+        print self.__doc__
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        self.optmap[ 'ancrev' ] = [ 'r', 0, \
+ "Specify an ancestor revision to show in the graphical diff." ]
+        self.optmap[ 'ancfile' ] = [ 'a', 0, \
+ "Specify an ancestor file to show in the graphical diff." ]
+        
+    def execute( self, args ):
+        # FIXME todo
+        # Note: I've got this code already done in xxct for ccase
+        pass
+
+#===============================================================================
+# CLASS CmdUpdate
+#===============================================================================
+
+class CmdUpdate(ExtCmdBase):
+
+    """ Updates the specified files (or all hierarchy if none specified), and
+invoke graphical diff/merge tool to resolve conflicts if any are present.  """
+
+    _name = 'update'
+    _description = "updates, with graphical merge where needed."
+    
+    def usage( self ):
+        print self.__doc__
+        
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        
+    def execute( self, args ):
+        # FIXME todo
+        # first parse output of status or some benine update call to figure out
+        # what to merge.
+        pass
+
+
+#===============================================================================
+# CLASS CmdCoAll
+#===============================================================================
+
+class CmdCoAll(ExtCmdBase):
+
+    """checks out all the revisions of a particular file in the following
+format: filename-rXXX, where XXX is the revision number.  """
+
+    _name = 'coall'
+    _description = "checks out all revisions of a file."
+    
+    def usage( self ):
+        print self.__doc__
+
+    def __init__( self ):
+        ExtCmdBase.__init__( self )
+        self.optmap[ 'dir' ] = [ 'd', 0, \
+ "First create a subdirectory file-revisions before extracting revisions." ]
+
+    def execute( self, args ):
+        for file in args:
+            pdir = ''
+            if self.opts.dir:
+                pdir = file.fullname + "-revisions"
+                try:
+                    os.mkdir( pdir )
+                except:
+                    sys.stderr.write( "Error: cannot create directory " + \
+                                      pdir + "\n" )
+                    sys.exit( 1 )
+
+            revisions = file.getAllRevisions()
+            for rev in revisions:
+                print "Checking out revision:", rev 
+                cvs.run( "update -p -r" + rev + " " + file.fullname + \
+                         " > " + pdir + '/' + file.fullname + "-r" + rev )
+
+
+#===============================================================================
+# MAIN
+#===============================================================================
+
+# Declare global options
+goptmap = {}
+goptmap[ 'help' ] = [ 'h', 0, "Prints this help." ]
+
+goptmap[ 'verbose' ] = [ 'v', 0, \
+ "Verbose mode. Prints lots of stuff on stdout." ]
+
+goptmap[ 'version' ] = [ 'V', 0, "Prints version." ]
+
+goptmap[ 'debug' ] = [ 'd', 0, "Self debugging utility (do not use)." ]
+
+goptmap[ 'fake' ] = [ 'n', 0, \
+ "Print the commands that would be executed, but do not execute them." ]
+
+goptmap[ 'nowait' ] = [ 'w', 0, \
+ "Don't wait after spawning child processes." ]
+
+goptmap[ 'cvs' ] = [ 'c', 1, "Specify cvs program location." ]
+
+goptmap[ 'xxdiff' ] = [ 'g', 1, "Specify xxdiff program location." ]
+
+goptmap[ 'xxdiffargs' ] = [ 'A', 1, \
+ "Arguments to pass directly to diff program." ]
+
+# Declare subcommands
+subcmds = [ CmdDiff(), \
+            CmdPrevious(), \
+            CmdBranch(), \
+            CmdMerge(), \
+            CmdConflict(), \
+            CmdUpdate(), \
+            CmdCoAll() ]
+subcmdlist = map( lambda x: x._name, subcmds )
+
+# Initialization
+gopts = quickopts.Options()
+
+gopts.cvs = 'cvs'
+gopts.xxdiff = 'xxdiff'
+gopts.xxdiffargs = ''
+
+# Parsing
+subargs = gopts.parse( sys.argv[1:], goptmap, subcmdlist )
+
+if gopts.version:
+    quickopts.printVersion( __version__ )
+    sys.exit(1)
+
+if not subargs or gopts.help:
+    quickopts.printMultiUsage( gopts, __doc__, \
+        map( lambda x: [x._name, x._description], subcmds ) )
+    sys.exit( 1 )
+
+if subargs[0] not in subcmdlist:
+    sys.stderr.write( "Error: unknown subcommand.\n" )
+    quickopts.printMultiUsage( gopts, __doc__, \
+        map( lambda x: [x._name, x._description], subcmds ) )
+    sys.exit( 1 )
+
+subcmd = subargs[0]
+subargs = subargs[1:]
+
+# Run command
+for sc in subcmds:
+    if sc._name == subcmd:
+        quickopts.CmdBase.execute( sc, subargs )
+

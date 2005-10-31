@@ -180,8 +180,8 @@ public:
 
 public slots:
 
-   // Redraws the text widgets.
-   void updateWidgets();
+// Redraws the text widgets.
+void updateWidgets();
 
    // On a number of line change in diffs.
    void onNbLinesChanged();
@@ -290,7 +290,7 @@ public slots:
    void cursorBottom(); 
    // </group>
 
-signals:
+   signals:
 
    // Signal emitted when the cursor changes line.
    void cursorChanged( int cursorLine );
@@ -382,6 +382,9 @@ private:
    // Get the merged filename.
    QString getMergedFilename() const;
 
+   // Compute if there is even a single byte different between the files.
+   bool computeAbsoluteDifference() const;
+
    /*----- static member functions -----*/
 
    // Reads the file arguments, returns the number of files to be read, creates
@@ -439,10 +442,16 @@ private:
    std::auto_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;
 
+   // True if there is even a single byte of difference between the files.
+   bool                    _isThereAnyDifference;
+
    XxResources*            _resources;
 
    // Data from parsing the cmdline.
    const XxCmdline&        _cmdline;
+
+   // Char for splitting newlines.
+   char                    _newlineChar;
 
 };
 

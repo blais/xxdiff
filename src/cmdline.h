@@ -128,11 +128,14 @@ private:
    int           _nbFilenames;
    QString       _filenames[3];
 
+   bool          _single;
    bool          _unmerge;
    // Nb.files to unmerge into.
    int           _unmergeNbFiles;
 
    bool          _outputOnExit;
+
+   bool          _macNewlines;
 
    /*----- static data members -----*/
 

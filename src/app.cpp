@@ -37,6 +37,7 @@
 #include <builderFiles3.h>
 #include <builderDirs2.h>
 #include <builderUnmerge.h>
+#include <builderSingle.h>
 #include <diffs.h>
 #include <buffer.h>
 #include <resources.h>
@@ -69,6 +70,7 @@
 #include <qsplitter.h>
 #include <qvaluelist.h>
 #include <qregexp.h>
+#include <qcheckbox.h>
 
 #ifdef XX_KDE
 #include <kmessagebox.h>
@@ -177,11 +179,11 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxMainWindow( 
+   XxMainWindow(
       XxApp*      app,
-      QWidget*    parent = 0, 
-      const char* name = 0, 
-      WFlags      f = WType_TopLevel 
+      QWidget*    parent = 0,
+      const char* name = 0,
+      WFlags      f = WType_TopLevel
    );
 
 
@@ -193,13 +195,13 @@ private:
 
 };
 //------------------------------------------------------------------------------
-// 
+//
 //------------------------------------------------------------------------------
 //
-XxMainWindow::XxMainWindow( 
+XxMainWindow::XxMainWindow(
    XxApp*      app,
    QWidget*    parent,
-   const char* name, 
+   const char* name,
    WFlags      f
 ) :
    QkMainWindow( parent, name, f ),
@@ -242,8 +244,13 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _cursorLine( 1 ), // disallowed value on purpose
    _filesAreDirectories( false ),
    _resources( 0 ),
-   _cmdline( cmdline )
+   _cmdline( cmdline ),
+   _newlineChar( '\n' )
 {
+   if ( _cmdline._macNewlines ) { 
+      _newlineChar = '\015';
+   }
+
    // Read in the resources and create resources object.
    _resources = buildResources();
 
@@ -254,13 +261,13 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       setStyle( _style );
    }
 #endif
-   
+
 #ifndef XX_KDE
    if ( _cmdline._forceFont == false ) {
       setFont( _resources->getFontApp(), true );
    }
 #endif
-   
+
    // Read in the file names.
    QString filenames[3];
    QString displayFilenames[3];
@@ -275,23 +282,28 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       throw XxUsageError( XX_EXC_PARAMS, "No files specified." );
    }
    // Check for odd number of files.
-   if ( ( _cmdline._unmerge == false && ( _nbFiles < 1 || _nbFiles > 3 ) ) ||
-        ( _cmdline._unmerge == true && _nbFiles < 1 ) ) {
+   if ( ( ( _cmdline._unmerge == false && _cmdline._single == false )
+          && ( _nbFiles < 1 || _nbFiles > 3 ) ) ||
+        ( ( _cmdline._unmerge == true || _cmdline._single == true )
+          && _nbFiles < 1 ) ) {
       throw XxUsageError( XX_EXC_PARAMS, "Wrong number of files specified." );
    }
 
    // Here is where in unmerge mode we make xxdiff think that it has two
    // files. There will be other special cases for this throughout the code too.
-   if ( _cmdline._unmerge == true ) { 
+   if ( _cmdline._unmerge == true ) {
       _nbFiles = _cmdline._unmergeNbFiles;
+   }
+   else if ( _cmdline._single == true ) {
+      _nbFiles = 2;
    }
 
    // Add extra diff arguments.
    XX_ASSERT( _resources != 0 );
    XxCommand cmdResId;
    if ( _filesAreDirectories == false ) {
-      cmdResId = _nbFiles == 2 ? 
-         CMD_DIFF_FILES_2 : 
+      cmdResId = _nbFiles == 2 ?
+         CMD_DIFF_FILES_2 :
          CMD_DIFF_FILES_3;
    }
    else {
@@ -314,7 +326,7 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    if ( _nbFiles != 0 ) {
 
       // Note: perhaps this should be replaced by a simple call to onRedoDiff().
-      if ( _cmdline._unmerge == false ) {
+      if ( _cmdline._unmerge == false && _cmdline._single == false ) {
          for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
             std::auto_ptr<XxBuffer> newbuf(
                readFile( ii,
@@ -324,6 +336,24 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
             );
             _files[ii] = newbuf;
          }
+      }
+      else if ( _cmdline._single == true ) {
+
+         // Read the one single file.
+         std::auto_ptr<XxBuffer> newbuf(
+            readFile( 0,
+                      filenames[0],
+                      displayFilenames[0],
+                      isTemporary[0] )
+         );
+         _files[0] = newbuf;
+
+         // Make an empty buffer.
+         std::auto_ptr<XxBuffer> emptybuf(
+            new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
+         );
+         _files[1] = emptybuf;
+
       }
       else {
          std::auto_ptr<XxBuffer> newbuf(
@@ -336,14 +366,18 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
 
          // Make a proxy for the other buffer.
          std::auto_ptr<XxBuffer> newbuf2(
-            new XxBuffer( (*_files[0]), filenames[0], displayFilenames[0] )
+            new XxBuffer(
+               (*_files[0]), filenames[0], displayFilenames[0]
+            )
          );
          _files[1] = newbuf2;
 
          if ( _cmdline._unmergeNbFiles == 3 ) {
             // Make a proxy for the other buffer.
             std::auto_ptr<XxBuffer> newbuf2(
-               new XxBuffer( (*_files[0]), filenames[0], displayFilenames[0] )
+               new XxBuffer(
+                  (*_files[0]), filenames[0], displayFilenames[0]
+               )
             );
             _files[2] = newbuf2;
          }
@@ -374,15 +408,15 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
 
    // Sets the title bar.
    if ( _nbFiles == 2 ) {
-      QString str = 
-         QString(_files[0]->getDisplayName()) + " <-> " + 
+      QString str =
+         QString(_files[0]->getDisplayName()) + " <-> " +
          QString(_files[1]->getDisplayName());
       _mainWindow->setCaption( str );
    }
    else if ( _nbFiles == 3 ) {
-      QString str = 
-         QString(_files[0]->getDisplayName()) + " <-> " + 
-         QString(_files[1]->getDisplayName()) + " <-> " + 
+      QString str =
+         QString(_files[0]->getDisplayName()) + " <-> " +
+         QString(_files[1]->getDisplayName()) + " <-> " +
          QString(_files[2]->getDisplayName());
       _mainWindow->setCaption( str );
    }
@@ -466,7 +500,7 @@ uint XxApp::processFileNames(
    QString bn;
    bool isDirectory[3] = { false, false, false };
 
-   if ( cmdline._unmerge == false ) {
+   if ( cmdline._unmerge == false && cmdline._single == false ) {
       //
       // First find if all paths are directories.  If this is the case, then
       // this is a directory diff.  If ONLY ONE path is a file, then we append
@@ -485,7 +519,7 @@ uint XxApp::processFileNames(
       for ( XxFno ii = 0; ii < cmdline._nbFilenames; ++ii ) {
          if ( cmdline._filenames[ii] == "-" ) {
             if ( stdinUsed == true ) {
-               throw XxUsageError( 
+               throw XxUsageError(
                   XX_EXC_PARAMS, "Cannot accept more than one file from stdin."
                );
             }
@@ -509,7 +543,7 @@ uint XxApp::processFileNames(
          );
       }
 
-      if ( nbPathFiles > 1 && 
+      if ( nbPathFiles > 1 &&
            nbFiles > ( nbPathFiles + (stdinUsed ? 1 : 0) ) ) {
          throw XxUsageError( XX_EXC_PARAMS,
                              "There are more than one named file AND "
@@ -531,8 +565,9 @@ uint XxApp::processFileNames(
    else { // Parsing filenames for unmerge.
 
       if ( cmdline._nbFilenames > 1 ) {
-         throw XxUsageError( 
-            XX_EXC_PARAMS, "Cannot accept more than one file in unmerge mode."
+         throw XxUsageError(
+            XX_EXC_PARAMS,
+            "Cannot accept more than one file in unmerge or single mode."
          );
       }
 
@@ -541,8 +576,9 @@ uint XxApp::processFileNames(
       if ( cmdline._nbFilenames == 1 ) {
          QFileInfo finfo( cmdline._filenames[0] );
          if ( finfo.isDir() ) {
-            throw XxUsageError( 
-               XX_EXC_PARAMS, "Input in unmerge mode must be a file."
+            throw XxUsageError(
+               XX_EXC_PARAMS,
+               "Input in unmerge or single mode must be a file."
             );
          }
          nbFiles++;
@@ -554,7 +590,7 @@ uint XxApp::processFileNames(
       if ( cmdline._filenames[iii] == "-" ) {
          XX_ASSERT( stdinSeen == false );
          stdinSeen = true;
-            
+
          filenames[iii] = cmdline._filenames[iii];
          displayFilenames[iii] = cmdline._stdinFilename;
          isTemporary[iii] = true;
@@ -603,7 +639,7 @@ void XxApp::createUI()
    //
    _splitter = new QSplitter( topCentralWidget, "splitter" );
    _splitter->setOrientation( Qt::Vertical );
-         
+
    topLayout->addWidget( _splitter );
 
    _paneMergedView = new XxMergedFrame( this, _splitter, "paneMergedView" );
@@ -632,21 +668,31 @@ void XxApp::createUI()
    // Overview and remaining unselected regions indicator area.
    //
    _overviewArea = new QWidget( topCentralWidget );
-   _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
-   _remUnselView->setAlignment( Qt::AlignCenter );
-   _overview = new XxOverview( this, _central, _overviewArea, "overview" );
-   _overviewArea->setFixedWidth( _overview->width() );
-
    QVBoxLayout* overviewLayout =
       new QVBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
-   if ( !_cmdline._originalXdiff ) {
-      // FIXME We cannot undo this once xxdiff has started. Not that we mind so
-      // much.
-      overviewLayout->addWidget( _remUnselView );
-   }
+
+   //QHBoxLayout* hlayout = new QHBoxLayout;
+   _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
+   _remUnselView->setAlignment( Qt::AlignCenter );
+   //hlayout->addWidget( _remUnselView, 100 );
+
+   //QCheckBox* _equalCheckBox = new QCheckBox( _overviewArea );
+   //hlayout->addWidget( _equalCheckBox, 1 );
+
+   //overviewLayout->addLayout( hlayout );
+   overviewLayout->addWidget( _remUnselView );
+
+   _overview = new XxOverview( this, _central, _overviewArea, "overview" );
+   _overviewArea->setFixedWidth( _overview->width() );
    overviewLayout->addWidget( _overview );
 
    topLayout->addWidget( _overviewArea );
+
+   if ( _cmdline._originalXdiff ) {
+      // FIXME We cannot undo this once xxdiff has started. Not that we mind so
+      // much.
+      _remUnselView->hide();
+   }
 
    if ( _resources->getShowOpt( SHOW_OVERVIEW ) == false ) {
       _overviewArea->hide();
@@ -662,17 +708,17 @@ void XxApp::createUI()
    // Note: these have effect at the top level only, they are not bound specific
    // to a particular widget.
    QAccel* a = new QAccel( _mainWindow );
-   a->connectItem( a->insertItem(Key_Delete), 
+   a->connectItem( a->insertItem(Key_Delete),
                    this, SLOT(selectRegionNeither()) );
 
    //
    // Cursor motion.
    //
-   a->connectItem( a->insertItem(Key_Down), this, SLOT(cursorDown()) ); 
-   a->connectItem( a->insertItem(Key_Up), this, SLOT(cursorUp()) ); 
+   a->connectItem( a->insertItem(Key_Down), this, SLOT(cursorDown()) );
+   a->connectItem( a->insertItem(Key_Up), this, SLOT(cursorUp()) );
 
-   a->connectItem( a->insertItem(Key_Home), this, SLOT(cursorTop()) ); 
-   a->connectItem( a->insertItem(Key_End), this, SLOT(cursorBottom()) ); 
+   a->connectItem( a->insertItem(Key_Home), this, SLOT(cursorTop()) );
+   a->connectItem( a->insertItem(Key_End), this, SLOT(cursorBottom()) );
 
    a->connectItem(
       a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_DOWN ) ),
@@ -752,25 +798,25 @@ QkToolBar* XxApp::createToolbar()
 #else
    QToolBar* toolbar = new QToolBar( "Tools", _mainWindow );
 #endif
-   
-   QPixmap pmSaveAsMerged( 
+
+   QPixmap pmSaveAsMerged(
       const_cast<const char**>( save_as_merged_xpm )
    );
-   /*QToolButton* butSaveAsMerged = */new QToolButton( 
-      pmSaveAsMerged, 
-      "Save as merged", 
-      "Save as merged", 
-      this, SLOT(saveAsMerged()), toolbar 
+   /*QToolButton* butSaveAsMerged = */new QToolButton(
+      pmSaveAsMerged,
+      "Save as merged",
+      "Save as merged",
+      this, SLOT(saveAsMerged()), toolbar
    );
 
-   QPixmap pmSaveAsLeft( 
+   QPixmap pmSaveAsLeft(
       const_cast<const char**>( save_as_left_xpm )
    );
-   /*QToolButton* butSaveAsLeft = */new QToolButton( 
-      pmSaveAsLeft, 
-      "Save as left", 
-      "Save as left", 
-      this, SLOT(saveAsLeft()), toolbar 
+   /*QToolButton* butSaveAsLeft = */new QToolButton(
+      pmSaveAsLeft,
+      "Save as left",
+      "Save as left",
+      this, SLOT(saveAsLeft()), toolbar
    );
 
 #ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
@@ -780,32 +826,32 @@ QkToolBar* XxApp::createToolbar()
       QPixmap pmSaveAsMiddle(
          const_cast<const char**>( save_as_middle_xpm )
       );
-      /*butSaveAsMiddle = */new QToolButton( 
-         pmSaveAsMiddle, 
-         "Save as middle", 
-         "Save as middle", 
-         this, SLOT(saveAsMiddle()), toolbar 
+      /*butSaveAsMiddle = */new QToolButton(
+         pmSaveAsMiddle,
+         "Save as middle",
+         "Save as middle",
+         this, SLOT(saveAsMiddle()), toolbar
       );
    }
 
-   QPixmap pmSaveAsRight( 
+   QPixmap pmSaveAsRight(
       const_cast<const char**>( save_as_right_xpm )
    );
-   QToolButton* butSaveAsRight = new QToolButton( 
-      pmSaveAsRight, 
-      "Save as right", 
-      "Save as right", 
-      this, SLOT(saveAsRight()), toolbar 
+   QToolButton* butSaveAsRight = new QToolButton(
+      pmSaveAsRight,
+      "Save as right",
+      "Save as right",
+      this, SLOT(saveAsRight()), toolbar
    );
 
-   QPixmap pmSaveAs( 
+   QPixmap pmSaveAs(
       const_cast<const char**>( save_as_xpm )
    );
-   /*QToolButton* butSaveAs = */new QToolButton( 
+   /*QToolButton* butSaveAs = */new QToolButton(
       pmSaveAs,
-      "Save as ...", 
-      "Save as ...", 
-      this, SLOT(saveAs()), toolbar 
+      "Save as ...",
+      "Save as ...",
+      this, SLOT(saveAs()), toolbar
    );
 
 #ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
@@ -819,162 +865,162 @@ QkToolBar* XxApp::createToolbar()
    }
 #endif
 
-   if ( _cmdline._unmerge == true ) {
+   if ( _cmdline._unmerge == true || _cmdline._single == true ) {
       butSaveAsRight->setEnabled( false );
    }
 
    toolbar->addSeparator();
 
-   QPixmap pmPreviousUnselectedDifference( 
+   QPixmap pmPreviousUnselectedDifference(
       const_cast<const char**>( previous_unselected_difference_xpm )
    );
-   new QToolButton( 
-      pmPreviousUnselectedDifference, 
-      "Previous unselected difference", 
-      "Previous unselected difference", 
-      this, SLOT(previousUnselected()), toolbar 
-   );
-   
-   QPixmap pmPreviousDifference( 
-      const_cast<const char**>( previous_difference_xpm )
-   );
-   new QToolButton( 
-      pmPreviousDifference, 
-      "Previous difference", 
-      "Previous difference", 
-      this, SLOT(previousDifference()), toolbar 
+   new QToolButton(
+      pmPreviousUnselectedDifference,
+      "Previous unselected difference",
+      "Previous unselected difference",
+      this, SLOT(previousUnselected()), toolbar
    );
 
-   QPixmap pmNextDifference( 
+   QPixmap pmPreviousDifference(
+      const_cast<const char**>( previous_difference_xpm )
+   );
+   new QToolButton(
+      pmPreviousDifference,
+      "Previous difference",
+      "Previous difference",
+      this, SLOT(previousDifference()), toolbar
+   );
+
+   QPixmap pmNextDifference(
       const_cast<const char**>( next_difference_xpm )
    );
    new QToolButton(
-      pmNextDifference, 
+      pmNextDifference,
       "Next difference",
-      "Next difference", 
+      "Next difference",
       this, SLOT(nextDifference()), toolbar
    );
 
-   QPixmap pmNextUnselectedDifference( 
+   QPixmap pmNextUnselectedDifference(
       const_cast<const char**>( next_unselected_difference_xpm )
    );
-   new QToolButton( 
-      pmNextUnselectedDifference, 
-      "Next unselected difference", 
-      "Next unselected difference", 
-      this, SLOT(nextUnselected()), toolbar 
+   new QToolButton(
+      pmNextUnselectedDifference,
+      "Next unselected difference",
+      "Next unselected difference",
+      this, SLOT(nextUnselected()), toolbar
    );
 
    toolbar->addSeparator();
 
-   QPixmap pmSearch( 
+   QPixmap pmSearch(
       const_cast<const char**>( search_xpm )
    );
-   new QToolButton( 
-      pmSearch, 
-      "Search", 
-      "Search", 
-      this, SLOT(search()), toolbar 
+   new QToolButton(
+      pmSearch,
+      "Search",
+      "Search",
+      this, SLOT(search()), toolbar
    );
-      
-   QPixmap pmSearchBackward( 
+
+   QPixmap pmSearchBackward(
       const_cast<const char**>( search_backward_xpm )
    );
-   new QToolButton( 
+   new QToolButton(
       pmSearchBackward,
-      "Search backward", 
-      "Search backward", 
-      this, SLOT(searchBackward()), toolbar 
+      "Search backward",
+      "Search backward",
+      this, SLOT(searchBackward()), toolbar
    );
-      
-   QPixmap pmSearchForward( 
+
+   QPixmap pmSearchForward(
       const_cast<const char**>( search_forward_xpm )
    );
-   new QToolButton( 
+   new QToolButton(
       pmSearchForward,
-      "Search forward", 
-      "Search forward", 
-      this, SLOT(searchForward()), toolbar 
+      "Search forward",
+      "Search forward",
+      this, SLOT(searchForward()), toolbar
    );
-      
+
    if ( _filesAreDirectories == false ) {
       toolbar->addSeparator();
-      
-      QPixmap pmSelectRegionLeft( 
+
+      QPixmap pmSelectRegionLeft(
          const_cast<const char**>( select_region_left_xpm )
       );
-      new QToolButton( 
+      new QToolButton(
          pmSelectRegionLeft,
-         "Select region left", 
-         "Select region left", 
-         this, SLOT(selectRegionLeft()), toolbar 
+         "Select region left",
+         "Select region left",
+         this, SLOT(selectRegionLeft()), toolbar
       );
-      
+
       if ( _nbFiles == 3 ) {
-         QPixmap pmSelectRegionMiddle( 
+         QPixmap pmSelectRegionMiddle(
             const_cast<const char**>( select_region_middle_xpm )
          );
-         new QToolButton( 
+         new QToolButton(
             pmSelectRegionMiddle,
-            "Select region middle", 
-            "Select region middle", 
-            this, SLOT(selectRegionMiddle()), toolbar 
+            "Select region middle",
+            "Select region middle",
+            this, SLOT(selectRegionMiddle()), toolbar
          );
       }
 
-      QPixmap pmSelectRegionRight( 
+      QPixmap pmSelectRegionRight(
          const_cast<const char**>( select_region_right_xpm )
       );
-      new QToolButton( 
+      new QToolButton(
          pmSelectRegionRight,
-         "Select region right", 
-         "Select region right", 
-         this, SLOT(selectRegionRight()), toolbar 
+         "Select region right",
+         "Select region right",
+         this, SLOT(selectRegionRight()), toolbar
       );
 
-      QPixmap pmSelectRegionNeither( 
+      QPixmap pmSelectRegionNeither(
          const_cast<const char**>( select_region_neither_xpm )
       );
-      new QToolButton( 
+      new QToolButton(
          pmSelectRegionNeither,
-         "Select region neither", 
-         "Select region neither", 
-         this, SLOT(selectRegionNeither()), toolbar 
+         "Select region neither",
+         "Select region neither",
+         this, SLOT(selectRegionNeither()), toolbar
       );
 
-      QPixmap pmSelectRegionUnselect( 
+      QPixmap pmSelectRegionUnselect(
          const_cast<const char**>( select_region_unselect_xpm )
       );
-      new QToolButton( 
+      new QToolButton(
          pmSelectRegionUnselect,
-         "Unselect region", 
-         "Unselect region", 
-         this, SLOT(selectRegionUnselect()), toolbar 
+         "Unselect region",
+         "Unselect region",
+         this, SLOT(selectRegionUnselect()), toolbar
       );
 
       toolbar->addSeparator();
 
-      QPixmap pmSplitSwapJoin( 
+      QPixmap pmSplitSwapJoin(
          const_cast<const char**>( split_swap_join_xpm )
       );
-      new QToolButton( 
+      new QToolButton(
          pmSplitSwapJoin,
-         "Split/swap/join", 
-         "Split/swap/join", 
-         this, SLOT(regionSplitSwapJoin()), toolbar 
+         "Split/swap/join",
+         "Split/swap/join",
+         this, SLOT(regionSplitSwapJoin()), toolbar
       );
    }
    else {
       toolbar->addSeparator();
-      
-      QPixmap pmDiffFiles( 
+
+      QPixmap pmDiffFiles(
          const_cast<const char**>( diff_files_xpm )
       );
-      new QToolButton( 
+      new QToolButton(
          pmDiffFiles,
-         "Diff files at cursor", 
-         "Diff files at cursor", 
-         this, SLOT(diffFilesAtCursor()), toolbar 
+         "Diff files at cursor",
+         "Diff files at cursor",
+         this, SLOT(diffFilesAtCursor()), toolbar
       );
    }
 
@@ -994,54 +1040,54 @@ void XxApp::createMenus()
 {
    // File menu
    QkPopupMenu* fileMenu = new QkPopupMenu;
-   fileMenu->insertItem( 
-      "Replace left file...", this, SLOT(openLeft()), 
-      _resources->getAccelerator( ACCEL_OPEN_LEFT ) 
+   fileMenu->insertItem(
+      "Replace left file...", this, SLOT(openLeft()),
+      _resources->getAccelerator( ACCEL_OPEN_LEFT )
    );
    if ( _nbFiles == 3 ) {
-      fileMenu->insertItem( 
-         "Replace middle file...", this, SLOT(openMiddle()), 
-         _resources->getAccelerator( ACCEL_OPEN_MIDDLE ) 
+      fileMenu->insertItem(
+         "Replace middle file...", this, SLOT(openMiddle()),
+         _resources->getAccelerator( ACCEL_OPEN_MIDDLE )
       );
    }
-   fileMenu->insertItem( 
-      "Replace right file...", this, SLOT(openRight()), 
-      _resources->getAccelerator( ACCEL_OPEN_RIGHT ) 
+   fileMenu->insertItem(
+      "Replace right file...", this, SLOT(openRight()),
+      _resources->getAccelerator( ACCEL_OPEN_RIGHT )
    );
    fileMenu->insertSeparator();
 
    int ids[6];
 
-   /*ids[0] = */fileMenu->insertItem( 
-      "Save as left", this, SLOT(saveAsLeft()), 
-      _resources->getAccelerator( ACCEL_SAVE_AS_LEFT ) 
+   /*ids[0] = */fileMenu->insertItem(
+      "Save as left", this, SLOT(saveAsLeft()),
+      _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
    );
 #ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    ids[1] = -1;
 #endif
    if ( _nbFiles == 3 ) {
-      /*ids[1] = */fileMenu->insertItem( 
-         "Save as middle", this, SLOT(saveAsMiddle()), 
-         _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE ) 
+      /*ids[1] = */fileMenu->insertItem(
+         "Save as middle", this, SLOT(saveAsMiddle()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
       );
    }
-   ids[2] = fileMenu->insertItem( 
-      "Save as right", this, SLOT(saveAsRight()), 
-      _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT ) 
+   ids[2] = fileMenu->insertItem(
+      "Save as right", this, SLOT(saveAsRight()),
+      _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
    );
-   fileMenu->insertItem( 
-      "Save as merged", this, SLOT(saveAsMerged()), 
-      _resources->getAccelerator( ACCEL_SAVE_AS_MERGED ) 
+   fileMenu->insertItem(
+      "Save as merged", this, SLOT(saveAsMerged()),
+      _resources->getAccelerator( ACCEL_SAVE_AS_MERGED )
    );
-   /*ids[3] = */fileMenu->insertItem( 
-      "Save as...", this, SLOT(saveAs()), 
-      _resources->getAccelerator( ACCEL_SAVE_AS ) 
+   /*ids[3] = */fileMenu->insertItem(
+      "Save as...", this, SLOT(saveAs()),
+      _resources->getAccelerator( ACCEL_SAVE_AS )
    );
-   /*ids[4] = */fileMenu->insertItem( 
-      "Save selected only...", this, SLOT(saveSelectedOnly()), 
-      _resources->getAccelerator( ACCEL_SAVE_SELECTED_ONLY ) 
+   /*ids[4] = */fileMenu->insertItem(
+      "Save selected only...", this, SLOT(saveSelectedOnly()),
+      _resources->getAccelerator( ACCEL_SAVE_SELECTED_ONLY )
    );
-   
+
 #ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
       for ( int ii = 0; ii < 5; ++ii ) {
@@ -1053,34 +1099,34 @@ void XxApp::createMenus()
 #endif
 
    fileMenu->insertSeparator();
-   fileMenu->insertItem( 
-      "Redo diff", this, SLOT(redoDiff()), 
-      _resources->getAccelerator( ACCEL_REDO_DIFF ) 
+   fileMenu->insertItem(
+      "Redo diff", this, SLOT(redoDiff()),
+      _resources->getAccelerator( ACCEL_REDO_DIFF )
    );
    fileMenu->insertSeparator();
-   fileMenu->insertItem( 
-      "Edit left file", this, SLOT(editLeft()), 
-     _resources->getAccelerator( ACCEL_EDIT_LEFT ) 
+   fileMenu->insertItem(
+      "Edit left file", this, SLOT(editLeft()),
+     _resources->getAccelerator( ACCEL_EDIT_LEFT )
    );
    if ( _nbFiles == 3 ) {
-      fileMenu->insertItem( 
-         "Edit middle file", this, SLOT(editMiddle()), 
-         _resources->getAccelerator( ACCEL_EDIT_MIDDLE ) 
+      fileMenu->insertItem(
+         "Edit middle file", this, SLOT(editMiddle()),
+         _resources->getAccelerator( ACCEL_EDIT_MIDDLE )
       );
    }
-   ids[5] = fileMenu->insertItem( 
-      "Edit right file", this, SLOT(editRight()), 
-      _resources->getAccelerator( ACCEL_EDIT_RIGHT ) 
+   ids[5] = fileMenu->insertItem(
+      "Edit right file", this, SLOT(editRight()),
+      _resources->getAccelerator( ACCEL_EDIT_RIGHT )
    );
 
-   if ( _cmdline._unmerge == true ) {
+   if ( _cmdline._unmerge == true || _cmdline._single == true ) {
       fileMenu->setItemEnabled( ids[2], false );
       fileMenu->setItemEnabled( ids[5], false );
    }
 
    fileMenu->insertSeparator();
 
-   fileMenu->insertItem( 
+   fileMenu->insertItem(
       "Exit", this, SLOT(quit()),
       _resources->getAccelerator( ACCEL_EXIT )
    );
@@ -1089,26 +1135,26 @@ void XxApp::createMenus()
 
    // Edit menu
    QkPopupMenu* editMenu = new QkPopupMenu;
-   editMenu->insertItem( 
+   editMenu->insertItem(
       "Search...", this, SLOT(search()),
-      _resources->getAccelerator( ACCEL_SEARCH ) 
+      _resources->getAccelerator( ACCEL_SEARCH )
    );
-   editMenu->insertItem( 
-      "Search forward", this, SLOT(searchForward()), 
-      _resources->getAccelerator( ACCEL_SEARCH_FORWARD ) 
+   editMenu->insertItem(
+      "Search forward", this, SLOT(searchForward()),
+      _resources->getAccelerator( ACCEL_SEARCH_FORWARD )
    );
-   editMenu->insertItem( 
-      "Search backward", this, SLOT(searchBackward()), 
-      _resources->getAccelerator( ACCEL_SEARCH_BACKWARD ) 
+   editMenu->insertItem(
+      "Search backward", this, SLOT(searchBackward()),
+      _resources->getAccelerator( ACCEL_SEARCH_BACKWARD )
    );
    editMenu->insertSeparator();
-   editMenu->insertItem( 
-      "Beginning of file", this, SLOT(cursorTop()), 
-      _resources->getAccelerator( ACCEL_CURSOR_TOP ) 
+   editMenu->insertItem(
+      "Beginning of file", this, SLOT(cursorTop()),
+      _resources->getAccelerator( ACCEL_CURSOR_TOP )
    );
-   editMenu->insertItem( 
-      "End of file", this, SLOT(cursorBottom()), 
-      _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ) 
+   editMenu->insertItem(
+      "End of file", this, SLOT(cursorBottom()),
+      _resources->getAccelerator( ACCEL_CURSOR_BOTTOM )
    );
 
    //---------------------------------------------------------------------------
@@ -1116,44 +1162,44 @@ void XxApp::createMenus()
    // View menu
    QkPopupMenu* viewMenu = new QkPopupMenu;
    if ( _filesAreDirectories == true ) {
-      _menuids[ ID_View_DiffFilesAtCursor ] = viewMenu->insertItem( 
+      _menuids[ ID_View_DiffFilesAtCursor ] = viewMenu->insertItem(
          "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
          _resources->getAccelerator( ACCEL_DIFF_FILES_AT_CURSOR )
       );
-      _menuids[ ID_View_CopyLeftToRight ] = viewMenu->insertItem( 
+      _menuids[ ID_View_CopyLeftToRight ] = viewMenu->insertItem(
          "Copy left file to right", this, SLOT(copyFileLeftToRight()),
          _resources->getAccelerator( ACCEL_COPY_LEFT_TO_RIGHT )
       );
-      _menuids[ ID_View_CopyRightToLeft ] = viewMenu->insertItem( 
+      _menuids[ ID_View_CopyRightToLeft ] = viewMenu->insertItem(
          "Copy right file to left", this, SLOT(copyFileRightToLeft()),
          _resources->getAccelerator( ACCEL_COPY_RIGHT_TO_LEFT )
       );
-      _menuids[ ID_View_RemoveLeft ] = viewMenu->insertItem( 
+      _menuids[ ID_View_RemoveLeft ] = viewMenu->insertItem(
          "Remove left file", this, SLOT(removeFileLeft()),
          _resources->getAccelerator( ACCEL_REMOVE_LEFT )
       );
-      _menuids[ ID_View_RemoveRight ] = viewMenu->insertItem( 
+      _menuids[ ID_View_RemoveRight ] = viewMenu->insertItem(
          "Remove right file", this, SLOT(removeFileRight()),
          _resources->getAccelerator( ACCEL_REMOVE_RIGHT )
       );
       viewMenu->insertSeparator();
    }
-   viewMenu->insertItem( 
+   viewMenu->insertItem(
       "Next difference", this, SLOT(nextDifference()),
-      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE ) 
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
    );
-   viewMenu->insertItem( 
+   viewMenu->insertItem(
       "Previous difference", this, SLOT(previousDifference()),
-      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE ) 
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
    );
    viewMenu->insertSeparator();
-   viewMenu->insertItem( 
+   viewMenu->insertItem(
       "Next unselected", this, SLOT(nextUnselected()),
-      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED ) 
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
    );
-   viewMenu->insertItem( 
+   viewMenu->insertItem(
       "Previous unselected", this, SLOT(previousUnselected()),
-      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED ) 
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
    );
    _viewPopup = viewMenu;
 
@@ -1161,124 +1207,124 @@ void XxApp::createMenus()
 
    // Global menu
    QkPopupMenu* globalMenu = new QkPopupMenu;
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Select left", this, SLOT(selectGlobalLeft()),
-      _resources->getAccelerator( ACCEL_SELECT_GLOBAL_LEFT ) 
+      _resources->getAccelerator( ACCEL_SELECT_GLOBAL_LEFT )
    );
    if ( _nbFiles == 3 ) {
-      globalMenu->insertItem( 
+      globalMenu->insertItem(
          "Select middle", this, SLOT(selectGlobalMiddle()),
-         _resources->getAccelerator( ACCEL_SELECT_GLOBAL_MIDDLE ) 
+         _resources->getAccelerator( ACCEL_SELECT_GLOBAL_MIDDLE )
       );
    }
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Select right", this, SLOT(selectGlobalRight()),
-      _resources->getAccelerator( ACCEL_SELECT_GLOBAL_RIGHT ) 
+      _resources->getAccelerator( ACCEL_SELECT_GLOBAL_RIGHT )
    );
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Select neither", this, SLOT(selectGlobalNeither()),
       _resources->getAccelerator( ACCEL_SELECT_GLOBAL_NEITHER )
    );
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Unselect", this, SLOT(selectGlobalUnselect()),
       _resources->getAccelerator( ACCEL_SELECT_GLOBAL_UNSELECT)
    );
    globalMenu->insertSeparator();
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Select unselected left", this, SLOT(selectGlobalUnselectedLeft()),
-      _resources->getAccelerator( 
-         ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT 
-      ) 
+      _resources->getAccelerator(
+         ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT
+      )
    );
    if ( _nbFiles == 3 ) {
-      globalMenu->insertItem( 
+      globalMenu->insertItem(
          "Select unselected middle", this, SLOT(selectGlobalUnselectedMiddle()),
-         _resources->getAccelerator( 
-            ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE 
-         ) 
+         _resources->getAccelerator(
+            ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE
+         )
       );
    }
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Select unselected right", this, SLOT(selectGlobalUnselectedRight()),
-      _resources->getAccelerator( 
-         ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT 
-      ) 
+      _resources->getAccelerator(
+         ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT
+      )
    );
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Select unselected neither", this, SLOT(selectGlobalUnselectedNeither()),
       _resources->getAccelerator(
-         ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER 
+         ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER
       )
    );
    globalMenu->insertSeparator();
-   globalMenu->insertItem( 
+   globalMenu->insertItem(
       "Merge", this, SLOT(selectGlobalMerge()),
       _resources->getAccelerator(
          ACCEL_SELECT_GLOBAL_MERGE
-      ) 
+      )
    );
 
    //---------------------------------------------------------------------------
 
    // Region menu
    QkPopupMenu* regionMenu = new QkPopupMenu;
-   regionMenu->insertItem( 
+   regionMenu->insertItem(
       "Select left", this, SLOT(selectRegionLeft()),
-      _resources->getAccelerator( ACCEL_SELECT_REGION_LEFT ) 
+      _resources->getAccelerator( ACCEL_SELECT_REGION_LEFT )
    );
    if ( _nbFiles == 3 ) {
-      regionMenu->insertItem( 
+      regionMenu->insertItem(
          "Select middle", this, SLOT(selectRegionMiddle()),
-         _resources->getAccelerator( ACCEL_SELECT_REGION_MIDDLE ) 
+         _resources->getAccelerator( ACCEL_SELECT_REGION_MIDDLE )
       );
    }
-   regionMenu->insertItem( 
+   regionMenu->insertItem(
       "Select right", this, SLOT(selectRegionRight()),
-      _resources->getAccelerator( ACCEL_SELECT_REGION_RIGHT ) 
+      _resources->getAccelerator( ACCEL_SELECT_REGION_RIGHT )
    );
-   regionMenu->insertItem( 
+   regionMenu->insertItem(
       "Select neither", this, SLOT(selectRegionNeither()),
       _resources->getAccelerator( ACCEL_SELECT_REGION_NEITHER )
    );
-   regionMenu->insertItem( 
+   regionMenu->insertItem(
       "Unselect", this, SLOT(selectRegionUnselect()),
       _resources->getAccelerator( ACCEL_SELECT_REGION_UNSELECT)
    );
    regionMenu->insertSeparator();
-   regionMenu->insertItem( 
+   regionMenu->insertItem(
       "Select left and next", this,
       SLOT(selectRegionLeftAndNext()),
       _resources->getAccelerator(
          ACCEL_SELECT_REGION_LEFT_AND_NEXT
-      ) 
+      )
    );
    if ( _nbFiles == 3 ) {
-      regionMenu->insertItem( 
+      regionMenu->insertItem(
          "Select middle and next", this,
          SLOT(selectRegionMiddleAndNext()),
          _resources->getAccelerator(
             ACCEL_SELECT_REGION_MIDDLE_AND_NEXT
-         ) 
+         )
       );
    }
-   regionMenu->insertItem( 
-      "Select right and next", this, 
+   regionMenu->insertItem(
+      "Select right and next", this,
       SLOT(selectRegionRightAndNext()),
       _resources->getAccelerator(
          ACCEL_SELECT_REGION_RIGHT_AND_NEXT
-      ) 
+      )
    );
-   regionMenu->insertItem( 
-      "Select neither and next", this, 
+   regionMenu->insertItem(
+      "Select neither and next", this,
       SLOT(selectRegionNeitherAndNext()),
       _resources->getAccelerator(
          ACCEL_SELECT_REGION_NEITHER_AND_NEXT
       )
    );
    regionMenu->insertSeparator();
-   regionMenu->insertItem( 
+   regionMenu->insertItem(
       "Split/swap/join", this, SLOT(regionSplitSwapJoin()),
-      _resources->getAccelerator( 
+      _resources->getAccelerator(
          ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN
       )
    );
@@ -1287,25 +1333,25 @@ void XxApp::createMenus()
 
    // Line menu
    QkPopupMenu* lineMenu = new QkPopupMenu;
-   lineMenu->insertItem( 
+   lineMenu->insertItem(
       "Select left", this, SLOT(selectLineLeft()),
-      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT ) 
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
    );
    if ( _nbFiles == 3 ) {
-      lineMenu->insertItem( 
+      lineMenu->insertItem(
          "Select middle", this, SLOT(selectLineMiddle()),
-         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE ) 
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
       );
    }
-   lineMenu->insertItem( 
+   lineMenu->insertItem(
       "Select right", this, SLOT(selectLineRight()),
-      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT ) 
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
    );
-   lineMenu->insertItem( 
+   lineMenu->insertItem(
       "Select neither", this, SLOT(selectLineNeither()),
       _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
    );
-   lineMenu->insertItem( 
+   lineMenu->insertItem(
       "Unselect", this, SLOT(selectLineUnselect()),
       _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
    );
@@ -1315,44 +1361,46 @@ void XxApp::createMenus()
    // Options menu
    _optionsMenu = new QkPopupMenu;
 
-   _optionsMenu->insertItem( 
-      "Edit diff options...", this, SLOT(editDiffOptions()), 
-      _resources->getAccelerator( ACCEL_EDIT_DIFF_OPTIONS ) 
+   _optionsMenu->insertItem(
+      "Edit diff options...", this, SLOT(editDiffOptions()),
+      _resources->getAccelerator( ACCEL_EDIT_DIFF_OPTIONS )
    );
 
    if ( _filesAreDirectories == false ) {
 
-      if ( _nbFiles == 2 && _cmdline._unmerge == false ) {
+      if ( _nbFiles == 2 &&
+           _cmdline._unmerge == false &&
+           _cmdline._single == false ) {
          _optionsMenu->insertSeparator();
 
-         _menuids[ ID_ToggleIgnoreTrailing ] = _optionsMenu->insertItem( 
+         _menuids[ ID_ToggleIgnoreTrailing ] = _optionsMenu->insertItem(
             "Ignore trailing blanks", this, SLOT(ignoreTrailing()),
             _resources->getAccelerator( ACCEL_IGNORE_TRAILING )
          );
-         _menuids[ ID_ToggleIgnoreWhitespace ] = _optionsMenu->insertItem( 
+         _menuids[ ID_ToggleIgnoreWhitespace ] = _optionsMenu->insertItem(
             "Ignore whitespace", this, SLOT(ignoreWhitespace()),
             _resources->getAccelerator( ACCEL_IGNORE_WHITESPACE )
          );
-         _menuids[ ID_ToggleIgnoreCase ] = _optionsMenu->insertItem( 
+         _menuids[ ID_ToggleIgnoreCase ] = _optionsMenu->insertItem(
             "Ignore case", this, SLOT(ignoreCase()),
             _resources->getAccelerator( ACCEL_IGNORE_CASE )
-         ); 
-         _menuids[ ID_ToggleIgnoreBlankLines ] = _optionsMenu->insertItem( 
+         );
+         _menuids[ ID_ToggleIgnoreBlankLines ] = _optionsMenu->insertItem(
             "Ignore blank lines", this, SLOT(ignoreBlankLines()),
             _resources->getAccelerator( ACCEL_IGNORE_BLANK_LINES )
          );
 
          _optionsMenu->insertSeparator();
 
-         _menuids[ ID_ToggleQualityNormal ] = _optionsMenu->insertItem( 
+         _menuids[ ID_ToggleQualityNormal ] = _optionsMenu->insertItem(
             "Quality: normal", this, SLOT(qualityNormal()),
             _resources->getAccelerator( ACCEL_QUALITY_NORMAL )
          );
-         _menuids[ ID_ToggleQualityFastest ] = _optionsMenu->insertItem( 
+         _menuids[ ID_ToggleQualityFastest ] = _optionsMenu->insertItem(
             "Quality: fastest", this, SLOT(qualityFastest()),
             _resources->getAccelerator( ACCEL_QUALITY_FASTEST )
          );
-         _menuids[ ID_ToggleQualityHighest ] = _optionsMenu->insertItem( 
+         _menuids[ ID_ToggleQualityHighest ] = _optionsMenu->insertItem(
             "Quality: highest", this, SLOT(qualityHighest()),
             _resources->getAccelerator( ACCEL_QUALITY_HIGHEST )
          );
@@ -1363,7 +1411,7 @@ void XxApp::createMenus()
 
       _menuids[ ID_ToggleDirDiffsRecursive ] = _optionsMenu->insertItem(
          "Recursive", this, SLOT(dirDiffRecursive()),
-         _resources->getAccelerator( 
+         _resources->getAccelerator(
             ACCEL_DIRDIFF_RECURSIVE
          )
       );
@@ -1375,9 +1423,9 @@ void XxApp::createMenus()
 
    _displayMenu = new QkPopupMenu;
 
-   _displayMenu->insertItem( 
-      "Edit display options...", this, SLOT(editDisplayOptions()), 
-      _resources->getAccelerator( ACCEL_EDIT_DISPLAY_OPTIONS ) 
+   _displayMenu->insertItem(
+      "Edit display options...", this, SLOT(editDisplayOptions()),
+      _resources->getAccelerator( ACCEL_EDIT_DISPLAY_OPTIONS )
    );
    _displayMenu->insertSeparator();
 
@@ -1386,38 +1434,38 @@ void XxApp::createMenus()
 
       {
          _hordiffMenu = new QkPopupMenu;
-      
-         _menuids[ ID_Hordiff_None ] = _hordiffMenu->insertItem( 
+
+         _menuids[ ID_Hordiff_None ] = _hordiffMenu->insertItem(
             "None", this, SLOT(hordiffTypeNone()),
             _resources->getAccelerator( ACCEL_HORDIFF_NONE )
          );
-         _menuids[ ID_Hordiff_Single ] = _hordiffMenu->insertItem( 
+         _menuids[ ID_Hordiff_Single ] = _hordiffMenu->insertItem(
             "Single", this, SLOT(hordiffTypeSingle()),
             _resources->getAccelerator( ACCEL_HORDIFF_SINGLE )
          );
-         _menuids[ ID_Hordiff_Multiple ] = _hordiffMenu->insertItem( 
+         _menuids[ ID_Hordiff_Multiple ] = _hordiffMenu->insertItem(
             "Multiple", this, SLOT(hordiffTypeMultiple()),
             _resources->getAccelerator( ACCEL_HORDIFF_MULTIPLE )
          );
       }
       _displayMenu->insertItem( "Horizontal diffs", _hordiffMenu );
-      
-      _menuids[ ID_ToggleIgnoreHorizontalWs ] = _displayMenu->insertItem( 
+
+      _menuids[ ID_ToggleIgnoreHorizontalWs ] = _displayMenu->insertItem(
          "Ignore horizontal whitespace", this, SLOT(toggleIgnoreHorizontalWs()),
          _resources->getAccelerator( ACCEL_TOGGLE_IGNORE_HORIZONTAL_WS )
       );
 
-      _menuids[ ID_ToggleIgnorePerHunkWs ] = _displayMenu->insertItem( 
+      _menuids[ ID_ToggleIgnorePerHunkWs ] = _displayMenu->insertItem(
          "Ignore per-hunk whitespace", this, SLOT(toggleIgnorePerHunkWs()),
          _resources->getAccelerator( ACCEL_TOGGLE_IGNORE_PERHUNK_WS )
       );
-      
-      _menuids[ ID_ToggleHideCarriageReturns ] = _displayMenu->insertItem( 
+
+      _menuids[ ID_ToggleHideCarriageReturns ] = _displayMenu->insertItem(
          "Hide carriage returns", this, SLOT(hideCarriageReturns()),
          _resources->getAccelerator( ACCEL_HIDE_CR )
       );
 
-      _menuids[ ID_ToggleVerticalLine ] = _displayMenu->insertItem( 
+      _menuids[ ID_ToggleVerticalLine ] = _displayMenu->insertItem(
          "Draw vertical line", this, SLOT(toggleVerticalLine()),
          _resources->getAccelerator( ACCEL_TOGGLE_VERTICAL_LINE )
       );
@@ -1426,17 +1474,17 @@ void XxApp::createMenus()
    else {
       _menuids[ ID_ToggleDirDiffsIgnoreFileChanges ] = _displayMenu->insertItem(
          "Ignore file changes", this, SLOT(ignoreFileChanges()),
-         _resources->getAccelerator( 
+         _resources->getAccelerator(
             ACCEL_DIRDIFF_IGNORE_FILE_CHANGES
          )
       );
    }
 
    _displayMenu->insertSeparator();
-   _menuids[ ID_ToggleFormatClipboardText ] = _displayMenu->insertItem( 
-      "Format clipboard text", this, 
+   _menuids[ ID_ToggleFormatClipboardText ] = _displayMenu->insertItem(
+      "Format clipboard text", this,
       SLOT(toggleFormatClipboardText()),
-      _resources->getAccelerator( 
+      _resources->getAccelerator(
          ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT
       )
    );
@@ -1444,23 +1492,23 @@ void XxApp::createMenus()
    if ( _filesAreDirectories == false ) {
 
       _displayMenu->insertSeparator();
-      
-      _menuids[ ID_TabsAtThree ] = _displayMenu->insertItem( 
+
+      _menuids[ ID_TabsAtThree ] = _displayMenu->insertItem(
          "Tabs at 3", this, SLOT(tabsAt3()),
          _resources->getAccelerator( ACCEL_TABS_AT_3 )
       );
-      _menuids[ ID_TabsAtFour ] = _displayMenu->insertItem( 
+      _menuids[ ID_TabsAtFour ] = _displayMenu->insertItem(
          "Tabs at 4", this, SLOT(tabsAt4()),
          _resources->getAccelerator( ACCEL_TABS_AT_4 )
       );
-      _menuids[ ID_TabsAtEight ] = _displayMenu->insertItem( 
+      _menuids[ ID_TabsAtEight ] = _displayMenu->insertItem(
          "Tabs at 8", this, SLOT(tabsAt8()),
          _resources->getAccelerator( ACCEL_TABS_AT_8 )
       );
    }
 
    _displayMenu->insertSeparator();
-   _menuids[ ID_ToggleLineNumbers ] = _displayMenu->insertItem( 
+   _menuids[ ID_ToggleLineNumbers ] = _displayMenu->insertItem(
       "Toggle line numbers", this, SLOT(toggleLineNumbers()),
       _resources->getAccelerator( ACCEL_TOGGLE_LINE_NUMBERS )
    );
@@ -1469,20 +1517,20 @@ void XxApp::createMenus()
    if ( _filesAreDirectories == false && _nbFiles == 3 ) {
 
       _displayMenu->insertSeparator();
-      
-      _menuids[ ID_IgnoreFileNone ] = _displayMenu->insertItem( 
+
+      _menuids[ ID_IgnoreFileNone ] = _displayMenu->insertItem(
          "No ignore", this, SLOT(ignoreFileNone()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_NONE )
       );
-      _menuids[ ID_IgnoreFileLeft ] = _displayMenu->insertItem( 
+      _menuids[ ID_IgnoreFileLeft ] = _displayMenu->insertItem(
          "Ignore left file", this, SLOT(ignoreFileLeft()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_LEFT )
       );
-      _menuids[ ID_IgnoreFileMiddle ] = _displayMenu->insertItem( 
+      _menuids[ ID_IgnoreFileMiddle ] = _displayMenu->insertItem(
          "Ignore middle file", this, SLOT(ignoreFileMiddle()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_MIDDLE )
       );
-      _menuids[ ID_IgnoreFileRight ] = _displayMenu->insertItem( 
+      _menuids[ ID_IgnoreFileRight ] = _displayMenu->insertItem(
          "Ignore right file", this, SLOT(ignoreFileRight()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_RIGHT )
       );
@@ -1496,26 +1544,26 @@ void XxApp::createMenus()
    // Windows menu
    _windowsMenu = new QkPopupMenu;
    if ( _filesAreDirectories == false ) {
-      _menuids[ ID_TogglePaneMergedView ] = _windowsMenu->insertItem( 
+      _menuids[ ID_TogglePaneMergedView ] = _windowsMenu->insertItem(
          "Toggle pane merged view", this, SLOT(togglePaneMergedView()),
          _resources->getAccelerator( ACCEL_TOGGLE_PANE_MERGED_VIEW )
       );
-      _menuids[ ID_TogglePopupMergedView ] = _windowsMenu->insertItem( 
+      _menuids[ ID_TogglePopupMergedView ] = _windowsMenu->insertItem(
          "Toggle popup merged view", this, SLOT(togglePopupMergedView()),
          _resources->getAccelerator( ACCEL_TOGGLE_POPUP_MERGED_VIEW )
       );
       _windowsMenu->insertSeparator();
    }
-   _menuids[ ID_ToggleToolbar ] = _windowsMenu->insertItem( 
-      "Toggle toolbar", this, 
+   _menuids[ ID_ToggleToolbar ] = _windowsMenu->insertItem(
+      "Toggle toolbar", this,
       SLOT(toggleToolbar()),
       _resources->getAccelerator( ACCEL_TOGGLE_TOOLBAR )
    );
-   _menuids[ ID_ToggleOverview ] = _windowsMenu->insertItem( 
+   _menuids[ ID_ToggleOverview ] = _windowsMenu->insertItem(
       "Toggle overview", this, SLOT(toggleOverview()),
       _resources->getAccelerator( ACCEL_TOGGLE_OVERVIEW )
    );
-   _menuids[ ID_ToggleShowFilenames ] = _windowsMenu->insertItem( 
+   _menuids[ ID_ToggleShowFilenames ] = _windowsMenu->insertItem(
       "Toggle show filename", this, SLOT(toggleShowFilenames()),
       _resources->getAccelerator( ACCEL_TOGGLE_SHOW_FILENAMES )
    );
@@ -1525,20 +1573,20 @@ void XxApp::createMenus()
 
    // Help menu
    QkPopupMenu* helpMenu = new QkPopupMenu;
-   helpMenu->insertItem( 
+   helpMenu->insertItem(
       "User's manual...", this, SLOT(helpManPage()),
       _resources->getAccelerator( ACCEL_HELP_MAN_PAGE )
    );
-   helpMenu->insertItem( 
+   helpMenu->insertItem(
       "On context", _mainWindow, SLOT(whatsThis()),
       _resources->getAccelerator( ACCEL_HELP_ON_CONTEXT )
    );
-   helpMenu->insertItem( 
+   helpMenu->insertItem(
       "Generate init file...", this, SLOT(helpGenInitFile()),
       _resources->getAccelerator( ACCEL_HELP_GEN_INIT_FILE )
    );
    helpMenu->insertSeparator();
-   helpMenu->insertItem( 
+   helpMenu->insertItem(
       "About...", this, SLOT(helpAbout()),
       _resources->getAccelerator( ACCEL_HELP_ABOUT )
    );
@@ -1563,8 +1611,8 @@ void XxApp::createMenus()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxBuffer> XxApp::readFile( 
-   const XxFno    no, 
+std::auto_ptr<XxBuffer> XxApp::readFile(
+   const XxFno    no,
    const QString& filename,
    const QString& displayFilename,
    bool           isTemporary
@@ -1583,17 +1631,18 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
          // Assign an empty buffer. The directory diffs builder will fill it in
          // with whatever contents are read from directory diffs command output.
          std::auto_ptr<XxBuffer> tmp(
-            new XxBuffer( false, filename, displayFilename )
+            new XxBuffer( false, filename, displayFilename, _newlineChar )
          );
          newbuf = tmp;
       }
       else {
          std::auto_ptr<XxBuffer> tmp(
-            new XxBuffer( 
-               filename, 
-               displayFilename, 
+            new XxBuffer(
+               filename,
+               displayFilename,
                _resources->getBoolOpt( BOOL_HIDE_CR ),
-               isTemporary 
+               isTemporary,
+               _newlineChar
             )
          );
          newbuf = tmp;
@@ -1613,15 +1662,17 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
 //
 bool XxApp::processDiff()
 {
+   _isThereAnyDifference = false;
+
    // Important note: this method assumes the UI has been created.
    XX_ASSERT( _isUICreated == true );
-   
+
    // Important note: this method assumes that the nbFiles have already been
    // loaded.
    for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
       XX_ASSERT( _files[ii].get() != 0 );
    }
-   
+
    // Note: disconnect when deleting _diffs.
    if ( _diffs.get() != 0 ) {
       disconnect( _diffs.get() );
@@ -1630,17 +1681,44 @@ bool XxApp::processDiff()
 
 
    //
+   // If this is a single, create the diffs directly without running anything
+   // special.
+   //
+   std::auto_ptr<XxBuilder> builder;
+   if ( _cmdline._single == true ) {
+
+      XxBuilderSingle* builderSingle = new XxBuilderSingle;
+      std::auto_ptr<XxBuilder> builderTmp( builderSingle );
+      builder = builderTmp;
+      try {
+
+         QString leftName, rightName;
+         std::auto_ptr<XxDiffs> tmp(
+            builderSingle->process( *(_files[0]) )
+         );
+         _diffs = tmp;
+         XX_ASSERT( _diffs.get() != 0 );
+      }
+      catch ( const XxError& ex ) {
+         QString str;
+         QTextOStream oss( &str );
+         oss << "Error processing single file:" << ex.getMsg() << endl;
+         outputDiffErrors( str );
+         _returnValue = builder->getStatus();
+         return false;
+      }
+   }
+   //
    // If this is an unmerge, create the diffs directly from the buffer in
    // memory (i.e. we do not need to spawn an external process).
    //
-   std::auto_ptr<XxBuilder> builder;
-   if ( _cmdline._unmerge == true ) {
+   else if ( _cmdline._unmerge == true ) {
 
       XxBuilderUnmerge* builderUnmerge = new XxBuilderUnmerge;
       std::auto_ptr<XxBuilder> builderTmp( builderUnmerge );
       builder = builderTmp;
       try {
-         
+
          QString leftName, middleName, rightName;
          if ( _cmdline._unmergeNbFiles == 2 ) {
             std::auto_ptr<XxDiffs> tmp(
@@ -1668,25 +1746,25 @@ bool XxApp::processDiff()
 
          // Add names from tags to display filenames.
          if ( !leftName.isEmpty() ) {
-            _files[0]->setDisplayName( 
+            _files[0]->setDisplayName(
                _files[0]->getDisplayName() + " (" + leftName + ")"
             );
          }
          if ( _cmdline._unmergeNbFiles == 2 ) {
             if ( !rightName.isEmpty() ) {
-               _files[1]->setDisplayName( 
+               _files[1]->setDisplayName(
                   _files[1]->getDisplayName() + " (" + rightName + ")"
                );
             }
          }
          else {
             if ( !middleName.isEmpty() ) {
-               _files[1]->setDisplayName( 
+               _files[1]->setDisplayName(
                   _files[1]->getDisplayName() + " (" + middleName + ")"
                );
             }
             if ( !rightName.isEmpty() ) {
-               _files[2]->setDisplayName( 
+               _files[2]->setDisplayName(
                   _files[2]->getDisplayName() + " (" + rightName + ")"
                );
             }
@@ -1701,7 +1779,7 @@ bool XxApp::processDiff()
          return false;
       }
    }
-   // 
+   //
    // else, normal diffs, run the diff command (this is the usual case).
    //
    else if ( _filesAreDirectories == false ) {
@@ -1725,7 +1803,7 @@ bool XxApp::processDiff()
          catch ( const XxError& ex ) {
             QString str;
             QTextOStream oss( &str );
-            oss << "Error executing \"" 
+            oss << "Error executing \""
                 << _resources->getCommand( CMD_DIFF_FILES_2 )
                 << "\" command, couldn't build diffs:" << endl
                 << ex.getMsg() << endl;
@@ -1753,7 +1831,7 @@ bool XxApp::processDiff()
          catch ( const XxError& ex ) {
             QString str;
             QTextOStream oss( &str );
-            oss << "Error executing \"" 
+            oss << "Error executing \""
                 << _resources->getCommand( CMD_DIFF_FILES_3 )
                 << "\" command, couldn't build diffs:" << endl
                 << ex.getMsg() << endl;
@@ -1799,7 +1877,7 @@ bool XxApp::processDiff()
       catch ( const XxError& ex ) {
          QString str;
          QTextOStream oss( &str );
-         oss << "Error executing \"" 
+         oss << "Error executing \""
              << dirdiff_command
              << "\" command, couldn't build diffs:" << endl
              << ex.getMsg() << endl;
@@ -1835,21 +1913,23 @@ bool XxApp::processDiff()
    if ( _diffs.get() != 0 ) {
 
       connect( _diffs.get(), SIGNAL(changed()), this, SLOT(updateWidgets()) );
-      connect( _diffs.get(), SIGNAL(nbLinesChanged()), 
+      connect( _diffs.get(), SIGNAL(nbLinesChanged()),
                this, SLOT(onNbLinesChanged()) );
-      
+
       // Sanity check: check that the number of file lines are smaller than the
       // number of diff lines.
-      if ( ! _cmdline._unmerge ) {
+      if ( !( _cmdline._unmerge || _cmdline._single ) ) {
          for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-#if 1  // FIXME this is not necessarily true with -B, depending on the implementation (if you display the empty lines then it should be true)
+#if 1
+// FIXME this is not necessarily true with -B, depending on the implementation
+// (if you display the empty lines then it should be true)
             if ( XxDln( _files[ii]->getNbLines() ) > _diffs->getNbLines() ) {
                throw XxInternalError( XX_EXC_PARAMS );
             }
 #endif
          }
       }
-      
+
       // Reset update connections and adjust scrollbars.
       if ( _diffs.get() != 0 ) {
          connect( _diffs.get(), SIGNAL(changed()),
@@ -1860,6 +1940,8 @@ bool XxApp::processDiff()
       // file separately.
       emit textSizeChanged();
    }
+
+   _isThereAnyDifference = computeAbsoluteDifference();
 
    return _returnValue == 2 || _diffs.get() != 0;
 }
@@ -1878,7 +1960,7 @@ XxResources* XxApp::buildResources() const
          resParser.parse( rcfilename, *resources );
       }
       catch ( const XxIoError& ioerr ) {
-         QMessageBox::critical( 
+         QMessageBox::critical(
             _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
          );
       }
@@ -1890,7 +1972,7 @@ XxResources* XxApp::buildResources() const
          resParser.parse( cmdlineStream, *resources );
       }
       catch ( const XxIoError& ioerr ) {
-         QMessageBox::critical( 
+         QMessageBox::critical(
             _mainWindow, "xxdiff cmdline resources", ioerr.getMsg(), 1,0,0
          );
       }
@@ -1903,8 +1985,8 @@ XxResources* XxApp::buildResources() const
 //
 void XxApp::outputDiffErrors( const QString& errors )
 {
-   _diffErrorsMsgBox = new XxSuicideMessageBox( 
-      _mainWindow, "Diff errors.", errors, QMessageBox::Warning 
+   _diffErrorsMsgBox = new XxSuicideMessageBox(
+      _mainWindow, "Diff errors.", errors, QMessageBox::Warning
    );
 }
 
@@ -1914,7 +1996,7 @@ uint XxApp::computeTextWidth() const
 {
    uint textWidth = 0;
    for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-      textWidth = std::max( textWidth, _files[ii]->computeTextWidth( 
+      textWidth = std::max( textWidth, _files[ii]->computeTextWidth(
          _resources->getFontText(), _resources->getTabWidth()
       ) );
    }
@@ -1998,6 +2080,11 @@ void XxApp::updateWidgets()
       }
 // FIXME error do this on diff change not on update
       _remUnselView->setNum( int(remNb) );
+
+      // Little marker if the files are EXACTLY equal.
+      if ( ! _isThereAnyDifference ) {
+         _remUnselView->setText( _remUnselView->text() + QString(" (=)") );
+      }
    }
    if ( _overview->isVisible() ) {
       _overview->update();
@@ -2024,7 +2111,7 @@ bool XxApp::saveToFile(
    const bool     ask,
    const bool     noCancel,
    const bool     overwrite
-) 
+)
 {
    if ( _diffs.get() == 0 ) {
       return false;
@@ -2033,7 +2120,7 @@ bool XxApp::saveToFile(
    // Check if there are some unselected regions remaining.
    bool allSelected = _diffs->isAllSelected();
    if ( !allSelected ) {
-      
+
       // Bring the user to the first unselected region.
       XxDln nextNo = _diffs->findNextUnselected( 0 );
       XX_ASSERT( nextNo != -1 );
@@ -2041,7 +2128,7 @@ bool XxApp::saveToFile(
    }
 
    QString cleanname = XxUtil::removeClearCaseExt( filename );
-   
+
    QString f;
    bool useConditionals = false;
    bool removeEmptyConditionals = false;
@@ -2051,7 +2138,7 @@ bool XxApp::saveToFile(
          f = XxMarkersFileDialog::getSaveFileName(
             cleanname, QString::null, _mainWindow, "xxdiff save file",
             _nbFiles == 3,
-            useConditionals, 
+            useConditionals,
             removeEmptyConditionals,
             conditionals
          );
@@ -2074,10 +2161,10 @@ bool XxApp::saveToFile(
       f = cleanname;
 
       if ( !allSelected ) {
-         bool res = XxMarkersDialog::getMarkers( 
+         bool res = XxMarkersDialog::getMarkers(
             _mainWindow, "xxdiff save file",
             _nbFiles == 3,
-            useConditionals, 
+            useConditionals,
             removeEmptyConditionals,
             conditionals,
             noCancel
@@ -2089,11 +2176,11 @@ bool XxApp::saveToFile(
       }
    }
    XX_ASSERT( !f.isEmpty() );
-   
+
    if ( !overwrite ) {
       // Check for file existence.
       QFileInfo finfo( f );
-      if ( finfo.exists() ) {        
+      if ( finfo.exists() ) {
          QString msg;
          if ( finfo.isWritable() ) {
             msg = QString("File exists, overwrite?");
@@ -2102,7 +2189,7 @@ bool XxApp::saveToFile(
             msg = QString("File exists (AND IS NOT WRITABLE), overwrite?");
          }
 
-         int resp = QMessageBox::warning( 
+         int resp = QMessageBox::warning(
             _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
          );
          if ( resp == 1 ) {
@@ -2112,7 +2199,7 @@ bool XxApp::saveToFile(
          // Continue anyway.
       }
    }
-   
+
    // Open a file.
    try {
       QFile outfile( f );
@@ -2120,7 +2207,7 @@ bool XxApp::saveToFile(
       if ( !succ ) {
          throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
       }
-      
+
       // Save to the file.
       {
          QTextStream osstream( &outfile );
@@ -2129,14 +2216,14 @@ bool XxApp::saveToFile(
                        useConditionals, removeEmptyConditionals,
                        conditionals );
       }
-      
+
       outfile.close();
       if ( outfile.status() != IO_Ok ) {
          throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
       }
    }
    catch ( const XxIoError& ioerr ) {
-      QMessageBox::critical( 
+      QMessageBox::critical(
          _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
       );
    }
@@ -2190,7 +2277,7 @@ void XxApp::editFile( const QString& filename )
          plus one for the terminating null byte.  */
       size = ( offsetof( struct sockaddr_un, sun_path )
                + strlen( name.sun_path ) + 1 );
-      
+
       if ( ::bind( _sockfd, (struct sockaddr*)&name, size ) < 0 ) {
          throw XxIoError( XX_EXC_PARAMS );
       }
@@ -2217,7 +2304,7 @@ void XxApp::editFile( const QString& filename )
 
       // connect to host
       ::connect( _sockfd, (struct sockaddr*)&name, sizeof(name) );
-      
+
       // set non-blocking
       ::fcntl( _sockfd, F_SETFL, O_NONBLOCK );
 
@@ -2242,11 +2329,11 @@ void XxApp::editFile( const QString& filename )
       QString text;
       {
          QTextOStream oss( &text );
-         oss << "There has been an error spawning the editor:" 
+         oss << "There has been an error spawning the editor:"
              << ioerr.getMsg() << endl;
       }
-      QMessageBox* box = new XxSuicideMessageBox( 
-         _mainWindow, "Error.", text, QMessageBox::Warning 
+      QMessageBox* box = new XxSuicideMessageBox(
+         _mainWindow, "Error.", text, QMessageBox::Warning
       );
       box->show();
    }
@@ -2290,31 +2377,31 @@ void XxApp::openFile( const XxFno no )
    if ( !isTemporary[no] ) {
       startWith = filenames[no];
    }
-   QString f = 
+   QString f =
       QkFileDialog::getOpenFileName( startWith, QString::null, _mainWindow );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
-      return; 
+      return;
    }
    else {
       bool isDirectory;
       XxUtil::testFile( f, false, isDirectory );
       if ( isDirectory == true ) {
          QString text( "Cannot open a new directory" );
-         QMessageBox* box = new XxSuicideMessageBox( 
-            _mainWindow, "Error.", text, QMessageBox::Warning 
+         QMessageBox* box = new XxSuicideMessageBox(
+            _mainWindow, "Error.", text, QMessageBox::Warning
          );
-         box->show();         
+         box->show();
          return;
       }
-      std::auto_ptr<XxBuffer> newbuf( 
+      std::auto_ptr<XxBuffer> newbuf(
          readFile( no, f, f, false )
       );
       _files[no] = newbuf;
 
 
       bool succ = processDiff();
-      
+
       // Adjust UI elements
       // Set filename label.
       if ( _files[no].get() != 0 ) {
@@ -2371,11 +2458,11 @@ void XxApp::onRedoDiff()
    if ( nbFiles > 0 ) {
       XxDln cursorLine = getCursorLine();
       XxDln centerLine = _central->getCenterLine();
-      
+
       bool succ = false; // Do nothing.
 
       // Reread the files.
-      if ( _cmdline._unmerge == false ) {
+      if ( _cmdline._unmerge == false && _cmdline._single == false ) {
          for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
             const XxBuffer& buffer = *_files[ii];
             if ( buffer.isTemporary() == false ) {
@@ -2392,7 +2479,25 @@ void XxApp::onRedoDiff()
          // Do the diff.
          succ = processDiff();
       }
-      else {
+      else if ( _cmdline._single == true ) {
+
+         // Read the one single file.
+         std::auto_ptr<XxBuffer> newbuf(
+            readFile( 0,
+                      _files[0]->getName(),
+                      _files[0]->getDisplayName(),
+                      _files[0]->isTemporary() )
+         );
+         _files[0] = newbuf;
+
+         // Make an empty buffer.
+         std::auto_ptr<XxBuffer> emptybuf(
+            new XxBuffer( false, QString("/dev/null"), QString("(empty)") )
+         );
+         _files[1] = emptybuf;
+
+      }
+      else { // unmerge
          const XxBuffer& buffer1 = *_files[0];
          if ( buffer1.isTemporary() == false ) {
             std::auto_ptr<XxBuffer> newbuf(
@@ -2546,8 +2651,8 @@ bool XxApp::validateNeedToSave( uint no ) const
              << "Save anyway?";
       }
 
-      int resp = QMessageBox::warning( 
-         _mainWindow, "xxdiff", text, 
+      int resp = QMessageBox::warning(
+         _mainWindow, "xxdiff", text,
          "Ok", "Cancel", QString::null, 0, 1
       );
       if ( resp == 1 ) {
@@ -2615,10 +2720,10 @@ void XxApp::saveSelectedOnly()
       // The user cancelled the dialog.
       return;
    }
-   
+
    // Check for file existence.
    QFileInfo finfo( f );
-   if ( finfo.exists() ) {     
+   if ( finfo.exists() ) {
       QString msg;
       if ( finfo.isWritable() ) {
          msg = QString("File exists, overwrite?");
@@ -2627,7 +2732,7 @@ void XxApp::saveSelectedOnly()
          msg = QString("File exists (AND IS NOT WRITABLE), overwrite?");
       }
 
-      int resp = QMessageBox::warning( 
+      int resp = QMessageBox::warning(
          _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
       );
       if ( resp == 1 ) {
@@ -2636,25 +2741,25 @@ void XxApp::saveSelectedOnly()
       }
       // Continue anyway.
    }
-   
+
    QFile outfile( f );
    bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
    if ( !succ ) {
       throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
    }
-   
+
    // Save to the file.
    {
       QTextStream osstream( &outfile );
       //osstream.setEncoding( QTextStream::Locale ); not necessary
       _diffs->saveSelectedOnly( osstream, getBuffers() );
    }
-   
+
    outfile.close();
    if ( outfile.status() != IO_Ok ) {
       throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
    }
-}   
+}
 
 //------------------------------------------------------------------------------
 //
@@ -2733,7 +2838,7 @@ void XxApp::exit( int retcode )
          if ( _resources->getBoolOpt( BOOL_WARN_ABOUT_UNSAVED ) == true &&
               _diffs->isDirty() == true &&
               _diffs->isSomeSelected() == true ) {
-            int resp = QMessageBox::warning( 
+            int resp = QMessageBox::warning(
                _mainWindow,
                "xxdiff",
                "Some selections changed and unsaved, quit anyway?",
@@ -2786,7 +2891,7 @@ void XxApp::searchForward()
 void XxApp::searchBackward()
 {
    if ( _diffs.get() != 0 ) {
-      XxDiffs::SearchResult sres = 
+      XxDiffs::SearchResult sres =
          _diffs->findPreviousSearch( getCursorLine() );
       if ( sres.isValid() ) {
          setCursorLine( sres._lineNo, true );
@@ -2800,7 +2905,7 @@ void XxApp::searchBackward()
 //------------------------------------------------------------------------------
 //
 void XxApp::redoDiff()
-{ 
+{
    if ( _nbFiles == 0 || _diffs.get() == 0 ) {
       return;
    }
@@ -2811,7 +2916,7 @@ void XxApp::redoDiff()
 //------------------------------------------------------------------------------
 //
 void XxApp::editDiffOptions()
-{ 
+{
    // Popup name and arguments box.
    if ( _optionsDialog == 0 ) {
       _optionsDialog = new XxOptionsDialog( this, _mainWindow );
@@ -2823,7 +2928,7 @@ void XxApp::editDiffOptions()
 //------------------------------------------------------------------------------
 //
 void XxApp::editDisplayOptions()
-{ 
+{
    // Popup name and arguments box.
    if ( _optionsDialog == 0 ) {
       _optionsDialog = new XxOptionsDialog( this, _mainWindow );
@@ -2835,20 +2940,21 @@ void XxApp::editDisplayOptions()
 //------------------------------------------------------------------------------
 //
 void XxApp::diffFilesAtCursor()
-{ 
+{
    XX_ASSERT( _filesAreDirectories == true );
    if ( _nbFiles != 2 || _diffs.get() == 0 ) {
       return;
    }
 
+   // Get filenames.
+   QStringList filenames;
+
    XxDln cursorLine = getCursorLine();
    const XxLine& line = _diffs->getLine( cursorLine );
    if ( line.getType() == XxLine::SAME ||
-        line.getType() == XxLine::DIFF_ALL || 
+        line.getType() == XxLine::DIFF_ALL ||
         line.getType() == XxLine::DIRECTORIES ) {
 
-      // Get filenames.
-      QStringList filenames;
       for ( XxFno ii = 0; ii < 2; ++ii ) {
          bool empty;
          XxFln fline = _diffs->getBufferLine( ii, cursorLine, empty );
@@ -2857,29 +2963,54 @@ void XxApp::diffFilesAtCursor()
          filenames.append( _files[ii]->getBufferAtLine( fline ) );
       }
 
+   }
+   else if ( line.getType() == XxLine::INSERT_1 ) {
+
+      bool empty;
+      XxFln fline = _diffs->getBufferLine( 0, cursorLine, empty );
+      XX_ASSERT( empty == false );
+
+      filenames.append( _files[0]->getBufferAtLine( fline ) );
+   }
+   else if ( line.getType() == XxLine::INSERT_2 ) {
+
+      bool empty;
+      XxFln fline = _diffs->getBufferLine( 1, cursorLine, empty );
+      XX_ASSERT( empty == false );
+
+      filenames.append( _files[1]->getBufferAtLine( fline ) );
+   }
+
+   if ( filenames.size() > 0 ) {
       // Spawn a diff.
-      QString command = argv()[0]; 
+      QString command = argv()[0];
+
+      if ( filenames.size() == 1 ) {
+         command += QString(" --single ");
+      }
+
       const char** args;
       XxUtil::splitArgs( command, filenames, args );
 
-      try { 
+      try {
          XxUtil::spawnCommand( args );
       }
       catch ( const XxIoError& ioerr ) {
          QString text;
          {
             QTextOStream oss( &text );
-            oss << "There has been an error spawning diff program:" 
+            oss << "There has been an error spawning diff program:"
                 << ioerr.getMsg() << endl;
          }
-         QMessageBox* box = new XxSuicideMessageBox( 
-            _mainWindow, "Error.", text, QMessageBox::Warning 
+         QMessageBox* box = new XxSuicideMessageBox(
+            _mainWindow, "Error.", text, QMessageBox::Warning
          );
          box->show();
       }
 
       XxUtil::freeArgs( args );
    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -2916,14 +3047,14 @@ void XxApp::copyFile( XxFno nnno ) const
    // Get filenames.
    XxFln fline = line.getLineNo( nosrc );
    if ( fline == -1 ) {
-      QMessageBox* box = new XxSuicideMessageBox( 
+      QMessageBox* box = new XxSuicideMessageBox(
          _mainWindow, "Error.", "File is empty.", QMessageBox::Warning
       );
       box->show();
       return;
    }
    QString filesrc = _files[nosrc]->getBufferAtLine( fline );
-         
+
    // If the destination file is empty, the filename should be the
    // directory name only.
    fline = line.getLineNo( nodst );
@@ -2936,7 +3067,7 @@ void XxApp::copyFile( XxFno nnno ) const
 
       QFileInfo finfo( filedst );
       if ( finfo.exists() ) {
-         int resp = QMessageBox::warning( 
+         int resp = QMessageBox::warning(
             _mainWindow, "xxdiff", "File exists, overwrite?",
             "Ok", "Cancel", QString::null, 0, 1
          );
@@ -2950,8 +3081,8 @@ void XxApp::copyFile( XxFno nnno ) const
 
    // Copy file.
    if ( XxUtil::copyFile( filesrc, filedst ) != 0 ) {
-      QMessageBox* box = new XxSuicideMessageBox( 
-         _mainWindow, "Error.", "Error copying file.", QMessageBox::Warning 
+      QMessageBox* box = new XxSuicideMessageBox(
+         _mainWindow, "Error.", "Error copying file.", QMessageBox::Warning
       );
       box->show();
       return;
@@ -2991,7 +3122,7 @@ void XxApp::removeFile( XxFno nnno ) const
    // Get filenames.
    XxFln fline = line.getLineNo( nosrc );
    if ( fline == -1 ) {
-      QMessageBox* box = new XxSuicideMessageBox( 
+      QMessageBox* box = new XxSuicideMessageBox(
          _mainWindow, "Error.", "File is empty.", QMessageBox::Warning
       );
       box->show();
@@ -2999,7 +3130,7 @@ void XxApp::removeFile( XxFno nnno ) const
    }
    QString filesrc = _files[nosrc]->getBufferAtLine( fline );
 
-   int resp = QMessageBox::warning( 
+   int resp = QMessageBox::warning(
       _mainWindow, "xxdiff", "Delete file... are you sure?",
       "Ok", "Cancel", QString::null, 0, 1
    );
@@ -3011,8 +3142,8 @@ void XxApp::removeFile( XxFno nnno ) const
 
    // Remove file.
    if ( XxUtil::removeFile( filesrc ) != 0 ) {
-      QMessageBox* box = new XxSuicideMessageBox( 
-         _mainWindow, "Error.", "Error deleting file.", QMessageBox::Warning 
+      QMessageBox* box = new XxSuicideMessageBox(
+         _mainWindow, "Error.", "Error deleting file.", QMessageBox::Warning
       );
       box->show();
       return;
@@ -3320,7 +3451,7 @@ void XxApp::setTabWidth( const int newTabWidth )
 
    emit textSizeChanged();
    synchronizeUI();
-   updateWidgets();   
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -3381,7 +3512,7 @@ void XxApp::setFileDiffOptions( XxCommandSwitch option )
 {
    XxCommand cmdResId = (_nbFiles == 2) ? CMD_DIFF_FILES_2 : CMD_DIFF_FILES_3;
    _resources->toggleCommandSwitch( cmdResId, option );
-   
+
    synchronizeUI();
    if ( _optionsDialog != 0 ) {
       _optionsDialog->synchronize();
@@ -3697,7 +3828,7 @@ void XxApp::helpGenInitFile()
       XxResParser::genInitFile( *_resources, *defres, outs );
    }
    if ( outstr.isEmpty() ) {
-      QMessageBox::warning( 
+      QMessageBox::warning(
          _mainWindow, "xxdiff",
          "There is nothing to write as init file\n(nothing has been changed).",
          "Ok"
@@ -3717,8 +3848,8 @@ void XxApp::helpGenInitFile()
    XX_ASSERT( !f.isEmpty() );
 
    QFileInfo finfo( f );
-   if ( finfo.exists() ) {        
-      int resp = QMessageBox::warning( 
+   if ( finfo.exists() ) {
+      int resp = QMessageBox::warning(
          _mainWindow, "xxdiff", "File exists, overwrite?",
          "Ok", "Cancel", QString::null, 0, 1
       );
@@ -3728,7 +3859,7 @@ void XxApp::helpGenInitFile()
       }
       // Continue anyway.
    }
-   
+
    // Open a file.
    try {
       QFile outfile( f );
@@ -3736,7 +3867,7 @@ void XxApp::helpGenInitFile()
       if ( !succ ) {
          throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
       }
-      
+
       // Save to the file.
       {
          QTextStream osstream( &outfile );
@@ -3749,7 +3880,7 @@ void XxApp::helpGenInitFile()
       }
    }
    catch ( const XxIoError& ioerr ) {
-      QMessageBox::critical( 
+      QMessageBox::critical(
          _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
       );
    }
@@ -3773,31 +3904,31 @@ void XxApp::synchronizeUI()
             (_nbFiles == 2) ? CMD_DIFF_FILES_2 : CMD_DIFF_FILES_3;
          // Note: useless, this is only valid for two-way file diffs.
 
-         _optionsMenu->setItemChecked( 
+         _optionsMenu->setItemChecked(
             _menuids[ ID_ToggleIgnoreTrailing ],
-            _resources->isCommandSwitch( 
-               cmdResId, 
+            _resources->isCommandSwitch(
+               cmdResId,
                CMDSW_FILES_IGNORE_TRAILING
             )
          );
-         _optionsMenu->setItemChecked( 
+         _optionsMenu->setItemChecked(
             _menuids[ ID_ToggleIgnoreWhitespace ],
-            _resources->isCommandSwitch( 
-               cmdResId, 
+            _resources->isCommandSwitch(
+               cmdResId,
                CMDSW_FILES_IGNORE_WHITESPACE
             )
          );
-         _optionsMenu->setItemChecked( 
+         _optionsMenu->setItemChecked(
             _menuids[ ID_ToggleIgnoreCase ],
-            _resources->isCommandSwitch( 
-               cmdResId, 
+            _resources->isCommandSwitch(
+               cmdResId,
                CMDSW_FILES_IGNORE_CASE
             )
          );
-         _optionsMenu->setItemChecked( 
+         _optionsMenu->setItemChecked(
             _menuids[ ID_ToggleIgnoreBlankLines ],
-            _resources->isCommandSwitch( 
-               cmdResId, 
+            _resources->isCommandSwitch(
+               cmdResId,
                CMDSW_FILES_IGNORE_BLANK_LINES
             )
          );
@@ -3820,7 +3951,7 @@ void XxApp::synchronizeUI()
       }
    }
    else {
-      _optionsMenu->setItemChecked( 
+      _optionsMenu->setItemChecked(
          _menuids[ ID_ToggleDirDiffsRecursive ],
          _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE )
       );
@@ -3843,31 +3974,31 @@ void XxApp::synchronizeUI()
             _resources->getHordiffType() == HD_MULTIPLE
          );
       }
-      _displayMenu->setItemChecked( 
+      _displayMenu->setItemChecked(
          _menuids[ ID_ToggleIgnoreHorizontalWs ],
          _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS )
       );
-      _displayMenu->setItemChecked( 
+      _displayMenu->setItemChecked(
          _menuids[ ID_ToggleIgnorePerHunkWs ],
          _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS )
       );
-      _displayMenu->setItemChecked( 
+      _displayMenu->setItemChecked(
          _menuids[ ID_ToggleHideCarriageReturns ],
          _resources->getBoolOpt( BOOL_HIDE_CR )
       );
-      _displayMenu->setItemChecked( 
+      _displayMenu->setItemChecked(
          _menuids[ ID_ToggleVerticalLine ],
          _resources->getShowOpt( SHOW_VERTICAL_LINE )
       );
    }
    else {
-      _displayMenu->setItemChecked( 
+      _displayMenu->setItemChecked(
          _menuids[ ID_ToggleDirDiffsIgnoreFileChanges ],
          _resources->getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES )
       );
    }
 
-   _displayMenu->setItemChecked( 
+   _displayMenu->setItemChecked(
       _menuids[ ID_ToggleFormatClipboardText ],
       _resources->getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
    );
@@ -3880,43 +4011,43 @@ void XxApp::synchronizeUI()
       _displayMenu->setItemChecked( _menuids[ ID_TabsAtEight ], tabWidth == 8 );
    }
 
-   _displayMenu->setItemChecked( 
-      _menuids[ ID_ToggleLineNumbers ], 
+   _displayMenu->setItemChecked(
+      _menuids[ ID_ToggleLineNumbers ],
       _resources->getShowOpt( SHOW_LINE_NUMBERS )
    );
 
    if ( _filesAreDirectories == false && _nbFiles == 3 ) {
 
       XxIgnoreFile ignoreFile = _resources->getIgnoreFile();
-      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileNone ], 
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileNone ],
                                     ignoreFile == IGNORE_NONE );
-      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileLeft ], 
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileLeft ],
                                     ignoreFile == IGNORE_LEFT );
-      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileMiddle ], 
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileMiddle ],
                                     ignoreFile == IGNORE_MIDDLE );
-      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileRight ], 
+      _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileRight ],
                                     ignoreFile == IGNORE_RIGHT );
    }
 
    //---------------------------------------------------------------------------
 
-   _windowsMenu->setItemChecked( 
-      _menuids[ ID_TogglePaneMergedView ], 
+   _windowsMenu->setItemChecked(
+      _menuids[ ID_TogglePaneMergedView ],
       ( _paneMergedView != 0 && _paneMergedView->isVisible() )
    );
-   _windowsMenu->setItemChecked( 
-      _menuids[ ID_TogglePopupMergedView ], 
+   _windowsMenu->setItemChecked(
+      _menuids[ ID_TogglePopupMergedView ],
       ( _popupMergedView != 0 && _popupMergedView->isVisible() )
    );
-   _windowsMenu->setItemChecked( 
-      _menuids[ ID_ToggleToolbar ], 
+   _windowsMenu->setItemChecked(
+      _menuids[ ID_ToggleToolbar ],
       _resources->getShowOpt( SHOW_TOOLBAR )
    );
-   _windowsMenu->setItemChecked( 
+   _windowsMenu->setItemChecked(
       _menuids[ ID_ToggleOverview ],
       _resources->getShowOpt( SHOW_OVERVIEW )
    );
-   _windowsMenu->setItemChecked( 
+   _windowsMenu->setItemChecked(
       _menuids[ ID_ToggleShowFilenames ],
       _resources->getShowOpt( SHOW_FILENAMES )
    );
@@ -3956,7 +4087,7 @@ XxDln XxApp::setCursorLine( const XxDln lineNo, const bool recenter )
    XxDln oldLine = _cursorLine;
 
    // Validate and set.
-   XxDln validLine = 
+   XxDln validLine =
       std::max( XxDln(1), std::min( XxDln(getNbLines()), lineNo ) );
    _cursorLine = validLine;
 
@@ -4038,5 +4169,33 @@ void XxApp::cursorBottom()
    setCursorLine( getNbLines(), true );
 }
 
-XX_NAMESPACE_END
+//------------------------------------------------------------------------------
+//
+bool XxApp::computeAbsoluteDifference() const
+{
+   const std::auto_ptr<XxBuffer>* buffers = getBuffers();
+   if ( _nbFiles == 2 ) {
+      uint bs1;
+      const char* b1 = buffers[0]->getBuffer( bs1 );
+      uint bs2;
+      const char* b2 = buffers[1]->getBuffer( bs2 );
+      if ( bs1 != bs2 ) {
+         return true;
+      }
+      return bool( ::memcmp( b1, b2, bs1 ) );
+   }
+   else { // _nbFiles == 3
+      uint bs1;
+      const char* b1 = buffers[0]->getBuffer( bs1 );
+      uint bs2;
+      const char* b2 = buffers[1]->getBuffer( bs2 );
+      uint bs3;
+      const char* b3 = buffers[2]->getBuffer( bs3 );
+      if ( bs1 != bs2 || bs2 != bs3 ) {
+         return true;
+      }
+      return bool( ::memcmp( b1, b2, bs1 ) ) || bool( ::memcmp( b1, b3, bs1 ) );
+   }
+}
 
+XX_NAMESPACE_END

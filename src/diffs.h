@@ -319,7 +319,7 @@ public:
    // Dump debug output.
    std::ostream& dump( std::ostream& ) const;
 
-   signals:
+signals:
 
    /*----- member functions -----*/
 
