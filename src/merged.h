@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: merged.h 450 2001-12-08 01:15:24Z blais $
- * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
+ * $Id: merged.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -104,7 +104,7 @@ public:
    // <group>
    virtual QSize computeDisplaySize() const;
    virtual uint computeTextLength() const;
-   virtual uint getNbDisplayLines() const;
+   virtual XxDln getNbDisplayLines() const;
    // </group>
    
 public slots:

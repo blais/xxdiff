@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: hordiffImp.cpp 469 2002-01-30 22:04:41Z blais $
- * $Date: 2002-01-30 17:04:41 -0500 (Wed, 30 Jan 2002) $
+ * $Id: hordiffImp.cpp 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -580,11 +580,12 @@ void XxHordiffImp::multipleHordiffs2(
          inword = false;
       }
 
+      int ii;
 #ifdef XX_LOCAL_HDIFF_DEBUG
       cerr << endl << "nb.matches " << c << endl;
 
       cerr << "matches left ";
-      for ( int ii = c/2-1; ii >= 0; --ii ) {
+      for ( ii = c/2-1; ii >= 0; --ii ) {
          cerr << " " << hbuffer0[ii*2] << "|";
          for ( int ic = hbuffer0[ii*2]; ic < hbuffer0[ii*2+1]; ++ic ) {
             cerr << ctext0[ic+1];
@@ -594,7 +595,7 @@ void XxHordiffImp::multipleHordiffs2(
       cerr << endl;
 
       cerr << "matches right ";
-      for ( int ii = c/2-1; ii >= 0; --ii ) {
+      for ( ii = c/2-1; ii >= 0; --ii ) {
          cerr << " " << hbuffer1[ii*2] << "|";
          for ( int ic = hbuffer1[ii*2]; ic < hbuffer1[ii*2+1]; ++ic ) {
             cerr << ctext1[ic+1];
@@ -612,7 +613,7 @@ void XxHordiffImp::multipleHordiffs2(
       tmpdiff0[cc] = 0;
       tmpdiff1[cc] = 0;
       ++cc;
-      for ( int ii = c/2-1; ii >= 0; --ii ) {
+      for ( ii = c/2-1; ii >= 0; --ii ) {
          tmpdiff0[cc] = hbuffer0[ii*2];
          tmpdiff1[cc] = hbuffer1[ii*2];
          ++cc;
@@ -630,12 +631,12 @@ void XxHordiffImp::multipleHordiffs2(
 #ifdef XX_LOCAL_HDIFF_DEBUG
       cerr << "------------------------------" << endl;
 
-      for ( int ii = 0; ii < cc; ++ii ) {
+      for ( ii = 0; ii < cc; ++ii ) {
          cerr << tmpdiff0[ii] << " ";
       }
       cerr << endl;
 
-      for ( int ii = 0; ii < cc; ++ii ) {
+      for ( ii = 0; ii < cc; ++ii ) {
          cerr << tmpdiff1[ii] << " ";
       }
       cerr << endl;
@@ -648,18 +649,18 @@ void XxHordiffImp::multipleHordiffs2(
       }
 
       // Adjust hordiffs for left bracket.
-      for ( int ii = 0; ii < cc; ++ii ) {
+      for ( ii = 0; ii < cc; ++ii ) {
          tmpdiff0[ii] += lefthd0;
          tmpdiff1[ii] += lefthd1;
       }
 
 #ifdef XX_LOCAL_HDIFF_DEBUG
-      for ( int ii = 0; ii < cc; ++ii ) {
+      for ( ii = 0; ii < cc; ++ii ) {
          cerr << tmpdiff0[ii] << " ";
       }
       cerr << endl;
 
-      for ( int ii = 0; ii < cc; ++ii ) {
+      for ( ii = 0; ii < cc; ++ii ) {
          cerr << tmpdiff1[ii] << " ";
       }
       cerr << endl;

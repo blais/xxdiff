@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resParser.cpp 481 2002-02-07 07:42:21Z blais $
- * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
+ * $Id: resParser.cpp 511 2002-02-19 19:13:57Z blais $
+ * $Date: 2002-02-19 14:13:57 -0500 (Tue, 19 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -49,7 +49,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <iostream>
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -214,7 +213,7 @@ only, and unless you're doing developemnt you should leave this to default \
      "(Not implemented) Use internal diff computation, does not spawn external \
 diff program." }
 
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    { "ForceSaveMergedFIle", FORCE_SAVE_MERGED_FILE,
      "Put xxdiff in a mode where it is forced to save to the merged file. This \
 option is made available as a resource because it was easy but you\'ll most \
@@ -238,7 +237,7 @@ XxBoolOpt boolMap[] = {
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
    BOOL_DIRDIFF_RECURSIVE,
    BOOL_USE_INTERNAL_DIFF
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    BOOL_FORCE_SAVE_MERGED_FILE
 #endif
 };
@@ -491,16 +490,29 @@ StringToken tagList[] = {
      "String used to end chunks when saving with conflicts." },
 
    { "Conditional.Ifdef", TAG_CONDITIONAL_IF, 
-     "Ifdef String used when saving with conditionals." },
+     "Ifdef string used when saving with conditionals." },
 
    { "Conditional.Elseif", TAG_CONDITIONAL_ELSEIF, 
-     "Elseif String used when saving with conditionals." },
+     "Elseif string used when saving with conditionals." },
 
    { "Conditional.Else", TAG_CONDITIONAL_ELSE, 
-     "Else String used when saving with conditionals." },
+     "Else string used when saving with conditionals." },
 
    { "Conditional.Endif", TAG_CONDITIONAL_ENDIF, 
-     "Endif String used when saving with conditionals." }
+     "Endif string used when saving with conditionals." },
+
+   { "Unmerge.Start", TAG_UNMERGE_START, 
+     "Tag that appears at the beginning of a line in a merged file to indicate \
+the start of a merged merge conflict. Default is the CVS start tag." },
+
+   { "Unmerge.Sep", TAG_UNMERGE_SEP, 
+     "Tag that appears at the beginning of a line in a merged file to separate \
+sides of a merged merge conflict. Default is the CVS start tag." },
+
+   { "Unmerge.End", TAG_UNMERGE_END, 
+     "Tag that appears at the beginning of a line in a merged file to indicate \
+the end of a merged merge conflict. Default is the CVS start tag." },
+
 };
 
 //------------------------------------------------------------------------------
@@ -724,7 +736,14 @@ char lexerBuffer[ LEX_BUFFER_MAX ];
 #define YY_DECL       int yylex( YYSTYPE* yylval )
 
 #include <resParser.l.c>
+
+#ifdef WINDOWS
+#  define std 
+#endif
 #include <resParser.y.c>
+#ifdef WINDOWS
+#  undef std 
+#endif
 
 // Reset warnings under IRIX.
 #ifdef COMPILER_MIPSPRO

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 476 2002-02-05 08:14:20Z blais $
- * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
+ * $Id: diffs.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -59,17 +59,13 @@
 #define INCL_STD_IOSFWD
 #endif
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
 
 class XxBuffer;
-
-
 
 /*==============================================================================
  * CLASS XxDiffs
@@ -110,18 +106,33 @@ public:
    XxDiffs();
 
    // Constructor.
-   XxDiffs( std::vector<XxLine>& lines, bool isDirectoryDiff = false );
+   // Validate checks that the line numbers are sequential.
+   //
+   // Important note: the given lines array must have a dummy line inserted at
+   // index 0. In other words, display line 1 should be at index 1. This is
+   // simply to avoid subtracting 1 in a bunch of places and to follow the
+   // external convention for display line numbers.
+   XxDiffs(
+      std::vector<XxLine>& lines,
+      bool                 isDirectoryDiff = false,
+      bool                 validate = true
+   );
 
    // Destructor.
    virtual ~XxDiffs();
 
    // Returns the number of display lines.
-   uint getNbLines() const;
+   XxDln getNbLines() const;
 
    // Returns the number of lines that have selected content (i.e. either just
    // have content, or have a selected side with content).  Counts the number of
    // times we encountered new unselected changes (for merged view).
-   uint getNbLinesWithContent( uint& unselectedChanges ) const;
+   XxDln getNbLinesWithContent( uint& unselectedChanges ) const;
+
+   // For a specific file, returns the number of lines with text for that
+   // file. We cannot trust the number of lines that the buffer returns, since
+   // not all lines from that buffer may be displayed.
+   XxFln getNbLinesWithText( const XxFno fno ) const;
 
    // Moves backwards nbLines lines from a specified starting line of the diffs,
    // counting only visible lines according to the current selection, counting
@@ -282,6 +293,15 @@ public:
    // Returns true if this diffs is a directory diffs.
    bool isDirectoryDiff() const;
 
+   // Re-index the buffers so that the lines they believe they have seem to be
+   // contiguous, and adjust the diffs accordingly. This method modifies both
+   // the buffers as well as this instance. This is used for unmerge.
+   void reindex( 
+      const std::auto_ptr<XxBuffer>& file1,
+      const std::auto_ptr<XxBuffer>& file2
+   );
+
+
    // Dump debug output.
    std::ostream& dump( std::ostream& ) const;
 
@@ -313,7 +333,7 @@ private:
    ) const;
 
    // Make really sure the line numbers are sequential.  This is zealous and
-   // that's how I like it.
+   // that's how I like it. Self-defensive programming.
    void validateLineNumbers() const;
 
    /*----- data members -----*/

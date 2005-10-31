@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: central.cpp 450 2001-12-08 01:15:24Z blais $
- * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
+ * $Id: central.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -84,7 +84,7 @@ XxCentralFrame::XxCentralFrame(
    QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
 
-   for ( uint ii = 0; ii < nbTextWidgets; ++ii ) { 
+   for ( uint ii = 0; ii < nbTextWidgets; ++ii ) {
       if ( ii == 1 ) {
          _vscroll[0] = new QScrollBar( this, "vscroll[0]" );
          _vscroll[0]->setFixedWidth( 20 );
@@ -216,7 +216,7 @@ uint XxCentralFrame::computeTextLength() const
 
 //------------------------------------------------------------------------------
 //
-uint XxCentralFrame::getNbDisplayLines() const
+XxDln XxCentralFrame::getNbDisplayLines() const
 {
    return _text[0]->computeDisplayLines();
 }
@@ -270,7 +270,11 @@ void XxCentralFrame::updateLineNumberLabels( int cursorLine )
          bool aempty;
 
          XxFln fline = diffs->getBufferLine( ii, cursorLine, aempty );
-         _lineNumberLabel[ii]->setNum( fline );
+         XxBuffer* file = _app->getBuffer( ii );
+         XX_ASSERT( file );
+         XxFln dfline = file->getDisplayLineNo( fline );
+         
+         _lineNumberLabel[ii]->setNum( dfline );
       }
    }
 }
@@ -284,7 +288,8 @@ void XxCentralFrame::adjustLineNumbers( bool show, const QFont& fontText )
       // Compute the maximum line numbers width.  This has to be the same for
       // all the texts, in order to have a consistent horizontal scrollbar.
       uint lnw = 0;
-      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+      XxFno ii;
+      for ( ii = 0; ii < nbFiles; ++ii ) {
          XxBuffer* file = _app->getBuffer( ii );
          XX_ASSERT( file );
          lnw = std::max(
@@ -294,7 +299,7 @@ void XxCentralFrame::adjustLineNumbers( bool show, const QFont& fontText )
               _lineNumbers[ii]->contentsRect().width() + 2 ) );
          
       }
-      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
+      for ( ii = 0; ii < nbFiles; ++ii ) {
          _lineNumbers[ii]->setFixedWidth( lnw );
          _lineNumbers[ii]->show();
       }
@@ -319,13 +324,6 @@ void XxCentralFrame::onCursorChanged( int cursorLine )
    }
 }
 
-// //------------------------------------------------------------------------------
-// //
-// void XxCentralFrame::horizontalScroll( int /*value*/ )
-// {
-//    _app->updateWidgets();
-// }
-
 //------------------------------------------------------------------------------
 //
 void XxCentralFrame::verticalScroll( int value )
@@ -334,20 +332,7 @@ void XxCentralFrame::verticalScroll( int value )
    _app->adjustCursor( getTopLine(), getBottomLine() );
 
    BaseClass::verticalScroll( value );
-//    _app->updateWidgets();
-//    if ( _vscroll[1] != 0 ) {
-//       // Will only change if different.
-//       _vscroll[1]->setValue( value );
-//    }
 }
-
-// //------------------------------------------------------------------------------
-// //
-// void XxCentralFrame::verticalScroll2( int value )
-// {
-//    _vscroll[0]->setValue( value );
-//    verticalScroll( value );
-// }
 
 //------------------------------------------------------------------------------
 //

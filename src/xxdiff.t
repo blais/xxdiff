@@ -47,12 +47,15 @@ $(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
 
 .qml.h: 
 	sed -e 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
+	echo 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' 
 
 help.o: doc.h
+help.obj: doc.h
 
 # Make the version number dependent on everything, so that we always recompile
 # this file whenever we link, thus updating that number.
 version.o: $(HEADERS) $(SOURCES) $(INTERFACES)
+version.obj: $(HEADERS) $(SOURCES) $(INTERFACES)
 
 
 #
@@ -61,3 +64,4 @@ version.o: $(HEADERS) $(SOURCES) $(INTERFACES)
 # does note include dependencies for files it cannot find in the include path.
 #
 cmdline.o: $(YACCOUTH)
+cmdline.obj: $(YACCOUTH)

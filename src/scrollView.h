@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: scrollView.h 450 2001-12-08 01:15:24Z blais $
- * $Date: 2001-12-07 20:15:24 -0500 (Fri, 07 Dec 2001) $
+ * $Id: scrollView.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -96,7 +96,7 @@ public:
 
    // Returns the number of fully visible display lines that this display can
    // currently see.
-   virtual uint getNbDisplayLines() const = 0;
+   virtual XxDln getNbDisplayLines() const = 0;
 
    // Returns the top/center/bottom/current display line.
    // <group>
@@ -125,8 +125,10 @@ public:
    // Returns the horizontal position of the horizontal scrollbar in pixels.
    virtual uint getHorizontalPos() const;
 
+public slots:
+
    // Adjusts the scrollbars for a change in either widget size or text size.
-   virtual void adjustScrollbars();
+   void adjustScrollbars();
 
 protected slots:
 

@@ -155,6 +155,7 @@ extern int _getopt_internal (int argc, char *const *argv,
 #if !defined(COMPILER_SUNWSPRO) && !defined(COMPILER_AIXXLC)
 extern int getopt ();
 
+#ifndef WINDOWS
 # ifndef __need_getopt
 extern int getopt_long ();
 extern int getopt_long_only ();
@@ -163,6 +164,7 @@ extern int _getopt_internal ();
 # endif
 
 #else
+#endif
 
 extern int getopt_long( int argc, char *const *argv, const char *__shortopts,
 		        const struct option *__longopts, int *__longind );

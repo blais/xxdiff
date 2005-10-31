@@ -1,0 +1,27 @@
+The preemptible Linux kernel patch that
+was originally introduced by MontaVista
+Software and more recently championed by
+Robert Love has been merged by Linus
+Torvalds into the main linux
+development-kernel tree, beginning
+version v2.5.4-pre6. This adds a far
+<<<<<<< SOMEFILE1
+greater degree of real-time
+=======
+lesser degree of interactive
+>>>>>>> 1.13
+responsiveness to the standard Linux
+kernel, by reducing interrupt latencies
+while kernel functions are
+<<<<<<< SOMEFILE2
+executing. The story at LinuxDevices.com
+=======
+>>>>>>> 1.14
+includes comments by Robert Love, and
+there is also a recent interview with
+<<<<<<< SOMEFILE3
+=======
+Robert Love about the preemptable kernel
+>>>>>>> 1.15
+here and a whitepaper about the
+technology by MontaVista here."

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: help.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: help.cpp 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -32,7 +32,11 @@
 #include <resParser.h>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
+#ifndef WINDOWS
 #include <doc.h>
+#else
+char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
+#endif
 }}
 
 #include <qdialog.h>
@@ -412,7 +416,7 @@ QString XxHelp::getUsage( int helpMask, bool plain )
 //
 QString XxHelp::getManual()
 {
-   QString srcManual( XX_NAMESPACE_PREFIX :: Manual :: text );
+   QString srcManual( XX_NAMESPACE_PREFIX Manual :: text );
    QString manual;
    int idx = 0;
 

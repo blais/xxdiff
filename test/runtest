@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # $Source$
-# $Id: runtest 489 2002-02-07 22:34:39Z  $
+# $Id: runtest 522 2002-02-23 22:02:53Z  $
 #
 # Copyright (c) 2001, Martin Blais. All rights reserved.
 #
@@ -25,6 +25,7 @@ function waitread {
 
 function waitexit { 
     echo "   <exit xxdiff>"
+    read
 }
 
 XXDIFF=../src/xxdiff
@@ -96,7 +97,7 @@ waitread;
 #-------------------------------------------------------------------------------
 testhdr "Testing cmdline: two files and one directory. Should fail."
 
-$XXDIFF dir1 dir2 dir3
+$XXDIFF mine older dir1
 waitread;
 
 #-------------------------------------------------------------------------------
@@ -221,6 +222,18 @@ waitexit;
 
 echo "Qt options (geometry), this should show up 400x400"
 $XXDIFF --geometry 400x400 mine yours
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Unmerge with two files. Should fail."
+
+$XXDIFF --unmerge unmerge/basic unmerge/contig
+waitexit;
+
+#-------------------------------------------------------------------------------
+testhdr "Unmerge with one file. Should work."
+
+$XXDIFF --unmerge unmerge/basic
 waitexit;
 
 

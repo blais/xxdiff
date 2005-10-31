@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builder.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: builder.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -35,6 +35,10 @@
 #include <diffs.h>
 #endif
 
+#ifndef INCL_XXDIFF_LINE
+#include <line.h>
+#endif
+
 #ifndef INCL_STD_MEMORY
 #include <memory>
 #define INCL_STD_MEMORY
@@ -45,9 +49,12 @@
 #define INCL_STD_STDIO
 #endif
 
+#ifndef INCL_STD_VECTOR
+#include <vector>
+#define INCL_STD_VECTOR
+#endif
 
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * CLASS XxBuilder
@@ -80,13 +87,22 @@ public:
 
 protected:
 
+   /*----- member functions -----*/
+
+   // Initializes the line array. Call this before processing.
+   void initLines();
+
+   // Add a new XxLine.
+   void addLine( const XxLine& line );
+
    /*----- data members -----*/
 
-   QString _errors;
-   int     _status;
+   QString             _errors;
+   int                 _status;
+   std::vector<XxLine> _lines;
+   bool                _debugPrint;
 
 };
-
 
 XX_NAMESPACE_END
 

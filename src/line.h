@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.h 464 2002-01-30 02:00:34Z blais $
- * $Date: 2002-01-29 21:00:34 -0500 (Tue, 29 Jan 2002) $
+ * $Id: line.h 514 2002-02-20 17:09:20Z blais $
+ * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -50,9 +50,7 @@
 #define INCL_STD_IOSTREAM
 #endif
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * CLASS XxLine
@@ -145,6 +143,10 @@ public:
    // the requested file nb. does not correspond to any actual file text, return
    // -1.
    XxFln getLineNo( const XxFno no ) const;
+
+   // Allows one to change a line no. Do not use this, this is meant to be used
+   // by the reindexing code only, for the unmerged support.
+   void setLineNo( const XxFno no, const XxFln fline );
 
    // Get the type.
    Type getType() const;

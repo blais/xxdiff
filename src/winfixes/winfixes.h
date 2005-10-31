@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: winfixes.h 226 2001-09-25 20:40:41Z blais $
- * $Date: 2001-09-25 16:40:41 -0400 (Tue, 25 Sep 2001) $
+ * $Id: winfixes.h 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -45,5 +45,10 @@ T max( const T& a, const T& b ) {
 }
 
 }
+
+
+#define snprintf _snprintf
+
+#define getenv(x) 0
 
 #endif

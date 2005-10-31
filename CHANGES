@@ -2,21 +2,67 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 488 2002-02-07 22:34:39Z blais $
+# $Id: CHANGES 520 2002-02-23 21:55:59Z blais $
 #
 
-Current version/current tasks:
+Current development version
 ------------------------------
 
+
+Version 2.4: (major feature)
+------------------------------
+
+This release introduces the unmerge feature.
+
+(CVS unmerge conflicts)
+   
+   * Fixed newly introduced bug found with regression tests.
+   * Fixed display of unmerge line numbers in filename bar.
+   * Fixed unmerge display line numbers through better method (the file buffer
+     contains the indirection line numbers, simple, less storage, and as
+     efficient).
+   * Started fixing split/swap/join with display line numbers.
+   * Wrote documentation for unmerge.
+   * Tags for unmerge are now configurable through the resources.
+   * Fixed redo diff in unmerge mode.
+   * Implemented display line no support for line nos different than the real
+     numbers, in XxLine.
+   * Fixed the overview area drawing problem by reindexing the buffers.
+   * Polished it up, and decided not to support arbitrary format through input,
+     until QRegExp supports grouping expressions (known to be in qt3).
+   * Got it working! Now have figure out some small issues and polish.
+   * Resumed work on unmerge feature.
+
+(Packaging)
+
+   * Enabled building rpms as user, not root.
+   * Added GPG signing of packages.
+
+(Cleanup)
+
+   * Added dummy to diffs lines to make the lines access a tad little tiny bit
+     faster.
+
+(Misc)
+
+   * Make optimization in XxDiffs to avoid having to subtract 1 from lines
+     array.
+   * Updated web page for 2.4.
+   * Fixed unimportant memory bugs in cmdline parsing.
+   * Fixed bug with scrollbars not adjusting properly to redo diff.  This bug is
+     not present in the stable tree.  Kudos to Gijsbert De Haan for finding this
+     one.
+
+(Windows port)
+
+   * Finished compiling and linking under W2K. However, it doesn't run, we 
+     have a weird problem with getenv() causing an Access Violation, and when
+     getenv is removed, we get an Access Violation inside Qt.
+   * More porting to Windows. It almost all compiles now.
 
 
 Version 2.3: (minor features and major bug fixes)
 ------------------------------
-
-(Bug Fixes)
-
-   * Fixed bug with not parsing incomplete lines (kudos go to Greg Lonnon
-     <glonnon at ridgerun dot com> for reporting it!)
 
 (Quick save merged results)
 
@@ -53,6 +99,8 @@ Version 2.3: (minor features and major bug fixes)
      (logged in as bug [508429].
    * Added warning and disabled init option to ignore blank lines, because we
      cannot support it for now.
+   * Fixed bug with not parsing incomplete lines (kudos go to Greg Lonnon
+     <glonnon at ridgerun dot com> for reporting it!)
 
 (Install and Packaging)
 

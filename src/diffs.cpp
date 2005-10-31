@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 482 2002-02-07 07:56:40Z blais $
- * $Date: 2002-02-07 02:56:40 -0500 (Thu, 07 Feb 2002) $
+ * $Id: diffs.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -117,19 +117,32 @@ XxDiffs::XxDiffs() :
    _lastInitializedDiffType( HD_NONE ),
    _lastInitializedContext( 0 ),
    _dirty( false )
-{}
+{
+   // Insure that at the very minimum there are 0 lines (see getNbLines()).
+   _lines.push_back( XxLine() );
+}
 
 //------------------------------------------------------------------------------
 //
-XxDiffs::XxDiffs( std::vector<XxLine>& lines, bool isDirectoryDiff ) :
+XxDiffs::XxDiffs(
+   std::vector<XxLine>& lines,
+   bool                 isDirectoryDiff,
+   bool                 XX_DEBUG_COMPILE( validate )
+ ) :
    _lastInitializedDiffType( HD_NONE ),
    _lastInitializedContext( 0 ),
    _isDirectoryDiff( isDirectoryDiff ),
    _dirty( false )
 {
    std::swap( _lines, lines );
+   if ( _lines.size() == 0 ) {
+      // Insure that at the very minimum there are 0 lines (see getNbLines()).
+      _lines.push_back( XxLine() );
+   }
 #ifdef XX_DEBUG
-   validateLineNumbers();
+   if ( validate ) {
+      validateLineNumbers();
+   }
 #endif
 }
 
@@ -140,17 +153,17 @@ XxDiffs::~XxDiffs()
 
 //------------------------------------------------------------------------------
 //
-uint XxDiffs::getNbLinesWithContent( uint& unselectedChanges ) const
+XxDln XxDiffs::getNbLinesWithContent( uint& unselectedChanges ) const
 {
    uint nbLines = 0;
    bool prevKnown = true;
    int prevfline = -1;
 
    unselectedChanges = 0;
-   for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
 
       int no, fline;
-      bool known = _lines[ii].getSelectedText( no, fline );
+      bool known = getLine( ii ).getSelectedText( no, fline );
       if ( known == true ) {
          if ( fline != -1 ) {
             nbLines++;
@@ -166,6 +179,20 @@ uint XxDiffs::getNbLinesWithContent( uint& unselectedChanges ) const
          unselectedChanges++;
       }
       prevKnown = known;
+   }
+   return nbLines;
+}
+
+//------------------------------------------------------------------------------
+//
+XxFln XxDiffs::getNbLinesWithText( const XxFno fno ) const
+{
+   int nbLines = 0;
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+      const XxLine& line = getLine( ii );
+      if ( line.getLineNo( fno ) != -1 ) {
+         ++nbLines;
+      }
    }
    return nbLines;
 }
@@ -214,7 +241,7 @@ XxDln XxDiffs::moveBackwardsVisibleLines(
 //
 void XxDiffs::selectLine( XxDln lineNo, XxLine::Selection selection )
 {
-   if ( lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo > getNbLines() ) {
       return;
    }
 
@@ -233,7 +260,7 @@ void XxDiffs::selectLine( XxDln lineNo, XxLine::Selection selection )
 //
 void XxDiffs::selectRegion( XxDln lineNo, XxLine::Selection selection )
 {
-   if ( lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo > getNbLines() ) {
       return;
    }
 
@@ -271,7 +298,7 @@ void XxDiffs::selectGlobal( XxLine::Selection selection )
       return;
    }
 
-   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       XxLine& line = getLineNC( ii );
       line.setSelection( selection );
    }
@@ -289,7 +316,7 @@ void XxDiffs::selectGlobalUnselected( XxLine::Selection selection )
       return;
    }
 
-   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       XxLine& line = getLineNC( ii );
       if ( line.getSelection() == XxLine::UNSELECTED ) {
          line.setSelection( selection );
@@ -308,7 +335,7 @@ XxLine::Type XxDiffs::findRegion(
    XxDln& regionEnd
 ) const
 {
-   XX_ASSERT( lineNo <= XxDln(_lines.size()) );
+   XX_ASSERT( lineNo <= getNbLines() );
 
    const XxLine& rline = getLine( lineNo );
    XxLine::Type type = rline.getType();
@@ -327,7 +354,7 @@ XxLine::Type XxDiffs::findRegion(
 
    // Move forwards.
    cur = lineNo + 1;
-   while ( cur <= XxDln(_lines.size()) ) {
+   while ( cur <= getNbLines() ) {
       const XxLine& line = getLine( cur );
       if ( !XxLine::isSameRegion( line.getType(), type ) ||
            rline.getHunkId() != line.getHunkId() ) {
@@ -347,7 +374,7 @@ XxLine::Type XxDiffs::findRegionWithSel(
    XxDln& regionEnd
 ) const
 {
-   XX_ASSERT( lineNo <= XxDln(_lines.size()) );
+   XX_ASSERT( lineNo <= getNbLines() );
 
    const XxLine& rline = getLine( lineNo );
    XxLine::Type type = rline.getType();
@@ -367,7 +394,7 @@ XxLine::Type XxDiffs::findRegionWithSel(
 
    // Move forwards.
    cur = lineNo + 1;
-   while ( cur <= XxDln(_lines.size()) ) {
+   while ( cur <= getNbLines() ) {
       const XxLine& line = getLine( cur );
       if ( !XxLine::isSameRegion( line.getType(), type ) ||
            rline.getHunkId() != line.getHunkId() ||
@@ -384,7 +411,7 @@ XxLine::Type XxDiffs::findRegionWithSel(
 //
 XxDln XxDiffs::findNextDifference( XxDln lineNo ) const
 {
-   if ( lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo > getNbLines() ) {
       return -1;
    }
 
@@ -393,26 +420,26 @@ XxDln XxDiffs::findNextDifference( XxDln lineNo ) const
 
    // Seek to end of current region.
    XxDln cur = lineNo + 1;
-   while ( cur <= XxDln(_lines.size()) ) {
+   while ( cur <= getNbLines() ) {
       const XxLine& line = getLine( cur );
       if ( !XxLine::isSameRegion( line.getType(), type ) ) {
          break;
       }
       cur++;
    }
-   if ( cur > XxDln(_lines.size()) ) {
+   if ( cur > getNbLines() ) {
       return -1;
    }
 
    // Seek to next difference.
-   while ( cur <= XxDln(_lines.size()) ) {
+   while ( cur <= getNbLines() ) {
       const XxLine& line = getLine( cur );
       if ( !XxLine::isSameRegion( line.getType(), XxLine::SAME ) ) {
          break;
       }
       cur++;
    }
-   if ( cur > XxDln(_lines.size()) ) {
+   if ( cur > getNbLines() ) {
       return -1;
    }
 
@@ -423,7 +450,7 @@ XxDln XxDiffs::findNextDifference( XxDln lineNo ) const
 //
 XxDln XxDiffs::findPreviousDifference( XxDln lineNo ) const
 {
-   if ( lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo > getNbLines() ) {
       return -1;
    }
 
@@ -465,14 +492,14 @@ XxDln XxDiffs::findNextUnselected( XxDln lineNo ) const
    // first/last unselected difference.
 
    XxDln cur = lineNo;
-   if ( 1 <= lineNo && lineNo <= XxDln(_lines.size()) ) {
+   if ( 1 <= lineNo && lineNo <= getNbLines() ) {
       // Skip current selection block.
       const XxLine& line = getLine( lineNo );
       XxLine::Type type = line.getType();
       XxLine::Selection sel = line.getSelection();
 
       cur = lineNo;
-      while ( cur <= XxDln(_lines.size()) ) {
+      while ( cur <= getNbLines() ) {
          const XxLine& line = getLine( cur );
          if ( !XxLine::isSameRegion( line.getType(), type ) ||
               line.getSelection() != sel ) {
@@ -484,7 +511,7 @@ XxDln XxDiffs::findNextUnselected( XxDln lineNo ) const
 
    // Seek to next unselected line.
    cur = std::max( 1, cur );
-   while ( cur <= XxDln(_lines.size()) ) {
+   while ( cur <= getNbLines() ) {
       const XxLine& line = getLine( cur ); 
       if ( line.getType() != XxLine::SAME &&
            line.getType() != XxLine::DIRECTORIES &&
@@ -493,7 +520,7 @@ XxDln XxDiffs::findNextUnselected( XxDln lineNo ) const
       }
       cur++;
    }
-   if ( cur > XxDln(_lines.size()) ) {
+   if ( cur > getNbLines() ) {
       return -1;
    }
    return cur;
@@ -507,7 +534,7 @@ XxDln XxDiffs::findPreviousUnselected( XxDln lineNo ) const
    // first/last unselected difference.
 
    XxDln cur = lineNo;
-   if ( 1 <= lineNo && lineNo <= XxDln(_lines.size()) ) {
+   if ( 1 <= lineNo && lineNo <= getNbLines() ) {
       // Skip current selection block.
       const XxLine& line = getLine( lineNo );
       XxLine::Type type = line.getType();
@@ -525,7 +552,7 @@ XxDln XxDiffs::findPreviousUnselected( XxDln lineNo ) const
    }
 
    // Seek to next unselected line.
-   cur = std::min( XxDln(_lines.size()), cur );
+   cur = std::min( getNbLines(), cur );
    while ( cur > 0 ) {
       const XxLine& line = getLine( cur );
       if ( line.getType() != XxLine::SAME &&
@@ -550,8 +577,8 @@ uint XxDiffs::getNbFileLines(
 ) const
 {
    XX_ASSERT( no == 0 || no == 1 || no == 2 );
-   XX_ASSERT( start <= XxDln(_lines.size()) );
-   XX_ASSERT( end <= XxDln(_lines.size()) );
+   XX_ASSERT( start <= getNbLines() );
+   XX_ASSERT( end <= getNbLines() );
    XX_ASSERT( start <= end );
 
    int count = 0;
@@ -573,13 +600,13 @@ XxFln XxDiffs::getBufferLine(
 ) const
 {
    XX_ASSERT( no == 0 || no == 1 || no == 2 );
-   if ( _lines.size() == 0 ) {
+   if ( getNbLines() < 1 ) {
       actuallyEmpty = true;
       return 0;
    }
    actuallyEmpty = false;
 
-   if ( lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo > getNbLines() ) {
       actuallyEmpty = true;
       return 0;
    }
@@ -606,7 +633,7 @@ XxFln XxDiffs::getBufferLine(
    // backwards, look forward.
    if ( fline == -1 ) {
       actuallyEmpty = true;
-      for ( ii = lineNo; ii <= XxDln(_lines.size()); ++ii ) {
+      for ( ii = lineNo; ii <= getNbLines(); ++ii ) {
          const XxLine& line = getLine( ii );
          fline = line.getLineNo( no );
          if ( fline != -1 ) {
@@ -623,7 +650,7 @@ XxFln XxDiffs::getBufferLine(
 //
 std::ostream& XxDiffs::dump( std::ostream& os ) const
 {
-   for ( XxDln ii = 0; ii < XxDln(_lines.size()); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       os << _lines[ii] << std::endl;
    }
    return os;
@@ -634,11 +661,12 @@ std::ostream& XxDiffs::dump( std::ostream& os ) const
 bool XxDiffs::isSomeSelected() const
 {
    // Look for a selected line.
-   for ( uint ii = 0; ii < _lines.size(); ++ii ) {
-      XxLine::Type type = _lines[ii].getType();
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+      const XxLine& line = getLine( ii );
+      XxLine::Type type = line.getType();
       if ( type != XxLine::SAME &&
            type != XxLine::DIRECTORIES ) {
-         XxLine::Selection selection = _lines[ii].getSelection();
+         XxLine::Selection selection = line.getSelection();
          if ( selection != XxLine::UNSELECTED ) {
             return true;
          }
@@ -652,11 +680,12 @@ bool XxDiffs::isSomeSelected() const
 bool XxDiffs::isAllSelected() const
 {
    // Make sure that there are no more unselected regions.
-   for ( uint ii = 0; ii < _lines.size(); ++ii ) {
-      XxLine::Type type = _lines[ii].getType();
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+      const XxLine& line = getLine( ii );
+      XxLine::Type type = line.getType();
       if ( type != XxLine::SAME && 
            type != XxLine::DIRECTORIES ) {
-         XxLine::Selection selection = _lines[ii].getSelection();
+         XxLine::Selection selection = line.getSelection();
          if ( selection == XxLine::UNSELECTED ) {
             return false;
          }
@@ -674,7 +703,7 @@ uint XxDiffs::countRemainingUnselected() const
    XxHunk curHunk = 0;
    XxLine::Type curType;
    uint nbunsel = 0;
-   for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
       XxLine::Type type = line.getType();
       
@@ -767,10 +796,10 @@ bool XxDiffs::save(
    bool insideUnsel = false;
    uint unselBegin = 0;
    uint unselEnd;
-   uint ii;
+   XxDln uii;
    enum State { IF = 0, ELSIF = 1, ELSE = 2 };
-   for ( ii = 1; ii <= _lines.size(); ++ii ) {
-      const XxLine& line = getLine( ii );
+   for ( uii = 1; uii <= getNbLines(); ++uii ) {
+      const XxLine& line = getLine( uii );
 
       XxLine::Selection selection = line.getSelection();
       if ( line.getType() == XxLine::SAME ||
@@ -779,7 +808,7 @@ bool XxDiffs::save(
 
          if ( insideUnsel == true ) {
             // Output the unselected portion.
-            unselEnd = ii;
+            unselEnd = uii;
             XX_ASSERT( unselEnd - unselBegin > 0 );
             int state = IF;
             for ( uint f = 0; f < 3; ++f ) {
@@ -839,7 +868,7 @@ bool XxDiffs::save(
          // Found the beginning of an unselected block.
          if ( insideUnsel == false ) {
             insideUnsel = true;
-            unselBegin = ii;
+            unselBegin = uii;
          }
          foundUnsel = true;
       }
@@ -848,7 +877,7 @@ bool XxDiffs::save(
    // If file ends with a hunk, make sure a pending unselected hunk is output.
    if ( insideUnsel == true ) {
       // Output the unselected portion.
-      unselEnd = ii;
+      unselEnd = uii;
       XX_ASSERT( unselEnd - unselBegin > 0 );
       for ( uint f = 0; f < 3; ++f ) {
          if ( files[f].get() != 0 ) {
@@ -883,7 +912,7 @@ bool XxDiffs::saveSelectedOnly(
 
    bool some = false;
    bool prevOut = false;
-   for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
       XxLine::Selection selection = line.getSelection();
       if ( selection == XxLine::SEL1 ||
@@ -923,8 +952,8 @@ void XxDiffs::search(
 )
 {
    XX_ASSERT( files != 0 );
-   for ( int ii = 0; ii < nbFiles; ++ii ) {
-      XX_ASSERT( files[ii].get() != 0 );
+   for ( int iii = 0; iii < nbFiles; ++iii ) {
+      XX_ASSERT( files[iii].get() != 0 );
    }
 
    // Note: we could easily avoid the stupid buffer copy by implementing
@@ -932,7 +961,7 @@ void XxDiffs::search(
 
    _searchResults.clear();
 
-   for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLineNC( ii );
       SearchResult scurrent; // init as invalid
 
@@ -969,7 +998,7 @@ const std::vector<XxDiffs::SearchResult>& XxDiffs::getSearchResults() const
 //
 XxDiffs::SearchResult XxDiffs::findNextSearch( XxDln lineNo ) const
 {
-   if ( lineNo <= 0 || lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo < 1 || lineNo > getNbLines() ) {
       return SearchResult();
    }
 
@@ -987,7 +1016,7 @@ XxDiffs::SearchResult XxDiffs::findNextSearch( XxDln lineNo ) const
 //
 XxDiffs::SearchResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
 {
-   if ( lineNo <= 0 || lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo < 1 || lineNo > getNbLines() ) {
       return SearchResult();
    }
 
@@ -1005,7 +1034,7 @@ XxDiffs::SearchResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
 //
 bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 {
-   if ( lineNo <= 0 || lineNo > XxDln(_lines.size()) ) {
+   if ( lineNo < 1 || lineNo > getNbLines() ) {
       return false;
    }
 
@@ -1123,10 +1152,11 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
            ( type1 == XxLine::INSERT_1 && type2 == XxLine::INSERT_3 ) ||
            ( type1 == XxLine::INSERT_2 && type2 == XxLine::INSERT_3 ) ) {
          // Swap two regions.
-         for ( XxDln ii = lstart[1]; ii <= lend[1]; ++ii ) {
+         XxDln ii;
+         for ( ii = lstart[1]; ii <= lend[1]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[0]; ii <= lend[0]; ++ii ) {
+         for ( ii = lstart[0]; ii <= lend[0]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
       }
@@ -1143,9 +1173,9 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
          uint len1 = lend[1] - lstart[1];
          uint nbmax = std::max( len0, len1 );
          uint nbmin = std::min( len0, len1 );
-         for ( uint ii = 0; ii <= nbmin; ++ii ) {
-            XxLine nline = XxLine::join( getLine( lstart[0] + ii ),
-                                          getLine( lstart[1] + ii ) );
+         for ( uint uii = 0; uii <= nbmin; ++uii ) {
+            XxLine nline = XxLine::join( getLine( lstart[0] + uii ),
+                                          getLine( lstart[1] + uii ) );
             if ( nbFiles > 2 ) {
                newLines.push_back( nline );
             }
@@ -1216,13 +1246,14 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
              type2 == XxLine::INSERT_1 &&
              type3 == XxLine::INSERT_2 ) ) {
          // Swap the two last regions.
-         for ( XxDln ii = lstart[0]; ii <= lend[0]; ++ii ) {
+         XxDln ii;
+         for ( ii = lstart[0]; ii <= lend[0]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[2]; ii <= lend[2]; ++ii ) {
+         for ( ii = lstart[2]; ii <= lend[2]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[1]; ii <= lend[1]; ++ii ) {
+         for ( ii = lstart[1]; ii <= lend[1]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
       }
@@ -1230,13 +1261,14 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
                 type2 == XxLine::INSERT_3 &&
                 type3 == XxLine::INSERT_2 ) {
          // Roll down.
-         for ( XxDln ii = lstart[2]; ii <= lend[2]; ++ii ) {
+         XxDln ii;
+         for ( ii = lstart[2]; ii <= lend[2]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[0]; ii <= lend[0]; ++ii ) {
+         for ( ii = lstart[0]; ii <= lend[0]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[1]; ii <= lend[1]; ++ii ) {
+         for ( ii = lstart[1]; ii <= lend[1]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
       }
@@ -1244,13 +1276,14 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
                 type2 == XxLine::INSERT_3 &&
                 type3 == XxLine::INSERT_1 ) {
          // Roll up.
-         for ( XxDln ii = lstart[1]; ii <= lend[1]; ++ii ) {
+         XxDln ii;
+         for ( ii = lstart[1]; ii <= lend[1]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[2]; ii <= lend[2]; ++ii ) {
+         for ( ii = lstart[2]; ii <= lend[2]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
-         for ( XxDln ii = lstart[0]; ii <= lend[0]; ++ii ) {
+         for ( ii = lstart[0]; ii <= lend[0]; ++ii ) {
             newLines.push_back( getLine( ii ) );
          }
       }
@@ -1262,8 +1295,8 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 
          uint len[3];
          uint ord[3] = { 0, 1, 2 };
-         for ( int ii = 0; ii < 3; ++ii ) {
-            len[ii] = lend[ii] - lstart[ii];
+         for ( int iii = 0; iii < 3; ++iii ) {
+            len[iii] = lend[iii] - lstart[iii];
          }
          uint swap;
 
@@ -1281,7 +1314,8 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
             swap = ord[1]; ord[1]= ord[2]; ord[2] = swap;
          }
 
-         for ( uint ii = 0; ii <= len[0]; ++ii ) {
+         uint ii;
+         for ( ii = 0; ii <= len[0]; ++ii ) {
             XxLine nline = XxLine::join(
                getLine( lstart[ord[0]] + ii ),
                getLine( lstart[ord[1]] + ii ),
@@ -1290,7 +1324,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
             newLines.push_back( nline );
          }
 
-         for ( uint ii = len[0]+1; ii <= len[1]; ++ii ) {
+         for ( ii = len[0]+1; ii <= len[1]; ++ii ) {
             XxLine nline = XxLine::join(
                getLine( lstart[ord[1]] + ii ),
                getLine( lstart[ord[2]] + ii )
@@ -1298,7 +1332,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
             newLines.push_back( nline.getPromoted( XxLine::DIFF_ALL ) );
          }
 
-         for ( uint ii = len[1]+1; ii <= len[2]; ++ii ) {
+         for ( ii = len[1]+1; ii <= len[2]; ++ii ) {
             XxLine nline = getLine( lstart[ord[2]] + ii );
             newLines.push_back( nline.getPromoted( XxLine::DIFF_ALL ) );
          }
@@ -1313,9 +1347,9 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 
    // Erase old lines.
    std::vector<XxLine>::iterator istart = _lines.begin();
-   istart += lstart.front() - 1;
+   istart += lstart.front();
    std::vector<XxLine>::iterator iend = _lines.begin();
-   iend += lend.back() - 1;
+   iend += lend.back();
 
    _lines.erase( istart, iend + 1 );
    _lines.insert( istart, newLines.begin(), newLines.end() );
@@ -1349,13 +1383,14 @@ void XxDiffs::initializeHorizontalDiffs(
         _lastInitializedContext != resources.getHordiffContext()
    ) {
 
-      for ( XxDln ii = 0; ii < XxDln(_lines.size()); ++ii ) {
+      for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
          const char* text[3];
          uint len[3];
+         XxLine& line = getLineNC( ii );
          for ( int iif = 0; iif < 3; ++iif ) {
-            XxFln line = _lines[ii].getLineNo( XxFln(iif) );
-            if ( line != -1 ) {
-               text[iif] = files[iif]->getTextLine( line, len[iif] );
+            XxFln fline = line.getLineNo( XxFln(iif) );
+            if ( fline != -1 ) {
+               text[iif] = files[iif]->getTextLine( fline, len[iif] );
             }
             else {
                text[iif] = 0;
@@ -1363,7 +1398,7 @@ void XxDiffs::initializeHorizontalDiffs(
             }
          }
 
-         _lines[ii].initializeHorizontalDiff( resources, text, len );
+         line.initializeHorizontalDiff( resources, text, len );
       }
 
       _lastInitializedDiffType = resources.getHordiffType();
@@ -1381,13 +1416,14 @@ void XxDiffs::splitTwoRegions(
    XxFno                s2
 ) const
 {
-   for ( XxDln ii = start; ii <= end; ++ii ) {
+   XxDln ii;
+   for ( ii = start; ii <= end; ++ii ) {
       const XxLine& cline = getLine( ii );
       if ( cline.getLineNo( s1 ) != -1 ) {
          newLines.push_back( cline.getSplit( s1 ) );
       }
    }
-   for ( XxDln ii = start; ii <= end; ++ii ) {
+   for ( ii = start; ii <= end; ++ii ) {
       const XxLine& cline = getLine( ii );
       if ( cline.getLineNo( s2 ) != -1 ) {
          newLines.push_back( cline.getSplit( s2 ) );
@@ -1407,7 +1443,7 @@ int XxDiffs::merge( uint nbFiles )
       // In 2-way diffs, the algorithm is simple: select insert side of all
       // inserts/deletes, and leave unselected the change regions.
 
-      for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+      for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
          XxLine& line = getLineNC( ii );
          switch ( line.getType() ) {
             // Ignored lines.
@@ -1504,7 +1540,7 @@ int XxDiffs::merge( uint nbFiles )
        *
        */
 
-      for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+      for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
          XxLine& line = getLineNC( ii );
          switch ( line.getType() ) {
             // Ignored lines.
@@ -1556,7 +1592,7 @@ int XxDiffs::merge( uint nbFiles )
 void XxDiffs::validateLineNumbers() const
 {
    int fline[3] = { 0, 0, 0 };
-   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
       for ( XxFno l = 0; l < 3; ++l ) {
          XxFln flineNo = line.getLineNo( l );
@@ -1572,7 +1608,7 @@ void XxDiffs::validateLineNumbers() const
 //
 bool XxDiffs::checkSelections( const XxLine::Selection sel ) const
 {
-   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
 
       if ( line.getType() != XxLine::SAME &&
@@ -1588,7 +1624,7 @@ bool XxDiffs::checkSelections( const XxLine::Selection sel ) const
 //
 XxDln XxDiffs::getDisplayLine( const XxFln fline, const XxFno fno ) const
 {
-   for ( XxDln ii = 1; ii <= XxDln(_lines.size()); ++ii ) {
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
       const XxLine& line = getLine( ii );
 
       if ( line.getLineNo( fno ) == fline ) {
@@ -1598,5 +1634,36 @@ XxDln XxDiffs::getDisplayLine( const XxFln fline, const XxFno fno ) const
    return 0;
 }
 
-XX_NAMESPACE_END
+//------------------------------------------------------------------------------
+//
+void XxDiffs::reindex( 
+   const std::auto_ptr<XxBuffer>& file1,
+   const std::auto_ptr<XxBuffer>& file2
+)
+{
+   // Go through the diffs on each side and generate re-indexing tables.
+   for ( XxFln fi = 0; fi < 2; ++fi ) {
+      std::vector<XxFln> reindexTbl;
+      reindexTbl.push_back( -1 );
+      int fline = 0;
+      for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+         XxLine& line = getLineNC( ii );
+         XxFln lno = line.getLineNo( fi );
+         if ( lno != -1 ) {
+            reindexTbl.push_back( line.getLineNo( fi ) );
+            ++fline;
+            /*line.setDisplayLineNo( fi, lno );*/ // FIXME remove
+            line.setLineNo( fi, fline );
+         }
+      }
 
+      if ( fi == 0 ) {
+         file1->reindex( reindexTbl );
+      }
+      else if ( fi == 1 ) {
+         file2->reindex( reindexTbl );
+      }
+   }
+}
+
+XX_NAMESPACE_END

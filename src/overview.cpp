@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 439 2001-12-03 05:17:26Z blais $
- * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
+ * $Id: overview.cpp 517 2002-02-21 06:58:40Z blais $
+ * $Date: 2002-02-21 01:58:40 -0500 (Thu, 21 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -134,6 +134,7 @@ void XxOverview::drawContents( QPainter* pp )
       files[ii] = _app->getBuffer( ii );
       XX_ASSERT( files[ii] != 0 );
       flines[ii] = files[ii]->getNbLines();
+      /*flines[ii] = diffs->getNbLinesWithText( ii );*/
       maxlines = std::max( maxlines, flines[ii] );
    }
    if ( maxlines == 0 ) {

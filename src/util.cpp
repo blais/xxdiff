@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 485 2002-02-07 20:10:05Z blais $
- * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
+ * $Id: util.cpp 507 2002-02-19 02:44:39Z blais $
+ * $Date: 2002-02-18 21:44:39 -0500 (Mon, 18 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -36,6 +36,7 @@
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdlib.h> 
 
 #ifndef WINDOWS
 #  include <sys/wait.h>
@@ -45,7 +46,9 @@
 #  include <io.h>
 #  include <time.h>
 #  include <winsock.h>
+//#  include <process.h> // for spawn()
 
+#define pipe _pipe
 #define popen _popen
 #define pclose _pclose
 
@@ -329,6 +332,62 @@ void XxUtil::spawnCommand(
          }
       }
    }
+
+#else
+
+//    /*
+//     * N**xed up version with Windows calls. Consider yourself lucky if this
+//     * works even just once.
+//     */
+
+//    if ( _spawnvp( _P_NOWAIT | _P_DETACH, argv[0], const_cast<char**>(argv) ) != 0 ) {
+//       // Send parent some output telling it we couldn't exec.
+//       QString errs;
+//       {
+//          QTextOStream errss( &errs );
+//          errss << "Error spawning process " << argv[0] << endl << flush;
+//       }
+//       fwrite( errs.latin1(), errs.length(), 1, stderr );
+//       fwrite( "\n", 1, 1, stderr );
+
+//       exit( 1 );
+//    }
+   
+   QString command;
+   const char** arg;
+   for ( arg = argv; *arg != 0; ++arg ) {
+      command += QString(*arg) + QString(" ");
+   }
+   XX_TRACE( command.latin1() );
+
+   FILE* outputf;
+   
+   /*
+    * Run command so that it writes its output to a pipe. Open this pipe with
+    * read text attribute so that we can read it like a text file.
+    */
+   if( (outputf = popen( command.latin1(), "rt" )) == NULL ) {
+      throw XxIoError( XX_EXC_PARAMS );
+   }
+
+#if 0 
+   /* 
+    * Read pipe until end of file. End of file indicates that outputf closed its
+    * standard out (probably meaning it terminated).
+    */
+   while( !feof( chkdsk ) )
+   {
+      if( fgets( psBuffer, 128, chkdsk ) != NULL )
+         printf( psBuffer );
+   }
+#endif
+
+   /* Close pipe and print return value of outputf. */
+   *outf = outputf;
+   *errf = 0;
+//   printf( "\nProcess returned %d\n", pclose( outputf ) );
+// FIXME todo, check result value as well
+
 #endif
 
    // Not reached.
@@ -423,34 +482,6 @@ int XxUtil::splitArgs(
     * spaces will break this.
     */
    
-#if 0 
-   int argc = 0;
-   const int BLOCKSIZE = 10;
-   int count = BLOCKSIZE;
-   const char** argv = (const char**) malloc( sizeof(char*) * count );
-   
-   // Make a copy of the args string because strtok is broken under
-   // Linux, it modifies the first argument (see BUGS section in man
-   // page of strtok).
-   char* cargs = strdup( command.latin1() );
-         
-   char* ptr;
-   for ( ptr = strtok( cargs, " \t" ); 
-         ptr; 
-         ptr = strtok( 0, " \t" ) ) {
-            
-      if ( argc >= count ) {
-         count += BLOCKSIZE;
-         argv = (const char**) realloc( argv, sizeof(char*) * count );
-      }
-            
-      argv[argc++] = strdup( ptr );
-   }
-   free( cargs );
-         
-   argv[argc] = 0;
-#endif
-
    QStringList args = QStringList::split( QRegExp( "\\s" ), command );
    args += filenames;
    int argc = 0;
@@ -464,9 +495,7 @@ int XxUtil::splitArgs(
    }
    argv[argc] = 0;
 
-
-
-#define ANAL_DEBUGGING
+//#define ANAL_DEBUGGING
 #ifdef ANAL_DEBUGGING
    std::ofstream ofs( "/tmp/diff_args" );
    ofs << " ARGS ------------------------------" << std::endl;

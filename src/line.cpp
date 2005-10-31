@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 476 2002-02-05 08:14:20Z blais $
- * $Date: 2002-02-05 03:14:20 -0500 (Tue, 05 Feb 2002) $
+ * $Id: line.cpp 514 2002-02-20 17:09:20Z blais $
+ * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -337,8 +337,13 @@ void XxLine::initializeHorizontalDiff(
    //
 
    // Remove current horizontal diffs.
-   for ( int ii = 0; ii < 3; ++ii ) {
+   int ii;
+   for ( ii = 0; ii < 3; ++ii ) {
+#ifndef WINDOWS
       delete[] _hordiffs[ii];
+#else
+      delete[] const_cast<int*>( _hordiffs[ii] );
+#endif
       _hordiffs[ii] = 0;
    }
 
@@ -386,13 +391,14 @@ void XxLine::initializeHorizontalDiff(
       case INSERT_2:
       case INSERT_3:
       case DIRECTORIES:
+      case NB_TYPES:
          XX_ABORT();
    }
 
    // Gather the non-null requested diffs.
    int nndiff[3];
    int nn = 0;
-   for ( int ii = 0; ii < 3; ++ii ) {
+   for ( ii = 0; ii < 3; ++ii ) {
       if ( idiff[ii] != -1 && text[ idiff[ii] ] != 0 ) {
          nndiff[nn++] = idiff[ii];
       }
@@ -409,7 +415,7 @@ void XxLine::initializeHorizontalDiff(
       int righthd[3];
       XxHordiffImp::boundsHordiff3( resources, text, len, lefthd, righthd );
 
-      for ( int ii = 0; ii < 3; ++ii ) {
+      for ( ii = 0; ii < 3; ++ii ) {
          _hordiffs[ii] = allocBounds( lefthd[ii], righthd[ii] );
       }
       return;
@@ -421,7 +427,7 @@ void XxLine::initializeHorizontalDiff(
 
       const char* ttext[2];
       uint tlen[2];
-      for ( int ii = 0; ii < 2; ++ii ) {
+      for ( ii = 0; ii < 2; ++ii ) {
          ttext[ii] = text[ nndiff[ii] ];
          tlen[ii] = len[ nndiff[ii] ];
       }
@@ -433,7 +439,7 @@ void XxLine::initializeHorizontalDiff(
          //
          // HD_SINGLE: simply use the horizontal diff bounds.
          //
-         for ( int ii = 0; ii < 2; ++ii ) {
+         for ( ii = 0; ii < 2; ++ii ) {
             _hordiffs[ nndiff[ii] ] = allocBounds( lefthd[ii], righthd[ii] );
          }
       }
@@ -442,7 +448,7 @@ void XxLine::initializeHorizontalDiff(
          // HD_MULTIPLE: compute and create lcs for diff region.
          //
          int blen[2];
-         for ( int ii = 0; ii < 2; ++ii ) {
+         for ( ii = 0; ii < 2; ++ii ) {
             blen[ii] = righthd[ii] - lefthd[ii];
          }
 
@@ -457,7 +463,7 @@ void XxLine::initializeHorizontalDiff(
          else {
             // The region is not long enough for multiple hordiffs, just use
             // brackets.
-            for ( int ii = 0; ii < 2; ++ii ) {
+            for ( ii = 0; ii < 2; ++ii ) {
                _hordiffs[ nndiff[ii] ] = allocBounds( lefthd[ii], righthd[ii] );
             }
          }
@@ -474,7 +480,7 @@ void XxLine::initializeHorizontalDiff(
 //
 XxLine XxLine::getSplit( const XxFno no ) const
 {
-   XxLine newline( *this ); // no default const.
+   XxLine newline;  /*( *this );*/ // no default const.
 
    switch ( _type ) {
       case SAME:
@@ -705,6 +711,7 @@ XxLine XxLine::join(
    }
    
    XxLine joined( DIFF_ALL, ll1._lineNo[0], ll2._lineNo[1], ll3._lineNo[2] );
+
    if ( ll1.getSelection() == ll2.getSelection() &&
         ll2.getSelection() == ll3.getSelection() ) {
       joined.setSelection( ll1.getSelection() );
@@ -955,4 +962,3 @@ void XxLine::getLineColorTypeStd(
 }
 
 XX_NAMESPACE_END
-

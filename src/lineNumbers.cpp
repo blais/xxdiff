@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: lineNumbers.cpp 439 2001-12-03 05:17:26Z blais $
- * $Date: 2001-12-03 00:17:26 -0500 (Mon, 03 Dec 2001) $
+ * $Id: lineNumbers.cpp 514 2002-02-20 17:09:20Z blais $
+ * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -152,11 +152,12 @@ void XxLineNumbers::drawContents( QPainter* pp )
 #endif
 
       // Render text.
-      int fline = line.getLineNo( _no );
+      XxFln fline = line.getLineNo( _no );
       if ( fline != -1 ) {
+         XxFln dfline = file->getDisplayLineNo( fline );
 
          const QString& renderedNums =
-            file->renderLineNumber( fline, lnFormat );
+            file->renderLineNumber( dfline, lnFormat );
 
          p.drawText( x, y + fm.ascent(), renderedNums );
       }

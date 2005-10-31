@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 487 2002-02-07 22:10:47Z blais $
- * $Date: 2002-02-07 17:10:47 -0500 (Thu, 07 Feb 2002) $
+ * $Id: app.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -36,6 +36,7 @@
 #include <builderFiles2.h>
 #include <builderFiles3.h>
 #include <builderDirs2.h>
+#include <builderUnmerge.h>
 #include <diffs.h>
 #include <buffer.h>
 #include <resources.h>
@@ -254,7 +255,6 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    _nbFiles = processFileNames(
       _cmdline, filenames, displayFilenames, isTemporary, _filesAreDirectories
    );
-   _nbTextWidgets = _nbFiles;
 
    // Note: this is already pretty much validated in XxCmdline.
    // Old code here stays anyway.
@@ -262,8 +262,15 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       throw XxUsageError( XX_EXC_PARAMS, "No files specified." );
    }
    // Check for odd number of files.
-   if ( _nbFiles < 1 || _nbFiles > 3 ) {
+   if ( ( _cmdline._unmerge == false && ( _nbFiles < 1 || _nbFiles > 3 ) ) ||
+        ( _cmdline._unmerge == true && _nbFiles < 1 ) ) {
       throw XxUsageError( XX_EXC_PARAMS, "Wrong number of files specified." );
+   }
+
+   // Here is where in unmerge mode we make xxdiff think that it has two
+   // files. There will be other special cases for this throughout the code too.
+   if ( _cmdline._unmerge == true ) { 
+      _nbFiles = 2;
    }
 
    // Add extra diff arguments.
@@ -292,15 +299,45 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
    synchronizeUI();
 
    if ( _nbFiles != 0 ) {
-      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-         readFile(
-            ii,
-            filenames[ii],
-            displayFilenames[ii],
-            isTemporary[ii] 
-         );
+
+      // Note: perhaps this should be replaced by a simple call to onRedoDiff().
+      if ( _cmdline._unmerge == false ) {
+         for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+            std::auto_ptr<XxBuffer> newbuf(
+               readFile( ii,
+                         filenames[ii],
+                         displayFilenames[ii],
+                         isTemporary[ii] )
+            );
+            _files[ii] = newbuf;
+         }
       }
+      else {
+         XX_ASSERT( _nbFiles == 2 );
+         std::auto_ptr<XxBuffer> newbuf(
+            readFile( 0,
+                      filenames[0],
+                      displayFilenames[0],
+                      isTemporary[0] )
+         );
+         _files[0] = newbuf;
+
+         // Make a proxy for the other buffer.
+         std::auto_ptr<XxBuffer> newbuf2(
+            new XxBuffer( (*_files[0]), filenames[0], displayFilenames[0] )
+         );
+         _files[1] = newbuf2;
+      }
+
       bool succ = processDiff();
+
+      // Adjust UI elements
+      // Set filename label.
+      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+         if ( _files[ii].get() != 0 ) {
+            _central->setFilename( ii, _files[ii]->getDisplayName() );
+         }
+      }
 
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
@@ -402,63 +439,90 @@ uint XxApp::processFileNames(
 )
 {
    uint nbFiles = 0;
-
-   //
-   // First find if all paths are directories.  If this is the case, then this
-   // is a directory diff.  If ONLY ONE path is a file, then we append the
-   // basename to the other ones which are directories.
-   //
-   // If stdin is encountered, then directory diffs are not allowed (you can't
-   // cat a directory into stdin!) so if all filenames are directories bail out.
-   //
-   // We aspire to do our best but only in cases where there is no ambiguity.
-   //
-
+   QString bn;
    bool isDirectory[3] = { false, false, false };
-   bool stdinUsed = false;
-   uint nbPathFiles = 0;
-   int filePathIndex = -1;
-   for ( XxFno ii = 0; ii < cmdline._nbFilenames; ++ii ) {
-      if ( cmdline._filenames[ii] == "-" ) {
-         if ( stdinUsed == true ) {
+
+   if ( cmdline._unmerge == false ) {
+      //
+      // First find if all paths are directories.  If this is the case, then
+      // this is a directory diff.  If ONLY ONE path is a file, then we append
+      // the basename to the other ones which are directories.
+      //
+      // If stdin is encountered, then directory diffs are not allowed (you
+      // can't cat a directory into stdin!) so if all filenames are directories
+      // bail out.
+      //
+      // We aspire to do our best but only in cases where there is no ambiguity.
+      //
+
+      bool stdinUsed = false;
+      uint nbPathFiles = 0;
+      int filePathIndex = -1;
+      for ( XxFno ii = 0; ii < cmdline._nbFilenames; ++ii ) {
+         if ( cmdline._filenames[ii] == "-" ) {
+            if ( stdinUsed == true ) {
+               throw XxUsageError( 
+                  XX_EXC_PARAMS, "Cannot accept more than one file from stdin."
+               );
+            }
+            stdinUsed = true;
+            isDirectory[ii] = false;
+         }
+         else {
+            QFileInfo finfo( cmdline._filenames[ii] );
+            isDirectory[ii] = finfo.isDir();
+            if ( ! isDirectory[ii] ) {
+               filePathIndex = ii;
+               nbPathFiles++;
+            }
+         }
+         nbFiles++;
+      }
+
+      if ( stdinUsed == true && nbPathFiles == 0 ) {
+         throw XxUsageError(
+            XX_EXC_PARAMS, "Cannot use stdin as only file with all directories."
+         );
+      }
+
+      if ( nbPathFiles > 1 && 
+           nbFiles > ( nbPathFiles + (stdinUsed ? 1 : 0) ) ) {
+         throw XxUsageError( XX_EXC_PARAMS,
+                             "There are more than one named file AND "
+                             "one of the files is a directory." );
+         // Note: we could check if both files basenames are equal, in that
+         // case, it would be valid.
+      }
+
+      filesAreDirectories = ( nbFiles > 0 && nbPathFiles == 0 );
+
+      // Find basename and append to directories.
+      if ( !filesAreDirectories && nbPathFiles < nbFiles ) {
+         XX_ASSERT( filePathIndex != -1 );
+         QFileInfo finfo( cmdline._filenames[ filePathIndex ] );
+         bn = finfo.fileName();
+      }
+
+   }
+   else { // Parsing filenames for unmerge.
+
+      if ( cmdline._nbFilenames > 1 ) {
+         throw XxUsageError( 
+            XX_EXC_PARAMS, "Cannot accept more than one file in unmerge mode."
+         );
+      }
+
+      filesAreDirectories = false;
+
+      if ( cmdline._nbFilenames == 1 ) {
+         QFileInfo finfo( cmdline._filenames[0] );
+         if ( finfo.isDir() ) {
             throw XxUsageError( 
-               XX_EXC_PARAMS, "Cannot accept more than one file from stdin."
+               XX_EXC_PARAMS, "Input in unmerge mode must be a file."
             );
          }
-         stdinUsed = true;
-         isDirectory[ii] = false;
+         nbFiles++;
       }
-      else {
-         QFileInfo finfo( cmdline._filenames[ii] );
-         isDirectory[ii] = finfo.isDir();
-         if ( ! isDirectory[ii] ) {
-            filePathIndex = ii;
-            nbPathFiles++;
-         }
-      }
-      nbFiles++;
-   }
-
-   if ( stdinUsed == true && nbPathFiles == 0 ) {
-      throw XxUsageError(
-         XX_EXC_PARAMS, "Cannot use stdin as only file with all directories."
-      );
-   }
-
-   if ( nbPathFiles > 1 && nbFiles > ( nbPathFiles + (stdinUsed ? 1 : 0) ) ) {
-      throw XxUsageError( XX_EXC_PARAMS,
-                          "There are more than one named file AND "
-                          "one of the files is a directory." );
-   }
-
-   filesAreDirectories = ( nbFiles > 0 && nbPathFiles == 0 );
-
-   // Find basename and append to directories.
-   QString bn;
-   if ( !filesAreDirectories && nbPathFiles < nbFiles ) {
-      XX_ASSERT( filePathIndex != -1 );
-      QFileInfo finfo( cmdline._filenames[ filePathIndex ] );
-      bn = finfo.fileName();
    }
 
    bool stdinCopied = false;
@@ -469,9 +533,15 @@ uint XxApp::processFileNames(
             
          displayFilenames[iii] = cmdline._stdinFilename;
          char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
+#ifndef WINDOWS
          int tfd = mkstemp( temporaryFilename );
          FILE *fout;
-         if ( ( fout = fdopen( tfd, "w") ) == NULL ) {
+         if ( ( fout = fdopen( tfd, "w" ) ) == NULL ) {
+#else
+         mktemp( temporaryFilename );
+         FILE *fout;
+         if ( ( fout = fopen( temporaryFilename, "w" ) ) == NULL ) {
+#endif
             throw XxIoError( XX_EXC_PARAMS, 
                              "Error opening temporary file." );
          }
@@ -483,8 +553,8 @@ uint XxApp::processFileNames(
          // Important comment: unfortunately we cannot use the unlink() trick
          // here since we will call the subordinate diff on this file, so it
          // needs to be visible in the directory.  Perhaps we could relink it
-         // just before calling the subordinate diff and then unlinking it right
-         // after.  Something to think about.
+         // just before calling the subordinate diff and then unlinking it
+         // right after.  Something to think about.
 
          if ( fclose( fout ) != 0 ) {
             throw XxIoError( XX_EXC_PARAMS,
@@ -694,7 +764,7 @@ QToolBar* XxApp::createToolbar()
       this, SLOT(saveAsLeft()), toolbar 
    );
 
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    /*QToolButton* butSaveAsMiddle = 0;*/
 #endif
    if ( _nbFiles == 3 ) {
@@ -712,7 +782,7 @@ QToolBar* XxApp::createToolbar()
    QPixmap pmSaveAsRight( 
       const_cast<const char**>( save_as_right_xpm )
    );
-   /*QToolButton* butSaveAsRight = */new QToolButton( 
+   QToolButton* butSaveAsRight = new QToolButton( 
       pmSaveAsRight, 
       "Save as right", 
       "Save as right", 
@@ -729,7 +799,7 @@ QToolBar* XxApp::createToolbar()
       this, SLOT(saveAs()), toolbar 
    );
 
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
       butSaveAsLeft->setEnabled( false );
       if ( butSaveAsMiddle ) {
@@ -739,6 +809,10 @@ QToolBar* XxApp::createToolbar()
       butSaveAs->setEnabled( false );
    }
 #endif
+
+   if ( _cmdline._unmerge == true ) {
+      butSaveAsRight->setEnabled( false );
+   }
 
    toolbar->addSeparator();
 
@@ -926,14 +1000,14 @@ void XxApp::createMenus()
       _resources->getAccelerator( ACCEL_OPEN_RIGHT ) 
    );
    fileMenu->insertSeparator();
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
-   int ids[5];
-#endif
+
+   int ids[6];
+
    /*ids[0] = */fileMenu->insertItem( 
       "Save as left", this, SLOT(saveAsLeft()), 
       _resources->getAccelerator( ACCEL_SAVE_AS_LEFT ) 
    );
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    ids[1] = -1;
 #endif
    if ( _nbFiles == 3 ) {
@@ -942,7 +1016,7 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE ) 
       );
    }
-   /*ids[2] = */fileMenu->insertItem( 
+   ids[2] = fileMenu->insertItem( 
       "Save as right", this, SLOT(saveAsRight()), 
       _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT ) 
    );
@@ -959,7 +1033,7 @@ void XxApp::createMenus()
       _resources->getAccelerator( ACCEL_SAVE_SELECTED_ONLY ) 
    );
    
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    if ( _resources->getBoolOpt( BOOL_FORCE_SAVE_MERGED_FILE ) ) {
       for ( int ii = 0; ii < 5; ++ii ) {
          if ( ids[ii] != -1 ) {
@@ -985,10 +1059,16 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_EDIT_MIDDLE ) 
       );
    }
-   fileMenu->insertItem( 
+   ids[5] = fileMenu->insertItem( 
       "Edit right file", this, SLOT(editRight()), 
       _resources->getAccelerator( ACCEL_EDIT_RIGHT ) 
    );
+
+   if ( _cmdline._unmerge == true ) {
+      fileMenu->setItemEnabled( ids[2], false );
+      fileMenu->setItemEnabled( ids[5], false );
+   }
+
    fileMenu->insertSeparator();
 
    fileMenu->insertItem( 
@@ -1475,7 +1555,7 @@ void XxApp::createMenus()
 
 //------------------------------------------------------------------------------
 //
-void XxApp::readFile( 
+std::auto_ptr<XxBuffer> XxApp::readFile( 
    const XxFno    no, 
    const QString& filename,
    const QString& displayFilename,
@@ -1488,6 +1568,7 @@ void XxApp::readFile(
    //
    // Read in the file.
    //
+   std::auto_ptr<XxBuffer> newbuf;
    try {
       if ( _filesAreDirectories &&
            _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
@@ -1496,7 +1577,7 @@ void XxApp::readFile(
          std::auto_ptr<XxBuffer> tmp(
             new XxBuffer( false, filename, displayFilename )
          );
-         _files[no] = tmp;
+         newbuf = tmp;
       }
       else {
          std::auto_ptr<XxBuffer> tmp(
@@ -1507,7 +1588,7 @@ void XxApp::readFile(
                isTemporary 
             )
          );
-         _files[no] = tmp;
+         newbuf = tmp;
       }
    }
    catch ( const std::exception& ex ) {
@@ -1515,73 +1596,9 @@ void XxApp::readFile(
       QTextOStream oss( &str );
       oss << "Error loading in file:" << endl << ex.what() << endl;
       outputDiffErrors( str );
-      _files[no].release();
-      return;
    }
 
-   //
-   // Adjust UI elements
-   //
-
-   // Set filename label.
-   if ( _files[no].get() != 0 ) {
-      _central->setFilename( no, _files[no]->getDisplayName() );
-   }
-
-   // Note: we should also readjust the width and hor. scrollbar here, really,
-   // but since the diff builder is always called after (and it does all that),
-   // it is more efficient not to.
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::reReadFile( const XxFno no )
-{
-   XX_ASSERT( 0 <= no && no <= 2 );
-
-   //
-   // Reread the file.
-   //
-   try {      
-      std::auto_ptr<XxBuffer> oldfile = _files[no];
-
-      if ( _filesAreDirectories &&
-           _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ) ) {
-         // Assign an empty buffer. The directory diffs builder will fill it in
-         // with whatever contents are read from directory diffs command output.
-         std::auto_ptr<XxBuffer> tmp(
-            new XxBuffer( 
-               false,
-               oldfile->getName(),
-               oldfile->getDisplayName()
-            )
-         );
-         _files[no] = tmp;
-      }
-      else {
-         std::auto_ptr<XxBuffer> tmp(
-            new XxBuffer( 
-               oldfile->getName(),
-               oldfile->getDisplayName(),
-               _resources->getBoolOpt( BOOL_HIDE_CR ),
-               oldfile->isTemporary()
-            )
-         );
-         _files[no] = tmp;
-      }
-   }
-   catch ( const std::exception& ex ) {
-      QString str;
-      QTextOStream oss( &str );
-      oss << "Error loading in file:" << endl << ex.what() << endl;
-      outputDiffErrors( str );
-      _files[no].release();
-      return;
-   }
-
-   // Note: we should also readjust the width and hor. scrollbar here, really,
-   // but since the diff builder is always called after (and it does all that),
-   // it is more efficient not to.
+   return newbuf;
 }
 
 //------------------------------------------------------------------------------
@@ -1603,17 +1620,67 @@ bool XxApp::processDiff()
    }
    _diffs.release();
 
-   // 
-   // Run the diff command
+
    //
-   if ( _filesAreDirectories == false ) {
+   // If this is an unmerge, create the diffs directly from the buffer in
+   // memory (i.e. we do not need to spawn an external process).
+   //
+   std::auto_ptr<XxBuilder> builder;
+   if ( _cmdline._unmerge == true ) {
+
+      XxBuilderUnmerge* builderUnmerge = new XxBuilderUnmerge;
+      std::auto_ptr<XxBuilder> builderTmp( builderUnmerge );
+      builder = builderTmp;
+      try {
+         QString leftName, rightName;
+         std::auto_ptr<XxDiffs> tmp(
+            builderUnmerge->process(
+               *(_files[0]), _resources, leftName, rightName
+            )
+         );
+         _diffs = tmp;
+         XX_ASSERT( _diffs.get() != 0 );
+
+         // Reindexing. We have chosen to use a different strategy because we'd
+         // really like to keep the line numbers from the original conflict
+         // file. This works and fools all the code into thinking it's a normal
+         // two-file diff, but we'd lose the real line numbers.
+         _diffs->reindex( _files[0], _files[1] );
+
+         // Add names from tags to display filenames.
+         if ( !leftName.isEmpty() ) {
+            _files[0]->setDisplayName( 
+               _files[0]->getDisplayName() + " (" + leftName + ")"
+            );
+         }
+         if ( !rightName.isEmpty() ) {
+            _files[1]->setDisplayName( 
+               _files[1]->getDisplayName() + " (" + rightName + ")"
+            );
+         }
+      }
+      catch ( const XxError& ex ) {
+         QString str;
+         QTextOStream oss( &str );
+         oss << "Error unmerging file:" << ex.getMsg() << endl;
+         outputDiffErrors( str );
+         _returnValue = builder->getStatus();
+         return false;
+      }
+   }
+   // 
+   // else, normal diffs, run the diff command (this is the usual case).
+   //
+   else if ( _filesAreDirectories == false ) {
       if ( _nbFiles == 2 ) {
-         XxBuilderFiles2 builder(
+         XxBuilderFiles2* filesBuilder = new XxBuilderFiles2(
             _resources->getBoolOpt( BOOL_USE_INTERNAL_DIFF )
          );
+         std::auto_ptr<XxBuilder> builderTmp( filesBuilder );
+         builder = builderTmp;
          try {
             std::auto_ptr<XxDiffs> tmp(
-               builder.process(
+               filesBuilder->process(
                   _resources->getCommand( CMD_DIFF_FILES_2 ),
                   _files[0]->getName(), _files[0]->getNbLines(),
                   _files[1]->getName(), _files[1]->getNbLines()
@@ -1630,25 +1697,17 @@ bool XxApp::processDiff()
                 << "\" command, couldn't build diffs:" << endl
                 << ex.getMsg() << endl;
             outputDiffErrors( str );
-            _returnValue = builder.getStatus();
+            _returnValue = builder->getStatus();
             return false;
-         }
-      
-         // Note: the return value of xxdiff matches the one that the spawned
-         // diff returns.  e.g. a return value of 1 does not indicate an error.
-         _returnValue = builder.getStatus();
-
-         // If there were some warnings, output them.
-         if ( !_resources->getBoolOpt( BOOL_IGNORE_ERRORS ) &&
-              builder.hasErrors() ) {
-            outputDiffErrors( builder.getErrors() );
          }
       }
       else if ( _nbFiles == 3 ) {
-         XxBuilderFiles3 builder;
+         XxBuilderFiles3* filesBuilder = new XxBuilderFiles3;
+         std::auto_ptr<XxBuilder> builderTmp( filesBuilder );
+         builder = builderTmp;
          try {
             std::auto_ptr<XxDiffs> tmp(
-               builder.process(
+               filesBuilder->process(
                   _resources->getCommand( CMD_DIFF_FILES_3 ),
                   _files[0]->getName(), _files[0]->getNbLines(),
                   _files[1]->getName(), _files[1]->getNbLines(),
@@ -1666,18 +1725,8 @@ bool XxApp::processDiff()
                 << "\" command, couldn't build diffs:" << endl
                 << ex.getMsg() << endl;
             outputDiffErrors( str );
-            _returnValue = builder.getStatus();
+            _returnValue = builder->getStatus();
             return false;
-         }
-      
-         // Note: the return value of xxdiff matches the one that the spawned
-         // diff returns.  e.g. a return value of 1 does not indicate an error.
-         _returnValue = builder.getStatus();
-
-         // If there were some errors, output them.
-         if ( !_resources->getBoolOpt( BOOL_IGNORE_ERRORS ) &&
-              builder.hasErrors() ) {
-            outputDiffErrors( builder.getErrors() );
          }
       }
    }
@@ -1689,11 +1738,13 @@ bool XxApp::processDiff()
          );
       }
 
-      XxBuilderDirs2 builder(
+      XxBuilderDirs2* dirsBuilder = new XxBuilderDirs2(
          _resources->getBoolOpt( BOOL_DIRDIFF_BUILD_FROM_OUTPUT ),
          _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ),
          _resources->getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES )
       );
+      std::auto_ptr<XxBuilder> builderTmp( dirsBuilder );
+      builder = builderTmp;
       const char* dirdiff_command = 0;
       try {
          if ( _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ) ) {
@@ -1707,7 +1758,7 @@ bool XxApp::processDiff()
             );
          }
          std::auto_ptr<XxDiffs> tmp(
-            builder.process(
+            dirsBuilder->process(
                dirdiff_command,
                _files[0]->getName(),
                _files[0].get(),
@@ -1726,19 +1777,19 @@ bool XxApp::processDiff()
              << "\" command, couldn't build diffs:" << endl
              << ex.getMsg() << endl;
          outputDiffErrors( str );
-         _returnValue = builder.getStatus();
+         _returnValue = builder->getStatus();
          return false;
       }
-      
-      // Note: the return value of xxdiff matches the one that the spawned
-      // diff returns.  e.g. a return value of 1 does not indicate an error.
-      _returnValue = builder.getStatus();
+   }
 
-         // If there were some warnings, output them.
-      if ( !_resources->getBoolOpt( BOOL_IGNORE_ERRORS ) &&
-           builder.hasErrors() ) {
-         outputDiffErrors( builder.getErrors() );
-      }
+   // Note: the return value of xxdiff matches the one that the spawned
+   // diff returns.  e.g. a return value of 1 does not indicate an error.
+   _returnValue = builder->getStatus();
+
+   // If there were some warnings, output them.
+   if ( !_resources->getBoolOpt( BOOL_IGNORE_ERRORS ) &&
+        builder->hasErrors() ) {
+      outputDiffErrors( builder->getErrors() );
    }
 
    //
@@ -1752,9 +1803,11 @@ bool XxApp::processDiff()
       
       // Sanity check: check that the number of file lines are smaller than the
       // number of diff lines.
-      for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-         if ( _files[ii]->getNbLines() > _diffs->getNbLines() ) {
-            throw XxInternalError( XX_EXC_PARAMS );
+      if ( ! _cmdline._unmerge ) {
+         for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+            if ( XxDln( _files[ii]->getNbLines() ) > _diffs->getNbLines() ) {
+               throw XxInternalError( XX_EXC_PARAMS );
+            }
          }
       }
       
@@ -2042,6 +2095,8 @@ void XxApp::editFile( const QString& filename )
       return;
    }
 
+#ifndef WINDOWS
+
    //
    // Open socket and create notifier if not yet done.  We're using a socket
    // notifier for synchronization reasons.
@@ -2124,7 +2179,7 @@ void XxApp::editFile( const QString& filename )
       {
          QTextOStream oss( &text );
          oss << "There has been an error spawning the editor:" 
-             << ioerr.getMsg() << endl << flush;
+             << ioerr.getMsg() << endl;
       }
       QMessageBox* box = new XxSuicideMessageBox( 
          _mainWindow, "Error.", text, QMessageBox::Warning 
@@ -2133,6 +2188,7 @@ void XxApp::editFile( const QString& filename )
    }
 
    XxUtil::freeArgs( args );
+#endif /* !WINDOWS */
 }
 
 //------------------------------------------------------------------------------
@@ -2188,9 +2244,20 @@ void XxApp::openFile( const XxFno no )
          box->show();         
          return;
       }
-      readFile( no, f, f, false );
+      std::auto_ptr<XxBuffer> newbuf( 
+         readFile( no, f, f, false )
+      );
+      _files[no] = newbuf;
+
+
       bool succ = processDiff();
       
+      // Adjust UI elements
+      // Set filename label.
+      if ( _files[no].get() != 0 ) {
+         _central->setFilename( no, _files[no]->getDisplayName() );
+      }
+
       // Initialize the horizontal diffs if necessary.
       if ( succ == true ) {
          _diffs->initializeHorizontalDiffs( *_resources, getBuffers() );
@@ -2239,8 +2306,34 @@ void XxApp::onRedoDiff()
       XxDln centerLine = _central->getCenterLine();
 
       // Reread the files.
-      for ( XxFno ii = 0; ii < nbFiles; ++ii ) {
-         reReadFile( ii );
+      if ( _cmdline._unmerge == false ) {
+         for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
+            std::auto_ptr<XxBuffer> newbuf(
+               readFile( ii,
+                         _files[ii]->getName(),
+                         _files[ii]->getDisplayName(),
+                         _files[ii]->isTemporary() )
+            );
+            _files[ii] = newbuf;
+         }
+      }
+      else {
+         XX_ASSERT( _nbFiles == 2 );
+         std::auto_ptr<XxBuffer> newbuf(
+            readFile( 0,
+                      _files[0]->getName(),
+                      _files[0]->getDisplayName(),
+                      _files[0]->isTemporary() )
+         );
+         _files[0] = newbuf;
+
+         // Make a proxy for the other buffer.
+         std::auto_ptr<XxBuffer> newbuf2(
+            new XxBuffer( (*_files[0]),
+                          _files[0]->getName(),
+                          _files[0]->getDisplayName() )
+         );
+         _files[1] = newbuf2;
       }
 
       // Do the diff.
@@ -2356,9 +2449,11 @@ bool XxApp::validateNeedToSave( uint no ) const
    if ( _diffs->checkSelections( XxLine::Selection(no) ) == true ) {
       // Pop a dialog.
       QString text;
-      QTextOStream oss( &text );
-      oss << "The selections are all on this file." << endl
-          << "Save anyway?" << flush;
+      {
+         QTextOStream oss( &text );
+         oss << "The selections are all on this file." << endl
+             << "Save anyway?";
+      }
 
       int resp = QMessageBox::warning( 
          _mainWindow, "xxdiff", text, 
@@ -2388,22 +2483,22 @@ QString XxApp::getMergedFilename() const
    QString left, middle, right;
    XxBuffer* leftbuf = getBuffer( 0 );
    if ( leftbuf ) {
-      left = leftbuf->getDisplayName();
+      left = leftbuf->getName();
    }
    if ( _nbFiles == 2 ) {
       XxBuffer* rightbuf = getBuffer( 1 );
       if ( rightbuf ) {
-         right = rightbuf->getDisplayName();
+         right = rightbuf->getName();
       }
    }
    else {
       XxBuffer* middlebuf = getBuffer( 1 );
       if ( middlebuf ) {
-         middle = middlebuf->getDisplayName();
+         middle = middlebuf->getName();
       }
       XxBuffer* rightbuf = getBuffer( 2 );
       if ( rightbuf ) {
-         right = rightbuf->getDisplayName();
+         right = rightbuf->getName();
       }
    }
 
@@ -2589,7 +2684,6 @@ void XxApp::redoDiff()
       return;
    }
 
-   // Popup name and arguments box.
    onRedoDiff();
 }
 
@@ -2655,7 +2749,7 @@ void XxApp::diffFilesAtCursor()
          {
             QTextOStream oss( &text );
             oss << "There has been an error spawning diff program:" 
-                << ioerr.getMsg() << endl << flush;
+                << ioerr.getMsg() << endl;
          }
          QMessageBox* box = new XxSuicideMessageBox( 
             _mainWindow, "Error.", text, QMessageBox::Warning 

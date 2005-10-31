@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: defs.h 442 2001-12-04 07:04:06Z blais $
- * $Date: 2001-12-04 02:04:06 -0500 (Tue, 04 Dec 2001) $
+ * $Id: defs.h 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -41,10 +41,11 @@ typedef unsigned int 	uint;
 
 #ifdef XX_USE_NAMESPACE
 
-#define XX_NAMESPACE_BEGIN		namespace Xxdiff {
+#define XX_NAMESPACE		        Xxdiff
+#define XX_NAMESPACE_BEGIN		namespace XX_NAMESPACE {
 #define XX_NAMESPACE_END		}
-#define XX_NAMESPACE_USING		using namespace Xxdiff;
-#define XX_NAMESPACE_PREFIX		Xxdiff::
+#define XX_NAMESPACE_USING		using namespace XX_NAMESPACE;
+#define XX_NAMESPACE_PREFIX		XX_NAMESPACE ::
 
 #else
 

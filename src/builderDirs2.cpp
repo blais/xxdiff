@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderDirs2.cpp 485 2002-02-07 20:10:05Z blais $
- * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
+ * $Id: builderDirs2.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -40,10 +40,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
+
 #include <unistd.h>
+#ifndef WINDOWS
+#include <sys/wait.h>
+#else
+#endif
+
 #include <iostream>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 //#define LOCAL_TRACE
 #ifdef LOCAL_TRACE
@@ -540,6 +545,8 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    XxBuffer*      buffer2
 )
 {
+   initLines();
+
    QStringList filenames;
    filenames.append( path1 );
    filenames.append( path2 );
@@ -693,30 +700,30 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
+#ifndef WINDOWS
       int stat_loc;
       if ( wait( &stat_loc ) == -1 ) {
          throw XxIoError( XX_EXC_PARAMS );
       }
       _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
       throw XxIoError( XX_EXC_PARAMS );
+#else
+      _status = 2;
+#endif
    }
 
+#ifndef WINDOWS
    int stat_loc;
    if ( wait( &stat_loc ) == -1 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
    _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
+#else
+   _status = 2;
+#endif
 
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, true ) );
    return ap;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxBuilderDirs2::addLine( const XxLine& line )
-{
-   XX_LOCAL_TRACE( "AddLine: " << line );
-   _lines.push_back( line );
 }
 
 XX_NAMESPACE_END

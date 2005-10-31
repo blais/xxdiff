@@ -2,7 +2,7 @@
 #
 # TODO for xxdiff
 #
-# $Id: TODO 487 2002-02-07 22:10:47Z blais $
+# $Id: TODO 519 2002-02-23 17:43:56Z blais $
 #
 # This file contains a wishlist, todo list, a list of tasks and a general
 # grubzone where the author feels free to plop in any worthy ideas and
@@ -27,12 +27,66 @@ Goals for 3.0 stable release:
 --------------------------------------------------------------------------------
 Tasks: current tasks
 
-   * Figure out how to produce the documentation from rpm file
+
+   * Add dummy line creation for new XxDiffs in all builders.
 
 
 
+(Raw diff output)
+
+   * Implement a window to display the raw diff output. Some people may enjoy
+     this.
 
 
+(Misc)
+  
+   * Add a first item to _lines for XxDiffs, so that we don't have to subtract 1
+     everytime!!!
+
+   * When using replace file on a local file, "./" is added before the displayed
+     filename, find out why, and eradicate if possible.
+
+   * Convert arrays of string to use a QStringList in many place
+     (e.g. cmdline.h)
+
+   * I think we could free the buffers before reloading them on redo diff.
+
+   * set up rsync to update SF automatically from co version at DIRO:
+     rsync -Cavz -e ssh  . blais@xxdiff.sourceforge.net:/home/users/b/bl/blais/xxdiff/xxdiff-web
+
+
+
+(Outstanding Bugs)
+
+   * When a file is from stdin, redo-diff clears xxdiffs, at the very least it
+     should not do anything (perhaps disable redo diff?).
+
+
+
+(CVS unmerge conflicts)
+
+   * Goto line will not work.
+
+   * Gray out useless menu items/buttons.
+
+   * It would be nice that if you click on the filename labels it wouldn't add
+     the "(SOMEFILE)" into the clipboard.
+
+   * diff3 and cvs markers seem to be different, perhaps implement parser for
+     both.
+
+   * Check for precise syntax of CVS conflict markers
+
+      * How is it different with 3 files? does this make any sense? diff3 -m?
+
+      * Compare our current output tags, are they ok?
+
+
+(Printed output)
+
+   * There is currently no generator of xxdiff-like output for printing. See if
+     the guts of xxdiff can be reused to implement one, and if so, add an xxdiff
+     feature to output to postscript or something.
 
 
 
@@ -187,30 +241,6 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
    * Redo diff clears selections!  can we do something about it?
 
 
-(CVS unmerge conflicts)
-
-   FIXME continue implementing --conflict in app::processfilenames()
-
-   * diff3 and cvs markers seem to be different, perhaps implement parser for
-     both.
-
-   * Implement remerge option!  for files with CVS conflicts!
-
-     Build the two diffs using a single file, and a single file storage, to save
-     memory (and avoid having to build two files), also be able to do it with
-     ifdefs.
-
-   * Check for precise syntax of CVS conflict markers
-
-      * How is it different with 3 files? does this make any sense? diff3 -m?
-
-      * What happens when a conflict text contains conflict markers?
-
-      * Compare our current output tags, are they ok?
-
-      * Added resources for input tags for parser.
-
-
 (Improve Directory Diffs)
 
 > *  Improve the comparison options for directories. Files and Dirs
@@ -218,6 +248,22 @@ Fix warnings reported from Geoff.Kingsmill at compaq compiling with g++-3.x:
 >    and raw and filterd data.
 >    I could write the backend of this part, if you like to include
 >    this ability, but I can't write the front end (gui) part.
+
+
+   * Make xxdiff able to go to the parent directories
+
+     While comapring two directory trees I noticed one can 
+     always go up one level (towards the leafe nodes) 
+     through the GUI, but not down or 'back'. 
+
+    Suggestion:
+    Add a new button to the toolbar [arrow-pointing-upwards], 
+    which stripps the last level of the current path on both sides
+    and reads those directories.
+
+    Beware of [up] + / as path :-).
+    Thank you,
+    Volker Apelt
 
 
 (Misc)
@@ -716,6 +762,16 @@ Tasks: Editing
 
 --------------------------------------------------------------------------------
 Tasks: Patch support.
+
+(Patch application idea)
+
+Oded Arbel <oded@geek.co.il>
+> BTW - in MS-Windows I use this pretty nice diff program called WinMerge,
+> and its one cool feature is that I can tell it to copy the selected
+> difference from one of the files to the other - actually being a "manual"
+> merge tool. it would be really nice if xxdiff had this feature - I like to
+> be able to selectibly apply partial differences w/o going to the trouble of
+> editing patch files by hand.
 
 
 (Patch input support)

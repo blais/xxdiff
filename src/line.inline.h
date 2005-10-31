@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.inline.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: line.inline.h 514 2002-02-20 17:09:20Z blais $
+ * $Date: 2002-02-20 12:09:20 -0500 (Wed, 20 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -57,6 +57,7 @@ inline XxLine::XxLine( const XxLine& copy )
    _type = copy._type;
    _selection = copy._selection;
    _hunkId = copy._hunkId;
+
    for ( int ii = 0; ii < 3; ++ii ) {
       _lineNo[ii] = copy._lineNo[ii];
       _hordiffs[ii] = 0; // Don't copy pointers.
@@ -68,7 +69,11 @@ inline XxLine::XxLine( const XxLine& copy )
 inline XxLine::~XxLine()
 {
    for ( int ii = 0; ii < 3; ++ii ) {
+#ifndef WINDOWS
       delete[] _hordiffs[ii];
+#else
+      delete[] const_cast<int*>( _hordiffs[ii] );
+#endif
    }
 }
 
@@ -134,6 +139,15 @@ inline XxFln XxLine::getLineNo( const XxFno no ) const
 {
    XX_ASSERT( no == 0 || no == 1 || no == 2 );
    return _lineNo[no];
+}
+
+//------------------------------------------------------------------------------
+//
+inline void XxLine::setLineNo( const XxFno no, const XxFln fline )
+{
+   XX_ASSERT( no == 0 || no == 1 || no == 2 );
+   XX_ASSERT( _lineNo[no] != -1 ); // Important check! See header file.
+   _lineNo[no] = fline;
 }
 
 //------------------------------------------------------------------------------

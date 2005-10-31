@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: scrollView.cpp 458 2002-01-03 02:48:38Z blais $
- * $Date: 2002-01-02 21:48:38 -0500 (Wed, 02 Jan 2002) $
+ * $Id: scrollView.cpp 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -57,6 +57,13 @@ XxScrollView::XxScrollView(
    // Initialize to null.  The derived classes create them.
    _hscroll = 0;
    _vscroll[0] = _vscroll[1] = 0;
+
+   // Watch changes in the text size and adjust accordingly.
+   XX_CHECK( _app != 0 );
+   connect(
+      _app, SIGNAL(textSizeChanged()),
+      this, SLOT(adjustScrollbars())
+   );
 }
 
 //------------------------------------------------------------------------------

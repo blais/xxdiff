@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.inline.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: buffer.inline.h 520 2002-02-23 21:55:59Z blais $
+ * $Date: 2002-02-23 16:55:59 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -57,7 +57,7 @@ inline bool XxBuffer::isTemporary() const
 //
 inline uint XxBuffer::getNbLines() const
 {
-   return _index.size() - 1;
+   return _index.size() - 2; // See header file for description.
 }
 
 //------------------------------------------------------------------------------
@@ -67,10 +67,31 @@ inline const char* XxBuffer::getTextLine(
    uint&       length 
 ) const
 {
-   XX_ASSERT( lineno > 0 );
-   XX_ASSERT( lineno < XxFln(_index.size()) );
-   length = _index[ lineno ] - _index[ lineno-1 ] - 1;
-   return & _buffer[ _index[ lineno-1 ] ];
+   XX_ASSERT( 0 < lineno && lineno <= XxFln(_index.size()) );
+
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   length = _lengths[ lineno ];
+   /*XX_TRACE( length << " " << _index[ lineno ] - _index[ lineno-1 ] - 1 );*/
+   /*XX_CHECK( length == _index[ lineno ] - _index[ lineno-1 ] - 1 );*/
+#else
+   // Note: in the case where the data buffer lines are contiguous, this would
+   // also work (this is what it used to be until the unmerged feature was
+   // introduced):
+   length = _index[ lineno + 1 ] - _index[ lineno ] - 1;
+#endif
+
+   return & _buffer[ _index[ lineno ] ];
+}
+
+//------------------------------------------------------------------------------
+//
+inline XxFln XxBuffer::getDisplayLineNo( const XxFln fline ) const
+{
+   if ( _dpyLineNos.empty() ) {
+      return fline;
+   }
+   XX_ASSERT( 0 < fline && fline <= XxFln(_index.size()) );
+   return _dpyLineNos[ fline ];
 }
 
 XX_NAMESPACE_END

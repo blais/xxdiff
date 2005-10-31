@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: buffer.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -94,14 +94,25 @@ public:
       const bool     deleteFile = false
    );
 
+   // Constructor that can impersonate another buffer but that does not own the
+   // data. This is used to share the data for unmerge mode.
+   XxBuffer(
+      const XxBuffer& orig,
+      const QString&  filename,
+      const QString&  displayFilename
+   );
+
    // Destructor.
    virtual ~XxBuffer();
 
    // Get file name.
    const QString& getName() const;
 
-   // Get display filename.
+   // Get/set display filename.
+   // <group>
    const QString& getDisplayName() const;
+   void setDisplayName( const QString& );
+   // </group>
 
    // Returns true if this file is stored as a temporary file.
    bool isTemporary() const;
@@ -171,6 +182,15 @@ public:
       const XxFln lineno
    ) const;
 
+   // Reindex the buffer lines, according to the given table. The table
+   // indicates what current lines the new lines should point to.
+   // This is used during unmerge.
+   void reindex( const std::vector<XxFln>& reindexTbl );
+
+   // Returns the line number to display for given text line.
+   XxFln getDisplayLineNo( const XxFln fline ) const;
+
+
 private:
 
    /*----- member functions -----*/
@@ -191,18 +211,44 @@ private:
 
    /*----- data members -----*/
 
-   QString          _name;
-   QString          _displayName;
-   bool             _hiddenCR;
-   bool             _temporary;
-   char*            _buffer;
-   uint             _bufferSize;
-   std::vector<int> _index;
-   char*            _renderBuffer;
-   int              _renderBufferSize;
-   QString          _lnBuffer;
+   QString            _name;
+   QString            _displayName;
+   bool               _hiddenCR;
+   bool               _temporary;
+   bool               _proxy;
+   char*              _buffer;
+   uint               _bufferSize;
 
-   QStringList      _directoryEntries;
+   // Index of character offsets.
+   // Entry 0 is a dummy.
+   // Entry 1 is an offset to the beginning of line 1 (== 0).
+   // Entry 2 is an offset to the beginning of line 2 (end of line 1 + \n).
+   // The last entry is an offset to the end of the last line.
+   std::vector<int>   _index;
+
+#define XX_ENABLED_BUFFER_LINE_LENGTHS
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   // Important note: due to the use of the short datatype to record line
+   // lengths, xxdiff is limited to lines of length up to 64k characters. We
+   // consider this reasonable for all purposes. However, this could be easily
+   // changed to int below if necessary.
+   //
+   // We had to introduce an explicit vector of lengths because the since the
+   // unmerge feature was introduced, since we're sharing the very text buffer
+   // that the multiple buffers use we cannot anymore rely on buffer lines
+   // appearing next to each other in the data array.
+   std::vector<short> _lengths;
+#endif
+
+   // Indirection index for reindexed files. This array contains the line
+   // numbers that should be displayed, for each line.
+   std::vector<XxFln> _dpyLineNos;
+
+   char*              _renderBuffer;
+   int                _renderBufferSize;
+   QString            _lnBuffer;
+
+   QStringList        _directoryEntries;
 
 };
 

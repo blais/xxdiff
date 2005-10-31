@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 482 2002-02-07 07:56:40Z blais $
- * $Date: 2002-02-07 02:56:40 -0500 (Thu, 07 Feb 2002) $
+ * $Id: text.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -50,6 +50,12 @@
 #define snprintf _snprintf
 #endif
 
+//#define LOCAL_TRACE
+#ifdef LOCAL_TRACE
+#define XX_LOCAL_TRACE(x) XX_TRACE(x)
+#else
+#define XX_LOCAL_TRACE(x)
+#endif
 
 //#define XX_DEBUG_TEXT  1
 
@@ -185,7 +191,7 @@ void XxText::drawContents( QPainter* pp )
    // if there was a way to allocate a QString with shallow copy of non-unicode
    // text, this would be much faster.
 
-   //XX_TRACE( "painting!" );
+   //XX_LOCAL_TRACE( "painting!" );
 
    // QPainter p;
    // p.begin( this );
@@ -253,7 +259,7 @@ void XxText::drawContents( QPainter* pp )
    XX_ASSERT( hbuffer0 && hbuffer1 );
 
    uint irenline = 0;
-   uint icurline = topLine;
+   XxDln icurline = topLine;
 
    int cursorY1 = -1;
    int cursorY2 = -1;
@@ -827,7 +833,7 @@ uint XxText::computeMergedLines() const
    SkipType skip = SK_NOSKIP;
    XxLine::Type prevtype;
    XxLine::Type type = XxLine::SAME;
-   for ( uint icurline = 1; icurline <= diffs->getNbLines(); ++icurline ) {
+   for ( XxDln icurline = 1; icurline <= diffs->getNbLines(); ++icurline ) {
 // #if 0 
 
 //       prevtype = type;
@@ -908,7 +914,7 @@ uint XxText::computeMergedLines() const
                   // Draw undecided marker.
                   //
                   y += HEIGHT_UNSEL_REGION;
-                  XX_TRACE( "HEIGHT_UNSEL_REGION " << y );
+                  XX_LOCAL_TRACE( "HEIGHT_UNSEL_REGION " << y );
                }
                continue;
             }
@@ -920,7 +926,7 @@ uint XxText::computeMergedLines() const
                   // Draw neither marker.
                   //
                   y += HEIGHT_NEITHER_REGION;
-                  XX_TRACE( "HEIGHT_NEITHER_REGION " << y );
+                  XX_LOCAL_TRACE( "HEIGHT_NEITHER_REGION " << y );
                }
                continue;
             }
@@ -942,7 +948,7 @@ uint XxText::computeMergedLines() const
       if ( fline != -1 ) {
 
          y += fm.lineSpacing();
-         XX_TRACE( "fm.lineSpacing() " << y );
+         XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
       }
       else {
 
@@ -950,7 +956,7 @@ uint XxText::computeMergedLines() const
 
             // The line is empty, just fill in the background.
             y += fm.lineSpacing();
-            XX_TRACE( "fm.lineSpacing() " << y );
+            XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
          }
          else { 
             // For merged view, render the first empty line as thin.
@@ -961,19 +967,19 @@ uint XxText::computeMergedLines() const
                // Draw empty marker.
                //
                y += HEIGHT_EMPTY_REGION;
-               XX_TRACE( "HEIGHT_EMPTY_REGION " << y );
+               XX_LOCAL_TRACE( "HEIGHT_EMPTY_REGION " << y );
             }
          }
       }
    }
 
 
-   XX_TRACE( "y = " << y 
+   XX_LOCAL_TRACE( "y = " << y 
              << " ls = " << fm.lineSpacing()
              << " difflines = " << diffs->getNbLines() );
 
    int approxNbLines = y / fm.lineSpacing() + 1;
-   XX_TRACE( "approxNbLines = " << approxNbLines );
+   XX_LOCAL_TRACE( "approxNbLines = " << approxNbLines );
    return approxNbLines;
 }
 

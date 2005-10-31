@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 2.3
+Version: 2.4
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
@@ -37,7 +37,7 @@ mkdir -p ${RPM_BUILD_ROOT}/usr/X11R6/bin
 mkdir -p ${RPM_BUILD_ROOT}/usr/X11R6/man/man1
 
 install -c -m 755 -s src/xxdiff ${RPM_BUILD_ROOT}/usr/X11R6/bin/
-install -c -m 644 -o 0 -g 0 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
+install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 
 %clean
 [ "${RPM_BUILD_ROOT}" != "/" ] && rm -rf ${RPM_BUILD_ROOT}
@@ -53,6 +53,12 @@ install -c -m 644 -o 0 -g 0 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xx
 
 
 %changelog
+* Thu Feb 23 2002 Martin Blais <blais@iro.umontreal.ca>
+- added documentation generation and released 2.4.
+
+* Sat Feb 9 2002 Martin Blais <blais@iro.umontreal.ca>
+- removed setting of user/group for man (thanks for crazy_pete@swissinfo.org)
+
 * Thu Feb 6 2002 Martin Blais <blais@iro.umontreal.ca>
 - added documentation generation and released 2.3.
 

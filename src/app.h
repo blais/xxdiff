@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.h 487 2002-02-07 22:10:47Z blais $
- * $Date: 2002-02-07 17:10:47 -0500 (Thu, 07 Feb 2002) $
+ * $Id: app.h 498 2002-02-11 02:25:21Z blais $
+ * $Date: 2002-02-10 21:25:21 -0500 (Sun, 10 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -306,15 +306,12 @@ private:
    XxResources* buildResources() const;
 
    // Reads in a file.
-   void readFile( 
+   std::auto_ptr<XxBuffer> readFile( 
       const XxFno    no, 
       const QString& filename,
       const QString& displayFilename,
       bool           isTemporary = false
    );
-
-   // Re-reads a file.
-   void reReadFile( const XxFno no );
 
    // Processes the diff command, be really careful with this.  Returns false if
    // there was an error.
@@ -426,7 +423,6 @@ private:
    // Real data.
    //
    int                     _nbFiles;
-   int                     _nbTextWidgets;
    std::auto_ptr<XxBuffer> _files[3];
    std::auto_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;

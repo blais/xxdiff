@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.inline.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: diffs.inline.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -34,29 +34,30 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-inline uint XxDiffs::getNbLines() const
+inline XxDln XxDiffs::getNbLines() const
 {
-   return _lines.size();
+   return _lines.size() - 1;
 }
 
 //------------------------------------------------------------------------------
 //
 inline const XxLine& XxDiffs::getLine( const XxDln lineno ) const
 {
-   if ( !( lineno > 0 && lineno <= XxDln(_lines.size()) ) ) {
+#ifdef XX_DEBUG
+   if ( !( lineno > 0 && lineno <= getNbLines() ) ) {
       XX_TRACE( lineno );
    }
-
-   XX_ASSERT( lineno > 0 && lineno <= XxDln(_lines.size()) );
-   return _lines[ lineno - 1 ];
+#endif
+   XX_CHECK( lineno > 0 && lineno <= getNbLines() );
+   return _lines[ lineno ];
 }
 
 //------------------------------------------------------------------------------
 //
 inline XxLine& XxDiffs::getLineNC( const XxDln lineno )
 {
-   XX_ASSERT( lineno > 0 && lineno <= XxDln(_lines.size()) );
-   return _lines[ lineno - 1 ];
+   XX_CHECK( lineno > 0 && lineno <= getNbLines() );
+   return _lines[ lineno ];
 }
 
 //------------------------------------------------------------------------------

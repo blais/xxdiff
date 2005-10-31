@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderFiles2.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: builderFiles2.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -49,9 +49,7 @@
 #define INCL_STD_STDIO
 #endif
 
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * CLASS XxBuilderFiles2
@@ -92,9 +90,6 @@ private:
 
    /*----- member functions -----*/
 
-   // Add a new XxLine.
-   void addLine( const XxLine& line );
-
    // Create the individual lines for different types of blocks.
    // <group>
    void createIgnoreBlock( 
@@ -124,11 +119,9 @@ private:
    /*----- data members -----*/
 
    bool                _useInternalDiff;
-   std::vector<XxLine> _lines;
    int                 _curHunk;
 
 };
-
 
 XX_NAMESPACE_END
 

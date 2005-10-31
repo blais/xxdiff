@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: buffer.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: buffer.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -35,6 +35,7 @@
 #include <iostream>
 #include <string.h>
 #include <algorithm>
+
 #include <unistd.h>
 #include <stdio.h>
 #include <math.h>
@@ -95,13 +96,14 @@ XX_NAMESPACE_BEGIN
 //
 XxBuffer::XxBuffer( 
    const bool     /*passiveDummy*/, // ignored
-   const QString& filename, 
+   const QString& filename,
    const QString& displayFilename
 ) :
    _name( filename ),
    _displayName( displayFilename ),
    _hiddenCR( false ),
    _temporary( false ),
+   _proxy( false ),
    _buffer( 0 )
 {
    XX_ASSERT( filename != 0 );
@@ -121,6 +123,7 @@ XxBuffer::XxBuffer(
    _displayName( displayFilename ),
    _hiddenCR( hideCR ),
    _temporary( deleteFile ),
+   _proxy( false ),
    _buffer( 0 )
 {
    XX_ASSERT( !filename.isEmpty() );
@@ -143,6 +146,30 @@ XxBuffer::XxBuffer(
 
 //------------------------------------------------------------------------------
 //
+XxBuffer::XxBuffer(
+   const XxBuffer& orig,
+   const QString&  filename,
+   const QString&  displayFilename
+) :
+   _name( filename ),
+   _displayName( displayFilename ),
+   _hiddenCR( orig._hiddenCR ),
+   _temporary( false ),
+   _proxy( true ),
+   _buffer( orig._buffer ), // Here is the "sharing the buffer" part.
+   _bufferSize( orig._bufferSize ),
+   _index( orig._index )
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   , _lengths( orig._lengths )
+#endif
+{
+   XX_ASSERT( filename != 0 );
+
+   init();
+}
+
+//------------------------------------------------------------------------------
+//
 void XxBuffer::init()
 {
    _renderBufferSize = 256;
@@ -153,7 +180,10 @@ void XxBuffer::init()
 //
 XxBuffer::~XxBuffer()
 {
-   delete[] _buffer;
+   if ( !_proxy ) {
+      delete[] _buffer;
+   }
+   _buffer = 0;
 
    // Delete the temporary file if asked for.
    if ( _temporary == true ) {
@@ -163,6 +193,13 @@ XxBuffer::~XxBuffer()
    if ( _renderBuffer != 0 ) {
       free( _renderBuffer );
    }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxBuffer::setDisplayName( const QString& fn )
+{
+   _displayName = fn;
 }
 
 //------------------------------------------------------------------------------
@@ -239,10 +276,10 @@ void XxBuffer::setDirectoryEntries(
    _directoryEntries = directoryEntries;
 
    _bufferSize = 0;
-   for ( QStringList::Iterator it = _directoryEntries.begin(); 
-         it != _directoryEntries.end();
-         ++it ) {
-      _bufferSize += (*it).length() + 1;
+   for ( QStringList::Iterator itr = _directoryEntries.begin(); 
+         itr != _directoryEntries.end();
+         ++itr ) {
+      _bufferSize += (*itr).length() + 1;
    }
 
    // Allocate buffer.
@@ -297,27 +334,76 @@ void XxBuffer::processCarriageReturns()
 void XxBuffer::indexFile()
 {
    XX_ASSERT( _buffer );
+
    uint ii;
+   _index.push_back( -1 );
    _index.push_back( 0 );
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   int prev = 0;
+   _lengths.push_back( -1 );
+#endif
 
    for ( ii = 0; ii < _bufferSize; ++ii ) {
       if ( _buffer[ii] == '\n' ) {
          _index.push_back( ii + 1 );
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+         _lengths.push_back( ii - prev );
+         prev = static_cast<short>( ii + 1 );
+#endif
       }
    }
+   _lengths.push_back( 0 ); // Just so that the two arrays are the same size.
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   XX_ASSERT( _index.size() == _lengths.size() );
+#endif
+
    // Make sure the file was [possibly artificially] terminated with a newline.
    XX_ASSERT( _index.back() == int(_bufferSize) );
 }
 
 //------------------------------------------------------------------------------
 //
+void XxBuffer::reindex( const std::vector<XxFln>& reindexTbl )
+{
+   XX_ASSERT( _buffer );
+
+   // Swap old indexes.
+   std::vector<int> oldIndex;
+   std::swap( _index, oldIndex );
+
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   std::vector<short> oldLengths;
+   std::swap( _lengths, oldLengths );
+#endif
+
+   uint ii;
+   _index.push_back( -1 );
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+   _lengths.push_back( -1 );
+#endif
+   
+   for ( ii = 1; ii < reindexTbl.size(); ++ii ) {
+      int reidx = reindexTbl[ii];
+      _index.push_back( oldIndex[reidx] );
+#ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
+      _lengths.push_back( oldLengths[reidx] );
+#endif
+   }
+
+   _dpyLineNos = reindexTbl;
+}
+
+//------------------------------------------------------------------------------
+//
 std::ostream& XxBuffer::dump( std::ostream& os ) const
 {
+   os << "Buffer dump:" << std::endl;
+   os << "------------------------------" << std::endl;
    int nbLines = getNbLines();
    for ( XxFln ii = 1; ii <= nbLines; ++ii ) {
       uint length;
       const char* line = getTextLine( ii, length );
-      os << ii << ":";
+      os << ii << "(" << length << ")[" << ( line - _buffer ) << "]:";
       os.write( line, length );
       os << std::endl;
    }
@@ -361,7 +447,8 @@ uint XxBuffer::computeLineNumbersWidth( const QFont& font ) const
    int nbLines = getNbLines();
    char buffer[12];
    for ( int ii = 1; ii <= nbLines; ++ii ) {
-      ::snprintf( buffer, sizeof(buffer), lnFormat, ii );
+      XxFln fline = getDisplayLineNo( ii );
+      ::snprintf( buffer, sizeof(buffer), lnFormat, fline );
       QString str( buffer );
 
       QRect rect = fm.boundingRect( str, str.length() );

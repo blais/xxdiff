@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: release_i386_rpm 352 2001-11-06 20:00:01Z blais $
+# $Id: release_i386_rpm 495 2002-02-09 20:48:11Z blais $
 #
 
 if [ ! -d "tools" ]; then
@@ -10,32 +10,43 @@ fi
 
 # Note: this script assume that release_bin has already been called.
 
-echo "Getting version number"
+echo "== Getting version number"
 VERSION=`tools/get_version`
-echo "   Version is " $VERSION
+echo "==   Version is " $VERSION
 
-echo "Creating spec file"
-cp tools/xxdiff-rpm.spec /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
+echo "== Getting and creating top dir"
+BUILDROOT=`rpm --showrc | egrep "[^{]_topdir" | cut --fields=2 | sed -e 'sX%{_usrsrc}X/usr/srcX'`
+mkdir -p $BUILDROOT/{SPECS,SOURCES,BUILD,SRPMS,RPMS}
 
-echo "Copying pristine build"
+# echo "== Creating spec file"
+# cp tools/xxdiff-rpm.spec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
+
+echo "== Copying pristine build to $BUILDROOT/SOURCES"
 PRISTINE=../xxdiff-$VERSION.tar.gz
 if [ ! -f "$PRISTINE" ]; then
-     echo "You must run release_src before running this script."
+     echo "Cannot find pristine sources in $PRISTINE"
 fi
-cp $PRISTINE /usr/src/redhat/SOURCES
+cp $PRISTINE $BUILDROOT/SOURCES
 
-echo "Building binary package"
-rpm -ba --nodeps /usr/src/redhat/SPECS/xxdiff-$VERSION.spec
+echo "== Building source and binary packages"
 # Note: we use nodeps here because tmake package is not quite common yet under 
 # rh-7.1.
 
-echo "Copy binary package home"
-DEST=/tmp
-cp /usr/src/redhat/RPMS/i386/xxdiff-$VERSION*.i386.rpm ${DEST}
-chmod 777 ${DEST}/xxdiff-$VERSION*.i386.rpm
+# use -bs to build source only
 
-cp /usr/src/redhat/SRPMS/xxdiff-$VERSION*.src.rpm ${DEST}
-chmod 777 ${DEST}/xxdiff-$VERSION*.src.rpm
+rpm -ba --nodeps --clean --rmsource tools/xxdiff-rpm.spec
 
-echo "Packages should be in $DEST."
-echo "Done."
+#rpm -bs --nodeps tools/xxdiff-rpm.spec
+#rpm -bs --nodeps --rmsource --rmspec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
+#rpm -bs --nodeps --rmsource --rmspec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
+#rpm -ts --nodeps --clean --rmsource --rmspec $PRISTINE
+
+DEST=$HOME
+echo "== Copying source and binary packages to $DEST"
+cp $BUILDROOT/RPMS/i386/xxdiff-$VERSION*.i386.rpm $DEST
+cp $BUILDROOT/SRPMS/xxdiff-$VERSION*.src.rpm $DEST
+
+echo "== Signing package files in $DEST"
+rpm --addsign $DEST/xxdiff-$VERSION*.rpm
+
+echo "== Done."

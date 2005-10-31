@@ -1,7 +1,7 @@
 # -*- mode: Makefile -*-
 #*****************************************************************************\
-# $Id: xxdiff.pro 481 2002-02-07 07:42:21Z blais $
-# $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
+# $Id: xxdiff.pro 520 2002-02-23 21:55:59Z blais $
+# $Date: 2002-02-23 16:55:59 -0500 (Sat, 23 Feb 2002) $
 #
 # Copyright (C) 2001  Martin Blais <blais@iro.umontreal.ca>
 #
@@ -27,9 +27,10 @@
 TEMPLATE = xxdiff
 CONFIG = release qt warn_on
 
+debug:TMAKE_CFLAGS += -DXX_DEBUG
 debug:TMAKE_CXXFLAGS += -DXX_DEBUG
 
-XX_VERSION=2.3
+XX_VERSION=2.4
 
 TMAKE_CFLAGS_DEBUG += -DXX_VERSION="\"$$XX_VERSION-devel ($(COMPILE_DATE))\""
 TMAKE_CFLAGS_RELEASE += -DXX_VERSION="\"$$XX_VERSION\""
@@ -40,13 +41,19 @@ LEXYACC  = resParser
 LEXYACC_OBJ  = $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
 TMAKE_CLEAN += $$LEXYACC_OBJ doc.h
 
+# Needed for Windows compile?
+#REQUIRES=full-config
 
 #
 # win32-msvc
 #
 
-win32-msvc:TMAKE_CXXFLAGS += -GX -DWINDOWS
+win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
+#win32-msvc:TMAKE_CFLAGS += -GX
+win32-msvc:TMAKE_CXXFLAGS += -GX
 win32-msvc:INCLUDEPATH += winfixes
+
+#win32-msvc:TMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
 
 #
 # irix-n32
@@ -134,7 +141,7 @@ HEADERS = \
 	builderFiles2.h \
 	builderFiles3.h \
 	builderDirs2.h \
-	builderConflicts.h \
+	builderUnmerge.h \
 	exceptions.h \
 	buffer.h \
 	buffer.inline.h \
@@ -183,7 +190,7 @@ SOURCES = \
 	builderFiles2.cpp \
 	builderFiles3.cpp \
 	builderDirs2.cpp \
-	builderConflicts.cpp \
+	builderUnmerge.cpp \
 	diffs.cpp \
 	hordiffImp.cpp \
 	line.cpp \

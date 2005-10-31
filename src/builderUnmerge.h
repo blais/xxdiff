@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderUnmerge.h 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: builderUnmerge.h 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -20,8 +20,8 @@
  *
  ******************************************************************************/
 
-#ifndef INCL_XXDIFF_BUILDERCONFLICTS
-#define INCL_XXDIFF_BUILDERCONFLICTS
+#ifndef INCL_XXDIFF_BUILDERUNMERGE
+#define INCL_XXDIFF_BUILDERUNMERGE
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -49,12 +49,22 @@
 #define INCL_STD_STDIO
 #endif
 
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class QString;
 
 XX_NAMESPACE_BEGIN
 
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class XxResources;
 
 /*==============================================================================
- * CLASS XxBuilderConflicts
+ * CLASS XxBuilderUnmerge
  *============================================================================*/
 
 // <summary> a class to build the diffs data structure </summary>
@@ -64,36 +74,33 @@ XX_NAMESPACE_BEGIN
 // line of the files.  The files themselves are not parsed here.  They are
 // referenced to by using line numbers only.
 
-class XxBuilderConflicts : public XxBuilder {
+class XxBuilderUnmerge : public XxBuilder {
 
 public:
 
    /*----- member functions -----*/
 
-   // Constructor.  The filenames must be valid.
-   XxBuilderConflicts( bool useInternalDiff );
+   // Constructor.
+   XxBuilderUnmerge();
 
    // Destructor.
-   virtual ~XxBuilderConflicts();
+   virtual ~XxBuilderUnmerge();
 
-   // Process the files and return a displayable diffs data structure.  If an
-   // error occurs, this will throw.  Otherwise you are guaranteed a valid newly
-   // allocated XxDiffs object.  However, there might be warnings, so you may
-   // want to check hasErrors() if you want to display those.
+   // Process the file (unmerge it) and return a displayable diffs data
+   // structure.  If an error occurs, this will throw.  Otherwise you are
+   // guaranteed a valid newly allocated XxDiffs object.  However, there might
+   // be warnings, so you may want to check hasErrors() if you want to display
+   // those.
    std::auto_ptr<XxDiffs> process(
-      const QString& command,
-      const QString& path1,
-      const uint     nbLines1,
-      const QString& path2,
-      const uint     nbLines2
+      const XxBuffer&    buffer,
+      const XxResources& resources,
+      QString&           outFileLeft,
+      QString&           outFileRight
    );
 
 private:
 
    /*----- member functions -----*/
-
-   // Add a new XxLine.
-   void addLine( const XxLine& line );
 
    // Create the individual lines for different types of blocks.
    // <group>
@@ -123,12 +130,9 @@ private:
 
    /*----- data members -----*/
 
-   bool                _useInternalDiff;
-   std::vector<XxLine> _lines;
-   int                 _curHunk;
+   int _curHunk;
 
 };
-
 
 XX_NAMESPACE_END
 

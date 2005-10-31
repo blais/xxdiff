@@ -53,6 +53,31 @@ install xxdiff/src/xxdiff /usr/X11R6/bin
 
 
 
+Building from source, under Windows:
+------------------------------
+
+This has not been done with success yet.
+
+Here is some advice:
+
+ - install Cygwin
+ - install qt non-commercial version
+ - use nmake.exe
+ - you'll have to hack the makefile produced by tmake, it's not working.
+ - you'll have to add DEFINES += QT_DLL to the compilation options
+
+Please don't bother me with Windows compilation questions, it's
+endless, complicated, and non-interesting. If you want to
+compile under Windows, you've got to be somewhat of a hacker,
+and then I'm sure you don't need me for that. You're on your
+own. Besides, I wouldn't have the answer anyway.
+
+Known limitations under Windows:
+
+ - you cannot spawn the editor, that's been ifdef'ed out.
+
+
+
 Packaging:
 ------------------------------
 

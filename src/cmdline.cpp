@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: cmdline.cpp 481 2002-02-07 07:42:21Z blais $
- * $Date: 2002-02-07 02:42:21 -0500 (Thu, 07 Feb 2002) $
+ * $Id: cmdline.cpp 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -147,13 +147,11 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "Automatically select regions that would end up being selected by "
      "an automatic merge."
    }, 
-#if 0 // do this soon.
-   { "conflict", 'C', false, 'C', 
-     "Invoke on a single file with CVS merge conflicts, splitting the "
+   { "unmerge", 'U', false, 'U', 
+     "Invoke on a single file with CVS-like merge conflicts, splitting the "
      "conflicts into two files for display.  If this is specified, only a "
      "single file can then be given as argument."
    }, 
-#endif
    { "title1", 0, true, '1', 
      "Display 'str' instead of filename in filename label 1 (left)."
    }, 
@@ -181,7 +179,7 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
    { "merged-filename", 'M', true, 'M',
      "Specifies the filename of the merged file for output."
    },
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    { "force-save-merged", 'S', false, 'S',
      "Put xxdiff in a mode where it is forced to save to the merged file. "
      "Leaving xxdiff will save as the merged filename. Use this with care, it "
@@ -275,7 +273,7 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
      "Running under a debugger can cause an implicit -nograb, use -dograb "
      "to override."
    }, 
-   { "sync", 0, false, 'U',
+   { "sync", 0, false, 'C',
      "Switches to synchronous mode for debugging."
    }, 
 }; 
@@ -289,7 +287,7 @@ XxCmdline::XxCmdline() :
    _originalXdiff( false ),
    _useRcfile( true ), 
    _extraDiffArgs( "" ),
-   _conflict( false ),
+   _unmerge( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -305,7 +303,12 @@ XxCmdline::~XxCmdline()
 {
    for ( int ii = 0; ii < _nbQtOptions; ++ii ) {
       XX_ASSERT( _qtOptions[ii] != 0 );
-      delete[] _qtOptions[ii];
+#ifndef WINDOWS
+      /* We don't know why Windows barfs on the free here.*/
+
+      // free(), because they are allocated with qstrdup().
+      free( _qtOptions[ii] );
+#endif
    }
 }
 
@@ -422,7 +425,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
                 << ": true" << endl;
          } break;
 
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
          case 'S': {
             QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
             oss << XxResParser::getBoolOptName( BOOL_FORCE_SAVE_MERGED_FILE )
@@ -430,8 +433,8 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          } break;
 #endif
 
-         case 'C': {
-            _conflict = true;
+         case 'U': {
+            _unmerge = true;
          } break;
 
          case '1':
@@ -544,7 +547,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'P':
          case 'K':
          case 'T':
-         case 'U': {
+         case 'C': {
             int oidx = searchForOption( 
                _optionsQt, sizeof(_optionsQt)/sizeof(Option), c
             );
@@ -601,16 +604,8 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    // End qt options with a marker.
    _qtOptions[ _nbQtOptions ] = 0;
 
-   // Check if there are too many.
-   if ( _conflict && _nbFilenames != 1 ) {
-      throw XxUsageError(
-         XX_EXC_PARAMS, 
-         "You need to specify a single filename in conflict mode."
-      );
-   }
-
-   int minfn = _conflict ? 1 : 2;
-   int maxfn = _conflict ? 1 : 3;
+   int minfn = _unmerge ? 1 : 2;
+   int maxfn = _unmerge ? 1 : 3;
 
    if ( _nbFilenames < minfn ) {
       QString msg;
@@ -635,10 +630,14 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
       throw XxUsageError( XX_EXC_PARAMS, msg );
    }
 
+#if 0 
+   // FIXME remove
+
    // Disable conflict until implemented.
-   if ( _conflict ) {
+   if ( _unmerge ) {
       throw XxUsageError( XX_EXC_PARAMS, "Not yet implemented." );
    }
+#endif
 
    // Read filenames.
    int ii;
@@ -670,7 +669,7 @@ void XxCmdline::getQtOptions( int& argc, char**& argv )
 {
    // We make a copy because Qt likes to remove the options it parses.
    for ( int ii = 0; ii < _nbQtOptions; ++ii ) {
-      _qtOptionsCopy[ii] = _qtOptions[ii];
+      _qtOptionsCopy[ii] = qstrdup( _qtOptions[ii] );
    }
 
    argc = _nbQtOptions;

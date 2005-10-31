@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 486 2002-02-07 21:06:27Z blais $
- * $Date: 2002-02-07 16:06:27 -0500 (Thu, 07 Feb 2002) $
+ * $Id: resources.cpp 511 2002-02-19 19:13:57Z blais $
+ * $Date: 2002-02-19 14:13:57 -0500 (Tue, 19 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -243,7 +243,7 @@ void XxResources::initializeOriginalXdiff()
    _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;
    _boolOpts[ BOOL_DIRDIFF_RECURSIVE ] = false;
    _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
-#ifdef XX_ENABLE_SAVE_MERGED_FILE
+#ifdef XX_ENABLE_FORCE_SAVE_MERGED_FILE
    _boolOpts[ BOOL_FORCE_SAVE_MERGED_FILE ] = false;
 #endif
 
@@ -264,7 +264,11 @@ void XxResources::initializeOriginalXdiff()
 
    //---------------------------------------------------------------------------
 
+#ifndef WINDOWS
    _commands[ CMD_DIFF_FILES_2 ] = "diff";
+#else
+   _commands[ CMD_DIFF_FILES_2 ] = "V:/cygwin/bin/diff.exe";
+#endif
    _commands[ CMD_DIFF_FILES_3 ] = "diff3";
    _commands[ CMD_DIFF_DIRECTORIES ] = "diff -q -s";
    _commands[ CMD_DIFF_DIRECTORIES_REC ] = "diff -q -s -r";
@@ -312,6 +316,11 @@ void XxResources::initializeOriginalXdiff()
    _tags[ TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
    _tags[ TAG_CONDITIONAL_ELSE ] = "#else";
    _tags[ TAG_CONDITIONAL_ENDIF ] = "#endif";
+
+   // Defaults match CVS format.
+   _tags[ TAG_UNMERGE_START ] = "<<<<<<<";
+   _tags[ TAG_UNMERGE_SEP ] = "=======";
+   _tags[ TAG_UNMERGE_END ] = ">>>>>>>";
 
    //---------------------------------------------------------------------------
 
@@ -737,7 +746,8 @@ void XxResources::applyInitSwitch()
    // Note that these are only valid for 2-way diff command.
    const XxCommand cmdId = CMD_DIFF_FILES_2;
 
-   for ( int ii = int(CMDSW_FILES_IGNORE_TRAILING);
+   int ii;
+   for ( ii = int(CMDSW_FILES_IGNORE_TRAILING);
          ii <= int(CMDSW_FILES_IGNORE_BLANK_LINES);
          ++ii ) {
       QString swstr = getCommandSwitch( XxCommandSwitch(ii) );
@@ -752,7 +762,7 @@ void XxResources::applyInitSwitch()
    // problem, really, and this won't really hurt anyway.
    // Perhaps we should remove the switch if there is none though.
    QString cmd = getCommand( cmdId );
-   for ( int ii = int(CMDSW_FILES_QUALITY_NORMAL);
+   for ( ii = int(CMDSW_FILES_QUALITY_NORMAL);
          ii <= int(CMDSW_FILES_QUALITY_HIGHEST);
          ++ii ) {
 

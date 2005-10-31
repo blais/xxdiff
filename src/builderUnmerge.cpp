@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: builderUnmerge.cpp 485 2002-02-07 20:10:05Z blais $
- * $Date: 2002-02-07 15:10:05 -0500 (Thu, 07 Feb 2002) $
+ * $Id: builderUnmerge.cpp 519 2002-02-23 17:43:56Z blais $
+ * $Date: 2002-02-23 12:43:56 -0500 (Sat, 23 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -24,25 +24,18 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <builderConflicts.h>
-#include <exceptions.h>
+#include <builderUnmerge.h>
 #include <diffs.h>
-#include <util.h>
-#include <diffutils.h>
+#include <buffer.h>
+#include <resources.h>
 
-#include <qstring.h>
+#include <qcstring.h>
 #include <qtextstream.h>
-#include <qfile.h>
 
-#include <stdexcept>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <iostream>
-#include <sys/types.h>
-#include <sys/wait.h>
 
-//#define LOCAL_TRACE
+// #define LOCAL_TRACE
 #ifdef LOCAL_TRACE
 #define XX_LOCAL_TRACE(x) XX_TRACE(x)
 #else
@@ -51,380 +44,247 @@
 
 #include <memory>
 
-namespace {
-XX_NAMESPACE_USING
-
 /*==============================================================================
  * LOCAL DECLARATIONS
  *============================================================================*/
 
-//------------------------------------------------------------------------------
-//
-bool parseDiffLine( 
-   XxLine::Type&  type,
-   const QString& line,
-   XxFln&         f1n1, 
-   XxFln&         f1n2, 
-   XxFln&         f2n1, 
-   XxFln&         f2n2 
-)
-{
-   /* 
-    * this code taken from "ediff.c" by David MacKenzie, a published,
-    * uncopyrighted program to translate diff output into plain English 
-    */ 
-   const char* buf = line.latin1();
-
-   bool error = true;
-   if ( ( buf[0] == '<' ) || ( buf[0] == '>' ) || ( buf[0] == '-' ) ) {
-      type = XxLine::SAME;
-      error = false;
-   }
-   else if ( sscanf( buf, "%d,%dc%d,%d", &f1n1, &f1n2, &f2n1, &f2n2 ) == 4 ) {
-      type = XxLine::DIFF_ALL;
-      error = false;
-   }
-   else if ( sscanf( buf, "%d,%dc%d", &f1n1, &f1n2, &f2n1) == 3 ) {
-      f2n2 = f2n1;
-      type = XxLine::DIFF_ALL;
-      error = false;
-   }
-   else if ( sscanf( buf, "%dc%d,%d", &f1n1, &f2n1, &f2n2 ) == 3 ) {
-      f1n2 = f1n1;
-      type = XxLine::DIFF_ALL;
-      error = false;
-   }
-   else if ( sscanf( buf, "%dc%d", &f1n1, &f2n1 ) == 2 ) {
-      f2n2 = f2n1;
-      f1n2 = f1n1;
-      type = XxLine::DIFF_ALL;
-      error = false;
-   }
-   else if ( sscanf( buf, "%d,%dd%d", &f1n1, &f1n2, &f2n1 ) == 3 ) {
-      f2n2 = f2n1;
-      type = XxLine::INSERT_1;
-      error = false;
-   }
-   else if ( sscanf( buf, "%dd%d", &f1n1, &f2n1 ) == 2 ) {
-      f2n2 = f2n1;
-      f1n2 = f1n1;
-      type = XxLine::INSERT_1;
-      error = false;
-   }
-   else if ( sscanf( buf, "%da%d,%d", &f1n1, &f2n1, &f2n2 ) == 3 ) {
-      f1n2 = f1n1;
-      type = XxLine::INSERT_2;
-      error = false;
-   }
-   else if ( sscanf( buf, "%da%d", &f1n1, &f2n1 ) == 2 ) {
-      f1n2 = f1n1;
-      f2n2 = f2n1;
-      type = XxLine::INSERT_2;
-      error = false;
-   }
-   // else
-   return error;
-}
-
-#ifndef NO_PARSE_DIFF_ERROR // Not needed for now.
-
-/*==============================================================================
- * CLASS XxParseDiffError
- *============================================================================*/
-
-class XxParseDiffError : public XxError,
-                         public std::runtime_error {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor with state.
-   XxParseDiffError(
-      XX_EXC_PARAMS_DECL(file,line),
-      const XxFln fline1, 
-      const XxFln fline2, 
-      const XxFln f1n1, 
-      const XxFln f1n2, 
-      const XxFln f2n1, 
-      const XxFln f2n2 
-   );
-
-};
-
-//------------------------------------------------------------------------------
-//
-XxParseDiffError::XxParseDiffError(
-   XX_EXC_PARAMS_DECL(file,line),
-   const XxFln fline1, 
-   const XxFln fline2, 
-   const XxFln f1n1, 
-   const XxFln f1n2, 
-   const XxFln f2n1, 
-   const XxFln f2n2 
-) :
-   XxError( file, line ),
-   std::runtime_error( "Parse diff output error." )
-{
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
-   oss << "Error parsing diff output: file1:" 
-       << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: " 
-       << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
-}
-#endif
-
-}
-
 XX_NAMESPACE_BEGIN
-
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
  *============================================================================*/
 
 /*==============================================================================
- * CLASS XxBuilderConflicts
+ * CLASS XxBuilderUnmerge
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxBuilderConflicts::XxBuilderConflicts( bool useInternalDiff ) :
-   XxBuilder(),
-   _useInternalDiff( useInternalDiff )
+XxBuilderUnmerge::XxBuilderUnmerge() :
+   XxBuilder()
 {}
 
 //------------------------------------------------------------------------------
 //
-XxBuilderConflicts::~XxBuilderConflicts()
+XxBuilderUnmerge::~XxBuilderUnmerge()
 {}
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderConflicts::process( 
-   const QString& command,
-   const QString& path1,
-   const uint     nbLines1,
-   const QString& path2,
-   const uint     nbLines2
+// FIXME grab information from the tags to set the display names.
+
+std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+   const XxBuffer&    buffer,
+   const XxResources& resources,
+   QString&           outFileLeft,
+   QString&           outFileRight
 )
 {
-//#define XX_INTERNAL_DIFFS
+   initLines();
 
-   QStringList filenames;
-   filenames.append( path1 );
-   filenames.append( path2 );
-   const char** out_args;
-#ifdef XX_INTERNAL_DIFFS
-   int argc = 
-#endif
-   XxUtil::splitArgs( command, filenames, out_args );
+   // Note: starting from qt-3, QRegExp will have group matching, so we could
+   // have the tags specified using reg.exps instead of strings.
 
-#ifndef XX_INTERNAL_DIFFS
-   FILE* fout;
-   FILE* ferr;
-   XxUtil::spawnCommand( out_args, &fout, &ferr );
-   if ( fout == 0 || ferr == 0 ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-#else
-   std::auto_ptr<XxDiffutils> diffutils( new XxDiffutils );
-   diffutils->diff( argc, const_cast<char**>(out_args) );
-#endif
-   XxUtil::freeArgs( out_args );
-
-   _curHunk = 0;
-   XxFln fline1 = 1;
-   XxFln fline2 = 1;
-
-   QFile qfout;
-   qfout.open( IO_ReadOnly, fout );
-   QTextStream outputs( &qfout );
+   enum InConflict { OUTSIDE, IN1, IN2 };
+   InConflict inConflict = OUTSIDE;
 
    QTextOStream errors( &_errors );
-   XxFln f1n1, f1n2, f2n1, f2n2;
 
-   while ( true ) {
-#ifndef XX_INTERNAL_DIFFS
-      QString line = outputs.readLine();
-      if ( line.isNull() ) {
-         break;
-      }
-#else
-      QString line = diffutils->readLine();
-      if ( line.isNull() ) {
-         break;
-      }
-#endif
+   XxFln f1n1 = -1;
+   XxFln f1n2 = -1;
+   XxFln f2n1 = -1;
+   XxFln f2n2 = -1;
+   f1n1 = 1;
 
-      XxLine::Type type;
-      if ( parseDiffLine( type, line, f1n1, f1n2, f2n1, f2n2 ) == true ) {
-         XX_LOCAL_TRACE( "ERROR" );
-         errors << "Diff error:" << endl;
-         errors << line << endl;
-         continue;
-      }
+   QString tagStart = resources.getTag( TAG_UNMERGE_START );
+   QString tagSep = resources.getTag( TAG_UNMERGE_SEP );
+   QString tagEnd = resources.getTag( TAG_UNMERGE_END );
 
-      switch ( type ) {
-         case XxLine::INSERT_1: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
-            XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
-                            "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
+//    // Prepare name buffers.
+//    char* outStart = 0;
+//    char* outSep = 0;
+//    char* outEnd = 0;
+//    int nbExpStart = 0;
+//    int nbExpSep = 0;
+//    int nbExpEnd = 0;
+//    QRegExp leftRE( "%L" );
+//    QRegExp rightRE( "%R" );
 
-	    if ( f1n1 != fline1 ) {
-               XxFln fsize = f1n1 - fline1;
+//    // Clean tags of garbage that scanf could interpret maliciously.
+//    QRegExp otherRE( "%[^LR]" );
+//    tagStart.replace( otherRE, "" );
+//    tagSep.replace( otherRE, "" );
+//    tagEnd.replace( otherRE, "" );
 
-               createIgnoreBlock( 
-                  fline1, fline2, fsize 
-               );
-               fline1 += fsize;
-               fline2 += fsize;
+//    const QString sin = "%s";
+
+//    // Setup output variables.
+//    if ( tagStart.find( leftRE ) != -1 ) {
+//       tagStart.replace( leftRE, sin );
+//       outStart = bufleft;
+//       ++nbExpStart;
+//    }
+//    else if ( tagStart.find( rightRE ) != -1 ) {
+//       tagStart.replace( rightRE, sin );
+//       outStart = bufright;
+//       ++nbExpStart;
+//    }
+
+//    if ( tagSep.find( leftRE ) != -1 ) {
+//       tagSep.replace( leftRE, sin );
+//       outSep = bufleft;
+//       ++nbExpSep;
+//    }
+//    else if ( tagSep.find( rightRE ) != -1 ) {
+//       tagSep.replace( rightRE, sin );
+//       outSep = bufright;
+//       ++nbExpSep;
+//    }
+
+//    if ( tagEnd.find( leftRE ) != -1 ) {
+//       tagEnd.replace( leftRE, sin );
+//       outEnd = bufleft;
+//       ++nbExpEnd;
+//    }
+//    else if ( tagEnd.find( rightRE ) != -1 ) {
+//       tagEnd.replace( rightRE, sin );
+//       outEnd = bufright;
+//       ++nbExpEnd;
+//    }
+
+   XX_LOCAL_TRACE( "start tag: " << tagStart /*<< " " << nbExpStart*/ );
+   XX_LOCAL_TRACE( "sep tag: " << tagSep /*<< " " << nbExpSep*/ );
+   XX_LOCAL_TRACE( "end tag: " << tagEnd /*<< " " << nbExpEnd*/ );
+
+   QCString fileLeft;
+   QCString fileRight;
+
+   int nbLines = buffer.getNbLines();
+   XX_LOCAL_TRACE( "nbLines " << nbLines );
+   for ( XxFln l = 1; l <= nbLines; ++l ) {
+      uint len;
+      const char* textline = buffer.getTextLine( l, len );
+
+      if ( inConflict == OUTSIDE ) {
+         XX_LOCAL_TRACE( sscanf( textline, tagStart ) );
+
+         if ( qstrncmp( textline, tagStart, tagStart.length() ) == 0 ) {
+            XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
+            XX_CHECK( l - f1n1 >= 0 );
+            createIgnoreBlock( f1n1, f1n1, l - f1n1 );
+            f1n1 = l + 1;
+            inConflict = IN1;
+
+            // Grab string after opening tag, if present.
+            // Note that we only take the first such tag to appear in the file.
+            if ( len > tagStart.length() && fileLeft.isEmpty() ) {
+               fileLeft = QCString( &textline[tagStart.length()],
+                                    len - tagStart.length() + 1 );
+               fileLeft = fileLeft.stripWhiteSpace();
             }
-
-            int fsize = f1n2 - f1n1 + 1;
-            createInsertLeftBlock( fline1, fsize );
-            fline1 += fsize;
-
-         } break;
-
-         case XxLine::INSERT_2: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
-            XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
-                            "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
-
-	    if ( f2n1 != fline2 ) {
-               int fsize = f2n1 - fline2;
-
-               createIgnoreBlock( 
-                  fline1, fline2, fsize 
-               );
-               fline1 += fsize;
-               fline2 += fsize;
-            }
-
-            int fsize = f2n2 - f2n1 + 1;
-            createInsertRightBlock( fline2, fsize );
-            fline2 += fsize;
-
-         } break;
-
-         case XxLine::DIFF_ALL: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
-            XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
-                            "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
-
-            // Sanity check: the number of unchanged lines should be the same.
-            // ... *NOT* if we're using the GNU diff option that ignores blank
-            // line changes (-B)!  Disabled.
-            //
-	    // if ( (f1n1 - fline1) != (f2n1 - fline2) ) {
-            //    throw XxParseDiffError( 
-            //       fline1, fline2, f1n1, f1n2, f2n1, f2n2 
-            //    );
-            // }
-
-	    if ( f1n1 != fline1 ) {
-               int fsize = f1n1 - fline1;
-
-               createIgnoreBlock( 
-                  fline1, fline2, fsize 
-               );
-               fline1 += fsize;
-               fline2 += fsize;
-            }
-
-            int fsize1 = f1n2 - f1n1 + 1;
-            int fsize2 = f2n2 - f2n1 + 1;
-            createChangeBlock( fline1, fline2, fsize1, fsize2 );
-            fline1 += fsize1;
-            fline2 += fsize2;
-
-         } break;
-
-         case XxLine::SAME: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
-         } break;
-
-         case XxLine::DIFF_1:
-         case XxLine::DIFF_2:
-         case XxLine::DIFF_3:
-         case XxLine::DELETE_1:
-         case XxLine::DELETE_2:
-         case XxLine::DELETE_3:
-         case XxLine::INSERT_3:
-         case XxLine::DIFFDEL_1:
-         case XxLine::DIFFDEL_2:
-         case XxLine::DIFFDEL_3:
-         case XxLine::DIRECTORIES: {
          }
-
+         else {
+            // Do nothing, accumulate.
+         }
       }
-   }
-   qfout.close();
-
-   // Collect stderr.
-   QFile qferr;
-   qferr.open( IO_ReadOnly, ferr );
-   {
-      QTextStream errorss( &qferr );
-      QString errstr = errorss.read();
-      if ( !errstr.isNull() ) {
-         errors << errstr << endl;
+      else if ( inConflict == IN1 ) {
+         if ( qstrncmp( textline, tagSep, tagSep.length() ) == 0 ) {
+            f1n2 = l;
+            f2n1 = l + 1;
+            inConflict = IN2;
+         }
+         else {
+            // Do nothing, accumulate.
+         }
       }
+      else if ( inConflict == IN2 ) {
+         if ( qstrncmp( textline, tagEnd, tagEnd.length() ) == 0 ) {
+            f2n2 = l;
+            int fsize1 = f1n2 - f1n1;
+            int fsize2 = f2n2 - f2n1;
+            XX_CHECK( fsize1 >= 0 && fsize2 >= 0 );
+            XX_LOCAL_TRACE( "f1n1, f2n1, fsize1, fsize2 " 
+                            << f1n1 << " " << f2n1 << " "
+                            << fsize1 << " " << fsize2 );
+            if ( fsize1 == 0 && fsize2 == 0 ) {
+               errors << "Warning: empty change at line " << (f1n1 - 1)
+                      << " in file with conflicts." << endl;
+            }
+            if ( fsize1 == 0 ) {
+               createInsertRightBlock( f2n1, fsize2 );
+            }
+            else if ( fsize2 == 0 ) {
+               createInsertLeftBlock( f1n1, fsize1 );
+            }
+            else {
+               createChangeBlock( f1n1, f2n1, fsize1, fsize2 );
+            }
+
+            f1n1 = l + 1;
+            inConflict = OUTSIDE;
+
+            // Grab string after opening tag, if present.
+            // Note that we only take the first such tag to appear in the file.
+            if ( len > tagEnd.length() && fileRight.isEmpty() ) {
+               fileRight = QCString( &textline[tagEnd.length()],
+                                     len - tagEnd.length() + 1 );
+               fileRight = fileRight.stripWhiteSpace();
+            }
+         }
+         else {
+            // Do nothing, accumulate.
+         }
+      }
+
    }
-   qferr.close();
+   
+   // Add final ignore region if present.
+   if ( inConflict == OUTSIDE && f1n1 <= nbLines ) {
+      createIgnoreBlock( f1n1, f1n1, nbLines + 1 - f1n1 );
+   }
+   else if ( inConflict == IN1 ) {
+      /*--_curHunk; // Extend current hunk.*/ // (it works anyway)
+      createInsertLeftBlock( f1n1, nbLines + 1 - f1n1 );
+      errors << "Warning: file ends inside change at line " << (f1n1 - 1)
+             << endl;
+   }
+   else if ( inConflict == IN2 ) {
+      int fsize1 = f1n2 - f1n1;
+      int fsize2 = nbLines + 1 - f2n1;
+      if ( fsize1 == 0 && fsize2 == 0 ) {
+         // Don't bother... we'll be warning anyway.
+      }
+      if ( fsize1 == 0 ) {
+         createInsertRightBlock( f2n1, fsize2 );
+      }
+      else if ( fsize2 == 0 ) {
+         createInsertLeftBlock( f1n1, fsize1 );
+      }
+      else {
+         createChangeBlock( f1n1, f2n1, fsize1, fsize2 );
+      }
+      errors << "Warning: file ends inside change at line " << (f1n1 - 1)
+             << endl;
+   }
+
+   XX_LOCAL_TRACE( "DONE" );
 
    // Saved error text.
    errors << flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
-   // If we've read no lines and there are diff errors then blow off
-   if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
-#ifndef XX_INTERNAL_DIFFS
-      int stat_loc;
-      if ( wait( &stat_loc ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-      _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-#else
-      _status = 2;
-#endif
-      throw XxError( XX_EXC_PARAMS, _errors );
-   }
+   XX_LOCAL_TRACE( "Left: " << fileLeft );
+   XX_LOCAL_TRACE( "Right: " << fileRight );
 
-   // Add final ignore region if present.
-   uint nbRemainingLines = nbLines1 + 1 - fline1;
-   if ( nbRemainingLines != nbLines2 + 1 - fline2 ) {
-      throw XxError( XX_EXC_PARAMS, _errors );
-   }
-   if ( nbRemainingLines > 0 ) { 
-      createIgnoreBlock( fline1, fline2, nbRemainingLines );
-   }
-
-#ifndef XX_INTERNAL_DIFFS
-   int stat_loc;
-   if ( wait( &stat_loc ) == -1 ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-   _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-#else
-   _status = 2;
-#endif
-
-#ifndef XX_INTERNAL_DIFFS
-   ::fclose( fout );
-   ::fclose( ferr );
-#else
-   std::auto_ptr<XxDiffutils> null( 0 );
-   diffutils = null;
-#endif
-
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
+   outFileLeft = fileLeft;
+   outFileRight = fileRight;
+   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderConflicts::createIgnoreBlock( 
+void XxBuilderUnmerge::createIgnoreBlock( 
    XxFln fline1,
    XxFln fline2,
    uint  fsize
@@ -440,7 +300,7 @@ void XxBuilderConflicts::createIgnoreBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderConflicts::createChangeBlock( 
+void XxBuilderUnmerge::createChangeBlock( 
    XxFln fline1,
    XxFln fline2,
    uint  fsize1,
@@ -477,7 +337,7 @@ void XxBuilderConflicts::createChangeBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderConflicts::createInsertLeftBlock( 
+void XxBuilderUnmerge::createInsertLeftBlock( 
    XxFln fline1,
    uint  fsize
 )
@@ -492,7 +352,7 @@ void XxBuilderConflicts::createInsertLeftBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderConflicts::createInsertRightBlock( 
+void XxBuilderUnmerge::createInsertRightBlock( 
    XxFln fline2,
    uint  fsize
 )
@@ -504,15 +364,5 @@ void XxBuilderConflicts::createInsertRightBlock(
    }
    _curHunk++;
 }
-
-
-//------------------------------------------------------------------------------
-//
-void XxBuilderConflicts::addLine( const XxLine& line )
-{
-   XX_LOCAL_TRACE( "AddLine: " << line );
-   _lines.push_back( line );
-}
-
 
 XX_NAMESPACE_END

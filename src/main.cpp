@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: main.cpp 432 2001-11-30 07:21:57Z blais $
- * $Date: 2001-11-30 02:21:57 -0500 (Fri, 30 Nov 2001) $
+ * $Id: main.cpp 501 2002-02-12 02:32:31Z blais $
+ * $Date: 2002-02-11 21:32:31 -0500 (Mon, 11 Feb 2002) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -83,7 +83,8 @@ int main( int argc, char** argv, char** envp )
       }
    }
    catch ( const XxError& ex ) {
-      std::cerr << ex.getMsg() << std::endl;
+      std::cerr << static_cast<const char*>( ex.getMsg() ) << std::endl;
+      // Note: we're casting for Windows MSVC streams which are broken.
    }
    catch ( const std::exception& ex ) {
       std::cerr << ex.what() << std::endl;

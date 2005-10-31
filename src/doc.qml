@@ -20,6 +20,7 @@ document from the Help menu of xxdiff.
 <li><a href="#compdirs2">Comparing two directories</a></li>
 <li><a href="#merging">Merging files and resolving conflicts</a></li>
 <li><a href="#review">Merge review features</a></li>
+<li><a href="#unmerge">Unmerging merge conflicts</a></li>
 <li><a href="#editing">Editing files</a></li>
 <li><a href="#customization">Customization using resource file</a></li>
 <li><a href="#resources">Resource reference</a></li>
@@ -99,6 +100,11 @@ cat file2 | sort | xxdiff file1 - file3
 <p>
 If all the file paths are directories, a directory diff is invoked.  Note that
 xxdiff doesn't do three-way directory diffs.
+</p>
+
+<p>
+If the "unmerge" option is given, then xxdiff can only be invoked with a single
+file containing the conflicts.
 </p>
 
 <!-- ---------------------------------------- -->
@@ -689,6 +695,67 @@ Also note that clicking on the filename labels will put the filenames in the
 clipboard for similar cut-n-paste action.  This can be useful when reviewing
 ClearCase revision files, which often have very long p-names.
 </p>
+
+
+<!-- ----------------------------------------------------------------------- -->
+<a name="unmerge">
+<h2>Unmerging merge conflicts</h2>
+
+<p>
+Unmerging merge conflicts is a special input mode of xxdiff where a single file
+containing the result of an automatic merge of two files is split into two files
+and displayed as such.
+</p>
+
+<p>
+This may sound like a "trava lengua", but unmerging merge conflicts can be a
+very useful feature, if you like to let your source code management system
+automatically perform merges and save the output without user intervention, such
+as the way CVS is normally used. Typical use of the CVS update command will
+merge the main branch changes into your local copy files. When there are
+conflicts, your files are modified to contain both your changes and the main
+branch changes in the regions that conflict. CVS inserts text markers such as
+the following to indicate the conflictual regions:
+</p>
+
+<p>
+<pre>
+Some merged text.
+>>>>>>>> MYFILE
+I added this.
+========
+This line added in main branch.
+<<<<<<<< 1.1
+Some finetext.
+</pre>
+</p>
+
+<p>
+Then, the user is notified of the conflictual files, and has to go inspect the
+conflicts and resolve them by editing the file accordingly. The problem is that
+it is often quite difficult (and unpleasant) to figure out exactly what happened
+during the automated merge process, without the original files (note that CVS
+does make a backup copy of your file before writing it over with the merged
+output, see CVS manual for details).
+</p>
+
+<p>
+To help in figuring out what happened during merge and in performing the
+user-directed selections, xxdiff can be invoked in "unmerge mode" with the file
+containing the merge conflicts. It parses the file and generates two files from
+it, displaying them with differences. You can then perform selections as usual
+to produce the final merged file.
+</p>
+
+<p>
+Note that we think that this is not the best way of resolving conflicts, rather
+just a useful feature for people who like to work this way. A better way to
+merge would be to use your source code management system to fetch the common
+ancestor revision, the latest/head of the main branch and to invoke xxdiff with
+your file, the ancestor and the latest/head. You can also tell xxdiff to
+initially perform all non-conflictual selections automatically.
+</p>
+
 
 <!-- ----------------------------------------------------------------------- -->
 <a name="editing">
