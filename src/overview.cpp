@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.cpp 181 2001-06-04 01:23:53Z blais $
- * $Date: 2001-06-03 21:23:53 -0400 (Sun, 03 Jun 2001) $
+ * $Id: overview.cpp 211 2001-07-07 19:41:03Z blais $
+ * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -37,6 +37,8 @@
 #include <qpopupmenu.h>
 
 #include <math.h>
+
+#include <iostream>
 
 
 XX_NAMESPACE_BEGIN
@@ -125,9 +127,7 @@ void XxOverview::drawContents( QPainter* pp )
    for ( ii = 0; ii < nbFiles; ++ii ) {
       files[ii] = _app->getFile( ii );
       XX_ASSERT( files[ii] != 0 );
-
       flines[ii] = files[ii]->getNbLines();
-      
       maxlines = std::max( maxlines, flines[ii] );
    }
    if ( maxlines == 0 ) {
@@ -150,29 +150,16 @@ void XxOverview::drawContents( QPainter* pp )
    p.setPen( pen );
    QBrush brush( QBrush::SolidPattern );
 
-   int y1[3];
-   int y2[3];
-   int dy[3];
-   int x[3];
-   for ( ii = 0; ii < nbFiles; ++ii ) {
-      y1[ii] = int( h * (1-flines[ii]/float(maxlines))/2.0f ) + 1;
-      y2[ii] = h-y1[ii];
-      dy[ii] = y2[ii]-y1[ii];
-   }
-   int cx = 0;
    for ( ii = 0; ii < nbFiles; ++ii ) {
       // Draw both ends.
       brush.setColor( backgroundColor );
-      p.fillRect( cx, 0, fileWidth, y1[ii], brush );
-      p.fillRect( cx, y2[ii], fileWidth, h-y2[ii], brush );
+      p.fillRect( _fileL[ii], 0, fileWidth, _fileT[ii], brush );
+      p.fillRect( _fileL[ii], _fileB[ii], fileWidth, h - _fileB[ii], brush );
 
       if ( ii != (nbFiles-1) ) {
          // Draw separator background.
-         p.fillRect( cx+fileWidth, 0, sepWidth, h, brush );
+         p.fillRect( _fileR[ii], 0, sepWidth, h, brush );
       }
-      
-      x[ii] = cx;
-      cx += fileWidth + sepWidth;
    }
 
    // Draw regions.
@@ -181,16 +168,17 @@ void XxOverview::drawContents( QPainter* pp )
 
    // Start drawing at beginning of blocks.
    int prevy[3];
-   prevy[0] = y1[0];
-   prevy[1] = y1[1];
-   prevy[2] = y1[2];
+   prevy[0] = _fileT[0];
+   prevy[1] = _fileT[1];
+   prevy[2] = _fileT[2];
    XxFln fline[3] = { 0,0,0 };
    QColor back, fore;
 
    // Draw very first line connecting regions.
    for ( ii = 0; ii < nbFiles; ++ii ) {
       if ( ii > 0 ) {
-         p.drawLine( x[ii] - sepWidth, prevy[ii-1], x[ii], prevy[ii] );
+         p.drawLine( _fileR[ii-1], prevy[ii-1], 
+                     _fileL[ii], prevy[ii] );
       }
    }
    
@@ -201,12 +189,13 @@ void XxOverview::drawContents( QPainter* pp )
 
          int fsize = diffs->getNbFileLines( ii, start, end );
          if ( fsize == 0 ) {
-            p.drawLine( x[ii], prevy[ii], x[ii] + fileWidth, prevy[ii] );
+            p.drawLine( _fileL[ii], prevy[ii], 
+                        _fileR[ii], prevy[ii] );
          }
          else {
             fline[ii] += fsize;
 
-            int yend = y1[ii] + (dy[ii]*fline[ii])/flines[ii];
+            int yend = _fileT[ii] + (_fileDy[ii]*fline[ii])/flines[ii];
             int ddy = yend - prevy[ii] + 1;
 
             const XxLine& line = diffs->getLine( start );
@@ -215,16 +204,16 @@ void XxOverview::drawContents( QPainter* pp )
 
             resources->getRegionColor( dtype, back, fore );
             brush.setColor( back );
-            p.fillRect( x[ii]+1, prevy[ii], fileWidth-2, ddy, brush );
+            p.fillRect( _fileL[ii]+1, prevy[ii], fileWidth-2, ddy, brush );
 
-            p.drawRect( x[ii], prevy[ii], fileWidth, ddy );
+            p.drawRect( _fileL[ii], prevy[ii], fileWidth, ddy );
 
             prevy[ii] = yend;
          }
 
          // Draw lines between regions.
          if ( ii > 0 ) {
-            p.drawLine( x[ii] - sepWidth, prevy[ii-1], x[ii], prevy[ii] );
+            p.drawLine( _fileR[ii-1], prevy[ii-1], _fileL[ii], prevy[ii] );
          }
       }
 
@@ -238,47 +227,52 @@ void XxOverview::drawContents( QPainter* pp )
    XxDln curline = _app->getCursorLine();
    XxDln topline = _app->getTopLine();
    XxDln bottomline = _app->getBottomLine();
-   const int visRegionBorder = 6;
    QColor cursorColor = resources->getColor( XxResources::COLOR_CURSOR );
    for ( ii = 0; ii < nbFiles; ++ii ) {
       bool aempty;
-      float curfline;
+      XxFln cfline;
 
       // Compute and draw visible region.
-      curfline = diffs->getFileLine( ii, topline, aempty );
+      cfline = diffs->getFileLine( ii, topline, aempty );
       if ( aempty == true ) {
-         curfline += 1.0;
+         cfline += 1;
       }
-      int toppos = y1[ii] + int( (dy[ii]*(curfline-1.0f))/flines[ii] );
+      int toppos =
+         _fileT[ii] + 
+         int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
 
-      curfline = diffs->getFileLine( ii, bottomline, aempty ) + 1.0;
-      int bottompos = y1[ii] + int( (dy[ii]*(curfline-1.0f))/flines[ii] );
+      cfline = diffs->getFileLine( ii, bottomline, aempty ) + 1;
+      int bottompos =
+         _fileT[ii] + 
+         int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
 
       p.setPen( cursorColor );
-      p.drawRect( x[ii] + visRegionBorder, toppos, 
-                  fileWidth - 2*visRegionBorder, bottompos - toppos );
+      p.drawRect( _regL[ii], toppos,
+                  _regR[ii] - _regL[ii], bottompos - toppos );
       p.setPen( Qt::black );
 
       // Compute arrow position.
-      curfline = diffs->getFileLine( ii, curline, aempty ) + 0.5;
+      float fcfline = diffs->getFileLine( ii, curline, aempty ) + 0.5;
       if ( aempty == true ) {
-         curfline += 0.5;
+         fcfline += 0.5;
       }
-      curppos[ii] = y1[ii] + int( (dy[ii]*(curfline-1.0f))/flines[ii] );
+      curppos[ii] =
+         _fileT[ii] + 
+         int( (_fileDy[ii] * (fcfline-1)) / float( flines[ii] ) );
 
       if ( ii > 0 ) {
 
          // Draw left arrow.
-         int pts1[6] = { x[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
-                         x[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
-                         x[ii] - sepWidth, curppos[ii-1] };                
+         int pts1[6] = { _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
+                         _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
+                         _fileL[ii] - sepWidth, curppos[ii-1] };                
          QPointArray pa1( 3, pts1 );
          p.drawPolygon( pa1 );
 
          // Draw right arrow.
-         int pts2[6] = { x[ii] + dx, curppos[ii] - dyo2,
-                         x[ii] + dx, curppos[ii] + dyo2,
-                         x[ii], curppos[ii] };                
+         int pts2[6] = { _fileL[ii] + dx, curppos[ii] - dyo2,
+                         _fileL[ii] + dx, curppos[ii] + dyo2,
+                         _fileL[ii], curppos[ii] };                
          QPointArray pa2( 3, pts2 );
          p.drawPolygon( pa2 );
       }
@@ -290,18 +284,21 @@ void XxOverview::drawContents( QPainter* pp )
    p.setBrush( Qt::white );
    const int sdx = 3;
    const int fw2 = fileWidth/2;
-   const std::vector<XxDiffs::SeaResult>& sresults = diffs->getSearchResults();
+   const std::vector<XxDiffs::SearchResult>& sresults =
+      diffs->getSearchResults();
    for ( uint is = 0; is < sresults.size(); ++is ) {
       for ( ii = 0; ii < nbFiles; ++ii ) {
 
          XxFln fline = sresults[is]._fline[ii];
          if ( fline != -1 ) {
             float ffline = fline + 0.5f;
-            int ypos = y1[ii] + int( (dy[ii]*(ffline-1.0f))/flines[ii] );
-            int pts1[8] = { x[ii] + fw2 - sdx, ypos,
-                            x[ii] + fw2, ypos + sdx,
-                            x[ii] + fw2 + sdx, ypos,
-                            x[ii] + fw2, ypos - sdx };
+            int ypos =
+               _fileT[ii] +
+               int( (_fileDy[ii] * (ffline-1)) / float( flines[ii] ) );
+            int pts1[8] = { _fileL[ii] + fw2 - sdx, ypos,
+                            _fileL[ii] + fw2, ypos + sdx,
+                            _fileL[ii] + fw2 + sdx, ypos,
+                            _fileL[ii] + fw2, ypos - sdx };
             QPointArray pa1( 4, pts1 );
             p.drawPolygon( pa1 );
          }
@@ -312,4 +309,159 @@ void XxOverview::drawContents( QPainter* pp )
    // p.end();
 }
 
+//------------------------------------------------------------------------------
+//
+void XxOverview::mousePressEvent( QMouseEvent* e )
+{
+   // Map in contents rect.
+   QRect rect = contentsRect();
+   int x = e->x() - rect.x();
+   int y = e->y() - rect.y();
+
+   // Find out in which file it was clicked.
+   uint nbFiles = _app->getNbFiles();
+   uint no;
+   for ( no = 0; no < nbFiles; ++no ) {
+      if ( _fileL[no] < x && x < _fileR[no] ) {
+         break;
+      }
+   }
+   if ( no == nbFiles ) {
+      return;
+   }
+
+   // Find out if it was clicked in the visible region.
+   if ( !( _regL[no] <= x && x <= _regR[no] ) ) {
+      return;
+   }
+
+   // Find out if it was clicked in the visible region.
+   if ( !( _fileT[no] <= y && y <= _fileB[no] ) ) {
+      return;
+   }
+
+   const XxDiffs* diffs = _app->getDiffs();
+   /*XxDln curline = _app->getCursorLine();*/
+   XxDln topline = _app->getTopLine();
+   XxDln bottomline = _app->getBottomLine();
+
+   XxBuffer* files[3];
+   XxFln flines[3];
+   for ( uint ii = 0; ii < nbFiles; ++ii ) {
+      files[ii] = _app->getFile( ii );
+      XX_ASSERT( files[ii] != 0 );
+      flines[ii] = files[ii]->getNbLines();
+   }
+
+   bool aempty;
+   float cfline = diffs->getFileLine( no, topline, aempty );
+   if ( aempty == true ) {
+      cfline += 1.0;
+   }
+   int toppos =
+      _fileT[no] +
+      int( (_fileDy[no] * (cfline-1)) / float( flines[no] ) );
+
+   cfline = diffs->getFileLine( no, bottomline, aempty ) + 1;
+   int bottompos =
+      _fileT[no] +
+      int( (_fileDy[no] * (cfline-1)) / float( flines[no] ) );
+
+   if ( !( toppos <= y && y <= bottompos ) ) {
+      return;
+   }
+
+   // At this point, visible region `no' has been chosen.
+   _manipNo = no;
+   _manipAnchor = y;
+   _manipTopLine = topline;
+   _manipFlines = flines[no];
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOverview::mouseMoveEvent( QMouseEvent* e )
+{
+   if ( _manipNo != -1 ) {
+      // Map in contents rect.
+      QRect rect = contentsRect();
+      int y = e->y() - rect.y();
+      int dy = y - _manipAnchor;
+
+      XxFln dline =
+         int( ( dy ) * _manipFlines / float( _fileDy[_manipNo] ) + 1 );
+
+      XxFln newTopLine = _manipTopLine + dline;
+      std::cout << dline << " " << newTopLine << std::endl;
+
+      _app->setTopLine( newTopLine );
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOverview::mouseReleaseEvent( QMouseEvent* /*e*/ )
+{
+   if ( _manipNo != -1 ) {
+      _manipNo = -1;
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxOverview::resizeEvent( QResizeEvent* e )
+{
+   BaseClass::resizeEvent( e );
+
+   // Recompute drawing data, and keep it around for picking.
+   uint nbFiles = _app->getNbFiles();
+
+   //
+   // Compute left/right extents.
+   //
+   const XxResources* resources = XxResources::getInstance();
+   int fileWidth = resources->getOverviewFileWidth();
+   int sepWidth = resources->getOverviewSepWidth();
+   
+   const int visRegionBorder = int( 0.25 * fileWidth );
+   int cx = 0;
+   for ( uint ii = 0; ii < nbFiles; ++ii ) {
+      _fileL[ii] = cx;
+      cx += fileWidth;
+      _fileR[ii] = cx;
+      cx += sepWidth;
+
+      _regL[ii] = _fileL[ii] + visRegionBorder;
+      _regR[ii] = _fileR[ii] - visRegionBorder;
+   }
+
+   //
+   // Compute top/bottom extents.
+   //
+
+   // Get the files and compute lengths.
+   XxBuffer* files[3];
+   XxFln flines[3];
+   XxFln maxlines = 0;
+   uint ii;
+   for ( ii = 0; ii < nbFiles; ++ii ) {
+      files[ii] = _app->getFile( ii );
+      XX_ASSERT( files[ii] != 0 );
+
+      flines[ii] = files[ii]->getNbLines();
+      maxlines = std::max( maxlines, flines[ii] );
+   }
+
+   QRect rect = contentsRect();
+   int h = rect.height();
+
+   for ( ii = 0; ii < nbFiles; ++ii ) {
+      _fileT[ii] = int( h * (1 - flines[ii] / float(maxlines) ) * 0.5f ) + 1;
+      _fileB[ii] = h - _fileT[ii];
+      _fileDy[ii] = _fileB[ii] - _fileT[ii];
+   }
+
+}
+
 XX_NAMESPACE_END
+

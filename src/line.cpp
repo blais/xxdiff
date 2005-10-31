@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.cpp 183 2001-06-04 05:08:52Z blais $
- * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
+ * $Id: line.cpp 206 2001-06-14 23:17:58Z blais $
+ * $Date: 2001-06-14 19:17:58 -0400 (Thu, 14 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -281,7 +281,7 @@ void XxLine::initializeHorizontalDiff(
 
          if ( ignoreWs && 
               ( allbegin || 
-                ( isspace( *pl0 ) && isspace( *pl1 ) && isspace( *pl2 ) ) ) ) {
+                ( isspace( *pl0 ) || isspace( *pl1 ) || isspace( *pl2 ) ) ) ) {
             while ( isspace( *pl0 ) && pl0 < end0 ) { pl0++; }
             while ( isspace( *pl1 ) && pl1 < end1 ) { pl1++; }
             while ( isspace( *pl2 ) && pl2 < end2 ) { pl2++; }
@@ -316,7 +316,7 @@ void XxLine::initializeHorizontalDiff(
 
          if ( ignoreWs &&
               ( allend ||
-                ( isspace( *pr0 ) && isspace( *pr1 ) && isspace( *pr2 ) ) ) ) {
+                ( isspace( *pr0 ) || isspace( *pr1 ) || isspace( *pr2 ) ) ) ) {
             while ( isspace( *pr0 ) && pr0 >= pl0 && pr0 >= text0 ) { pr0--; }
             while ( isspace( *pr1 ) && pr1 >= pl1 && pr1 >= text1 ) { pr1--; }
             while ( isspace( *pr2 ) && pr2 >= pl2 && pr2 >= text2 ) { pr2--; }
@@ -401,7 +401,7 @@ void XxLine::initializeHorizontalDiff(
 
          if ( ignoreWs &&
               ( allbegin ||
-                ( isspace( *pl0 ) && isspace( *pl1 ) ) ) ) {
+                ( isspace( *pl0 ) || isspace( *pl1 ) ) ) ) {
             while ( isspace( *pl0 ) && pl0 < end0 ) { pl0++; }
             while ( isspace( *pl1 ) && pl1 < end1 ) { pl1++; }
          }
@@ -430,7 +430,7 @@ void XxLine::initializeHorizontalDiff(
 
          if ( ignoreWs &&
               ( allend ||
-                ( isspace( *pr0 ) && isspace( *pr1 ) ) ) ) {
+                ( isspace( *pr0 ) || isspace( *pr1 ) ) ) ) {
             while ( isspace( *pr0 ) && pr0 >= pl0 && pr0 >= text0 ) { pr0--; }
             while ( isspace( *pr1 ) && pr1 >= pl1 && pr1 >= text1 ) { pr1--; }
          }

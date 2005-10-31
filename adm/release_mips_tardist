@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# $Id: release_mips_tardist 194 2001-06-05 21:44:25Z blais $
+#
+
+VERSION=`tools/get_version`
+
+SBASE=$HOME/xxdiff
+COMPONENTS="xxdiff xxdiff.idb xxdiff.sw xxdiff.man"
+DEST=$HOME/xxdiff-$VERSION.mips.tardist
+
+
+# Generate distribution.
+gendist -sbase $SBASE -idb $SBASE/spec/xxdiff-sgi.idb \
+ -spec $SBASE/spec/xxdiff-sgi.spec -dist /tmp -all
+
+( cd /tmp  ; tar cvf $DEST $COMPONENTS ; rm $COMPONENTS )
+
+
+
+
+

@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.cpp 160 2001-05-28 14:39:15Z blais $
- * $Date: 2001-05-28 10:39:15 -0400 (Mon, 28 May 2001) $
+ * $Id: diffs.cpp 202 2001-06-08 16:04:58Z blais $
+ * $Date: 2001-06-08 12:04:58 -0400 (Fri, 08 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -115,12 +115,12 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 /*==============================================================================
- * CLASS XxDiffs::SeaResult
+ * CLASS XxDiffs::SearchResult
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxDiffs::SeaResult::SeaResult() :
+XxDiffs::SearchResult::SearchResult() :
    _lineNo( -1 )
 {
    _fline[0] = _fline[1] = _fline[2] = -1;
@@ -128,7 +128,10 @@ XxDiffs::SeaResult::SeaResult() :
 
 //------------------------------------------------------------------------------
 //
-XxDiffs::SeaResult::SeaResult( const XxDln lineNo, const XxFln fline[3] ) :
+XxDiffs::SearchResult::SearchResult(
+   const XxDln lineNo,
+   const XxFln fline[3]
+) :
    _lineNo( lineNo )
 {
    _fline[0] = fline[0];
@@ -138,7 +141,7 @@ XxDiffs::SeaResult::SeaResult( const XxDln lineNo, const XxFln fline[3] ) :
 
 //------------------------------------------------------------------------------
 //
-bool XxDiffs::SeaResult::isValid() const
+bool XxDiffs::SearchResult::isValid() const
 {
    return _lineNo != -1;
 }
@@ -909,7 +912,7 @@ void XxDiffs::search(
 
    for ( uint ii = 1; ii <= _lines.size(); ++ii ) {
       const XxLine& line = getLineNC( ii );
-      SeaResult scurrent; // init as invalid
+      SearchResult scurrent; // init as invalid
 
       // Look in all files.
       for ( int ni = 0; ni < nbFiles; ++ni ) {
@@ -935,14 +938,14 @@ void XxDiffs::search(
 
 //------------------------------------------------------------------------------
 //
-const std::vector<XxDiffs::SeaResult>& XxDiffs::getSearchResults() const
+const std::vector<XxDiffs::SearchResult>& XxDiffs::getSearchResults() const
 {
    return _searchResults;
 }
 
 //------------------------------------------------------------------------------
 //
-XxDiffs::SeaResult XxDiffs::findNextSearch( XxDln lineNo ) const
+XxDiffs::SearchResult XxDiffs::findNextSearch( XxDln lineNo ) const
 {
    XX_ASSERT( lineNo > 0 && lineNo <= XxDln(_lines.size()) );
 
@@ -953,12 +956,12 @@ XxDiffs::SeaResult XxDiffs::findNextSearch( XxDln lineNo ) const
       }
    }
    // else return invalid.
-   return SeaResult();
+   return SearchResult();
 }
 
 //------------------------------------------------------------------------------
 //
-XxDiffs::SeaResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
+XxDiffs::SearchResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
 {
    XX_ASSERT( lineNo > 0 && lineNo <= XxDln(_lines.size()) );
 
@@ -969,7 +972,7 @@ XxDiffs::SeaResult XxDiffs::findPreviousSearch( XxDln lineNo ) const
       }
    }
    // else return invalid.
-   return SeaResult();
+   return SearchResult();
 }
 
 //------------------------------------------------------------------------------

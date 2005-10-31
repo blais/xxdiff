@@ -5,7 +5,12 @@ bin_PROGRAMS = xxdiff
 
 CXXFLAGS = @CXXFLAGS@ 
 CXXFLAGS += -I$(QTDIR)/include
-LDFLAGS += @LDFLAGS@ -L$(QTDIR)/lib
+
+if IS_COMPILER_MIPSPRO
+LDFLAGS += @LDFLAGS@ $(USER_LDFLAGS) -L$(QTDIR)/lib32
+else
+LDFLAGS += @LDFLAGS@ -L/usr/X11R6/lib -L$(QTDIR)/lib
+endif
 
 ################################################################################
 # designer dialogs
@@ -176,7 +181,6 @@ EXTRA_DIST += rcfileParser.lex rcfileParser.y
 # flags
 
 CXXFLAGS += $(USER_INCLUDES)
-LDFLAGS += $(USER_LDFLAGS) -L/usr/X11R6/lib
 
 
 ################################################################################
@@ -216,7 +220,9 @@ LIBS += $(LINKSTATIC_LIBS) -lX11 -lXext -lm
 ################################################################################
 # --enable-runtime-help option
 
-man.h: xxdiff.1
+#man.h: xxdiff.1
+
+man.h:
 	echo "char manText[] = " > man.h
 	nroff -man xxdiff.1 | col -b | sed -e 's/\(.*\)/"\1\\\n"/' >> man.h
 	echo ";" >> man.h
@@ -249,14 +255,18 @@ COMPILER_MIPSPRO_LDADDA = -lC -lCio
 # for basename
 COMPILER_MIPSPRO_LIBS += -lgen
 
+# for linking dynamically with potential SGI freeware Qt install.
+COMPILER_MIPSPRO_LIBS += -rpath /usr/freeware/lib32
+
 MIPSSTRIPFLAGS = -s
 
 endif
+
 CXXFLAGS += $(COMPILER_MIPSPRO_CXXFLAGS)
 CPPFLAGS += $(COMPILER_MIPSPRO_CPPFLAGS)
 LDADD += $(COMPILER_MIPSPRO_LDADDA)
 LIBS += $(COMPILER_MIPSPRO_LIBS)
- 
+
 if DEBUG
 else
 DEBUGFLAGS += $(MIPSSTRIPFLAGS)
@@ -368,7 +378,7 @@ CLEANFILES = *.moc.cpp ii_files/* cxx_repository/* .deps/*
 
 DISTCLEANFILES = rcfileParser.y.c rcfileParser.y.h rcfileParser.lex.c
 
-MAINTAINERCLEANFILES = xxdiff.catman man.h \
+MAINTAINERCLEANFILES = xxdiff.catman \
 	$(UIDESIGNER_HEADERS) $(UIDESIGNER_SOURCES)
 
 

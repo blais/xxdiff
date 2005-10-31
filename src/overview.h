@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: overview.h 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: overview.h 207 2001-06-15 21:11:06Z blais $
+ * $Date: 2001-06-15 17:11:06 -0400 (Fri, 15 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -57,6 +57,10 @@ class XxOverview : public QFrame {
 
 public:
 
+   /*----- types and enumerations -----*/
+
+   typedef QFrame BaseClass;
+
    /*----- member functions -----*/
 
    // Constructor.
@@ -71,11 +75,39 @@ public:
    // Override to expand.
    virtual QSizePolicy sizePolicy() const;
 
+protected:
+
+   /*----- member functions -----*/
+
+   // See base class.
+   // <group>
+   virtual void mousePressEvent( QMouseEvent* );
+   virtual void mouseMoveEvent( QMouseEvent* );
+   virtual void mouseReleaseEvent( QMouseEvent* );
+   virtual void resizeEvent( QResizeEvent* );
+   // </group>
+
 private:
 
    /*----- data members -----*/
 
-   XxApp*	_app;
+   XxApp* _app;
+
+   // Data computed upon resizing.
+   int    _fileL[3]; // Left borders of files (in pixels).
+   int    _fileR[3]; // Right borders of file (in pixels).
+   int    _fileT[3]; // Top of files (in pixels).
+   int    _fileB[3]; // Bottom of files (in pixels).
+   int    _fileDy[3]; // Length of files (in pixels).
+
+   int    _regL[3]; // Left borders of visible region (in pixels).
+   int    _regR[3]; // Right borders of visible region (in pixels).
+
+   int    _manipNo;
+   int    _manipTopLine;
+   int    _manipFlines;
+   int    _manipAnchor;
+   
 
 };
 
@@ -83,3 +115,4 @@ private:
 XX_NAMESPACE_END
 
 #endif
+

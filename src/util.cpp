@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.cpp 183 2001-06-04 05:08:52Z blais $
- * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
+ * $Id: util.cpp 210 2001-06-27 01:57:08Z blais $
+ * $Date: 2001-06-26 21:57:08 -0400 (Tue, 26 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -27,6 +27,9 @@
 #include <util.h>
 #include <exceptions.h>
 #include <main.h>
+
+#include <qstring.h>
+#include <qtextstream.h>
 
 #include <sstream>
 #include <iostream>
@@ -187,9 +190,10 @@ bool XxUtil::testFile(
    
    // Check for access.
    if ( access( filename, R_OK ) != 0 ) {
-      std::ostringstream oss;
-      oss << "Cannot access file: " << filename << std::ends;
-      throw new XxIoError( oss.str().c_str() );
+      QString s;
+      QTextOStream oss( & s );
+      oss << "Cannot access file: " << filename;
+      throw new XxIoError( s.latin1() );
    }
 
    // Stat file.
@@ -276,7 +280,7 @@ bool XxUtil::spawnCommand(
       }
 
       default: {
-         if ( sigaction != 0 ) {
+         if ( sigChldHandler != 0 ) {
             XX_TRACE( "Installing SIGCHLD handler." );
 
             // sigset_t spm_o;
@@ -436,4 +440,18 @@ void XxUtil::printTime( std::ostream& os, long time )
    os << "sec.usec=" << tv_sec << "." << tv_usec << std::endl;
 }
 
+//------------------------------------------------------------------------------
+//
+void XxUtil::TESTQTSTREAMS() const
+{
+   QString s;
+   QTextOStream oss( & s );
+   oss << "Cannot access file: " << "gugu";
+
+   std::cout << s.latin1();
+
+
+}
+
 XX_NAMESPACE_END
+

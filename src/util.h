@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: util.h 186 2001-06-04 20:16:12Z blais $
- * $Date: 2001-06-04 16:16:12 -0400 (Mon, 04 Jun 2001) $
+ * $Id: util.h 208 2001-06-18 03:17:30Z blais $
+ * $Date: 2001-06-17 23:17:30 -0400 (Sun, 17 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -112,6 +112,9 @@ public:
 
    // Print time value to stream.
    static void printTime( std::ostream& os, long time );
+
+   // FIXME remove
+   void TESTQTSTREAMS() const;
 
 };
 

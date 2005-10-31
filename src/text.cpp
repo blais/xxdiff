@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: text.cpp 181 2001-06-04 01:23:53Z blais $
- * $Date: 2001-06-03 21:23:53 -0400 (Sun, 03 Jun 2001) $
+ * $Id: text.cpp 212 2001-07-09 20:43:50Z blais $
+ * $Date: 2001-07-09 16:43:50 -0400 (Mon, 09 Jul 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -479,44 +479,50 @@ std::string XxText::formatClipboardLine(
 {
    std::string forline = clipboardFormat;
    
+   std::string::size_type pos = 0;
+
    // Fileno.
    while ( 1 ) {
-      std::string::size_type pos = forline.find( "%N" );
-      if ( pos == std::string::npos ) {
+      std::string::size_type spos = forline.find( "%N", pos );
+      if ( spos == std::string::npos ) {
          break;
       }
       char buf[12];
       ::snprintf( buf, sizeof(buf), "%d", fileno );
-      forline.replace( pos, 2, buf );
+      forline.replace( spos, 2, buf );
+      pos += spos + ::strlen( buf );
    }
 
    // Lineno.
    while ( 1 ) {
-      std::string::size_type pos = forline.find( "%L" );
-      if ( pos == std::string::npos ) {
+      std::string::size_type spos = forline.find( "%L", pos );
+      if ( spos == std::string::npos ) {
          break;
       }
       char buf[12];
       ::snprintf( buf, sizeof(buf), "%d", lineno );
-      forline.replace( pos, 2, buf );
+      forline.replace( spos, 2, buf );
+      pos += spos + ::strlen( buf );
    }
 
    // Filename.
    while ( 1 ) {
-      std::string::size_type pos = forline.find( "%F" );
-      if ( pos == std::string::npos ) {
+      std::string::size_type spos = forline.find( "%F", pos );
+      if ( spos == std::string::npos ) {
          break;
       }
-      forline.replace( pos, 2, filename );
+      forline.replace( spos, 2, filename );
+      pos = spos + filename.length();
    }
 
    // Line contents.
    while ( 1 ) {
-      std::string::size_type pos = forline.find( "%s" );
-      if ( pos == std::string::npos ) {
+      std::string::size_type spos = forline.find( "%s", pos );
+      if ( spos == std::string::npos ) {
          break;
       }
-      forline.replace( pos, 2, lineContents );
+      forline.replace( spos, 2, lineContents );
+      pos = spos + lineContents.length();
    }
 
    return forline;

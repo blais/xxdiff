@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: resources.cpp 183 2001-06-04 05:08:52Z blais $
- * $Date: 2001-06-04 01:08:52 -0400 (Mon, 04 Jun 2001) $
+ * $Id: resources.cpp 193 2001-06-05 20:29:44Z blais $
+ * $Date: 2001-06-05 16:29:44 -0400 (Tue, 05 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -1325,7 +1325,7 @@ XxDefaultsParser::XxDefaultsParser()
    _map[ XxResources::OVERVIEW_FILE_WIDTH ] = "20";
    _map[ XxResources::OVERVIEW_SEP_WIDTH ] = "14";
    _map[ XxResources::VERTICAL_LINE_POS ] = "80";
-   _map[ XxResources::CLIPBOARD_TEXT_FORMAT ] = "%N: %L";
+   _map[ XxResources::CLIPBOARD_TEXT_FORMAT ] = "%L: %s";
 
 }
 

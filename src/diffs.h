@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: diffs.h 158 2001-05-28 02:17:42Z blais $
- * $Date: 2001-05-27 22:17:42 -0400 (Sun, 27 May 2001) $
+ * $Id: diffs.h 202 2001-06-08 16:04:58Z blais $
+ * $Date: 2001-06-08 12:04:58 -0400 (Fri, 08 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -81,15 +81,15 @@ public:
 
    /*----- types and enumerations -----*/
 
-   struct SeaResult {
+   struct SearchResult {
 
       /*----- member functions -----*/
 
       // Construtor for invalid search result.
-      SeaResult();
+      SearchResult();
 
       // Constructor.
-      SeaResult( const XxDln lineNo, const XxFln fline[3] );
+      SearchResult( const XxDln lineNo, const XxFln fline[3] );
 
       // Returns true if valid.
       bool isValid() const;
@@ -247,12 +247,12 @@ public:
    );
 
    // Returns the search results.
-   const std::vector<SeaResult>& getSearchResults() const;
+   const std::vector<SearchResult>& getSearchResults() const;
 
    // Finds the next/previous search results.
    // <group>
-   SeaResult findNextSearch( XxDln lineNo ) const;
-   SeaResult findPreviousSearch( XxDln lineNo ) const;
+   SearchResult findNextSearch( XxDln lineNo ) const;
+   SearchResult findPreviousSearch( XxDln lineNo ) const;
    // </group>
 
    // Initialize horizontal diffs for lines.
@@ -308,13 +308,13 @@ private:
    /*----- data members -----*/
 
    // list of line descriptors
-   std::vector< XxLine >    _lines;
+   std::vector< XxLine >       _lines;
 
-   std::vector< SeaResult > _searchResults;
+   std::vector< SearchResult > _searchResults;
 
-   bool                     _initializedHorizontalDiffs;
-   bool                     _isDirectoryDiff;
-   bool                     _dirty;
+   bool                        _initializedHorizontalDiffs;
+   bool                        _isDirectoryDiff;
+   bool                        _dirty;
 
 };
 

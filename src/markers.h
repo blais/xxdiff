@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: markers.h 158 2001-05-28 02:17:42Z blais $
- * $Date: 2001-05-27 22:17:42 -0400 (Sun, 27 May 2001) $
+ * $Id: markers.h 211 2001-07-07 19:41:03Z blais $
+ * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -124,6 +124,7 @@ public:
       const QString& startWith,
       const QString& filter,
       QWidget*       parent,
+      const char*    name,
       bool           threeWay,
       bool&          useConditionals,
       bool&          removeEmptyConditionals,

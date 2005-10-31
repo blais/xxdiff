@@ -115,6 +115,11 @@ extern int _getopt_internal (int argc, char *const *argv,
 		             const struct option *longopts, int *longind,
 			     int long_only);
 #else /* not __STDC__ */
+/* extern int getopt (); */ /* blais: commented out for solaris2.8 build */
+/* blais: Have to use full defn for Sparc, somehow */
+/*extern int getopt_long (int argc, char *const *argv, const char *shortopts,
+		        const struct option *longopts, int *longind);*/
+
 extern int getopt ();
 extern int getopt_long ();
 extern int getopt_long_only ();

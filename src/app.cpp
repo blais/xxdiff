@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: app.cpp 178 2001-06-02 01:26:38Z blais $
- * $Date: 2001-06-01 21:26:38 -0400 (Fri, 01 Jun 2001) $
+ * $Id: app.cpp 211 2001-07-07 19:41:03Z blais $
+ * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -52,6 +52,7 @@
 #ifdef XX_USE_RCFILE
 #include <rcfileParser.h>
 #endif
+
 #include <getopt.h>
 
 #include <qmainwindow.h>
@@ -167,10 +168,10 @@ public:
 
    // Constructor.
    XxMainWindow( 
-      XxApp* app,
-      QWidget* parent = 0, 
+      XxApp*      app,
+      QWidget*    parent = 0, 
       const char* name = 0, 
-      WFlags f = WType_TopLevel 
+      WFlags      f = WType_TopLevel 
    );
 
 
@@ -185,10 +186,10 @@ private:
 //------------------------------------------------------------------------------
 //
 XxMainWindow::XxMainWindow( 
-   XxApp* app,
-   QWidget* parent,
+   XxApp*      app,
+   QWidget*    parent,
    const char* name, 
-   WFlags f
+   WFlags      f
 ) :
    QMainWindow( parent, name, f ),
    _app( app )
@@ -683,7 +684,7 @@ void XxApp::createUI( uint nbTextWidgets )
 {
    XX_ASSERT( _resources != 0 );
 
-   _mainWindow = new XxMainWindow( this );
+   _mainWindow = new XxMainWindow( this, 0, "xxdiff main window" );
 
    //
    // Create widgets
@@ -1000,17 +1001,17 @@ void XxApp::createMenus()
    // File menu
    QPopupMenu* fileMenu = new QPopupMenu;
    fileMenu->insertItem( 
-      "Open left...", this, SLOT(openLeft()), 
+      "Replace left file...", this, SLOT(openLeft()), 
       _resources->getAccelerator( XxResources::ACCEL_OPEN_LEFT ) 
    );
    if ( _nbFiles == 3 ) {
       fileMenu->insertItem( 
-         "Open middle...", this, SLOT(openMiddle()), 
+         "Replace middle file...", this, SLOT(openMiddle()), 
          _resources->getAccelerator( XxResources::ACCEL_OPEN_MIDDLE ) 
       );
    }
    fileMenu->insertItem( 
-      "Open right...", this, SLOT(openRight()), 
+      "Replace right file...", this, SLOT(openRight()), 
       _resources->getAccelerator( XxResources::ACCEL_OPEN_RIGHT ) 
    );
    fileMenu->insertSeparator();
@@ -1451,7 +1452,7 @@ void XxApp::createMenus()
    _displayMenu->setItemEnabled( _menuids[ ID_ToggleShowMarkers ], false );
 
 
-   if ( _filesAreDirectories == false ) {
+   if ( _filesAreDirectories == false && _nbFiles == 3 ) {
 
       _displayMenu->insertSeparator();
       
@@ -2416,7 +2417,7 @@ void XxApp::saveToFile( const char* filename, const bool ask )
    if ( !allSelected ) {
 
       f = XxMarkersFileDialog::getSaveFileName( 
-         cleanname, QString::null, _mainWindow,
+         cleanname, QString::null, _mainWindow, "xxdiff save file",
          _nbFiles == 3,
          useConditionals, 
          removeEmptyConditionals,
@@ -2432,7 +2433,7 @@ void XxApp::saveToFile( const char* filename, const bool ask )
    }
    else if ( ask == true || !allSelected ) {
       f = QFileDialog::getSaveFileName( 
-         cleanname, QString::null, _mainWindow
+         cleanname, QString::null, _mainWindow, "xxdiff save file"
       );
       if ( f.isEmpty() ) {
          // The user cancelled the dialog.
@@ -2615,7 +2616,7 @@ void XxApp::openFile( const XxFno no )
       startWith = filenames[no].c_str();
    }
    QString f = QFileDialog::getOpenFileName( 
-      startWith, QString::null, _mainWindow 
+      startWith, QString::null, _mainWindow, "xxdiff open file"
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
@@ -2826,7 +2827,7 @@ void XxApp::saveSelectedOnly()
    }
 
    QString f = QFileDialog::getSaveFileName( 
-      QString::null, QString::null, _mainWindow
+      QString::null, QString::null, _mainWindow, "xxdiff save selected"
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
@@ -2941,7 +2942,7 @@ void XxApp::search()
 void XxApp::searchForward()
 {
    if ( _diffs.get() != 0 ) {
-      XxDiffs::SeaResult sres =
+      XxDiffs::SearchResult sres =
          _diffs->findNextSearch( getCursorLine() );
       if ( sres.isValid() ) {
 	 setCursorLine( sres._lineNo );
@@ -2959,7 +2960,7 @@ void XxApp::searchForward()
 void XxApp::searchBackward()
 {
    if ( _diffs.get() != 0 ) {
-      XxDiffs::SeaResult sres = 
+      XxDiffs::SearchResult sres = 
          _diffs->findPreviousSearch( getCursorLine() );
       if ( sres.isValid() ) {
          setCursorLine( sres._lineNo );
@@ -3708,7 +3709,9 @@ void XxApp::mergedView()
 
    // Popup merged view.
    if ( _mergedWindow == 0 ) {
-      _mergedWindow = new XxMergedWindow( this, _mainWindow );
+      _mergedWindow = new XxMergedWindow(
+         this, _mainWindow, "xxdiff merged window"
+      );
    }
    if ( _mergedWindow->isVisible() == false ) {
       // Resize the merged window to have the same size as the text widgets.
@@ -3928,7 +3931,10 @@ void XxApp::helpGenInitFile()
 {
    QString f;
    f = QFileDialog::getSaveFileName( 
-      QString( "sample.xxdiffrc" ), QString::null, _mainWindow
+      QString( "sample.xxdiffrc" ),
+      QString::null,
+      _mainWindow,
+      "xxdiff save sample"
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
@@ -4090,7 +4096,7 @@ void XxApp::synchronizeUI()
       _resources->getBoolOpt( XxResources::SHOW_MARKERS )
    );
 
-   if ( _filesAreDirectories == false ) {
+   if ( _filesAreDirectories == false && _nbFiles == 3 ) {
 
       XxResources::IgnoreFile ignoreFile = _resources->getIgnoreFile();
       _displayMenu->setItemChecked( _menuids[ ID_IgnoreFileNone ], 

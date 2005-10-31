@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# $Id: release_bin 192 2001-06-05 01:13:39Z blais $
+#
 
 # Package for simple binary release.
 VERSION=`tools/get_version`

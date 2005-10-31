@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: line.inline.h 181 2001-06-04 01:23:53Z blais $
- * $Date: 2001-06-03 21:23:53 -0400 (Sun, 03 Jun 2001) $
+ * $Id: line.inline.h 202 2001-06-08 16:04:58Z blais $
+ * $Date: 2001-06-08 12:04:58 -0400 (Fri, 08 Jun 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -160,6 +160,7 @@ inline XxFno XxLine::mapTypeToFileNo( Type type )
       case XxLine::DIFFDEL_2: lno = 1; break;
       case XxLine::DIFFDEL_3: lno = 2; break;
       case XxLine::DIRECTORIES: lno = -1; break;
+      case XxLine::NB_TYPES: XX_ASSERT( false );
    }
    return lno;
 }

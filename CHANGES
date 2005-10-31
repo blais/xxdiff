@@ -2,11 +2,37 @@
 #
 # CHANGES for xxdiff
 #
-# $Id: CHANGES 189 2001-06-04 21:47:40Z blais $
+# $Id: CHANGES 216 2001-07-11 18:38:29Z blais $
 #
 
 Current development version:
-  
+
+------------------------------
+
+Version 1.13:
+
+   * Release.
+
+   * Change in parser, workaround for ":" in clipboard text string.
+   * Fixed bug with clipboard formatting on files that had %s in them 
+     (infinite loop).
+   * Generated and removed dependency on man.h.
+   * Fixed bug [430778]: renamed "open file" to "replace file".
+   * Fixed bug [437962]: no window class name, in all windows and dialogs.
+   * Started implementing overview area scrollbar, the offset is not file
+     specific yet, the inverse mapping (file to display) has to be done.
+   * Autoconf-2.50 fixes under IRIX.
+   * Fixed logical bug in ignore horizontal whitespace.
+     It should ignore much more now!
+   * Lots of spec file diddling.
+   * Bug fix: ignore file was displayed in 2-way diff mode.
+
+------------------------------
+
+Version 1.12:
+
+   * Release.
+
    * Implemented options ui for ignore file feature.
    * Fixed spec file for redhat compliance and succesfully sbumitted to
      rhcontrib.
@@ -732,8 +758,20 @@ Version 1.0:
 
 --------------------------------------------------------------------------------
 
-Wishlist/ToDo list:
+Wishlist/ToDo todo TODO list:
 ------------------------------
+
+ - autoconf: rename configure.in to configure.ac when autoconf-2.50 becomes
+   ubiquitous; 
+
+
+ - ignore horizontal whitespace is buggy, it doesn't ignore two separate
+   whitespace changes
+
+ - per-hunk ignore whitespace (ignores whitespace if a hunk's non-whitespace
+   chars are all the same... this should allow filtering out most code
+   re-indentation and such)
+
 
  - builder for patches
  - drag sb overview
@@ -804,7 +842,8 @@ great blue overhaul:
 
  - show two or three sides in merged view, as an option
 
- - link with GNU diff, script to modify the source code
+ - link with GNU diff, perhaps a write script to modify the source code for
+   gathering output if that's necessary
 
 
 gijsbert dinner:

@@ -1,8 +1,29 @@
+dnl
+dnl $Id: configure.in 217 2001-07-11 18:38:29Z  $
+dnl $Date: 2001-07-11 14:38:29 -0400 (Wed, 11 Jul 2001) $
+dnl
+dnl Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+dnl
+
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/defs.h)
 
 XXDIFF_MAJOR_VERSION=1
-XXDIFF_MINOR_VERSION=12
+XXDIFF_MINOR_VERSION=13
 
 AC_SUBST(XXDIFF_MAJOR_VERSION)
 AC_SUBST(XXDIFF_MINOR_VERSION)
@@ -19,16 +40,15 @@ dnl XXDIFF_VERSION=$XXDIFF_MAJOR_VERSION.$XXDIFF_MINOR_VERSION.$XXDIFF_MICRO_VER
 AM_INIT_AUTOMAKE(xxdiff,${XXDIFF_VERSION})
 AM_PROG_LIBTOOL
 
-dnl According to doc, this is required for compiler-specific behaviour but it
-dnl seems to work without anyway.
-dnl AC_CANONICAL_SYSTEM
+dnl Really required since autoconf 2.50.
+AC_CANONICAL_BUILD
 
 AC_PROG_MAKE_SET
 
 dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_YACC
-AM_PROG_LEX
+dnl AM_PROG_LEX
 
 AC_PATH_QT_MOC
 AC_PATH_PROG(UIC, uic, $QTDIR/bin/uic, $QTDIR/bin:$PATH)
@@ -64,13 +84,13 @@ dnl
 AM_CONDITIONAL(IS_COMPILER_GNU, test x$GXX = xyes)
 
 AM_CONDITIONAL(IS_COMPILER_MIPSPRO,
-test x$build_alias = xmips-sgi-irix6.5)
+test x$build_vendor = xsgi)
 
 AM_CONDITIONAL(IS_COMPILER_SUNWSPRO,
-test x$build_alias = xsparc-sun-solaris2.8)
+test x$build_vendor = xsun)
 
 AM_CONDITIONAL(IS_COMPILER_COMPAQCXX,
-echo $build_alias | grep -q '\-osf' && $CXX -V | grep -q Compaq)
+echo $build_triplet | grep -q '\-osf' && $CXX -V | grep -q Compaq)
 
 dnl
 dnl xxdiff options

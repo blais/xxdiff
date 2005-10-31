@@ -1,6 +1,6 @@
 /******************************************************************************\
- * $Id: stringResParser.cpp 138 2001-05-20 18:08:45Z blais $
- * $Date: 2001-05-20 14:08:45 -0400 (Sun, 20 May 2001) $
+ * $Id: stringResParser.cpp 211 2001-07-07 19:41:03Z blais $
+ * $Date: 2001-07-07 15:41:03 -0400 (Sat, 07 Jul 2001) $
  *
  * Copyright (C) 1999-2001  Martin Blais <blais@iro.umontreal.ca>
  *
@@ -142,7 +142,7 @@ XxStringResParser::~XxStringResParser()
          iter != _resources.end();
          ++iter ) {
       if ( (*iter).second._used == false ) {
-         std::cerr << "Warning: ignored resource: "
+         std::cerr << "xxdiff warning: ignored resource: "
                    << (*iter).first
                    << " : " 
                    << (*iter).second._value << std::endl;

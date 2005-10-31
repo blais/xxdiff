@@ -4,8 +4,10 @@ xxdiff README
 Home page: http://xxdiff.sourceforge.net
 Author: Martin Blais <blais@iro.umontreal.ca>
 
-To build from source:
+Building from source:
 ------------------------------
+# You'll need g++-2.96 or higher, because of the STL that comes with it (the STL
+# that comes with 2.95.x is not sufficient).
 
 # Run automoc (you'll get a link error if you forget this).
 perl ./automoc
@@ -16,25 +18,17 @@ perl ./automoc
 # Compile
 make
 
-# Install
+# Installling by hand.
 su - 
 cp src/xxdiff /usr/X11R6/bin
 
 
 
-To build from redhat srpm:
-------------------------------
-
-# Standard procedure: cp pristine sources and run automated build.
-cp xxdiff-<version>.tar.gz /usr/src/redhat/SOURCES
-rpm -ba xxdiff/spec/xxdiff-<version>.spec
-
-
-
-
-Compile warnings:
-------------------------------
-You might get some of the following warnings, due to a bug in libstdc++:
+#
+# Compile warnings
+#
+You might get some of the following warnings, due to a bug in libstdc++ that
+comes with 2.96:
 
 In file included from stringResParser.cpp:35:
 /usr/include/g++-3/sstream: In method `int stringbuf::sync ()':
@@ -42,8 +36,61 @@ In file included from stringResParser.cpp:35:
 
 
 
+Source packaging:
+------------------------------
+make dist
 
-To distribute source I use:
+
+
+Redhat Linux packaging:
+------------------------------
+# Standard procedure: cp pristine distribution sources and run automated build.
+cp xxdiff-<version>.tar.gz /usr/src/redhat/SOURCES
+rpm -ba xxdiff/spec/xxdiff-<version>.spec
+
+# Installing from redhat package.
+rpm -Uvh xxdiff-<version>.i386.rpm
+
+
+
+Debian Linux packaging:
+------------------------------
+See web page for link.
+
+
+
+OpenBSD packaging:
+------------------------------
+In the ports tree.
+
+
+
+SGI packaging:
+------------------------------
+./configure ; make ; tools/release_dist
+#To install the SGI package you'll need fw_qt and it's prerequisites.
+
+# Installing from tardist package.
+inst -f xxdiff-<version>.mips.tardist
+> go
+
+
+
+My release process:
 ------------------------------
 
-make dist
+1) build
+make dist (problem with autoconf 2.50, fix bug by hand $$/ to $$d/)
+build src.rpm and i389.rpm for linux
+build mips.tardist on sgi
+
+2) distribute
+add release to sourceforge project
+upload to sourceforge htdocs (secondary download location)
+upload to sourceforge web page
+upload to rhcontrib.bero.org
+
+3) announce
+release announcement on freshmeat.net
+announce from sourceforge project release
+
