@@ -14,3 +14,5 @@ moc_*
 doc.h
 version.h
 *.merge
+*.o
+.cvsignore
