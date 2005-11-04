@@ -1,0 +1,64 @@
+/* 
+ * Common definitions for Furius projects web pages. 
+ */
+
+body {
+  font-family: Luxi Sans, Lucida, Arial, sans-serif;
+  margin: 0px;
+  padding: 0px; /* for IE -- krock */
+  background-color: rgb(255,255,255);
+}
+
+div.document {
+  margin-top: 0em;
+  margin-left: 1.2em;
+  margin-right: 1.2em;
+}
+
+div#project-header {
+  background-color: rgb(0,0,0);
+  background-repeat: no-repeat;
+  height: 62px;
+  border-bottom: 3px solid black;
+  margin: 0px;
+  padding: 0px; /* for IE -- krock */
+}
+
+/* main large logo  */
+#logo {
+  z-index: 5;
+  border-style: none;
+  position: absolute;  /* necessary for z-index */
+}
+
+div#project-home { 
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  padding-top: 2px;
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-bottom: 2px;
+  background-color: #CCC;
+}
+
+div#project-home a:link, div#project-home a:visited {
+  color: #666;
+  text-decoration: none;
+  text-align: center;
+  font-size: small;
+}
+
+div#download-link { 
+  float: right;
+  text-align: right;
+  font-size: small;
+  font-weight: bold;
+  margin: 10px;
+}
+
+div#download-link a { 
+  text-decoration: overline;
+  color: blue;
+}
+
