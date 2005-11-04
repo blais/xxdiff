@@ -13,7 +13,7 @@ TXTDOC=\
 
 TXTDOC_HTML = $(TXTDOC:.txt=.html)
 
-TXTHTML_CONVERT=docutils-html-convert
+TXTHTML_CONVERT=projects-rst2html --project-header  --project-home=".."
 
 TOOLS=\
 	xxdiff-cond-replace \
@@ -47,6 +47,7 @@ $(TOOLS_HTML) : %.html : $(BIN)/%
 clean:
 	rm -f $(USERMANUAL)
 	rm -f $(TOOLS_HTML)
+	rm -f $(TXTDOC_HTML)
 
 debug:
 	@echo TOOLS

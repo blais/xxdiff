@@ -3,13 +3,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.3.0: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.3.10: http://docutils.sourceforge.net/" />
 <title>Integrating xxdiff with scripts</title>
 <meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
 <meta name="date" content="2004-01-21" />
-<link rel="stylesheet" href="/docutils-style.css" type="text/css" />
+<link rel="stylesheet" href="../style.css" type="text/css" />
 </head>
 <body>
+
+<div id="project-header">
+  <a href="/"><img src="/home/furius-logo-w.png" id="logo"></a>
+  <div id="project-home"><a href="..">Project Home</a></div>
+</div>
+
 <div class="document" id="integrating-xxdiff-with-scripts">
 <h1 class="title">Integrating xxdiff with scripts</h1>
 <table class="docinfo" frame="void" rules="none">
@@ -23,12 +29,12 @@
 </tbody>
 </table>
 <div class="abstract topic">
-<p class="topic-title">Abstract</p>
+<p class="topic-title first">Abstract</p>
 <p>A summary of some of the features and techniques that can be used to
 integrate xxdiff with your own homegrown programs.</p>
 </div>
-<div class="contents topic" id="table-of-contents">
-<p class="topic-title"><a name="table-of-contents">Table of Contents</a></p>
+<div class="contents topic">
+<p class="topic-title first"><a id="table-of-contents" name="table-of-contents">Table of Contents</a></p>
 <ul class="simple">
 <li><a class="reference" href="#introduction" id="id1" name="id1">Introduction</a></li>
 <li><a class="reference" href="#features-and-techniques" id="id2" name="id2">Features and Techniques</a><ul>
@@ -45,8 +51,8 @@ integrate xxdiff with your own homegrown programs.</p>
 <li><a class="reference" href="#examples" id="id11" name="id11">Examples</a></li>
 </ul>
 </div>
-<div class="section" id="introduction">
-<h1><a class="toc-backref" href="#id1" name="introduction">Introduction</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id1" id="introduction" name="introduction">Introduction</a></h1>
 <p>xxdiff is built with integration in mind since the first version.  It does not
 include builtin support for specific source control systems, such as CVS or
 ClearCase.  Instead, its command-line interface is built so that it can easily
@@ -57,33 +63,33 @@ environments, with various revision control systems (CVS, ClearCase, others).
 This document aims at introducing these features and explaining how they are
 meant to be used.</p>
 </div>
-<div class="section" id="features-and-techniques">
-<h1><a class="toc-backref" href="#id2" name="features-and-techniques">Features and Techniques</a></h1>
-<div class="section" id="automatic-maximizing">
-<h2><a class="toc-backref" href="#id3" name="automatic-maximizing">Automatic Maximizing</a></h2>
+<div class="section">
+<h1><a class="toc-backref" href="#id2" id="features-and-techniques" name="features-and-techniques">Features and Techniques</a></h1>
+<div class="section">
+<h2><a class="toc-backref" href="#id3" id="automatic-maximizing" name="automatic-maximizing">Automatic Maximizing</a></h2>
 <p>Often xxdiff is used in a policing context, where the reviewer/&quot;merge cop&quot; will
 have to visualize a series of files one-by-one and make comments on each. Many
 people like to maximize their xxdiff to perform this arduous task. You can set
-the <tt class="literal"><span class="pre">Geometry</span></tt> resource to special value <tt class="literal"><span class="pre">Maximize</span></tt> for that purpose.  (Note
+the <tt class="docutils literal"><span class="pre">Geometry</span></tt> resource to special value <tt class="docutils literal"><span class="pre">Maximize</span></tt> for that purpose.  (Note
 that you can also specify arbitraty resource strings on the command-line with
-the <tt class="literal"><span class="pre">--resource</span></tt> option).</p>
+the <tt class="docutils literal"><span class="pre">--resource</span></tt> option).</p>
 </div>
-<div class="section" id="reading-files-from-stdin">
-<h2><a class="toc-backref" href="#id4" name="reading-files-from-stdin">Reading Files from Stdin</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id4" id="reading-files-from-stdin" name="reading-files-from-stdin">Reading Files from Stdin</a></h2>
 <p>Sometimes it can be convenient to use the output of a process directly as input
 for comparison, for example, something like this:</p>
 <pre class="literal-block">
 cat foo.c | sed -e 's/get_instance/getInstance/g' | xxdiff foo.c -
 </pre>
-<p>You can specify <tt class="literal"><span class="pre">-</span></tt> in lieu of a filename on the xxdiff command-line to let it
+<p>You can specify <tt class="docutils literal"><span class="pre">-</span></tt> in lieu of a filename on the xxdiff command-line to let it
 know to read standard input for that file position.  (Internally, xxdiff will
 have to create a temporary file by itself to spawn GNU diff on it but you don't
 really need to know that.)</p>
 <p>Note that xxdiff currently cannot read different files from different file
 descriptors, i.e. it can only read from stdin or files.</p>
 </div>
-<div class="section" id="adding-arbitraty-information-to-filenames">
-<h2><a class="toc-backref" href="#id5" name="adding-arbitraty-information-to-filenames">Adding Arbitraty Information to Filenames</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id5" id="adding-arbitraty-information-to-filenames" name="adding-arbitraty-information-to-filenames">Adding Arbitraty Information to Filenames</a></h2>
 <p>In the xxdiff interface, the filename is shown over the corresponding file.</p>
 <p>Often when calling xxdiff from a wrapper script, you will run xxdiff on a
 temporary file, or accepting input from stdin.  It can also be that there is a
@@ -92,49 +98,49 @@ or that the file has been somehow manipulated automatically before being
 compared, or that it represents a specific revision. It is only natural that you
 would want to show this information in the graphical comparison program.</p>
 <p>To that extent, xxdiff allows you to specify what information you want displayed
-over the file.  Use the <tt class="literal"><span class="pre">--title1</span></tt>, <tt class="literal"><span class="pre">--title2</span></tt> or <tt class="literal"><span class="pre">--title3</span></tt> options to
+over the file.  Use the <tt class="docutils literal"><span class="pre">--title1</span></tt>, <tt class="docutils literal"><span class="pre">--title2</span></tt> or <tt class="docutils literal"><span class="pre">--title3</span></tt> options to
 have xxdiff display what you want it to.</p>
 </div>
-<div class="section" id="setting-the-output-filename">
-<h2><a class="toc-backref" href="#id6" name="setting-the-output-filename">Setting the Output Filename</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id6" id="setting-the-output-filename" name="setting-the-output-filename">Setting the Output Filename</a></h2>
 <p>Sometimes you may be invoking xxdiff with the intent of maybe getting a merged
 output file as a result. In order to specify where this result should lie,
 xxdiff provides the concept of &quot;merged filename&quot;, which is the default location
 where it will save the results of user selections, the merged file.  You can
-provide this filename on the command-line with the <tt class="literal"><span class="pre">--merged-filename</span></tt> option.</p>
+provide this filename on the command-line with the <tt class="docutils literal"><span class="pre">--merged-filename</span></tt> option.</p>
 <p>Note that when a merged filename is specific on the command-line, xxdiff will
 not warn when overwriting that file. We assume that since you specify a
 particular file to be used for merged output, you expect it to be potentially
 overwritten.</p>
 </div>
-<div class="section" id="requesting-accept-merge-reject-decision">
-<h2><a class="toc-backref" href="#id7" name="requesting-accept-merge-reject-decision">Requesting Accept/Merge/Reject Decision</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id7" id="requesting-accept-merge-reject-decision" name="requesting-accept-merge-reject-decision">Requesting Accept/Merge/Reject Decision</a></h2>
 <p>Sometimes you may want to <strong>force</strong> the user to produce a merged file as the
 result of file comparison.  For this purpose, we provide the Decision or
-Accept/Merge/Reject mode in xxdiff, triggered with the <tt class="literal"><span class="pre">--decision</span></tt> option.</p>
+Accept/Merge/Reject mode in xxdiff, triggered with the <tt class="docutils literal"><span class="pre">--decision</span></tt> option.</p>
 <p>In this mode, xxdiff will not let you exit normally.  Instead:</p>
 <ul class="simple">
 <li>if you press 'A', the file on the right will be saved as the merged file and
-<tt class="literal"><span class="pre">ACCEPT</span></tt> will be printed on stdout;</li>
+<tt class="docutils literal"><span class="pre">ACCEPT</span></tt> will be printed on stdout;</li>
 <li>if you press 'R', the file on the left will be saved as the merged file and
-<tt class="literal"><span class="pre">REJECT</span></tt> will be printed on stdout;</li>
+<tt class="docutils literal"><span class="pre">REJECT</span></tt> will be printed on stdout;</li>
 <li>if you press 'M', the results of user selections will be saved as the merged
-file and <tt class="literal"><span class="pre">MERGED</span></tt> will be printed on stdout;</li>
+file and <tt class="docutils literal"><span class="pre">MERGED</span></tt> will be printed on stdout;</li>
 </ul>
 <p>In all three cases, the merged file will be saved with the appropriate contents.
 Note that if xxdiff gets terminated otherwise (e.g. by the window manager), it
-will print out the string <tt class="literal"><span class="pre">NODECISION</span></tt>.</p>
-<p>The calling script can invoke xxdiff (specifying <tt class="literal"><span class="pre">--merged-filename</span></tt>) and read
+will print out the string <tt class="docutils literal"><span class="pre">NODECISION</span></tt>.</p>
+<p>The calling script can invoke xxdiff (specifying <tt class="docutils literal"><span class="pre">--merged-filename</span></tt>) and read
 its stdout to find out the result of the decision, and then pick up the merged
 file and do whatever is desired with it.</p>
 <p>If you prefer to work with the mouse, three distinct buttons will appear on the
 toolbar for that purpose.</p>
 </div>
-<div class="section" id="indication-of-input-processing-completion">
-<h2><a class="toc-backref" href="#id8" name="indication-of-input-processing-completion">Indication of Input Processing Completion</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id8" id="indication-of-input-processing-completion" name="indication-of-input-processing-completion">Indication of Input Processing Completion</a></h2>
 <p>In some circumstances, a calling script will generate temporary files for a
 short time, just to pass them on to xxdiff as input.  If you want to delete
-those files as soon as possible, you may use the <tt class="literal"><span class="pre">--indicate-input-processed</span></tt>
+those files as soon as possible, you may use the <tt class="docutils literal"><span class="pre">--indicate-input-processed</span></tt>
 option to xxdiff which will make it print the string 'INPUT-PROCESSED` as soon
 as it does not need its inputs anymore.</p>
 <p>Thus you would do something like this:</p>
@@ -145,24 +151,24 @@ as it does not need its inputs anymore.</p>
 <li>wait for xxdiff to complete.</li>
 </ol>
 </div>
-<div class="section" id="return-value">
-<h2><a class="toc-backref" href="#id9" name="return-value">Return Value</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id9" id="return-value" name="return-value">Return Value</a></h2>
 <p>By default, xxdiff returns the same return value that GNU diff does (see
 diff(1)).</p>
-<p>This behaviour is altered if you use the <tt class="literal"><span class="pre">--exit-with-merge-status</span></tt> option:
+<p>This behaviour is altered if you use the <tt class="docutils literal"><span class="pre">--exit-with-merge-status</span></tt> option:
 if all diff hunks are selected and no unsaved selections exist, only then xxdiff
 will exit with code of 0.</p>
 </div>
-<div class="section" id="conditional-display">
-<h2><a class="toc-backref" href="#id10" name="conditional-display">Conditional Display</a></h2>
-<p>If <tt class="literal"><span class="pre">--exit-on-same</span></tt> is selected xxdiff does not show its UI and exits if the
+<div class="section">
+<h2><a class="toc-backref" href="#id10" id="conditional-display" name="conditional-display">Conditional Display</a></h2>
+<p>If <tt class="docutils literal"><span class="pre">--exit-on-same</span></tt> is selected xxdiff does not show its UI and exits if the
 files are have no differences (according to GNU diff).</p>
-<p>If <tt class="literal"><span class="pre">--exit-if-no-conflicts</span></tt> is selected xxdiff does not show its UI and exits
+<p>If <tt class="docutils literal"><span class="pre">--exit-if-no-conflicts</span></tt> is selected xxdiff does not show its UI and exits
 if automatic merging would result in no conflicts.</p>
 </div>
 </div>
-<div class="section" id="examples">
-<h1><a class="toc-backref" href="#id11" name="examples">Examples</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id11" id="examples" name="examples">Examples</a></h1>
 <p>You can look at the various scripts available in the distribution in the <a class="reference" href="../bin/">bin
 directory</a> or the <a class="reference" href="../tools/">tools directory</a>. They are working
 examples of integration between xxdiff and Bourne-shell and Python scripts.</p>
