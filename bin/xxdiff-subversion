@@ -90,7 +90,7 @@ def main():
     # run command
     xxdiff_path = 'xxdiff'
 
-    decision = False
+    decision = len(args) == 3
     cmd = [xxdiff_path]
     if decision:
         cmd.append('--decision')
