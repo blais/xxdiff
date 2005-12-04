@@ -159,7 +159,7 @@ if automatic merging would result in no conflicts.
 Examples
 --------
 
-You can look at the various scripts available in the distribution in the ``bin
-directory`` or the ``tools directory``. They are working examples of integration
+You can look at the various scripts available in the distribution in the ``bin``
+directory or the ``tools`` directory. They are working examples of integration
 between xxdiff and Bourne-shell and Python scripts.
 
