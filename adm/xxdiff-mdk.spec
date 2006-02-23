@@ -6,7 +6,7 @@ Copyright: GNU GPL
 Group: Development/Tools
 Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.gz
 URL: http://xxdiff.sourceforge.net
-Packager: Martin Blais <blais@furius.ca>
+Packager: Philippe Corbes <philippe.corbes@laposte.net>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: libqt3 >= 3.0
 BuildRequires: libqt3-devel >= 3.0
