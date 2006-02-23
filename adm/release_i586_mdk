@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# $RCSfile: release_i586_mdk,v $
+#
+
+if [ ! -d "adm" ]; then
+     echo "You must be running this script from the topdir directory."
+     exit 1;
+fi
+
+# Note: this script assume that release_bin has already been called.
+
+echo "== Getting version number"
+VERSION=`adm/get_version`
+echo "==   Version is " $VERSION
+
+echo "== Getting and creating top dir"
+BUILDROOT=`rpm --showrc | egrep "[^{]_topdir" | cut --fields=2 | sed -e 'sX%{_usrsrc}X/usr/srcX'`
+mkdir -p $BUILDROOT/{SPECS,SOURCES,BUILD,SRPMS,RPMS}
+
+# echo "== Creating spec file"
+# cp adm/xxdiff-mdk.spec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
+
+echo "== Copying pristine build to $BUILDROOT/SOURCES"
+PRISTINE=../xxdiff-$VERSION.tar.gz
+if [ ! -f "$PRISTINE" ]; then
+     echo "Cannot find pristine sources in $PRISTINE"
+fi
+cp $PRISTINE $BUILDROOT/SOURCES
+
+echo "== Building source and binary packages"
+# Note: we use nodeps here because tmake package is not quite common yet under 
+# rh-7.1.
+
+# use -bs to build source only
+
+rpmbuild -ba --nodeps --clean --rmsource adm/xxdiff-mdk.spec
+
+#rpm -bs --nodeps adm/xxdiff-mdk.spec
+#rpm -bs --nodeps --rmsource --rmspec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
+#rpm -bs --nodeps --rmsource --rmspec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
+#rpm -ts --nodeps --clean --rmsource --rmspec $PRISTINE
+
+DEST=$HOME
+echo "== Copying source and binary packages to $DEST"
+cp $BUILDROOT/RPMS/i586/xxdiff-$VERSION*.i586.rpm $DEST
+cp $BUILDROOT/SRPMS/xxdiff-$VERSION*.src.rpm $DEST
+
+echo "== Signing package files in $DEST"
+rpm --addsign $DEST/xxdiff-$VERSION*.rpm
+
+echo "== Done."
