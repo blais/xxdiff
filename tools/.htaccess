@@ -1,0 +1,3 @@
+# Add directory indexes for tools since they are accessible
+# from the web.
+Options +Indexes
