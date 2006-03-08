@@ -28,7 +28,7 @@ PDIR=xxdiff-$VERSION.$PEXT
 ROOT=..
 
 mkdir $ROOT/$PDIR
-cp src/xxdiff $ROOT/$PDIR
+cp bin/* $ROOT/$PDIR
 
 strip $ROOT/$PDIR/xxdiff
 

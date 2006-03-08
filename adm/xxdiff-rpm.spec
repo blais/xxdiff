@@ -2,7 +2,7 @@ Summary: A graphical front end to the diff command
 Name: xxdiff
 Version: 3.1
 Release: 1
-Copyright: GNU GPL
+License: GNU GPL
 Group: Development/Tools
 Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.gz
 URL: http://xxdiff.sourceforge.net
