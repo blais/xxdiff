@@ -5,29 +5,76 @@
 xxdiff-find-grep-sed
 ====================
 
-- rename it to xxdiff-rename
-- remove subcommands for side-by-side diffs
 
-  - add to the difflib std Python module to allow producing textual side-by-side
-    diffs
+* Implement xxdiff-rename:
 
-- create "Processor" objects, one for SedProcessor and one for ReplaceProcessor.
-  SedProcessor will implement the same behaviour as before, using sed, when the
-  (new) --sed option is given to the program.  Otherwise, a simple string
-  replacement will be applied, using the ReplaceProcessor.  This object is to be
-  given to the replace() function.
+  * default must be to ignore .svn and CVS
 
-All the changes about should allow it to work under Windows.
+  * implement inputting two strings, it is by far the most common case and I'm
+    annoyed as hell about the problems with not ignoring .svn.
 
-- send it to key people who wanted this at my Python course.
+  * it should work on Windows as well, in preparation for an appropriate version
+    of xxdiff for Windows (with Qt4)
+
+  * There should be options about what to do with case, is it
+    case-sensitively matching the strings, and how the replacement is
+    performed (as is, or smart replacement like emacs, which looks at the
+    case of the input string and does something similar with the output
+    string).
+
+  * There needs to be a -r,--regexp option to interpret the
+    from and to strings are regular expressions.
+
+
+
+* Replace xxdiff-find-grep-sed with xxdiff-filter, which takes a command
+  argument and performs like xxdiff-find-grep-sed, the filter regexp
+  should become a new select option (by default the command would be run
+  on all files).  Some code between xxdiff-rename, xxdiff-cond-replace
+  and others should be shared.
+
+
+* Write a tool that will diff the Subversion diffs correctly.  I think we do
+  not need to be called from Subversion, we can run the show ourselves, that
+  would probably be better, and even better if we can provide a little menu
+  for the differing files.
+
+
+* xxdiff-subversion sometimes leaves tempfiles in /tmp??
+
+
+
+
+
 
 
 --------------------------------------------------------------------------------
 
 
+* create "Processor" objects, one for SedProcessor and one for ReplaceProcessor.
+  SedProcessor will implement the same behaviour as before, using sed, when the
+  (new) --sed option is given to the program.  Otherwise, a simple string
+  replacement will be applied, using the ReplaceProcessor.  This object is to be
+  given to the replace() function.
 
 
-- install xxdiff on windows, when Qt4 non-commercial comes out
+
+* Send it to key people who wanted this at my Python course.
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+* In order to be able to share Python code in a library, spawn in a new package
+  xxdiff-helpers, that gets installed and announced independently, and would
+  give the project some popularity on its own.
+
+
+
+
+- Install xxdiff on windows, when Qt4 non-commercial comes out
 
 - try beyondcompare::
 
@@ -40,6 +87,7 @@ All the changes about should allow it to work under Windows.
    et c'est aussi incroyablement facile de faire un merge. Vraiment
    g\x{00E9}nial..
    http://www.scootersoftware.com/
+
 
 
 New feature, ignore regexp patterns::
@@ -60,11 +108,12 @@ New feature, ignore regexp patterns::
   regular expression.  Voil
 
 
-* fix bug on tp with 3-way, press S
-QPixmap: Invalid pixmap parameters
-QPainter::begin: Cannot paint null pixmap
-QPainter::setPen: Will be reset by begin()
-Segmentation fault
+* fix bug on tp with 3-way, press S::
+
+    QPixmap: Invalid pixmap parameters
+    QPainter::begin: Cannot paint null pixmap
+    QPainter::setPen: Will be reset by begin()
+    Segmentation fault
 
 
 
@@ -73,7 +122,7 @@ Segmentation fault
   directory diffs when clicking on a hunk where there is only a file on the
   right.  Right now the file appears on the left anyway, which just looks wrong.
 
-* xxdiff-subversion sometimes leaves tempfiles in /tmp??
+
 
 * prepare to build with qmake
 
@@ -82,7 +131,7 @@ Segmentation fault
 * add the horizontal marker to the options dialog as well.
 
 
-*  xxdiff test/tabs/w2a test/tabs/w2b::
+* xxdiff test/tabs/w2a test/tabs/w2b::
 
         while ( true ) {
      #ifndef XX_INTERNAL_DIFFS
@@ -91,14 +140,14 @@ Segmentation fault
            results in // harmless but nonetheless annoying empty diff error
            messages.
            QString line = outputs.readLine();
-     
+
 
 * Known problem:
-  
+
   - set tab width to 0
   - diff files which have tabs and spaces but other characters the same
   - set hordiff threshold low enough
-  
+
   We get minimum hordiff width to 1 with this combination.
   I think we would need to recompute the diffs.
 
@@ -1299,11 +1348,5 @@ Tasks: CM integration
    * Idea (plante@iro): Pour faire des diffs de fichiers binaires...
      Sers-toi d'un programme qui fait des hexdumps (sur linux il y a xxd), et
      fais le diff la-dessus. Ça marche bien.
-
-
-
-
-
-
 
 
