@@ -20,6 +20,6 @@
 
 "Use --help for usage or see the xxdiff Python module for details."
 
-from xxdiff.scripts.findgrepsed import main
+from xxdiff.scripts.encrypted import main
 main()
 

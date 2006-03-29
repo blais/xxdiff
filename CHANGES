@@ -2,10 +2,53 @@
 CHANGES: xxdiff
 ===============
 
+Soon:
+
+* Created xxdiff-rename, a simpler version of xxdiff-find-grep-sed that
+
+  - Does not use external programs to perform the replacements
+  - Supports normal strings (regular expressions are not triggered on an option)
+  - With respect to case sensitivity, supports the smart replacement behaviour
+    that is present in GNU emacs.
+
+  The reason for this is that far-and-wide the main reason to use
+  xxdiff-find-grep-sed was to perform renamings within large codebases.  This
+  was the overwhelmingly prevalent use case, and I found myself annoyed with the
+  semantic of the arguments, and having to write a sed expression every time.
+
+* There is a new script ``xxdiff-svn`` that can be used to view all the changes
+  in a subversion checkout.  It drives the show itself, rather than being
+  invoked by Subversion itself.  This has several advantages.
+
+
+
 Current
 -------
 
+* The xxdiff-subversion proxy script that is used to be invoked from ``svn
+  diff`` has been renamed to ``xxdiff-svnproxy``.
+
+* Created lib/python directory to hold shared code between all the Python tools,
+  thereby reducing redundancy.  The price to pay for this is that you cannot
+  simply copy the xxdiff-* scripts in a bin directory anymore, to run them, you
+  must also install the xxdiff python library.  A setup.py file is provided for
+  this purpose.
+
+  I finally did this because the cost of redundant code was becoming annoying in
+  the presence of my desire to code new tools.  I did not want to have to
+  cut-n-paste anymore, in the name of having every script be self-contained.
+  Installing a Python library is not such a big deal anyway, and I judge that
+  there is enough code by now to warrant it.  In addition, this will make it
+  possible for people that want to write their own scripts to reuse some of the
+  infrastructure that I provide for the already existing scripts.
+
+  Note to packagers: you should be able to install the xxdiff Python library in
+  the most usual way for Python programs::
+
+      (as root)#  python setup.py install
+
 * Created ports subdirectory, added files for MAC OSX from Alexandre Feblot.
+
 * Added patch from Robin Humble for building x86_64 rpm.
 
 
