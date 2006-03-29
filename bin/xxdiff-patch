@@ -5,5 +5,9 @@
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
+raise NotImplementedError(
+    "Error: FIXME not finished have yet to deal with deleted and added files")
+
 from xxdiff.scripts.patch import main
 main()
+

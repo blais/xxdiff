@@ -6,6 +6,36 @@ xxdiff-find-grep-sed
 ====================
 
 
+continue in findgrepsed and finish selectfiles
+
+
+- backup() function everywhere should be put in a single place.
+
+Soon:
+
+* Created xxdiff-rename, a simpler version of xxdiff-find-grep-sed that
+
+  - Does not use external programs to perform the replacements
+  - Supports normal strings (regular expressions are not triggered on an option)
+  - With respect to case sensitivity, supports the smart replacement behaviour
+    that is present in GNU emacs.
+
+  The reason for this is that far-and-wide the main reason to use
+  xxdiff-find-grep-sed was to perform renamings within large codebases.  This
+  was the overwhelmingly prevalent use case, and I found myself annoyed with the
+  semantic of the arguments, and having to write a sed expression every time.
+
+* There is a new script ``xxdiff-svn`` that can be used to view all the changes
+  in a subversion checkout.  It drives the show itself, rather than being
+  invoked by Subversion itself.  This has several advantages.
+
+
+
+
+
+
+
+
 * Implement xxdiff-rename:
 
   * default must be to ignore .svn and CVS

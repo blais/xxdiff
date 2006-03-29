@@ -60,6 +60,9 @@ from os.path import *
 import re
 from tempfile import NamedTemporaryFile
 
+# xxdiff imports.
+import xxdiff.scripts
+
 
 #-------------------------------------------------------------------------------
 #
@@ -116,7 +119,7 @@ cvs_unmerge2 = unmerge2
 
 #-------------------------------------------------------------------------------
 #
-def xxdiff( textlist, outmerged=None ):
+def do_xxdiff( textlist, outmerged=None ):
 
     """Run a comparison of the encrypted texts specified in textlists and if
     outmerged filename is specified, encrypt the merged file into it."""
@@ -275,7 +278,7 @@ def encrypted_main():
             # Read input conflict file.
             text = open(fn, 'r').read()
             text1, text2 = cvs_unmerge2(text)
-            xxdiff([text1, text2], fn)
+            do_xxdiff([text1, text2], fn)
     else:
         if len(args) <= 1:
             raise SystemExit("Error: you need to specify 2 or 3 arguments.")
@@ -284,7 +287,7 @@ def encrypted_main():
         for fn in args:
             text = open(fn, 'r').read()
             textlist.append(text)
-        xxdiff(textlist, opts.output)
+        do_xxdiff(textlist, opts.output)
 
 
 #-------------------------------------------------------------------------------

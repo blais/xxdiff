@@ -61,10 +61,6 @@ Examples
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.3', 'diffutils (patch)']
 
-raise NotImplementedError(
-    "Error: FIXME not finished have yet to deal with deleted and added files")
-
-
 # stdlib imports.
 import sys, os, os.path
 import re
@@ -258,10 +254,7 @@ def patch_main():
         dopts += opts.xxdiff_options
         cmd = 'xxdiff %s "%s" "%s"' % (dopts, leftfn, rightfn)
 
-        try:
-            s, o = commands.getstatusoutput(cmd)
-        except KeyboardInterrupt:
-            raise SystemExit("Interrupted.")
+        s, o = commands.getstatusoutput(cmd)
 
         # print output of xxdiff command.
         if o: print o
@@ -299,7 +292,8 @@ def patch_main():
 
 #-------------------------------------------------------------------------------
 #
-main = patch_main
+def main():
+    xxdiff.scripts.interruptible_main(patch_main)
 
 if __name__ == '__main__':
     main()

@@ -24,22 +24,9 @@ import commands, shutil
 from tempfile import NamedTemporaryFile
 
 
-
-
-
-
-
 #-------------------------------------------------------------------------------
 #
-tmppfx = '%s.' % os.path.basename(sys.argv[0])
-
-
-
-
-
-
-
-
+tmpfiles_pfx = '%s.' % os.path.basename(sys.argv[0])
 
 #-------------------------------------------------------------------------------
 #
@@ -82,7 +69,7 @@ def svnproxy_main():
     opts, args = parse_options()
 
     # create temporary file to hold merged results.
-    tmpf = NamedTemporaryFile('rw', prefix=tmppfx)
+    tmpf = NamedTemporaryFile('rw', prefix=tmpfiles_pfx)
 
     # run command
     xxdiff_path = 'xxdiff'

@@ -37,13 +37,12 @@ import commands, tempfile, shutil
 
 # xxdiff imports.
 import xxdiff.scripts
+import xxdiff.selectfiles
 
 
 
 #-------------------------------------------------------------------------------
 #
-# Self-debugging
-debug = 1
 
 # Prefix for temporaray files
 tmpprefix = '%s.' % basename(sys.argv[0])
@@ -251,65 +250,6 @@ def check_replace( fn, regexp, sedcmd, opts ):
     return processed
 
 
-#-------------------------------------------------------------------------------
-#
-def select_patterns( roots, select, ignore ):
-    """
-    Generator that selects files to process by regexps.
-
-    Arguments:
-    - roots: root directories -> list of strings
-    - select: patterns to select -> list of re regexp objects
-    - ignore: patterns to ignore -> list of re regexp objects
-
-    Yields: selected filenames -> string
-    """
-    # Walk the tree of files and select files as requested
-    for root in roots:
-        for dn, dirs, files in os.walk(root):
-            for d in list(dirs):
-                add = False
-                for sre in select:
-                    if sre.match(d):
-                        add = True
-                        break
-                for ire in ignore:
-                    if ire.match(d):
-                        add = False
-                        break
-                if not add:
-                    dirs.remove(d)
-
-            for fn in files:
-                add = False
-                for sre in select:
-                    if sre.match(fn):
-                        add = True
-                        break
-                for ire in ignore:
-                    if ire.match(fn):
-                        add = False
-                        break
-                if add:
-                    yield join(dn, fn)
-
-#-------------------------------------------------------------------------------
-#
-def select_from_file( fn ):
-    """
-    Generator that yields selected filenames read from a file.
-
-    Arguments:
-    - fn: filename of the file that contains the list of filenames -> string
-
-    Yields: selected filenames -> string
-    """
-    try:
-        f = open(fn, 'r')
-        for fn in f.xreadline():
-            yield fn.strip()
-    except IOError, e:
-        raise SystemExit("Error: cannot open/read file (%s)" % e)
 
 
 
@@ -362,30 +302,7 @@ def parse_options():
                       help="Do not ask for confirmation with graphical "
                       "diff viewer.")
 
-    # Options for selection of files
-    group = optparse.OptionGroup(parser, "File selection options",
-                                 "These options affect which files are "
-                                 "selected for grepping in the first place.")
-
-    group.add_option('-s', '--select', action='append',
-                     metavar="REGEXP", default=[],
-                     help="Adds a regular expression for filenames to "
-                     "process.")
-
-    group.add_option('-I', '--ignore', action='append',
-                     metavar="REGEXP", default=[],
-                     help="Adds a regular expression for files to ignore.")
-
-    group.add_option('-c', '--select-cpp', action='store_true',
-                     help="Adds a regular expression for selecting C++ "
-                     "files to match against.")
-
-    group.add_option('-f', '--select-from-file', action='store',
-                     metavar='FILE',
-                     help="Do not run find but instead use the list of files "
-                     "in the specified filename.")
-
-    parser.add_option_group(group)
+    xxdiff.selectfiles.add_select_optgroup(parser)
 
     xxdiff.scripts.install_autocomplete(parser)
 
@@ -417,11 +334,19 @@ def parse_options():
             parser.error(
                 "backup-dir is only valid for backups of type 'other'.")
 
+
+
+
+
+## FIXME move to selectfiles
     # Process file selection options
     if opts.select_from_file and \
            (opts.select or opts.select_cpp or opts.ignore):
         parser.error("you cannot use select-from-file and other "
                      "select options together.")
+
+
+
 
     # Compile regular expression
     try:
@@ -429,12 +354,6 @@ def parse_options():
     except re.error:
         parser.error("Cannot compile given regexp.")
 
-    # Print options if we're debugging ourself
-    if debug:
-        for oname in ('backup_type', 'backup_dir', 'checkout_clearcase',
-                      'dry_run', 'no_confirm', 'select', 'ignore',
-                      'select_cpp', 'select_from_file'):
-            print 'opts.%-20s: %s' % (oname, getattr(opts, oname))
 
     return regexp, sedcmd, roots, opts
 
@@ -447,9 +366,11 @@ def findgrepsed_main():
     """
     regexp, sedcmd, roots, opts = parse_options()
 
-    # Add C++ filename patterns to my selection patterns
-    if opts.select_cpp:
-        opts.select.append('.*\.(h(pp)?|c(pp|\+\+|c)?)')
+
+
+
+
+FIXME move to selectfiles
 
     # Process all files if no filter specified
     if not opts.select:
@@ -466,6 +387,12 @@ def findgrepsed_main():
         selector = select_patterns(roots, select, ignore)
     else:
         selector = select_from_file(opts.select_from_file)
+
+
+
+
+
+
 
     # Perform search and replacement
     for fn in selector:

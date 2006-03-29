@@ -41,38 +41,8 @@ __depends__ = ['xxdiff', 'Python-2.3']
 # stdlib imports.
 import sys, os
 
-
-
-
-
-
-
-
-#-------------------------------------------------------------------------------
-#
-def passthruopts( argv ):
-    """
-    Hack to allow passing some options.  This hack may fail when the given
-    options are incorrect but has the advantage that it doesn't require
-    knowledge of a specific xxdiff command-line (it will not rot as fast).
-    """
-    try:
-        i = argv.index('--endopts')
-        opts, args = argv[1:i], argv[i+1:]
-    except ValueError:
-        for i in xrange(len(argv)-1, -1, -1):
-            if argv[i].startswith('-'):
-                break
-        opts, args = argv[1:i+1], argv[i+1:]
-    return opts, args
-
-
-
-
-
-
-
-
+# xxdiff imports.
+import xxdiff.scripts
 
 
 #-------------------------------------------------------------------------------
@@ -81,40 +51,37 @@ def match_main():
     """
     Main program for match script.
     """
-    try:
-        # get options
-        opts, files = passthruopts(sys.argv)
+    # get options
+    opts, files = xxdiff.scripts.passthruopts(sys.argv)
 
-        # build map of basenames
-        bnmap = {}
-        for fn in files:
-            dn, bn = os.path.split(fn)
-            bnmap.setdefault(bn, []).append(fn)
+    # build map of basenames
+    bnmap = {}
+    for fn in files:
+        dn, bn = os.path.split(fn)
+        bnmap.setdefault(bn, []).append(fn)
 
-        # invoke xxdiff's on alphabetical order of the basenames
-        bnkeys = bnmap.keys()
-        bnkeys.sort()
-        for bn in bnkeys:
-            l = bnmap[bn]
-            if len(l) == 2 or len(l) == 3:
-                extra = []
-            elif len(l) == 1:
-                extra = ['--single']
-            else:
-                # ignore the files.
-                continue
+    # invoke xxdiff's on alphabetical order of the basenames
+    bnkeys = bnmap.keys()
+    bnkeys.sort()
+    for bn in bnkeys:
+        l = bnmap[bn]
+        if len(l) == 2 or len(l) == 3:
+            extra = []
+        elif len(l) == 1:
+            extra = ['--single']
+        else:
+            # ignore the files.
+            continue
 
-            print ' '.join(l)
-            cmd = ' '.join( ['xxdiff'] + extra + opts + l )
-            os.popen(cmd)
+        print ' '.join(l)
+        cmd = ' '.join( ['xxdiff'] + extra + opts + l )
+        os.popen(cmd)
 
-    except KeyboardInterrupt, e:
-        print >> sys.stderr, 'Interrupted.'
-        sys.exit(1)
 
 #-------------------------------------------------------------------------------
 #
-main = match_main
+def main():
+    xxdiff.scripts.interruptible_main(match_main)
 
 if __name__ == '__main__':
     main()

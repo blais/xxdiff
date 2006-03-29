@@ -30,41 +30,14 @@ import sys, os, os.path, re
 import commands, shutil
 from tempfile import NamedTemporaryFile
 
+# xxdiff imports.
+import xxdiff.scripts
+import xxdiff.patches
+
 
 #-------------------------------------------------------------------------------
 #
 tmppfx = '%s.' % os.path.basename(sys.argv[0])
-
-#-------------------------------------------------------------------------------
-#
-def splitpatch( text ):
-
-    """Split output in chunks starting with ^Index.  Returns a list of pairs
-    (tuples), each with (filename, patch) contents."""
-
-    splitre = re.compile('^Index: (.*)$', re.M)
-    chunks = []
-    curbeg, curfn = None, None
-    for mo in splitre.finditer(text):
-        if curbeg != None:
-            assert curfn
-            chunks.append( (curfn, text[curbeg:mo.start()]) )
-        curbeg = mo.start()
-        curfn = mo.group(1)
-    if curbeg != None:
-        chunks.append( (curfn, text[curbeg:]) )
-
-    return chunks
-
-
-
-
-
-
-
-
-
-
 
 #-------------------------------------------------------------------------------
 #
@@ -96,7 +69,7 @@ def cvsdiff_main():
     s, o = commands.getstatusoutput(cmd)
     if s != 0 and not o:
         raise SystemExit("Error: running cvs command (%s): %s" % (s, cmd))
-    chunks = splitpatch(o)
+    chunks = xxdiff.patches.splitpatch(o)
 
     #
     # For each subpatch, apply it individually

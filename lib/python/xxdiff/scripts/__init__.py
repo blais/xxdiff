@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-Common code for all the scripts.
+Common command-line/script -related code for all the scripts.
 
 This directory contains the actual scripts that are run from the stubs.  Any
 significant code should be shared in the parent directory.  These files should
@@ -11,6 +11,16 @@ scripts.
 """
 
 __author__ = 'Martin Blais <blais@furius.ca>'
+
+
+# stdlib imports.
+import sys
+
+
+# Check interpreter version requirements.
+if sys.version_info[:2] < (2, 3):
+    raise SystemExit(
+        "Error: you need at least version 2.3 of Python or greater.")
 
 
 #-------------------------------------------------------------------------------
@@ -38,4 +48,23 @@ def install_autocomplete( parser ):
         optcomplete.autocomplete(parser)
     except ImportError:
         pass
+
+
+#-------------------------------------------------------------------------------
+#
+def passthruopts( argv ):
+    """
+    Hack to allow passing some options.  This hack may fail when the given
+    options are incorrect but has the advantage that it doesn't require
+    knowledge of a specific xxdiff command-line (it will not rot as fast).
+    """
+    try:
+        i = argv.index('--endopts')
+        opts, args = argv[1:i], argv[i+1:]
+    except ValueError:
+        for i in xrange(len(argv)-1, -1, -1):
+            if argv[i].startswith('-'):
+                break
+        opts, args = argv[1:i+1], argv[i+1:]
+    return opts, args
 
