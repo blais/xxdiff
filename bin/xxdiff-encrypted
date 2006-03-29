@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #******************************************************************************\
-#* $Source$
-#* $Id: xxdiff-encrypted 766 2004-02-25 17:37:35Z blais $
-#* $Date: 2004-02-25 12:37:35 -0500 (Wed, 25 Feb 2004) $
-#*
-#* Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>
+#* Copyright (C) 2003-2006 Martin Blais <blais@furius.ca>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -77,18 +73,13 @@ __depends__ = ['xxdiff', 'Python-2.3', 'GnuPG']
 __copyright__ = """Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>.
 This code is distributed under the terms of the GNU General Public License."""
 
-#===============================================================================
-# EXTERNAL DECLARATIONS
-#===============================================================================
 
+# stdlib imports.
 import sys, os
 from os.path import *
 import re
 from tempfile import NamedTemporaryFile
 
-#===============================================================================
-# LOCAL DECLARATIONS
-#===============================================================================
 
 pfx = join("%s.tmp." % basename(sys.argv[0]))
 
@@ -244,10 +235,9 @@ def complete( parser ):
     except ImportError:
         pass
 
-#===============================================================================
-# MAIN
-#===============================================================================
 
+#-------------------------------------------------------------------------------
+#
 def main():
     import optparse
     parser = optparse.OptionParser(__doc__)
@@ -304,3 +294,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

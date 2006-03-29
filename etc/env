@@ -7,3 +7,4 @@
 # directory.  Note to packagers: this file is useless to anyone but me.
 
 USERPATH=$USERPATH:$PROJDIR/bin
+PYTHONPATH=$PYTHONPATH:$PROJDIR/lib/python

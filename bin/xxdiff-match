@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #******************************************************************************\
-#* $Source$
-#* $Id: xxdiff-match 766 2004-02-25 17:37:35Z blais $
-#* $Date: 2004-02-25 12:37:35 -0500 (Wed, 25 Feb 2004) $
-#*
-#* Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>
+#* Copyright (C) 2003-2006 Martin Blais <blais@furius.ca>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -61,24 +57,18 @@ __depends__ = ['xxdiff', 'Python-2.3']
 __copyright__ = """Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>.
 This code is distributed under the terms of the GNU General Public License."""
 
-#===============================================================================
-# EXTERNAL DECLARATIONS
-#===============================================================================
-
+# stdlib imports.
 import sys, os
 
-#===============================================================================
-# LOCAL DECLARATIONS
-#===============================================================================
 
 #-------------------------------------------------------------------------------
 #
 def passthruopts( argv ):
-
-    """Hack to allow passing some options.  This hack may fail when the given
+    """
+    Hack to allow passing some options.  This hack may fail when the given
     options are incorrect but has the advantage that it doesn't require
-    knowledge of a specific xxdiff command-line (will not rot as fast)."""
-
+    knowledge of a specific xxdiff command-line (will not rot as fast).
+    """
     try:
         i = argv.index('--endopts')
         opts, args = argv[1:i], argv[i+1:]
@@ -89,10 +79,9 @@ def passthruopts( argv ):
         opts, args = argv[1:i+1], argv[i+1:]
     return opts, args
 
-#===============================================================================
-# MAIN
-#===============================================================================
 
+#-------------------------------------------------------------------------------
+#
 def main():
     try:
         # get options
@@ -127,3 +116,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

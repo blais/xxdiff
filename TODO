@@ -43,7 +43,8 @@ xxdiff-find-grep-sed
 * xxdiff-subversion sometimes leaves tempfiles in /tmp??
 
 
-
+* FIXME: there is some minor bug with backup file naming in find-grep-sed, check
+  the backup file names with the various options.
 
 
 

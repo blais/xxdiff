@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #******************************************************************************\
-#* $Source$
-#* $Id: xxdiff-subversion 854 2005-10-17 14:11:03Z blais $
-#* $Date: 2005-10-17 10:11:03 -0400 (Mon, 17 Oct 2005) $
-#*
-#* Copyright (C) 2004 Martin Blais <blais@furius.ca>
+#* Copyright (C) 2004-2006 Martin Blais <blais@furius.ca>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -41,24 +37,18 @@ __depends__ = ['xxdiff', 'Python-2.3']
 __copyright__ = """Copyright (C) 2003-2004 Martin Blais <blais@furius.ca>.
 This code is distributed under the terms of the GNU General Public License."""
 
-#===============================================================================
-# EXTERNAL DECLARATIONS
-#===============================================================================
 
+# stdlib imports.
 import sys, os
 import commands, shutil
 from tempfile import NamedTemporaryFile
 
-#===============================================================================
-# LOCAL DECLARATIONS
-#===============================================================================
 
 tmppfx = '%s.' % os.path.basename(sys.argv[0])
 
-#===============================================================================
-# MAIN
-#===============================================================================
 
+#-------------------------------------------------------------------------------
+#
 def main():
     import optparse
     parser = optparse.OptionParser(__doc__.strip(), version=__version__)
@@ -125,3 +115,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
