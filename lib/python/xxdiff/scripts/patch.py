@@ -61,9 +61,8 @@ Examples
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.3', 'diffutils (patch)']
 
-import sys
-print >> sys.stderr, \
-    "Error: FIXME not finished have yet to deal with deleted and added files"
+raise NotImplementedError(
+    "Error: FIXME not finished have yet to deal with deleted and added files")
 
 
 # stdlib imports.
@@ -73,6 +72,19 @@ import commands, shutil
 from tempfile import NamedTemporaryFile
 
 
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+#
 tmppfx = '%s.' % os.path.basename(sys.argv[0])
 
 #-------------------------------------------------------------------------------
@@ -97,22 +109,27 @@ def splitpatch( text ):
 
     return chunks
 
-#-------------------------------------------------------------------------------
-#
-def complete( parser ):
-    "Programmable completion support. Script should work without it."
-    try:
-        import optcomplete
-        optcomplete.autocomplete(parser)
-    except ImportError:
-        pass
 
 
+
+
+
+
+
+
+
+
+
+
+
 #-------------------------------------------------------------------------------
 #
-def main():
+def parse_options():
+    """
+    Parse the options.
+    """
     import optparse
-    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
+    parser = optparse.OptionParser(__doc__.strip())
 
     parser.add_option('-x', '--xxdiff-options', action='store', metavar="OPTS",
                       default='',
@@ -142,9 +159,19 @@ def main():
     parser.add_option('-B', '--no-backup', action='store_true',
                       help="disable backup filesa")
 
-    complete(parser)
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
+    return opts, args
 
+
+#-------------------------------------------------------------------------------
+#
+def patch_main():
+    """
+    Main program for patch script.
+    """
+    opts, args = parse_options()
+    
     #
     # read the input file.
     #
@@ -269,6 +296,10 @@ def main():
             else:
                 raise SystemExit(
                         "Error: unexpected answer from xxdiff: %s" % o)
+
+#-------------------------------------------------------------------------------
+#
+main = patch_main
 
 if __name__ == '__main__':
     main()

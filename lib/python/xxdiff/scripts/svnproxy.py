@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-subversion [<options>] <file> <file> [<file>]
+"""xxdiff-svn-proxy [<options>] <file> <file> [<file>]
 
 Simple wrapper script for integration with Subversion in user's configuration
 file.  This is meant to be used in a user's configuration file to set diff-cmd
@@ -24,14 +24,31 @@ import commands, shutil
 from tempfile import NamedTemporaryFile
 
 
-tmppfx = '%s.' % os.path.basename(sys.argv[0])
+
+
+
 
 
 #-------------------------------------------------------------------------------
 #
-def main():
+tmppfx = '%s.' % os.path.basename(sys.argv[0])
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+#
+def parse_options():
+    """
+    Parse the options.
+    """
     import optparse
-    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
+    parser = optparse.OptionParser(__doc__.strip())
 
     # For diff-cmd invocation.
     parser.add_option('-u', action='store_true',
@@ -53,6 +70,16 @@ def main():
 
     if len(args) > 3:
         raise parser.error("Cannot invoke wrapper with more than 3 files.")
+
+    return opts, args
+
+#-------------------------------------------------------------------------------
+#
+def svnproxy_main():
+    """
+    Main program for cond-replace script.
+    """
+    opts, args = parse_options()
 
     # create temporary file to hold merged results.
     tmpf = NamedTemporaryFile('rw', prefix=tmppfx)
@@ -92,6 +119,11 @@ def main():
         else:
             raise SystemExit(
                     "Error: unexpected answer from xxdiff: %s" % o)
+
+
+#-------------------------------------------------------------------------------
+#
+main = svnproxy_main
 
 if __name__ == '__main__':
     main()

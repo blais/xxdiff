@@ -48,7 +48,12 @@ import sys, os, re
 from os.path import *
 import commands, tempfile, shutil
 
+# xxdiff imports.
+import xxdiff.scripts
 
+
+#-------------------------------------------------------------------------------
+#
 tmpprefix = '%s.' % basename(sys.argv[0])
 
 #-------------------------------------------------------------------------------
@@ -175,22 +180,25 @@ def cond_replace( origfile, modfile, opts ):
 
     return rval
 
-#-------------------------------------------------------------------------------
-#
-def complete( parser ):
-    "Programmable completion support. Script should work without it."
-    try:
-        import optcomplete
-        optcomplete.autocomplete(parser)
-    except ImportError:
-        pass
+
+
+
+
+
+
+
+
 
 
 #-------------------------------------------------------------------------------
 #
-def main():
+def parse_options():
+    """
+    Parse the options.
+    """
     import optparse
-    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
+
+    parser = optparse.OptionParser(__doc__.strip())
     parser.add_option('--command', action='store', default='xxdiff',
                       help="xxdiff command prefix to use.")
     parser.add_option('-b', '--backup-type', action='store', type='choice',
@@ -217,12 +225,24 @@ def main():
                       help="do not ask for confirmation with graphical "
                       "diff viewer. This essentially generates a diff log and "
                       "copies the file over with backups.")
-    complete(parser)
-    opts, args = parser.parse_args()
 
+    xxdiff.scripts.install_autocomplete(parser)
+    opts, args = parser.parse_args()
 
     if not args or len(args) > 2:
         raise parser.error("you must specify exactly two files.")
+
+    return opts, args
+
+
+#-------------------------------------------------------------------------------
+#
+def condreplace_main():
+    """
+    Main program for cond-replace script.
+    """
+    opts, args = parse_options()
+
     if len(args) == 1:
         if opts.delete:
             raise parser.error("no need to use --delete on file from stdin.")
@@ -264,9 +284,13 @@ def main():
 
     return rval
 
+
+#-------------------------------------------------------------------------------
+#
+def main():
+    xxdiff.scripts.interruptible_main(condreplace_main)
+
 if __name__ == '__main__':
-    try:
-        sys.exit(main())
-    except KeyboardInterrupt:
-        print >> sys.stderr, 'Interrupted.'
+    main()
+
 

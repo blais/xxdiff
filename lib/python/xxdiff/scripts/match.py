@@ -42,13 +42,19 @@ __depends__ = ['xxdiff', 'Python-2.3']
 import sys, os
 
 
+
+
+
+
+
+
 #-------------------------------------------------------------------------------
 #
 def passthruopts( argv ):
     """
     Hack to allow passing some options.  This hack may fail when the given
     options are incorrect but has the advantage that it doesn't require
-    knowledge of a specific xxdiff command-line (will not rot as fast).
+    knowledge of a specific xxdiff command-line (it will not rot as fast).
     """
     try:
         i = argv.index('--endopts')
@@ -61,9 +67,20 @@ def passthruopts( argv ):
     return opts, args
 
 
+
+
+
+
+
+
+
+
 #-------------------------------------------------------------------------------
 #
-def main():
+def match_main():
+    """
+    Main program for match script.
+    """
     try:
         # get options
         opts, files = passthruopts(sys.argv)
@@ -94,6 +111,10 @@ def main():
     except KeyboardInterrupt, e:
         print >> sys.stderr, 'Interrupted.'
         sys.exit(1)
+
+#-------------------------------------------------------------------------------
+#
+main = match_main
 
 if __name__ == '__main__':
     main()

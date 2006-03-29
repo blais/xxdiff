@@ -35,7 +35,13 @@ import sys, os, re
 from os.path import *
 import commands, tempfile, shutil
 
+# xxdiff imports.
+import xxdiff.scripts
 
+
+
+#-------------------------------------------------------------------------------
+#
 # Self-debugging
 debug = 1
 
@@ -307,18 +313,17 @@ def select_from_file( fn ):
 
 
 
-#-------------------------------------------------------------------------------
-#
-def install_autocomplete( parser ):
-    """
-    Install automatic programmable completion support if available.
-    Scripts should work when it's not there.
-    """
-    try:
-        import optcomplete
-        optcomplete.autocomplete(parser)
-    except ImportError:
-        pass
+
+
+
+
+
+
+
+
+
+
+
 
 #-------------------------------------------------------------------------------
 #
@@ -333,7 +338,7 @@ def parse_options():
     """
 
     import optparse
-    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
+    parser = optparse.OptionParser(__doc__.strip())
 
     parser.add_option('-b', '--backup-type', action='store',
                       type='choice',
@@ -382,8 +387,7 @@ def parse_options():
 
     parser.add_option_group(group)
 
-    # Support auto-completion if available
-    install_autocomplete(parser)
+    xxdiff.scripts.install_autocomplete(parser)
 
     # Parse arguments
     opts, args = parser.parse_args()
@@ -439,7 +443,7 @@ def parse_options():
 #
 def findgrepsed_main():
     """
-    Main program.
+    Main program for find-grep-sed script.
     """
     regexp, sedcmd, roots, opts = parse_options()
 
@@ -477,14 +481,7 @@ def findgrepsed_main():
 #-------------------------------------------------------------------------------
 #
 def main():
-    """
-    Wrapper to allow keyboard interrupt signals.
-    """
-    try:
-        findgrepsed_main()
-    except KeyboardInterrupt:
-        # If interrupted, exit nicely
-        print >> sys.stderr, 'Interrupted.'
+    xxdiff.scripts.interruptible_main(findgrepsed_main)
 
 if __name__ == '__main__':
     main()

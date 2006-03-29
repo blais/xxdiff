@@ -31,6 +31,8 @@ import commands, shutil
 from tempfile import NamedTemporaryFile
 
 
+#-------------------------------------------------------------------------------
+#
 tmppfx = '%s.' % os.path.basename(sys.argv[0])
 
 #-------------------------------------------------------------------------------
@@ -54,27 +56,41 @@ def splitpatch( text ):
 
     return chunks
 
-#-------------------------------------------------------------------------------
-#
-def complete( parser ):
-    "Programmable completion support. Script should work without it."
-    try:
-        import optcomplete
-        optcomplete.autocomplete(parser)
-    except ImportError:
-        pass
+
+
+
+
+
+
+
+
 
 
 #-------------------------------------------------------------------------------
 #
-def main():
+def parse_options():
+    """
+    Parse the options.
+    """
     import optparse
-    parser = optparse.OptionParser(__doc__.strip(), version=__version__)
+    parser = optparse.OptionParser(__doc__.strip())
+
     parser.add_option('-c', '--commit', action='store_true',
                       help="ask for confirmation and commit accepted changes.")
-    complete(parser)
-    opts, args = parser.parse_args()
 
+    xxdiff.scripts.install_autocomplete(parser)
+
+    opts, args = parser.parse_args()
+    return opts, args
+
+#-------------------------------------------------------------------------------
+#
+def cvsdiff_main():
+    """
+    Main program for cvs-diff script.
+    """
+    opts, args = parse_options()
+    
     # run cvs diff and read its output.
     cmd = 'cvs diff -u ' + ' '.join(map(lambda x: '"%s"' % x, args))
     s, o = commands.getstatusoutput(cmd)
@@ -140,6 +156,11 @@ def main():
             else:
                 raise SystemExit(
                         "Error: unexpected answer from xxdiff: %s" % o)
+
+
+#-------------------------------------------------------------------------------
+#
+main = cvsdiff_main
 
 if __name__ == '__main__':
     main()

@@ -61,6 +61,8 @@ import re
 from tempfile import NamedTemporaryFile
 
 
+#-------------------------------------------------------------------------------
+#
 pfx = join("%s.tmp." % basename(sys.argv[0]))
 
 diffcmd = '%(xxdiff)s --merged-filename "%(merged)s" ' + \
@@ -205,20 +207,21 @@ def xxdiff( textlist, outmerged=None ):
                       'Error: cannot write to encoded merged file.'
                 raise e
 
-#-------------------------------------------------------------------------------
-#
-def complete( parser ):
-    "Programmable completion support. Script should work without it."
-    try:
-        import optcomplete
-        optcomplete.autocomplete(parser)
-    except ImportError:
-        pass
+
+
+
+
+
+
+
 
 
 #-------------------------------------------------------------------------------
 #
-def main():
+def parse_options():
+    """
+    Parse the options.
+    """
     import optparse
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-x', '--xxdiff', default="xxdiff",
@@ -235,11 +238,22 @@ def main():
     parser.add_option('-r', '--recipient', action='store',
                       help="Encrypt for user id name.")
     global opts
-    complete(parser)
+    xxdiff.scripts.install_autocomplete(parser)
+
     opts, args = parser.parse_args()
 
     if not args:
         raise parser.error('no files to decrypt and compare.')
+
+    return opts, args
+
+#-------------------------------------------------------------------------------
+#
+def encrypted_main():
+    """
+    Main program for cond-replace script.
+    """
+    opts, args = parse_options()
 
     if isabs(opts.xxdiff) and not exists(opts.xxdiff):
         raise SystemExit('Error: xxdiff program does not exist in "%s"' %
@@ -271,6 +285,11 @@ def main():
             text = open(fn, 'r').read()
             textlist.append(text)
         xxdiff(textlist, opts.output)
+
+
+#-------------------------------------------------------------------------------
+#
+main = encrypted_main
 
 if __name__ == '__main__':
     main()
