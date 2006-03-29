@@ -26,6 +26,8 @@ xxdiff-find-grep-sed
     from and to strings are regular expressions.
 
 
+* Fix the automatically-generated docs for the new tools (see Makefile).
+
 
 * Replace xxdiff-find-grep-sed with xxdiff-filter, which takes a command
   argument and performs like xxdiff-find-grep-sed, the filter regexp

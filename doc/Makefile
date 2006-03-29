@@ -16,13 +16,14 @@ TXTDOC_HTML = $(TXTDOC:.txt=.html)
 TXTHTML_CONVERT=projects-rst2html --project-header  --project-home=".."
 
 TOOLS=\
-	xxdiff-cond-replace \
-	xxdiff-find-grep-sed \
-	xxdiff-cvs-diff \
-	xxdiff-subversion \
-	xxdiff-encrypted \
-	xxdiff-match \
-	xxdiff-patch-UNFINISHED
+	condreplace \
+	findgrepsed \
+	cvsdiff \
+	svnproxy \
+	svn \
+	encrypted \
+	match \
+	patch
 
 BIN=../bin
 SCRIPTS = $(patsubst %,$(BIN)/%,$(TOOLS))
@@ -56,3 +57,4 @@ debug:
 	@echo $(SCRIPTS)
 	@echo TOOLS_HTML
 	@echo $(TOOLS_HTML)
+
