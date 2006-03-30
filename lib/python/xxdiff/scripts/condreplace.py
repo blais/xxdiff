@@ -45,7 +45,7 @@ __depends__ = ['xxdiff', 'Python-2.3']
 
 
 # stdlib imports.
-import sys, os, re
+import sys, os
 from os.path import *
 import commands, tempfile, shutil
 

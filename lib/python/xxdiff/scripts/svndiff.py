@@ -11,12 +11,6 @@ __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.3']
 
 
-# stdlib imports.
-import sys, os
-import commands, shutil
-from tempfile import NamedTemporaryFile
-
-
 #-------------------------------------------------------------------------------
 #
 def parse_options():

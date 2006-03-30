@@ -57,7 +57,6 @@ __depends__ = ['xxdiff', 'Python-2.3', 'GnuPG']
 # stdlib imports.
 import sys, os
 from os.path import *
-import re
 from tempfile import NamedTemporaryFile
 
 # xxdiff imports.

@@ -20,7 +20,7 @@ __depends__ = ['xxdiff', 'Python-2.3']
 
 # stdlib imports.
 import sys, os
-import commands, shutil
+import commands
 from tempfile import NamedTemporaryFile
 
 # xxdiff imports.

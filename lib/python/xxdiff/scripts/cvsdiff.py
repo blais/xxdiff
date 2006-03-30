@@ -26,7 +26,7 @@ __depends__ = ['xxdiff', 'Python-2.3', 'cvs', 'diffutils (patch)']
 
 
 # stdlib imports.
-import sys, os, os.path, re
+import os
 import commands, shutil
 from tempfile import NamedTemporaryFile
 

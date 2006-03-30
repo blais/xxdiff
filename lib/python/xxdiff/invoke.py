@@ -9,11 +9,8 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import sys, os, shutil, optparse, tempfile
+import os, optparse
 from os.path import *
-
-# xxdiff imports.
-from xxdiff.scripts import tmpprefix
 
 
 #-------------------------------------------------------------------------------
