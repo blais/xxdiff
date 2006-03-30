@@ -15,6 +15,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 # stdlib imports.
 import sys
+from os.path import basename
 
 
 # Check interpreter version requirements.

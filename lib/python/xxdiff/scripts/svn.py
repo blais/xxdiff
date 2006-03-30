@@ -4,7 +4,7 @@
 """xxdiff-svn [<options>] <file> <file> [<file>]
 
 Script that invokes xxdiff for all modified files in the given Subversion
-checkout.
+checkout area.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
@@ -41,6 +41,24 @@ def svn_main():
     opts, args = parse_options()
 
 ## FIXME: todo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #-------------------------------------------------------------------------------

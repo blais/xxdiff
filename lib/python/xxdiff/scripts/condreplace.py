@@ -32,10 +32,11 @@ Notes
 -----
 
 - the script automatically creates backup files.
+
 - the script automatically generates a detailed log of its actions and
   a text summary of all the differences beteween the original and new files.
-- the script can optionally checkout the file with ClearCase before performing
-  the replacement.
+
+- the script can optionally checkout the file before performing the replacement.
 
 """
 
@@ -51,7 +52,7 @@ import commands, tempfile, shutil
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.backup
-import xxdiff.checkout
+import xxdiff.scm
 import xxdiff.invoke
 from xxdiff.scripts import tmpprefix
 
@@ -107,7 +108,7 @@ def cond_replace( origfile, modfile, opts ):
                 print o, origfile
         if o == 'ACCEPT' or o == 'NOCONFIRM':
             xxdiff.backup.backup_file(origfile, opts, sys.stdout)
-            xxdiff.checkout.insure_checkout(origfile, opts, sys.stdout)
+            xxdiff.scm.insure_checkout(origfile, opts, sys.stdout)
             shutil.copyfile(modfile, origfile)
 
         elif o == 'REJECT' or o == 'NODECISION':
@@ -125,7 +126,7 @@ def cond_replace( origfile, modfile, opts ):
                 print
 
             xxdiff.backup.backup_file(origfile, opts, sys.stdout)
-            xxdiff.checkout.insure_checkout(origfile, opts, sys.stdout)
+            xxdiff.scm.insure_checkout(origfile, opts, sys.stdout)
             shutil.copyfile(tmpf2.name, origfile)
         else:
             raise SystemExit("Error: unexpected answer from xxdiff: %s" % o)
@@ -139,15 +140,6 @@ def cond_replace( origfile, modfile, opts ):
     return rval
 
 
-
-
-
-
-
-
-
-
-
 #-------------------------------------------------------------------------------
 #
 def parse_options():
@@ -159,7 +151,7 @@ def parse_options():
     parser = optparse.OptionParser(__doc__.strip())
 
     xxdiff.backup.options_graft(parser)
-    xxdiff.checkout.options_graft(parser)
+    xxdiff.scm.options_graft(parser)
     xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
@@ -186,7 +178,7 @@ def parse_options():
     opts, args = parser.parse_args()
 
     xxdiff.backup.options_validate(opts, logs=sys.stdout)
-    xxdiff.checkout.options_validate(opts)
+    xxdiff.scm.options_validate(opts)
     xxdiff.invoke.options_validate(opts)
 
     if not args or len(args) > 2:

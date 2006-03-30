@@ -33,11 +33,8 @@ from tempfile import NamedTemporaryFile
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.patches
+from xxdiff.scripts import tmpprefix
 
-
-#-------------------------------------------------------------------------------
-#
-tmppfx = '%s.' % os.path.basename(sys.argv[0])
 
 #-------------------------------------------------------------------------------
 #
@@ -87,7 +84,7 @@ def cvsdiff_main():
 
         # feed diffs to patch, patch will do its deed and save the output to
         # a temporary file.
-        tmpf = NamedTemporaryFile(prefix=tmppfx)
+        tmpf = NamedTemporaryFile(prefix=tmpprefix)
         cin, cout = os.popen2(
             'patch --reverse --output "%s"' % tmpf.name, 'rw')
         cin.write('Index: %s\n' % filename)
@@ -105,7 +102,7 @@ def cvsdiff_main():
             os.system('xxdiff "%s" "%s"' % (tmpf.name, filename))
         else:
             # create temporary file to hold merged results.
-            tmpf2 = NamedTemporaryFile('w', prefix=tmppfx)
+            tmpf2 = NamedTemporaryFile('w', prefix=tmpprefix)
 
             cmd = ('xxdiff --decision --merged-filename "%s" ' +
                    '--title2 "NEW FILE" "%s" "%s" ') % \

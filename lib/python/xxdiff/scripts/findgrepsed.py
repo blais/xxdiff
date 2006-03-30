@@ -40,8 +40,8 @@ import xxdiff.scripts
 import xxdiff.selectfiles
 import xxdiff.backup
 import xxdiff.invoke
+import xxdiff.scm
 from xxdiff.scripts import tmpprefix
-
 
 
 #-------------------------------------------------------------------------------
@@ -52,25 +52,7 @@ difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
 
 #-------------------------------------------------------------------------------
 #
-def overwrite_original( fromfn, tofn, opts ):
-    """
-    Copy a file to a destination, checking out the destination file from
-    Clearcase if requested.
-
-    Arguments:
-    - fromfn: source file
-    - tofn: destination file
-    - opts
-    """
-    if xxdiff.checkout.insure_checkout(tofn, opts, sys.stdout):
-        print
-
-    shutil.copyfile(fromfn, tofn)
-
-
-#-------------------------------------------------------------------------------
-#
-def replace( fn, sedcmd, opts ):
+def perform_sed_replace( fn, sedcmd, opts ):
     """
     Process a file through sed.
 
@@ -123,12 +105,13 @@ def replace( fn, sedcmd, opts ):
 
     def do_replace( tmpfn, fn ):
         "Replace the original file."
-
-        # Backup the file
         xxdiff.backup.backup_file(fn, opts, sys.stdout)
 
+        if xxdiff.scm.insure_checkout(fn, opts, sys.stdout):
+            print
+
         # Copy the modified file over the original
-        overwrite_original(tmpfn, fn, opts)
+        shutil.copyfile(tmpfn, fn)
 
 
     if opts.no_confirm:
@@ -178,46 +161,6 @@ def replace( fn, sedcmd, opts ):
 
 #-------------------------------------------------------------------------------
 #
-def check_replace( fn, regexp, sedcmd, opts ):
-    """
-    Grep a file and perform the replacement if necessary.
-
-    Arguments:
-    - fn: filename -> string
-    - regexp: regular expression object to check contents with -> string
-    - sedcmd: sed command to run if match -> string
-    - opts: program options -> Options instance
-    """
-    processed = False
-    try:
-        text = open(fn, 'r').read()
-        if regexp.search(text, re.MULTILINE):
-            replace(fn, sedcmd, opts)
-            processed = True
-    except IOError, e:
-        # Don't bail out if we cannot read a file.
-        print >> sys.stderr, "Warning: cannot read file '%s'." % fn
-
-    return processed
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options and return a tuple of
@@ -233,7 +176,7 @@ def parse_options():
     
     xxdiff.backup.options_graft(parser)
     xxdiff.selectfiles.options_graft(parser)
-    xxdiff.checkout.options_graft(parser)
+    xxdiff.scm.options_graft(parser)
     xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
@@ -260,7 +203,7 @@ def parse_options():
 
     selector = xxdiff.selectfiles.options_validate(opts, roots)
     xxdiff.backup.options_validate(opts, logs=sys.stdout)
-    xxdiff.checkout.options_validate(opts, logs=sys.stdout)
+    xxdiff.scm.options_validate(opts, logs=sys.stdout)
     xxdiff.invoke.options_validate(opts, logs=sys.stdout)
 
     # Compile regular expression
@@ -283,9 +226,18 @@ def findgrepsed_main():
 
     # Perform search and replacement
     for fn in selector:
-        check_replace(fn, regexp, sedcmd, opts)
+        try:
+            # Grep the file.
+            text = open(fn, 'r').read()
+            if regexp.search(text, re.MULTILINE):
+                # The grep matched, now process the file.
+                perform_sed_replace(fn, sedcmd, opts)
 
-    # Print out location of backup files again for convenience.
+        except IOError, e:
+            # Don't bail out if we cannot read a file.
+            print >> sys.stderr, "Warning: cannot read file '%s'." % fn
+
+    # Print out reminder of location of backup files (for convenience).
     if opts.backup_dir:
         print
         print "Stored backup files under:", opts.backup_dir

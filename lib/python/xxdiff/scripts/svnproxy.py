@@ -23,10 +23,9 @@ import sys, os
 import commands, shutil
 from tempfile import NamedTemporaryFile
 
+# xxdiff imports.
+from xxdiff.scripts import tmpprefix
 
-#-------------------------------------------------------------------------------
-#
-tmpfiles_pfx = '%s.' % os.path.basename(sys.argv[0])
 
 #-------------------------------------------------------------------------------
 #
@@ -40,6 +39,7 @@ def parse_options():
     # For diff-cmd invocation.
     parser.add_option('-u', action='store_true',
                       help="See diff(1). Ignored for xxdiff.")
+
     parser.add_option('-L', '--label', action='append', default=[],
                       help="See diff(1). Label gets set as file title string "
                       "for xxdiff.")
@@ -47,6 +47,7 @@ def parse_options():
     # For diff3-cmd invocation.
     parser.add_option('-E', '--show-overlap', action='store_true',
                       help="See diff3(1). Ignored for xxdiff.")
+
     parser.add_option('-m', '--merge', action='store_true',
                       help="See diff3(1). Passed to xxdiff for automatic "
                       "selection of non-conflictual regions..")
@@ -60,6 +61,7 @@ def parse_options():
 
     return opts, args
 
+
 #-------------------------------------------------------------------------------
 #
 def svnproxy_main():
@@ -69,7 +71,7 @@ def svnproxy_main():
     opts, args = parse_options()
 
     # create temporary file to hold merged results.
-    tmpf = NamedTemporaryFile('rw', prefix=tmpfiles_pfx)
+    tmpf = NamedTemporaryFile('rw', prefix=tmpprefix)
 
     # run command
     xxdiff_path = 'xxdiff'

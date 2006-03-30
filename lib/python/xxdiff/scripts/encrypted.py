@@ -62,12 +62,12 @@ from tempfile import NamedTemporaryFile
 
 # xxdiff imports.
 import xxdiff.scripts
+import xxdiff.invoke
+from xxdiff.scripts import tmpprefix
 
 
 #-------------------------------------------------------------------------------
 #
-pfx = join("%s.tmp." % basename(sys.argv[0]))
-
 diffcmd = '%(xxdiff)s --merged-filename "%(merged)s" ' + \
           '--indicate-input-processed ' # + filenames
 # Note: we are not even using --decision for the case where output is requested
@@ -80,63 +80,27 @@ decodecmd = '%(gpg)s --decrypt --use-agent '
 encodecmd_noarmor = '%(gpg)s --encrypt --use-agent '
 encodecmd = encodecmd_noarmor + '--armor '
 
-#-------------------------------------------------------------------------------
-#
-# Note: this is cut-n-paste from cvs.py, for simplicity of distribution.
-def unmerge2( text ):
-    """Unmerges conflicts between two files and returns the two split original
-    files."""
-
-    begre = re.compile('^<<<<<<< (.*)')
-    sepre = re.compile('^=======\s*$')
-    endre = re.compile('^>>>>>>> (.*)')
-    OUT, IN1, IN2 = 0, 1, 2
-    status = OUT
-    lines1, lines2 = [], []
-    for l in text.splitlines():
-        if status == OUT:
-            if begre.match(l):
-                status = IN1
-            else:
-                lines1.append(l)
-                lines2.append(l)
-        elif status == IN1:
-            if sepre.match(l):
-                status = IN2
-            else:
-                lines1.append(l)
-        elif status == IN2:
-            if endre.match(l):
-                status = OUT
-            else:
-                lines2.append(l)
-    text1 = os.linesep.join(lines1)
-    text2 = os.linesep.join(lines2)
-    return text1, text2
-
-cvs_unmerge2 = unmerge2
-
 
 #-------------------------------------------------------------------------------
 #
-def do_xxdiff( textlist, outmerged=None ):
-
-    """Run a comparison of the encrypted texts specified in textlists and if
-    outmerged filename is specified, encrypt the merged file into it."""
-
+def diff_encrypted( textlist, outmerged=None ):
+    """
+    Run a comparison of the encrypted texts specified in textlists and if
+    outmerged filename is specified, encrypt the merged file into it.
+    """
     # Create temporary files.
     tempfiles = []
     for t in xrange(len(textlist)):
-        f = NamedTemporaryFile(prefix=pfx)
+        f = NamedTemporaryFile(prefix=tmpprefix)
         print '== TEMPFILE', f.name
         tempfiles.append(f)
 
     # Always create a temporary file for the merged file, we will delete it for
     # sure, since it would contain decrypted content if saved.
-    fmerge = NamedTemporaryFile(prefix=pfx)
+    fmerge = NamedTemporaryFile(prefix=tmpprefix)
     print '== TEMPFILE', fmerge.name
 
-    m = {'xxdiff': opts.xxdiff,
+    m = {'xxdiff': opts.xxdiff_exec,
          'gpg': opts.gpg,
          'merged': fmerge.name}
 
@@ -211,14 +175,6 @@ def do_xxdiff( textlist, outmerged=None ):
                 raise e
 
 
-
-
-
-
-
-
-
-
 #-------------------------------------------------------------------------------
 #
 def parse_options():
@@ -227,26 +183,34 @@ def parse_options():
     """
     import optparse
     parser = optparse.OptionParser(__doc__)
-    parser.add_option('-x', '--xxdiff', default="xxdiff",
-                      help="specify path to xxdiff program to use")
+
+    xxdiff.invoke.options_graft(parser)
+
     parser.add_option('-g', '--gpg', default="gpg",
                       help="specify path to gpg program to use")
+
+    parser.add_option('-A', '--dont-armor', action='store_true',
+                      help="Create output file in binary format.")
+
     parser.add_option('-o', '--output', action='store',
                       help="require and encrypt merged output.")
+
     parser.add_option('-u', '--unmerge', action='store_true',
                       help="split CVS conflicts in single input file and "
                       "encrypt required output merged file over input")
-    parser.add_option('-A', '--dont-armor', action='store_true',
-                      help="Create output file in binary format.")
+
     parser.add_option('-r', '--recipient', action='store',
                       help="Encrypt for user id name.")
+
     global opts
     xxdiff.scripts.install_autocomplete(parser)
 
     opts, args = parser.parse_args()
 
     if not args:
-        raise parser.error('no files to decrypt and compare.')
+        raise parser.error('No files to decrypt and compare.')
+
+    xxdiff.invoke.options_validate(opts, logs=sys.stdout)
 
     return opts, args
 
@@ -258,9 +222,6 @@ def encrypted_main():
     """
     opts, args = parse_options()
 
-    if isabs(opts.xxdiff) and not exists(opts.xxdiff):
-        raise SystemExit('Error: xxdiff program does not exist in "%s"' %
-                         opts.xxdiff)
     if isabs(opts.gpg) and not exists(opts.gpg):
         raise SystemExit('Error: gpg program does not exist in "%s"' %
                          opts.gpg)
@@ -278,7 +239,7 @@ def encrypted_main():
             # Read input conflict file.
             text = open(fn, 'r').read()
             text1, text2 = cvs_unmerge2(text)
-            do_xxdiff([text1, text2], fn)
+            diff_encrypted([text1, text2], fn)
     else:
         if len(args) <= 1:
             raise SystemExit("Error: you need to specify 2 or 3 arguments.")
@@ -287,7 +248,7 @@ def encrypted_main():
         for fn in args:
             text = open(fn, 'r').read()
             textlist.append(text)
-        do_xxdiff(textlist, opts.output)
+        diff_encrypted(textlist, opts.output)
 
 
 #-------------------------------------------------------------------------------

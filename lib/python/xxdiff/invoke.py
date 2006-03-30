@@ -49,11 +49,18 @@ def options_validate( opts, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def confirm( opts, *arguments ):
+def confirm( opts, create_merged_temp=False, *arguments ):
     """
     Runs xxdiff with the given arguments, passed directly to subprocess.call().
+    Return the decision code, if there was one requested.
+
+    If 'create_merged_temp' is specified, we create a temporary file to be used
+    as the merged output to be collected and modify the options accordingly.
     """
-    FIXME TODO
+    raise NotImplementedError
+    ## FIXME TODO
+
+    # Use opts.xxdiff_exec and opts.xxdiff_options
 
 
 
@@ -65,7 +72,7 @@ def test():
     """
 
 
-        
+
 if __name__ == '__main__':
     test()
 

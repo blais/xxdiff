@@ -2,13 +2,16 @@
    TODO: xxdiff
 ==================
 
-xxdiff-find-grep-sed
-====================
+XXDIFF SCRIPTS TOTAL REVAMP
+===========================
 
+* Finish invoke and convert all the scripts to use it.
 
-continue in findgrepsed and finish selectfiles
+  * Convert all code to use the new subprocess module, or invoke.py
 
-* Add setup.py and register with CheeseShop
+* Implement a commit function in the scm module and replace all found commit
+  code by that (there is some in cvsdiff.py)
+
 
 * Make infrastructure to process files in common from xxdiff-rename and
   xxdiff-find-grep-sed (the loop is the same, only the file transform differs).
@@ -16,92 +19,105 @@ continue in findgrepsed and finish selectfiles
   * Add an example about how to provide another transform function with xxdiff
     verification (in documentation)
 
-* Write documentation about the scripts
 
-* cond-replace should reuse code from find-grep-sed as well, it is only a
-  simplified version of that, without the file selection and the looping
+* Write global, general documentation about the scripts and remove the
+  automatically-generated documentation.
 
-* Create simple PyQt GUI for listing files from ``svn status``
+  * Fix (remove?) the automatically-generated docs for the new tools (see
+    Makefile).
 
-* Create xxdiff-resolve, that finds all the files that are still in conflict and
-  invokes a 3-way merge algorithm to resolve them
-
-* Release as a new version of xxdiff
-
+  * In the docs:  â€œxxdiff-cond-replace implements the same idea at the
+    transformation programs, except that we let the user perform the
+    transformation and the loop from the outside.â€
 
 
+* cond-replace might be able to reuse code from find-grep-sed as well, it is
+  only a simplified version of that, without the file selection and the looping,
+  you need to investigate how this can be done, or if it really needs be.
+
+  Or perhaps... (and this makes sense): the looping functions should call on the
+  function that is invoked within xxdiff-cond-replace.  Yes!  That is the way
+  that it should be done!
+
+
+
+* Modify the file-transformation scripts to use a common loop, and to only have
+  to provide a function that will perform the transformation of the file.
+  Everything else should be the same.  Those scripts are:
+
+  - xxdiff-find-grep-sed
+  - xxdiff-rename
+  - xxdiff-filter
 
 
 
 
-- The backup() function everywhere should be put in a single place.
 
-Soon:
-
-* Created xxdiff-rename, a simpler version of xxdiff-find-grep-sed that
+* xxdiff-rename: Created xxdiff-rename, a simpler version of
+  xxdiff-find-grep-sed that
 
   - Does not use external programs to perform the replacements
+
   - Supports normal strings (regular expressions are not triggered on an option)
+
   - With respect to case sensitivity, supports the smart replacement behaviour
     that is present in GNU emacs.
+
+  - default must be to ignore .svn and CVS
+
+  - implement inputting two strings, it is by far the most common case and I'm
+    annoyed as hell about the problems with not ignoring .svn.
+
+  - it should work on Windows as well, in preparation for an appropriate version
+    of xxdiff for Windows (with Qt4)
+
+  - There should be options about what to do with case, is it
+    case-sensitively matching the strings, and how the replacement is
+    performed (as is, or smart replacement like emacs, which looks at the
+    case of the input string and does something similar with the output
+    string).
+
+  - There needs to be a -r,--regexp option to interpret the
+    from and to strings are regular expressions.
 
   The reason for this is that far-and-wide the main reason to use
   xxdiff-find-grep-sed was to perform renamings within large codebases.  This
   was the overwhelmingly prevalent use case, and I found myself annoyed with the
   semantic of the arguments, and having to write a sed expression every time.
 
-* There is a new script ``xxdiff-svn`` that can be used to view all the changes
-  in a subversion checkout.  It drives the show itself, rather than being
-  invoked by Subversion itself.  This has several advantages.
+
+* xxdiff-resolve: Create a new script that finds all the files that are still in
+  conflict and invokes a 3-way merge algorithm to resolve them
 
 
+* xxdiff-svn-diff: There is a new script ``xxdiff-svn-diff`` that can be used to
+  view all the changes in a subversion checkout.  It drives the show itself,
+  rather than being invoked by Subversion itself.  This has several advantages.
+
+  * --launcher: Create simple PyQt GUI for listing files from ``svn status``, on
+    which you can click to view the diffs.
 
 
+* xxdiff-filter: Write a new xxdiff-filter script, which takes a command
+  argument and performs a transformation like xxdiff-find-grep-sed, the
+  filtering regexp should become a new select option (by default the command
+  would be run on all files and xxdiff only invoked if there was a difference --
+  this should be an option).
 
 
+* Fix bug: xxdiff-subversion sometimes leaves tempfiles in /tmp, fix that?
+
+* Fix bug: There is some minor bug with backup file naming in find-grep-sed,
+  check the backup file names with the various options.
 
 
-* Implement xxdiff-rename:
+* Make sure that all the short options declared in options_graft() functions are
+  disjoint.
 
-  * default must be to ignore .svn and CVS
-
-  * implement inputting two strings, it is by far the most common case and I'm
-    annoyed as hell about the problems with not ignoring .svn.
-
-  * it should work on Windows as well, in preparation for an appropriate version
-    of xxdiff for Windows (with Qt4)
-
-  * There should be options about what to do with case, is it
-    case-sensitively matching the strings, and how the replacement is
-    performed (as is, or smart replacement like emacs, which looks at the
-    case of the input string and does something similar with the output
-    string).
-
-  * There needs to be a -r,--regexp option to interpret the
-    from and to strings are regular expressions.
+* Add setup.py and register with the CheeseShop
+* Release as a new version of xxdiff
 
 
-* Fix the automatically-generated docs for the new tools (see Makefile).
-
-
-* Replace xxdiff-find-grep-sed with xxdiff-filter, which takes a command
-  argument and performs like xxdiff-find-grep-sed, the filter regexp
-  should become a new select option (by default the command would be run
-  on all files).  Some code between xxdiff-rename, xxdiff-cond-replace
-  and others should be shared.
-
-
-* Write a tool that will diff the Subversion diffs correctly.  I think we do
-  not need to be called from Subversion, we can run the show ourselves, that
-  would probably be better, and even better if we can provide a little menu
-  for the differing files.
-
-
-* xxdiff-subversion sometimes leaves tempfiles in /tmp??
-
-
-* FIXME: there is some minor bug with backup file naming in find-grep-sed, check
-  the backup file names with the various options.
 
 
 
@@ -154,7 +170,7 @@ New feature, ignore regexp patterns::
   Comme convenu voici le  feature  que je trouvais utile dans Examdiff Pro :
   - Regular Expression support dans le champs Ignore.
   Exemple :
-              Faire une comparaison de 2 fichiers contenant des UID que je ne veux pas considérer comme différent lors de la comparaison.
+              Faire une comparaison de 2 fichiers contenant des UID que je ne veux pas considÃ©rer comme diffÃ©rent lors de la comparaison.
   Contexte :
               j'avais a comparer des fichiers generes par un generateur de code java.  les fichiers contenait des code pockets du genre:
   // BEGIN Code pocket ID : XXXX-XXXX-XXXX-XXXX
@@ -1131,43 +1147,43 @@ Tasks: Editing
 >
 > Martin Blais wrote:
 > >
-> > On Monday 21 January 2002 07:06, you wrote:
-> > > Hi,
-> > >
-> > > I have a question about xxdiff
-> > > (http://sourceforge.net/projects/xxdiff/).
-> > >
-> > > Is it possible to change the merged file
-> > > manually. I mean to be able to add text
-> > > that is not in any of the 2 or 3 files
-> > > compared. This is sometime very useful.
-> > >
-> > > I haven't see that (clearly) in the online
-> > > documentation. I think this will be a very
-> > > interesting item for the FAQ.
-> > >
-> > > I'm using ClearCase at work and from this
-> > > point of view clearmerge is really good.
-> > > But for me, I would prefer some tool under
-> > > GPL.
+> >Â On Monday 21 January 2002 07:06, you wrote:
+> >Â > Hi,
+> >Â >
+> >Â > I have a question about xxdiff
+> >Â > (http://sourceforge.net/projects/xxdiff/).
+> >Â >
+> >Â > Is it possible to change the merged file
+> >Â > manually. I mean to be able to add text
+> >Â > that is not in any of the 2 or 3 files
+> >Â > compared. This is sometime very useful.
+> >Â >
+> >Â > I haven't see that (clearly) in the online
+> >Â > documentation. I think this will be a very
+> >Â > interesting item for the FAQ.
+> >Â >
+> >Â > I'm using ClearCase at work and from this
+> >Â > point of view clearmerge is really good.
+> >Â > But for me, I would prefer some tool under
+> >Â > GPL.
 > >
-> > nope, you cannot. the rationale behind this is that I don't
-> > want xxdiff to become an editor.
+> >Â nope, you cannot. the rationale behind this is that I don't
+> >Â want xxdiff to become an editor.
 >
 > It would be a logical evolution, wouldn't it?
 > I mean for the merge window only.
 >
-> >  i'd like to eventually make it able to do very simple
-> > editing (and to limit it to that).
+> >Â  i'd like to eventually make it able to do very simple
+> >Â editing (and to limit it to that).
 > >
-> > you can, however, click on the filename widgets to put
-> > them in the clipboard and then paste into a shell for
-> > editing the file.
+> >Â you can, however, click on the filename widgets to put
+> >Â them in the clipboard and then paste into a shell for
+> >Â editing the file.
 >
 > Not very friendly way and error prone I suppose.
 >
-> > let me know the minimal editing capabilities you would
-> > like to have and i'll consider it on the todo list.
+> >Â let me know the minimal editing capabilities you would
+> >Â like to have and i'll consider it on the todo list.
 >
 > For me the minimum would be to able to add a complete
 > line anywhere in the merged window.
@@ -1201,12 +1217,12 @@ Tasks: Editing
 > PS: tu parles francais?
 > --
 > D2SET Scientific and Technical Non profit Association
->  http://www.d2set.org/
->  mailto:d2set@d2set.org
+> Â http://www.d2set.org/
+> Â mailto:d2set@d2set.org
 >
 > Artificial Anthill Project
->  http://www.aanthill.org/
->  mailto:aanthill@aanthill.org
+> Â http://www.aanthill.org/
+> Â mailto:aanthill@aanthill.org
 >
 
 
@@ -1405,6 +1421,6 @@ Tasks: CM integration
 
    * Idea (plante@iro): Pour faire des diffs de fichiers binaires...
      Sers-toi d'un programme qui fait des hexdumps (sur linux il y a xxd), et
-     fais le diff la-dessus. Ça marche bien.
+     fais le diff la-dessus. Ã‡a marche bien.
 
 
