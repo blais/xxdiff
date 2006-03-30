@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-svn-proxy [<options>] <file> <file> [<file>]
+"""xxdiff-diff-proxy [<options>] <file> <file> [<file>]
 
-Simple wrapper script for integration with Subversion in user's configuration
-file.  This is meant to be used in a user's configuration file to set diff-cmd
-and diff3-cmd.
+Simple wrapper script for xxdiff that presents options that are the same as the
+diff or diff3 commands.  This can be used with programs that expect to call
+diff/diff3 to present differences to users, and that can be configured with a
+different diff program.
+
+This was originally created for integration with Subversion.  This is meant to
+be used in a user's configuration file to set diff-cmd and diff3-cmd options, so
+that when you run ``svn diff`` it spawns xxdiffs instead of textual diffs (see
+also xxdiff-svn-diff).
 
 Add the following lines ``~/.subversion/config``::
 
-  diff-cmd = xxdiff-subversion
-  diff3-cmd = xxdiff-subversion
+  diff-cmd = xxdiff-diff-proxy
+  diff3-cmd = xxdiff-diff-proxy
 
 """
 
@@ -64,7 +70,7 @@ def parse_options():
 
 #-------------------------------------------------------------------------------
 #
-def svnproxy_main():
+def diffproxy_main():
     """
     Main program for cond-replace script.
     """
@@ -96,6 +102,10 @@ def svnproxy_main():
 
     if decision:
         # if the user merged, copy the merged file over the original.
+
+## FIXME: should reject also copy the file?  I think not, no?  Is this a bug?
+## Review this.
+
         if o in ['MERGED', 'ACCEPT', 'REJECT']:
             tmpf.flush()
             tmpf.seek(0)
@@ -112,7 +122,7 @@ def svnproxy_main():
 
 #-------------------------------------------------------------------------------
 #
-main = svnproxy_main
+main = diffproxy_main
 
 if __name__ == '__main__':
     main()

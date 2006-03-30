@@ -9,6 +9,7 @@ XXDIFF SCRIPTS TOTAL REVAMP
 
   * Convert all code to use the new subprocess module, or invoke.py
 
+
 * Implement a commit function in the scm module and replace all found commit
   code by that (there is some in cvsdiff.py)
 
@@ -18,6 +19,10 @@ XXDIFF SCRIPTS TOTAL REVAMP
 
   * Add an example about how to provide another transform function with xxdiff
     verification (in documentation)
+
+  * The transformers should be able to abort a transformation by raising an
+    exception, in which case no change occurs.  This could be used to implement
+    the grep portion of find-grep-sed
 
 
 * Write global, general documentation about the scripts and remove the
@@ -50,6 +55,22 @@ XXDIFF SCRIPTS TOTAL REVAMP
   - xxdiff-filter
 
 
+* Add new options to selection code:
+
+  - --select-grep: Among the files selected by filename, select only those which
+      match the given regexp (or multiple clauses)
+
+  - --ignore-grep: Among the files selected by filename, ignore those which
+      match the given regexp (or multiple clauses)
+
+  - xxdiff-find-grep-sed becomes obsolete, because it can be implemented as::
+
+      xxdiff-filter --select-grep 'sed -e <sed-code>'
+
+
+* Fwd email to python-dev about optparse
+
+* Send append_const_cb trick to optik user slist
 
 
 
@@ -118,6 +139,12 @@ XXDIFF SCRIPTS TOTAL REVAMP
 * Release as a new version of xxdiff
 
 
+* xxdiff-patch: finish it! Come on...
+
+  * deal with delete and add
+
+  * Q: what do we do when patch fails?  How do we treat it?
+    must read the output messages of patch and warn the user.
 
 
 
@@ -258,12 +285,6 @@ Promo
 
 
 
-* finish xxdiff-patch, come on
-
-  * deal with delete and add
-
-  * Q: what do we do when patch fails?  How do we treat it?
-    must read the output messages of patch and warn the user.
 
 
 

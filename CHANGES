@@ -6,7 +6,7 @@ Current
 -------
 
 * The xxdiff-subversion proxy script that is used to be invoked from ``svn
-  diff`` has been renamed to ``xxdiff-svnproxy``.
+  diff`` has been renamed to ``xxdiff-diff-proxy``.
 
 * Created lib/python directory to hold shared code between all the Python tools,
   thereby reducing redundancy.  The price to pay for this is that you cannot

@@ -54,6 +54,18 @@ def confirm( opts, create_merged_temp=False, *arguments ):
     If 'create_merged_temp' is specified, we create a temporary file to be used
     as the merged output to be collected and modify the options accordingly.
     """
+
+    
+
+    
+
+
+
+
+
+
+
+
     raise NotImplementedError
     ## FIXME TODO
 
