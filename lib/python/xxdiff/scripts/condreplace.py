@@ -16,11 +16,11 @@ whether to copy the file or not.  This is useful to run in a loop, for example::
    for i in `*/*.xml` ; do
       cat $i | ...pipeline of cmds that modifies the file... > /tmp/out.xml
       # copy only if the user accepts or merges.
-      xxdiff-cond-replace $i /tmp/out.xml
+      xxdiff-cond-replace /tmp/out.xml $i
    done
 
 **IMPORTANT**: Notice well that the original file which will be overwritten is
-on the LEFT side. The syntax is the reverse of the UNIX cp command.
+on the RIGHT side. The syntax is like that of the UNIX cp command.
 
 Exit Status
 -----------
@@ -210,7 +210,7 @@ def condreplace_main():
                 "Error: saving stdin to temporary file (%s)" % str(e))
         modfile = intmpf.name
     else:
-        origfile, modfile = args
+        modfile, origfile = args
 
     if opts.silent and opts.diff:
         raise parser.error("you cannot ask for a diff output and for silent at "

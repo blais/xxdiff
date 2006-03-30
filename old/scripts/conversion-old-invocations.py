@@ -1,4 +1,23 @@
+findgrepsed:
 
+        # Create a temporary file to contain the merged results.
+        tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+
+        # Call xxdiff on it.
+        status, xxdiff_output = commands.getstatusoutput(
+            ('xxdiff --decision --merged-filename "%s" '
+             '--title2 "NEW FILE" "%s" "%s" ') %
+            (tmpf2.name, fn, tmpf.name))
+
+        print xxdiff_output
+
+        # Check out the exit code from xxdiff
+        l1 = xxdiff_output.splitlines()[0]   # first line
+
+        if l1 == 'ACCEPT':
+
+
+--------------------------------------------------------------------------------
 
 condreplace:
 
@@ -50,23 +69,6 @@ encrypted:
 
 
 
-findgrepsed:
-
-        # Create a temporary file to contain the merged results.
-        tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
-
-        # Call xxdiff on it.
-        status, xxdiff_output = commands.getstatusoutput(
-            ('xxdiff --decision --merged-filename "%s" '
-             '--title2 "NEW FILE" "%s" "%s" ') %
-            (tmpf2.name, fn, tmpf.name))
-
-        print xxdiff_output
-
-        # Check out the exit code from xxdiff
-        l1 = xxdiff_output.splitlines()[0]   # first line
-
-        if l1 == 'ACCEPT':
 
 
 match:

@@ -29,7 +29,7 @@ def options_graft( parser ):
 
     group.add_option('-C', '--checkout', action='store',
                      type='choice', choices=checkout_choices,
-                     metavar="CHOICE",
+                     metavar="NAME",
                      help="Checkout files from an SCM before overwriting. "
                      "Choices include: %s" % ', '.join(checkout_choices))
 
@@ -58,6 +58,7 @@ def insure_checkout( fn, opts, logs=None ):
     if opts.checkout == 'clearcase':
         # FIXME: TODO -- implement this.
         # ret = subprocess.call(['cleartool', 'desc', fn])
+        pass
 
     # Checkout the file.
     if logs:

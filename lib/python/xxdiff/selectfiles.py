@@ -62,8 +62,9 @@ def options_graft( parser ):
 
     group.add_option('-f', '--select-from-file', action='store',
                      metavar='FILE',
-                     help="Do not run find but instead use the list of files "
-                     "in the specified filename.")
+                     help="Do not recurse through directories to find files "
+                     "but instead read the list of filenames from the "
+                     "given file.")
 
     parser.add_option_group(group)
 

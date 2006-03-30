@@ -45,7 +45,6 @@ XXDIFF SCRIPTS TOTAL REVAMP
   that it should be done!
 
 
-
 * Modify the file-transformation scripts to use a common loop, and to only have
   to provide a function that will perform the transformation of the file.
   Everything else should be the same.  Those scripts are:
@@ -147,6 +146,9 @@ XXDIFF SCRIPTS TOTAL REVAMP
     must read the output messages of patch and warn the user.
 
 
+
+* In decision mode, we should warn the user when selections have been made and
+  the user exits with "merged".
 
 
 --------------------------------------------------------------------------------

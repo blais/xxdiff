@@ -5,10 +5,6 @@
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
-import warnings
-warnings.warn("xxdiff-find-grep-sed is obsolete. "
-              "Use xxdiff-filter with --select-grep option instead.")
-
 from xxdiff.scripts.findgrepsed import main
 main()
 

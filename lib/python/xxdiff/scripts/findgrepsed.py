@@ -119,40 +119,31 @@ def perform_sed_replace( fn, sedcmd, opts ):
         do_replace(tmpf.name, fn)
 
     else:
-        # Create a temporary file to contain the merged results.
-        tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
-
         # Call xxdiff on it.
-        status, xxdiff_output = commands.getstatusoutput(
-            ('xxdiff --decision --merged-filename "%s" '
-             '--title2 "NEW FILE" "%s" "%s" ') %
-            (tmpf2.name, fn, tmpf.name))
+        decision, mergedf = xxdiff.invoke.xxdiff_decision(
+            opts, '--title2', 'NEW FILE', fn, tmpf.name)
 
-        print xxdiff_output
-
-        # Check out the exit code from xxdiff
-        l1 = xxdiff_output.splitlines()[0]   # first line
-
-        if l1 == 'ACCEPT':
+        print decision
+        if decision == 'ACCEPT':
             # Accepted change, perform the replacement
             do_replace(tmpf.name, fn)
 
-        elif l1 == 'REJECT' or l1 == 'NODECISION':
+        elif decision == 'REJECT' or decision == 'NODECISION':
             # Rejected change (or program killed), do not replace
             pass
 
-        elif l1 == 'MERGED':
+        elif decision == 'MERGED':
             # Some user-driven selections saved to the merge file
 
             # Run diff again to show the real changes that will be applied.
-            diffcmd2 = difffmt % (fn, tmpf2.name)
+            diffcmd2 = difffmt % (fn, mergedf.name)
             status, diff_output = commands.getstatusoutput(diffcmd2)
             print 'Actual merged changes:'
             print
             print diff_output
             print
 
-            do_replace(tmpf2.name, fn)
+            do_replace(mergedf.name, fn)
 
         else:
             raise SystemExit(
@@ -203,7 +194,7 @@ def parse_options():
 
     selector = xxdiff.selectfiles.options_validate(opts, roots)
     xxdiff.backup.options_validate(opts, logs=sys.stdout)
-    xxdiff.scm.options_validate(opts, logs=sys.stdout)
+    xxdiff.scm.options_validate(opts)
     xxdiff.invoke.options_validate(opts, logs=sys.stdout)
 
     # Compile regular expression
@@ -223,6 +214,10 @@ def findgrepsed_main():
     Main program for find-grep-sed script.
     """
     regexp, sedcmd, selector, opts = parse_options()
+
+    import warnings
+    warnings.warn("xxdiff-find-grep-sed is obsolete. "
+                  "Use xxdiff-filter with --select-grep option instead.")
 
     # Perform search and replacement
     for fn in selector:

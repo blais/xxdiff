@@ -26,7 +26,7 @@ def options_graft( parser ):
     group = optparse.OptionGroup(parser, "Options for xxdiff subprocesses",
                                  "These options affect how xxdiff is called.")
 
-    group.add_option('-X', '--xxdiff-exec', action='store', metavar='XXDIFF',
+    group.add_option('-Z', '--xxdiff-exec', action='store', metavar='XXDIFF',
                      default='xxdiff',
                      help="Specifies which xxdiff executable to use (default "
                      "is looked up in PATH.")
@@ -35,6 +35,9 @@ def options_graft( parser ):
                      action='store', metavar="OPTS",
                      default='',
                      help="Additional options to pass on to xxdiff.")
+
+    group.add_option('-Y', '--xxdiff-verbose', action='store_true',
+                     help="Output xxdiff commands on stdout, for debugging.")
 
     parser.add_option_group(group)
 
@@ -100,7 +103,8 @@ def xxdiff_decision( opts, *arguments, **kwds ):
     if '--decision' not in options:
         options.insert(0, '--decision')
 
-    alloptions = options + list(arguments)
+    assert '--merged-filename' not in (list(arguments) + options)
+    alloptions = options + ['--merged-filename', mergedf.name] + list(arguments)
 
     # If we're not waiting, we only want to return after all the input has been
     # processed.  This is always the case.
@@ -110,6 +114,9 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
     # Run xxdiff.
     cmd = [xexec] + alloptions
+    if opts.xxdiff_verbose:
+        print '===', ' '.join(cmd)
+
     stdin_text = kwds.pop('stdin', None)
     p = Popen(cmd,
               stdout=PIPE,
