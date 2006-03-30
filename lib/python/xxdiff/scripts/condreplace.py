@@ -50,51 +50,10 @@ import commands, tempfile, shutil
 
 # xxdiff imports.
 import xxdiff.scripts
+import xxdiff.backup
+import xxdiff.checkout
+from xxdiff.scripts import tmpprefix
 
-
-#-------------------------------------------------------------------------------
-#
-tmpprefix = '%s.' % basename(sys.argv[0])
-
-#-------------------------------------------------------------------------------
-#
-def backup( fn, opts ):
-    """
-    Compute backup filename and copy backup file.
-    """
-
-    if opts.backup_type == 'parallel':
-        fmt = '%s.bak.%d'
-        ii = 0
-        while 1:
-            backupfn = fmt % (fn, ii)
-            if not exists(backupfn):
-                break
-            ii += 1
-
-    elif opts.backup_type == 'other':
-        ##afn = abspath(fn)
-        backupfn = normpath(join(opts.backup_dir, fn))
-    else:
-        backupfn = None
-
-    if backupfn:
-        if not opts.silent:
-            print 'Backup:', backupfn
-        ddn = dirname(backupfn)
-        if ddn and not exists(ddn):
-            os.makedirs(ddn)
-        shutil.copy2(fn, backupfn)
-
-#-------------------------------------------------------------------------------
-#
-def cc_checkout(fn, opts):
-    """
-    Checkout the file from ClearCase.
-    """
-    if not opts.silent:
-        print 'Checking out the file'
-    os.system('cleartool co -nc "%s"' % fn)
 
 #-------------------------------------------------------------------------------
 #
@@ -146,9 +105,9 @@ def cond_replace( origfile, modfile, opts ):
             else:
                 print o, origfile
         if o == 'ACCEPT' or o == 'NO_CONFIRM':
-            backup(origfile, opts)
-            if opts.checkout_clearcase:
-                cc_checkout(origfile, opts)
+            xxdiff.backup.backup_file(origfile, opts, sys.stdout)
+
+            xxdiff.checkout.insure_checkout(origfile, opts, sys.stdout)
 
             shutil.copyfile(modfile, origfile)
         elif o == 'REJECT' or o == 'NODECISION':
@@ -164,9 +123,8 @@ def cond_replace( origfile, modfile, opts ):
                 print o
                 print
 
-            backup(origfile, opts)
-            if opts.checkout_clearcase:
-                cc_checkout(origfile, opts)
+            xxdiff.backup.backup_file(origfile, opts, sys.stdout)
+            xxdiff.checkout.insure_checkout(origfile, opts, sys.stdout)
 
             shutil.copyfile(tmpf2.name, origfile)
         else:
@@ -199,28 +157,29 @@ def parse_options():
     import optparse
 
     parser = optparse.OptionParser(__doc__.strip())
+
+    xxdiff.backup.options_graft(parser)
+    xxdiff.checkout.options_graft(parser)
+
     parser.add_option('--command', action='store', default='xxdiff',
                       help="xxdiff command prefix to use.")
-    parser.add_option('-b', '--backup-type', action='store', type='choice',
-                      choices=['parallel', 'other', 'none'], metavar="CHOICE",
-                      default='none',
-                      help="selects the backup type "
-                      "('parallel', 'other', 'none')")
-    parser.add_option('--backup-dir', action='store',
-                      help="specify backup directory for type 'other'")
-    parser.add_option('-C', '--checkout-clearcase', action='store_true',
-                      help="checkout files with clearcase before storing.")
+
+
     parser.add_option('-n', '--dry-run', action='store_true',
                       help="print the commands that would be executed " +
                       "but don't really run them.")
+
     parser.add_option('-q', '--silent', '--quiet', action='store_true',
                       help="Do not output anything. Normally the decision "
                       "status and backup file location is output.")
+
     parser.add_option('-x', '--diff', action='store_true',
                       help="Run a diff and log the differences on stdout.")
+
     parser.add_option('-d', '--delete', action='store_true',
                       help="Instead of copying the temporary file, move it "
                       "(delete it after copying).")
+
     parser.add_option('-X', '--no-confirm', action='store_true',
                       help="do not ask for confirmation with graphical "
                       "diff viewer. This essentially generates a diff log and "
@@ -228,6 +187,9 @@ def parse_options():
 
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
+
+    xxdiff.backup.options_validate(opts, logs=sys.stdout)
+    xxdiff.checkout.options_validate(opts)
 
     if not args or len(args) > 2:
         raise parser.error("you must specify exactly two files.")
@@ -263,15 +225,6 @@ def condreplace_main():
     if opts.silent and opts.diff:
         raise parser.error("you cannot ask for a diff output and for silent at "
                            "the same time.")
-        
-    if opts.backup_type == 'other':
-        if not opts.backup_dir:
-            opts.backup_dir = tempfile.mkdtemp(prefix=tmpprefix)
-        print "Storing backup files under:", opts.backup_dir
-    else:
-        if opts.backup_dir:
-            raise SystemExit("Error: backup-dir is only valid for backups of "
-                             "type 'other'.")
 
     # call xxdiff and perform the conditional replacement.
     rval = cond_replace(origfile, modfile, opts)
@@ -292,5 +245,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 

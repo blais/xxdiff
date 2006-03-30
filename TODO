@@ -8,8 +8,33 @@ xxdiff-find-grep-sed
 
 continue in findgrepsed and finish selectfiles
 
+* Add setup.py and register with CheeseShop
 
-- backup() function everywhere should be put in a single place.
+* Make infrastructure to process files in common from xxdiff-rename and
+  xxdiff-find-grep-sed (the loop is the same, only the file transform differs).
+
+  * Add an example about how to provide another transform function with xxdiff
+    verification (in documentation)
+
+* Write documentation about the scripts
+
+* cond-replace should reuse code from find-grep-sed as well, it is only a
+  simplified version of that, without the file selection and the looping
+
+* Create simple PyQt GUI for listing files from ``svn status``
+
+* Create xxdiff-resolve, that finds all the files that are still in conflict and
+  invokes a 3-way merge algorithm to resolve them
+
+* Release as a new version of xxdiff
+
+
+
+
+
+
+
+- The backup() function everywhere should be put in a single place.
 
 Soon:
 

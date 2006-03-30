@@ -38,67 +38,20 @@ import commands, tempfile, shutil
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.selectfiles
+import xxdiff.backup
+from xxdiff.scripts import tmpprefix
 
 
 
 #-------------------------------------------------------------------------------
 #
-
-# Prefix for temporaray files
-tmpprefix = '%s.' % basename(sys.argv[0])
-
 # Diff command template
 difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
 
-#-------------------------------------------------------------------------------
-#
-def backup( fn, opts ):
-    """
-    Compute backup filename and copy backup file.
-
-    Arguments:
-    - fn: filename to backup -> string
-    - opts: program options -> Options instance
-    """
-
-    # Compute destination backup filename
-    if opts.backup_type == 'parallel':
-        # Search for a non-existing backup filename alongside the original
-        # filename
-        fmt = '%s.bak.%%d' % fn
-        ii = 1
-        while 1:
-            backupfn = fmt % ii
-            if not exists(backupfn):
-                break
-            ii += 1
-
-    elif opts.backup_type == 'other':
-        # Backup to a different directory
-        fn = normpath(fn)
-        if isabs(fn):
-            fn = fn[1:]
-        backupfn = join(opts.backup_dir, normpath(fn))
-
-    else:
-        backupfn = None
-
-    if backupfn:
-        # Perform the backup
-        print 'Backup:', backupfn
-
-        # Make sure that the destination directory exists
-        ddn = dirname(backupfn)
-        if ddn and not exists(ddn):
-            os.makedirs(ddn)
-
-        # Copy the original to the backup directory
-        shutil.copy2(fn, backupfn)
-
 
 #-------------------------------------------------------------------------------
 #
-def overwrite_original( fromfn, tofn, checkout ):
+def overwrite_original( fromfn, tofn, opts ):
     """
     Copy a file to a destination, checking out the destination file from
     Clearcase if requested.
@@ -108,14 +61,11 @@ def overwrite_original( fromfn, tofn, checkout ):
     - tofn: destination file
     - opts
     """
-    if checkout:
-        print 'Checking out the file'
-        os.system('cleartool co -nc "%s"' % tofn)
+    if xxdiff.checkout.insure_checkout(tofn, opts, sys.stdout):
         print
-        # FIXME: todo, please check the return status
-        # Note: output from system() automatically goes to stdout
 
     shutil.copyfile(fromfn, tofn)
+
 
 #-------------------------------------------------------------------------------
 #
@@ -174,10 +124,10 @@ def replace( fn, sedcmd, opts ):
         "Replace the original file."
 
         # Backup the file
-        backup(fn, opts)
+        xxdiff.backup.backup_file(fn, opts, sys.stdout)
 
         # Copy the modified file over the original
-        overwrite_original(tmpfn, fn, opts.checkout_clearcase)
+        overwrite_original(tmpfn, fn, opts)
 
 
     if opts.no_confirm:
@@ -279,20 +229,10 @@ def parse_options():
 
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
-
-    parser.add_option('-b', '--backup-type', action='store',
-                      type='choice',
-                      metavar="CHOICE",
-                      choices=['parallel', 'other', 'none'],
-                      default='other',
-                      help="Selects the backup type "
-                      "('parallel', 'other', 'none')")
-
-    parser.add_option('--backup-dir', action='store',
-                      help="Specify backup directory for type 'other'")
-
-    parser.add_option('-C', '--checkout-clearcase', action='store_true',
-                      help="Checkout files with clearcase before storing.")
+    
+    xxdiff.backup.options_graft(parser)
+    xxdiff.selectfiles.options_graft(parser)
+    xxdiff.checkout.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
                       help="Print the commands that would be executed " +
@@ -301,8 +241,6 @@ def parse_options():
     parser.add_option('-X', '--no-confirm', action='store_true',
                       help="Do not ask for confirmation with graphical "
                       "diff viewer.")
-
-    xxdiff.selectfiles.add_select_optgroup(parser)
 
     xxdiff.scripts.install_autocomplete(parser)
 
@@ -318,44 +256,18 @@ def parse_options():
     regexp, sedcmd = args[:2]
     roots = args[2:] or ['.']  # Root directories, use CWD if none specified
 
-    # Validate backup options
-    if opts.backup_type == 'other':
-        if not opts.backup_dir:
-            # Create backup directory.
-            #
-            # Note: mkdtemp() leaves with us the responsibility to delete the
-            # temporary directory or not.
-            opts.backup_dir = tempfile.mkdtemp(prefix=tmpprefix)
-        print "Storing backup files under:", opts.backup_dir
-        print
-    else:
-        # Parallel backups.
-        if opts.backup_dir:
-            parser.error(
-                "backup-dir is only valid for backups of type 'other'.")
-
-
-
-
-
-## FIXME move to selectfiles
-    # Process file selection options
-    if opts.select_from_file and \
-           (opts.select or opts.select_cpp or opts.ignore):
-        parser.error("you cannot use select-from-file and other "
-                     "select options together.")
-
-
-
+    selector = xxdiff.selectfiles.options_validate(opts, roots)
+    xxdiff.backup.options_validate(opts, logs=sys.stdout)
+    xxdiff.checkout.options_validate(opts, logs=sys.stdout)
 
     # Compile regular expression
     try:
         regexp = re.compile(regexp)
     except re.error:
-        parser.error("Cannot compile given regexp.")
+        parser.error("Cannot compile given regexp '%s'." % regexp)
 
 
-    return regexp, sedcmd, roots, opts
+    return regexp, sedcmd, selector, opts
 
 
 #-------------------------------------------------------------------------------
@@ -364,44 +276,16 @@ def findgrepsed_main():
     """
     Main program for find-grep-sed script.
     """
-    regexp, sedcmd, roots, opts = parse_options()
-
-
-
-
-
-FIXME move to selectfiles
-
-    # Process all files if no filter specified
-    if not opts.select:
-        opts.select = ['.*']
-
-    # Create an appropriate generator for the "select" method
-    if not opts.select_from_file:
-        try:
-            select = map(re.compile, opts.select)
-            ignore = map(re.compile, opts.ignore)
-        except re.error:
-            raise SystemExit("Error: compiling select/ignore regexps.")
-
-        selector = select_patterns(roots, select, ignore)
-    else:
-        selector = select_from_file(opts.select_from_file)
-
-
-
-
-
-
+    regexp, sedcmd, selector, opts = parse_options()
 
     # Perform search and replacement
     for fn in selector:
         check_replace(fn, regexp, sedcmd, opts)
 
     # Print out location of backup files again for convenience.
-    if opts.backup_type == 'other' and opts.backup_dir:
+    if opts.backup_dir:
         print
-        print "Storing backup files under:", opts.backup_dir
+        print "Stored backup files under:", opts.backup_dir
         print
 
 
