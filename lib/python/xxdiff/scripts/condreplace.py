@@ -52,6 +52,7 @@ import commands, tempfile, shutil
 import xxdiff.scripts
 import xxdiff.backup
 import xxdiff.checkout
+import xxdiff.invoke
 from xxdiff.scripts import tmpprefix
 
 
@@ -93,25 +94,25 @@ def cond_replace( origfile, modfile, opts ):
         if not opts.no_confirm:
             cmd = ('%s --decision --merged-filename "%s" ' + \
                    '--title2 "NEW FILE" "%s" "%s" ') % \
-                   (opts.command, tmpf2.name, origfile, modfile)
+                   (opts.xxdiff_exec, tmpf2.name, origfile, modfile)
             s, o = commands.getstatusoutput(cmd)
 
         else:
-            s, o = 0, 'NO_CONFIRM'
+            s, o = 0, 'NOCONFIRM' # Special flag to handle this case.
 
         if not opts.silent:
             if opts.diff:
                 print o
             else:
                 print o, origfile
-        if o == 'ACCEPT' or o == 'NO_CONFIRM':
+        if o == 'ACCEPT' or o == 'NOCONFIRM':
             xxdiff.backup.backup_file(origfile, opts, sys.stdout)
-
             xxdiff.checkout.insure_checkout(origfile, opts, sys.stdout)
-
             shutil.copyfile(modfile, origfile)
+
         elif o == 'REJECT' or o == 'NODECISION':
             rval = 1
+
         elif o == 'MERGED':
             if opts.diff:
                 # run diff again to show the changes that have actually been
@@ -125,7 +126,6 @@ def cond_replace( origfile, modfile, opts ):
 
             xxdiff.backup.backup_file(origfile, opts, sys.stdout)
             xxdiff.checkout.insure_checkout(origfile, opts, sys.stdout)
-
             shutil.copyfile(tmpf2.name, origfile)
         else:
             raise SystemExit("Error: unexpected answer from xxdiff: %s" % o)
@@ -160,10 +160,7 @@ def parse_options():
 
     xxdiff.backup.options_graft(parser)
     xxdiff.checkout.options_graft(parser)
-
-    parser.add_option('--command', action='store', default='xxdiff',
-                      help="xxdiff command prefix to use.")
-
+    xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
                       help="print the commands that would be executed " +
@@ -190,6 +187,7 @@ def parse_options():
 
     xxdiff.backup.options_validate(opts, logs=sys.stdout)
     xxdiff.checkout.options_validate(opts)
+    xxdiff.invoke.options_validate(opts)
 
     if not args or len(args) > 2:
         raise parser.error("you must specify exactly two files.")

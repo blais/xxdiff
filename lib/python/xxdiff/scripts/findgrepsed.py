@@ -39,6 +39,7 @@ import commands, tempfile, shutil
 import xxdiff.scripts
 import xxdiff.selectfiles
 import xxdiff.backup
+import xxdiff.invoke
 from xxdiff.scripts import tmpprefix
 
 
@@ -233,6 +234,7 @@ def parse_options():
     xxdiff.backup.options_graft(parser)
     xxdiff.selectfiles.options_graft(parser)
     xxdiff.checkout.options_graft(parser)
+    xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
                       help="Print the commands that would be executed " +
@@ -259,6 +261,7 @@ def parse_options():
     selector = xxdiff.selectfiles.options_validate(opts, roots)
     xxdiff.backup.options_validate(opts, logs=sys.stdout)
     xxdiff.checkout.options_validate(opts, logs=sys.stdout)
+    xxdiff.invoke.options_validate(opts, logs=sys.stdout)
 
     # Compile regular expression
     try:

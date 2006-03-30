@@ -67,55 +67,11 @@ import re
 import commands, shutil
 from tempfile import NamedTemporaryFile
 
-
-
-
-
-
-
-
-
-
-
-
-
-#-------------------------------------------------------------------------------
-#
-tmppfx = '%s.' % os.path.basename(sys.argv[0])
-
-#-------------------------------------------------------------------------------
-#
-def splitpatch( text ):
-
-    """Split output in chunks starting with ^Index.  Returns a list of pairs
-    (tuples), each with (filename, patch) contents."""
-
-    ## splitre = re.compile('^Index: (.*)$', re.M)
-    splitre = re.compile('^diff (.*)\s+(\S+)\s+(\S+)\s*$', re.M)
-    chunks = []
-    curbeg, curfn = None, None
-    for mo in splitre.finditer(text):
-        if curbeg != None:
-            assert curfn
-            chunks.append( (curfn, text[curbeg:mo.start()]) )
-        curbeg = mo.start()
-        curfn = mo.groups()[-1]
-    if curbeg != None:
-        chunks.append( (curfn, text[curbeg:]) )
-
-    return chunks
-
-
-
-
-
-
-
-
-
-
-
-
+# xxdiff imports
+from xxdiff.scripts import tmpprefix
+import xxdiff.patches
+import xxdiff.invoke
+import xxdiff.backup
 
 
 #-------------------------------------------------------------------------------
@@ -127,13 +83,13 @@ def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
 
-    parser.add_option('-x', '--xxdiff-options', action='store', metavar="OPTS",
-                      default='',
-                      help="specifies additional options to pass on to xxdiff.")
+    xxdiff.invoke.options_graft(parser)
+    xxdiff.backup.options_graft(parser)
 
     parser.add_option('-p', '--patch-options', action='store', metavar="OPTS",
                       default='',
                       help="specifies additional options to pass on to patch.")
+
     parser.add_option('-s', '--strip', action='store', type='int',
                       help="strip option to patch, provided for convenience.")
 
@@ -152,11 +108,12 @@ def parse_options():
                       help="""don't apply the patch, just show the
                       differences (you don't have to make any decisions).""")
 
-    parser.add_option('-B', '--no-backup', action='store_true',
-                      help="disable backup filesa")
-
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
+
+    xxdiff.invoke.options_validate(parser)
+    xxdiff.backup.options_validate(parser)
+
     return opts, args
 
 
@@ -187,7 +144,7 @@ def patch_main():
             raise SystemExit(
                 "Error: reading patchfile %s: %s" % (fn, str(e)))
 
-        chunks += splitpatch(text)
+        chunks += xxdiff.patches.splitpatch(text)
 
     #
     # For each subpatch, apply it individually
@@ -207,7 +164,7 @@ def patch_main():
 
         # feed diffs to patch, patch will do its deed and save the output to
         # a temporary file.
-        tmpfp = NamedTemporaryFile(prefix=tmppfx)
+        tmpfp = NamedTemporaryFile(prefix=tmpprefix)
 
         popts = opts.patch_options
         popts += ['--reverse', ''][ opts.reverse == None ]
@@ -247,7 +204,7 @@ def patch_main():
         dopts = ''
         if not opts.dry_run:
             # create temporary file to hold merged results.
-            tmpfm = NamedTemporaryFile('w', prefix=tmppfx)
+            tmpfm = NamedTemporaryFile('w', prefix=tmpprefix)
             dopts += '--decision --merged-filename "%s" ' % tmpfm.name
 
         dopts += '--title%d="%s (patched)"' % (pno, sfilename)
@@ -264,23 +221,20 @@ def patch_main():
 
             if o == 'ACCEPT':
                 if not opts.invert:
-                    if not opts.no_backup:
-                        shutil.copyfile(sfilename, "%s.bak" % sfilename)
+                    xxdiff.backup.backup_file(sfilename, opts)
                     shutil.copyfile(rightfn, sfilename)
                 else:
                     assert rightfn == sfilename
 
             elif o == 'REJECT':
                 if not opts.invert:
-                    if not opts.no_backup:
-                        shutil.copyfile(sfilename, "%s.bak" % sfilename)
+                    xxdiff.backup.backup_file(sfilename, opts)
                     shutil.copyfile(leftfn, sfilename)
                 else:
                     assert leftfn == sfilename
 
             elif o == 'MERGED':
-                if not opts.no_backup:
-                    shutil.copyfile(sfilename, "%s.bak" % sfilename)
+                xxdiff.backup.backup_file(sfilename, opts)
                 shutil.copyfile(tmpfm.name, sfilename)
 
             elif o == 'NODECISION':

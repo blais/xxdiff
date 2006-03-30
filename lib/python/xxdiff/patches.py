@@ -15,10 +15,12 @@ import re
 #-------------------------------------------------------------------------------
 #
 def splitpatch( text ):
+    """
+    Split output in chunks starting with ^Index.  Returns a list of pairs
+    (tuples), each with (filename, patch) contents.
+    """
 
-    """Split output in chunks starting with ^Index.  Returns a list of pairs
-    (tuples), each with (filename, patch) contents."""
-
+    ## splitre = re.compile('^Index: (.*)$', re.M)
     splitre = re.compile('^Index: (.*)$', re.M)
     chunks = []
     curbeg, curfn = None, None
@@ -32,4 +34,5 @@ def splitpatch( text ):
         chunks.append( (curfn, text[curbeg:]) )
 
     return chunks
+
 

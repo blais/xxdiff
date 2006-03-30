@@ -49,12 +49,13 @@ def parse_options():
     parser = optparse.OptionParser(__doc__.strip())
 
     parser.add_option('-c', '--commit', action='store_true',
-                      help="ask for confirmation and commit accepted changes.")
+                      help="Ask for confirmation and commit accepted changes.")
 
     xxdiff.scripts.install_autocomplete(parser)
 
     opts, args = parser.parse_args()
     return opts, args
+
 
 #-------------------------------------------------------------------------------
 #
@@ -123,6 +124,7 @@ def cvsdiff_main():
 
             if o == 'ACCEPT' or o == 'MERGED':
                 # the user accepted, commit the file to CVS.
+## FIXME: move this to scm.py
                 os.system('cvs commit "%s"' % filename)
             elif o == 'REJECT' or o == 'NODECISION':
                 pass # do nothing
