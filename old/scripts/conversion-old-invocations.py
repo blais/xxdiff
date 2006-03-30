@@ -28,8 +28,15 @@ cvsdiff:
 
 encrypted:
 
-diffcmd = '%(xxdiff)s --merged-filename "%(merged)s" ' + \
-          '--indicate-input-processed ' # + filenames
+    diffcmd = '%(xxdiff)s --merged-filename "%(merged)s" ' + \
+              '--indicate-input-processed ' # + filenames
+
+    fmerge = NamedTemporaryFile(prefix=tmpprefix)
+    print '== TEMPFILE', fmerge.name
+
+    m = {'xxdiff': opts.xxdiff_exec,
+         'gpg': opts.gpg,
+         'merged': fmerge.name}
 
     cmd = diffcmd % m + ' '.join(map(lambda x: '"%s"' % x.name, tempfiles))
     fout = os.popen(cmd, 'r')
@@ -85,7 +92,7 @@ patch:
 
             if o == 'ACCEPT':
 
-svnproxy:
+diffproxy:
 
     tmpf = NamedTemporaryFile('rw', prefix=tmpprefix)
 
@@ -113,3 +120,5 @@ svnproxy:
     if decision:
         # if the user merged, copy the merged file over the original.
         if o in ['MERGED', 'ACCEPT', 'REJECT']:
+
+

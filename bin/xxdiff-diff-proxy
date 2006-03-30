@@ -5,6 +5,6 @@
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
-from xxdiff.scripts.svnproxy import main
+from xxdiff.scripts.diffproxy import main
 main()
 

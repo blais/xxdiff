@@ -19,9 +19,9 @@ from os.path import basename
 
 
 # Check interpreter version requirements.
-if sys.version_info[:2] < (2, 3):
+if sys.version_info[:2] < (2, 4):
     raise SystemExit(
-        "Error: you need at least version 2.3 of Python or greater.")
+        "Error: you need at least version 2.4 of Python or greater.")
 
 
 #-------------------------------------------------------------------------------

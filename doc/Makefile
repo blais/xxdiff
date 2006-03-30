@@ -19,8 +19,8 @@ TOOLS=\
 	condreplace \
 	findgrepsed \
 	cvsdiff \
-	svnproxy \
-	svn \
+	diffproxy \
+	svndiff \
 	encrypted \
 	match \
 	patch
