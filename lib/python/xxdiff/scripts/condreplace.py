@@ -57,80 +57,129 @@ import xxdiff.invoke
 from xxdiff.scripts import tmpprefix
 
 
+
+FIXME remove this, 
+
 #-------------------------------------------------------------------------------
 #
-def cond_replace( origfile, modfile, opts ):
+def do_replace_file( ofn, nfn, opts, oss ):
+    """
+    Function that performs the file replacement safely.  Replace the original
+    file 'ofn' by 'nfn'.
+    """
+    # Backup the original file first.
+    xxdiff.backup.backup_file(ofn, opts, oss)
+
+    # Insure that the file is checked out.
+    xxdiff.scm.insure_checkout(ofn, opts, oss)
+
+    # Copy the new file over the original.
+    shutil.copyfile(nfn, ofn)
+
+#-------------------------------------------------------------------------------
+#
+def cond_replace( origfn, newfn, opts ):
     """
     Spawn xxdiff and perform the replacement if confirmed.
     """
 
-    if opts.diff:
+    # Print header
+    if opts.verbose >= 2:
         print '=' * 80
-        print 'File:    ', origfile
-        print 'Absolute:', abspath(origfile)
+        print 'File:    ', origfn
+        print 'Absolute:', abspath(origfn)
         print
 
-        # Run diff command.
+    #===========================================================================
+    # BEGIN FILE TRANSFORMATION
+
+    # Nothing to do.
+
+    # END FILE TRANSFORMATION
+    #===========================================================================
+
+    if opts.verbose >= 2:
+        # Run diff between the original and the new/modified file
         difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
-        diffcmd = difffmt % (origfile, modfile)
-        s, o = commands.getstatusoutput(diffcmd)
+        diffcmd = difffmt % (origfn, newfn)
+        status, diff_output = commands.getstatusoutput(diffcmd)
+        if os.WEXITSTATUS(status) == 0:
+            print
+            print "(Warning: no differences.)"
+            print
 
-        rv = os.WEXITSTATUS(s)
-        if rv == 0:
-            print >> sys.stderr
-            print >> sys.stderr, "Warning: no differences."
-            print >> sys.stderr
-
-        #print
-        #print '_' * 80
-        print o
-        #print '_' * 80
-        #print
+        # Print output from sed command
+        print diff_output
         print
 
-    rval = 0
-    if not opts.dry_run:
-        if not opts.no_confirm:
-            decision, mergedf = xxdiff.invoke.xxdiff_decision(
-                opts, '--title2', 'NEW FILE', origfile, modfile)
-        else:
-            decision = 'NOCONFIRM' # Special flag to handle this case.
+    # Return immediately if this is not for real
+    if opts.dry_run:
+        return 0
 
-        if not opts.silent:
-            if opts.diff:
-                print decision
-            else:
-                print decision, origfile
-        if decision == 'ACCEPT' or decision == 'NOCONFIRM':
-            xxdiff.backup.backup_file(origfile, opts, sys.stdout)
-            xxdiff.scm.insure_checkout(origfile, opts, sys.stdout)
-            shutil.copyfile(modfile, origfile)
+    def print_decision( decision ):
+        # Print out decision code.
+        if opts.verbose >= 2:
+            print decision
+        elif opts.verbose >= 1:
+            print '%10s %s' % (decision, origfn)
+
+    returnval = 0
+    if opts.no_confirm:
+        # No graphical diff, just replace the files without asking.
+        do_replace_file(origfn, newfn, opts, sys.stdout)
+
+        print_decision('NOCONFIRM')
+    else:
+        # Call xxdiff!
+        decision, mergedf = xxdiff.invoke.xxdiff_decision(
+            opts, '--title2', 'NEW FILE', origfn, newfn)
+
+        print_decision(decision)
+
+        if decision == 'ACCEPT':
+            # Changes accepted, replace original with new..
+            do_replace_file(origfn, newfn, opts, sys.stdout)
 
         elif decision == 'REJECT' or decision == 'NODECISION':
-            rval = 1
+            # Rejected change (or program killed), do not replace
+            returnval = 1
 
         elif decision == 'MERGED':
-            if opts.diff:
-                # run diff again to show the changes that have actually been
-                # merged in the output log.
-                diffcmd = difffmt % (origfile, mergedf.name)
-                s, o = commands.getstatusoutput(diffcmd)
+            if opts.verbose >= 2:
+                # Run diff again to show the real changes that will be applied.
+                diffcmd2 = difffmt % (origfn, mergedf.name)
+                status, diff_output = commands.getstatusoutput(diffcmd2)
                 print 'Actual merged changes:'
                 print
-                print o
+                print diff_output
                 print
 
-            xxdiff.backup.backup_file(origfile, opts, sys.stdout)
-            xxdiff.scm.insure_checkout(origfile, opts, sys.stdout)
-            shutil.copyfile(mergedf.name, origfile)
+            do_replace_file(origfn, mergedf.name, opts, sys.stdout)
 
-        if opts.delete:
-            try:
-                os.unlink(modfile)
-            except OSError, e:
-                raise SystemExit("Error: deleting modified file (%s)" % str(e))
+    return returnval
 
-    return rval
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #-------------------------------------------------------------------------------
@@ -151,9 +200,12 @@ def parse_options():
                       help="print the commands that would be executed " +
                       "but don't really run them.")
 
-    parser.add_option('-q', '--silent', '--quiet', action='store_true',
-                      help="Do not output anything. Normally the decision "
-                      "status and backup file location is output.")
+    parser.add_option('-v', '--verbose', '--quiet', action='count',
+                      default=0,
+                      help="Verbose output.  By default nothing is output. "
+                      "If you use this switch once, you will get the decision "
+                      "code followed by the filename.  If you use it twice, "
+                      "you will obtain a side-by-side diff of the changes.")
 
     parser.add_option('-x', '--diff', action='store_true',
                       help="Run a diff and log the differences on stdout.")
@@ -192,7 +244,7 @@ def condreplace_main():
         if opts.delete:
             raise parser.error("no need to use --delete on file from stdin.")
 
-        origfile, = args
+        origfn, = args
         intmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
         try:
             intmpf.write(sys.stdin.read())
@@ -201,16 +253,18 @@ def condreplace_main():
         except IOError, e:
             raise SystemExit(
                 "Error: saving stdin to temporary file (%s)" % str(e))
-        modfile = intmpf.name
+        newfn = intmpf.name
     else:
-        modfile, origfile = args
-
-    if opts.silent and opts.diff:
-        raise parser.error("you cannot ask for a diff output and for silent at "
-                           "the same time.")
+        newfn, origfn = args
 
     # call xxdiff and perform the conditional replacement.
-    rval = cond_replace(origfile, modfile, opts)
+    rval = cond_replace(origfn, newfn, opts)
+
+    if opts.delete and not opts.dry_run:
+        try:
+            os.unlink(newfn)
+        except OSError, e:
+            raise SystemExit("Error: deleting modified file (%s)" % str(e))
 
     # repeat message at the end for convenience.
     if opts.backup_type == 'other' and opts.backup_dir:

@@ -46,28 +46,70 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-# Diff command template
-difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
+def do_replace_file( ofn, nfn, opts, oss ):
+    """
+    Function that performs the file replacement safely.  Replace the original
+    file 'ofn' by 'nfn'.
+    """
+    # Backup the original file first.
+    xxdiff.backup.backup_file(ofn, opts, oss)
+
+    # Insure that the file is checked out.
+    xxdiff.scm.insure_checkout(ofn, opts, oss)
+
+    # Copy the new file over the original.
+    shutil.copyfile(nfn, ofn)
 
 
 #-------------------------------------------------------------------------------
 #
-def perform_sed_replace( fn, sedcmd, opts ):
+FIXME change description, add transformer
+def perform_sed_replace( origfn, sedcmd, opts, logs ):
     """
     Process a file through sed.
 
+
+
+
+
+
+
+
+
     Arguments:
-    - fn: filename to process -> string
-    - sedcmd: the sed command to run -> string
-    - opts: program options object -> Options instance
+
+    - 'origfn': filename to process -> string
+
+    - 'sedcmd': the sed command to run -> string
+
+    - 'opts': program options object -> Options instance
+
+      The options that are used are:
+
+      * opts.verbose: How much output to print
+
+          Three levels of verbosity are assumed:
+          - 0: completely silent
+          - 1: outputs only the decision code and then the filename
+               (This can be useful for scripts to process the output of a run)
+          - 2: outputs a side-by-side diff of the changes.
+
+      * opts.dry_run: Whether to actually apply the changes or not.
+
+      * opts.no_confirm: Apply the changes without confirmation.
+
     """
 
     # Print header
-    print '=' * 80
-    print
-    print 'File:    ', fn
-    print 'Absolute:', abspath(fn)
-    print
+    if opts.verbose >= 2:
+        print >> logs,  '=' * 80
+        print >> logs
+        print >> logs,  'File:    ', origfn
+        print >> logs,  'Absolute:', abspath(origfn)
+        print >> logs
+
+    #===========================================================================
+    # BEGIN FILE TRANSFORMATION
 
     # Create temporary file
     tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
@@ -76,78 +118,80 @@ def perform_sed_replace( fn, sedcmd, opts ):
 
     # If this is not for show only, make sure right away that we can overwrite
     # the destination file
-    if not opts.dry_run and not os.access(fn, os.W_OK):
-        raise SystemExit("Error: cannot write to file '%s'." % fn)
+    if not opts.dry_run and not os.access(origfn, os.W_OK):
+        raise SystemExit("Error: cannot write to file '%s'." % origfn)
 
     # Perform sed replacement to a temporary file
-    replcmd = 'sed -e "%s" "%s" > "%s"' % (sedcmd, fn, tmpf.name)
+    replcmd = 'sed -e "%s" "%s" > "%s"' % (sedcmd, origfn, tmpf.name)
     status, sed_output = commands.getstatusoutput(replcmd)
     if status != 0:
         raise SystemExit(
-            "Error: running sed command:\nFile:%s\n%s" % (fn, sed_output))
+            "Error: running sed command:\nFile:%s\n%s" % (origfn, sed_output))
 
-    # Run diff between the original and the temp file
-    diffcmd = difffmt % (fn, tmpf.name)
-    status, diff_output = commands.getstatusoutput(diffcmd)
-    if os.WEXITSTATUS(status) == 0:
-        print
-        print "(Warning: no differences.)"
-        print
+    newfn = tmpf.name
 
-    # Print output from sed command
-    print diff_output
-    print
+    # END FILE TRANSFORMATION
+    #===========================================================================
 
+    if opts.verbose >= 2:
+        # Run diff between the original and the new/modified file
+        difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
+        diffcmd = difffmt % (origfn, newfn)
+        status, diff_output = commands.getstatusoutput(diffcmd)
+        if os.WEXITSTATUS(status) == 0:
+            print >> logs
+            print >> logs, "(Warning: no differences.)"
+            print >> logs
+
+        # Print output from sed command
+        print >> logs, diff_output
+        print >> logs
+
+    # Return immediately if this is not for real
     if opts.dry_run:
-        return
-    # So this is for real...
+        return 0
 
+    def print_decision( decision ):
+        # Print out decision code.
+        if opts.verbose >= 2:
+            print >> logs, decision
+        elif opts.verbose >= 1:
+            print >> logs, '%10s %s' % (decision, origfn)
 
-    def do_replace( tmpfn, fn ):
-        "Replace the original file."
-        xxdiff.backup.backup_file(fn, opts, sys.stdout)
-
-        if xxdiff.scm.insure_checkout(fn, opts, sys.stdout):
-            print
-
-        # Copy the modified file over the original
-        shutil.copyfile(tmpfn, fn)
-
-
+    returnval = 0
     if opts.no_confirm:
         # No graphical diff, just replace the files without asking.
-        do_replace(tmpf.name, fn)
+        do_replace_file(origfn, newfn, opts, logs)
 
+        print_decision('NOCONFIRM')
     else:
-        # Call xxdiff on it.
+        # Call xxdiff!
         decision, mergedf = xxdiff.invoke.xxdiff_decision(
-            opts, '--title2', 'NEW FILE', fn, tmpf.name)
+            opts, '--title2', 'NEW FILE', origfn, newfn)
 
-        print decision
+        print_decision(decision)
+
         if decision == 'ACCEPT':
-            # Accepted change, perform the replacement
-            do_replace(tmpf.name, fn)
+            # Changes accepted, replace original with new..
+            do_replace_file(origfn, newfn, opts, logs)
 
         elif decision == 'REJECT' or decision == 'NODECISION':
             # Rejected change (or program killed), do not replace
-            pass
+            returnval = 1
 
         elif decision == 'MERGED':
-            # Some user-driven selections saved to the merge file
+            if opts.verbose >= 2:
+                # Run diff again to show the real changes that will be applied.
+                diffcmd2 = difffmt % (origfn, mergedf.name)
+                status, diff_output = commands.getstatusoutput(diffcmd2)
+                print >> logs, 'Actual merged changes:'
+                print >> logs
+                print >> logs, diff_output
+                print >> logs
 
-            # Run diff again to show the real changes that will be applied.
-            diffcmd2 = difffmt % (fn, mergedf.name)
-            status, diff_output = commands.getstatusoutput(diffcmd2)
-            print 'Actual merged changes:'
-            print
-            print diff_output
-            print
+            do_replace_file(origfn, mergedf.name, opts, logs)
 
-            do_replace(mergedf.name, fn)
-
-        else:
-            raise SystemExit(
-                "Error: unexpected answer from xxdiff: %s" % diff_output)
+    return returnval
 
 
 #-------------------------------------------------------------------------------
@@ -164,7 +208,7 @@ def parse_options():
 
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
-    
+
     xxdiff.backup.options_graft(parser)
     xxdiff.selectfiles.options_graft(parser)
     xxdiff.scm.options_graft(parser)
@@ -191,6 +235,9 @@ def parse_options():
     # Unpack arguments
     regexp, sedcmd = args[:2]
     roots = args[2:] or ['.']  # Root directories, use CWD if none specified
+
+    # Force to always perform a diff on output.
+    opts.verbose = 2
 
     selector = xxdiff.selectfiles.options_validate(opts, roots)
     xxdiff.backup.options_validate(opts, logs=sys.stdout)
@@ -246,4 +293,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+
