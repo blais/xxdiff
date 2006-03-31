@@ -90,35 +90,30 @@ def cond_replace( origfile, modfile, opts ):
 
     rval = 0
     if not opts.dry_run:
-        tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
-
         if not opts.no_confirm:
-            cmd = ('%s --decision --merged-filename "%s" ' + \
-                   '--title2 "NEW FILE" "%s" "%s" ') % \
-                   (opts.xxdiff_exec, tmpf2.name, origfile, modfile)
-            s, o = commands.getstatusoutput(cmd)
-
+            decision, mergedf = xxdiff.invoke.xxdiff_decision(
+                opts, '--title2', 'NEW FILE', origfile, modfile)
         else:
-            s, o = 0, 'NOCONFIRM' # Special flag to handle this case.
+            decision = 'NOCONFIRM' # Special flag to handle this case.
 
         if not opts.silent:
             if opts.diff:
-                print o
+                print decision
             else:
-                print o, origfile
-        if o == 'ACCEPT' or o == 'NOCONFIRM':
+                print decision, origfile
+        if decision == 'ACCEPT' or decision == 'NOCONFIRM':
             xxdiff.backup.backup_file(origfile, opts, sys.stdout)
             xxdiff.scm.insure_checkout(origfile, opts, sys.stdout)
             shutil.copyfile(modfile, origfile)
 
-        elif o == 'REJECT' or o == 'NODECISION':
+        elif decision == 'REJECT' or decision == 'NODECISION':
             rval = 1
 
-        elif o == 'MERGED':
+        elif decision == 'MERGED':
             if opts.diff:
                 # run diff again to show the changes that have actually been
                 # merged in the output log.
-                diffcmd = difffmt % (origfile, tmpf2.name)
+                diffcmd = difffmt % (origfile, mergedf.name)
                 s, o = commands.getstatusoutput(diffcmd)
                 print 'Actual merged changes:'
                 print
@@ -127,9 +122,7 @@ def cond_replace( origfile, modfile, opts ):
 
             xxdiff.backup.backup_file(origfile, opts, sys.stdout)
             xxdiff.scm.insure_checkout(origfile, opts, sys.stdout)
-            shutil.copyfile(tmpf2.name, origfile)
-        else:
-            raise SystemExit("Error: unexpected answer from xxdiff: %s" % o)
+            shutil.copyfile(mergedf.name, origfile)
 
         if opts.delete:
             try:

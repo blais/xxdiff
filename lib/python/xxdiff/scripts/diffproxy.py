@@ -15,6 +15,7 @@ also xxdiff-svn-diff).
 
 Add the following lines ``~/.subversion/config``::
 
+  [helpers]
   diff-cmd = xxdiff-diff-proxy
   diff3-cmd = xxdiff-diff-proxy
 
@@ -26,11 +27,9 @@ __depends__ = ['xxdiff', 'Python-2.3']
 
 # stdlib imports.
 import sys, os
-import commands
-from tempfile import NamedTemporaryFile
 
 # xxdiff imports.
-from xxdiff.scripts import tmpprefix
+import xxdiff.invoke
 
 
 #-------------------------------------------------------------------------------
@@ -41,6 +40,13 @@ def parse_options():
     """
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
+
+    xxdiff.invoke.options_graft(parser)
+
+    parser.add_option('--decision', action='store_true',
+                      help="Use decision mode for the diffed files.  This "
+                      "allows you to save merged files over the originals.")
+
 
     # For diff-cmd invocation.
     parser.add_option('-u', action='store_true',
@@ -65,6 +71,8 @@ def parse_options():
     if len(args) > 3:
         raise parser.error("Cannot invoke wrapper with more than 3 files.")
 
+    xxdiff.invoke.options_validate(opts)
+
     return opts, args
 
 
@@ -76,48 +84,41 @@ def diffproxy_main():
     """
     opts, args = parse_options()
 
-    # create temporary file to hold merged results.
-    tmpf = NamedTemporaryFile('rw', prefix=tmpprefix)
-
-    # run command
-    xxdiff_path = 'xxdiff'
-
-    decision = len(args) == 3
-    cmd = [xxdiff_path]
-    if decision:
-        cmd.append('--decision')
+    dargs = []
     if opts.merge:
-        cmd.append('--merge')
-    cmd.append('--merged-filename="%s"' % tmpf.name)
+        dargs.append('--merge')
+
     for o1, o2, fn in zip(['--title1', '--title2', '--title3'],
                           ['"%s"' % x for x in opts.label],
                           args):
         if os.path.basename(fn) == 'empty-file':
             o2 = '"(NON-EXISTANT FILE)"'
-        cmd.extend([o1, o2])
-    cmd.extend(args)
-    ##print ' '.join(cmd)
 
-    s, o = commands.getstatusoutput(' '.join(cmd))
+        dargs.extend([o1, o2])
 
-    if decision:
-        # if the user merged, copy the merged file over the original.
+    dargs.extend(args)
 
-## FIXME: should reject also copy the file?  I think not, no?  Is this a bug?
-## Review this.
+    # Decision xxdiff: if we force it or if we have 3 arguments.
+    if opts.decision or len(args) == 3:
+        decision, mergedf = xxdiff.invoke.xxdiff_decision(opts, *dargs)
 
-        if o in ['MERGED', 'ACCEPT', 'REJECT']:
-            tmpf.flush()
-            tmpf.seek(0)
-            text = tmpf.read()
-            tmpf.close()
+        # If the user merged, copy the merged file over the original.
+        if decision in ('MERGED', 'ACCEPT'):
+            mergedf.flush()
+            mergedf.seek(0)
+            text = mergedf.read()
+            mergedf.close()
             sys.stdout.write(text)
     
-        elif o == 'NODECISION':
+        elif decision in ('NODECISION', 'REJECT'):
             pass # do nothing
         else:
             raise SystemExit(
-                    "Error: unexpected answer from xxdiff: %s" % o)
+                    "Error: unexpected answer from xxdiff: %s" % decision)
+
+    # Just spawn xxdiff and discard the results.
+    else:
+        xxdiff.invoke.xxdiff_display(opts, *dargs)
 
 
 #-------------------------------------------------------------------------------
@@ -126,4 +127,5 @@ main = diffproxy_main
 
 if __name__ == '__main__':
     main()
+
 

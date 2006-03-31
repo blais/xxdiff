@@ -1,4 +1,5 @@
-findgrepsed:
+#-------------------------------------------------------------------------------
+# findgrepsed:
 
         # Create a temporary file to contain the merged results.
         tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
@@ -17,9 +18,8 @@ findgrepsed:
         if l1 == 'ACCEPT':
 
 
---------------------------------------------------------------------------------
-
-condreplace:
+#-------------------------------------------------------------------------------
+# condreplace:
 
         tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
 
@@ -32,7 +32,8 @@ condreplace:
         if o == 'ACCEPT' ...
 
 
-cvsdiff:
+#-------------------------------------------------------------------------------
+# cvsdiff:
 
             tmpf2 = NamedTemporaryFile('w', prefix=tmpprefix)
 
@@ -45,7 +46,9 @@ cvsdiff:
             if o:
                 print o
 
-encrypted:
+
+#-------------------------------------------------------------------------------
+# encrypted:
 
     diffcmd = '%(xxdiff)s --merged-filename "%(merged)s" ' + \
               '--indicate-input-processed ' # + filenames
@@ -68,17 +71,16 @@ encrypted:
     fout.read()
 
 
-
-
-
-match:
+#-------------------------------------------------------------------------------
+# match:
 
         print ' '.join(l)
         cmd = ' '.join( ['xxdiff'] + extra + opts + l )
         os.popen(cmd)
 
 
-patch:
+#-------------------------------------------------------------------------------
+# patch:
 
         dopts += '--title%d="%s (patched)"' % (pno, sfilename)
         dopts += opts.xxdiff_options
@@ -94,7 +96,9 @@ patch:
 
             if o == 'ACCEPT':
 
-diffproxy:
+
+#-------------------------------------------------------------------------------
+# diffproxy:
 
     tmpf = NamedTemporaryFile('rw', prefix=tmpprefix)
 
@@ -122,5 +126,4 @@ diffproxy:
     if decision:
         # if the user merged, copy the merged file over the original.
         if o in ['MERGED', 'ACCEPT', 'REJECT']:
-
 

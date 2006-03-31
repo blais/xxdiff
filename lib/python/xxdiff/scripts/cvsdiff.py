@@ -61,7 +61,7 @@ def cvsdiff_main():
     Main program for cvs-diff script.
     """
     opts, args = parse_options()
-    
+
     # run cvs diff and read its output.
     cmd = 'cvs diff -u ' + ' '.join(map(lambda x: '"%s"' % x, args))
     s, o = commands.getstatusoutput(cmd)
@@ -90,7 +90,7 @@ def cvsdiff_main():
         cin.write('Index: %s\n' % filename)
         cin.write(patch)
         # avoid "patch unexpectedly ends in middle of line" warning.
-        if patch[-1] != '\n': 
+        if patch[-1] != '\n':
             cin.write('\n')
         cin.close()
 
@@ -101,33 +101,27 @@ def cvsdiff_main():
             # simply invoke xxdiff on the files.
             os.system('xxdiff "%s" "%s"' % (tmpf.name, filename))
         else:
-            # create temporary file to hold merged results.
-            tmpf2 = NamedTemporaryFile('w', prefix=tmpprefix)
-
-            cmd = ('xxdiff --decision --merged-filename "%s" ' +
-                   '--title2 "NEW FILE" "%s" "%s" ') % \
-                   (tmpf2.name, tmpf.name, filename)
-            s, o = commands.getstatusoutput(cmd)
+            decision, mergedf = xxdiff.invoke.xxdiff_decision(
+                opts, '--title2', 'NEW FILE', tmpf.name, filename)
 
             # print output of xxdiff command.
-            if o:
-                print o
+            print decision
 
             # if the user merged, copy the merged file over the original.
-            if o == 'MERGED':
+            if decision == 'MERGED':
                 # save a backup, in case.
                 shutil.copyfile(filename, "%s.bak" % filename)
                 shutil.copyfile(tmpf2.name, filename)
 
-            if o == 'ACCEPT' or o == 'MERGED':
+            if decision == 'ACCEPT' or decision == 'MERGED':
                 # the user accepted, commit the file to CVS.
-## FIXME: move this to scm.py
-                os.system('cvs commit "%s"' % filename)
-            elif o == 'REJECT' or o == 'NODECISION':
+                xxdiff.scm.commit(filename)
+
+            elif decision == 'REJECT' or decision == 'NODECISION':
                 pass # do nothing
             else:
                 raise SystemExit(
-                        "Error: unexpected answer from xxdiff: %s" % o)
+                        "Error: unexpected answer from xxdiff: %s" % decision)
 
 
 #-------------------------------------------------------------------------------

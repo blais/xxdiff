@@ -67,14 +67,6 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-diffcmd = '%(xxdiff)s --merged-filename "%(merged)s" ' + \
-          '--indicate-input-processed ' # + filenames
-# Note: we are not even using --decision for the case where output is requested
-# (i.e. --output=filename), because we want to let the user decide at the time
-# of comparison if he wants to back out on merging the files. Not letting him
-# "not save" the merged output (i.e. forcing accept/merge/reject with
-# --decision does give the option of the status quo.)
-
 decodecmd = '%(gpg)s --decrypt --use-agent '
 encodecmd_noarmor = '%(gpg)s --encrypt --use-agent '
 encodecmd = encodecmd_noarmor + '--armor '
@@ -84,8 +76,8 @@ encodecmd = encodecmd_noarmor + '--armor '
 #
 def diff_encrypted( textlist, outmerged=None ):
     """
-    Run a comparison of the encrypted texts specified in textlists and if
-    outmerged filename is specified, encrypt the merged file into it.
+    Run a comparison of the encrypted texts specified in textlists and if an
+    'outmerged' filename is specified, encrypt the merged file into it.
     """
     # Create temporary files.
     tempfiles = []
@@ -96,12 +88,7 @@ def diff_encrypted( textlist, outmerged=None ):
 
     # Always create a temporary file for the merged file, we will delete it for
     # sure, since it would contain decrypted content if saved.
-    fmerge = NamedTemporaryFile(prefix=tmpprefix)
-    print '== TEMPFILE', fmerge.name
-
-    m = {'xxdiff': opts.xxdiff_exec,
-         'gpg': opts.gpg,
-         'merged': fmerge.name}
+    m = {'gpg': opts.gpg}
 
     # Decode the files.
     for i in xrange(len(textlist)):
@@ -118,60 +105,48 @@ def diff_encrypted( textlist, outmerged=None ):
         f.flush()
 
     # Spawn xxdiff on the temporary/decoded files.
-    cmd = diffcmd % m + ' '.join(map(lambda x: '"%s"' % x.name, tempfiles))
-    fout = os.popen(cmd, 'r')
-
-    # Leave time for xxdiff to read the files before hiding, it will let us know
-    # when it is done with the input files.
-    l = fout.readline()
-    assert l.startswith('INPUT-PROCESSED')
+    waiter = xxdiff.invoke.xxdiff_decision(
+        opts, nowait=1, *map(lambda x: x.name, tempfiles))
 
     # Close and automatically delete the temporary/decoded files.
     for f in tempfiles:
         f.close()
 
-    if opts.unmerge or opts.output:
-        print 'Waiting... save as merged file to merge back to encrypted file.'
-    else:
-        print 'Waiting...'
-    fout.read()
+    print 'Waiting...'
+    decision, mergedf = waiter()
 
-    # Read the decoded merged output file from xxdiff.
-    textm = fmerge.read()
+    if decision != 'NODECISION' and outmerged:
+        # Read the decoded merged output file from xxdiff.
+        textm = mergedf.read()
+        assert textm
+    
+        # Close and automatically delete the decoded merged output file.
+        mergedf.close()
 
-    # Close and automatically delete the decoded merged output file.
-    fmerge.close()
-
-    if outmerged:
-        # Processed the merged text.
-        if not textm:
-            print >> sys.stderr, \
-                  'Warning: merged file was not saved. Not replacing.'
+        # Encode the merged output text.
+        if not opts.dont_armor:
+            cmd = encodecmd % m
         else:
-            # Encode the merged output text.
-            if not opts.dont_armor:
-                cmd = encodecmd % m
-            else:
-                cmd = encodecmd_noarmor % m
+            cmd = encodecmd_noarmor % m
 
-            if opts.recipient:
-                cmd += ' --recipient "%s"' % opts.recipient
+        if opts.recipient:
+            cmd += ' --recipient "%s"' % opts.recipient
 
-            fin, fout = os.popen2(cmd, 'w')
-            fin.write(textm)
-            fin.close()
-            encoded_output = fout.read()
-            fout.close()
+        fin, fout = os.popen2(cmd, 'w')
+        fin.write(textm)
+        fin.close()
+        encoded_output = fout.read()
+        fout.close()
 
-            # Write out the encoded output file.
-            try:
-                f = open(outmerged, 'w')
-                f.write(encoded_output)
-                f.close()
-            except IOError, e:
-                print >> sys.stderr, \
-                      'Error: cannot write to encoded merged file.'
-                raise e
+        # Write out the encoded output file.
+        try:
+            f = open(outmerged, 'w')
+            f.write(encoded_output)
+            f.close()
+        except IOError, e:
+            print >> sys.stderr, \
+                  'Error: cannot write to encoded merged file.'
+            raise e
 
 
 #-------------------------------------------------------------------------------
@@ -186,17 +161,17 @@ def parse_options():
     xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-g', '--gpg', default="gpg",
-                      help="specify path to gpg program to use")
+                      help="Specify path to gpg program to use.")
 
     parser.add_option('-A', '--dont-armor', action='store_true',
                       help="Create output file in binary format.")
 
     parser.add_option('-o', '--output', action='store',
-                      help="require and encrypt merged output.")
+                      help="Require and encrypt merged output.")
 
     parser.add_option('-u', '--unmerge', action='store_true',
-                      help="split CVS conflicts in single input file and "
-                      "encrypt required output merged file over input")
+                      help="Split CVS conflicts in single input file and "
+                      "encrypt required output merged file over input.")
 
     parser.add_option('-r', '--recipient', action='store',
                       help="Encrypt for user id name.")

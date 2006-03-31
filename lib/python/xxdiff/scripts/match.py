@@ -43,6 +43,7 @@ import sys, os
 
 # xxdiff imports.
 import xxdiff.scripts
+import xxdiff.invoke
 
 
 #-------------------------------------------------------------------------------
@@ -51,31 +52,33 @@ def match_main():
     """
     Main program for match script.
     """
-    # get options
+    # Get options
     opts, files = xxdiff.scripts.passthruopts(sys.argv)
 
-    # build map of basenames
+    # Make sure that we display the commands.
+    class Opts:
+        xxdiff_verbose = True
+
+    # Build map of basenames
     bnmap = {}
     for fn in files:
         dn, bn = os.path.split(fn)
         bnmap.setdefault(bn, []).append(fn)
 
-    # invoke xxdiff's on alphabetical order of the basenames
+    # Invoke xxdiff's on alphabetical order of the basenames
     bnkeys = bnmap.keys()
     bnkeys.sort()
     for bn in bnkeys:
-        l = bnmap[bn]
-        if len(l) == 2 or len(l) == 3:
+        filenames = bnmap[bn]
+        if len(filenames) == 2 or len(filenames) == 3:
             extra = []
-        elif len(l) == 1:
+        elif len(filenames) == 1:
             extra = ['--single']
         else:
             # ignore the files.
             continue
 
-        print ' '.join(l)
-        cmd = ' '.join( ['xxdiff'] + extra + opts + l )
-        os.popen(cmd)
+        xxdiff.invoke.xxdiff_display(Opts, *(extra + filenames))
 
 
 #-------------------------------------------------------------------------------

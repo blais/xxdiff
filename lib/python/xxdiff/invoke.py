@@ -11,7 +11,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 # stdlib imports.
 import os, optparse, tempfile
 from os.path import *
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 
 # xxdiff imports.
 from xxdiff.scripts import tmpprefix
@@ -68,7 +68,7 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
     You should unpack its arguments like this::
 
-       decision, mergedf = xxdiff_confirm( ... )
+       decision, mergedf = xxdiff_decision( ... )
 
        # use mergedf.name to copy the file or seek(0) and read() it again.
 
@@ -84,7 +84,7 @@ def xxdiff_decision( opts, *arguments, **kwds ):
     is returned that can be invoked to wait for the final results and returns
     the same data as the function specifies.  You use it like this::
 
-      xxwait = xxdiff_confirm( ..., nowait=1)
+      xxwait = xxdiff_decision( ..., nowait=1)
 
       # Do something...
 
@@ -114,7 +114,7 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
     # Run xxdiff.
     cmd = [xexec] + alloptions
-    if opts.xxdiff_verbose:
+    if getattr(opts, 'xxdiff_verbose', None):
         print '===', ' '.join(cmd)
 
     stdin_text = kwds.pop('stdin', None)
@@ -174,6 +174,84 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
 #-------------------------------------------------------------------------------
 #
+def xxdiff_display( opts, *arguments, **kwds ):
+    """
+    Runs xxdiff with the given arguments, passed directly to subprocess.call().
+    We do not run it in decision mode, and there is not return code.  There is a
+    similar 'nowait' option as xxdiff_decision() with a waiter object returned
+    to wait on the child process.  Otherwise, this function will wait for the
+    child to terminate.
+
+    We do not create a merged file, but you are free to pass in these options if
+    so desired.
+    """
+    if '--decision' in arguments:
+        raise RuntimeError("Internal error: use xxdiff_decision() "
+                           "instead of xxdiff_display() if you want a user "
+                           "return code.")
+
+    # Get the appropriate xxdiff executable and options.
+    xexec = getattr(opts, 'xxdiff_exec', None) or 'xxdiff'
+    options = getattr(opts, 'xxdiff_options', None) or []
+
+    alloptions = options + list(arguments)
+
+    # If we're not waiting, we only want to return after all the input has been
+    # processed.  This is always the case.
+    nowait = kwds.pop('nowait', None)
+    if nowait and '--indicate-input-processed' not in alloptions:
+        alloptions.insert(0, '--indicate-input-processed')
+
+    # Run xxdiff.
+    cmd = [xexec] + alloptions
+    if getattr(opts, 'xxdiff_verbose', None):
+        print '===', ' '.join(cmd)
+
+    stdin_text = kwds.pop('stdin', None)
+    p = Popen(cmd,
+              stdout=PIPE,
+              stderr=PIPE,
+              stdin=(stdin_text and PIPE or None))
+
+    # Write to stdin if necessary.
+    if stdin_text:
+        p.stdin.write(stdin_text)
+        p.stdin.close()
+    
+
+    # Define waiter object.
+    def waiter():
+        # Select-wait for stdout and stderr
+        stdout, stderr = p.communicate()
+
+        # If xxdiff failed, we bail out of the script.
+        if p.returncode == 2:
+            raise SystemExit(
+                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
+                stderr)
+
+    # Eat up the processed tag.
+    #
+    # Important note: there is a subtle race condition that can cause an error
+    # here, but it is rather unlikely to happen (in practice it will never
+    # happen because xxdiff is faster than the user's fingers).
+    if nowait and p.returncode is None:
+        # Wait for the processed tag.
+        line = p.stdout.readline().strip()
+        if line != 'INPUT-PROCESSED':
+            stdout, stderr = p.communicate()
+            raise SystemExit(
+                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
+                stderr)
+            
+        return waiter
+
+    # Wait for the results and return them.
+    return waiter()
+
+
+#-------------------------------------------------------------------------------
+#
 def test():
     """
     Test launcher.
@@ -193,15 +271,23 @@ def test():
             print xxdiff_decision(Opts, f1, f2)
 
         elif t == 'async':
-            waiter = xxdiff_decision(Opts, f1, f2, nowait=1)
+            w = xxdiff_decision(Opts, f1, f2, nowait=1)
             print 'Deleting temp input files...'
-            print waiter()
+            print w()
 
         elif t == 'error':
             print xxdiff_decision(Opts, '--bullshit', f1, f2)
 
         elif t == 'error-nowait':
             print xxdiff_decision(Opts, '--bullshit', f1, f2, nowait=1)
+
+        if t == 'display':
+            print xxdiff_display(Opts, f1, f2)
+
+        if t == 'display-nowait':
+            w = xxdiff_display(Opts, f1, f2, nowait=1)
+            print 'Deleting temp input files...'
+            print w()
 
 if __name__ == '__main__':
     test()

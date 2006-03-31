@@ -120,3 +120,13 @@ def cvs_unmerge2( text ):
 
     return text1, text2
 
+
+#-------------------------------------------------------------------------------
+#
+def cvs_commit( filename ):
+    """
+    Commit the given filename into CVS.
+    """
+    subprocess.call(['cvs', 'commit', filename])
+
+

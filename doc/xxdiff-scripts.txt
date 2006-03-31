@@ -1,0 +1,121 @@
+=============================
+  Helper Scripts for xxdiff
+=============================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2006-03-30
+:Abstract:
+
+  A description of the Python scripts and infrastructure that is provided around
+  xxdiff, to faciliate implementing processes requiring display and selection
+  of differences.
+
+.. contents::
+..
+    1  Introduction
+    2  Looping and Confirming
+      2.1  Per-file Conditional Replacement: xxdiff-cond-replace
+      2.2  Higher-Level Loops
+        2.2.1  xxdiff-filter
+        2.2.2  xxdiff-rename
+        2.2.3  xxdiff-find-grep-sed
+    3  xxdiff-match
+    4  Applying Patches
+      4.1  xxdiff-patch
+    5  CVS Support
+      5.1  xxdiff-cvs-diff
+    6  Subversion Support
+      6.1  xxdiff-diff-proxy
+      6.2  xxdiff-svn-diff
+      6.3  xxdiff-svn-resolve
+    7  Encrypted Files
+      7.1  xxdiff-encrypted
+
+
+Introduction
+============
+
+
+Looping and Confirming
+======================
+
+.. introduction to the general loop structure
+
+
+Per-file Conditional Replacement: xxdiff-cond-replace
+-----------------------------------------------------
+
+
+Higher-Level Loops
+------------------
+
+xxdiff-filter
+~~~~~~~~~~~~~
+
+xxdiff-rename
+~~~~~~~~~~~~~
+
+xxdiff-find-grep-sed
+~~~~~~~~~~~~~~~~~~~~
+
+This script is actually the ancestor to all of this.  FIXME MORE
+
+
+xxdiff-match
+============
+
+One day, a silly man asked me the following question: “Why is it that when I
+call ``xxdiff dir1/*.c dir2/*.c`` it does not work?”
+
+FIXME more
+
+
+Applying Patches
+================
+
+
+
+xxdiff-patch
+------------
+
+
+
+
+CVS Support
+===========
+
+xxdiff-cvs-diff
+---------------
+
+
+
+Subversion Support
+==================
+
+In my opinion, Subversion provides a diff loop that is rather weak for my
+purposes.  I want to be able to review  FIXME MORE
+
+
+xxdiff-diff-proxy
+-----------------
+
+
+xxdiff-svn-diff
+---------------
+
+.. FIXME todo
+
+
+xxdiff-svn-resolve
+------------------
+
+.. FIXME todo
+
+
+
+Encrypted Files
+===============
+
+xxdiff-encrypted
+----------------
+

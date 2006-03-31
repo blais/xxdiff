@@ -5,15 +5,6 @@
 XXDIFF SCRIPTS TOTAL REVAMP
 ===========================
 
-* Finish invoke and convert all the scripts to use it.
-
-  * Convert all code to use the new subprocess module, or invoke.py
-
-
-* Implement a commit function in the scm module and replace all found commit
-  code by that (there is some in cvsdiff.py)
-
-
 * Make infrastructure to process files in common from xxdiff-rename and
   xxdiff-find-grep-sed (the loop is the same, only the file transform differs).
 
@@ -23,6 +14,15 @@ XXDIFF SCRIPTS TOTAL REVAMP
   * The transformers should be able to abort a transformation by raising an
     exception, in which case no change occurs.  This could be used to implement
     the grep portion of find-grep-sed
+
+  * create "Processor" objects, one for SedProcessor and one for
+    ReplaceProcessor.  SedProcessor will implement the same behaviour as before,
+    using sed, when the (new) --sed option is given to the program.  Otherwise,
+    a simple string replacement will be applied, using the ReplaceProcessor.
+    This object is to be given to the replace() function.
+
+
+
 
 
 * Write global, general documentation about the scripts and remove the
@@ -43,6 +43,8 @@ XXDIFF SCRIPTS TOTAL REVAMP
   Or perhaps... (and this makes sense): the looping functions should call on the
   function that is invoked within xxdiff-cond-replace.  Yes!  That is the way
   that it should be done!
+
+    Merge cond_replace() and perform_sed_replace()
 
 
 * Modify the file-transformation scripts to use a common loop, and to only have
@@ -70,6 +72,8 @@ XXDIFF SCRIPTS TOTAL REVAMP
 * Fwd email to python-dev about optparse
 
 * Send append_const_cb trick to optik user slist
+
+* Send xxdiff scripts to Belley when they're done.
 
 
 
@@ -138,6 +142,10 @@ XXDIFF SCRIPTS TOTAL REVAMP
 * Release as a new version of xxdiff
 
 
+* Convert all other invocations, including non-xxdiff ones, to use the
+  subprocess module.
+
+
 * xxdiff-patch: finish it! Come on...
 
   * deal with delete and add
@@ -153,18 +161,9 @@ XXDIFF SCRIPTS TOTAL REVAMP
 
 --------------------------------------------------------------------------------
 
-
-* create "Processor" objects, one for SedProcessor and one for ReplaceProcessor.
-  SedProcessor will implement the same behaviour as before, using sed, when the
-  (new) --sed option is given to the program.  Otherwise, a simple string
-  replacement will be applied, using the ReplaceProcessor.  This object is to be
-  given to the replace() function.
-
-
-
-* Send it to key people who wanted this at my Python course.
-
-
+* Implement --single-right: we should be able to display single files on either
+  side.  You should fix xxdiff-match after that, so that it passes the correct
+  options to xxdiff.
 
 
 --------------------------------------------------------------------------------

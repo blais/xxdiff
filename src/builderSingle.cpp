@@ -65,6 +65,9 @@ std::auto_ptr<XxDiffs> XxBuilderSingle::process( const XxBuffer& buffer )
    _curHunk = 0;
    createInsertLeftBlock( 1, buffer.getNbLines() );
 
+   // Set a succesful status.
+   _status = 0;
+
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }

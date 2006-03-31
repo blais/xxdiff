@@ -63,7 +63,7 @@ __depends__ = ['xxdiff', 'Python-2.3', 'diffutils (patch)']
 
 # stdlib imports.
 import sys, os
-import commands, shutil
+import shutil
 from tempfile import NamedTemporaryFile
 
 # xxdiff imports
@@ -199,49 +199,43 @@ def patch_main():
             leftfn, rightfn = rightfn, leftfn
             pno = 1
 
-        # calculate xxdiff options
-        dopts = ''
-        if not opts.dry_run:
-            # create temporary file to hold merged results.
-            tmpfm = NamedTemporaryFile('w', prefix=tmpprefix)
-            dopts += '--decision --merged-filename "%s" ' % tmpfm.name
-
-        dopts += '--title%d="%s (patched)"' % (pno, sfilename)
-        dopts += opts.xxdiff_options
-        cmd = 'xxdiff %s "%s" "%s"' % (dopts, leftfn, rightfn)
-
-        s, o = commands.getstatusoutput(cmd)
+        # Invoke xxdiff.
+        decision, mergedf = xxdiff.invoke.xxdiff_decision(
+            opts, '--title%d' % pno, '%s (patched)' % sfilename,
+            leftfn, rightfn)
 
         # print output of xxdiff command.
-        if o: print o
+        if decision:
+            print decision
 
         # perform the requested action
-        if o and not opts.dry_run:
+        if decision and not opts.dry_run:
 
-            if o == 'ACCEPT':
+            if decision == 'ACCEPT':
                 if not opts.invert:
                     xxdiff.backup.backup_file(sfilename, opts)
                     shutil.copyfile(rightfn, sfilename)
                 else:
                     assert rightfn == sfilename
 
-            elif o == 'REJECT':
+            elif decision == 'REJECT':
                 if not opts.invert:
                     xxdiff.backup.backup_file(sfilename, opts)
                     shutil.copyfile(leftfn, sfilename)
                 else:
                     assert leftfn == sfilename
 
-            elif o == 'MERGED':
+            elif decision == 'MERGED':
                 xxdiff.backup.backup_file(sfilename, opts)
                 shutil.copyfile(tmpfm.name, sfilename)
 
-            elif o == 'NODECISION':
+            elif decision == 'NODECISION':
                 pass # do nothing
 
             else:
                 raise SystemExit(
-                        "Error: unexpected answer from xxdiff: %s" % o)
+                        "Error: unexpected answer from xxdiff: %s" % decision)
+
 
 #-------------------------------------------------------------------------------
 #
