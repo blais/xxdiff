@@ -520,7 +520,7 @@ following lines to your ``~/.subversion/config`` file::
 -------------------
 
 In my opinion, Subversion provides a diff loop that is rather weak.  I want more
-options in the ways that I can review my changes, for example
+options in the ways that I can review my changes, for example, 
 
 * It would be nice to be able to optionally automatically spawn a 3-way diff for
   those files which have a newer version on the server.  This would allow you to
@@ -540,7 +540,9 @@ options in the ways that I can review my changes, for example
 * I want to be able to review diffs between any revisions.
 
 ``xxdiff-svn-diff`` provides what I think should become a better ``svn diff``
-with graphical diff viewing.
+with graphical diff viewing.  At this point (2006-04-01), its functionality is
+rather simple, similar to what ``svn diff`` does, but I will beef it up
+gradually.
 
 
 ``xxdiff-svn-resolve``

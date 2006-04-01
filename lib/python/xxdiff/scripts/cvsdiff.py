@@ -84,8 +84,8 @@ def cvsdiff_main():
         print patch
         print '*' * 40
 
-        # feed diffs to patch, patch will do its deed and save the output to
-        # a temporary file.
+        # Feed diffs to patch, patch will do its deed and save the output to a
+        # temporary file.
         tmpf = NamedTemporaryFile(prefix=tmpprefix)
         cin, cout = os.popen2(
             'patch --reverse --output "%s"' % tmpf.name, 'rw')

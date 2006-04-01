@@ -44,10 +44,19 @@ def svn_main():
     """
     opts, args = parse_options()
 
+    # Get the status of the working copy.
+    statii = subversion.status(args)
+
+    # First print out the status to the user.
+    subversion.print_status(statii)
+    print
+    print '(Starting diffs)'
+
     # For each of the files reported by status
-    for s in subversion.status(args):
-        msg = 'diff'
+    for s in statii:
+        msg = 'xxdiff'
         dopts = []
+        merged = s.filename
         try:
             # Ignore unmodified files if there are any.
             if s.status in (' ', '?'):
@@ -102,6 +111,8 @@ def svn_main():
 
         # Run xxdiff on the files.
         assert left and right
+        if merged is not None:
+            dopts.extend(['--merged-filename', merged])
         xxdiff.invoke.xxdiff_display(opts, left, right, *dopts)
 
 

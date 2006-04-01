@@ -154,6 +154,14 @@ def status( rootdirs ):
     return statii
 
 
+def print_status( statii ):
+    """
+    Reproduce printing out the status.
+    """
+    for s in statii:
+        print s.parsed_line
+        
+
 #-------------------------------------------------------------------------------
 #
 def get_history( filename ):

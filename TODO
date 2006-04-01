@@ -5,42 +5,10 @@
 XXDIFF SCRIPTS TOTAL REVAMP
 ===========================
 
-
-* xxdiff-svn-diff: There is a new script ``xxdiff-svn-diff`` that can be used to
-  view all the changes in a subversion checkout.  It drives the show itself,
-  rather than being invoked by Subversion itself.  This has several advantages.
-
-  * --launcher: Create simple PyQt GUI for listing files from ``svn status``, on
-    which you can click to view the diffs.
-
-
-
-
-* xxdiff-resolve: Create a new script that finds all the files that are still in
+* xxdiff-svn-resolve: Create a new script that finds all the files that are still in
   conflict and invokes a 3-way merge algorithm to resolve them
 
   * Use --merge to automatically select the regions to be merged.
-
-
-
-
-
-
-
-* Fix this crap with the subprocess module::
-
-   banane:~/p/.../python/xxdiff$ igrep os.popen .
-   ./scripts/encrypted.py:        fin, fout = os.popen2(decodecmd % m, 'w')
-   ./scripts/encrypted.py:        fin, fout = os.popen2(cmd, 'w')
-   ./scripts/patch.py:        cin, cout = os.popen2(cmd, 'rw')
-   ./scripts/cvsdiff.py:        cin, cout = os.popen2(
-   banane:~/p/.../python/xxdiff$ igrep os.system .
-   ./scripts/cvsdiff.py:            os.system('xxdiff "%s" "%s"' % (tmpf.name, filename))
-   ./condrepl.py:    os.system('cp /home/blais/.emacs %(file1)s' % fm)
-   ./condrepl.py:    os.system('cat %(file1)s | sed -e "s/control/FREAK/" > %(file2)s' % fm)
-
-
-
 
 Release:
 
@@ -56,6 +24,28 @@ Release:
 
 
 --------------------------------------------------------------------------------
+
+* xxdiff-svn-diff: TODO
+
+  * --launcher: Create simple PyQt or CURSES GUI for listing files from ``svn
+    status``, on which you can click to view the diffs.
+
+  * Implement including differences from the ancestor file with 3-way diffs.
+
+  * Implement viewing differences between any two revision in the repository.
+
+  * Wouldn't it be nice to have a decision mode here?  Maybe, maybe not.  You
+    can save as merged if desired, the merged filename is set to the output
+    filename.
+
+* Fix these old subprocesses by using the subprocess module::
+
+   banane:~/p/.../python/xxdiff$ igrep os.popen .
+   ./scripts/encrypted.py:        fin, fout = os.popen2(decodecmd % m, 'w')
+   ./scripts/encrypted.py:        fin, fout = os.popen2(cmd, 'w')
+   ./scripts/cvsdiff.py:        cin, cout = os.popen2(
+   ./scripts/patch.py:        cin, cout = os.popen2(cmd, 'rw')
+
 
 * Implement --single-right: we should be able to display single files on either
   side.  You should fix xxdiff-match after that, so that it passes the correct

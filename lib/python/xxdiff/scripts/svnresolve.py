@@ -3,9 +3,9 @@
 
 """xxdiff-svn-resolve [<options>] <file> <file> [<file>]
 
-Script that invokes xxdiff for all files in a Subversion checkout whose
-conflicts need to be resolved.  Depending on the exit status, xxdiff also calls
-'svn resolve' on the files.
+Script that invokes xxdiff with a 3-way merge view for all files in a Subversion
+checkout whose conflicts need to be resolved.  Depending on the exit status,
+xxdiff also calls 'svn resolve' on the files.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
@@ -36,6 +36,8 @@ def svn_main():
     opts, args = parse_options()
 
 ## FIXME: todo
+
+    
 
 
 
