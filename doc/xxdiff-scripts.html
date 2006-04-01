@@ -514,8 +514,10 @@ therefore begin producing more support for this SCM.</p>
 you can avoid changing the administrative files stored in the .svn directories
 by using the following ignore option:</p>
 <pre class="literal-block">
-xxdiff-renam -I .svn   ...
+xxdiff-rename -I .svn   ...
 </pre>
+<p>Note that by default Subversion and CVS directories are ignored (you can disable
+that with an option).</p>
 </div>
 <div class="section">
 <h2><a class="toc-backref" href="#id31" id="xxdiff-diff-proxy" name="xxdiff-diff-proxy">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-diff-proxy</span></tt></a></h2>
@@ -544,7 +546,7 @@ not had problems with it yet, I have not experienced bugs.</p>
 <div class="section">
 <h2><a class="toc-backref" href="#id32" id="xxdiff-svn-diff" name="xxdiff-svn-diff">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt></a></h2>
 <p>In my opinion, Subversion provides a diff loop that is rather weak.  I want more
-options in the ways that I can review my changes, for example</p>
+options in the ways that I can review my changes, for example,</p>
 <ul class="simple">
 <li>It would be nice to be able to optionally automatically spawn a 3-way diff for
 those files which have a newer version on the server.  This would allow you to
@@ -557,9 +559,12 @@ taken care of automatically;</li>
 my config file everytime.</li>
 <li>I would like to have a graphical or curses interface to select which files to
 view, in which order I want.</li>
+<li>I want to be able to review diffs between any revisions.</li>
 </ul>
 <p><tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt> provides what I think should become a better <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">diff</span></tt>
-with graphical diff viewing.</p>
+with graphical diff viewing.  At this point (2006-04-01), its functionality is
+rather simple, similar to what <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">diff</span></tt> does, but I will beef it up
+gradually.</p>
 </div>
 <div class="section">
 <h2><a class="toc-backref" href="#id33" id="xxdiff-svn-resolve" name="xxdiff-svn-resolve">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></h2>
@@ -570,7 +575,8 @@ invoke it with the 3 files, ignoring the automatic merging that took place
 within Subversion, and providing the user with the interactive merge
 capabilities within xxdiff to resolve the conflicts, if possible.</p>
 <p>Then the user's changes can be applied automatically over the merged file and we
-can call <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">resolve</span></tt> as well to clear it.</p>
+can call <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">resolve</span></tt> as well to clear it (optionally).  All the versions
+used to resolve the conflict are backed up before the files are removed.</p>
 <p>This is what <tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt> does.  If you give it a directory, it also
 finds and loops through all the conflicting files recursively to resolve them
 graphically.</p>

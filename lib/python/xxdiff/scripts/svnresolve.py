@@ -68,8 +68,6 @@ def select_conflicts( statii ):
 
 #-------------------------------------------------------------------------------
 #
-proper_decisions = ('ACCEPT', 'REJECT', 'MERGED')
-
 def svnresolve_main():
     """
     Main program for svn-resolve script.
@@ -99,11 +97,11 @@ def svnresolve_main():
 
         # Spawn xxdiff in decision mode on the three files.
         decision = xxdiff.condrepl.cond_resolve(
-            mine, ancestor, yours, s.filename, opts, logs)
+            mine, ancestor, yours, s.filename, opts, logs, extra=('--merge',))
 
         # Backup all the other files that will get when the file gets resolved,
         # whether by this script or later by the user by hand.
-        if decision in proper_decisions:
+        if decision in xxdiff.condrepl.proper_decisions:
             xxdiff.backup.backup_file(mine, opts, logs)
             xxdiff.backup.backup_file(ancestor, opts, logs)
             xxdiff.backup.backup_file(yours, opts, logs)

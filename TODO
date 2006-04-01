@@ -5,11 +5,6 @@
 XXDIFF SCRIPTS TOTAL REVAMP
 ===========================
 
-* xxdiff-svn-resolve: Create a new script that finds all the files that are still in
-  conflict and invokes a 3-way merge algorithm to resolve them
-
-  * Use --merge to automatically select the regions to be merged.
-
 Release:
 
 * Register the package with the CheeseShop

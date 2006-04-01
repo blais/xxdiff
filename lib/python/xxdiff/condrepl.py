@@ -2,8 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-Function for conditional replacement.
-
+Functions for conditional replacement.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
@@ -204,7 +203,9 @@ def do_replace_file( ofn, nfn, opts, logs ):
 #
 diff3_cmd = ['diff3']
 
-def cond_resolve( mine, ancestor, yours, output, opts, logs=None ):
+proper_decisions = ('ACCEPT', 'REJECT', 'MERGED')
+
+def cond_resolve( mine, ancestor, yours, output, opts, logs=None, extra=None ):
     """
     Given three filenames, 'mine', 'ancestor', 'yours', spawn a 3-way xxdiff for
     a decision, and replace the 'original' file with the contents of the merged
@@ -233,6 +234,8 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None ):
 
       * opts.dry_run: Whether to actually apply the changes or not.
 
+    - 'extra': are extra parameters to pass on to xxdiff.
+    
     Returns the decision code for the file.
     """
     mine, ancestor, yours, output = map(abspath,
@@ -263,6 +266,9 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None ):
     dargs = ['--title1', '%s (WORKING)' % mine,
              '--title2', '%s (ANCESTOR)' % ancestor,
              '--title3', '%s (MERGED/NEW BASE)' % yours]
+    if extra is not None:
+        dargs = list(extra) + dargs
+
     # Call xxdiff!
     dargs.extend(files3)
     decision, mergedf = xxdiff.invoke.xxdiff_decision(opts, *dargs)
@@ -291,7 +297,7 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None ):
         # No Decision: Do not change anything.
         pass
 
-    if opts.verbose >= 2:
+    if opts.verbose >= 2 and decision in proper_decisions:
         # Run diff again to show the real changes that will be applied to
         # 'mine' into the output file.
         p = Popen(sbs_diff_cmd + [mine, output], stdout=PIPE, stderr=PIPE)

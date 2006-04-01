@@ -556,7 +556,8 @@ within Subversion, and providing the user with the interactive merge
 capabilities within xxdiff to resolve the conflicts, if possible.  
 
 Then the user's changes can be applied automatically over the merged file and we
-can call ``svn resolve`` as well to clear it.
+can call ``svn resolve`` as well to clear it (optionally).  All the versions
+used to resolve the conflict are backed up before the files are removed.
 
 This is what ``xxdiff-svn-resolve`` does.  If you give it a directory, it also
 finds and loops through all the conflicting files recursively to resolve them
