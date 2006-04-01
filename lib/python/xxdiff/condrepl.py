@@ -102,10 +102,6 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
     else:
         diff_output = None
 
-    # Return immediately if this is not for real
-    if opts.dry_run:
-        return 0
-
     if opts.no_confirm:
         # No graphical diff, just replace the files without asking.
         do_replace_file(origfn, newfn, opts, logs)
@@ -151,6 +147,9 @@ def do_replace_file( ofn, nfn, opts, logs ):
     Function that performs the file replacement safely.  Replace the original
     file 'ofn' by 'nfn'.
     """
+    if opts.dry_run:
+        return
+
     # Backup the original file first.
     if hasattr(opts, 'backup_type'):
         xxdiff.backup.backup_file(ofn, opts, logs)
@@ -176,8 +175,8 @@ def test():
     fm = dict(map(lambda x: ('file%d' % x, join(newdir, 'file%d' % x)),
                   xrange(1, 5)))
     pprint(fm)
-    os.system('cp /home/blais/.emacs %(file1)s' % fm)
-    os.system('cat %(file1)s | sed -e "s/control/FREAK/" > %(file2)s' % fm)
+    os.system('cp /home/blais/.emacs %(file1)s' % fm) # TEST
+    os.system('cat %(file1)s | sed -e "s/contr/FREAK/" > %(file2)s' % fm) # TEST
 
     class Opts:
         "dummy options class"

@@ -52,7 +52,7 @@ def options_validate( opts, parser, logs=None ):
 #-------------------------------------------------------------------------------
 #
 # Different kinds of backups.
-backup_choices = ['parallel', 'other', 'none']
+backup_choices = ['along', 'other', 'none']
 
 
 #-------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ def backup_file( fn, opts, logs=None ):
     """
 
     # Compute destination backup filename
-    if opts.backup_type == 'parallel':
+    if opts.backup_type == 'along':
         # Search for a non-existing backup filename alongside the original
         # filename
         fmt = '%s.bak.%%d' % fn

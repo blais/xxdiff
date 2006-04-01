@@ -57,6 +57,7 @@ def options_graft( parser ):
 
         group.add_option('--%s' % ftype, '--select-%s' % ftype, dest='select',
             action='callback', callback=append_const_cb(re.compile(fregexp)),
+            default=[],
             help=("Adds a regular expression for selecting %s files to "
                   "match against.") % fname)
 

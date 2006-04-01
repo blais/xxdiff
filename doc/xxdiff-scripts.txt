@@ -13,33 +13,40 @@
 .. section-numbering::
 .. contents::
 ..
-    1  Introduction
+    1   Introduction
       1.1  History
-    2  xxdiff's Decision Mode
-    3  Looping and Confirming
-      3.1  Per-File Conditional Replacement
-        3.1.1  ``xxdiff-cond-replace``
-      3.2  Higher-Level Loops
-        3.2.1  Selecting Files
-          3.2.1.1  Selecting By Filename
-          3.2.1.2  Selecting By Contents
-          3.2.1.3  Selecting From A Fixed List
-          3.2.1.4  All Options
-          3.2.1.5  Debugging The Selection Process
-        3.2.2  ``xxdiff-filter``
-        3.2.3  ``xxdiff-rename``
-        3.2.4  ``xxdiff-find-grep-sed``
-    4  ``xxdiff-match``
-    5  CVS Support
+    2   xxdiff's Decision Mode
+    3   Looping and Confirming
+      3.1  Backups
+      3.2  Write Permissions / Checkout
+      3.3  Running Without Graphical Diff
+      3.4  Per-File Conditional Replacement
+        3.4.1  ``xxdiff-cond-replace``
+      3.5  Higher-Level Loops
+        3.5.1  Selecting Files
+          3.5.1.1  Selecting By Filename
+          3.5.1.2  Selecting By Contents
+          3.5.1.3  Selecting From A Fixed List
+          3.5.1.4  All Options
+          3.5.1.5  Debugging The File Selection Process
+        3.5.2  ``xxdiff-filter``
+        3.5.3  ``xxdiff-rename``
+        3.5.4  ``xxdiff-find-grep-sed``
+        3.5.5  Writing Other Transformation Loops
+    4   ``xxdiff-match``
+    5   CVS Support
       5.1  ``xxdiff-cvs-diff``
-    6  Subversion Support
-      6.1  ``xxdiff-diff-proxy``
-      6.2  ``xxdiff-svn-diff``
-      6.3  ``xxdiff-svn-resolve``
-    7  Encrypted Files
+      5.2  Resolving CVS Conflicts
+    6   Subversion Support
+      6.1  Ignoring .svn Files In Loops
+      6.2  ``xxdiff-diff-proxy``
+      6.3  ``xxdiff-svn-diff``
+      6.4  ``xxdiff-svn-resolve``
+    7   Encrypted Files
       7.1  ``xxdiff-encrypted``
-    8  Applying Patches
-      8.1  ``xxdiff-patch``
+    8   Pre-Visualizing And Cherry-Picking From Patches
+    9   Writing Your Own Scripts
+    10  Questions
 
 
 Introduction
@@ -125,7 +132,7 @@ accepting those changes.  The high-level algorithm looks like this::
          xxdiff runs, while the parent script waits
 
       Conditionally replace the target file with the result of the merge (or
-      simply, with the other file, in case of accept).
+      simply, with the newer file, in case of ACCEPT).
 
 
 There are many functionalities involved:
@@ -134,7 +141,8 @@ a. Recursively traversing and selecting files for processing
 
 b. Invoking xxdiff to get the user's opinion
 
-c. Performing the conditional replacement.
+c. Performing the conditional replacement.  This may mean that the file has to
+   be checked out of the SCM system.
 
 d. When your original files are overwritten, first create a backup of the
    original file in case something went wrong.
@@ -142,9 +150,53 @@ d. When your original files are overwritten, first create a backup of the
 e. Produce a nice-looking textual log of all the changes that were applied to
    the files.
 
+The provided scripts allow you to carry out some of these tasks in different
+combinations.
 
-The following provided scripts allow you to carry out some of these tasks in
-different combinations.
+
+Backups
+-------
+
+File backups are automatically created.  There are a few options about where to
+put the backup files:
+
+- Along with the original files, but with an added extension, e.g.::
+
+     source.cpp
+     source.cpp.bak.1
+     source.cpp.bak.2
+
+- In a separate directory, recreating the directory hierarchy there (just for
+  the backed up files).
+
+All backup options::
+
+  File backup options:
+    These options affect automatic backup of overwritten files.
+
+    -b CHOICE, --backup-type=CHOICE
+                        Selects the backup type from: along, other, none
+    --backup-dir=BACKUP_DIR
+                        Specify backup directory for type 'other'
+
+
+Write Permissions / Checkout
+----------------------------
+
+Some SCM systems require the user to *checkout* files to make them writable,
+like ClearCase (under certain configurations).  There are options to do that.
+
+
+Running Without Graphical Diff
+------------------------------
+
+There is a ``--no-confirm`` option that runs the transformation, accepting the
+changes on all the files, producing a nice log of all the changes applied,
+without querying the user with a graphical diff at all.  This is useful when
+you've started confirming changes and after checking many files you've become
+confident that your transformation code will not fail.  If you have a large
+codebase to process, you may prefer to just apply unconditionally and them
+visualize the changes in the textual side-by-side diff log.
 
 
 Per-File Conditional Replacement
@@ -170,6 +222,8 @@ loop in, for example, Bourne shell::
          cat $i | tr -s \\n > /tmp/temp.$PID ; 
          xxdiff-cond-replace /tmp/temp.$PID $i ; 
       done
+
+
 
 
 Higher-Level Loops
@@ -250,8 +304,8 @@ Here is the full set of options (as of [2006-03-31])::
                         CWD).  You can use this option many timesfor multiple
                         roots.
 
-Debugging The Selection Process
-+++++++++++++++++++++++++++++++
+Debugging The File Selection Process
+++++++++++++++++++++++++++++++++++++
 
 To test which files are going to be selected before running your modification
 command, you can use the ``--select-debug`` switch (or ``-@``) to view the list,
@@ -259,7 +313,7 @@ e.g.::
 
    xxdiff-rename --cpp 'Application', 'LargeApplication' -@
 
-Would give something like::
+Would give output like this, without running any graphical diff at all::
 
   /home/blais/p/xxdiff/src/builderFiles3.h
   /home/blais/p/xxdiff/src/diffutils.h
@@ -281,6 +335,9 @@ that is, it takes each file as stdin and outputs the modified file as stdout.
 For example, repeating the previous example::
 
    xxdiff-filter 'tr -s \\n'
+
+The output will be a log of all the decisions that were made and all
+the changes that were applied, as a side-by-side log.
 
 
 ``xxdiff-rename``
@@ -315,6 +372,52 @@ Today we have a much more generic version of the same idea::
 There ``xxdiff-find-grep-sed`` is a bit obsolete.  I mean, it still works fine,
 and I provide it to support those who already have it in their process, but
 really, it should go.
+
+
+Writing Other Transformation Loops
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With the provided Python package, it is quite easy to create a new program to
+process a file in your own very customly way and to use the visualization and
+confirmation loop described above.  You need to do the following:
+
+#. Implement a transformer class that will perform the file transformation::
+
+        class CustomTransformer(xxdiff.xformloop.Transformer):
+            def transform( self, fn, outf ):
+                text = open(fn, 'r').read()
+                newtext = ... # transform text somehow
+                outf.write(newtext)
+                return True
+
+   You can return False to skip the file in that method.  You can also
+   initialize your transformer with the parameters of your transformation, if
+   needed.
+
+#. Add your own options and parse the arguments with the provided loop's
+   method::
+
+        import optparse
+        parser = optparse.OptionParser()
+        
+        parser.add_option('-M', '--my-option', action='store_true',
+                          help="My custom special option for my transformer.")
+
+        opts, args, selector = xxdiff.xformloop.parse_args(parser)
+
+#. Do your own arguments validation, if your script takes arguments.
+
+#. Create an instance of your transformer and use our main loop to invoke it
+   over the selected files::
+
+        # Create an appropriate transformer.
+        xformer = CustomTransformer(opts, <custom-arguments...>)
+
+        xxdiff.xformloop.transform_replace_loop(
+            opts, selector, xformer, sys.stdout)
+
+Some simplistic details are omitted, but that is the gist of it.  You can use
+the scripts provided with the package as examples, they all follow that pattern.
 
 
 ``xxdiff-match``
@@ -361,12 +464,30 @@ Unfortunately, I never wrote much more than this for CVS, but with the new
 packaged architecture of xxdiff Python code it should be easy to create new
 scripts for it if you need to.
 
+Resolving CVS Conflicts
+-----------------------
+
+Back in the days where xxdiff did not have any scripts, I implemented unmerging
+of CVS conflict markers directly in xxdiff itself (should I have to do this
+today I would definitely implement that in a script instead).  Just can just
+invoke xxdiff with the ``--unmerge`` or ``--unmerge3`` options to do that.
+
 
 Subversion Support
 ==================
 
 Since 2005, I have switched my repository of files to Subversion and I will
 therefore begin producing more support for this SCM.
+
+Ignoring .svn Files In Loops
+----------------------------
+
+If you use any of the looping scripts described before in a Subversion checkout,
+you can avoid changing the administrative files stored in the .svn directories
+by using the following ignore option::
+
+   xxdiff-renam -I .svn   ...
+
 
 
 ``xxdiff-diff-proxy``
@@ -389,10 +510,9 @@ following lines to your ``~/.subversion/config`` file::
    diff-cmd = xxdiff-diff-proxy
    diff3-cmd = xxdiff-diff-proxy
 
-.. important::  Note: there have been reports that this does not work terribly
-                well in certain cases.  I still need to investigate in which
-                cases it breaks down because I have not had problems with it
-                yet.
+.. important::  Note: there have been reports of bugs in certain cases.  I still
+                need to investigate in which cases it breaks down because I have
+                not had problems with it yet, I have not experienced bugs.
 
 ``xxdiff-svn-diff``
 -------------------
@@ -406,38 +526,112 @@ options in the ways that I can review my changes, for example
   committing the file (before actually updating);
 
 * I want to have the option to unmerge some changes and save the results
-  conveniently;
+  conveniently.  And I want backup files for the original overwritten files,
+  taken care of automatically;
 
 * I want to *also* have normal ``svn diff`` behaviour and I don't want to hack
   my config file everytime.
 
+* I would like to have a graphical or curses interface to select which files to
+  view, in which order I want.
 
-
-
+``xxdiff-svn-diff`` provides what I think should become a better ``svn diff``
+with graphical diff viewing.
 
 
 ``xxdiff-svn-resolve``
 ----------------------
 
-.. FIXME todo
+Subversion provides a fancier version of conflict resolution: all three files--
+yours, the other and the ancestor--are provided in your checkout to help you
+figure out what happened.  This is a perfect situation for xxdiff: I simply can
+invoke it with the 3 files, ignoring the automatic merging that took place
+within Subversion, and providing the user with the interactive merge
+capabilities within xxdiff to resolve the conflicts, if possible.  
 
+Then the user's changes can be applied automatically over the merged file and we
+can call ``svn resolve`` as well to clear it.
+
+This is what ``xxdiff-svn-resolve`` does.  If you give it a directory, it also
+finds and loops through all the conflicting files recursively to resolve them
+graphically.
 
 
 Encrypted Files
 ===============
 
+I maintain some of my more sensitive personal data in ascii-armored encrypted
+files in an CVS/Subversion repository.  I can open, modify and save the files
+from within Emacs without ever writing a non-encrypted version on disk.  This
+means that if I edit the files in two different machines, the merge operation
+will surely fail, because the encrypted file does not merge.  This happens
+rarely, but when it does, it is quite a problem: for each of the conflicting
+file, I must: 
+
+* Find the original file;
+* Rebuild my local file somehow, from the file with the conflicts in it;
+* Decrypt both files;
+* Launch xxdiff and resolve the conflict;
+* Encrypt the new, merged file;
+* And most importantly: make sure I do not forget to *remove the decrypted files
+  from disk*.  If the files are encrypted, there is a reason, and you don't want
+  to leave plaintext version of the data on disk.
+
+This is quite time-consuming.  Let's automate!
+
 ``xxdiff-encrypted``
 --------------------
 
-..
+This script will do all of the above for two encryped files, and it also
+attempts to minimize the amount of time that a decrypted file will live on
+disk--if needed at all.  In the cases where it needs to temporarily write
+decrypted text to disk, as soon as xxdiff finished gulping the files in, it
+deletes them right away.   This is not the super-dooper safest way of doing
+this, but it sure beats doing it all by hand [#]_.
+
+It also supports unmerging CVS conflict markers in order to obtain the original
+and the new file automatically.  For example::
+
+   xxdiff-encrypted --unmerge  my_secrets.asc
+   
+.. [#] xxdiff could be enhanced to accept input from multiple file descriptors
+       to avoid having to use temporary files in most cases.  This just has not
+       been done yet.
 
 
-Applying Patches
-================
+Pre-Visualizing And Cherry-Picking From Patches
+===============================================
+
+I would like to be able to apply a patch to a temporary copy of a set of files,
+and then to visualize the patch's changes, pick and choose the ones that we want
+using xxdiff, and apply them to the original files.  I have started doing some
+work on this in the ``xxdiff-patch`` program, but there remains some unsolved
+issues:
+
+* How do we deal with failed hunks?  What do we do with them?  How do we present
+  them to the user?
+
+* How do we insure that our patch selected from the merged output will apply
+  correctly?
+
+* How do we deal with added and deleted files?
+
+For these reasons, until I find a good solution for all of these problems, the
+``xxdiff-patch`` code remains hidden in the codebase.  If you're interested in
+working on this let me know.
 
 
+Writing Your Own Scripts
+========================
 
-``xxdiff-patch``
-----------------
+Use the provided scripts as examples.  There are many convenient functions in
+the package that you can leverage from to write your own processing scripts
+around xxdiff.
 
-..
+
+Questions
+=========
+
+Any questions should be directed to Martin Blais <blais@furius.ca>.
+Contributions appreciated.  If you find these programs useful, drop me a note.
+

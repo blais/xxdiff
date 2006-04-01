@@ -11,27 +11,6 @@ XXDIFF SCRIPTS TOTAL REVAMP
 
 
 
-* Write global, general documentation about the scripts and remove the
-  automatically-generated documentation.
-
-  * Add an example about how to provide another transform function with xxdiff
-    verification (in documentation)
-
-  * Fix (remove?) the automatically-generated docs for the new tools (see
-    Makefile).
-
-  * In the docs:  “xxdiff-cond-replace implements the same idea at the
-    transformation programs, except that we let the user perform the
-    transformation and the loop from the outside.”
-
-
-
-
-
-* xxdiff-resolve: Create a new script that finds all the files that are still in
-  conflict and invokes a 3-way merge algorithm to resolve them
-
-
 
 
 * xxdiff-svn-diff: There is a new script ``xxdiff-svn-diff`` that can be used to
@@ -44,13 +23,37 @@ XXDIFF SCRIPTS TOTAL REVAMP
 
 
 
+* xxdiff-resolve: Create a new script that finds all the files that are still in
+  conflict and invokes a 3-way merge algorithm to resolve them
+
+  * Use --merge to automatically select the regions to be merged.
+
+
+
+
+
+
+
+* Fix this crap with the subprocess module::
+
+   banane:~/p/.../python/xxdiff$ igrep os.popen .
+   ./scripts/encrypted.py:        fin, fout = os.popen2(decodecmd % m, 'w')
+   ./scripts/encrypted.py:        fin, fout = os.popen2(cmd, 'w')
+   ./scripts/patch.py:        cin, cout = os.popen2(cmd, 'rw')
+   ./scripts/cvsdiff.py:        cin, cout = os.popen2(
+   banane:~/p/.../python/xxdiff$ igrep os.system .
+   ./scripts/cvsdiff.py:            os.system('xxdiff "%s" "%s"' % (tmpf.name, filename))
+   ./condrepl.py:    os.system('cp /home/blais/.emacs %(file1)s' % fm)
+   ./condrepl.py:    os.system('cat %(file1)s | sed -e "s/control/FREAK/" > %(file2)s' % fm)
+
+
+
 
 Release:
 
-* Send append_const_cb trick to optik user slist
 * Register the package with the CheeseShop
 * Release as a new version of xxdiff 3.2
-* Send xxdiff scripts to Belley when they're done.
+* Send xxdiff scripts to Belley when they're complete and released.
 
 
 

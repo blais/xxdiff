@@ -101,7 +101,7 @@ def cvsdiff_main():
 
         if not opts.commit:
             # simply invoke xxdiff on the files.
-            os.system('xxdiff "%s" "%s"' % (tmpf.name, filename))
+            xxdiff.invoke.xxdiff_display(opts, tmpf.name, filename)
         else:
             decision, mergedf = xxdiff.invoke.xxdiff_decision(
                 opts, '--title2', 'NEW FILE', tmpf.name, filename)
