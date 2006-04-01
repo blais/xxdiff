@@ -51,7 +51,7 @@ could feed the decrypted files to an arbitrary program.)
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.3', 'GnuPG']
+__depends__ = ['xxdiff', 'Python-2.4', 'GnuPG']
 
 
 # stdlib imports.
@@ -184,7 +184,7 @@ def parse_options():
     if not args:
         raise parser.error('No files to decrypt and compare.')
 
-    xxdiff.invoke.options_validate(opts, logs=sys.stdout)
+    xxdiff.invoke.options_validate(opts, parser, logs=sys.stdout)
 
     return opts, args
 

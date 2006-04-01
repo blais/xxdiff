@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-svn-diff [<options>] <file> <file> [<file>]
+"""xxdiff-svn-resolve [<options>] <file> <file> [<file>]
 
-Script that invokes xxdiff for all modified files in the given Subversion
-checkout area.
+Script that invokes xxdiff for all files in a Subversion checkout whose
+conflicts need to be resolved.  Depending on the exit status, xxdiff also calls
+'svn resolve' on the files.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"

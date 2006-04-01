@@ -5,28 +5,17 @@
 XXDIFF SCRIPTS TOTAL REVAMP
 ===========================
 
-* Make infrastructure to process files in common from xxdiff-rename and
-  xxdiff-find-grep-sed (the loop is the same, only the file transform differs).
-
-  * Add an example about how to provide another transform function with xxdiff
-    verification (in documentation)
-
-  * The transformers should be able to abort a transformation by raising an
-    exception, in which case no change occurs.  This could be used to implement
-    the grep portion of find-grep-sed
-
-  * create "Processor" objects, one for SedProcessor and one for
-    ReplaceProcessor.  SedProcessor will implement the same behaviour as before,
-    using sed, when the (new) --sed option is given to the program.  Otherwise,
-    a simple string replacement will be applied, using the ReplaceProcessor.
-    This object is to be given to the replace() function.
-
+* BUG: cond_replace: --no-confirm --dry-run does not print anything right
+  now... we need to fix that.
 
 
 
 
 * Write global, general documentation about the scripts and remove the
   automatically-generated documentation.
+
+  * Add an example about how to provide another transform function with xxdiff
+    verification (in documentation)
 
   * Fix (remove?) the automatically-generated docs for the new tools (see
     Makefile).
@@ -36,82 +25,13 @@ XXDIFF SCRIPTS TOTAL REVAMP
     transformation and the loop from the outside.”
 
 
-* cond-replace might be able to reuse code from find-grep-sed as well, it is
-  only a simplified version of that, without the file selection and the looping,
-  you need to investigate how this can be done, or if it really needs be.
 
-  Or perhaps... (and this makes sense): the looping functions should call on the
-  function that is invoked within xxdiff-cond-replace.  Yes!  That is the way
-  that it should be done!
-
-    Merge cond_replace() and perform_sed_replace()
-
-
-* Modify the file-transformation scripts to use a common loop, and to only have
-  to provide a function that will perform the transformation of the file.
-  Everything else should be the same.  Those scripts are:
-
-  - xxdiff-find-grep-sed
-  - xxdiff-rename
-  - xxdiff-filter
-
-
-* Add new options to selection code:
-
-  - --select-grep: Among the files selected by filename, select only those which
-      match the given regexp (or multiple clauses)
-
-  - --ignore-grep: Among the files selected by filename, ignore those which
-      match the given regexp (or multiple clauses)
-
-  - xxdiff-find-grep-sed becomes obsolete, because it can be implemented as::
-
-      xxdiff-filter --select-grep 'sed -e <sed-code>'
-
-
-* Fwd email to python-dev about optparse
-
-* Send append_const_cb trick to optik user slist
-
-* Send xxdiff scripts to Belley when they're done.
-
-
-
-* xxdiff-rename: Created xxdiff-rename, a simpler version of
-  xxdiff-find-grep-sed that
-
-  - Does not use external programs to perform the replacements
-
-  - Supports normal strings (regular expressions are not triggered on an option)
-
-  - With respect to case sensitivity, supports the smart replacement behaviour
-    that is present in GNU emacs.
-
-  - default must be to ignore .svn and CVS
-
-  - implement inputting two strings, it is by far the most common case and I'm
-    annoyed as hell about the problems with not ignoring .svn.
-
-  - it should work on Windows as well, in preparation for an appropriate version
-    of xxdiff for Windows (with Qt4)
-
-  - There should be options about what to do with case, is it
-    case-sensitively matching the strings, and how the replacement is
-    performed (as is, or smart replacement like emacs, which looks at the
-    case of the input string and does something similar with the output
-    string).
-
-  - There needs to be a -r,--regexp option to interpret the
-    from and to strings are regular expressions.
-
-  The reason for this is that far-and-wide the main reason to use
-  xxdiff-find-grep-sed was to perform renamings within large codebases.  This
-  was the overwhelmingly prevalent use case, and I found myself annoyed with the
-  semantic of the arguments, and having to write a sed expression every time.
 
 
 * xxdiff-resolve: Create a new script that finds all the files that are still in
   conflict and invokes a 3-way merge algorithm to resolve them
+
+
 
 
 * xxdiff-svn-diff: There is a new script ``xxdiff-svn-diff`` that can be used to
@@ -122,41 +42,21 @@ XXDIFF SCRIPTS TOTAL REVAMP
     which you can click to view the diffs.
 
 
-* xxdiff-filter: Write a new xxdiff-filter script, which takes a command
-  argument and performs a transformation like xxdiff-find-grep-sed, the
-  filtering regexp should become a new select option (by default the command
-  would be run on all files and xxdiff only invoked if there was a difference --
-  this should be an option).
-
-
-* Fix bug: xxdiff-subversion sometimes leaves tempfiles in /tmp, fix that?
-
-* Fix bug: There is some minor bug with backup file naming in find-grep-sed,
-  check the backup file names with the various options.
-
-
-* Make sure that all the short options declared in options_graft() functions are
-  disjoint.
-
-* Add setup.py and register with the CheeseShop
-* Release as a new version of xxdiff
-
-
-* Convert all other invocations, including non-xxdiff ones, to use the
-  subprocess module.
-
-
-* xxdiff-patch: finish it! Come on...
-
-  * deal with delete and add
-
-  * Q: what do we do when patch fails?  How do we treat it?
-    must read the output messages of patch and warn the user.
 
 
 
-* In decision mode, we should warn the user when selections have been made and
-  the user exits with "merged".
+Release:
+
+* Send append_const_cb trick to optik user slist
+* Register the package with the CheeseShop
+* Release as a new version of xxdiff 3.2
+* Send xxdiff scripts to Belley when they're done.
+
+
+
+
+
+
 
 
 --------------------------------------------------------------------------------
@@ -164,6 +64,28 @@ XXDIFF SCRIPTS TOTAL REVAMP
 * Implement --single-right: we should be able to display single files on either
   side.  You should fix xxdiff-match after that, so that it passes the correct
   options to xxdiff.
+
+
+--------------------------------------------------------------------------------
+(Scripts)
+
+* xxdiff: In decision mode, we should warn the user when selections have been
+  made and the user exits with "merged".
+
+* xxdiff-rename: With respect to case sensitivity, supports the smart
+  replacement behaviour that is present in GNU emacs.
+
+* Implement a better side-by-side diff that includes line numbers and context.
+  The current side-by-side diff sucks.
+
+  - Add an option to generate normal diffs rather than side-by-side.
+
+* xxdiff-patch: Finish It! 
+
+  * You have to deal with 'delete' and 'add' cases.
+
+  * Q: what do we do when patch fails?  How do we treat it?
+    must read the output messages of patch and warn the user.
 
 
 --------------------------------------------------------------------------------
@@ -223,6 +145,19 @@ New feature, ignore regexp patterns::
   be displayed on the right side and not the left, this would be nice for
   directory diffs when clicking on a hunk where there is only a file on the
   right.  Right now the file appears on the left anyway, which just looks wrong.
+
+
+
+* Maybe create a new return code for the combination of ``--decision`` and
+  ``-D``::
+
+    int XxApp::exec()
+    {
+       if ( _dontShow ) {
+          // If we asked for a decision, at least output something.
+          // FIXME: maybe this should become NODIFF?
+          if ( _cmdline._forceDecision == true ) {
+             std::cout << "NODECISION" << std::endl;
 
 
 
@@ -590,6 +525,14 @@ Mini-Project: cvs.py -related
 
 
 (Font Drawing Problem)
+
+   * There is a bug whereby editing the font in the dialog does not work
+     properly, the dialog does not show the appropriate font.  This occurs when
+     the font is set in .xxdiffrc.  Version: 3.1, the contents of the resources
+     file was::
+
+        FontText: "Lucidatypewriter,14,-1,2,50,0,0,0,1,0"
+        Accel.Exit: "Alt+Q"
 
    * Italics fonts sometimes don't draw all that they should be.
 

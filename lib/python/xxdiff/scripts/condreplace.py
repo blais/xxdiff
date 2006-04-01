@@ -41,145 +41,21 @@ Notes
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.3']
+__depends__ = ['xxdiff', 'Python-2.4']
 
 
 # stdlib imports.
 import sys, os
 from os.path import *
-import commands, tempfile, shutil
+import tempfile
 
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.backup
 import xxdiff.scm
 import xxdiff.invoke
+import xxdiff.condrepl
 from xxdiff.scripts import tmpprefix
-
-
-
-FIXME remove this, 
-
-#-------------------------------------------------------------------------------
-#
-def do_replace_file( ofn, nfn, opts, oss ):
-    """
-    Function that performs the file replacement safely.  Replace the original
-    file 'ofn' by 'nfn'.
-    """
-    # Backup the original file first.
-    xxdiff.backup.backup_file(ofn, opts, oss)
-
-    # Insure that the file is checked out.
-    xxdiff.scm.insure_checkout(ofn, opts, oss)
-
-    # Copy the new file over the original.
-    shutil.copyfile(nfn, ofn)
-
-#-------------------------------------------------------------------------------
-#
-def cond_replace( origfn, newfn, opts ):
-    """
-    Spawn xxdiff and perform the replacement if confirmed.
-    """
-
-    # Print header
-    if opts.verbose >= 2:
-        print '=' * 80
-        print 'File:    ', origfn
-        print 'Absolute:', abspath(origfn)
-        print
-
-    #===========================================================================
-    # BEGIN FILE TRANSFORMATION
-
-    # Nothing to do.
-
-    # END FILE TRANSFORMATION
-    #===========================================================================
-
-    if opts.verbose >= 2:
-        # Run diff between the original and the new/modified file
-        difffmt = 'diff -y --suppress-common-lines "%s" "%s" 2>&1'
-        diffcmd = difffmt % (origfn, newfn)
-        status, diff_output = commands.getstatusoutput(diffcmd)
-        if os.WEXITSTATUS(status) == 0:
-            print
-            print "(Warning: no differences.)"
-            print
-
-        # Print output from sed command
-        print diff_output
-        print
-
-    # Return immediately if this is not for real
-    if opts.dry_run:
-        return 0
-
-    def print_decision( decision ):
-        # Print out decision code.
-        if opts.verbose >= 2:
-            print decision
-        elif opts.verbose >= 1:
-            print '%10s %s' % (decision, origfn)
-
-    returnval = 0
-    if opts.no_confirm:
-        # No graphical diff, just replace the files without asking.
-        do_replace_file(origfn, newfn, opts, sys.stdout)
-
-        print_decision('NOCONFIRM')
-    else:
-        # Call xxdiff!
-        decision, mergedf = xxdiff.invoke.xxdiff_decision(
-            opts, '--title2', 'NEW FILE', origfn, newfn)
-
-        print_decision(decision)
-
-        if decision == 'ACCEPT':
-            # Changes accepted, replace original with new..
-            do_replace_file(origfn, newfn, opts, sys.stdout)
-
-        elif decision == 'REJECT' or decision == 'NODECISION':
-            # Rejected change (or program killed), do not replace
-            returnval = 1
-
-        elif decision == 'MERGED':
-            if opts.verbose >= 2:
-                # Run diff again to show the real changes that will be applied.
-                diffcmd2 = difffmt % (origfn, mergedf.name)
-                status, diff_output = commands.getstatusoutput(diffcmd2)
-                print 'Actual merged changes:'
-                print
-                print diff_output
-                print
-
-            do_replace_file(origfn, mergedf.name, opts, sys.stdout)
-
-    return returnval
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #-------------------------------------------------------------------------------
@@ -219,12 +95,15 @@ def parse_options():
                       "diff viewer. This essentially generates a diff log and "
                       "copies the file over with backups.")
 
+    parser.add_option('-D', '--exit-on-same', action='store_true',
+                      help="Do not do anything if the files are the same.")
+
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
-    xxdiff.backup.options_validate(opts, logs=sys.stdout)
-    xxdiff.scm.options_validate(opts)
-    xxdiff.invoke.options_validate(opts)
+    xxdiff.backup.options_validate(opts, parser, logs=sys.stdout)
+    xxdiff.scm.options_validate(opts, parser)
+    xxdiff.invoke.options_validate(opts, parser)
 
     if not args or len(args) > 2:
         raise parser.error("you must specify exactly two files.")
@@ -258,7 +137,8 @@ def condreplace_main():
         newfn, origfn = args
 
     # call xxdiff and perform the conditional replacement.
-    rval = cond_replace(origfn, newfn, opts)
+    decision = xxdiff.condrepl.cond_replace(origfn, newfn, opts, sys.stdout,
+                                            opts.exit_on_same)
 
     if opts.delete and not opts.dry_run:
         try:
@@ -269,8 +149,13 @@ def condreplace_main():
     # repeat message at the end for convenience.
     if opts.backup_type == 'other' and opts.backup_dir:
         print
-        print "Storing backup files under:", opts.backup_dir
+        print "  Backup files:", opts.backup_dir
         print
+
+    # Compute return value.
+    rval = 0
+    if decision in ('REJECT', 'NODECISION'):
+        rval = 1 
 
     return rval
 

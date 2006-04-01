@@ -44,7 +44,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, logs=None ):
+def options_validate( opts, parser, logs=None ):
     """
     Validate xxdiff options.
     """

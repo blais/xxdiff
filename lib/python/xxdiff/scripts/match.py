@@ -35,7 +35,7 @@ this file matching heuristic.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.3']
+__depends__ = ['xxdiff', 'Python-2.4']
 
 
 # stdlib imports.

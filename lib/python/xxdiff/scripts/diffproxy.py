@@ -22,7 +22,7 @@ Add the following lines ``~/.subversion/config``::
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.3']
+__depends__ = ['xxdiff', 'Python-2.4']
 
 
 # stdlib imports.
@@ -71,7 +71,7 @@ def parse_options():
     if len(args) > 3:
         raise parser.error("Cannot invoke wrapper with more than 3 files.")
 
-    xxdiff.invoke.options_validate(opts)
+    xxdiff.invoke.options_validate(opts, parser)
 
     return opts, args
 

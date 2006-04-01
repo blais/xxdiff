@@ -59,7 +59,7 @@ Examples
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.3', 'diffutils (patch)']
+__depends__ = ['xxdiff', 'Python-2.4', 'diffutils (patch)']
 
 # stdlib imports.
 import sys, os
@@ -110,8 +110,8 @@ def parse_options():
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
-    xxdiff.invoke.options_validate(parser)
-    xxdiff.backup.options_validate(parser)
+    xxdiff.invoke.options_validate(opts, parser)
+    xxdiff.backup.options_validate(opts, parser)
 
     return opts, args
 

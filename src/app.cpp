@@ -3068,6 +3068,13 @@ void XxApp::saveOptions()
 int XxApp::exec()
 {
    if ( _dontShow ) {
+      // If we asked for a decision, at least output something.
+      // FIXME: maybe this should become NODIFF?
+      if ( _cmdline._forceDecision == true ) {
+         std::cout << "NODECISION" << std::endl;
+      }
+
+      // Exit program.
       return _returnValue;
    }
    return QkApplication::exec();

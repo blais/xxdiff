@@ -22,12 +22,12 @@ xxdiff-patch.  The current script is really about committing "some" cvs changes.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.3', 'cvs', 'diffutils (patch)']
+__depends__ = ['xxdiff', 'Python-2.4', 'cvs', 'diffutils (patch)']
 
 
 # stdlib imports.
-import os
-import commands, shutil
+import os, shutil
+from subprocess import Popen, PIPE, STDOUT
 from tempfile import NamedTemporaryFile
 
 # xxdiff imports.
@@ -63,11 +63,13 @@ def cvsdiff_main():
     opts, args = parse_options()
 
     # run cvs diff and read its output.
+
     cmd = 'cvs diff -u ' + ' '.join(map(lambda x: '"%s"' % x, args))
-    s, o = commands.getstatusoutput(cmd)
-    if s != 0 and not o:
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+    stdout, stderr = p.communicate()
+    if p.returncode != 0 and not stdout:
         raise SystemExit("Error: running cvs command (%s): %s" % (s, cmd))
-    chunks = xxdiff.patches.splitpatch(o)
+    chunks = xxdiff.patches.splitpatch(stdout)
 
     #
     # For each subpatch, apply it individually

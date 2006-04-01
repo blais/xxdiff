@@ -40,7 +40,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, logs=None ):
+def options_validate( opts, parser, logs=None ):
     """
     Validate backup options.
     """
@@ -79,10 +79,14 @@ def backup_file( fn, opts, logs=None ):
             ii += 1
 
     elif opts.backup_type == 'other':
-        # Backup to a different directory
-        relfn = normpath(fn)
-        if isabs(relfn):
-            relfn = relfn[1:]
+        # Always backup the files rooted to the very root, because there may be
+        # multiple root directories during the selection process.  Besides, it
+        # does not matter all that much, the backup files are not really meant
+        # to be accessed unless something goes really wrong.
+        relfn = abspath(fn)
+
+        # Remove the leading slash (this may f*ck up under Windoze).
+        relfn = relfn[1:]
 
         # If the backup directory has not been set, create a temporary one
         if opts.backup_dir is None:
@@ -91,9 +95,6 @@ def backup_file( fn, opts, logs=None ):
         elif not exists(opts.backup_dir):
             os.makedirs(opts.backup_dir)
 
-        if logs:
-            logs.write("Storing backup files under: %s\n" % opts.backup_dir)
-
         backupfn = join(opts.backup_dir, relfn)
 
     else: # opts.backup_type == 'none'
@@ -101,7 +102,7 @@ def backup_file( fn, opts, logs=None ):
 
     if backupfn:
         # Perform the backup
-        if logs:
+        if logs and opts.verbose >= 3:
             logs.write( 'Backup: %s\n' % backupfn)
 
         # Make sure that the destination directory exists
@@ -123,7 +124,7 @@ def test():
     options_graft(parser)
     opts, args = parser.parse_args()
 
-    options_validate(opts, logs=sys.stdout)
+    options_validate(opts, parser, logs=sys.stdout)
 
     print 'Dir:', opts.backup_dir
     print 'Type:', opts.backup_type

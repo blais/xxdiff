@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<title>Helper Scripts for xxdiff</title>
+<meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
+<meta name="date" content="2006-03-30" />
+<link rel="stylesheet" href="../style.css" type="text/css" />
+</head>
+<body>
+
+<div id="project-header">
+  <a href="/"><img src="/home/furius-logo-w.png" id="logo"></a>
+  <div id="project-home"><a href="..">Project Home</a></div>
+</div>
+
+<div class="document" id="helper-scripts-for-xxdiff">
+<h1 class="title">Helper Scripts for xxdiff</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
+<tr><th class="docinfo-name">Date:</th>
+<td>2006-03-30</td></tr>
+</tbody>
+</table>
+<div class="abstract topic">
+<p class="topic-title first">Abstract</p>
+<p>A description of the Python scripts and infrastructure that is provided around
+xxdiff, to faciliate implementing processes requiring display and selection
+of differences.</p>
+</div>
+<div class="contents topic">
+<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
+<ul class="auto-toc simple">
+<li><a class="reference" href="#introduction" id="id3" name="id3">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
+<li><a class="reference" href="#history" id="id4" name="id4">1.1&nbsp;&nbsp;&nbsp;History</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#xxdiff-s-decision-mode" id="id5" name="id5">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></li>
+<li><a class="reference" href="#looping-and-confirming" id="id6" name="id6">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a><ul class="auto-toc">
+<li><a class="reference" href="#per-file-conditional-replacement" id="id7" name="id7">3.1&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a><ul class="auto-toc">
+<li><a class="reference" href="#xxdiff-cond-replace" id="id8" name="id8">3.1.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-cond-replace</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#higher-level-loops" id="id9" name="id9">3.2&nbsp;&nbsp;&nbsp;Higher-Level Loops</a><ul class="auto-toc">
+<li><a class="reference" href="#selecting-files" id="id10" name="id10">3.2.1&nbsp;&nbsp;&nbsp;Selecting Files</a><ul class="auto-toc">
+<li><a class="reference" href="#selecting-by-filename" id="id11" name="id11">3.2.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></li>
+<li><a class="reference" href="#selecting-by-contents" id="id12" name="id12">3.2.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></li>
+<li><a class="reference" href="#selecting-from-a-fixed-list" id="id13" name="id13">3.2.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></li>
+<li><a class="reference" href="#all-options" id="id14" name="id14">3.2.1.4&nbsp;&nbsp;&nbsp;All Options</a></li>
+<li><a class="reference" href="#debugging-the-selection-process" id="id15" name="id15">3.2.1.5&nbsp;&nbsp;&nbsp;Debugging The Selection Process</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#xxdiff-filter" id="id16" name="id16">3.2.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-filter</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-rename" id="id17" name="id17">3.2.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-rename</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-find-grep-sed" id="id18" name="id18">3.2.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-find-grep-sed</span></tt></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference" href="#xxdiff-match" id="id19" name="id19">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-match</span></tt></a></li>
+<li><a class="reference" href="#cvs-support" id="id20" name="id20">5&nbsp;&nbsp;&nbsp;CVS Support</a><ul class="auto-toc">
+<li><a class="reference" href="#xxdiff-cvs-diff" id="id21" name="id21">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-cvs-diff</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#subversion-support" id="id22" name="id22">6&nbsp;&nbsp;&nbsp;Subversion Support</a><ul class="auto-toc">
+<li><a class="reference" href="#xxdiff-diff-proxy" id="id23" name="id23">6.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-diff-proxy</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-svn-diff" id="id24" name="id24">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-svn-resolve" id="id25" name="id25">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#encrypted-files" id="id26" name="id26">7&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
+<li><a class="reference" href="#xxdiff-encrypted" id="id27" name="id27">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-encrypted</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#applying-patches" id="id28" name="id28">8&nbsp;&nbsp;&nbsp;Applying Patches</a><ul class="auto-toc">
+<li><a class="reference" href="#xxdiff-patch" id="id29" name="id29">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-patch</span></tt></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<!-- 1  Introduction
+  1.1  History
+2  xxdiff's Decision Mode
+3  Looping and Confirming
+  3.1  Per-File Conditional Replacement
+    3.1.1  ``xxdiff-cond-replace``
+  3.2  Higher-Level Loops
+    3.2.1  Selecting Files
+      3.2.1.1  Selecting By Filename
+      3.2.1.2  Selecting By Contents
+      3.2.1.3  Selecting From A Fixed List
+      3.2.1.4  All Options
+      3.2.1.5  Debugging The Selection Process
+    3.2.2  ``xxdiff-filter``
+    3.2.3  ``xxdiff-rename``
+    3.2.4  ``xxdiff-find-grep-sed``
+4  ``xxdiff-match``
+5  CVS Support
+  5.1  ``xxdiff-cvs-diff``
+6  Subversion Support
+  6.1  ``xxdiff-diff-proxy``
+  6.2  ``xxdiff-svn-diff``
+  6.3  ``xxdiff-svn-resolve``
+7  Encrypted Files
+  7.1  ``xxdiff-encrypted``
+8  Applying Patches
+  8.1  ``xxdiff-patch`` -->
+<div class="section">
+<h1><a class="toc-backref" href="#id3" id="introduction" name="introduction">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
+<p>xxdiff is a computer program that allows a user (usually a software developer of
+some sort) to easily visualize the differences between files.  The manner and
+goal for which this process is applied over multiple files is highly dependent
+on the application, and most of the time is driven by custom user scripts.</p>
+<p>For example, a configuration management engineer in a company might provide some
+kind of merge policing environment, that allows software developers to review
+changes in files for the purpose of accepting or rejecting a submitted changeset
+to a codebase.  Another example is that of a developer wishing to review the
+changes he made to a checkout of files from a source-code management system such
+as CVS, Subversion, ClearCase, Perforce, etc.</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id4" id="history" name="history">1.1&nbsp;&nbsp;&nbsp;History</a></h2>
+<p>xxdiff has been developed in a corporate environment with hundreds of users.
+Over time, it has been progressively augmented with features to allow it to
+better interact with caller scripts, and many of Python scripts were provided as
+open source on the internet, to perform various common tasks.  It was only
+natural that at some point in time common code between these programs should be
+shared in a library, and a Python package provided to ease the task of writing
+other, new, custom scripts.</p>
+<p>This document describes this package, and the scripts that are provided along
+with xxdiff, implemented using the same code.</p>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id5" id="xxdiff-s-decision-mode" name="xxdiff-s-decision-mode">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></h1>
+<p>The prototypical task of carrying out a merge is that of visualizing and
+accepting or rejecting all or some changes to a file, changes from a source file
+(e.g. in the case of an update, these are changes forced by other developers) to
+a target file (in that case, files living in a developer's own checkout).  There
+are three possibilities:</p>
+<ol class="arabic simple">
+<li>Accept all changes to the file;</li>
+<li>Reject all changes to the file, leaving the target file as is;</li>
+<li>Accept only some of the changes.  In the great majority of cases, this
+usually only involves selecting diff hunks from either of the files.  It is
+relatively rare to have to edit the files, as this is often related to the
+presence of conflicts, and various SCM systems already provide means to deal
+with those.</li>
+</ol>
+<p>xxdiff already provides the ability to interactively select diff hunks from
+either files to produce a merged output file.</p>
+<p>Therefore, in order to answer the needs above in the context of a script
+querying the user for actions to be carried out, a special mode was added to
+xxdiff, that <em>forces</em> the user to answer with either &#8220;accept&#8221;, &#8220;reject&#8221; or
+&#8220;merge&#8221; <a class="footnote-reference" href="#id2" id="id1" name="id1">[1]</a>.  xxdiff takes special precautions to ensure that the file you
+decide to output is complete, for example, if you answer with <em>merge</em>, it
+insures that you have made a decision about all the diff hunks.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1" name="id2">[1]</a></td><td>This mode is invoked with the <tt class="docutils literal"><span class="pre">--decision</span></tt> switch, and the corresponding
+keys are <tt class="docutils literal"><span class="pre">A</span></tt>, <tt class="docutils literal"><span class="pre">R</span></tt> and <tt class="docutils literal"><span class="pre">M</span></tt>.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id6" id="looping-and-confirming" name="looping-and-confirming">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a></h1>
+<p>A very commonly occuring case is that of having to loop over multiple files for
+changes, either from an update from a source code repository, or applying a set
+of modifications to a file via a program--such as sed--and reviewing and
+accepting those changes.  The high-level algorithm looks like this:</p>
+<pre class="literal-block">
+Recurse in directories, selecting files.
+For each file selected
+
+   Apply automated changes to the file
+   OR
+   Fetch the different versions of the file
+
+   Launch xxdiff in decision mode to find out what action to perform
+
+      xxdiff runs, while the parent script waits
+
+   Conditionally replace the target file with the result of the merge (or
+   simply, with the other file, in case of accept).
+</pre>
+<p>There are many functionalities involved:</p>
+<ol class="loweralpha simple">
+<li>Recursively traversing and selecting files for processing</li>
+<li>Invoking xxdiff to get the user's opinion</li>
+<li>Performing the conditional replacement.</li>
+<li>When your original files are overwritten, first create a backup of the
+original file in case something went wrong.</li>
+<li>Produce a nice-looking textual log of all the changes that were applied to
+the files.</li>
+</ol>
+<p>The following provided scripts allow you to carry out some of these tasks in
+different combinations.</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id7" id="per-file-conditional-replacement" name="per-file-conditional-replacement">3.1&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a></h2>
+<p>We can easily implement the (c) part without embedding it in a loop.</p>
+<div class="section">
+<h3><a class="toc-backref" href="#id8" id="xxdiff-cond-replace" name="xxdiff-cond-replace">3.1.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-cond-replace</span></tt></a></h3>
+<p>This program is akin to the UNIX command <tt class="docutils literal"><span class="pre">cp</span></tt>, but its actions are conditional
+to your feedback within xxdiff.  If you <em>accept</em>, the target file is overwritten
+with the contents of the source file.  If you <em>reject</em>, nothing happens to the
+target file.  If you <em>merge</em>, the target file is overwritten with the contents
+of the merged results.</p>
+<p>This allows you to write the produce the modified file yourself and to write the
+loop in, for example, Bourne shell:</p>
+<pre class="literal-block">
+# Remove all empty lines in files
+find . -name '*.txt' | while read i ; do
+      cat $i | tr -s \\n &gt; /tmp/temp.$PID ;
+      xxdiff-cond-replace /tmp/temp.$PID $i ;
+   done
+</pre>
+</div>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id9" id="higher-level-loops" name="higher-level-loops">3.2&nbsp;&nbsp;&nbsp;Higher-Level Loops</a></h2>
+<p>Many of the find-loops that occur in practice are very simple, e.g. replace a
+string in all the files ending with <tt class="docutils literal"><span class="pre">.h</span></tt> and <tt class="docutils literal"><span class="pre">.cpp</span></tt>.  For this purpose, we
+have implemented a few scripts that perform the loop for you.  This is the
+functionality mentioned as (a) in the introduction.</p>
+<div class="section">
+<h3><a class="toc-backref" href="#id10" id="selecting-files" name="selecting-files">3.2.1&nbsp;&nbsp;&nbsp;Selecting Files</a></h3>
+<p>These scripts all work from the same loop: a recursive walk of all the files in
+a set of root directories, by default the current directory.  The selection
+process embodies common patterns for selecting files.</p>
+<div class="section">
+<h4><a class="toc-backref" href="#id11" id="selecting-by-filename" name="selecting-by-filename">3.2.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></h4>
+<p>You can restrict and ignore files by filename, for example, to select all the
+.html and .htm files, you could use:</p>
+<pre class="literal-block">
+xxdiff-rename -I \.svn --select='.*.htm$' --select='.*.html$' ...
+</pre>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">The ignore patterns works on directories, but select does not.</p>
+</div>
+</div>
+<div class="section">
+<h4><a class="toc-backref" href="#id12" id="selecting-by-contents" name="selecting-by-contents">3.2.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></h4>
+<p>There are switches that allow you to <em>grep</em> the files for some patterns in order
+to determine if they should be processed or not, e.g.:</p>
+<pre class="literal-block">
+xxdiff-rename --select-grep='^#include' FROM TO
+</pre>
+</div>
+<div class="section">
+<h4><a class="toc-backref" href="#id13" id="selecting-from-a-fixed-list" name="selecting-from-a-fixed-list">3.2.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></h4>
+<p>You can also instruct the scripts to work on a fixed set of filenames, which you
+provide via a file:</p>
+<pre class="literal-block">
+xxdiff-rename --select-from-file=/tmp/procfiles FROM TO
+</pre>
+<p>Where <tt class="docutils literal"><span class="pre">/tmp/procfiles</span></tt> would have been generated by your beforehand, in any
+way you like.</p>
+</div>
+<div class="section">
+<h4><a class="toc-backref" href="#id14" id="all-options" name="all-options">3.2.1.4&nbsp;&nbsp;&nbsp;All Options</a></h4>
+<p>Here is the full set of options (as of [2006-03-31]):</p>
+<pre class="literal-block">
+File selection options:
+  These options affect which files are selected for grepping in the
+  first place.
+
+  -s REGEXP, --select=REGEXP
+                      Adds a regular expression for filenames to process.
+  -I REGEXP, --ignore=REGEXP
+                      Adds a regular expression for filenames to ignore.
+  --cpp, --select-cpp
+                      Adds a regular expression for selecting C++ files to
+                      match against.
+  --py, --select-py   Adds a regular expression for selecting Python files
+                      to match against.
+  --select-grep=REGEXP
+                      Further restrict the files to those which match the
+                      given regular expression.
+  --ignore-grep=REGEXP
+                      Do not select files to those which match the given
+                      regular expression.
+  -f FILE, --select-from-file=FILE
+                      Do not recurse through directories to find files but
+                      instead read the list of filenames from the given
+                      file.
+  -r ROOTS, --root=ROOTS
+                      Specify a root to perform the search from (default is
+                      CWD).  You can use this option many timesfor multiple
+                      roots.
+</pre>
+</div>
+<div class="section">
+<h4><a class="toc-backref" href="#id15" id="debugging-the-selection-process" name="debugging-the-selection-process">3.2.1.5&nbsp;&nbsp;&nbsp;Debugging The Selection Process</a></h4>
+<p>To test which files are going to be selected before running your modification
+command, you can use the <tt class="docutils literal"><span class="pre">--select-debug</span></tt> switch (or <tt class="docutils literal"><span class="pre">-&#64;</span></tt>) to view the list,
+e.g.:</p>
+<pre class="literal-block">
+xxdiff-rename --cpp 'Application', 'LargeApplication' -&#64;
+</pre>
+<p>Would give something like:</p>
+<pre class="literal-block">
+/home/blais/p/xxdiff/src/builderFiles3.h
+/home/blais/p/xxdiff/src/diffutils.h
+/home/blais/p/xxdiff/src/scrollView.h
+/home/blais/p/xxdiff/src/diffs.h
+/home/blais/p/xxdiff/src/accelUtil.cpp
+/home/blais/p/xxdiff/src/app.inline.h
+...
+</pre>
+</div>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id16" id="xxdiff-filter" name="xxdiff-filter">3.2.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-filter</span></tt></a></h3>
+<p>This script invokes the selection loop (a), runs a command that you specify and
+invokes xxdiff on each result (c).  It basically directs the process, and runs
+should UNIX filter command in a shell for you.  You command must be a filter,
+that is, it takes each file as stdin and outputs the modified file as stdout.</p>
+<p>For example, repeating the previous example:</p>
+<pre class="literal-block">
+xxdiff-filter 'tr -s \\n'
+</pre>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id17" id="xxdiff-rename" name="xxdiff-rename">3.2.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-rename</span></tt></a></h3>
+<p>By far, the most common use case for this kind of process is that of
+FIXME continue here</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id18" id="xxdiff-find-grep-sed" name="xxdiff-find-grep-sed">3.2.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-find-grep-sed</span></tt></a></h3>
+<p>This script is actually the ancestor to all of this.  FIXME MORE</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id19" id="xxdiff-match" name="xxdiff-match">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-match</span></tt></a></h1>
+<p>One day, a silly man asked me the following question: &#8220;Why is it that when I
+call <tt class="docutils literal"><span class="pre">xxdiff</span> <span class="pre">dir1/*.c</span> <span class="pre">dir2/*.c</span></tt> it does not work?&#8221;</p>
+<p>FIXME more</p>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id20" id="cvs-support" name="cvs-support">5&nbsp;&nbsp;&nbsp;CVS Support</a></h1>
+<div class="section">
+<h2><a class="toc-backref" href="#id21" id="xxdiff-cvs-diff" name="xxdiff-cvs-diff">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-cvs-diff</span></tt></a></h2>
+<!--  -->
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id22" id="subversion-support" name="subversion-support">6&nbsp;&nbsp;&nbsp;Subversion Support</a></h1>
+<p>In my opinion, Subversion provides a diff loop that is rather weak for my
+purposes.  I want to be able to review  FIXME MORE</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id23" id="xxdiff-diff-proxy" name="xxdiff-diff-proxy">6.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-diff-proxy</span></tt></a></h2>
+<!--  -->
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id24" id="xxdiff-svn-diff" name="xxdiff-svn-diff">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt></a></h2>
+<!-- FIXME todo -->
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id25" id="xxdiff-svn-resolve" name="xxdiff-svn-resolve">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></h2>
+<!-- FIXME todo -->
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id26" id="encrypted-files" name="encrypted-files">7&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
+<div class="section">
+<h2><a class="toc-backref" href="#id27" id="xxdiff-encrypted" name="xxdiff-encrypted">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-encrypted</span></tt></a></h2>
+<!--  -->
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id28" id="applying-patches" name="applying-patches">8&nbsp;&nbsp;&nbsp;Applying Patches</a></h1>
+<div class="section">
+<h2><a class="toc-backref" href="#id29" id="xxdiff-patch" name="xxdiff-patch">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-patch</span></tt></a></h2>
+<!--  -->
+</div>
+</div>
+</div>
+</body>
+</html>

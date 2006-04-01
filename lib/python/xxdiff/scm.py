@@ -26,7 +26,6 @@ def options_graft( parser ):
                                  "These options are related to source code "
                                  "management systems you may be using.")
 
-
     group.add_option('-C', '--checkout', action='store',
                      type='choice', choices=checkout_choices,
                      metavar="NAME",
@@ -37,7 +36,7 @@ def options_graft( parser ):
 
     return group
 
-def options_validate( opts ):
+def options_validate( opts, parser ):
     """
     Validate checkout options.
     """

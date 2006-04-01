@@ -10,104 +10,414 @@
   xxdiff, to faciliate implementing processes requiring display and selection
   of differences.
 
+.. section-numbering::
 .. contents::
 ..
     1  Introduction
-    2  Looping and Confirming
-      2.1  Per-file Conditional Replacement: xxdiff-cond-replace
-      2.2  Higher-Level Loops
-        2.2.1  xxdiff-filter
-        2.2.2  xxdiff-rename
-        2.2.3  xxdiff-find-grep-sed
-    3  xxdiff-match
-    4  Applying Patches
-      4.1  xxdiff-patch
+      1.1  History
+    2  xxdiff's Decision Mode
+    3  Looping and Confirming
+      3.1  Per-File Conditional Replacement
+        3.1.1  ``xxdiff-cond-replace``
+      3.2  Higher-Level Loops
+        3.2.1  Selecting Files
+          3.2.1.1  Selecting By Filename
+          3.2.1.2  Selecting By Contents
+          3.2.1.3  Selecting From A Fixed List
+          3.2.1.4  All Options
+          3.2.1.5  Debugging The Selection Process
+        3.2.2  ``xxdiff-filter``
+        3.2.3  ``xxdiff-rename``
+        3.2.4  ``xxdiff-find-grep-sed``
+    4  ``xxdiff-match``
     5  CVS Support
-      5.1  xxdiff-cvs-diff
+      5.1  ``xxdiff-cvs-diff``
     6  Subversion Support
-      6.1  xxdiff-diff-proxy
-      6.2  xxdiff-svn-diff
-      6.3  xxdiff-svn-resolve
+      6.1  ``xxdiff-diff-proxy``
+      6.2  ``xxdiff-svn-diff``
+      6.3  ``xxdiff-svn-resolve``
     7  Encrypted Files
-      7.1  xxdiff-encrypted
+      7.1  ``xxdiff-encrypted``
+    8  Applying Patches
+      8.1  ``xxdiff-patch``
 
 
 Introduction
 ============
 
+xxdiff is a computer program that allows a user (usually a software developer of
+some sort) to easily visualize the differences between files.  The manner and
+goal for which this process is applied over multiple files is highly dependent
+on the application, and most of the time is driven by custom user scripts.
+
+For example, a configuration management engineer in a company might provide some
+kind of merge policing environment, that allows software developers to review
+changes in files for the purpose of accepting or rejecting a submitted changeset
+to a codebase.  Another example is that of a developer wishing to review the
+changes he made to a checkout of files from a source-code management system such
+as CVS, Subversion, ClearCase, Perforce, etc.
+
+History
+-------
+
+xxdiff has been developed in a corporate environment with hundreds of users.
+Over time, it has been progressively augmented with features to allow it to
+better interact with caller scripts, and many of Python scripts were provided as
+open source on the internet, to perform various common tasks.  It was only
+natural that at some point in time common code between these programs should be
+shared in a library, and a Python package provided to ease the task of writing
+other, new, custom scripts.
+
+This document describes this package, and the scripts that are provided along
+with xxdiff, implemented using the same code.
+
+
+xxdiff's Decision Mode
+======================
+
+The prototypical task of carrying out a merge is that of visualizing and
+accepting or rejecting all or some changes to a file, changes from a source file
+(e.g. in the case of an update, these are changes forced by other developers) to
+a target file (in that case, files living in a developer's own checkout).  There
+are three possibilities:
+
+1. Accept all changes to the file;
+
+2. Reject all changes to the file, leaving the target file as is;
+
+3. Accept only some of the changes.  In the great majority of cases, this
+   usually only involves selecting diff hunks from either of the files.  It is
+   relatively rare to have to edit the files, as this is often related to the
+   presence of conflicts, and various SCM systems already provide means to deal
+   with those.
+
+xxdiff already provides the ability to interactively select diff hunks from
+either files to produce a merged output file.
+
+Therefore, in order to answer the needs above in the context of a script
+querying the user for actions to be carried out, a special mode was added to
+xxdiff, that *forces* the user to answer with either “accept”, “reject” or
+“merge” [#]_.  xxdiff takes special precautions to ensure that the file you
+decide to output is complete, for example, if you answer with *merge*, it
+insures that you have made a decision about all the diff hunks.
+
+.. [#] This mode is invoked with the ``--decision`` switch, and the corresponding
+       keys are ``A``, ``R`` and ``M``.
+
 
 Looping and Confirming
 ======================
 
-.. introduction to the general loop structure
+A very commonly occuring case is that of having to loop over multiple files for
+changes, either from an update from a source code repository, or applying a set
+of modifications to a file via a program--such as sed--and reviewing and
+accepting those changes.  The high-level algorithm looks like this::
+
+   Recurse in directories, selecting files.
+   For each file selected
+
+      Apply automated changes to the file
+      OR
+      Fetch the different versions of the file
+
+      Launch xxdiff in decision mode to find out what action to perform
+
+         xxdiff runs, while the parent script waits
+
+      Conditionally replace the target file with the result of the merge (or
+      simply, with the other file, in case of accept).
 
 
-Per-file Conditional Replacement: xxdiff-cond-replace
------------------------------------------------------
+There are many functionalities involved:
+
+a. Recursively traversing and selecting files for processing
+
+b. Invoking xxdiff to get the user's opinion
+
+c. Performing the conditional replacement.
+
+d. When your original files are overwritten, first create a backup of the
+   original file in case something went wrong.
+
+e. Produce a nice-looking textual log of all the changes that were applied to
+   the files.
+
+
+The following provided scripts allow you to carry out some of these tasks in
+different combinations.
+
+
+Per-File Conditional Replacement
+--------------------------------
+
+We can easily implement the (c) part without embedding it in a loop.
+
+
+``xxdiff-cond-replace``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This program is akin to the UNIX command ``cp``, but its actions are conditional
+to your feedback within xxdiff.  If you *accept*, the target file is overwritten
+with the contents of the source file.  If you *reject*, nothing happens to the
+target file.  If you *merge*, the target file is overwritten with the contents
+of the merged results.
+
+This allows you to write the produce the modified file yourself and to write the
+loop in, for example, Bourne shell::
+
+   # Remove all empty lines in files
+   find . -name '*.txt' | while read i ; do 
+         cat $i | tr -s \\n > /tmp/temp.$PID ; 
+         xxdiff-cond-replace /tmp/temp.$PID $i ; 
+      done
 
 
 Higher-Level Loops
 ------------------
 
-xxdiff-filter
-~~~~~~~~~~~~~
+Many of the find-loops that occur in practice are very simple, e.g. replace a
+string in all the files ending with ``.h`` and ``.cpp``.  For this purpose, we
+have implemented a few scripts that perform the loop for you.  This is the
+functionality mentioned as (a) in the introduction.
 
-xxdiff-rename
-~~~~~~~~~~~~~
+Selecting Files
+~~~~~~~~~~~~~~~
 
-xxdiff-find-grep-sed
-~~~~~~~~~~~~~~~~~~~~
+These scripts all work from the same loop: a recursive walk of all the files in
+a set of root directories, by default the current directory.  The selection
+process embodies common patterns for selecting files.
 
-This script is actually the ancestor to all of this.  FIXME MORE
+Selecting By Filename
++++++++++++++++++++++
+
+You can restrict and ignore files by filename, for example, to select all the
+.html and .htm files, you could use::
+
+   xxdiff-rename -I \.svn --select='.*.htm$' --select='.*.html$' ...
+
+.. note:: The *ignore* patterns works on directories, but the *select* patterns
+          do not.
+
+Selecting By Contents
++++++++++++++++++++++
+
+There are switches that allow you to *grep* the files for some patterns in order
+to determine if they should be processed or not, e.g.::
+
+   xxdiff-rename --select-grep='^#include' FROM TO
+
+Selecting From A Fixed List
++++++++++++++++++++++++++++
+
+You can also instruct the scripts to work on a fixed set of filenames, which you
+provide via a file::
+
+   xxdiff-rename --select-from-file=/tmp/procfiles FROM TO
+
+Where ``/tmp/procfiles`` would have been generated by your beforehand, in any
+way you like.
+
+All Options
++++++++++++
+
+Here is the full set of options (as of [2006-03-31])::
+
+  File selection options:
+    These options affect which files are selected for grepping in the
+    first place.
+
+    -s REGEXP, --select=REGEXP
+                        Adds a regular expression for filenames to process.
+    -I REGEXP, --ignore=REGEXP
+                        Adds a regular expression for filenames to ignore.
+    --cpp, --select-cpp
+                        Adds a regular expression for selecting C++ files to
+                        match against.
+    --py, --select-py   Adds a regular expression for selecting Python files
+                        to match against.
+    --select-grep=REGEXP
+                        Further restrict the files to those which match the
+                        given regular expression.
+    --ignore-grep=REGEXP
+                        Do not select files to those which match the given
+                        regular expression.
+    -f FILE, --select-from-file=FILE
+                        Do not recurse through directories to find files but
+                        instead read the list of filenames from the given
+                        file.
+    -r ROOTS, --root=ROOTS
+                        Specify a root to perform the search from (default is
+                        CWD).  You can use this option many timesfor multiple
+                        roots.
+
+Debugging The Selection Process
++++++++++++++++++++++++++++++++
+
+To test which files are going to be selected before running your modification
+command, you can use the ``--select-debug`` switch (or ``-@``) to view the list,
+e.g.::
+
+   xxdiff-rename --cpp 'Application', 'LargeApplication' -@
+
+Would give something like::
+
+  /home/blais/p/xxdiff/src/builderFiles3.h
+  /home/blais/p/xxdiff/src/diffutils.h
+  /home/blais/p/xxdiff/src/scrollView.h
+  /home/blais/p/xxdiff/src/diffs.h
+  /home/blais/p/xxdiff/src/accelUtil.cpp
+  /home/blais/p/xxdiff/src/app.inline.h
+  ...
 
 
-xxdiff-match
-============
+``xxdiff-filter``
+~~~~~~~~~~~~~~~~~
 
-One day, a silly man asked me the following question: “Why is it that when I
-call ``xxdiff dir1/*.c dir2/*.c`` it does not work?”
+This script invokes the selection loop (a), runs a command that you specify and
+invokes xxdiff on each result (c).  It basically directs the process, and runs
+should UNIX filter command in a shell for you.  You command must be a filter,
+that is, it takes each file as stdin and outputs the modified file as stdout.
 
-FIXME more
+For example, repeating the previous example::
+
+   xxdiff-filter 'tr -s \\n'
 
 
-Applying Patches
+``xxdiff-rename``
+~~~~~~~~~~~~~~~~~
+
+By far, the most common use case for this kind of process is that of renaming a
+string or text matched by a regular expression by another string.  This works
+similarly to the **sed** ``s/FROM/TO/g`` program expression.
+
+Here is an example invocation::
+
+   xxdiff-rename FrobnicatorBaseClass FrobnicatorBase
+
+
+``xxdiff-find-grep-sed``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This script is a relic of the past, the actual ancestor to all of this.  You
+see, this used to be a Bourne shell script, before it became something called
+``cc_multi``--its first Python incarnation.  We then used to perform a grep in a
+subprocess, to find out if the file should be processed (if it matched the
+pattern), followed by a sed subprocess to perform the actual change.
+
+Here is an example invocation::
+
+   xxdiff-find-grep-sed 'class Frobni.*' 's/Frobnica/Brofnica/g'
+
+Today we have a much more generic version of the same idea::
+
+   xxdiff-filter --select-grep='class Frobni.*' "sed -e 's/Frobnica/Brofnica/g'"
+
+There ``xxdiff-find-grep-sed`` is a bit obsolete.  I mean, it still works fine,
+and I provide it to support those who already have it in their process, but
+really, it should go.
+
+
+``xxdiff-match``
 ================
 
+One day, a silly man asked me the following question via email: 
 
+  “Why is it that when I call ``xxdiff dir1/*.c dir2/*.c`` it doesn't work?”
 
-xxdiff-patch
-------------
+The answer is simple: the globbing patterns get expanded *by the shell* and not
+by xxdiff itself.  ``xxdiff`` only gets a large list of files, and clearly,
+there isn't much it can do... almost.
 
+I thought, “hey, maybe I can do something for this person” and I wrote
+``xxdiff-match``.  It just builds a map of basenames and runs diffs on sets of
+matching basenames.  The result: it mostly works like the gentleman wanted it.
 
+So there.
+
+I provide the script for educational value more than anything else (or for those
+who really like that syntax).
+
+Note that the matching algorithm can be implemented separately, and therefore is
+a more generic version of this available in my `pubcode
+<http://furius.ca/pubcode>`_ directory: `match-files
+<http://furius.ca/pubcode/pub/conf/common/bin/match-files.html>`_, e.g.::
+
+   match-files -x '--single' dir1/*.c dir2/*.c | xargs -n2 xxdiff
 
 
 CVS Support
 ===========
 
-xxdiff-cvs-diff
----------------
+``xxdiff-cvs-diff``
+-------------------
 
+I wanted to be able to preview the changes that I had made in a CVS checkout.
+This script does it.  It pulls the original versions from the server by using
+``cvs diff``, which is very efficient as it provides a single file with all the
+diffs (a patch).  The patch is then applied to temporary files to visualize the
+changes.
+
+Unfortunately, I never wrote much more than this for CVS, but with the new
+packaged architecture of xxdiff Python code it should be easy to create new
+scripts for it if you need to.
 
 
 Subversion Support
 ==================
 
-In my opinion, Subversion provides a diff loop that is rather weak for my
-purposes.  I want to be able to review  FIXME MORE
+Since 2005, I have switched my repository of files to Subversion and I will
+therefore begin producing more support for this SCM.
 
 
-xxdiff-diff-proxy
------------------
+``xxdiff-diff-proxy``
+---------------------
+
+Subversion has a diff subcommand:;
+
+   svn diff
+
+It also has the ability to let you specify which diff program you want to use to
+actually display the diffs.  This program has to behave like GNU diff, i.e. the
+options it accepts, the return value, etc.
+
+``xxdiff-diff-proxy`` is a script whose interface is compatible with being
+invoked from Subversion, but that displays the diffs graphically rather than
+textually, using xxdiff.  You can configure this per-user by adding the
+following lines to your ``~/.subversion/config`` file::
+
+   [helpers]
+   diff-cmd = xxdiff-diff-proxy
+   diff3-cmd = xxdiff-diff-proxy
+
+.. important::  Note: there have been reports that this does not work terribly
+                well in certain cases.  I still need to investigate in which
+                cases it breaks down because I have not had problems with it
+                yet.
+
+``xxdiff-svn-diff``
+-------------------
+
+In my opinion, Subversion provides a diff loop that is rather weak.  I want more
+options in the ways that I can review my changes, for example
+
+* It would be nice to be able to optionally automatically spawn a 3-way diff for
+  those files which have a newer version on the server.  This would allow you to
+  preview not only your changes, but also future problems when updating and
+  committing the file (before actually updating);
+
+* I want to have the option to unmerge some changes and save the results
+  conveniently;
+
+* I want to *also* have normal ``svn diff`` behaviour and I don't want to hack
+  my config file everytime.
 
 
-xxdiff-svn-diff
----------------
-
-.. FIXME todo
 
 
-xxdiff-svn-resolve
-------------------
+
+
+``xxdiff-svn-resolve``
+----------------------
 
 .. FIXME todo
 
@@ -116,6 +426,18 @@ xxdiff-svn-resolve
 Encrypted Files
 ===============
 
-xxdiff-encrypted
+``xxdiff-encrypted``
+--------------------
+
+..
+
+
+Applying Patches
+================
+
+
+
+``xxdiff-patch``
 ----------------
 
+..

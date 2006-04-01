@@ -9,7 +9,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import os, re, optparse
+import sys, os, re, optparse
 from os.path import join
 
 
@@ -60,27 +60,52 @@ def options_graft( parser ):
             help=("Adds a regular expression for selecting %s files to "
                   "match against.") % fname)
 
+    group.add_option('--select-grep', action='store',
+                     metavar='REGEXP',
+                     help="Further restrict the files to those which match "
+                     "the given regular expression.")
+
+    group.add_option('--ignore-grep', action='store',
+                     metavar='REGEXP',
+                     help="Do not select files to those which match "
+                     "the given regular expression.")
+
     group.add_option('-f', '--select-from-file', action='store',
                      metavar='FILE',
                      help="Do not recurse through directories to find files "
                      "but instead read the list of filenames from the "
                      "given file.")
 
+    group.add_option('-r', '--root', action='append', dest='roots',
+                     default=[],
+                     help="Specify a root to perform the search from "
+                     "(default is CWD).  You can use this option many times"
+                     "for multiple roots.")
+
+    # This is a convenient option rather than making a test script, because we
+    # don't pollute the bin directory with a script that does not do much, and
+    # the option is available in all the scripts that use the select files
+    # proces.
+    parser.add_option('-T', '-@', '--select-debug', action='store_true',
+                      help="Only list the files and exit.  This is used to "
+                      "debug and test out which files will match your "
+                      "replacement process when you run it.")
+
     parser.add_option_group(group)
 
     return group
 
 
-def options_validate( opts, rootdirs ):
+def options_validate( opts, parser ):
     """
     Validate and prepare the parsed options for the file selection option group.
     This method returns an appropriate generator for selecting files.
-
-    'rootdirs': a list of root directories.
     """
+    # If no root directory has been specified, use the CWD.
+    if not opts.roots:
+        opts.roots.append(os.getcwd())
 
     # Process file selection options
-
     if opts.select_from_file:
         if opts.select or opts.ignore:
             parser.error("You cannot use select-from-file and other "
@@ -95,18 +120,35 @@ def options_validate( opts, rootdirs ):
         if not opts.select:
             opts.select.append(re.compile('.*'))
 
+    # Compile the regular expressions if given.
+    for regname in 'select_grep', 'ignore_grep':
+        regstr = getattr(opts, regname)
+        if regstr:
+            try:
+                setattr(opts, regname, re.compile(regstr))
+            except re.error, e:
+                raise SystemExit("Error: compiling regexp '%s':\n%s" %
+                                 (regstr, e))
+
     # Create an appropriate generator for the "select" method
     if opts.select_from_file:
         selector = select_from_file(opts.select_from_file)
     else:
-        selector = select_patterns(rootdirs, opts.select, opts.ignore)
+        selector = select_patterns(opts.roots, opts)
+
+    # If we're asked to print the list of files, exhaust the generator and print
+    # the filenames and exit.
+    if opts.select_debug:
+        for fn in selector:
+            print fn
+        sys.exit(0)
 
     return selector
 
 
 #-------------------------------------------------------------------------------
 #
-def select_patterns( rootdirs, select, ignore ):
+def select_patterns( rootdirs, opts ):
     """
     Generator that selects files to process by regexps.
 
@@ -124,7 +166,7 @@ def select_patterns( rootdirs, select, ignore ):
             for d in list(dirs):
                 add = True
                 # Only ignore applies to directories.
-                for ire in ignore:
+                for ire in opts.ignore:
                     if ire.match(d):
                         add = False
                         break
@@ -134,14 +176,39 @@ def select_patterns( rootdirs, select, ignore ):
             # Filter files.
             for fn in files:
                 add = False
-                for sre in select:
+
+                # Select.
+                for sre in opts.select:
                     if sre.match(fn):
                         add = True
                         break
-                for ire in ignore:
+                
+                # Further restrict by grepping the file for a pattern.
+                if add and opts.select_grep:
+                    try:
+                        text = open(join(dn, fn), 'r').read()
+                    except IOError, e:
+                        raise SystemExit(
+                            "Error: could not read file '%s'." % fn)
+                    if not opts.select_grep.search(text):
+                        add = False
+
+                # Ignore files.
+                for ire in opts.ignore:
                     if ire.match(fn):
                         add = False
                         break
+
+                # Further ignore by grepping the file for a pattern.
+                if add and opts.ignore_grep:
+                    try:
+                        text = open(join(dn, fn), 'r').read()
+                    except IOError, e:
+                        raise SystemExit(
+                            "Error: could not read file '%s'." % fn)
+                    if opts.ignore_grep.search(text):
+                        add = False
+
                 if add:
                     yield join(dn, fn)
 
@@ -173,7 +240,7 @@ def test():
     options_graft(parser)
     opts, args = parser.parse_args()
 
-    selector = options_validate(opts, args)
+    selector = options_validate(opts, parser)
 
     print 'from-file:', opts.select_from_file
     print 'select:', map(lambda x: x.pattern, opts.select)

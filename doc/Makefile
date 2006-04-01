@@ -7,32 +7,40 @@
 
 USERMANUAL=xxdiff-doc.html
 
-TXTDOC=\
-	xxdiff-integration.txt \
-	xxdiff-secrets.txt
+TXTDOC=						\
+	xxdiff-integration.txt			\
+	xxdiff-secrets.txt			\
+	xxdiff-scripts.txt
 
 TXTDOC_HTML = $(TXTDOC:.txt=.html)
 
 TXTHTML_CONVERT=projects-rst2html --project-header  --project-home=".."
 
-TOOLS=\
-	condreplace \
-	findgrepsed \
-	cvsdiff \
-	diffproxy \
-	svndiff \
-	encrypted \
-	match \
-	patch
-
 BIN=../bin
-SCRIPTS = $(patsubst %,$(BIN)/%,$(TOOLS))
-TMPFILE=/tmp/xxdiff-doc-convert.tmp
-TOOLS_HTML = $(TOOLS:=.html)
+
+# TOOLS=						\
+# 	condreplace				\
+# 	findgrepsed				\
+# 	cvsdiff					\
+# 	diffproxy				\
+# 	svndiff					\
+# 	encrypted				\
+# 	match					\
+# 	patch
+
+# TMPFILE=/tmp/xxdiff-doc-convert.tmp
+# SCRIPTS = $(patsubst %,$(BIN)/%,$(TOOLS))
+# TOOLS_HTML = $(TOOLS:=.html)
+
+# $(TOOLS_HTML) : %.html : $(BIN)/%
+# 	python-genpage -l $< -o $(TMPFILE) $<
+# 	$(TXTHTML_CONVERT) $(TMPFILE) $@
+# 	rm -f $(TMPFILE)
+
 
 .SUFFIXES: .txt .html
 
-all: $(USERMANUAL) $(TOOLS_HTML) $(TXTDOC_HTML)
+all: $(USERMANUAL) $(TXTDOC_HTML)
 
 .txt.html:
 	$(TXTHTML_CONVERT) $< $@
@@ -40,10 +48,6 @@ all: $(USERMANUAL) $(TOOLS_HTML) $(TXTDOC_HTML)
 $(USERMANUAL): $(BIN)/xxdiff
 	$(BIN)/xxdiff --help-html > $@
 
-$(TOOLS_HTML) : %.html : $(BIN)/%
-	python-genpage -l $< -o $(TMPFILE) $<
-	$(TXTHTML_CONVERT) $(TMPFILE) $@
-	rm -f $(TMPFILE)
 
 clean:
 	rm -f $(USERMANUAL)
