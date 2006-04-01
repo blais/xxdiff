@@ -61,28 +61,20 @@ def parse_args( parser ):
     - program arguments -> list of strings
     - a selector of the files to iterate over -> generator
     """
-    xxdiff.backup.options_graft(parser)
-    xxdiff.selectfiles.options_graft(parser)
-    xxdiff.checkout.options_graft(parser)
-    xxdiff.invoke.options_graft(parser)
-
-    parser.add_option('-n', '--dry-run', action='store_true',
-                      help="Print the commands that would be executed " +
-                      "but don't really run them.")
-
-    parser.add_option('-X', '--no-confirm', action='store_true',
-                      help="Do not ask for confirmation with graphical "
-                      "diff viewer.")
+    xxmodules = (xxdiff.selectfiles, xxdiff.backup, xxdiff.checkout,
+                 xxdiff.invoke, xxdiff.condrepl)
+    for mod in xxmodules:
+        mod.options_graft(parser)
 
     xxdiff.scripts.install_autocomplete(parser)
 
     # Parse arguments
     opts, args = parser.parse_args()
 
-    xxdiff.backup.options_validate(opts, parser, logs=sys.stdout)
-    xxdiff.checkout.options_validate(opts, parser)
-    xxdiff.invoke.options_validate(opts, parser, logs=sys.stdout)
-    selector = xxdiff.selectfiles.options_validate(opts, parser)
+    vargs = opts, parser, sys.stdout
+    for mod in xxmodules[1:]:
+        mod.options_validate(*vargs)
+    selector = xxdiff.selectfiles.options_validate(*vargs)
 
     return opts, args, selector
 
@@ -126,3 +118,4 @@ def postloop_footer( opts, decision_map=None ):
         print
         print "Backup files in:", opts.backup_dir
         print
+

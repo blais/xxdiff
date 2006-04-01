@@ -8,21 +8,19 @@ checkout area.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.4']
+__depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 
 # stdlib imports.
-import sys, os, re, tempfile
+import sys, os, tempfile
+from subprocess import Popen
 from os.path import *
 
 # xxdiff imports.
 import xxdiff.scripts
-import xxdiff.selectfiles
-import xxdiff.backup
 import xxdiff.invoke
-import xxdiff.checkout
-import xxdiff.condrepl
 from xxdiff.scripts import tmpprefix
+from xxdiff.scm import subversion
 
 
 #-------------------------------------------------------------------------------
@@ -35,41 +33,82 @@ def parse_options():
     parser = optparse.OptionParser(__doc__.strip())
     opts, args = parser.parse_args()
 
-
     return opts, args
+
 
 #-------------------------------------------------------------------------------
 #
 def svn_main():
     """
-    Main program for cond-replace script.
+    Main program for svn-diff script.
     """
     opts, args = parse_options()
 
-## FIXME: todo
+    # For each of the files reported by status
+    for s in subversion.status(args):
+        msg = 'diff'
+        dopts = []
+        try:
+            # Ignore unmodified files if there are any.
+            if s.status in (' ', '?'):
+                continue
+
+            # Diff modified files
+            if s.status == 'M':
+                tmpf = subversion.cat_revision_temp(s.filename, 'BASE')
+                left, right = tmpf.name, s.filename
+
+                dopts.extend(['--title1', '%s (BASE)' % s.filename])
+
+            # Diff added files
+            elif s.status == 'A':
+                # Check if it is a directory.
+                if not isfile(s.filename):
+                    msg = 'directory, skip'
+                    continue
+
+                if s.withhist == '+':
+                    # Get the source filename from the history.
+                    from_url, from_rev = subversion.get_history(s.filename)
+                    tmpf = subversion.cat_revision_temp(s.filename, 'BASE')
+                    dopts.extend(['--title1', '%s (%s)' % (from_url, from_rev)])
+                else:
+                    tmpf = tempfile.NamedTemporaryFile('w')
+                    dopts.extend(['--title1', '(NON-EXISTING)'])
+
+                left, right = tmpf.name, s.filename
+
+            # Diff deleted files
+            elif s.status == 'D':
+                tmpf = subversion.cat_revision_temp(s.filename, 'BASE')
+                tmpf_empty = tempfile.NamedTemporaryFile('w')
+
+                dopts.extend(['--title1', '%s (BASE)' % s.filename,
+                              '--title2', '(DELETED)'])
+
+                left, right = tmpf.name, tmpf_empty.name
+                
+            # We don't know what to do with the rest yet.
+            else:
+                msg = 'ignored'
+                print >> sys.stderr, (
+                    "Error: Action for status '%s' on file '%s' "
+                    "is not implemented yet") % (s.status, s.filename)
+                continue
+
+        finally:
+            print '%-16s | %s' % (msg, s.parsed_line)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # Run xxdiff on the files.
+        assert left and right
+        xxdiff.invoke.xxdiff_display(opts, left, right, *dopts)
 
 
 #-------------------------------------------------------------------------------
 #
-main = svn_main
+def main():
+    xxdiff.scripts.interruptible_main(svn_main)
 
 if __name__ == '__main__':
     main()

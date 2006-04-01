@@ -5,13 +5,6 @@
 XXDIFF SCRIPTS TOTAL REVAMP
 ===========================
 
-* BUG: cond_replace: --no-confirm --dry-run does not print anything right
-  now... we need to fix that.
-
-
-
-
-
 
 * xxdiff-svn-diff: There is a new script ``xxdiff-svn-diff`` that can be used to
   view all the changes in a subversion checkout.  It drives the show itself,

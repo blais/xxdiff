@@ -10,7 +10,7 @@ __author__ = "Martin Blais <blais@furius.ca>"
 
 
 # stdlib imports.
-import sys, os
+import sys, os, optparse
 from os.path import *
 from subprocess import Popen, PIPE
 import shutil
@@ -22,6 +22,36 @@ import xxdiff.checkout
 
 
 __all__ = ('cond_replace',)
+
+
+#-------------------------------------------------------------------------------
+#
+def options_graft( parser ):
+    """
+    Graft options on given parser for automatic file backups.
+    """
+    group = optparse.OptionGroup(parser, "Replacement options",
+                                 "These options affect the overwriting of the"
+                                 "original file.")
+
+    parser.add_option('-n', '--dry-run', action='store_true',
+                      help="Print the commands that would be executed " +
+                      "but don't really run them.")
+
+    parser.add_option('-x', '--no-confirm', action='store_true',
+                      help="Do not ask for confirmation with graphical "
+                      "diff viewer.")
+
+    parser.add_option_group(group)
+
+    return group
+
+
+def options_validate( opts, parser, logs=None ):
+    """
+    Validate replacement options.
+    """
+    pass
 
 
 #-------------------------------------------------------------------------------

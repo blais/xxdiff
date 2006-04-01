@@ -42,7 +42,7 @@ def options_graft( parser ):
 
     return group
 
-def options_validate( opts, parser ):
+def options_validate( opts, parser, logs=None ):
     """
     Validate checkout options.
     """

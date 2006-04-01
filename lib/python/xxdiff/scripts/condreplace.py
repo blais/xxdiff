@@ -68,13 +68,9 @@ def parse_options():
 
     parser = optparse.OptionParser(__doc__.strip())
 
-    xxdiff.backup.options_graft(parser)
-    xxdiff.checkout.options_graft(parser)
-    xxdiff.invoke.options_graft(parser)
-
-    parser.add_option('-n', '--dry-run', action='store_true',
-                      help="print the commands that would be executed " +
-                      "but don't really run them.")
+    xxmodules = xxdiff.backup, xxdiff.checkout, xxdiff.invoke, xxdiff.condrepl
+    for mod in xxmodules:
+        mod.options_graft(parser)
 
     parser.add_option('-v', '--verbose', '--quiet', action='count',
                       default=0,
@@ -83,17 +79,12 @@ def parse_options():
                       "code followed by the filename.  If you use it twice, "
                       "you will obtain a side-by-side diff of the changes.")
 
-    parser.add_option('-x', '--diff', action='store_true',
+    parser.add_option('-d', '--diff', action='store_true',
                       help="Run a diff and log the differences on stdout.")
 
-    parser.add_option('-d', '--delete', action='store_true',
+    parser.add_option('--delete', action='store_true',
                       help="Instead of copying the temporary file, move it "
                       "(delete it after copying).")
-
-    parser.add_option('-X', '--no-confirm', action='store_true',
-                      help="do not ask for confirmation with graphical "
-                      "diff viewer. This essentially generates a diff log and "
-                      "copies the file over with backups.")
 
     parser.add_option('-D', '--exit-on-same', action='store_true',
                       help="Do not do anything if the files are the same.")
@@ -101,9 +92,8 @@ def parse_options():
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
-    xxdiff.backup.options_validate(opts, parser, logs=sys.stdout)
-    xxdiff.checkout.options_validate(opts, parser)
-    xxdiff.invoke.options_validate(opts, parser)
+    for mod in xxmodules:
+        mod.options_validate(opts, parser, logs=sys.stdout)
 
     if not args or len(args) > 2:
         raise parser.error("you must specify exactly two files.")

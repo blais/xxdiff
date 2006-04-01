@@ -106,7 +106,7 @@ def options_graft( parser ):
 #
 ignore_defaults = ('.svn', 'CVS')
 
-def options_validate( opts, parser ):
+def options_validate( opts, parser, logs=None ):
     """
     Validate and prepare the parsed options for the file selection option group.
     This method returns an appropriate generator for selecting files.

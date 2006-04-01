@@ -31,6 +31,10 @@ Current
 
 * Added patch from Robin Humble for building x86_64 rpm.
 
+* WARNING!!!  Some of the switches have changed, in the name of consistency.
+  You will need to review your scripts.
+
+
 
 Version 3.1: (minor feature enhancements)
 -----------------------------------------

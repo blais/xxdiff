@@ -82,8 +82,9 @@ def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
 
-    xxdiff.invoke.options_graft(parser)
-    xxdiff.backup.options_graft(parser)
+    xxmodules = xxdiff.backup, xxdiff.invoke
+    for mod in xxmodules:
+        mod.options_graft(parser)
 
     parser.add_option('-p', '--patch-options', action='store', metavar="OPTS",
                       default='',
@@ -110,8 +111,8 @@ def parse_options():
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
-    xxdiff.invoke.options_validate(opts, parser)
-    xxdiff.backup.options_validate(opts, parser)
+    for mod in xxmodules:
+        mod.options_validate(opts, parser, logs=sys.stdout)
 
     return opts, args
 
