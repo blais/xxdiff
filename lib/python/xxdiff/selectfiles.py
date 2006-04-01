@@ -92,10 +92,19 @@ def options_graft( parser ):
                       "debug and test out which files will match your "
                       "replacement process when you run it.")
 
+    parser.add_option('-N', '--select-no-defaults', action='store_true',
+                      help="Do not setup default ignores (i.e. by default, "
+                      "appropriate ignore patterns are set for Subversion "
+                      "and CVS directories, etc.)")
+
     parser.add_option_group(group)
 
     return group
 
+
+#-------------------------------------------------------------------------------
+#
+ignore_defaults = ('.svn', 'CVS')
 
 def options_validate( opts, parser ):
     """
@@ -117,6 +126,10 @@ def options_validate( opts, parser ):
         # Note: eventually we might want to support chaining the generators
         # instead.
     else:
+        # By default ignore some common directories.
+        if not opts.select_no_defaults:
+            opts.ignore = map(re.compile, ignore_defaults) + opts.ignore
+
         # Process all files if no filter specified
         if not opts.select:
             opts.select.append(re.compile('.*'))

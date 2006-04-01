@@ -52,7 +52,7 @@ import tempfile
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.backup
-import xxdiff.scm
+import xxdiff.checkout
 import xxdiff.invoke
 import xxdiff.condrepl
 from xxdiff.scripts import tmpprefix
@@ -69,7 +69,7 @@ def parse_options():
     parser = optparse.OptionParser(__doc__.strip())
 
     xxdiff.backup.options_graft(parser)
-    xxdiff.scm.options_graft(parser)
+    xxdiff.checkout.options_graft(parser)
     xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
@@ -102,7 +102,7 @@ def parse_options():
     opts, args = parser.parse_args()
 
     xxdiff.backup.options_validate(opts, parser, logs=sys.stdout)
-    xxdiff.scm.options_validate(opts, parser)
+    xxdiff.checkout.options_validate(opts, parser)
     xxdiff.invoke.options_validate(opts, parser)
 
     if not args or len(args) > 2:

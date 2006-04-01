@@ -18,7 +18,7 @@ import shutil
 # xxdiff imports.
 import xxdiff.backup
 import xxdiff.invoke
-import xxdiff.scm
+import xxdiff.checkout
 
 
 __all__ = ('cond_replace',)
@@ -155,8 +155,8 @@ def do_replace_file( ofn, nfn, opts, logs ):
         xxdiff.backup.backup_file(ofn, opts, logs)
 
     # Insure that the file is checked out.
-    if hasattr(opts, 'checkout'):
-        xxdiff.scm.insure_checkout(ofn, opts, logs)
+    if getattr(opts, 'checkout', None):
+        xxdiff.checkout.insure_checkout(ofn, opts, logs)
 
     # Copy the new file over the original.
     shutil.copyfile(nfn, ofn)

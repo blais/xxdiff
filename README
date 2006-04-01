@@ -99,12 +99,10 @@ Tools
 **xxdiff** comes with a bunch of wrapper Python scripts that invoke xxdiff in
 creative ways.  The author has been using these for a long time now and decided
 for version 3.0 to clean them up and make them a little more generic so everyone
-can use them.
-
-As of version 3.2, the standalone scripts have been refactored a great deal, to
-share code together and to make them more stable.  All this code is now
-distributed with xxdiff, in an ``xxdiff`` Python package, which you can leverage
-to build your own file transformation scripts around xxdiff.
+can use them.  As of version 3.2, the standalone scripts have been refactored a
+great deal, to share code together and to make them more stable.  All this code
+is now distributed with xxdiff, in an ``xxdiff`` Python package, which you can
+leverage to build your own file transformation scripts around xxdiff.
 
 See the document `Helper Scripts for xxdiff <doc/xxdiff-scripts.html>`_ for full
 details.  

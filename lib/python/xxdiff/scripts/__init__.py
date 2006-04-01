@@ -73,5 +73,6 @@ def passthruopts( argv ):
 #-------------------------------------------------------------------------------
 #
 # Default prefix for temporary files uses the invoking script's name.
-tmpprefix = '%s.' % basename(sys.argv[0])
+script_name = basename(sys.argv[0])
+tmpprefix = '%s.' % script_name
 

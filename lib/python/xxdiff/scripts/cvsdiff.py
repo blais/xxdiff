@@ -117,7 +117,7 @@ def cvsdiff_main():
 
             if decision == 'ACCEPT' or decision == 'MERGED':
                 # the user accepted, commit the file to CVS.
-                xxdiff.scm.commit(filename)
+                xxdiff.checkout.commit(filename)
 
             elif decision == 'REJECT' or decision == 'NODECISION':
                 pass # do nothing

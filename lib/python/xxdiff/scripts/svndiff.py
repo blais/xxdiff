@@ -11,6 +11,20 @@ __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4']
 
 
+# stdlib imports.
+import sys, os, re, tempfile
+from os.path import *
+
+# xxdiff imports.
+import xxdiff.scripts
+import xxdiff.selectfiles
+import xxdiff.backup
+import xxdiff.invoke
+import xxdiff.checkout
+import xxdiff.condrepl
+from xxdiff.scripts import tmpprefix
+
+
 #-------------------------------------------------------------------------------
 #
 def parse_options():
@@ -21,8 +35,6 @@ def parse_options():
     parser = optparse.OptionParser(__doc__.strip())
     opts, args = parser.parse_args()
 
-    if len(args) > 3:
-        raise parser.error("Cannot invoke wrapper with more than 3 files.")
 
     return opts, args
 

@@ -486,8 +486,10 @@ If you use any of the looping scripts described before in a Subversion checkout,
 you can avoid changing the administrative files stored in the .svn directories
 by using the following ignore option::
 
-   xxdiff-renam -I .svn   ...
+   xxdiff-rename -I .svn   ...
 
+Note that by default Subversion and CVS directories are ignored (you can disable
+that with an option).
 
 
 ``xxdiff-diff-proxy``
@@ -534,6 +536,8 @@ options in the ways that I can review my changes, for example
 
 * I would like to have a graphical or curses interface to select which files to
   view, in which order I want.
+
+* I want to be able to review diffs between any revisions.
 
 ``xxdiff-svn-diff`` provides what I think should become a better ``svn diff``
 with graphical diff viewing.

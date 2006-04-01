@@ -19,7 +19,7 @@ import xxdiff.scripts
 import xxdiff.selectfiles
 import xxdiff.backup
 import xxdiff.invoke
-import xxdiff.scm
+import xxdiff.checkout
 import xxdiff.condrepl
 from xxdiff.scripts import tmpprefix
 
@@ -63,7 +63,7 @@ def parse_args( parser ):
     """
     xxdiff.backup.options_graft(parser)
     xxdiff.selectfiles.options_graft(parser)
-    xxdiff.scm.options_graft(parser)
+    xxdiff.checkout.options_graft(parser)
     xxdiff.invoke.options_graft(parser)
 
     parser.add_option('-n', '--dry-run', action='store_true',
@@ -80,7 +80,7 @@ def parse_args( parser ):
     opts, args = parser.parse_args()
 
     xxdiff.backup.options_validate(opts, parser, logs=sys.stdout)
-    xxdiff.scm.options_validate(opts, parser)
+    xxdiff.checkout.options_validate(opts, parser)
     xxdiff.invoke.options_validate(opts, parser, logs=sys.stdout)
     selector = xxdiff.selectfiles.options_validate(opts, parser)
 
