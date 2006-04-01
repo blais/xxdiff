@@ -12,6 +12,17 @@ __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 
+# stdlib imports.
+import sys, os
+from os.path import *
+
+# xxdiff imports.
+import xxdiff.scripts
+import xxdiff.backup
+import xxdiff.condrepl
+from xxdiff.scm import subversion
+
+
 #-------------------------------------------------------------------------------
 #
 def parse_options():
@@ -20,48 +31,100 @@ def parse_options():
     """
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
+
+    xxmodules = (xxdiff.backup,)
+    for mod in xxmodules:
+        mod.options_graft(parser)
+
+    parser.add_option('-n', '--dry-run', action='store_true',
+                      help="Print the commands that would be executed " +
+                      "but don't really run them.")
+
+    parser.add_option('-R', '--no-resolve', '--dont-resolve', 
+                      action='store_true',
+                      help="Do not resolve the conflicts even after a merge "
+                      "decision has been made.")
+
     opts, args = parser.parse_args()
 
-    if len(args) > 3:
-        raise parser.error("Cannot invoke wrapper with more than 3 files.")
+    # Force to always perform a verbose diff on output.
+    opts.verbose = 2
+
+    for mod in xxmodules[1:]:
+        mod.options_validate(*vargs)
 
     return opts, args
 
+
 #-------------------------------------------------------------------------------
 #
-def svn_main():
+def select_conflicts( statii ):
     """
-    Main program for cond-replace script.
+    A generator that selects only the conflictual files.
+    """
+    for s in statii:
+        if s.status == 'C':
+            yield s
+
+#-------------------------------------------------------------------------------
+#
+proper_decisions = ('ACCEPT', 'REJECT', 'MERGED')
+
+def svnresolve_main():
+    """
+    Main program for svn-resolve script.
     """
     opts, args = parse_options()
 
-## FIXME: todo
-
+    # Get the status of the working copy.
+    statii = subversion.status(args)
     
+    # First print out the list/status of the conflicting files to the user.
+    for s in select_conflicts(statii):
+        print s.parsed_line
+    print
 
+    logs = sys.stdout
 
+    # For each of the files reported by status
+    for s in select_conflicts(statii):
 
+        # Get the three files before the merge conflicts.
+        info = subversion.getinfo(s.filename)
+        dn = dirname(s.filename)
+        ancestor, mine, yours = [join(dn, info[x]) for x in 
+                                 ('Conflict Previous Base File',
+                                  'Conflict Previous Working File',
+                                  'Conflict Current Base File')]
 
+        # Spawn xxdiff in decision mode on the three files.
+        decision = xxdiff.condrepl.cond_resolve(
+            mine, ancestor, yours, s.filename, opts, logs)
 
+        # Backup all the other files that will get when the file gets resolved,
+        # whether by this script or later by the user by hand.
+        if decision in proper_decisions:
+            xxdiff.backup.backup_file(mine, opts, logs)
+            xxdiff.backup.backup_file(ancestor, opts, logs)
+            xxdiff.backup.backup_file(yours, opts, logs)
+        else:
+            # If no proper decision has been made, do not resolve.
+            continue
 
+        # Resolve the conflict with Subversion, if requested.
+        if not opts.no_resolve:
+            subversion.resolve(s.filename)
+            print '(Resolved.)'
 
+    xxdiff.backup.print_reminder(opts)
 
-
-
-
-
-
-
-
-
-
-
-
-
+            
 #-------------------------------------------------------------------------------
 #
-main = svn_main
+def main():
+    xxdiff.scripts.interruptible_main(svnresolve_main)
 
 if __name__ == '__main__':
     main()
+
 

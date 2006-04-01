@@ -113,9 +113,5 @@ def postloop_footer( opts, decision_map=None ):
     Print some common stuff at the end of the looping scripts.
     You don't have to add this to your script, but it's convenient.
     """
-    # Print reminder of location of backup files at the end (for convenience).
-    if opts.backup_dir:
-        print
-        print "Backup files in:", opts.backup_dir
-        print
+    xxdiff.backup.print_reminder(opts)
 

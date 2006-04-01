@@ -48,7 +48,9 @@ See documentation for a full list of the scripts and their role.
       author_email="blais@furius.ca",
       url="http://furius.ca/xxdiff",
       package_dir = {'': 'lib/python'},
-      packages = ['xxdiff', join('xxdiff', 'scripts')],
+      packages = ['xxdiff',
+                  join('xxdiff', 'scripts'),
+                  join('xxdiff', 'scm')],
       scripts = allscripts
      )
 

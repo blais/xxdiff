@@ -116,6 +116,19 @@ def backup_file( fn, opts, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
+def print_reminder( opts ):
+    """
+    Print a reminder of the location of the backup files.
+    """
+    # Print reminder of location of backup files at the end (for convenience).
+    if opts.backup_dir:
+        print
+        print "Backup files in:", opts.backup_dir
+        print
+
+
+#-------------------------------------------------------------------------------
+#
 def test():
     """
     Test stub.

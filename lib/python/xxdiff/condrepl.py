@@ -56,7 +56,7 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-# Side-by-side diff command.
+# Side-by-side diff2 command.
 sbs_diff_cmd = ['diff', '--side-by-side', '--suppress-common-lines']
 
 #-------------------------------------------------------------------------------
@@ -93,27 +93,12 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
 
     Returns the decision code for the file.
     """
-
-    # A handy close for printing out the decision code.
-    def print_decision( decision ):
-        if opts.verbose >= 2:
-            print >> logs, decision
-        elif opts.verbose >= 1:
-            print >> logs, '%-10s %s' % (decision, origfn)
-
-    def print_diffs( diff_output ):
-        print >> logs
-        for line in map(str.expandtabs, diff_output.splitlines()):
-            print >> logs, ' |', line
-        print >> logs
-
-
     origfn = normpath(abspath(origfn))
 
     # Print header
     if opts.verbose >= 2:
         print >> logs,  '=' * 80
-        print >> logs,  'File: ', origfn
+        print >> logs,  'File: ', output
 
     if opts.verbose >= 2 or exitonsame:
 
@@ -127,8 +112,8 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
                 print >> logs, "(Warning: no differences.)"
 
             if exitonsame:
-                print_decision('NODIFF')
-                return 0
+                print_decision('NODIFF', opts, logs)
+                return 'NODECISION'
     else:
         diff_output = None
 
@@ -137,20 +122,20 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
         do_replace_file(origfn, newfn, opts, logs)
         decision = 'NOCONFIRM'
 
-        print_decision(decision)
-        if opts.verbose >= 2 and diff_output: print_diffs(diff_output)
+        print_decision(decision, opts, logs)
+        if opts.verbose >= 2 and diff_output: print_diffs(diff_output, logs)
     else:
         # Call xxdiff!
         decision, mergedf = xxdiff.invoke.xxdiff_decision(
             opts, '--title2', 'NEW FILE', origfn, newfn)
 
-        print_decision(decision)
+        print_decision(decision, opts, logs)
 
         if decision == 'ACCEPT':
             # Changes accepted, replace original with new..
             do_replace_file(origfn, newfn, opts, logs)
 
-            if opts.verbose >= 2 and diff_output: print_diffs(diff_output)
+            if opts.verbose >= 2 and diff_output: print_diffs(diff_output, logs)
 
         elif decision == 'REJECT' or decision == 'NODECISION':
             # Rejected change (or program killed), do not replace
@@ -163,12 +148,34 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
                           stdout=PIPE, stderr=PIPE)
                 diff_output, stderr = p.communicate()
 
-                if diff_output: print_diffs(diff_output)
+                if diff_output: print_diffs(diff_output, logs)
 
             do_replace_file(origfn, mergedf.name, opts, logs)
 
     return decision
 
+
+#-------------------------------------------------------------------------------
+#
+def print_decision( decision, opts, logs ):
+    """
+    Print the decision string.
+    """
+    if opts.verbose >= 2:
+        print >> logs, decision
+    elif opts.verbose >= 1:
+        print >> logs, '%-10s %s' % (decision, origfn)
+
+#-------------------------------------------------------------------------------
+#
+def print_diffs( diff_output, logs ):
+    """
+    Format nicely and print the output of side-by-side diff.
+    """
+    print >> logs
+    for line in map(str.expandtabs, diff_output.splitlines()):
+        print >> logs, ' |', line
+    print >> logs
 
 #-------------------------------------------------------------------------------
 #
@@ -190,6 +197,110 @@ def do_replace_file( ofn, nfn, opts, logs ):
 
     # Copy the new file over the original.
     shutil.copyfile(nfn, ofn)
+
+
+
+#-------------------------------------------------------------------------------
+#
+diff3_cmd = ['diff3']
+
+def cond_resolve( mine, ancestor, yours, output, opts, logs=None ):
+    """
+    Given three filenames, 'mine', 'ancestor', 'yours', spawn a 3-way xxdiff for
+    a decision, and replace the 'original' file with the contents of the merged
+    output.
+
+    Arguments:
+
+    - 'mine', 'ancestor', 'yours': files that contains the local file before
+      merging, the common ancestor file of 'mine' and 'yours', and 'yours' the
+      merged file, -> strings
+
+    - 'output': the filename where we want to store the merged results (in the
+      case of a merge, the original filename) -> string
+
+    - 'opts': program options object -> Options instance
+
+      The options that are used are:
+
+      * opts.verbose: How much output to print
+
+          Three levels of verbosity are assumed:
+          - 0: completely silent
+          - 1: outputs only the decision code and then the filename
+               (This can be useful for scripts to process the output of a run)
+          - 2: outputs a side-by-side diff of the changes.
+
+      * opts.dry_run: Whether to actually apply the changes or not.
+
+    Returns the decision code for the file.
+    """
+    mine, ancestor, yours, output = map(abspath,
+                                        (mine, ancestor, yours, output))
+    files3 = [mine, ancestor, yours]
+
+    # Print header
+    if opts.verbose >= 2:
+        print >> logs,  '=' * 80
+        print >> logs,  'File: ', output
+
+    if opts.verbose >= 2:
+        # Run diff between the three files.
+        p = Popen(diff3_cmd + files3, stdout=PIPE, stderr=PIPE)
+        diff_output, stderr = p.communicate()
+
+        # Print differences.  
+        if not diff_output: # Note: we cannot rely on the return code.
+            if opts.verbose >= 2:
+                print >> logs, "(Warning: no differences.)"
+
+            print_decision('NODIFF', opts, logs)
+            return 'NODECISION'
+    else:
+        diff_output = None
+
+    # Add arguments to identify files in the title bars.
+    dargs = ['--title1', '%s (WORKING)' % mine,
+             '--title2', '%s (ANCESTOR)' % ancestor,
+             '--title3', '%s (MERGED/NEW BASE)' % yours]
+    # Call xxdiff!
+    dargs.extend(files3)
+    decision, mergedf = xxdiff.invoke.xxdiff_decision(opts, *dargs)
+
+    print_decision(decision, opts, logs)
+
+    # Backup all 3 files and the destination output before overwriting.
+    if decision != 'NODECISION' and not opts.dry_run:
+        if hasattr(opts, 'backup_type'):
+            xxdiff.backup.backup_file(output, opts, logs)
+
+    if decision == 'ACCEPT':
+        # Accept: discard our local changes and replace file with the update.
+        shutil.copyfile(yours, output)
+
+    elif decision == 'REJECT':
+        # Reject: discard the update and keep our local file as it were before
+        # the merge.
+        shutil.copyfile(mine, output)
+
+    elif decision == 'MERGED':
+        # Merge: replace the output file with the merged output of xxdiff.
+        shutil.copyfile(mergedf.name, output)
+
+    elif decision == 'NODECISION':
+        # No Decision: Do not change anything.
+        pass
+
+    if opts.verbose >= 2:
+        # Run diff again to show the real changes that will be applied to
+        # 'mine' into the output file.
+        p = Popen(sbs_diff_cmd + [mine, output], stdout=PIPE, stderr=PIPE)
+        diff_output, stderr = p.communicate()
+
+        if diff_output:
+            print_diffs(diff_output, logs)
+
+    return decision
 
 
 #-------------------------------------------------------------------------------

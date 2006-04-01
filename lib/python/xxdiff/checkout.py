@@ -14,11 +14,6 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 # stdlib imports.
 import optparse
 
-# xxdiff imports.
-import xxdiff.scm.cvs
-import xxdiff.scm.clearcase
-import xxdiff.scm.subversion
-
 
 #-------------------------------------------------------------------------------
 #
@@ -56,9 +51,11 @@ def get_module( modname ):
     Returns the appropriate module for the given SCM.
     """
     try:
-        return getattr(xxdiff.scm, modname)
-    except AttributeError, e:
+        mod = __import__("xxdiff.scm.%s" % 'cvs')
+        mod = getattr(mod.scm, 'cvs')
+    except ImportError, e:
         raise SystemExit("Internal Error: SCM module not found.")
+    return mod
 
 #-------------------------------------------------------------------------------
 #

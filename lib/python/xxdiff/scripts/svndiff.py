@@ -13,7 +13,6 @@ __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 # stdlib imports.
 import sys, os, tempfile
-from subprocess import Popen
 from os.path import *
 
 # xxdiff imports.
@@ -38,7 +37,7 @@ def parse_options():
 
 #-------------------------------------------------------------------------------
 #
-def svn_main():
+def svndiff_main():
     """
     Main program for svn-diff script.
     """
@@ -50,8 +49,11 @@ def svn_main():
     # First print out the status to the user.
     subversion.print_status(statii)
     print
-    print '(Starting diffs)'
 
+    msgfmt = '%-16s | %s'
+    print msgfmt % ('Action', 'Status')
+    print msgfmt % ('-'*16, '-'*40)
+    
     # For each of the files reported by status
     for s in statii:
         msg = 'xxdiff'
@@ -60,10 +62,11 @@ def svn_main():
         try:
             # Ignore unmodified files if there are any.
             if s.status in (' ', '?'):
+                msg = 'ignored'
                 continue
 
             # Diff modified files
-            if s.status == 'M':
+            if s.status in ('M', 'C'):
                 tmpf = subversion.cat_revision_temp(s.filename, 'BASE')
                 left, right = tmpf.name, s.filename
 
@@ -78,11 +81,14 @@ def svn_main():
 
                 if s.withhist == '+':
                     # Get the source filename from the history.
-                    from_url, from_rev = subversion.get_history(s.filename)
+                    info = subversion.getinfo(s.filename)
+                    from_url, from_rev = [info.get('Copied From %s' % x, None)
+                                          for x in 'URL', 'Rev']
+
                     tmpf = subversion.cat_revision_temp(s.filename, 'BASE')
                     dopts.extend(['--title1', '%s (%s)' % (from_url, from_rev)])
                 else:
-                    tmpf = tempfile.NamedTemporaryFile('w')
+                    tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
                     dopts.extend(['--title1', '(NON-EXISTING)'])
 
                 left, right = tmpf.name, s.filename
@@ -90,7 +96,7 @@ def svn_main():
             # Diff deleted files
             elif s.status == 'D':
                 tmpf = subversion.cat_revision_temp(s.filename, 'BASE')
-                tmpf_empty = tempfile.NamedTemporaryFile('w')
+                tmpf_empty = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
 
                 dopts.extend(['--title1', '%s (BASE)' % s.filename,
                               '--title2', '(DELETED)'])
@@ -106,7 +112,7 @@ def svn_main():
                 continue
 
         finally:
-            print '%-16s | %s' % (msg, s.parsed_line)
+            print msgfmt % (msg, s.parsed_line)
 
 
         # Run xxdiff on the files.
@@ -119,7 +125,7 @@ def svn_main():
 #-------------------------------------------------------------------------------
 #
 def main():
-    xxdiff.scripts.interruptible_main(svn_main)
+    xxdiff.scripts.interruptible_main(svndiff_main)
 
 if __name__ == '__main__':
     main()

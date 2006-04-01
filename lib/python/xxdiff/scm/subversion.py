@@ -3,6 +3,11 @@
 
 """
 Functions for Subversion.
+
+Note: we do not use the official Python bindings because we want to evolve
+independently and not break when Subversion changes.  This only makes sense
+inasmuch as we do not do much with Subversion.  Should we get do more involved
+stuff with it, we should switch this code to use the Subversion Python bindings.
 """
 
 __author__ = 'Martin Blais <blais@furius.ca>'
@@ -46,6 +51,18 @@ def commit( filename ):
     msg = 'Committed by %s' % script_name
     call(['svn', 'commit', '-m', msg, filename])
 
+
+#-------------------------------------------------------------------------------
+#
+def resolve( filename ):
+    """
+    Commit the given filename into CVS.
+    """
+    p = Popen(['svn', 'resolved', filename], stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate()
+    if p.returncode != 0:
+        raise SystemExit("Error: Resolving file '%s':\n%s\n" %
+                         (filename, stderr))
 
 #-------------------------------------------------------------------------------
 #
@@ -154,6 +171,8 @@ def status( rootdirs ):
     return statii
 
 
+#-------------------------------------------------------------------------------
+#
 def print_status( statii ):
     """
     Reproduce printing out the status.
@@ -164,10 +183,9 @@ def print_status( statii ):
 
 #-------------------------------------------------------------------------------
 #
-def get_history( filename ):
+def getinfo( filename ):
     """
-    Return where a file was copied from and at which revision, the 'Copied From
-    ...' fields from the output of 'svn info'.
+    Return the fields of 'svn info', in a dictionary.
     """
     p = Popen(['svn', 'info', filename], stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
@@ -177,7 +195,7 @@ def get_history( filename ):
     colon_split_re = re.compile(': ')
     d = dict([colon_split_re.split(x, 1) for x in stdout.strip().splitlines()])
 
-    return [d.get('Copied From %s' % x, None) for x in 'URL', 'Rev']
+    return d
 
 
 #-------------------------------------------------------------------------------
