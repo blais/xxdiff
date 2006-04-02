@@ -97,7 +97,7 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
     # Print header
     if opts.verbose >= 2:
         print >> logs,  '=' * 80
-        print >> logs,  'File: ', output
+        print >> logs,  'File: ', origfn
 
     if opts.verbose >= 2 or exitonsame:
 

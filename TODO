@@ -5,6 +5,24 @@
 
 (Scripts)
 
+* diffproxy.py: Include this patch from Martin Renold::
+
+    ## Return code depends on whether conflict markers were inserted
+    ## conflict_remaining = True
+    ## if exitcode not in [0, 3]:
+    ##     sys.stderr.write('Unexpected xxdiff exit code %d\n' % exitcode)
+    ## elif exitcode == 0:
+    ##     conflict_remaining = False
+    ## 
+    ## ...
+    ## elif o == 'NODECISION':
+    ##     conflict_remaining = True
+    ## ...
+    ## 
+    ## if conflict_remaining:
+    ##     sys.exit(1)
+
+
 * xxdiff: In decision mode, we should warn the user when selections have been
   made and the user exits with "merged".
 

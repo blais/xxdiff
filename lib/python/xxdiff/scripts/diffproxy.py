@@ -120,6 +120,25 @@ def diffproxy_main():
     else:
         xxdiff.invoke.xxdiff_display(opts, *dargs)
 
+    ## FIXME: TODO add this later, I need to modify my invoke.py to pass along
+    ## the return code.'
+
+    ## Return code depends on whether conflict markers were inserted
+    ## conflict_remaining = True
+    ## if exitcode not in [0, 3]:
+    ##     sys.stderr.write('Unexpected xxdiff exit code %d\n' % exitcode)
+    ## elif exitcode == 0:
+    ##     conflict_remaining = False
+    ## 
+    ## ...
+    ## elif o == 'NODECISION':
+    ##     conflict_remaining = True
+    ## ...
+    ## 
+    ## if conflict_remaining:
+    ##     sys.exit(1)
+
+
 
 #-------------------------------------------------------------------------------
 #
