@@ -2,24 +2,26 @@
    TODO: xxdiff
 ==================
 
-XXDIFF SCRIPTS TOTAL REVAMP
-===========================
 
-Release:
+(Scripts)
 
-* Register the package with the CheeseShop
-* Release as a new version of xxdiff 3.2
-* Send xxdiff scripts to Belley, Gijsbert, Henson, when they're complete and
-  released.
+* xxdiff: In decision mode, we should warn the user when selections have been
+  made and the user exits with "merged".
 
+* xxdiff-rename: With respect to case sensitivity, supports the smart
+  replacement behaviour that is present in GNU emacs.
 
+* Implement a better side-by-side diff that includes line numbers and context.
+  The current side-by-side diff sucks.
 
+  - Add an option to generate normal diffs rather than side-by-side.
 
+* xxdiff-patch: Finish It! 
 
+  * You have to deal with 'delete' and 'add' cases.
 
-
-
---------------------------------------------------------------------------------
+  * Q: what do we do when patch fails?  How do we treat it?
+    must read the output messages of patch and warn the user.
 
 * xxdiff-svn-diff: TODO
 
@@ -42,43 +44,12 @@ Release:
    ./scripts/cvsdiff.py:        cin, cout = os.popen2(
    ./scripts/patch.py:        cin, cout = os.popen2(cmd, 'rw')
 
-
 * Implement --single-right: we should be able to display single files on either
   side.  You should fix xxdiff-match after that, so that it passes the correct
   options to xxdiff.
 
 
 --------------------------------------------------------------------------------
-(Scripts)
-
-* xxdiff: In decision mode, we should warn the user when selections have been
-  made and the user exits with "merged".
-
-* xxdiff-rename: With respect to case sensitivity, supports the smart
-  replacement behaviour that is present in GNU emacs.
-
-* Implement a better side-by-side diff that includes line numbers and context.
-  The current side-by-side diff sucks.
-
-  - Add an option to generate normal diffs rather than side-by-side.
-
-* xxdiff-patch: Finish It! 
-
-  * You have to deal with 'delete' and 'add' cases.
-
-  * Q: what do we do when patch fails?  How do we treat it?
-    must read the output messages of patch and warn the user.
-
-
---------------------------------------------------------------------------------
-
-
-* In order to be able to share Python code in a library, spawn in a new package
-  xxdiff-helpers, that gets installed and announced independently, and would
-  give the project some popularity on its own.
-
-
-
 
 - Install xxdiff on windows, when Qt4 non-commercial comes out
 

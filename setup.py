@@ -41,7 +41,8 @@ CVS, Subversion, etc.  This package was born after a number of these useful
 scripts had sprouted, and it became apparent that sharing the common code for
 the scripts would be a great advantage to tools writers.
 
-See documentation for a full list of the scripts and their role.
+See documentation for a full list of the scripts and their role:
+http://furius.ca/xxdiff/doc/xxdiff-scripts.html
 """,
       license="GNU GPL",
       author="Martin Blais",

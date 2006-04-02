@@ -1,2 +1,5 @@
 README index.html @header
 tools/index.txt @header
+doc/xxdiff-integration.txt @header
+doc/xxdiff-secrets.txt @header
+doc/xxdiff-scripts.txt @header
