@@ -92,6 +92,8 @@ Version 3.2: (major feature enhancements)
 
 * Changes not related to the scripts:
 
+  * When using --exit-on-same, output something if we're in decision mode.
+
   * Created ports subdirectory, added files for MAC OSX from Alexandre Feblot.
 
   * Added patch from Robin Humble for building x86_64 rpm.
