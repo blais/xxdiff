@@ -2,37 +2,102 @@
 CHANGES: xxdiff
 ===============
 
-Current
--------
+Version 3.2: (major feature enhancements)
+-----------------------------------------
 
-* The xxdiff-subversion proxy script that is used to be invoked from ``svn
-  diff`` has been renamed to ``xxdiff-diff-proxy``.
+* **IMPORTANT** This release focuses on a complete overhaul of the
+  infrastructure for making Python scripts around xxdiff.  There is now a Python
+  package that is to be distributed and installed with xxdiff, and all the
+  scripts share code in there.  For the full juicy details, see::
 
-* Created lib/python directory to hold shared code between all the Python tools,
-  thereby reducing redundancy.  The price to pay for this is that you cannot
-  simply copy the xxdiff-* scripts in a bin directory anymore, to run them, you
-  must also install the xxdiff python library.  A setup.py file is provided for
-  this purpose.
+      doc/xxdiff-scripts.html
 
-  I finally did this because the cost of redundant code was becoming annoying in
-  the presence of my desire to code new tools.  I did not want to have to
-  cut-n-paste anymore, in the name of having every script be self-contained.
-  Installing a Python library is not such a big deal anyway, and I judge that
-  there is enough code by now to warrant it.  In addition, this will make it
-  possible for people that want to write their own scripts to reuse some of the
-  infrastructure that I provide for the already existing scripts.
-
-  Note to packagers: you should be able to install the xxdiff Python library in
-  the most usual way for Python programs::
+  Note to packagers: you now have to include a Python distutils install in
+  addition to the C++ xxdiff code.  This is done like this::
 
       (as root)#  python setup.py install
 
-* Created ports subdirectory, added files for MAC OSX from Alexandre Feblot.
+  All the Python scripts now depend on Python-2.4 or higher.
 
-* Added patch from Robin Humble for building x86_64 rpm.
 
-* WARNING!!!  Some of the switches have changed, in the name of consistency.
-  You will need to review your scripts.
+  * Completely rewrote all the Python scripts.
+
+  * Fixed some bugs in the scripts.
+
+  * Improved the way that backup files are saved.
+
+  * Wrote global, general documentation about the scripts and removed the
+    automatically-generated documentation.
+
+    * Added an example about how to provide another transformer with xxdiff
+      verification (in documentation)
+
+
+  * Ported all old child process code (like popen) in the scripts to the
+    subprocess module.
+
+  * xxdiff-resolve: Created a new script that finds all the files that are still
+    in conflict and invokes a 3-way merge algorithm to resolve them.
+
+  * xxdiff-svn-diff: There is a new script ``xxdiff-svn-diff`` that can be used
+    to view all the changes in a subversion checkout.  It drives the show
+    itself, rather than being invoked by Subversion itself.  This has several
+    advantages.
+
+  * Add new options to selection code:
+
+    - --select-grep: Among the files selected by filename, select only those
+      which match the given regexp (or multiple clauses)
+
+    - --ignore-grep: Among the files selected by filename, ignore those which
+      match the given regexp (or multiple clauses)
+
+  * Some (but few) of the short options have changed during the complete revamp
+    of the Python scripts.  You should review your calling scripts if they use
+    short option names.
+
+  * Created xxdiff-rename, a script that allows one to perform global renames
+    (this is similar in purpose to the most common use case for
+    xxdiff-find-grep-sed).  Also: xxdiff-rename does not use external processes
+    to perform the replacement, it's all done from within Python.  This should
+    make it possible to run easily under Windows.
+
+  * Created xxdiff-filter, a script that runs the transformation loop using a
+    UNIX command filter (see docs).
+
+  * Made an infrastructure to process files in transformation loops. 
+    xxdiff-find-grep-sed was rewritten in those terms.
+
+  * The xxdiff-subversion proxy script that is used to be invoked from ``svn
+    diff`` has been renamed to ``xxdiff-diff-proxy``.
+
+  * Created lib/python directory to hold shared code between all the Python
+    tools, thereby reducing redundancy.  The price to pay for this is that you
+    cannot simply copy the xxdiff-* scripts in a bin directory anymore, to run
+    them, you must also install the xxdiff python library.  A setup.py file is
+    provided for this purpose.
+
+    I finally did this because the cost of redundant code was becoming annoying
+    in the presence of my desire to code new tools.  I did not want to have to
+    cut-n-paste anymore, in the name of having every script be self-contained.
+    Installing a Python library is not such a big deal anyway, and I judge that
+    there is enough code by now to warrant it.  In addition, this will make it
+    possible for people that want to write their own scripts to reuse some of
+    the infrastructure that I provide for the already existing scripts.
+
+    Note to packagers: you should be able to install the xxdiff Python library in
+    the most usual way for Python programs::
+
+        (as root)#  python setup.py install
+
+* Changes not related to the scripts:
+
+  * Created ports subdirectory, added files for MAC OSX from Alexandre Feblot.
+
+  * Added patch from Robin Humble for building x86_64 rpm.
+
+  * WARNING!!!  Some of the switches have changed, in the name of consistency.
+    You will need to review your scripts.
 
 
 
