@@ -23,7 +23,7 @@ allscripts = [join('bin', x) for x in os.listdir('bin')
 setup(name="xxdiff-scripts",
       version=read_version(),
       description=\
-      "Python package for infrastructure for writing scripts around xxdiff",
+      "Python package for writing scripts around xxdiff",
       long_description="""
 This package provides a number of scripts that are used to perform a variety of
 tasks that all involve getting user verification and feedback using the xxdiff
