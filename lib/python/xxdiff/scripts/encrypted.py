@@ -113,7 +113,7 @@ def diff_encrypted( textlist, outmerged=None ):
         f.close()
 
     print 'Waiting...'
-    decision, mergedf = waiter()
+    decision, mergedf, retcode = waiter()
 
     if decision != 'NODECISION' and outmerged:
         # Read the decoded merged output file from xxdiff.

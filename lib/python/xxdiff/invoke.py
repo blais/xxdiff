@@ -58,17 +58,17 @@ decisions = ('ACCEPT', 'REJECT', 'MERGED', 'NODECISION')
 def xxdiff_decision( opts, *arguments, **kwds ):
     """
     Runs xxdiff with the given arguments, passed directly to subprocess.call(),
-    and return the decision code, and merged output temporary file.  We create
-    this temporary file to be used as the merged output to be collected and
-    modify the options accordingly.  It is a named file.  If you close the
-    merged temporary file, it is deleted autoamtically.  This file is opened in
-    'rw' mode, so you can rewind it and read it directly if desired, or you can
-    use its filename with high-level operations, like file copy, as long as you
-    keep the reference to the file.
+    and return the decision code, the temporary file containing merged output,
+    and xxdiff's return code.  We create this temporary file to be used as the
+    merged output to be collected and modify the options accordingly.  It is a
+    named file.  If you close the merged temporary file, it is deleted
+    automatically.  This file is opened in 'rw' mode, so you can rewind it and
+    read it directly if desired, or you can use its filename with high-level
+    operations, like file copy, as long as you keep the reference to the file.
 
     You should unpack its arguments like this::
 
-       decision, mergedf = xxdiff_decision( ... )
+       decision, mergedf, retcode = xxdiff_decision( ... )
 
        # use mergedf.name to copy the file or seek(0) and read() it again.
 
@@ -89,7 +89,7 @@ def xxdiff_decision( opts, *arguments, **kwds ):
       # Do something...
 
       # Wait for the xxdiff results
-      decision, merged = xxwait()
+      decision, merged, retcode = xxwait()
 
     """
     # Create a temporary file to contain the output or merged results.
@@ -150,7 +150,7 @@ def xxdiff_decision( opts, *arguments, **kwds ):
         else:
             out_mergedf = mergedf
 
-        return decision, out_mergedf
+        return decision, out_mergedf, p.returncode
 
     # Eat up the processed tag.
     #
@@ -177,10 +177,11 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 def xxdiff_display( opts, *arguments, **kwds ):
     """
     Runs xxdiff with the given arguments, passed directly to subprocess.call().
-    We do not run it in decision mode, and there is not return code.  There is a
-    similar 'nowait' option as xxdiff_decision() with a waiter object returned
-    to wait on the child process.  Otherwise, this function will wait for the
-    child to terminate.
+    We do not run it in decision mode.  We return xxdiff's own return code (the
+    --exit-with-merge-status will have an effect on this).  There is a similar
+    'nowait' option as xxdiff_decision() with a waiter object returned to wait
+    on the child process.  Otherwise, this function will wait for the child to
+    terminate.
 
     We do not create a merged file, but you are free to pass in these options if
     so desired.
@@ -229,6 +230,8 @@ def xxdiff_display( opts, *arguments, **kwds ):
             raise SystemExit(
                 "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
                 stderr)
+
+        return p.returncode
 
     # Eat up the processed tag.
     #

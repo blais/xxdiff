@@ -2657,7 +2657,7 @@ void XxApp::onRedoDiff()
          // Reread the files.
          if ( _cmdline._unmerge == false && _cmdline._single == false ) {
             for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-               const XxBuffer& buffer = *_files[ii];
+               const XxBuffer& buffer = *(_files[ii].get());
                if ( buffer.isTemporary() == false ) {
                   // We need to get the fileinfo again here because the size
                   // might have changed.
@@ -2697,7 +2697,7 @@ void XxApp::onRedoDiff()
 
          }
          else { // unmerge
-            const XxBuffer& buffer1 = *_files[0];
+            const XxBuffer& buffer1 = *(_files[0].get());
             if ( buffer1.isTemporary() == false ) {
                std::auto_ptr<XxBuffer> newbuf(
                   readFile( 0,
@@ -3381,11 +3381,14 @@ void XxApp::copyFile( XxFno nnno ) const
    QString filesrc = _files[nosrc]->getBufferAtLine( fline );
 
    // If the destination file is empty, the filename should be the
-   // directory name only.
+   // destination directory with the source filename appended.
    fline = line.getLineNo( nodst );
    QString filedst;
    if ( fline == -1 ) {
       filedst = _files[nodst]->getName();
+
+      // Append source filename with root of source directory removed
+      filedst.append( "/" ).append( filesrc.mid( _files[nosrc]->getName().length() ) );
    }
    else {
       filedst = _files[nodst]->getBufferAtLine( fline );

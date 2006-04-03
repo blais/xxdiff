@@ -1031,10 +1031,28 @@ QString XxUtil::escapeChars( const QString& format )
 QString XxUtil::unescapeChars( const QString& format )
 {
    QString newFormat = format;
+   uint ix = 0;
 
-   newFormat.replace( "\\n", "\n" );
-   newFormat.replace( "\\r", "\r" );
-   newFormat.replace( "\\\"", "\"" );
+   while ( ix < newFormat.length() ) {
+       int found = newFormat.find( QChar( '\\' ), ix );
+       if ( found < 0 )
+	   break;
+       // use at() in case found+1 is past the end of the string
+       QChar escapedChar = newFormat.at( found+1 );
+       switch( escapedChar ) {
+       case 'n':
+	   newFormat = newFormat.replace( found, 2, QChar( '\n' ) );
+	   break;
+       case 'r':
+	   newFormat = newFormat.replace( found, 2, QChar( '\r' ) );
+	   break;
+       default:
+	   newFormat = newFormat.remove( found, 1 );
+	   break;
+       }
+       ix = found + 1;
+   }
+   
    return newFormat;
 }
 

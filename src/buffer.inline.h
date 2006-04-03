@@ -59,6 +59,10 @@ inline const QString& XxBuffer::getDisplayName() const
 //
 inline uint XxBuffer::getNbLines() const
 {
+   if ( _index.size() == 0 ) {
+      return 0;
+   }
+   XX_ASSERT( _index.size() >= 2 );
    return _index.size() - 2; // See header file for description.
 }
 

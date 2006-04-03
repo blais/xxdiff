@@ -19,6 +19,10 @@ Add the following lines ``~/.subversion/config``::
   diff-cmd = xxdiff-diff-proxy
   diff3-cmd = xxdiff-diff-proxy
 
+This script returns the same value as the underlying xxdiff with option
+--exit-with-merge-status, so that you can do something special if there are
+remaining conflicts.  I think Subversion uses that on 'svn update' if you
+configure it in your helper hooks.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
@@ -84,7 +88,7 @@ def diffproxy_main():
     """
     opts, args = parse_options()
 
-    dargs = []
+    dargs = ['--exit-with-merge-status']
     if opts.merge:
         dargs.append('--merge')
 
@@ -100,7 +104,7 @@ def diffproxy_main():
 
     # Decision xxdiff: if we force it or if we have 3 arguments.
     if opts.decision or len(args) == 3:
-        decision, mergedf = xxdiff.invoke.xxdiff_decision(opts, *dargs)
+        decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(opts, *dargs)
 
         # If the user merged, copy the merged file over the original.
         if decision in ('MERGED', 'ACCEPT'):
@@ -118,26 +122,13 @@ def diffproxy_main():
 
     # Just spawn xxdiff and discard the results.
     else:
-        xxdiff.invoke.xxdiff_display(opts, *dargs)
+        retcode = xxdiff.invoke.xxdiff_display(opts, *dargs)
+        
+    # Process return code
+    if retcode not in [0, 3]:
+        raise SystemExit('Warning: Unexpected xxdiff exit code: %d' % exitcode)
 
-    ## FIXME: TODO add this later, I need to modify my invoke.py to pass along
-    ## the return code.'
-
-    ## Return code depends on whether conflict markers were inserted
-    ## conflict_remaining = True
-    ## if exitcode not in [0, 3]:
-    ##     sys.stderr.write('Unexpected xxdiff exit code %d\n' % exitcode)
-    ## elif exitcode == 0:
-    ##     conflict_remaining = False
-    ## 
-    ## ...
-    ## elif o == 'NODECISION':
-    ##     conflict_remaining = True
-    ## ...
-    ## 
-    ## if conflict_remaining:
-    ##     sys.exit(1)
-
+    return retcode
 
 
 #-------------------------------------------------------------------------------

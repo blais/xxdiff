@@ -68,6 +68,9 @@ Version 3.2: (major feature enhancements)
   * Made an infrastructure to process files in transformation loops. 
     xxdiff-find-grep-sed was rewritten in those terms.
 
+  * xxdiff-diff-proxy: Included patch from Martin Renold <martinxyz@sf.net> for
+    return code and ignoring stderr [1329298].
+
   * The xxdiff-subversion proxy script that is used to be invoked from ``svn
     diff`` has been renamed to ``xxdiff-diff-proxy``.
 
@@ -92,6 +95,18 @@ Version 3.2: (major feature enhancements)
 
 * Changes not related to the scripts:
 
+  * Fixed pointer ownership bug that occurs on BSD, using user-submitted patch
+    and review (Russell Cattelan - cattelan@sf.net) [1382170].
+
+  * Applied user submitted patch (Robert Jackson - rjsweb@sf.net), which fixes
+    the destination directory for file copy in directory diffs mode, to add the
+    appropriate destination directory. [1210548]
+
+  * Fixed line number in --single mode [1351955].
+
+  * Applied user submitted patch (Wim Lewis - wiml@sf.net) for unescapeChars()
+    bug [1094008].
+
   * When using --exit-on-same, output something if we're in decision mode.
 
   * Created ports subdirectory, added files for MAC OSX from Alexandre Feblot.
@@ -100,7 +115,6 @@ Version 3.2: (major feature enhancements)
 
   * WARNING!!!  Some of the switches have changed, in the name of consistency.
     You will need to review your scripts.
-
 
 
 Version 3.1: (minor feature enhancements)

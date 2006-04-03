@@ -125,7 +125,7 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
         if opts.verbose >= 2 and diff_output: print_diffs(diff_output, logs)
     else:
         # Call xxdiff!
-        decision, mergedf = xxdiff.invoke.xxdiff_decision(
+        decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(
             opts, '--title2', 'NEW FILE', origfn, newfn)
 
         print_decision(decision, opts, logs)
@@ -271,7 +271,7 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None, extra=None ):
 
     # Call xxdiff!
     dargs.extend(files3)
-    decision, mergedf = xxdiff.invoke.xxdiff_decision(opts, *dargs)
+    decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(opts, *dargs)
 
     print_decision(decision, opts, logs)
 

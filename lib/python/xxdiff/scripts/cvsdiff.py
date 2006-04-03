@@ -103,7 +103,7 @@ def cvsdiff_main():
             # simply invoke xxdiff on the files.
             xxdiff.invoke.xxdiff_display(opts, tmpf.name, filename)
         else:
-            decision, mergedf = xxdiff.invoke.xxdiff_decision(
+            decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(
                 opts, '--title2', 'NEW FILE', tmpf.name, filename)
 
             # print output of xxdiff command.

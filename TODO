@@ -2,35 +2,20 @@
    TODO: xxdiff
 ==================
 
+The More Urgent
+===============
+
 * Fix [1200496] Diff Errors reported with certain text files
 
 * Fix [1079038] Split Bug.
 
-* See open bug [ 1174957 ] Odd behavior when "-O" and "-E" used together:  When
+* See open bug [1174957] Odd behavior when "-O" and "-E" used together:  When
   --exit-if-no-conflicts and --merged-filename are specified together, and there
   are no conflicts, output the result file to the merged filename.
 
 * There is a slight rendering bug with my current font (see png file under /bugs)
 
-* diffproxy.py: Include this patch from Martin Renold <martinxyz@sf.net>::
-
-    ## Return code depends on whether conflict markers were inserted
-    ## conflict_remaining = True
-    ## if exitcode not in [0, 3]:
-    ##     sys.stderr.write('Unexpected xxdiff exit code %d\n' % exitcode)
-    ## elif exitcode == 0:
-    ##     conflict_remaining = False
-    ## 
-    ## ...
-    ## elif o == 'NODECISION':
-    ##     conflict_remaining = True
-    ## ...
-    ## 
-    ## if conflict_remaining:
-    ##     sys.exit(1)
-
-
-
+--------------------------------------------------------------------------------
 (Scripts)
 
 * xxdiff: In decision mode, we should warn the user when selections have been

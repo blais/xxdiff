@@ -201,7 +201,7 @@ def patch_main():
             pno = 1
 
         # Invoke xxdiff.
-        decision, mergedf = xxdiff.invoke.xxdiff_decision(
+        decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(
             opts, '--title%d' % pno, '%s (patched)' % sfilename,
             leftfn, rightfn)
 
