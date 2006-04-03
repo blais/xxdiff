@@ -374,6 +374,19 @@ and I provide it to support those who already have it in their process, but
 really, it should go.
 
 
+``xxdiff-pyline``
+~~~~~~~~~~~~~~~~~
+
+In the Python cookbook, `this recipe`__ proposes to compile and run a Python
+expression on lines, similar to sed, but just using Python code.  With the new
+scripting infrastructure, it was trivial to build another transformation program
+that uses that method.  Here is an example::
+
+   xxdiff-pyline -m os "os.stat(line).st_size > 1024 and line"
+
+__ http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/437932
+
+
 Writing Other Transformation Loops
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
