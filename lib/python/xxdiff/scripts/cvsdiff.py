@@ -22,7 +22,7 @@ xxdiff-patch.  The current script is really about committing "some" cvs changes.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.4', 'cvs', 'diffutils (patch)']
+__depends__ = ['xxdiff', 'Python-2.4', 'cvs', 'diffutils']
 
 
 # stdlib imports.

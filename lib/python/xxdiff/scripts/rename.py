@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-xxdiff-rename [<options>] <from-string> <to-string> [<root> ...]
+xxdiff-rename [<options>] <from-string> <to-string>
 
 Run a command to perform a replacement of <from-string> to <to-string> in files
 and confirm the application of changes via xxdiff.
@@ -15,7 +15,7 @@ changes or not.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.4', 'findutils', 'diffutils', 'sed']
+__depends__ = ['xxdiff', 'Python-2.4']
 
 
 # stdlib imports.
@@ -68,7 +68,6 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
             return False
         
         outf.write(newtext)
-        outf.flush()
         return True
 
 

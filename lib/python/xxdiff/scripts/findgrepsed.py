@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-xxdiff-find-grep-sed [<options>] <regexp> <sed-cmd> [<root> ...]
+xxdiff-find-grep-sed [<options>] <regexp> <sed-cmd>
 
 Perform global sed-like replacements in a set of files.
 
@@ -19,7 +19,7 @@ more generic equivalent::
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.4', 'findutils', 'diffutils', 'sed']
+__depends__ = ['xxdiff', 'Python-2.4', 'diffutils', 'sed']
 
 
 # stdlib imports.
@@ -70,7 +70,6 @@ class GrepSedTransformer(xxdiff.xformloop.Transformer):
             raise SystemExit("Error: Running sed command '%s':\n%s" %
                              (self.sedprog, p.stderr.read()))
 
-        outf.flush()
         if p.returncode != 0:
             raise SystemExit(
                 "Error: running sed command:\nFile:%s\n%s" % (fn, stderr))

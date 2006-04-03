@@ -59,7 +59,7 @@ Examples
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.4', 'diffutils (patch)']
+__depends__ = ['xxdiff', 'Python-2.4', 'diffutils']
 
 # stdlib imports.
 import sys, os

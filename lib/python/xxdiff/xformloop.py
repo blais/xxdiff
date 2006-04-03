@@ -99,6 +99,9 @@ def transform_replace_loop( opts, selector, xformer, logs ):
             decision_map[fn] = 'SKIPPED'
             continue
 
+        # Flush the temporary file before invoking xxdiff on it.
+        tmpf.flush()
+
         # Invoke conditional replacement via xxdiff.
         decision = xxdiff.condrepl.cond_replace(fn, tmpf.name, opts, logs)
         decision_map[fn] = decision

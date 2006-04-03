@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-xxdiff-filter [<options>] <cmd> [<root> ...]
+xxdiff-filter [<options>] <cmd>
 
 Run a command to perform replacements in files and confirm the application of
 changes via xxdiff.
@@ -15,7 +15,7 @@ whether he wants to apply the changes or not.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
-__depends__ = ['xxdiff', 'Python-2.4', 'findutils', 'diffutils', 'sed']
+__depends__ = ['xxdiff', 'Python-2.4']
 
 
 # stdlib imports.
