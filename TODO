@@ -2,10 +2,17 @@
    TODO: xxdiff
 ==================
 
+* Fix [1200496] Diff Errors reported with certain text files
 
-(Scripts)
+* Fix [1079038] Split Bug.
 
-* diffproxy.py: Include this patch from Martin Renold::
+* See open bug [ 1174957 ] Odd behavior when "-O" and "-E" used together:  When
+  --exit-if-no-conflicts and --merged-filename are specified together, and there
+  are no conflicts, output the result file to the merged filename.
+
+* There is a slight rendering bug with my current font (see png file under /bugs)
+
+* diffproxy.py: Include this patch from Martin Renold <martinxyz@sf.net>::
 
     ## Return code depends on whether conflict markers were inserted
     ## conflict_remaining = True
@@ -22,6 +29,9 @@
     ## if conflict_remaining:
     ##     sys.exit(1)
 
+
+
+(Scripts)
 
 * xxdiff: In decision mode, we should warn the user when selections have been
   made and the user exits with "merged".
@@ -83,6 +93,18 @@
    g\x{00E9}nial..
    http://www.scootersoftware.com/
 
+
+
+* Bugs with horizontal diffs:
+
+    However, I do have a suggestion. Your code does not
+    seem to be using a logic such as the Ratcliff/Obershelp
+    pattern recognition algorithm, which is adopted by some
+    other common graphical diff tools. Using such a logic,
+    they search for the longest common substring between
+    two strings. The match is then used as an archor,
+    around which they would recursively do the same for the
+    left and right remaining pieces.
 
 
 New feature, ignore regexp patterns::
