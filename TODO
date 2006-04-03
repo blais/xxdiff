@@ -15,6 +15,9 @@ The More Urgent
 
 * There is a slight rendering bug with my current font (see png file under /bugs)
 
+* xxdiff-cond-replace: find a way to put a set of invocations in the same backup
+  directory.
+
 --------------------------------------------------------------------------------
 (Scripts)
 
@@ -25,7 +28,9 @@ The More Urgent
   replacement behaviour that is present in GNU emacs.
 
 * Implement a better side-by-side diff that includes line numbers and context.
-  The current side-by-side diff sucks.
+  The current side-by-side diff sucks.  One of the things that could be done
+  easily is reuse diff --side-by-side without compressing, adding the line
+  numbers by hand, and then compressing by hand too.
 
   - Add an option to generate normal diffs rather than side-by-side.
 

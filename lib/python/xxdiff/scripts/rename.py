@@ -25,6 +25,7 @@ from os.path import *
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.xformloop
+from xxdiff.utils import idify
 
 
 #-------------------------------------------------------------------------------
@@ -96,6 +97,10 @@ def parse_options():
 
     # Force to always perform a diff on output.
     opts.verbose = 2
+
+    # Idify the arguments and setup backup a suffix, to make the default backup
+    # directory easier to identify.
+    opts.backup_prefix = '%s.%s' % tuple(map(idify, (sfrom, sto)))
 
     return sfrom, sto, opts, selector
 

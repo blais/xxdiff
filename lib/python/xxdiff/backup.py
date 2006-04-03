@@ -35,6 +35,9 @@ def options_graft( parser ):
     group.add_option('--backup-dir', action='store',
                      help="Specify backup directory for type 'other'")
 
+    group.add_option('--backup-prefix', action='store', default=None,
+                     help=optparse.SUPPRESS_HELP)
+
     parser.add_option_group(group)
 
     return group
@@ -90,7 +93,11 @@ def backup_file( fn, opts, logs=None ):
 
         # If the backup directory has not been set, create a temporary one
         if opts.backup_dir is None:
-            opts.backup_dir = tempfile.mkdtemp(prefix=tmpprefix)
+            if opts.backup_prefix:
+                pfx = opts.backup_prefix + '.'
+            else:
+                pfx = ''
+            opts.backup_dir = tempfile.mkdtemp(prefix=tmpprefix + pfx)
         # Otherwise create the specified directory if it does not exist
         elif not exists(opts.backup_dir):
             os.makedirs(opts.backup_dir)
