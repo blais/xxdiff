@@ -130,7 +130,7 @@ def print_reminder( opts ):
     # Print reminder of location of backup files at the end (for convenience).
     if opts.backup_dir:
         print
-        print "Backup files in:", opts.backup_dir
+        print "Backup files in: '%s'" % opts.backup_dir
         print
 
 
