@@ -15,7 +15,10 @@ VERSION=`adm/get_version`
 echo "==   Version is " $VERSION
 
 echo "== Getting and creating top dir"
-BUILDROOT=`rpm --showrc | egrep "[^{]_topdir" | cut --fields=2 | sed -e 'sX%{_usrsrc}X/usr/srcX'`
+# Variable subsitution for rpm --showrc output
+_usrsrc="/usr/src"
+
+BUILDROOT=`eval echo $(rpm --showrc | egrep "[^{]_topdir" | cut --fields=2 | sed 's/%/$/')`
 mkdir -p $BUILDROOT/{SPECS,SOURCES,BUILD,SRPMS,RPMS}
 
 # echo "== Creating spec file"

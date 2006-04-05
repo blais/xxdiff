@@ -95,6 +95,9 @@ Version 3.2: (major feature enhancements)
 
 * Changes not related to the scripts:
 
+  * Incorporated patch for building RPMs (untested, I don't have a RH box),
+    submitted by Harshula <hash at jayasolutions dot cjb dot net>
+
   * Fixed pointer ownership bug that occurs on BSD, using user-submitted patch
     and review (Russell Cattelan - cattelan@sf.net) [1382170].
 
