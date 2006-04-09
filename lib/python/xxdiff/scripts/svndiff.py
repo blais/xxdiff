@@ -30,6 +30,12 @@ def parse_options():
     """
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
+
+    parser.add_option('-c', '--commit-after-review', action='store_true',
+                      help="Spawns an editor window for adding comments and "
+                      "starts the review, then commits the files with the "
+                      "given comment.")
+
     opts, args = parser.parse_args()
 
     return opts, args

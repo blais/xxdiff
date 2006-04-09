@@ -111,21 +111,21 @@ def options_validate( opts, parser, logs=None ):
     Validate and prepare the parsed options for the file selection option group.
     This method returns an appropriate generator for selecting files.
     """
-    # If no root directory has been specified, use the CWD.
-    if not opts.roots:
-        opts.roots.append(os.getcwd())
-
     # Process file selection options
     if opts.select_from_file:
         if opts.select or opts.ignore:
             parser.error("You cannot use select-from-file and other "
                          "select options together.")
-        if rootdirs:
+        if opts.roots:
             parser.error("You cannot use select-from-file and specify "
                          "a list of root directories to search for.")
         # Note: eventually we might want to support chaining the generators
         # instead.
     else:
+        # If no root directory has been specified, use the CWD.
+        if not opts.roots:
+            opts.roots.append(os.getcwd())
+
         # By default ignore some common directories.
         if not opts.select_no_defaults:
             opts.ignore = map(re.compile, ignore_defaults) + opts.ignore
