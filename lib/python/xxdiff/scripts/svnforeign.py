@@ -31,10 +31,16 @@ svn-foreign runs 'svn status' on the given Subversion-managed directories, to
 find out which files are unaccounted for and for each of these files, it asks
 you what to do with it::
 
-   [a] add it,
+   [a] add it
    [d] delete it
-   [m] set an svn:ignore property on its parent directory to mask it
-   [i] ignore and leave it where it is
+   [m] mask it (sets an svn:ignore property on its parent directory)
+   [i] ignore it (leave it where it is)
+
+Other actions::
+
+   [q] quit / [x] exit, this interrupts the process
+   [D] delete with no backups (for large files)
+   [v] view the file with a pager (more)
 
 The script works interactively and is meant to allow you to quickly deal with
 the forgotten files in a subversion checkout.  It works with directories as
@@ -70,6 +76,13 @@ from subprocess import Popen, PIPE, call
 from os.path import *
 
 
+# xxdiff imports (optional)
+try:
+    from xxdiff import backup
+except ImportError:
+    backup = None
+
+    
 #-------------------------------------------------------------------------------
 #
 debug = False
@@ -102,15 +115,6 @@ def add( fn ):
 
 #-------------------------------------------------------------------------------
 #
-def delete( fn ):
-    """
-    Delete the file or directory (recursively) from the checkout.
-    """
-    if isdir(fn):
-        rmrf(fn)
-    else:
-        os.unlink(fn)
-
 def rmrf( fnodn ):
     """
     Delete the given directory and all its contents.
@@ -177,17 +181,31 @@ def parse_options():
     parser.add_option('-C', '--commit', action='store',
                       help="Ask to commit after running, with given comments.")
 
-    parser.add_option('-q', '--quiet', '--silent', action='store_true',
+    parser.add_option('-v', '--verbose',
+                      action='store_const', const=2, dest='verbose',
+                      default=1,
+                      help=optparse.SUPPRESS_HELP)
+    parser.add_option('-q', '--quiet', '--silent', 
+                      action='store_const', const=0, dest='verbose',
                       help="Suppress certain harmless warnings.")
 
+    # Add backups disabling option if the xxdiff libraries are available.
+    if backup is not None:
+        backup.options_graft(parser,
+                             "These options affect automatic backup of "
+                             "deleted files.")
+    
     opts, args = parser.parse_args()
+
+    if backup is not None:
+        backup.options_validate(opts, parser)
 
     return opts, args
 
 
 #-------------------------------------------------------------------------------
 #
-def query_unregistered_svn_files( filenames, quiet=True, output=sys.stdout ):
+def query_unregistered_svn_files( filenames, opts, output=sys.stdout ):
     """
     Runs an 'svn status' command, and then loops over all the files that are not
     registered, asking the user one-by-one what action to take (see this
@@ -240,11 +258,11 @@ def query_unregistered_svn_files( filenames, quiet=True, output=sys.stdout ):
 
             # Command loop (one command)
             while True:
-                write('[Add|Del|Mask|Ign|View|Quit]  %10d  %s %s ? ' %
+                write('=> [Add|Del|Mask|Ign|View|Quit]  %10d  %s %s ? ' %
                       (size, fn, ftype))
 
                 # Read command
-                c = read_one().lower()
+                c = read_one()
                 write(c)
                 write('\n')
 
@@ -253,10 +271,21 @@ def query_unregistered_svn_files( filenames, quiet=True, output=sys.stdout ):
                     break
 
                 elif c == 'd': # Delete
-                    delete(fn)
+                    # Do backups if requested.
+                    if backup is not None:
+                        backupfn = backup.backup_file(fn, opts, output)
+                        if backupfn:
+                            write( "Backed up to: '%s'\n" % backupfn)
+                    elif opts.verbose >= 1:
+                        write( '(Warning: no backups.)\n')
+                    rmrf(fn)
                     break
 
-                elif c == 'm': # Mask
+                elif c == 'D': # Delete with no backups
+                    rmrf(fn)
+                    break
+
+                elif c in ['m', 'I']: # Mask
                     dn, bn = split(fn)
                     if dn == '':
                         dn = '.'
@@ -280,7 +309,9 @@ def query_unregistered_svn_files( filenames, quiet=True, output=sys.stdout ):
                     pat = raw_input()
                     if pat == '':
                         pat = bn
-                    if pat != '!':
+                    if pat == '!':
+                        print '(cancelled.)'
+                    else:
                         svnign += pat + '\n'
                         ignore_prop(dn, svnign)
 
@@ -324,7 +355,7 @@ def main():
     opts, args = parse_options()
 
     # Run the main loop...
-    if query_unregistered_svn_files(args, opts.quiet, sys.stdout) != True:
+    if query_unregistered_svn_files(args, opts, sys.stdout) != True:
         # The user has quit.
         sys.exit(0)
 

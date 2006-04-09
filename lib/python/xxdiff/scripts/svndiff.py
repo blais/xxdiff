@@ -122,7 +122,13 @@ def parse_options():
                       "unregistered files and ask the user one by one about "
                       "what to do with them.")
 
+    xxdiff.backup.options_graft(parser,
+                                "These options affect automatic backup of "
+                                "deleted files, if enabled.")
+    
     opts, args = parser.parse_args()
+
+    xxdiff.backup.options_validate(opts, parser)
 
     if opts.comments_file and not opts.commit:
         print >> sys.stderr, "(Option '%s' ignored.) " % o.dest
@@ -140,7 +146,7 @@ def svndiff_main():
 
     if opts.foreign:
         # Consider the unregistered files.
-        if query_unregistered_svn_files(args, False, sys.stdout) != True:
+        if query_unregistered_svn_files(args, opts, sys.stdout) != True:
             # The user has quit, don't continue.
             sys.exit(0)
         print

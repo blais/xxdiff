@@ -18,13 +18,14 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft( parser, msg=None ):
     """
     Graft options on given parser for automatic file backups.
     """
-    group = optparse.OptionGroup(parser, "File backup options",
-                                 "These options affect automatic backup of "
-                                 "overwritten files.")
+    if msg is None:
+        msg = "These options affect automatic backup of overwritten files."
+
+    group = optparse.OptionGroup(parser, "File backup options", msg)
 
     group.add_option('-b', '--backup-type', action='store',
                      type='choice', choices=backup_choices,
@@ -118,7 +119,15 @@ def backup_file( fn, opts, logs=None ):
             os.makedirs(ddn)
 
         # Copy the original to the backup directory
-        shutil.copy2(fn, backupfn)
+        if isfile(fn) or islink(fn):
+            shutil.copy2(fn, backupfn)
+        elif isdir(fn):
+            shutil.copytree(fn, backupfn, True)
+        else:
+            raise RuntimeError("Internal error: cannot backup '%s'. " % fn,
+                               "Invalid file type.")
+
+    return backupfn
 
 
 #-------------------------------------------------------------------------------

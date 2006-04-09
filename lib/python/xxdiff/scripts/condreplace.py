@@ -72,7 +72,7 @@ def parse_options():
     for mod in xxmodules:
         mod.options_graft(parser)
 
-    parser.add_option('-v', '--verbose', '--quiet', action='count',
+    parser.add_option('-v', '--verbose', action='count',
                       default=0,
                       help="Verbose output.  By default nothing is output. "
                       "If you use this switch once, you will get the decision "
