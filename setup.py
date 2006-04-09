@@ -19,6 +19,7 @@ def read_version():
 
 allscripts = [join('bin', x) for x in os.listdir('bin')
               if x.startswith('xxdiff-')]
+allscripts.append(join('bin', 'svn-foreign'))
 
 setup(name="xxdiff-scripts",
       version=read_version(),
