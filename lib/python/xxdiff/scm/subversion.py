@@ -14,7 +14,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import os, tempfile, re
+import sys, os, tempfile, re
 from subprocess import Popen, call, PIPE
 from os.path import abspath, isabs
 
@@ -44,14 +44,31 @@ def checkout( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def commit( filename ):
+def commit( filenames, comments=None ):
     """
     Commit the given filename into CVS.
     """
-    msg = 'Committed by %s' % script_name
-    call(['svn', 'commit', '-m', msg, filename])
+    if comments is None:
+        comments = 'Committed by %s' % script_name
 
+    if isinstance(filenames, (str, unicode)):
+        filenames = [filenames]
+    else:
+        assert isinstance(filenames, (tuple, list))
+        
+    # Note: if the comments are ever so huge, we consider using a file with the
+    # -f option to 'svn commit'.  Wondering if there may be any important issues
+    # with passing large objects through the environment.  This is certainly not
+    # the usual thing to do.
+    if len(comments) < 512:
+        call(['svn', 'commit', '--message', comments] + filenames)
+    else:
+        tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf.write(comments)
+        tmpf.flush()
+        call(['svn', 'commit', '--file', tmpf.name] + filenames)
 
+        
 #-------------------------------------------------------------------------------
 #
 def resolve( filename ):
@@ -171,14 +188,7 @@ def status( rootdirs ):
     return statii
 
 
-#-------------------------------------------------------------------------------
-#
-def print_status( statii ):
-    """
-    Reproduce printing out the status.
-    """
-    for s in statii:
-        print s.parsed_line
+
         
 
 #-------------------------------------------------------------------------------
