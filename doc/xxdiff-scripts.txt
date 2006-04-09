@@ -44,13 +44,13 @@
       6.3  ``xxdiff-svn-diff``
         6.3.1  Future Features
       6.4  ``xxdiff-svn-resolve``
+      6.5  Handling Unregistered Files
+        6.5.1  ``svn-foreign``
     7   Encrypted Files
       7.1  ``xxdiff-encrypted``
-    8   Handling Unregistered Files
-      8.1  ``svn-foreign``
-    9   Pre-Visualizing And Cherry-Picking From Patches
-    10  Writing Your Own Scripts
-    11  Questions
+    8   Pre-Visualizing And Cherry-Picking From Patches
+    9   Writing Your Own Scripts
+    10  Questions
 
 
 Introduction
@@ -593,57 +593,15 @@ finds and loops through all the conflicting files recursively to resolve them
 graphically.
 
 
-Encrypted Files
-===============
-
-I maintain some of my more sensitive personal data in ascii-armored encrypted
-files in an CVS/Subversion repository.  I can open, modify and save the files
-from within Emacs without ever writing a non-encrypted version on disk.  This
-means that if I edit the files in two different machines, the merge operation
-will surely fail, because the encrypted file does not merge.  This happens
-rarely, but when it does, it is quite a problem: for each of the conflicting
-file, I must: 
-
-* Find the original file;
-* Rebuild my local file somehow, from the file with the conflicts in it;
-* Decrypt both files;
-* Launch xxdiff and resolve the conflict;
-* Encrypt the new, merged file;
-* And most importantly: make sure I do not forget to *remove the decrypted files
-  from disk*.  If the files are encrypted, there is a reason, and you don't want
-  to leave plaintext version of the data on disk.
-
-This is quite time-consuming.  Let's automate!
-
-``xxdiff-encrypted``
---------------------
-
-This script will do all of the above for two encryped files, and it also
-attempts to minimize the amount of time that a decrypted file will live on
-disk--if needed at all.  In the cases where it needs to temporarily write
-decrypted text to disk, as soon as xxdiff finished gulping the files in, it
-deletes them right away.   This is not the super-dooper safest way of doing
-this, but it sure beats doing it all by hand [#]_.
-
-It also supports unmerging CVS conflict markers in order to obtain the original
-and the new file automatically.  For example::
-
-   xxdiff-encrypted --unmerge  my_secrets.asc
-   
-.. [#] xxdiff could be enhanced to accept input from multiple file descriptors
-       to avoid having to use temporary files in most cases.  This just has not
-       been done yet.
-
-
 Handling Unregistered Files
-===========================
+---------------------------
 
 After a long session of work in various checkouts, having to type up commands to
 decide what to do with each unregistered file is a bit tiresome.  I wrote an
 interactive script to handle that.
 
 ``svn-foreign``
----------------
+~~~~~~~~~~~~~~~
 
 This script runs an ``svn status``, outputs that for you to see, and then
 queries the user for what to do with each file that is not registered with
@@ -685,6 +643,48 @@ Here is an example session::
 internally by some of the them, and also because it reuses the backup module of
 the xxdiff scripts.  You can copy its file separately and it will still work
 (minus the backups).
+
+
+Encrypted Files
+===============
+
+I maintain some of my more sensitive personal data in ascii-armored encrypted
+files in an CVS/Subversion repository.  I can open, modify and save the files
+from within Emacs without ever writing a non-encrypted version on disk.  This
+means that if I edit the files in two different machines, the merge operation
+will surely fail, because the encrypted file does not merge.  This happens
+rarely, but when it does, it is quite a problem: for each of the conflicting
+file, I must: 
+
+* Find the original file;
+* Rebuild my local file somehow, from the file with the conflicts in it;
+* Decrypt both files;
+* Launch xxdiff and resolve the conflict;
+* Encrypt the new, merged file;
+* And most importantly: make sure I do not forget to *remove the decrypted files
+  from disk*.  If the files are encrypted, there is a reason, and you don't want
+  to leave plaintext version of the data on disk.
+
+This is quite time-consuming.  Let's automate!
+
+``xxdiff-encrypted``
+--------------------
+
+This script will do all of the above for two encryped files, and it also
+attempts to minimize the amount of time that a decrypted file will live on
+disk--if needed at all.  In the cases where it needs to temporarily write
+decrypted text to disk, as soon as xxdiff finished gulping the files in, it
+deletes them right away.   This is not the super-dooper safest way of doing
+this, but it sure beats doing it all by hand [#]_.
+
+It also supports unmerging CVS conflict markers in order to obtain the original
+and the new file automatically.  For example::
+
+   xxdiff-encrypted --unmerge  my_secrets.asc
+   
+.. [#] xxdiff could be enhanced to accept input from multiple file descriptors
+       to avoid having to use temporary files in most cases.  This just has not
+       been done yet.
 
 
 Pre-Visualizing And Cherry-Picking From Patches
