@@ -77,17 +77,24 @@ of differences.</p>
 <li><a class="reference" href="#subversion-support" id="id31" name="id31">6&nbsp;&nbsp;&nbsp;Subversion Support</a><ul class="auto-toc">
 <li><a class="reference" href="#ignoring-svn-files-in-loops" id="id32" name="id32">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></li>
 <li><a class="reference" href="#xxdiff-diff-proxy" id="id33" name="id33">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-diff-proxy</span></tt></a></li>
-<li><a class="reference" href="#xxdiff-svn-diff" id="id34" name="id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt></a></li>
-<li><a class="reference" href="#xxdiff-svn-resolve" id="id35" name="id35">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-svn-diff" id="id34" name="id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt></a><ul class="auto-toc">
+<li><a class="reference" href="#future-features" id="id35" name="id35">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#encrypted-files" id="id36" name="id36">7&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
-<li><a class="reference" href="#xxdiff-encrypted" id="id37" name="id37">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-encrypted</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-svn-resolve" id="id36" name="id36">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></li>
 </ul>
 </li>
-<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id38" name="id38">8&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
-<li><a class="reference" href="#writing-your-own-scripts" id="id39" name="id39">9&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
-<li><a class="reference" href="#questions" id="id40" name="id40">10&nbsp;&nbsp;&nbsp;Questions</a></li>
+<li><a class="reference" href="#encrypted-files" id="id37" name="id37">7&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
+<li><a class="reference" href="#xxdiff-encrypted" id="id38" name="id38">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-encrypted</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#handling-unregistered-files" id="id39" name="id39">8&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a><ul class="auto-toc">
+<li><a class="reference" href="#svn-foreign" id="id40" name="id40">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id41" name="id41">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
+<li><a class="reference" href="#writing-your-own-scripts" id="id42" name="id42">10&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
+<li><a class="reference" href="#questions" id="id43" name="id43">11&nbsp;&nbsp;&nbsp;Questions</a></li>
 </ul>
 </div>
 <!-- 1   Introduction
@@ -109,7 +116,8 @@ of differences.</p>
     3.5.2  ``xxdiff-filter``
     3.5.3  ``xxdiff-rename``
     3.5.4  ``xxdiff-find-grep-sed``
-    3.5.5  Writing Other Transformation Loops
+    3.5.5  ``xxdiff-pyline``
+    3.5.6  Writing Other Transformation Loops
 4   ``xxdiff-match``
 5   CVS Support
   5.1  ``xxdiff-cvs-diff``
@@ -118,12 +126,15 @@ of differences.</p>
   6.1  Ignoring .svn Files In Loops
   6.2  ``xxdiff-diff-proxy``
   6.3  ``xxdiff-svn-diff``
+    6.3.1  Future Features
   6.4  ``xxdiff-svn-resolve``
 7   Encrypted Files
   7.1  ``xxdiff-encrypted``
-8   Pre-Visualizing And Cherry-Picking From Patches
-9   Writing Your Own Scripts
-10  Questions -->
+8   Handling Unregistered Files
+  8.1  ``svn-foreign``
+9   Pre-Visualizing And Cherry-Picking From Patches
+10  Writing Your Own Scripts
+11  Questions -->
 <div class="section">
 <h1><a class="toc-backref" href="#id6" id="introduction" name="introduction">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
 <p>xxdiff is a computer program that allows a user (usually a software developer of
@@ -557,7 +568,23 @@ not had problems with it yet, I have not experienced bugs.</p>
 <div class="section">
 <h2><a class="toc-backref" href="#id34" id="xxdiff-svn-diff" name="xxdiff-svn-diff">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt></a></h2>
 <p>In my opinion, Subversion provides a diff loop that is rather weak.  I want more
-options in the ways that I can review my changes, for example,</p>
+options in the ways that I can review my changes.  <tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt> runs
+<tt class="docutils literal"><span class="pre">svn</span> <span class="pre">status</span></tt> and then loops over the files using xxdiff.</p>
+<p>A problem with the approach described in the <tt class="docutils literal"><span class="pre">xxdiff-diff-proxy</span></tt> section above
+is that I want to <em>also</em> have normal <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">diff</span></tt> behaviour (i.e. textual
+output) and I don't want to hack my config file everytime I want to do this.</p>
+<p>It is a good script to use instead of svn commit:</p>
+<ul class="simple">
+<li>It has an option to run <tt class="docutils literal"><span class="pre">svn-foreign</span></tt> before starting the graphical diffs,
+so you can quickly handle the unregistered files with a few keystrokes.  This
+process is enhanced with an automatic backup of the deleted files;</li>
+<li>It has an option to commit the files after the preview is done.  When you
+select that option, it opens a file editor with the list of files to be
+committed, which allows you to write up your merge comments to be used on the
+subsequent commit.</li>
+</ul>
+<div class="section">
+<h3><a class="toc-backref" href="#id35" id="future-features" name="future-features">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></h3>
 <ul class="simple">
 <li>It would be nice to be able to optionally automatically spawn a 3-way diff for
 those files which have a newer version on the server.  This would allow you to
@@ -566,19 +593,14 @@ committing the file (before actually updating);</li>
 <li>I want to have the option to unmerge some changes and save the results
 conveniently.  And I want backup files for the original overwritten files,
 taken care of automatically;</li>
-<li>I want to <em>also</em> have normal <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">diff</span></tt> behaviour and I don't want to hack
-my config file everytime.</li>
 <li>I would like to have a graphical or curses interface to select which files to
 view, in which order I want.</li>
 <li>I want to be able to review diffs between any revisions.</li>
 </ul>
-<p><tt class="docutils literal"><span class="pre">xxdiff-svn-diff</span></tt> provides what I think should become a better <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">diff</span></tt>
-with graphical diff viewing.  At this point (2006-04-01), its functionality is
-rather simple, similar to what <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">diff</span></tt> does, but I will beef it up
-gradually.</p>
+</div>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id35" id="xxdiff-svn-resolve" name="xxdiff-svn-resolve">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></h2>
+<h2><a class="toc-backref" href="#id36" id="xxdiff-svn-resolve" name="xxdiff-svn-resolve">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-svn-resolve</span></tt></a></h2>
 <p>Subversion provides a fancier version of conflict resolution: all three files--
 yours, the other and the ancestor--are provided in your checkout to help you
 figure out what happened.  This is a perfect situation for xxdiff: I simply can
@@ -594,7 +616,7 @@ graphically.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id36" id="encrypted-files" name="encrypted-files">7&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
+<h1><a class="toc-backref" href="#id37" id="encrypted-files" name="encrypted-files">7&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
 <p>I maintain some of my more sensitive personal data in ascii-armored encrypted
 files in an CVS/Subversion repository.  I can open, modify and save the files
 from within Emacs without ever writing a non-encrypted version on disk.  This
@@ -614,7 +636,7 @@ to leave plaintext version of the data on disk.</li>
 </ul>
 <p>This is quite time-consuming.  Let's automate!</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id37" id="xxdiff-encrypted" name="xxdiff-encrypted">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-encrypted</span></tt></a></h2>
+<h2><a class="toc-backref" href="#id38" id="xxdiff-encrypted" name="xxdiff-encrypted">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xxdiff-encrypted</span></tt></a></h2>
 <p>This script will do all of the above for two encryped files, and it also
 attempts to minimize the amount of time that a decrypted file will live on
 disk--if needed at all.  In the cases where it needs to temporarily write
@@ -637,7 +659,54 @@ been done yet.</td></tr>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id38" id="pre-visualizing-and-cherry-picking-from-patches" name="pre-visualizing-and-cherry-picking-from-patches">8&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></h1>
+<h1><a class="toc-backref" href="#id39" id="handling-unregistered-files" name="handling-unregistered-files">8&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a></h1>
+<p>After a long session of work in various checkouts, having to type up commands to
+decide what to do with each unregistered file is a bit tiresome.  I wrote an
+interactive script to handle that.</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id40" id="svn-foreign" name="svn-foreign">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></h2>
+<p>This script runs an <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">status</span></tt>, outputs that for you to see, and then
+queries the user for what to do with each file that is not registered with
+Subversion.  You can add it, delete the file (with or without backups), mask it
+(setting the <tt class="docutils literal"><span class="pre">svn:ignore</span></tt> property on the parent directory), and more.</p>
+<p>Here is an example session:</p>
+<pre class="literal-block">
+banane:$ svn-foreign
+Status
+------
+M      current/todo.txt
+?      cv/cv.pdf
+?      cv/cv.aux
+?      cv/cv.log
+ M     cv
+?      reading/reviews/books/the-da-vinci-code.txt
+
+=&gt; [Add|Del|Mask|Ign|View|Quit]       14699  cv/cv.pdf  ? d
+Backed up to: '/tmp/svn-foreign.xYz8nm/home/blais/tmp/priv/cv/cv.pdf'
+=&gt; [Add|Del|Mask|Ign|View|Quit]           8  cv/cv.aux  ? m
+--(current svn:ignore on 'cv')--
+
+----------------------------
+Add pattern (! to cancel, default: [cv.aux]):*.aux
+property 'svn:ignore' set on 'cv'
+----------------------------
+
+*.aux
+----------------------------
+=&gt; [Add|Del|Mask|Ign|View|Quit]        6265  cv/cv.log  ? d
+Backed up to: '/tmp/svn-foreign.xYz8nm/home/blais/tmp/priv/cv/cv.log'
+=&gt; [Add|Del|Mask|Ign|View|Quit]        1689  reading/reviews/books/the-da-vinci-code.txt  ? a
+A         reading/reviews/books/the-da-vinci-code.txt
+(Done.)
+</pre>
+<p><tt class="docutils literal"><span class="pre">svn-foreign</span></tt> is included with the xxdiff scripts, because it is used
+internally by some of the them, and also because it reuses the backup module of
+the xxdiff scripts.  You can copy its file separately and it will still work
+(minus the backups).</p>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id41" id="pre-visualizing-and-cherry-picking-from-patches" name="pre-visualizing-and-cherry-picking-from-patches">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></h1>
 <p>I would like to be able to apply a patch to a temporary copy of a set of files,
 and then to visualize the patch's changes, pick and choose the ones that we want
 using xxdiff, and apply them to the original files.  I have started doing some
@@ -655,13 +724,13 @@ correctly?</li>
 working on this let me know.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id39" id="writing-your-own-scripts" name="writing-your-own-scripts">9&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></h1>
+<h1><a class="toc-backref" href="#id42" id="writing-your-own-scripts" name="writing-your-own-scripts">10&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></h1>
 <p>Use the provided scripts as examples.  There are many convenient functions in
 the package that you can leverage from to write your own processing scripts
 around xxdiff.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id40" id="questions" name="questions">10&nbsp;&nbsp;&nbsp;Questions</a></h1>
+<h1><a class="toc-backref" href="#id43" id="questions" name="questions">11&nbsp;&nbsp;&nbsp;Questions</a></h1>
 <p>Any questions should be directed to Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;.
 Contributions appreciated.  If you find these programs useful, drop me a note.</p>
 </div>

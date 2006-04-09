@@ -32,7 +32,8 @@
         3.5.2  ``xxdiff-filter``
         3.5.3  ``xxdiff-rename``
         3.5.4  ``xxdiff-find-grep-sed``
-        3.5.5  Writing Other Transformation Loops
+        3.5.5  ``xxdiff-pyline``
+        3.5.6  Writing Other Transformation Loops
     4   ``xxdiff-match``
     5   CVS Support
       5.1  ``xxdiff-cvs-diff``
@@ -41,12 +42,15 @@
       6.1  Ignoring .svn Files In Loops
       6.2  ``xxdiff-diff-proxy``
       6.3  ``xxdiff-svn-diff``
+        6.3.1  Future Features
       6.4  ``xxdiff-svn-resolve``
     7   Encrypted Files
       7.1  ``xxdiff-encrypted``
-    8   Pre-Visualizing And Cherry-Picking From Patches
-    9   Writing Your Own Scripts
-    10  Questions
+    8   Handling Unregistered Files
+      8.1  ``svn-foreign``
+    9   Pre-Visualizing And Cherry-Picking From Patches
+    10  Writing Your Own Scripts
+    11  Questions
 
 
 Introduction
@@ -529,11 +533,31 @@ following lines to your ``~/.subversion/config`` file::
                 need to investigate in which cases it breaks down because I have
                 not had problems with it yet, I have not experienced bugs.
 
+
 ``xxdiff-svn-diff``
 -------------------
 
 In my opinion, Subversion provides a diff loop that is rather weak.  I want more
-options in the ways that I can review my changes, for example, 
+options in the ways that I can review my changes.  ``xxdiff-svn-diff`` runs
+``svn status`` and then loops over the files using xxdiff.
+
+A problem with the approach described in the ``xxdiff-diff-proxy`` section above
+is that I want to *also* have normal ``svn diff`` behaviour (i.e. textual
+output) and I don't want to hack my config file everytime I want to do this.
+
+It is a good script to use instead of svn commit:
+
+* It has an option to run ``svn-foreign`` before starting the graphical diffs,
+  so you can quickly handle the unregistered files with a few keystrokes.  This
+  process is enhanced with an automatic backup of the deleted files;
+
+* It has an option to commit the files after the preview is done.  When you
+  select that option, it opens a file editor with the list of files to be
+  committed, which allows you to write up your merge comments to be used on the
+  subsequent commit.
+
+Future Features
+~~~~~~~~~~~~~~~
 
 * It would be nice to be able to optionally automatically spawn a 3-way diff for
   those files which have a newer version on the server.  This would allow you to
@@ -544,18 +568,10 @@ options in the ways that I can review my changes, for example,
   conveniently.  And I want backup files for the original overwritten files,
   taken care of automatically;
 
-* I want to *also* have normal ``svn diff`` behaviour and I don't want to hack
-  my config file everytime.
-
 * I would like to have a graphical or curses interface to select which files to
   view, in which order I want.
 
 * I want to be able to review diffs between any revisions.
-
-``xxdiff-svn-diff`` provides what I think should become a better ``svn diff``
-with graphical diff viewing.  At this point (2006-04-01), its functionality is
-rather simple, similar to what ``svn diff`` does, but I will beef it up
-gradually.
 
 
 ``xxdiff-svn-resolve``
@@ -617,6 +633,58 @@ and the new file automatically.  For example::
 .. [#] xxdiff could be enhanced to accept input from multiple file descriptors
        to avoid having to use temporary files in most cases.  This just has not
        been done yet.
+
+
+Handling Unregistered Files
+===========================
+
+After a long session of work in various checkouts, having to type up commands to
+decide what to do with each unregistered file is a bit tiresome.  I wrote an
+interactive script to handle that.
+
+``svn-foreign``
+---------------
+
+This script runs an ``svn status``, outputs that for you to see, and then
+queries the user for what to do with each file that is not registered with
+Subversion.  You can add it, delete the file (with or without backups), mask it
+(setting the ``svn:ignore`` property on the parent directory), and more.
+
+Here is an example session::
+
+  banane:$ svn-foreign 
+  Status
+  ------
+  M      current/todo.txt
+  ?      cv/cv.pdf
+  ?      cv/cv.aux
+  ?      cv/cv.log
+   M     cv
+  ?      reading/reviews/books/the-da-vinci-code.txt
+
+  => [Add|Del|Mask|Ign|View|Quit]       14699  cv/cv.pdf  ? d
+  Backed up to: '/tmp/svn-foreign.xYz8nm/home/blais/tmp/priv/cv/cv.pdf'
+  => [Add|Del|Mask|Ign|View|Quit]           8  cv/cv.aux  ? m
+  --(current svn:ignore on 'cv')--
+
+  ----------------------------
+  Add pattern (! to cancel, default: [cv.aux]):*.aux
+  property 'svn:ignore' set on 'cv'
+  ----------------------------
+
+  *.aux
+  ----------------------------
+  => [Add|Del|Mask|Ign|View|Quit]        6265  cv/cv.log  ? d
+  Backed up to: '/tmp/svn-foreign.xYz8nm/home/blais/tmp/priv/cv/cv.log'
+  => [Add|Del|Mask|Ign|View|Quit]        1689  reading/reviews/books/the-da-vinci-code.txt  ? a
+  A         reading/reviews/books/the-da-vinci-code.txt
+  (Done.)
+
+
+``svn-foreign`` is included with the xxdiff scripts, because it is used
+internally by some of the them, and also because it reuses the backup module of
+the xxdiff scripts.  You can copy its file separately and it will still work
+(minus the backups).
 
 
 Pre-Visualizing And Cherry-Picking From Patches
