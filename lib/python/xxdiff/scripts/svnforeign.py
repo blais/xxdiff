@@ -229,7 +229,7 @@ def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
     if len(dirs) > 1:
         svndirs = [x for x in dirs if isdir(join(x, '.svn'))]
         if svndirs != dirs:
-            if not quiet:
+            if opts.verbose >= 1:
                 for dn in set(dirs) - set(svndirs):
                     write("Warning: skipping non-checkout dir '%s'\n" % dn)
             filenames = svndirs + files

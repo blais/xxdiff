@@ -5,6 +5,9 @@
 The More Urgent
 ===============
 
+* Complete xxdiff-sql-schemas, and move the code in the xxdiff package.
+
+
 * Fix [1200496] Diff Errors reported with certain text files
 
 * Fix [1079038] Split Bug.
