@@ -33,13 +33,13 @@ def options_graft( parser ):
                                  "These options affect the overwriting of the"
                                  "original file.")
 
-    parser.add_option('-n', '--dry-run', action='store_true',
-                      help="Print the commands that would be executed " +
-                      "but don't really run them.")
+    group.add_option('-n', '--dry-run', action='store_true',
+                     help="Print the commands that would be executed " +
+                     "but don't really run them.")
 
-    parser.add_option('-x', '--no-confirm', action='store_true',
-                      help="Do not ask for confirmation with graphical "
-                      "diff viewer.")
+    group.add_option('-x', '--no-confirm', action='store_true',
+                     help="Do not ask for confirmation with graphical "
+                     "diff viewer.")
 
     parser.add_option_group(group)
 

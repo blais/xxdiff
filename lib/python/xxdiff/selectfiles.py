@@ -87,15 +87,15 @@ def options_graft( parser ):
     # don't pollute the bin directory with a script that does not do much, and
     # the option is available in all the scripts that use the select files
     # proces.
-    parser.add_option('-T', '-@', '--select-debug', action='store_true',
-                      help="Only list the files and exit.  This is used to "
-                      "debug and test out which files will match your "
-                      "replacement process when you run it.")
+    group.add_option('-T', '-@', '--select-debug', action='store_true',
+                     help="Only list the files and exit.  This is used to "
+                     "debug and test out which files will match your "
+                     "replacement process when you run it.")
 
-    parser.add_option('-N', '--select-no-defaults', action='store_true',
-                      help="Do not setup default ignores (i.e. by default, "
-                      "appropriate ignore patterns are set for Subversion "
-                      "and CVS directories, etc.)")
+    group.add_option('-N', '--select-no-defaults', action='store_true',
+                     help="Do not setup default ignores (i.e. by default, "
+                     "appropriate ignore patterns are set for Subversion "
+                     "and CVS directories, etc.)")
 
     parser.add_option_group(group)
 

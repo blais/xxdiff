@@ -1,0 +1,257 @@
+#!/usr/bin/env python
+# This file is part of the xxdiff package.  See xxdiff for license and details.
+
+"""xxdiff-sql-schemas [<options>] <db1> <db2>
+
+Where <dbX> is of the form:   [user@]<dbname>[/schema]
+
+Script that dumps the schemas for two PostgreSQL databases, re-orders the
+contents so that they diff nicely, and spawns xxdiff on the results.
+"""
+
+__author__ = "Martin Blais <blais@furius.ca>"
+__depends__ = ['xxdiff', 'Python-2.4', 'PostgreSQL']
+
+
+# stdlib imports.
+import sys, os, tempfile, datetime, optparse, re, StringIO
+from os.path import *
+from subprocess import Popen, PIPE, call
+from pprint import pprint, pformat ## FIXME remove
+
+# xxdiff imports.
+import xxdiff.scripts
+import xxdiff.invoke
+import xxdiff.editor
+from xxdiff.scripts import tmpprefix
+from xxdiff.scm import subversion
+from xxdiff.scripts.svnforeign import query_unregistered_svn_files
+
+
+
+#-------------------------------------------------------------------------------
+#
+def options_graft( parser ):
+    """
+    Graft options on given parser for SQL connections.
+    """
+    group = optparse.OptionGroup(parser, "SQL connection options",
+                                 "These options affect how we connect to "
+                                 "SQL databases.")
+
+    group.add_option('-H', '--host', action='store',
+                     default=None,
+                     help="Database server host or socket directory")
+
+    group.add_option('-p', '--port', action='store',
+                     default=None,
+                     help="Database server port number")
+
+    group.add_option('-U', '--username', '--user', action='store',
+                     default=None,
+                     help="Connect as specified database user")
+
+    parser.add_option_group(group)
+
+    return group
+
+
+def options_validate( opts, parser, logs=None ):
+    """
+    Validate replacement options.
+    """
+    args = []
+    if opts.host:
+        args.extend( ['-h', opts.host] )
+    if opts.port:
+        args.extend( ['-p', opts.port] )
+    
+    opts.pgsqlargs = args
+
+
+#-------------------------------------------------------------------------------
+#
+def parse_options():
+    """
+    Parse the options.
+    """
+    import optparse
+    parser = optparse.OptionParser(__doc__.strip())
+
+    options_graft(parser)
+    xxdiff.invoke.options_graft(parser)
+
+    opts, args = parser.parse_args()
+
+    options_validate(opts, parser)
+    xxdiff.invoke.options_validate(opts, parser)
+    
+    if len(args) != 2:
+        parser.error("You need to specify two databases/schemas to compare.")
+    
+    dbspec1, dbspec2 = args
+
+    return (opts,
+            parse_dbspec(dbspec1, parser, opts),
+            parse_dbspec(dbspec2, parser, opts))
+
+#-------------------------------------------------------------------------------
+#
+dbspec_re = re.compile(
+    '^(?:([a-zA-Z0-9_]+)@)?([a-zA-Z0-9_]+)(?:/([a-zA-Z0-9_]+))?$')
+
+def parse_dbspec( dbspec, parser, opts ):
+    """
+    Parse the DB spec and return the user, dbname, schema components.
+
+    DB specs are of the form:  [user@]<dbname>[/schema]
+    """
+    mo = dbspec_re.match(dbspec)
+    if not mo:
+        parser.error("Invalid database/schema specification: '%s'" % dbspec)
+
+    user, db, schema = mo.groups()
+
+    # Set defaults from the options.
+    if user is None:
+        user = opts.username
+        
+    return Schema(user, db, schema)
+
+
+#-------------------------------------------------------------------------------
+#
+class Schema(object):
+    """
+    Container for all database schema-related things.
+    """
+    def __init__( self, user, dbname, schema ):
+        self.user, self.dbname, self.schema = user, dbname, schema
+        self.dump = None
+        
+#-------------------------------------------------------------------------------
+#
+def dump_schema( user, dbname, schema, opts ):
+    """
+    Dump the schema for the given database.  Returns the dump text on output.
+    """
+    tmplcmd = ['pg_dump', '--schema-only'] + opts.pgsqlargs
+
+    cmd = list(tmplcmd)
+    if user:
+        cmd.extend(['-u', user])
+    if schema:
+        cmd.extend(['--schema', schema])
+    cmd.append(dbname)
+
+    p = Popen(cmd, stdout=PIPE)
+    dump, stderr = p.communicate()
+    if p.returncode != 0:
+        raise SystemExit("Error: Dumping database '%s':\n%s\n" %
+                         (dbname, stderr))
+
+    return dump
+
+
+#-------------------------------------------------------------------------------
+#
+# FIXME: this should go to the utils module.
+def consepairs( seq ):
+    """
+    Iterate over consecutive pairs.
+    """
+    it = iter(seq)
+    prev = it.next()
+    for el in it:
+        yield prev, el
+        prev = el
+
+
+#-------------------------------------------------------------------------------
+#
+sec_re = re.compile('^-- Name:\s*([^\s;]+);\s*Type:\s*([^\s;]+)(.*)$', re.M)
+com_re = re.compile('--.*$', re.M)
+
+def parse_dump( dbdump ):
+    """
+    Parse a PostgreSQL database dump, extracting all its section into a
+    dictionary (returned).  The keys are built from the Name and Type fields in
+    the header comments.
+    """
+
+    # Class to contain info about chunks.
+    class Chunk:
+        def __init__( self, mo ):
+            self.mo = mo
+            self.name, self.typ = mo.group(1, 2)
+            
+    # Parse chunks.
+    chunks = map(lambda mo: Chunk(mo), sec_re.finditer(dbdump))
+    for c1, c2 in consepairs(chunks):
+        c1.contents = dbdump[c1.mo.end():c2.mo.start()]
+    chunks[-1].contents = dbdump[chunks[-1].mo.end():]
+
+    # Remove comments in the contents.
+    for c in chunks:
+        c.descline = c.mo.group(0)
+        c.contents = com_re.sub('', c.contents).strip()
+        c.mo = None # release the match objects
+
+    return dict(((c.name, c.typ), c) for c in chunks)
+
+def dump_chunks( chunks ):
+    """
+    Debug printout of chunks.
+    """
+    for chunk in chunks:
+        print '========', chunk.name, chunk.typ
+        print chunk.descline
+        print chunk.contents
+
+
+#-------------------------------------------------------------------------------
+#
+def sqlcompare_main():
+    """
+    Main program for schema comparison script.
+    """
+    opts, db1, db2 = parse_options()
+    
+    # Dump the database schemas.
+    objmaps = []
+    for db in db1, db2:
+        db.dump = dump_schema(db.user, db.dbname, db.schema, opts)
+
+        # Parse the dumps, produce an adequate map of its contained objects.
+        db.objmap = parse_dump(db.dump)
+
+    # Produce two files that will diff nicely.
+    tmpf1 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+    tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+
+    for key in sorted(set(db1.objmap.keys() + db2.objmap.keys())):
+        for db, tmpf in (db1, tmpf1), (db2, tmpf2):
+            try:
+                chunk = db.objmap[key]
+                tmpf.write(chunk.descline)
+                tmpf.write('\n')
+                tmpf.write(chunk.contents)
+                tmpf.write('\n\n')
+            except KeyError:
+                pass
+
+    [f.flush() for f in tmpf1, tmpf2]
+
+    xxdiff.invoke.xxdiff_display(opts, tmpf1.name, tmpf2.name)
+
+## FIXME: todo, sort the CREATE TABLE statements columns
+
+
+#-------------------------------------------------------------------------------
+#
+def main():
+    xxdiff.scripts.interruptible_main(sqlcompare_main)
+
+if __name__ == '__main__':
+    main()
+

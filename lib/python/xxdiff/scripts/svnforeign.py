@@ -71,7 +71,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports
-import sys, os, termios, tty, shutil, tempfile
+import sys, os, termios, tty, tempfile
 from subprocess import Popen, PIPE, call
 from os.path import *
 
