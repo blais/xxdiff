@@ -21,6 +21,7 @@ import xxdiff.invoke
 import xxdiff.editor
 from xxdiff.scripts import tmpprefix
 from xxdiff.scm import subversion
+from xxdiff.scripts.svnforeign import query_unregistered_svn_files
 
 
 #-------------------------------------------------------------------------------
@@ -109,13 +110,22 @@ def parse_options():
                       "starts the review, then commits the files with the "
                       "given comment.")
 
-##     parser.add_option('-f', '--foreign', '--consider-foreign-files',
-##                       action='store_true',
-##                       help="Before starting the review/diffs, check all the "
-##                       "unregistered files and ask the user one by one about "
-##                       "what to do with them.")
+    o = parser.add_option('-C', '--comments-file', action='store',
+                          default=None,
+                          help="Specified the comments file to use.  This file "
+                          "is left behind and its contents reused if it is "
+                          "specified.")
+
+    parser.add_option('-f', '--foreign', '--consider-foreign-files',
+                      action='store_true',
+                      help="Before starting the review/diffs, check all the "
+                      "unregistered files and ask the user one by one about "
+                      "what to do with them.")
 
     opts, args = parser.parse_args()
+
+    if opts.comments_file and not opts.commit:
+        print >> sys.stderr, "(Option '%s' ignored.) " % o.dest
 
     return opts, args
 
@@ -127,7 +137,15 @@ def svndiff_main():
     Main program for svn-diff script.
     """
     opts, args = parse_options()
-        
+
+    if opts.foreign:
+        # Consider the unregistered files.
+        if query_unregistered_svn_files(args, False, sys.stdout) != True:
+            # The user has quit, don't continue.
+            sys.exit(0)
+        print
+        print
+
     # Get the status of the working copy.
     statii = subversion.status(args)
 
@@ -142,27 +160,31 @@ def svndiff_main():
     if opts.commit:
         m = {'date': datetime.datetime.now()}
         comments = renstatus
-        edit_waiter = xxdiff.editor.spawn_editor(comments)
+        edit_waiter = xxdiff.editor.spawn_editor(comments,
+                                                 filename=opts.comments_file)
 
     # Get the status of the working copy.
     statii = subversion.status(args)
 
     # First print out the status to the user.
+    print 'Status Of Files To Be Diffed'
+    print '----------------------------'
     print renstatus
 
     # Then we start printing each file and the associated decision.
-    msgfmt = '%-16s | %s'
+    msgfmt = '  %-16s | %s'
     print
     print msgfmt % ('Action', 'Status')
     print msgfmt % ('-'*16, '-'*40)
 
-    # For each of the files reported by status
+    # Main loop for graphical diffs, over each of the files reported by status.
     for s in statii:
         msg, waiter = review_file(s, opts)
         print msgfmt % (msg, s.parsed_line)
         if waiter is not None:
             waiter()
 
+    # Commit the files if requested.
     if opts.commit:
         print '\nWaiting for editor to complete...',
         sys.stdout.flush()
@@ -173,7 +195,7 @@ def svndiff_main():
             print '(None)'
             comments = None
         else:
-            print 
+            print
             print '-' * 70
             print comments
             print '-' * 70
