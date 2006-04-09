@@ -5,6 +5,50 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+(Version 3.2b2)
+
+* xxdiff-svn-diff: Allowed an explicitly specified file (via --comments-file) to
+  be recycled;  this is useful if you interrupted the preview process and you
+  do not want to lose the comments you made.  By specifying the same filename,
+  the file is not overwritten and its contents are thus recycled.
+
+* xxdiff-svn-diff: Ignoring the specified comments file if it is within the
+  Subversion directory that we want to diff.  So you can do this at the root of
+  your checkout, and it works::
+
+     xxdiff-svn-diff -cC .comments
+
+* xxdiff-svn-diff: can optionally spawn a comments editor window and commit
+  after review.  A nice process to commit to Subversion with this is this:
+
+     xxdiff-svn-diff -fc
+
+  This will:
+
+  1. Run svn-foreign to handle unregistered files, if necessary
+  2. Asynchronously spawn an editor window with the list of files to be
+     reviewed, for you to write your merge comments while you review your
+     changes with the xxdiffs in the background;
+  3. Run the changes preview with xxdiffs
+  4. Wait for you editor to terminate.
+  5. Commit the changes to Subversion.
+
+
+* xxdiff-svn-diff: can optionally run svn-foreign before the file preview (in
+  the same process).
+
+* svn-foreign: Added backups to svn-foreign, for deleted files.  svn-foreign can
+  still be copied and used independently from the xxdiff library, and the
+  backups feature is only available if the xxdiff libs are found.
+
+* Moved svn-foreign into the xxdiff scripts packages, so that its functionality
+  can be reused in-process.  (Note to packagers: feel free to install it or not
+  along with the rest of the xxdiff-scripts.  When used by itself, it is not
+  really tied to xxdiff but it is a really useful program.)
+
+
+(Version 3.2b1)
+
 * **IMPORTANT** This release focuses on a complete overhaul of the
   infrastructure for making Python scripts around xxdiff.  There is now a Python
   package that is to be distributed and installed with xxdiff, and all the
@@ -65,7 +109,7 @@ Version 3.2: (major feature enhancements)
   * Created xxdiff-filter, a script that runs the transformation loop using a
     UNIX command filter (see docs).
 
-  * Made an infrastructure to process files in transformation loops. 
+  * Made an infrastructure to process files in transformation loops.
     xxdiff-find-grep-sed was rewritten in those terms.
 
   * xxdiff-diff-proxy: Included patch from Martin Renold <martinxyz@sf.net> for
@@ -139,7 +183,7 @@ Version 3.1: (minor feature enhancements)
 * Implemented interactive font resizing [ 964629 ].
 * Simplified wheel redirect code.
 * Updated documentation ([ 1011009 ] Tomas Pospisek)
-* Added wheel support in overview area ([ 1022392 ]) 
+* Added wheel support in overview area ([ 1022392 ])
   Thanks to Brett Levin for the patch.
 * Fixed xxdiff-cond-replace with zero arguments.
 
@@ -287,12 +331,12 @@ bugs.  We have implemented a few minor features and have decided to release as
   with interactive patch merging. You can use the string output by xxdiff
   upon exiting to implement the desired replacement.  The MERGED button
   forces a merge output to be present.  Not sure if this is generic enough,
-  but I think it is.  
+  but I think it is.
 * Applied patch from Eric Veum <eric.veum at oracle.com> for Clearcase return
   status.
 * Applied patches from Georg Baum <Georg.Baum at post.rwth-aachen.de> for
   switch from rawname to toString/fromString.
-* Incorporated patch for format strings in user-provided titles by 
+* Incorporated patch for format strings in user-provided titles by
   Tommi Kyntola <tkyntola at cc.hut.fi>
 * Added SaveAsMerged binding.
 * Added Christian Fowler <cfowler at lulu dot com> tools for Perforce.
@@ -321,9 +365,9 @@ Version 2.9.2: (minor features)
 * Implemented "--single" option to allow xxdiff to open a single file.
 
 * Double-clicking on an added or removed file in directories mode now
-  opens an xxdiff with a single file in it. This is to be used for 
+  opens an xxdiff with a single file in it. This is to be used for
   convenience. You'd be better off using a file editor to visualize
-  single files, but some people like the consistency of looking at 
+  single files, but some people like the consistency of looking at
   everything thru the same program.
 
 
@@ -339,12 +383,12 @@ Version 2.9.1: (minor bug fixes)
   So I have decided to change it, nasty me, to Control+Button1. I moved the
   NEITHER selection that was bound there to Shift+Button3.
 
-     
+
 Version 2.9: (minor features)
 ------------------------------
 
 * Implemented variable text selection in text widget.
-  Press ALT-Button1 and drag to select text that gets put in the 
+  Press ALT-Button1 and drag to select text that gets put in the
   clipboard.
 
 * Split formatting into header formatting for the whole selection text and
@@ -587,7 +631,7 @@ This release introduces the unmerge feature.
 
 (Windows port)
 
-* Finished compiling and linking under W2K. However, it doesn't run, we 
+* Finished compiling and linking under W2K. However, it doesn't run, we
   have a weird problem with getenv() causing an Access Violation, and when
   getenv is removed, we get an Access Violation inside Qt.
 * More porting to Windows. It almost all compiles now.
@@ -623,7 +667,7 @@ Version 2.3: (minor features and major bug fixes)
 * Some changes for HP/UX compilation (thanks to Albert Chin-A-Young)
 * Fixed bug in color dialog; pressing cancel would set the color to
   blank. Credits to <volker_apelt at yahoo dot de> for reporting it.
-* Fixed Debian compilation warnings reported by Tomas Pospisek 
+* Fixed Debian compilation warnings reported by Tomas Pospisek
   <tpo at sourcepole dot ch>.
 * Fixed implementation on EXIT_ON_SAME to really not show the window at all.
 * Fixed bug with EXIT_ON_SAME and IGNORE_BLANK_LINES being turned on.
@@ -676,7 +720,7 @@ release. I won't announce it on freshmeat.
 
 (Misc)
 
-* Fixed compilation to work with aix-xlc configuration, thanks to 
+* Fixed compilation to work with aix-xlc configuration, thanks to
   instructions from mark.truman@gtech.com.
 * Fixed bug introduced in 2.1 with line copy exhibited with split/swap/join.
 * Fixed bug introduced in 2.1 [485741]: insert at beginning of a line would
@@ -752,7 +796,7 @@ command-line Qt options and formatted like KDE programs.
 
 * Make the ignore horizontal whitespace treat all contiguous chunks of
   whitespace as a single whitespace (tdemarge idea).
-  Implemented ignore horizontal whitespace as ws compression 
+  Implemented ignore horizontal whitespace as ws compression
   (this is a big difference and should be mentioned in the change log).
 
 * Realized there is a problem with the implementation of the ignore
@@ -896,7 +940,7 @@ connection anymore).
 
 * Removed circular dependendy in resParser.lex.c, this was due to the fact
   that by default make considers a lex file to have .l suffix and not .lex.
-  We could patch it with a simple rule, but instead we rename the file to 
+  We could patch it with a simple rule, but instead we rename the file to
   use the standard suffix.
 
 
@@ -1071,11 +1115,11 @@ Version 1.15: (development snapshot)
 * fixed bug with SHOW_TOOLBAR not being implemented [446123]
 * fixed bug with setting the commands from options dialog.
 * reviewed all FIXME comments, address all of the current changes
-* reviewed all #if 0 blocks, address all 
+* reviewed all #if 0 blocks, address all
 * fix for parser which could not  be restarted it seems
-* removed app font override.  let them users use that old font if they 
+* removed app font override.  let them users use that old font if they
   want sgi looks.
-* removed XLFD warning by changing to a different XLFD but that generates 
+* removed XLFD warning by changing to a different XLFD but that generates
   the same font.
 * Re-implemented the generated init file functionality.
 * remove singleton b.s. from resources.
@@ -1166,7 +1210,7 @@ Version 1.13
 * Release.
 
 * Change in parser, workaround for ":" in clipboard text string.
-* Fixed bug with clipboard formatting on files that had %s in them 
+* Fixed bug with clipboard formatting on files that had %s in them
   (infinite loop).
 * Generated and removed dependency on man.h.
 * Fixed bug [430778]: renamed "open file" to "replace file".
@@ -1230,7 +1274,7 @@ Version 1.9.3
 
 * Types cleanup (XxFln and XxDln and more).
 * Implemented goto-line feature in search dialog.
-* Implemented @@.* removal in "Save As" because ClearCase takes forever to 
+* Implemented @@.* removal in "Save As" because ClearCase takes forever to
   come up with a directory that we don't care about anyway.  Save As when
   using ClearCase extended syntax should be fast now (untested).
 * Started implementing goto-line feature (unfinished).
@@ -1244,7 +1288,7 @@ Version 1.9.2
 * added "--args" option to specify arbitrary arguments to diffs
 * sets titlebar for 3 files
 * now returns a nice error message when dir diff invoked with 3 files.
-* added file copy feature for directory diffs (idea from 
+* added file copy feature for directory diffs (idea from
   Guillaume Kerrien, gkerrien@free.fr)
 * enable state on view popup now makes sense
 * started working on file copy idea, FIXME not done
@@ -1324,10 +1368,10 @@ Version 1.7.6
 * Fixed bugs in new space-tidying function.
 * Remove undef calls, so that XX_TRACE() works everywhere, replaced by
   uniform XX_LOCAL_TRACE() trick.
-* Factored options dialog into three tabs, disabled 2-way options in 3-way 
+* Factored options dialog into three tabs, disabled 2-way options in 3-way
   mode.
 * Removed old diff options dialog.
-* Creating errors in editing options should display errors in dialog, 
+* Creating errors in editing options should display errors in dialog,
   cleaned up cerr output, now goes into dialog.
 
 Version 1.7.5
@@ -1338,7 +1382,7 @@ Version 1.7.5
 * Fixed recursive diff and build solely from output combination.
 * Major review of resource names.
 * United colors.
-* Resource improvements, lots of important changes, user-visible 
+* Resource improvements, lots of important changes, user-visible
   consequences (resource names have changed).
 * Added resources for GNU diff options (-r) (-i) etc
 
@@ -1525,7 +1569,7 @@ Version 1.5.9
 Version 1.5.8
 -------------
 
-* Fixed bug in 3-way diff when diff at the very first line (thanks to 
+* Fixed bug in 3-way diff when diff at the very first line (thanks to
   Damjan Lango for reporting it).
 
 Version 1.5.7
@@ -1585,7 +1629,7 @@ Version 1.4.7
 * Added horizontal-diffs-ignore-whitespace, which ignores whitespace
   differences when doing diffs horizontally (a separate process than
   the usual line-per-line diffs).  This feature is a little bit tricky:
-  you cannot just skip the whitespace, to begin skipping, all the sides 
+  you cannot just skip the whitespace, to begin skipping, all the sides
   have to start with some whitespace.
 * Fixed bug with horizontal diff: rendering tabs wasn't done correctly.
 * Added resource to disable display of cursor (for mcguffm, jfr?).
@@ -1603,7 +1647,7 @@ Version 1.4.6
 Version 1.4.5
 -------------
 
-* Split/swap/merge renamed split/swap/join to avoid confusion with 
+* Split/swap/merge renamed split/swap/join to avoid confusion with
   upcomin merge feature.
 * Added merge feature.
 
@@ -1679,7 +1723,7 @@ Version 1.3.9
 
 * Added default bindings Ctrl+R -> Redo Diff for giasson.
 * Fixed buffer allocation bug for string rendering which broke on long lines.
-* Bug fix: horizontal scrollbar is not correct because of varying widths of 
+* Bug fix: horizontal scrollbar is not correct because of varying widths of
   text widgets due to linenumbers.  adjustScrollbars() cannot deal with it
   correctly since it gets called to adjust on the first widget's resize and
   the other ones haven't been resized yet (at that point).  We need to make
@@ -1753,14 +1797,14 @@ Version 1.2.14
 * Updated README.
 * Stripped down man page.
 * Documentation web page: explain use patterns: merging, leaving regions
-  unselected for further editing, short-lived diff (an assumption), 
+  unselected for further editing, short-lived diff (an assumption),
   emacs bindings.
 * Bug fix: crashes when specifying only one file!
 * Finished saving unselected anyway with tagging.
 * Fixed global selection bug.
 * Added all new colors to color legend, improved code a bit.
 * Made the resources object a singleton everywhere in the code.
-* Bug fix: isAsciiText doesn't deal with C-l's (which occurs often in text), 
+* Bug fix: isAsciiText doesn't deal with C-l's (which occurs often in text),
   make it work as ascii.  Now we're only checking the very first line of
   text.
 * Added diff option toggles and resources and qualities.
@@ -1807,7 +1851,7 @@ Version 1.2.7
 * Added menu accelerators.
 * Fixed toggle button bug.
 * Added "select X and go to next unselected, wrap around if at the end of
-  the file and save if no more unselected" (more simply called "select X and 
+  the file and save if no more unselected" (more simply called "select X and
   next").  This feature for rapid merging (request by Peter Maly and
   jdilelle).
 * Started sketching out merged view.
@@ -1822,7 +1866,7 @@ Version 1.2.6
 * Cleaned up boolean resource access.
 * Added a resource and UI for toggling markers (but no functionality)
 * Bug fix: tabs and horizontal diffs weren't rendered synchronously.
-  
+
 Version 1.2.5
 -------------
 
@@ -1837,7 +1881,7 @@ Version 1.2.4
 * Wrote proper accelerator reading routine, home/end and func keys now work
   (fixes bug: Shift+F1 help doesn't work on on context menu).
 * Clicking on the filename label puts the filename in the clipboard (this is
-  a cool feature for making merge review comments with long ClearCase 
+  a cool feature for making merge review comments with long ClearCase
   filenames).
 
 Version 1.2.3
@@ -1850,10 +1894,10 @@ Version 1.2.2
 
 * Bug fix: when file is not writable, (e.g. clearcase not checked out) error
   was not reported (reported by gdh).
-* Bug fix: redo diff was broken.  Change one of the files, then redo diff, 
+* Bug fix: redo diff was broken.  Change one of the files, then redo diff,
   it crapped out (reported by belley).
 * Moved dialogs in their own compilation unit.
-* Provided simple command to perform redo diff without asking for options 
+* Provided simple command to perform redo diff without asking for options
   (requested by belley)
 * Started sketching out on-context help.
 
@@ -1882,7 +1926,7 @@ Version 1.1.6
 Version 1.1.5
 -------------
 
-* Fixed minimum size limitation on filenames.  ClearCase pnames tended to 
+* Fixed minimum size limitation on filenames.  ClearCase pnames tended to
   present a limitation on the horizontal size.
 
 Version 1.1.4
@@ -1915,9 +1959,9 @@ Version 1.1.1
 -------------
 
 * Fixed bug: initially setting horizontal diff thru resource wasn't working.
-* Added lighter colors for selected and deleted (looks much nicer in 
+* Added lighter colors for selected and deleted (looks much nicer in
   horizontal diffs more).
-* Added "paste with line numbers" option, which add the name of the file as 
+* Added "paste with line numbers" option, which add the name of the file as
   well as line numbers, this will be great for making review comments.
 
 
@@ -1947,7 +1991,7 @@ Version 1.0.5
 
 * Ported to STLport.
 * Static linkage for better Linux distribution.
-* Fixed a bug when vertical maximizing the overview: didn't redraw 
+* Fixed a bug when vertical maximizing the overview: didn't redraw
   visible regions correctly.
 
 Version 1.0.4

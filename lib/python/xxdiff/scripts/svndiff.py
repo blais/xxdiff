@@ -144,9 +144,13 @@ def svndiff_main():
     """
     opts, args = parse_options()
 
+    comfn = abspath(opts.comments_file)
+    comments_files = [comfn, '%s.swp' % comfn]
+
     if opts.foreign:
         # Consider the unregistered files.
-        if query_unregistered_svn_files(args, opts, sys.stdout) != True:
+        if query_unregistered_svn_files(
+            args, opts, sys.stdout, ignore=comments_files) != True:
             # The user has quit, don't continue.
             sys.exit(0)
         print
@@ -155,6 +159,9 @@ def svndiff_main():
     # Get the status of the working copy.
     statii = subversion.status(args)
 
+    # Ignore the comments file from the svn status output.
+    statii = [s for s in statii if abspath(s.filename) not in comments_files]
+            
     if not statii:
         print '(Nothing to do, exiting.)'
         return 0
@@ -168,9 +175,6 @@ def svndiff_main():
         comments = renstatus
         edit_waiter = xxdiff.editor.spawn_editor(comments,
                                                  filename=opts.comments_file)
-
-    # Get the status of the working copy.
-    statii = subversion.status(args)
 
     # First print out the status to the user.
     print 'Status Of Files To Be Diffed'

@@ -205,17 +205,22 @@ def parse_options():
 
 #-------------------------------------------------------------------------------
 #
-def query_unregistered_svn_files( filenames, opts, output=sys.stdout ):
+def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
+                                  ignore=[] ):
     """
     Runs an 'svn status' command, and then loops over all the files that are not
     registered, asking the user one-by-one what action to take (see this
     module's docstring for more details).
 
+    'ignore' specifies a list of files to completely ignore.
+
     Return True upon completion.  Anything else signals that the user has
     interrupted the procedure.
     """
     write = output.write
-    
+
+    ignore = map(abspath, ignore)
+
     # If there are multiple args--such as *--filter out the non svn directories.
     dirs, files = filter2(isdir, filenames)
     if len(dirs) > 1:
@@ -249,6 +254,8 @@ def query_unregistered_svn_files( filenames, opts, output=sys.stdout ):
     for line in out.splitlines():
         if line[0] == '?':
             fn = line[7:]
+            if abspath(fn) in ignore:
+                continue
 
             # Get the file size.
             size = os.lstat(fn).st_size

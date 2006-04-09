@@ -35,8 +35,12 @@ def spawn_editor( initcontents=None, filename=None ):
     the returned object without waiting on it, the editor program is killed.
     
     If 'initcontents' is given, it is inserted in the temporary file to be
-    edited before spawing the editor.  If 'filename' is specified, the editor is
-    spawned on that file rather than a temporary.
+    edited before spawing the editor.  This is only used if no 'filename' has
+    been specified.
+
+    If 'filename' is specified, the editor is spawned on that file rather than a
+    temporary.  If the file specified by filename exists and is not empty, we
+    recycle it.
 
     This function returns the contents of the edited file, or None, if the edit
     was cancelled.  It may return an empty string.
@@ -44,7 +48,13 @@ def spawn_editor( initcontents=None, filename=None ):
     # Create and the filename that we will eventually read from.
     tmpf = None
     if filename is not None:
-        tmpf = open(filename, 'w+')
+        # Check if the specified file already exists, and don't overwrite it if
+        # this is the case.
+        if exists(filename) and getsize(filename) > 0:
+            tmpf = open(filename, 'r')
+            initcontents = None
+        else:
+            tmpf = open(filename, 'w+')
     else:
         tmpf = tempfile.NamedTemporaryFile('w+', prefix=tmpprefix)
         filename = tmpf.name
