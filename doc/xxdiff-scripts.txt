@@ -564,6 +564,9 @@ Future Features
   preview not only your changes, but also future problems when updating and
   committing the file (before actually updating);
 
+* It will maintain a history of the files that have been previewed already, so
+  that you can easily interrupt the process and restart where you left off.
+
 * I want to have the option to unmerge some changes and save the results
   conveniently.  And I want backup files for the original overwritten files,
   taken care of automatically;

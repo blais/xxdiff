@@ -18,6 +18,11 @@ The More Urgent
 * xxdiff-cond-replace: find a way to put a set of invocations in the same backup
   directory.
 
+* Create a xxdiff.history module that uses the same mechanisms as exp-preview
+  for maintaining a history of the files that have been reviewed, and that
+  allows you to interrupt and restart the diffing process where you left off.
+  That would *rock*!  Put that in xxdiff-svn-diff.
+
 --------------------------------------------------------------------------------
 (Scripts)
 

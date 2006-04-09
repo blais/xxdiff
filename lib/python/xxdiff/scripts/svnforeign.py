@@ -174,12 +174,11 @@ def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
 
-    parser.add_option('-c', '--commit-without-comment', action='store_const',
-                      dest='commit', const='',
-                      help="Ask to commit after running, with given comments.")
+    parser.add_option('-c', '--commit', action='store_true',
+                      help="Ask to commit after running.")
 
-    parser.add_option('-C', '--commit', action='store',
-                      help="Ask to commit after running, with given comments.")
+    parser.add_option('-m', '--comments', action='store',
+                      help="Specify comments for commit.")
 
     parser.add_option('-v', '--verbose',
                       action='store_const', const=2, dest='verbose',
@@ -199,6 +198,10 @@ def parse_options():
 
     if backup is not None:
         backup.options_validate(opts, parser)
+
+    if opts.comments and not opts.commit:
+        parser.error("You cannot specify comments if you're not going to "
+                     "commit!")
 
     return opts, args
 
@@ -375,8 +378,9 @@ def main():
         c = read_one().lower()
         print c
 
-        if c == 'y': # Commit, without comments.
-            call(['svn', 'commit', '-m', opts.commit] + args)
+        if c == 'y': # Commit.
+            comments = opts.comments or ''
+            call(['svn', 'commit', '-m', comments] + args)
 
 
 if __name__ == '__main__':
