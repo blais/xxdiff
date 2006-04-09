@@ -170,11 +170,11 @@ def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
 
-    parser.add_option('-c', '--commit', action='store',
+    parser.add_option('-c', '--commit-without-comment', action='store_const',
+                      dest='commit', const='',
                       help="Ask to commit after running, with given comments.")
 
-    parser.add_option('-C', '--commit-without-comment', action='store_const',
-                      dest='commit', const='',
+    parser.add_option('-C', '--commit', action='store',
                       help="Ask to commit after running, with given comments.")
 
     parser.add_option('-q', '--quiet', '--silent', action='store_true',
