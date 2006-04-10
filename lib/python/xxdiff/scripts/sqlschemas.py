@@ -72,9 +72,21 @@ def sqlcompare_main():
         # Parse the dumps, produce an adequate map of its contained objects.
         db.objmap = postgresql.parse_dump(dump)
 
+    # List all objects that were found.
+    for key in sorted(set(db1.objmap.keys() + db2.objmap.keys())):
+        print key
+
+    # Render comparable files.
     files = xxdiff.mapcompare.render_diffable_maps(opts, db1.objmap, db2.objmap)
 
-    xxdiff.invoke.xxdiff_display(opts, *(x.name for x in files))
+    # Set displayed titles.
+    titles = []
+    for i, db in enumerate( (db1, db2) ):
+        titles.extend(['--title%s' % (i+1), '%s (SCHEMA)' % db.dbspec])
+        
+    # Invoke xxdiff .
+    xxargs = titles + [x.name for x in files]
+    xxdiff.invoke.xxdiff_display(opts, *xxargs)
 
 
 #-------------------------------------------------------------------------------

@@ -31,13 +31,13 @@ def options_graft( parser ):
                                  "These options affect diff maps generation.")
 
     group.add_option('-g', '--garbage-lines', action='store', type='int',
-                     default=3,
+                     dest='NBLINES', default=3,
                      help="Specifies the number of garbage lines to use to "
                      "separate the map items.")
 
-    parser.add_option('--show-common-only', '--common', action='store_true',
-                      help="Only render the keys that are in common in all "
-                      "the maps.")
+    group.add_option('--show-common-only', '--common', action='store_true',
+                     help="Only render the keys that are in common in all "
+                     "the maps.")
 
     parser.add_option_group(group)
 

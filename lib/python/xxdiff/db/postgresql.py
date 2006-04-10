@@ -15,7 +15,6 @@ __author__ = "Martin Blais <blais@furius.ca>"
 import os, optparse, re
 from os.path import *
 from subprocess import Popen, PIPE
-from pprint import pprint, pformat ## FIXME remove
 
 # xxdiff imports.
 from xxdiff.utils import consepairs
@@ -82,7 +81,7 @@ def parse_dbspec( dbspec, parser, opts ):
     if user is None:
         user = opts.username
         
-    return Schema(user, db, schema)
+    return Schema(dbspec, user, db, schema)
 
 
 #-------------------------------------------------------------------------------
@@ -91,7 +90,8 @@ class Schema(object):
     """
     Container for all database schema-related things.
     """
-    def __init__( self, user, dbname, schema ):
+    def __init__( self, dbspec, user, dbname, schema ):
+        self.dbspec = dbspec
         self.user, self.dbname, self.schema = user, dbname, schema
         self.dump = None
         
@@ -152,17 +152,13 @@ def parse_dump( dbdump ):
 
         # Sort columns in CREATE TABLE statements.
         mo = ct_re.match(c.contents)
-        print '---------'
-        print c.contents
-        print '---------'
-        print mo
         if mo:
             pre, post = c.contents[:mo.end(1)], c.contents[mo.start(2):]
             columns = c.contents[mo.end(1):mo.start(2)].strip()
             line_cols = map(str.strip, columns.splitlines())
             line_cols.sort()
             c.contents = pre + ''.join('   %s\n' % x for x in line_cols) + post
-        
+    
     return dict(((c.name, c.typ), (c.descline + '\n\n' + c.contents))
                 for c in chunks)
 
