@@ -157,7 +157,9 @@ def parse_dump( dbdump ):
             columns = c.contents[mo.end(1):mo.start(2)].strip()
             line_cols = map(str.strip, columns.splitlines())
             line_cols.sort()
-            c.contents = pre + ''.join('   %s\n' % x for x in line_cols) + post
+            c.contents = (pre + '\n' +
+                          ''.join('   %s\n' % x for x in line_cols) +
+                          post)
     
     return dict(((c.name, c.typ), (c.descline + '\n\n' + c.contents))
                 for c in chunks)

@@ -31,7 +31,7 @@ def options_graft( parser ):
                                  "These options affect diff maps generation.")
 
     group.add_option('-g', '--garbage-lines', action='store', type='int',
-                     dest='NBLINES', default=3,
+                     metavar='NBLINES', default=3,
                      help="Specifies the number of garbage lines to use to "
                      "separate the map items.")
 
