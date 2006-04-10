@@ -14,6 +14,19 @@ from curses.ascii import isalnum
 
 #-------------------------------------------------------------------------------
 #
+def consepairs( seq ):
+    """
+    Iterate over consecutive pairs.
+    """
+    it = iter(seq)
+    prev = it.next()
+    for el in it:
+        yield prev, el
+        prev = el
+
+
+#-------------------------------------------------------------------------------
+#
 def idify( s, strip=True, preserve_chars=[] ):
     """
     Removes non-alphanumeric characters from a string, morphing them into
