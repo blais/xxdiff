@@ -108,7 +108,11 @@ def parse_options():
                       action='store_true',
                       help="Spawns an editor window for adding comments and "
                       "starts the review, then commits the files with the "
-                      "given comment.")
+                      "given comment.  NOTE: you editor is taken from the "
+                      "environment variables XXDIFF_EDITOR, SVN_EDITOR, and "
+                      "then EDITOR.  This program *MUST* open a new window "
+                      "(for example, you cannot use just 'vi' but rather "
+                      "something like: xterm -e 'vi %s').")
 
     o = parser.add_option('-C', '--comments-file', action='store',
                           default=None,
@@ -200,7 +204,7 @@ def svndiff_main():
 
     # Commit the files if requested.
     if opts.commit:
-        print '\nWaiting for editor to complete...',
+        print "\nWaiting for editor '%s' to complete..." % edit_waiter.command,
         sys.stdout.flush()
         comments = edit_waiter()
         print 'Done.\n'

@@ -75,7 +75,6 @@ import sys, os, termios, tty, tempfile
 from subprocess import Popen, PIPE, call
 from os.path import *
 
-
 # xxdiff imports (optional)
 try:
     from xxdiff import backup

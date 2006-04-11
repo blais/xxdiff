@@ -68,22 +68,24 @@ def spawn_editor( initcontents=None, filename=None ):
     # Note: the editor should the kind to open a new window because we're going
     # to keep printing stuff to stdout during the diffing.  You can just set it
     # up to spawn a new VT if you need to, like in an xterm or something.
-    for var in 'XXDIFF_EDITOR', 'SVN_EDITOR', 'VISUAL', 'EDITOR':
+    for var in 'XXDIFF_EDITOR', 'SVN_EDITOR', 'EDITOR':
         editor = os.environ.get(var, None)
         if editor:
             break
 
+    shell = False
     if editor:
         if '%s' in editor:
             editor %= filename
             cmd = editor
+            shell = True
         else:
             cmd = [editor, filename]
     else:
         cmd = def_editor
         cmd[-1] %= filename
 
-    p = Popen(cmd, shell=bool(editor), stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     
     def waiter():
         "Waiter closure."
@@ -92,6 +94,8 @@ def spawn_editor( initcontents=None, filename=None ):
             raise RuntimeError("Error running editor:\n%s\n" % stderr)
         tmpf.seek(0)
         return tmpf.read()
-        
+
+    waiter.command = ' '.join(cmd)
+
     return waiter
 
