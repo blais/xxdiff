@@ -12,16 +12,30 @@ __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 
 # stdlib imports.
-import sys, os, tempfile, datetime
+import sys, os, tempfile, datetime, md5
 from os.path import *
 
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.invoke
 import xxdiff.editor
-from xxdiff.scripts import tmpprefix
+from xxdiff.scripts import tmpprefix, script_name
 from xxdiff.scm import subversion
 from xxdiff.scripts.svnforeign import query_unregistered_svn_files
+
+#-------------------------------------------------------------------------------
+#
+# A per-user directory to hold comments files.  We want to be able to recycle
+# the comments file if the review process has been interrupted for some
+# reason--this is quite common for source code, as the reviewer often realizes
+# he forgot to do something or other, this is a benefit of reviewing diffs
+# before committing--if the same directories/files are to be checked-in.  We do
+# not want to store the files in the CWD because that might change, and it may
+# later interfere with other tools, e.g. show up in 'svn status' if left behind.
+# Therefore, we store the comments file in the user's home directory under a
+# hash computed from the absolute paths of the directories given as arguments.
+comments_dir = join(os.environ['HOME'], '.%s' % script_name)
+
 
 
 #-------------------------------------------------------------------------------
@@ -150,15 +164,15 @@ def svndiff_main():
     """
     opts, args = parse_options()
 
-    comments_files = []
-    if opts.comments_file:
+    ignofiles = []
+    if opts.commit and opts.comments_file:
         comfn = abspath(opts.comments_file)
-        comments_files.extend([comfn, '%s.swp' % comfn])
+        ignofiles.extend([comfn, '%s.swp' % comfn])
 
     if opts.foreign:
         # Consider the unregistered files.
         if query_unregistered_svn_files(
-            args, opts, sys.stdout, ignore=comments_files) != True:
+            args, opts, sys.stdout, ignore=ignofiles) != True:
             # The user has quit, don't continue.
             sys.exit(0)
         print
@@ -168,7 +182,7 @@ def svndiff_main():
     statii = subversion.status(args)
 
     # Ignore the comments file from the svn status output.
-    statii = [s for s in statii if abspath(s.filename) not in comments_files]
+    statii = [s for s in statii if abspath(s.filename) not in ignofiles]
             
     if not statii:
         print '(Nothing to do, exiting.)'
@@ -177,12 +191,31 @@ def svndiff_main():
     # First print out the status to a string.
     renstatus = os.linesep.join(x.parsed_line for x in statii)
 
+    if opts.commit:
+        # File to delete after a succesful commit.
+        delete_comfn = None
+
+        if opts.comments_file:
+            comfn = abspath(opts.comments_file)
+        else:
+            # Select a comments file and make sure that it exists.
+            comhash = md5.new()
+            for arg in args:
+                comhash.update(abspath(arg))
+            comfn = join(comments_dir, comhash.hexdigest())
+            delete_comfn = comfn
+            if not exists(comfn):
+                # Make sure that the parent directories are created.
+                if not exists(comments_dir):
+                    os.makedirs(comments_dir)
+                # Touch the file.
+                open(comfn, 'w')
+
     # Spawn an editor if requested before starting the review.
     if opts.commit:
         m = {'date': datetime.datetime.now()}
         comments = renstatus
-        edit_waiter = xxdiff.editor.spawn_editor(comments,
-                                                 filename=opts.comments_file)
+        edit_waiter = xxdiff.editor.spawn_editor(comments, filename=comfn)
 
     # First print out the status to the user.
     print 'Status Of Files To Be Diffed'
@@ -220,7 +253,11 @@ def svndiff_main():
 
         subversion.commit(args, comments=comments)
 
+        # Delete temporary comments flie if we created it.
+        if delete_comfn:
+            os.unlink(delete_comfn)
 
+        
 #-------------------------------------------------------------------------------
 #
 def main():

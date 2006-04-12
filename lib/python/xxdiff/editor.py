@@ -95,7 +95,10 @@ def spawn_editor( initcontents=None, filename=None ):
         tmpf.seek(0)
         return tmpf.read()
 
-    waiter.command = ' '.join(cmd)
+    # Set the command string for the client to display if necessary.
+    waiter.command = cmd
+    if isinstance(waiter.command, (tuple, list)):
+        waiter.command = ' '.join(waiter.command)
 
     return waiter
 

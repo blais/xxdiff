@@ -9,5 +9,5 @@
 USERPATH=$USERPATH:$PROJDIR/bin
 PYTHONPATH=$PYTHONPATH:$PROJDIR/lib/python
 
-XXDIFF_EDITOR=emacsclient
+XXDIFF_EDITOR="xterm -e '/usr/bin/vim %s'"
 export XXDIFF_EDITOR
