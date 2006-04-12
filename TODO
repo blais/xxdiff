@@ -5,8 +5,32 @@
 The More Urgent
 ===============
 
-* Complete xxdiff-sql-schemas, and move the code in the xxdiff package.
+* Bug: when a directory has been moved, we get this::
 
+    Status Of Files To Be Diffed
+    ----------------------------
+    A  +   /home/blais/p/carpool/test/lisp-css-generator
+    D      /home/blais/p/carpool/test/css-stylesheets
+    D      /home/blais/p/carpool/test/css-stylesheets/cssgen.cl
+    D      /home/blais/p/carpool/test/css-stylesheets/style.cl
+    D      /home/blais/p/carpool/test/css-stylesheets/css.lisp
+    M      /home/blais/p/carpool/app/root/resources/style.css
+    A      /home/blais/p/carpool/app/root/resources/cloth-background.gif
+    M      /home/blais/p/carpool/app/root/resources/style.css.in
+    M      /home/blais/p/carpool/app/config/draco-home.ini
+
+      Action           | Status
+      ---------------- | ----------------------------------------
+      directory, skip  | A  +   /home/blais/p/carpool/test/lisp-css-generator
+    svn: '/home/blais/p/carpool/test/css-stylesheets' refers to a directory
+    Error: Cannot fetch BASE revision: None
+
+
+* Binary file differences cause xxdiff_display to return an error, we need to
+  figure out some solution for this, because it stops the script.
+
+* Bug: toggling "Format clipboard text" at runtime does not seem to have an
+  effect.
 
 * Fix [1200496] Diff Errors reported with certain text files
 
@@ -26,8 +50,18 @@ The More Urgent
   allows you to interrupt and restart the diffing process where you left off.
   That would *rock*!  Put that in xxdiff-svn-diff.
 
+- From Monotone docs, easy fix::
+
+    Isn't it annoying that xxdiff doesn't have any keybinding for "save as merged"?
+    echo 'Accel.SaveAsMerged: "Ctrl+M"' >>~/.xxdiffrc
+
+
 --------------------------------------------------------------------------------
 (Scripts)
+
+* Write an asynchronous background loop in xformloop for slow processes, where a
+  number of diffs could accumulate in the background and be ready to diff while
+  whatever is being done to produce the diffs keeps running.
 
 * xxdiff: In decision mode, we should warn the user when selections have been
   made and the user exits with "merged".
@@ -73,6 +107,30 @@ The More Urgent
 * Implement --single-right: we should be able to display single files on either
   side.  You should fix xxdiff-match after that, so that it passes the correct
   options to xxdiff.
+
+--------------------------------------------------------------------------------
+
+* From Michalis Giannakidis, mgiann@beta-cae.gr
+
+  Do this:
+
+    What, here in our company, find useful about cvsxxdiff is:
+    o) cvsxxdiff is one file. No python module directory or initialization is
+    requierd.
+    o) Do a 'cvs up; cvsxxdiff' before commit to see all the local changes we have
+    made.
+    o) Do 'cvs up; cvsxxdiff -b 1 file.c' to see the last chages that were made on
+    a file by a colleague.
+    o) We often need to track bugs in our code. This means going back to previous
+    revisions, thus doing ex: 'cvsxxdiff -b 1 -b 2 file.c' to compare the
+    previous with the 2nd previous revision. (similar with cvsxxdiff -r 1.1 -r
+    1.2 file.c)
+    o) The utility prints  in the standard output the logs between revisions i
+    and j ( ex: cvsxxdif -b i -b j file.c)
+
+    One script to do it all.
+
+
 
 
 --------------------------------------------------------------------------------
