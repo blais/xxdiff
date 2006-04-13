@@ -5,6 +5,11 @@
 The More Urgent
 ===============
 
+* Implement the review restart functionality that was present in ``exp
+  preview``, this is annoying!!!
+
+
+
 * Bug: when a directory has been moved, we get this::
 
     Status Of Files To Be Diffed
@@ -26,8 +31,6 @@ The More Urgent
     Error: Cannot fetch BASE revision: None
 
 
-* Binary file differences cause xxdiff_display to return an error, we need to
-  figure out some solution for this, because it stops the script.
 
 * Bug: toggling "Format clipboard text" at runtime does not seem to have an
   effect.
@@ -43,7 +46,8 @@ The More Urgent
 * There is a slight rendering bug with my current font (see png file under /bugs)
 
 * xxdiff-cond-replace: find a way to put a set of invocations in the same backup
-  directory.
+  directory rather than creating a new directory for each invocation (which is
+  really stupid if called inside a loop).
 
 * Create a xxdiff.history module that uses the same mechanisms as exp-preview
   for maintaining a history of the files that have been reviewed, and that
@@ -107,6 +111,9 @@ The More Urgent
 * Implement --single-right: we should be able to display single files on either
   side.  You should fix xxdiff-match after that, so that it passes the correct
   options to xxdiff.
+
+* Consider putting a check for binary files in xxdiff.invoke.* and raise a
+  RuntimeError if the files aren't text.
 
 --------------------------------------------------------------------------------
 

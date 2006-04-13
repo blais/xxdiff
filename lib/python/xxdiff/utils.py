@@ -9,7 +9,9 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
+import re
 from curses.ascii import isalnum
+from subprocess import Popen, PIPE
 
 
 #-------------------------------------------------------------------------------
@@ -47,4 +49,29 @@ def idify( s, strip=True, preserve_chars=[] ):
         while e > 1 and ss[e-1] == '_': e -= 1
         ss = ss[b:e]
     return ss
+
+
+#-------------------------------------------------------------------------------
+#
+# Note: there has been a 'file' command for a long time under UNIX.  We favor
+# the short options to promote portability.  The --bried and --dereference
+# options were taken from Ian F. Darwin's file implementation.
+guesscmd = ['file', '-b', '-L']
+text_re = re.compile('\\btext\\b')
+
+def istextfile( fn ):
+    """
+    Attempts to guess if the file indicated by the given filename is a text file
+    or a binary file.
+    """
+
+    # Unfortunately 'file' does not return an appropriate return code when there
+    # is an error.  On top of that, it returns its errors on stdout.  We need to
+    # parse the output.
+    p = Popen(guesscmd + [fn], stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate()
+    if p.returncode != 0 or stderr or stdout.startswith('cannot open'):
+        raise RuntimeError("Error: Running 'file' on '%s'." % fn)
+
+    return bool(text_re.search(stdout))
 

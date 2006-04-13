@@ -19,6 +19,7 @@ from os.path import *
 import xxdiff.scripts
 import xxdiff.invoke
 import xxdiff.editor
+import xxdiff.utils
 from xxdiff.scripts import tmpprefix, script_name
 from xxdiff.scm import subversion
 from xxdiff.scripts.svnforeign import query_unregistered_svn_files
@@ -101,6 +102,10 @@ def review_file( sobj, opts ):
     finally:
         pass
 
+    # Check for non-text files.
+    if not xxdiff.utils.istextfile(left) or not xxdiff.utils.istextfile(right):
+        return 'non-text, skip', None
+        
     # Run xxdiff on the files.
     assert left and right
     if merged is not None:
