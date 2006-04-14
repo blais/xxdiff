@@ -289,7 +289,7 @@ def svndiff_main():
 
         # Delete temporary comments flie if we created it.
         if not opts.comments_file:
-            xxdiff.resilient.resilient_remove(delete_comfn)
+            xxdiff.resilient.resilient_remove(comfn)
 
     # The entire list of files has been reviewed (and possibly committed), clear
     # the history file.
