@@ -17,19 +17,19 @@ __author__ = ('Michalis Giannakidis <mgiannakidis@gmail.com>',
 
 
 # stdlib imports.
-import sys, os, re
+import sys, os, re, tempfile
+from subprocess import Popen, PIPE, call
 from os.path import *
 
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.invoke
-from xxdiff.invoke import title_opts
-from xxdiff.scripts import tmpprefix, script_name
+from xxdiff.scripts import tmpprefix
 
 
 #-------------------------------------------------------------------------------
 #
-match_status = re.compile('File:(.*)Status: (.*)')
+match_status = re.compile('File:\s*([^\s]+)\s*Status: (.*)')
 
 def collect_unupdated_files( diff_files, diff_directories, resolve_conflicts ):
     """
@@ -58,7 +58,7 @@ def collect_unupdated_files( diff_files, diff_directories, resolve_conflicts ):
         # FIXME: aren't you going to see the CVS/* files by doing this?
         # FIXME: do this with os.walk() in Python rather than by calling
         # 'find'.
-        p = Popen(['find', '.', '-name', fn], stdout=PIPE)
+        p = Popen(['find', '.', '-name', fn, '-print'], stdout=PIPE)
         stdout, stderr = p.communicate()
         files = map(str.strip, stdout.splitlines())
         if files:
@@ -105,8 +105,8 @@ def get_repository_revision( filename ):
     stdout, stderr = p.communicate()
     for l in stdout.splitlines():
             m = match_repository_rev.search(l)
-            if  m:
-                    return m.group(1)
+            if m:
+                return m.group(1)
     return '1.1'
 
 #-------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ def cvsxxdiff_bi_bj( diff_files, prevcounts ):
         # Print the revisions.
         revs = get_revisions_between(v1, v2)
         for r in revs:
-            print ' '.join(get_revision_log(fn, r))
+            print '\n'.join(get_revision_log(fn, r))
 
         # Launch xxdiff.
         xxdiff.invoke.xxdiff_display(
@@ -230,7 +230,7 @@ def cvsxxdiff_bi( diff_files, prevcount ):
         # Print the revisions.
         revs = get_revisions_between(v, vl)
         for r in revs:
-            print ' '.join(get_revision_log(fn, r))
+            print '\n'.join(get_revision_log(fn, r))
 
         # Get the other file from the server.
         p = Popen(['cvs', 'update', '-r', v, '-p', fn], stdout=PIPE)
@@ -255,7 +255,7 @@ def cvsxxdiff_ri( diff_files, action ):
 
         # Print the revisions.
         if action[0] == 'r':
-            print ' '.join(get_revision_log(fn, action[1]))
+            print '\n'.join(get_revision_log(fn, action[1]))
 
         # Launch xxdiff.
         p = Popen(['cvs', 'update', '-%s' % action[0], action[1], '-p', fn],
@@ -274,7 +274,7 @@ def cvsxxdiff_ri_rj( diff_files, actions ):
     """
     Compare to two absolute revision numbers.
     """
-    revs = [x[1] for x in actions]
+    revisions = [x[1] for x in actions]
     for fn in diff_files:
         print mkheader(fn)
 
@@ -287,16 +287,16 @@ def cvsxxdiff_ri_rj( diff_files, actions ):
 
         # Print revisions.
         if actions[0][0] == 'r' and actions[1][0] == 'r':
-            revs = get_revisions_between(revs[0], revs[1]])
+            revs = get_revisions_between(revisions[0], revisions[1])
             for r in revs:
-                print ' '.join(get_revision_log(fn, r))
+                print '\n'.join(get_revision_log(fn, r))
 
-        # Launch xxdiff.
-        xxdiff.invoke.xxdiff_display(
-            opts,
-            '--title1', "%s ( %s )" % (fn, revs[0]),
-            '--title2', "%s ( %s )" % (fn, revs[1]),
-            *[x.name for x in tmpfiles])
+##         # Launch xxdiff.
+##         xxdiff.invoke.xxdiff_display(
+##             opts,
+##             '--title1', "%s ( %s )" % (fn, revisions[0]),
+##             '--title2', "%s ( %s )" % (fn, revisions[1]),
+##             *[x.name for x in tmpfiles])
 
 #-------------------------------------------------------------------------------
 #
@@ -314,7 +314,7 @@ def cvsxxdiff_rep( diff_files ):
         # Print the revisions.
         revs = get_revisions_between(vr, vl)
         for r in revs:
-            print ' '.join(get_revision_log(fn, r))
+            print '\n'.join(get_revision_log(fn, r))
 
         # Launch xxdiff.
         p = Popen(['cvs', 'update', '-p', fn], stdout=PIPE)
@@ -336,7 +336,7 @@ def cvsxxdiff_c( diff_files ):
 
         # Get revision numbers.
         vl = get_local_trunk_version(fn)
-        print ' '.join(get_revision_log(fn, vl))
+        print '\n'.join(get_revision_log(fn, vl))
 
 
         # Launch xxdiff.
@@ -369,7 +369,7 @@ def parse_options():
                      dest='dates', default=[],
                      help="A date spec like CVS.  See cvs(1).")
 
-    group.add_option('-b', '--nb-revisions-before', action='append',
+    group.add_option('-b', '--nb-revisions-before', action='append', type='int',
                      metavar='NBREVS', dest='before', default=[],
                      help="The number of previous CVS revisions from HEAD.")
 
@@ -420,22 +420,23 @@ def revcomp_main():
     # Collect files.
     # FIXME: (add a better comment here.)
     if len(diff_files) == 0 or len(diff_directories) :
-        collect_unupdated_files(diff_files, diff_directories, resolve_conflicts)
+        collect_unupdated_files(diff_files, diff_directories,
+                                opts.resolve_conflicts)
 
     elif len(diff_files) > 1 :
         # Print a message to the user about the list of files to diff.
         print '%d files to diff:' % len(diff_files)
-        print '=' *80
+        print '=' * 80 + '\n'
         for fn in diff_files:
             print fn
-        print '=' *80 + '\n'
+        print '=' * 80 + '\n'
 
     # Dispatch to the appropriate method.
     if opts.resolve_conflicts:
         # ex: -c
         if actions:
-            parser.error("You cannot specify revision selectors when "
-                         "resolving conflicts.")
+            raise SystemExit("You cannot specify revision selectors when "
+                             "resolving conflicts.")
         cvsxxdiff_c(diff_files)
 
     # With a single revision selector.
@@ -450,11 +451,12 @@ def revcomp_main():
             cvsxxdiff_ri(diff_files, actions[0])
 
         else:
-            parser.error("Unsupported revision combination.")
+            raise SystemExit("Unsupported revision combination.")
 
     # With two revision selectors.
     elif len(actions) == 2:
         codes = tuple([x[0] for x in actions])
+        revs = tuple([x[1] for x in actions])
 
         if codes == ('b', 'b'):
             # ex: -b1 -b2
@@ -465,7 +467,7 @@ def revcomp_main():
             cvsxxdiff_ri_rj(diff_files, actions)
 
         else:
-            parser.error("Unsupported revision combination.")
+            raise SystemExit("Unsupported revision combination.")
 
     elif not actions:
         # ex: cvsxxdiff
