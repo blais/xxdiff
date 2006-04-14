@@ -80,10 +80,9 @@ def sqlcompare_main():
     files = xxdiff.mapcompare.render_diffable_maps(opts, db1.objmap, db2.objmap)
 
     # Set displayed titles.
-    titles = []
-    for i, db in enumerate( (db1, db2) ):
-        titles.extend(['--title%s' % (i+1), '%s (SCHEMA)' % db.dbspec])
-        
+    titles = xxdiff.invoke.title_opts(
+        '%s (SCHEMA)' % db.dbspec for db in (db1, db2))
+
     # Invoke xxdiff .
     xxargs = titles + [x.name for x in files]
     xxdiff.invoke.xxdiff_display(opts, *xxargs)

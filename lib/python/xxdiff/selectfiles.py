@@ -10,7 +10,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 # stdlib imports.
 import sys, os, re, optparse
-from os.path import join
+from os.path import join, isfile
 
 
 #-------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ def options_graft( parser ):
                      "given file.")
 
     group.add_option('-r', '--root', action='append', dest='roots',
-                     default=[],
+                     default=[], metavar='ROOT',
                      help="Specify a root to perform the search from "
                      "(default is CWD).  You can use this option many times"
                      "for multiple roots.")
@@ -189,6 +189,10 @@ def select_patterns( rootdirs, opts ):
 
             # Filter files.
             for fn in files:
+                # Skip symlinks and special files.
+                if not isfile(join(dn, fn)):
+                    continue
+
                 add = False
 
                 # Select.
@@ -203,7 +207,7 @@ def select_patterns( rootdirs, opts ):
                         text = open(join(dn, fn), 'r').read()
                     except IOError, e:
                         raise SystemExit(
-                            "Error: could not read file '%s'." % fn)
+                            "Error: could not read file '%s' for grep." % fn)
                     if not opts.select_grep.search(text):
                         add = False
 
@@ -219,7 +223,7 @@ def select_patterns( rootdirs, opts ):
                         text = open(join(dn, fn), 'r').read()
                     except IOError, e:
                         raise SystemExit(
-                            "Error: could not read file '%s'." % fn)
+                            "Error: could not read file for ignore '%s'." % fn)
                     if opts.ignore_grep.search(text):
                         add = False
 

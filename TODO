@@ -2,11 +2,25 @@
    TODO: xxdiff
 ==================
 
+
 The More Urgent
 ===============
 
+* Write documentation for SQL schema comparison!
+* Write documentation for the new revcomp script!
+
+
 * Implement the review restart functionality that was present in ``exp
   preview``, this is annoying!!!
+
+  Lines like this::
+
+    lastmod    M      /home/blais/p/carpool/app/config/draco-home.ini
+
+  Check if line there, if so, skip it.
+
+
+
 
 
 
@@ -65,7 +79,8 @@ The More Urgent
 
 * Write an asynchronous background loop in xformloop for slow processes, where a
   number of diffs could accumulate in the background and be ready to diff while
-  whatever is being done to produce the diffs keeps running.
+  whatever is being done to produce the diffs keeps running.  Grab this from my
+  good old exp preview.  Put this in ``lib/python/xxdiff/async.py``
 
 * xxdiff: In decision mode, we should warn the user when selections have been
   made and the user exits with "merged".

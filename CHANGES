@@ -7,6 +7,18 @@ Version 3.2: (major feature enhancements)
 
 (Version 3.2b2)
 
+* xxdiff/invoke.py: refactored the xxdiff invocation functions to accept open
+  files as stdin.
+
+* xxdiff-svn-diff: Fixed bug with diff of directories crashing: we're not
+  ignoring directories and symlinks appropriately.
+
+* xxdiff-svn-diff: Implemented history for file review.  xxdiff-svn-diff
+  remembers the list of files it has already viewed in previous sessions, as
+  long as the list of pathnames (considered as absolute) are the same.  This
+  information is saved, along with the merge comments in the user's
+  $HOME/.xxdiff-svn-diff directory under an appropriate hash.
+
 * xxdiff-svn-diff: Allowed an explicitly specified file (via --comments-file) to
   be recycled;  this is useful if you interrupted the preview process and you
   do not want to lose the comments you made.  By specifying the same filename,

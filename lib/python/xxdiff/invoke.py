@@ -53,6 +53,41 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
+def _run_xxdiff( cmd, opts, stdin ):
+    """
+    Runs the given xxdiff command and return a Popen object.
+    'stdin' is the optional stdin text or open file to send to xxdiff.
+
+    Note: this is an internal function, not meant to be called from the outside.
+    """
+    if getattr(opts, 'xxdiff_verbose', None):
+        print '===', ' '.join(cmd)
+
+    if stdin is not None:
+        assert '-' in cmd
+    if isinstance(stdin, (str, unicode)):
+        # stdin is text.
+        intype = PIPE
+        intext = stdin
+    elif isinstance(stdin, file) or hasattr(stdin, 'read'):
+        # stdin is an open pipe/file.
+        intype = stdin
+    else:
+        intype = None
+        
+    p = Popen(cmd,
+              stdout=PIPE,
+              stderr=PIPE,
+              stdin=intype)
+
+    # Write the given text to stdin if necessary.
+    if intype is PIPE:
+        p.stdin.write(intext)
+    
+    return p
+
+#-------------------------------------------------------------------------------
+#
 decisions = ('ACCEPT', 'REJECT', 'MERGED', 'NODECISION')
 
 def xxdiff_decision( opts, *arguments, **kwds ):
@@ -75,8 +110,8 @@ def xxdiff_decision( opts, *arguments, **kwds ):
     If the decision code is 'NODECISION', the merged file is set to None (its
     contents are undefined).
 
-    'stdin' (in kwds) can be used to pass input to the subordinate xxdiff
-    process.
+    'stdin' (in kwds) can be used to pass text or an open file to the
+    subordinate xxdiff process.
 
     If you want to perform actions asynchronously while xxdiff is waiting for
     the user's decision, you can set 'nowait' (in kwds) to True, the function
@@ -114,20 +149,8 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
     # Run xxdiff.
     cmd = [xexec] + alloptions
-    if getattr(opts, 'xxdiff_verbose', None):
-        print '===', ' '.join(cmd)
+    p = _run_xxdiff(cmd, opts, kwds.pop('stdin', None))
 
-    stdin_text = kwds.pop('stdin', None)
-    p = Popen(cmd,
-              stdout=PIPE,
-              stderr=PIPE,
-              stdin=(stdin_text and PIPE or None))
-
-    # Write to stdin if necessary.
-    if stdin_text:
-        p.stdin.write(stdin_text)
-        p.stdin.close()
-    
     # Define waiter object.
     def waiter():
         # Select-wait for stdout and stderr
@@ -183,6 +206,10 @@ def xxdiff_display( opts, *arguments, **kwds ):
     on the child process.  Otherwise, this function will wait for the child to
     terminate.
 
+    'stdin' (in kwds) can be used to pass text or an open file to the
+    subordinate xxdiff process.  You will need to specify a '-' as one of the
+    file arguments to specify on which side to display the stdin file.
+
     We do not create a merged file, but you are free to pass in these options if
     so desired.
     """
@@ -205,20 +232,7 @@ def xxdiff_display( opts, *arguments, **kwds ):
 
     # Run xxdiff.
     cmd = [xexec] + alloptions
-    if getattr(opts, 'xxdiff_verbose', None):
-        print '===', ' '.join(cmd)
-
-    stdin_text = kwds.pop('stdin', None)
-    p = Popen(cmd,
-              stdout=PIPE,
-              stderr=PIPE,
-              stdin=(stdin_text and PIPE or None))
-
-    # Write to stdin if necessary.
-    if stdin_text:
-        p.stdin.write(stdin_text)
-        p.stdin.close()
-    
+    p = _run_xxdiff(cmd, opts, kwds.pop('stdin', None))
 
     # Define waiter object.
     def waiter():
@@ -251,6 +265,21 @@ def xxdiff_display( opts, *arguments, **kwds ):
 
     # Wait for the results and return them.
     return waiter()
+
+
+#-------------------------------------------------------------------------------
+#
+def title_opts( *titles ):
+    """
+    Generate title options for each of the given titles.  This returns a list of
+    the options to give xxdiff to set the titles in the given order.
+    """
+    assert len(titles) <= 3
+    topts = []
+    for idx, title in enumerate(titles):
+        topts.append('--title%d' % (idx+1))
+        topts.append(title)
+    return topts
 
 
 #-------------------------------------------------------------------------------
@@ -291,6 +320,13 @@ def test():
             w = xxdiff_display(Opts, f1, f2, nowait=1)
             print 'Deleting temp input files...'
             print w()
+
+        if t == 'pipe-text':
+            print xxdiff_display(Opts, f2, '-', stdin='Some text\n')
+
+        if t == 'pipe-cmd':
+            p = Popen('cat $HOME/.xxdiffrc', shell=True, stdout=PIPE)
+            print xxdiff_display(Opts, '-', f2, stdin=p.stdout)
 
 if __name__ == '__main__':
     test()

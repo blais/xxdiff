@@ -263,9 +263,9 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None, extra=None ):
         diff_output = None
 
     # Add arguments to identify files in the title bars.
-    dargs = ['--title1', '%s (WORKING)' % mine,
-             '--title2', '%s (ANCESTOR)' % ancestor,
-             '--title3', '%s (MERGED/NEW BASE)' % yours]
+    dargs = xxdiff.invoke.title_opts('%s (WORKING)' % mine,
+                                     '%s (ANCESTOR)' % ancestor,
+                                     '%s (MERGED/NEW BASE)' % yours)
     if extra is not None:
         dargs = list(extra) + dargs
 

@@ -2,14 +2,15 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-Misc utilities.
+Misc utilities.  No, really, they are really miscallenous, and unrelated.
 """
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import re
+import os, re
+from os.path import exists
 from curses.ascii import isalnum
 from subprocess import Popen, PIPE
 
@@ -58,6 +59,7 @@ def idify( s, strip=True, preserve_chars=[] ):
 # options were taken from Ian F. Darwin's file implementation.
 guesscmd = ['file', '-b', '-L']
 text_re = re.compile('\\btext\\b')
+empty_re = re.compile('^empty$')
 
 def istextfile( fn ):
     """
@@ -73,5 +75,18 @@ def istextfile( fn ):
     if p.returncode != 0 or stderr or stdout.startswith('cannot open'):
         raise RuntimeError("Error: Running 'file' on '%s'." % fn)
 
-    return bool(text_re.search(stdout))
+    return bool(text_re.search(stdout) or empty_re.match(stdout))
+
+
+#-------------------------------------------------------------------------------
+#
+def makedirs( dirn, error_on_exist=True ):
+    """
+    A replacement for os.makedirs() that has an option to avoid complaining if
+    the destination directory already exists.
+    """
+    if error_on_exist is False:
+        if exists(dirn):
+            return 
+    os.makedirs(dirn)
 

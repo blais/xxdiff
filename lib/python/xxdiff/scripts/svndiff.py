@@ -18,25 +18,15 @@ from os.path import *
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.invoke
+from xxdiff.invoke import title_opts
 import xxdiff.editor
+import xxdiff.resilient
 import xxdiff.utils
+from xxdiff.utils import makedirs
+import xxdiff.history
 from xxdiff.scripts import tmpprefix, script_name
 from xxdiff.scm import subversion
 from xxdiff.scripts.svnforeign import query_unregistered_svn_files
-
-#-------------------------------------------------------------------------------
-#
-# A per-user directory to hold comments files.  We want to be able to recycle
-# the comments file if the review process has been interrupted for some
-# reason--this is quite common for source code, as the reviewer often realizes
-# he forgot to do something or other, this is a benefit of reviewing diffs
-# before committing--if the same directories/files are to be checked-in.  We do
-# not want to store the files in the CWD because that might change, and it may
-# later interfere with other tools, e.g. show up in 'svn status' if left behind.
-# Therefore, we store the comments file in the user's home directory under a
-# hash computed from the absolute paths of the directories given as arguments.
-comments_dir = join(os.environ['HOME'], '.%s' % script_name)
-
 
 
 #-------------------------------------------------------------------------------
@@ -44,14 +34,16 @@ comments_dir = join(os.environ['HOME'], '.%s' % script_name)
 def review_file( sobj, opts ):
     """
     Check the given status object and if necessary, spawn xxdiff on it.
+
+    Return a pair of ((file type description, action) waiter-object).
     """
-    msg = 'xxdiff'
+    msg = ('normal', 'display')
     dopts = []
     merged = sobj.filename
     try:
         # Ignore unmodified files if there are any.
         if sobj.status in (' ', '?'):
-            msg = 'ignored'
+            msg = ('unmodified', 'ignored')
             return msg, None
 
         # Diff modified files
@@ -59,13 +51,13 @@ def review_file( sobj, opts ):
             tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
             left, right = tmpf.name, sobj.filename
 
-            dopts.extend(['--title1', '%s (BASE)' % sobj.filename])
+            dopts.extend(title_opts('%s (BASE)' % sobj.filename))
 
         # Diff added files
         elif sobj.status == 'A':
             # Check if it is a directory.
             if not isfile(sobj.filename):
-                msg = 'directory, skip'
+                msg = ('directory', 'skip')
                 return msg, None
 
             if sobj.withhist == '+':
@@ -75,10 +67,10 @@ def review_file( sobj, opts ):
                                       for x in 'URL', 'Rev']
 
                 tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
-                dopts.extend(['--title1', '%s (%s)' % (from_url, from_rev)])
+                dopts.extend(title_opts('%s (%s)' % (from_url, from_rev)))
             else:
                 tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
-                dopts.extend(['--title1', '(NON-EXISTING)'])
+                dopts.extend(title_opts('(NON-EXISTING)'))
 
             left, right = tmpf.name, sobj.filename
 
@@ -87,14 +79,14 @@ def review_file( sobj, opts ):
             tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
             tmpf_empty = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
 
-            dopts.extend(['--title1', '%s (BASE)' % sobj.filename,
-                          '--title2', '(DELETED)'])
+            dopts.extend(title_opts('%s (BASE)' % sobj.filename,
+                                    '(DELETED)'))
 
             left, right = tmpf.name, tmpf_empty.name
 
         # We don't know what to do with the rest yet.
         else:
-            msg = 'ignored'
+            msg = ('unknown', 'ignored')
             print >> sys.stderr, (
                 "Error: Action for status '%s' on file '%s' "
                 "is not implemented yet") % (sobj.status, sobj.filename)
@@ -104,7 +96,7 @@ def review_file( sobj, opts ):
 
     # Check for non-text files.
     if not xxdiff.utils.istextfile(left) or not xxdiff.utils.istextfile(right):
-        return 'non-text, skip', None
+        return ('non-text', 'skip'), None
         
     # Run xxdiff on the files.
     assert left and right
@@ -145,15 +137,16 @@ def parse_options():
                       "unregistered files and ask the user one by one about "
                       "what to do with them.")
 
-    xxdiff.invoke.options_graft(parser)
+    for mod in xxdiff.invoke, xxdiff.history:
+        mod.options_graft(parser)
     xxdiff.backup.options_graft(parser,
                                 "These options affect automatic backup of "
                                 "deleted files, if enabled.")
     
     opts, args = parser.parse_args()
 
-    xxdiff.backup.options_validate(opts, parser)
-    xxdiff.invoke.options_validate(opts, parser)
+    for mod in xxdiff.backup, xxdiff.invoke, xxdiff.history:
+        mod.options_validate(opts, parser)
 
     if opts.comments_file and not opts.commit:
         print >> sys.stderr, "(Option '%s' ignored.) " % o.dest
@@ -169,10 +162,21 @@ def svndiff_main():
     """
     opts, args = parse_options()
 
+    # Compute the location of the resilient directory for the comments and
+    # history files (and maybe more stuff later on).
+    resildir = xxdiff.resilient.resilient_for_paths(args)
+    hist = xxdiff.history.History(opts, resildir)
+
+    # Compute a list of files to ignore (e.g. if the comments or history file is
+    # located in the checkout, we want to ignore them and then associated
+    # swap/temp files).
     ignofiles = []
     if opts.commit and opts.comments_file:
         comfn = abspath(opts.comments_file)
         ignofiles.extend([comfn, '%s.swp' % comfn])
+    if opts.history and opts.history_file:
+        histfn = abspath(opts.history_file)
+        ignofiles.extend([histfn, '%s.swp' % histfn])
 
     if opts.foreign:
         # Consider the unregistered files.
@@ -191,29 +195,22 @@ def svndiff_main():
             
     if not statii:
         print '(Nothing to do, exiting.)'
-        return 0
+        hist.delete()
+        return
 
     # First print out the status to a string.
     renstatus = os.linesep.join(x.parsed_line for x in statii)
 
     if opts.commit:
         # File to delete after a succesful commit.
-        delete_comfn = None
-
         if opts.comments_file:
             comfn = abspath(opts.comments_file)
         else:
             # Select a comments file and make sure that it exists.
-            comhash = md5.new()
-            for arg in args:
-                comhash.update(abspath(arg))
-            comfn = join(comments_dir, comhash.hexdigest())
-            delete_comfn = comfn
+            comfn = join(resildir, 'comments')
+
+            makedirs(resildir, False)
             if not exists(comfn):
-                # Make sure that the parent directories are created.
-                if not exists(comments_dir):
-                    os.makedirs(comments_dir)
-                # Touch the file.
                 open(comfn, 'w')
 
     # Spawn an editor if requested before starting the review.
@@ -228,17 +225,49 @@ def svndiff_main():
     print renstatus
 
     # Then we start printing each file and the associated decision.
-    msgfmt = '  %-16s | %s'
+    msgfmt = '  %-10s | %-10s | %s'
     print
-    print msgfmt % ('Action', 'Status')
-    print msgfmt % ('-'*16, '-'*40)
+    print msgfmt % ('Type', 'Action', 'Status')
+    print msgfmt % ('-'*10, '-'*10, '-'*40)
 
     # Main loop for graphical diffs, over each of the files reported by status.
     for s in statii:
-        msg, waiter = review_file(s, opts)
-        print msgfmt % (msg, s.parsed_line)
+        kind, action = 'unknown', 'exception' # Initialize for in case of an
+                                              # exception.
+        try:
+            # Skip directories.
+            if isdir(s.filename):
+                kind, action = 'directory', 'skip'
+                continue
+            elif islink(s.filename):
+                kind, action = 'symlink', 'skip'
+                continue
+                
+            # Compute unique string for history recorder.  We use the size, last
+            # modification time, and status info to hash on this.
+            if exists(s.filename):
+                fstat = os.lstat(s.filename)
+                sz, mtime = fstat.st_size, fstat.st_mtime
+            else:
+                # Deal with files that have been deleted.
+                sz, mtime = 0, 0
+            histitem = ' '.join((str(sz), str(mtime), s.parsed_line))
+
+            # If the file has already been reviewed in the history, skip it.
+            if hist.check(histitem):
+                kind, action = 'seen', 'skip'
+                continue
+
+            # Review the file.
+            (kind, action), waiter = review_file(s, opts)
+        finally:
+            print msgfmt % (kind, action, s.parsed_line)
+
         if waiter is not None:
             waiter()
+
+        # We have succesfully finished viewing the file, add it to the history.
+        hist.append(histitem)
 
     # Commit the files if requested.
     if opts.commit:
@@ -259,10 +288,17 @@ def svndiff_main():
         subversion.commit(args, comments=comments)
 
         # Delete temporary comments flie if we created it.
-        if delete_comfn:
-            os.unlink(delete_comfn)
+        if not opts.comments_file:
+            xxdiff.resilient.resilient_remove(delete_comfn)
 
-        
+    # The entire list of files has been reviewed (and possibly committed), clear
+    # the history file.
+    if opts.history:
+        print 
+        print '(Review complete, history cleared)'
+    hist.delete()
+
+    
 #-------------------------------------------------------------------------------
 #
 def main():
