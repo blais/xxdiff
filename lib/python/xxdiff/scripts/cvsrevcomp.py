@@ -159,8 +159,9 @@ def get_revision_log( filename, rev ):
     """
     log = []
 
-    p = Popen(['cvs', 'log', '-r', rev, filename], stdout=PIPE)
+    p = Popen(['cvs', 'log', '-r', rev, filename], stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
+    # Note: we're simply throwing away stderr here.
 
     start_log = False
     for l in stdout.splitlines():
