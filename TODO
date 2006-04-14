@@ -77,6 +77,11 @@ The More Urgent
 --------------------------------------------------------------------------------
 (Scripts)
 
+* xxdiff-svn-diff: When the parent process gets killed, make sure to kill the
+  editor as well, otherwise it can be really annoying because this leaves swap
+  files around if we restart manually killing the editing window (which can
+  happen if you leave it in the background).
+
 * Write an asynchronous background loop in xformloop for slow processes, where a
   number of diffs could accumulate in the background and be ready to diff while
   whatever is being done to produce the diffs keeps running.  Grab this from my
