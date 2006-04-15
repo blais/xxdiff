@@ -420,6 +420,12 @@ similarly to the <strong>sed</strong> <tt class="docutils literal"><span class="
 <pre class="literal-block">
 xx-rename FrobnicatorBaseClass FrobnicatorBase
 </pre>
+<p>Note that you can also specify more than one from/to rename pair and all the
+renamings are applied in the same run, in the same order that they appear on the
+command-line:</p>
+<pre class="literal-block">
+xx-rename from1 to1 from2 to2 from3 to3
+</pre>
 </div>
 <div class="section">
 <h3><a class="toc-backref" href="#id24" id="xx-find-grep-sed" name="xx-find-grep-sed">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></h3>

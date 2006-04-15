@@ -215,7 +215,7 @@ We can easily implement the (c) part without embedding it in a loop.
 
 
 ``xx-cond-replace``
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 This program is akin to the UNIX command ``cp``, but its actions are conditional
 to your feedback within xxdiff.  If you *accept*, the target file is overwritten
@@ -342,7 +342,7 @@ Would give output like this, without running any graphical diff at all::
 
 
 ``xx-filter``
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 This script invokes the selection loop (a), runs a command that you specify and
 invokes xxdiff on each result (c).  It basically directs the process, and runs
@@ -358,7 +358,7 @@ the changes that were applied, as a side-by-side log.
 
 
 ``xx-rename``
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 By far, the most common use case for this kind of process is that of renaming a
 string or text matched by a regular expression by another string.  This works
@@ -368,9 +368,15 @@ Here is an example invocation::
 
    xx-rename FrobnicatorBaseClass FrobnicatorBase
 
+Note that you can also specify more than one from/to rename pair and all the
+renamings are applied in the same run, in the same order that they appear on the
+command-line::
+
+   xx-rename from1 to1 from2 to2 from3 to3
+
 
 ``xx-find-grep-sed``
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 This script is a relic of the past, the actual ancestor to all of this.  You
 see, this used to be a Bourne shell script, before it became something called
@@ -392,7 +398,7 @@ really, it should go.
 
 
 ``xx-pyline``
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 In the Python cookbook, `this recipe`__ proposes to compile and run a Python
 expression on lines, similar to sed, but just using Python code.  With the new
@@ -451,7 +457,7 @@ the scripts provided with the package as examples, they all follow that pattern.
 
 
 ``xx-match``
-================
+============
 
 One day, a silly man asked me the following question via email: 
 
@@ -482,7 +488,7 @@ CVS Support
 ===========
 
 ``xx-cvs-diff``
--------------------
+---------------
 
 I wanted to be able to preview the changes that I had made in a CVS checkout.
 This script does it.  It pulls the original versions from the server by using
@@ -523,7 +529,7 @@ that with an option).
 
 
 ``xx-diff-proxy``
----------------------
+-----------------
 
 Subversion has a diff subcommand:;
 
@@ -548,7 +554,7 @@ following lines to your ``~/.subversion/config`` file::
 
 
 ``xx-svn-diff``
--------------------
+---------------
 
 In my opinion, Subversion provides a diff loop that is rather weak.  I want more
 options in the ways that I can review my changes.  ``xx-svn-diff`` runs
@@ -591,7 +597,7 @@ Future Features
 
 
 ``xx-svn-resolve``
-----------------------
+------------------
 
 Subversion provides a fancier version of conflict resolution: all three files--
 yours, the other and the ancestor--are provided in your checkout to help you
@@ -684,7 +690,7 @@ file, I must:
 This is quite time-consuming.  Let's automate!
 
 ``xx-encrypted``
---------------------
+----------------
 
 This script will do all of the above for two encryped files, and it also
 attempts to minimize the amount of time that a decrypted file will live on
