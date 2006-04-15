@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-xxdiff-pyline [<options>] <python-expr> [<python-expr> ...]
+xx-pyline [<options>] <python-expr> [<python-expr> ...]
 
 Run the given Python code on each line of the input.  This is a bit like sed,
 except that it's just Python code.

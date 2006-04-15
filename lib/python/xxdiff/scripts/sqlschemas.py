@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-sql-schemas [<options>] <db1> <db2>
+"""xx-sql-schemas [<options>] <db1> <db2>
 
 Where <dbX> is of the form:   [user@]<dbname>[/schema]
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-diff-proxy [<options>] <file> <file> [<file>]
+"""xx-diff-proxy [<options>] <file> <file> [<file>]
 
 Simple wrapper script for xxdiff that presents options that are the same as the
 diff or diff3 commands.  This can be used with programs that expect to call
@@ -11,13 +11,13 @@ different diff program.
 This was originally created for integration with Subversion.  This is meant to
 be used in a user's configuration file to set diff-cmd and diff3-cmd options, so
 that when you run ``svn diff`` it spawns xxdiffs instead of textual diffs (see
-also xxdiff-svn-diff).
+also xx-svn-diff).
 
 Add the following lines ``~/.subversion/config``::
 
   [helpers]
-  diff-cmd = xxdiff-diff-proxy
-  diff3-cmd = xxdiff-diff-proxy
+  diff-cmd = xx-diff-proxy
+  diff3-cmd = xx-diff-proxy
 
 This script returns the same value as the underlying xxdiff with option
 --exit-with-merge-status, so that you can do something special if there are

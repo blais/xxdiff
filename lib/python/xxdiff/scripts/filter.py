@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-xxdiff-filter [<options>] <cmd>
+xx-filter [<options>] <cmd>
 
 Run a command to perform replacements in files and confirm the application of
 changes via xxdiff.

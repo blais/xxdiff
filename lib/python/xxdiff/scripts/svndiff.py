@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-svn-diff [<options>] <file> <file> [<file>]
+"""xx-svn-diff [<options>] <file> <file> [<file>]
 
 Script that invokes xxdiff for all modified files in the given Subversion
 checkout area.

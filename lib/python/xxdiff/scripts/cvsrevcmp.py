@@ -5,7 +5,7 @@
 # name cvsxxdiff.py.  This script was integrated in april 2006 in the xxdiff
 # scripts.
 
-"""xxdiff-cvs-revcmp [<options>] [FILE ...]
+"""xx-cvs-revcmp [<options>] [FILE ...]
 
 Display file differences with the current or a previous CVS version.  Use one or
 two of the version selection options to select which fileset to compare.

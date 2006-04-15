@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-cond-replace [<options>] <orig-file> <modified-file>
+"""xx-cond-replace [<options>] <orig-file> <modified-file>
 
 Useful script to conditionally replace a original by a generated file.
 
@@ -16,7 +16,7 @@ whether to copy the file or not.  This is useful to run in a loop, for example::
    for i in `*/*.xml` ; do
       cat $i | ...pipeline of cmds that modifies the file... > /tmp/out.xml
       # copy only if the user accepts or merges.
-      xxdiff-cond-replace /tmp/out.xml $i
+      xx-cond-replace /tmp/out.xml $i
    done
 
 **IMPORTANT**: Notice well that the original file which will be overwritten is

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-match [<options>] <file> <file> <file> <file> ...
+"""xx-match [<options>] <file> <file> <file> <file> ...
 
 Wrapper script for xxdiff that implements an invocation syntax like this:
 
-  xxdiff-match dir1/*.c dir2/*.c
+  xx-match dir1/*.c dir2/*.c
 
 The way we implement the heuristic to match up files is simple: we match up the
 basenames of the files.  If there are exactly two or three files in the list, we
@@ -17,7 +17,7 @@ matching script (see 'match-files' by the same author) along with xargs, e.g.::
 
   match-files dir1/*.c dir2/*.c | xargs -n2 xxdiff
 
-Using xxdiff-match has the advantage that it work with matches of 2 or 3 files,
+Using xx-match has the advantage that it work with matches of 2 or 3 files,
 and also spawns xxdiff on single files (with an empty side).
 
 Note: many users do not seem to understand why such a script is necessary. One

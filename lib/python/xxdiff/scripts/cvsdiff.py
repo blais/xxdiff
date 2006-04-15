@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-cvs-diff [<options>] [<file> <file> ...]
+"""xx-cvs-diff [<options>] [<file> <file> ...]
 
 This simple script invokes 'cvs diff' with the given file arguments, then splits
 the output patch for individual files, applies the reverse patches to temporary
@@ -18,7 +18,7 @@ user, then the script takes the following actions upon the answer:
 - REJECT: don't do anything, keep the new file as it but do not commit.
 
 For more generic behaviour about merging patches graphically, see also
-xxdiff-patch.  The current script is really about committing "some" cvs changes.
+xx-patch.  The current script is really about committing "some" cvs changes.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"

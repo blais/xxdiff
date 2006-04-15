@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-svn-resolve [<options>] <file> <file> [<file>]
+"""xx-svn-resolve [<options>] <file> <file> [<file>]
 
 Script that invokes xxdiff with a 3-way merge view for all files in a Subversion
 checkout whose conflicts need to be resolved.  Depending on the exit status,

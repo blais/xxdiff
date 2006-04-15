@@ -2,7 +2,7 @@
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
-xxdiff-find-grep-sed [<options>] <regexp> <sed-cmd>
+xx-find-grep-sed [<options>] <regexp> <sed-cmd>
 
 Perform global sed-like replacements in a set of files.
 
@@ -14,7 +14,7 @@ through a sed command and replace the file with that output.
 This script effectively becomes obsolete, because it can be replace by a much
 more generic equivalent::
 
-   xxdiff-filter --select-grep='<regexp>' 'sed -e <sed-code>'
+   xx-filter --select-grep='<regexp>' 'sed -e <sed-code>'
 
 """
 
@@ -115,8 +115,8 @@ def findgrepsed_main():
     xformer = GrepSedTransformer(opts, regexp, sedprog)
 
     import warnings
-    warnings.warn("xxdiff-find-grep-sed is obsolete. "
-                  "Use xxdiff-filter with --select-grep option instead.")
+    warnings.warn("xx-find-grep-sed is obsolete. "
+                  "Use xx-filter with --select-grep option instead.")
 
     try:
         decision_map = xxdiff.xformloop.transform_replace_loop(

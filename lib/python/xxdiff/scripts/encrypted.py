@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-encrypted [<options>] <encrypted-file> [<encrypted file> ...]
+"""xx-encrypted [<options>] <encrypted-file> [<encrypted file> ...]
 
 Compare and merge contents of encrypted files relatively safely.
 

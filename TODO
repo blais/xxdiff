@@ -8,7 +8,7 @@ The More Urgent
 
 * Write documentation for the new revcomp script!
 
-* xxdiff-svn-diff: Comments file: To add new files to the comments file:
+* xx-svn-diff: Comments file: To add new files to the comments file:
 
   a) Check if at least one line of the comments file is the same as any line of
   the status OR if the file is empty
@@ -18,6 +18,11 @@ The More Urgent
 
   c) otherwise we do not append the new statii lines
 
+
+* In decision mode, if there are at least one selection from each side, if the
+  user leaves with A or R, pop a confirmation box.  This is important to avoid
+  errors.  It is way too easy to select for merge and exit with A.  I've been
+  caught many times.
 
 * Bug: toggling "Format clipboard text" at runtime does not seem to have an
   effect.
@@ -32,14 +37,14 @@ The More Urgent
 
 * There is a slight rendering bug with my current font (see png file under /bugs)
 
-* xxdiff-cond-replace: find a way to put a set of invocations in the same backup
+* xx-cond-replace: find a way to put a set of invocations in the same backup
   directory rather than creating a new directory for each invocation (which is
   really stupid if called inside a loop).
 
 * Create a xxdiff.history module that uses the same mechanisms as exp-preview
   for maintaining a history of the files that have been reviewed, and that
   allows you to interrupt and restart the diffing process where you left off.
-  That would *rock*!  Put that in xxdiff-svn-diff.
+  That would *rock*!  Put that in xx-svn-diff.
 
 - From Monotone docs, easy fix::
 
@@ -53,7 +58,7 @@ The More Urgent
 --------------------------------------------------------------------------------
 (Scripts)
 
-* xxdiff-svn-diff: When the parent process gets killed, make sure to kill the
+* xx-svn-diff: When the parent process gets killed, make sure to kill the
   editor as well, otherwise it can be really annoying because this leaves swap
   files around if we restart manually killing the editing window (which can
   happen if you leave it in the background).
@@ -66,7 +71,7 @@ The More Urgent
 * xxdiff: In decision mode, we should warn the user when selections have been
   made and the user exits with "merged".
 
-* xxdiff-rename: With respect to case sensitivity, supports the smart
+* xx-rename: With respect to case sensitivity, supports the smart
   replacement behaviour that is present in GNU emacs.
 
 * Implement a better side-by-side diff that includes line numbers and context.
@@ -76,14 +81,14 @@ The More Urgent
 
   - Add an option to generate normal diffs rather than side-by-side.
 
-* xxdiff-patch: Finish It! 
+* xx-patch: Finish It! 
 
   * You have to deal with 'delete' and 'add' cases.
 
   * Q: what do we do when patch fails?  How do we treat it?
     must read the output messages of patch and warn the user.
 
-* xxdiff-svn-diff: TODO
+* xx-svn-diff: TODO
 
   * --launcher: Create simple PyQt or CURSES GUI for listing files from ``svn
     status``, on which you can click to view the diffs.
@@ -105,7 +110,7 @@ The More Urgent
    ./scripts/patch.py:        cin, cout = os.popen2(cmd, 'rw')
 
 * Implement --single-right: we should be able to display single files on either
-  side.  You should fix xxdiff-match after that, so that it passes the correct
+  side.  You should fix xx-match after that, so that it passes the correct
   options to xxdiff.
 
 * Consider putting a check for binary files in xxdiff.invoke.* and raise a
@@ -268,7 +273,7 @@ Promo
 - promotion on xxdiff webpage before release:  ask ev and gd for a quote, how
   many developers, etc.
 
-- send email to GnuPG mailing-list about xxdiff-encrypted script
+- send email to GnuPG mailing-list about xx-encrypted script
 
 
 

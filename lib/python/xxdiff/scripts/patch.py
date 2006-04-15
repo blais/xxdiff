@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
-"""xxdiff-patch [<options>] [<patchfile>]
+"""xx-patch [<options>] [<patchfile>]
 
 This simple script splits the input patch for the individual files it
 represents, applies the individual patches to temporary files and for each,
@@ -10,7 +10,7 @@ interactively.  You can accept or reject a patch for each file.  You can also
 merge the patch interactively with xxdiff, and select for the merged results to
 be applied on the output file.
 
-If no <patchfile> is specified, xxdiff-patch attempts to read the patch from
+If no <patchfile> is specified, xx-patch attempts to read the patch from
 stdin.
 
 Important: the new (patched) file will always be shown on the right.  The
@@ -41,15 +41,15 @@ Examples
   To apply a patch, simply cd into the root of the directory where the patch
   should be applied, and invoke like this:
 
-     cat patchfile | xxdiff-patch
+     cat patchfile | xx-patch
 
   To preview the changes that have been made in a cvs checkout area, use the
   following command::
 
-     cvs diff | xxdiff-patch --reverse --invert --preview
+     cvs diff | xx-patch --reverse --invert --preview
 
   (For better cvs-specific behaviour about committing changes, see script
-  xxdiff-cvs-diff.)
+  xx-cvs-diff.)
 
 .. important::
 

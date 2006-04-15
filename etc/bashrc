@@ -10,9 +10,9 @@
 #
 # This is not necessary for other users, the scripts will work without 
 # auto-generated programmable completion.
-complete -F _optcomplete xxdiff-cond-replace
-complete -F _optcomplete xxdiff-cvs-diff
-complete -F _optcomplete xxdiff-encrypted
-complete -F _optcomplete xxdiff-find-grep-sed
-complete -F _optcomplete xxdiff-match
-complete -F _optcomplete xxdiff-patch-UNFINISHED # FIXME
+complete -F _optcomplete xx-cond-replace
+complete -F _optcomplete xx-cvs-diff
+complete -F _optcomplete xx-encrypted
+complete -F _optcomplete xx-find-grep-sed
+complete -F _optcomplete xx-match
+complete -F _optcomplete xx-patch-UNFINISHED # FIXME

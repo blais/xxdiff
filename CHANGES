@@ -7,6 +7,8 @@ Version 3.2: (major feature enhancements)
 
 (Version 3.2b4)
 
+* xx-rename: we now support multiple lists of rename pairs in one run.
+
 * Renamed all the xxdiff-* scripts to their equivalent xx-* scripts.  This is
   done to shorten the names, and to clearly mark the transition between the old
   and the new codebase.  I know it's evil, and I don't do this very often, but
