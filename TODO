@@ -22,7 +22,9 @@ The More Urgent
 * In decision mode, if there are at least one selection from each side, if the
   user leaves with A or R, pop a confirmation box.  This is important to avoid
   errors.  It is way too easy to select for merge and exit with A.  I've been
-  caught many times.
+  caught many times. (dup: In decision mode, we should warn the user when
+  selections have been made and the user exits with "merged".)
+
 
 * Bug: toggling "Format clipboard text" at runtime does not seem to have an
   effect.
@@ -30,6 +32,9 @@ The More Urgent
 * Fix [1200496] Diff Errors reported with certain text files
 
 * Fix [1079038] Split Bug.
+
+* xx-svn-diff: Implement fetching any two revisions and displaying the filelist
+  and the diffs graphically for those changes.
 
 * See open bug [1174957] Odd behavior when "-O" and "-E" used together:  When
   --exit-if-no-conflicts and --merged-filename are specified together, and there
@@ -58,18 +63,16 @@ The More Urgent
 --------------------------------------------------------------------------------
 (Scripts)
 
-* xx-svn-diff: When the parent process gets killed, make sure to kill the
-  editor as well, otherwise it can be really annoying because this leaves swap
-  files around if we restart manually killing the editing window (which can
-  happen if you leave it in the background).
-
 * Write an asynchronous background loop in xformloop for slow processes, where a
   number of diffs could accumulate in the background and be ready to diff while
   whatever is being done to produce the diffs keeps running.  Grab this from my
   good old exp preview.  Put this in ``lib/python/xxdiff/async.py``
 
-* xxdiff: In decision mode, we should warn the user when selections have been
-  made and the user exits with "merged".
+* xx-svn-diff: When the parent process gets killed, make sure to kill the
+  editor as well, otherwise it can be really annoying because this leaves swap
+  files around if we restart manually killing the editing window (which can
+  happen if you leave it in the background).
+
 
 * xx-rename: With respect to case sensitivity, supports the smart
   replacement behaviour that is present in GNU emacs.
