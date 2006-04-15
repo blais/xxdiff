@@ -18,7 +18,7 @@ def read_version():
             "Error: you must run setup from the root directory (%s)" % str(e))
 
 allscripts = [join('bin', x) for x in os.listdir('bin')
-              if x.startswith('xxdiff-')]
+              if x.startswith('xx-')]
 allscripts.append(join('bin', 'svn-foreign'))
 
 setup(name="xxdiff-scripts",

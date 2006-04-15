@@ -7,7 +7,17 @@ Version 3.2: (major feature enhancements)
 
 (Version 3.2b4)
 
-* Renamed all the xxdiff-* scripts to xx-* scripts, in order to mark
+* Renamed all the xxdiff-* scripts to their equivalent xx-* scripts.  This is
+  done to shorten the names, and to clearly mark the transition between the old
+  and the new codebase.  I know it's evil, and I don't do this very often, but
+  there is so much code that is on top of xxdiff being called by these scripts
+  now, that to include the full xxdiff name in them does not make so much sense
+  anymore.  They all leverage xxdiff, but they do so much more.  So there.  If
+  you got annoyed by this, please send me email, otherwise I'll never know.
+
+* Renamed cvs-revcomp to cvs-revcmp.
+
+* Worked on xxdiff.el somewhat, not finished.
 
 * Integrated code from Michalis Giannakidis (cvsxxdiff.py author), so that
   cvsxxdiff.py is now xxdiff-cvs-revcmp.  Thanks!

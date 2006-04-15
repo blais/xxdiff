@@ -8,41 +8,15 @@ The More Urgent
 
 * Write documentation for the new revcomp script!
 
+* xxdiff-svn-diff: Comments file: To add new files to the comments file:
 
-* Implement the review restart functionality that was present in ``exp
-  preview``, this is annoying!!!
+  a) Check if at least one line of the comments file is the same as any line of
+  the status OR if the file is empty
 
-  Lines like this::
+  b) if so, add all the status lines tha tdiffer at thte end of the comments
+  file (with an empty line in between)
 
-    lastmod    M      /home/blais/p/carpool/app/config/draco-home.ini
-
-  Check if line there, if so, skip it.
-
-
-
-
-
-
-* Bug: when a directory has been moved, we get this::
-
-    Status Of Files To Be Diffed
-    ----------------------------
-    A  +   /home/blais/p/carpool/test/lisp-css-generator
-    D      /home/blais/p/carpool/test/css-stylesheets
-    D      /home/blais/p/carpool/test/css-stylesheets/cssgen.cl
-    D      /home/blais/p/carpool/test/css-stylesheets/style.cl
-    D      /home/blais/p/carpool/test/css-stylesheets/css.lisp
-    M      /home/blais/p/carpool/app/root/resources/style.css
-    A      /home/blais/p/carpool/app/root/resources/cloth-background.gif
-    M      /home/blais/p/carpool/app/root/resources/style.css.in
-    M      /home/blais/p/carpool/app/config/draco-home.ini
-
-      Action           | Status
-      ---------------- | ----------------------------------------
-      directory, skip  | A  +   /home/blais/p/carpool/test/lisp-css-generator
-    svn: '/home/blais/p/carpool/test/css-stylesheets' refers to a directory
-    Error: Cannot fetch BASE revision: None
-
+  c) otherwise we do not append the new statii lines
 
 
 * Bug: toggling "Format clipboard text" at runtime does not seem to have an
