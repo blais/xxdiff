@@ -33,6 +33,8 @@ from tempfile import NamedTemporaryFile
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.patches
+import xxdiff.invoke
+import xxdiff.scm.cvs
 from xxdiff.scripts import tmpprefix
 
 
@@ -117,7 +119,7 @@ def cvsdiff_main():
 
             if decision == 'ACCEPT' or decision == 'MERGED':
                 # the user accepted, commit the file to CVS.
-                xxdiff.checkout.commit(filename)
+                xxdiff.scm.cvs.commit(filename)
 
             elif decision == 'REJECT' or decision == 'NODECISION':
                 pass # do nothing

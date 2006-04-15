@@ -18,7 +18,10 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser, msg=None ):
+# Different kinds of backups.
+backup_choices = ['along', 'other', 'none']
+
+def options_graft( parser, msg=None, deftype='other' ):
     """
     Graft options on given parser for automatic file backups.
     """
@@ -29,9 +32,9 @@ def options_graft( parser, msg=None ):
 
     group.add_option('-b', '--backup-type', action='store',
                      type='choice', choices=backup_choices,
-                     default='other', metavar="CHOICE",
-                     help=("Selects the backup type from: %s" %
-                           ', '.join(backup_choices)))
+                     default=deftype, metavar="CHOICE",
+                     help=("Selects the backup type from: %s (default: %s)" %
+                           (', '.join(backup_choices), deftype)))
 
     group.add_option('--backup-dir', action='store',
                      help="Specify backup directory for type 'other'")
@@ -51,12 +54,6 @@ def options_validate( opts, parser, logs=None ):
     if opts.backup_type != 'other' and opts.backup_dir:
         parser.error(
             "option backup-dir is only valid for backups of type 'other'.")
-
-
-#-------------------------------------------------------------------------------
-#
-# Different kinds of backups.
-backup_choices = ['along', 'other', 'none']
 
 
 #-------------------------------------------------------------------------------
@@ -105,13 +102,17 @@ def backup_file( fn, opts, logs=None ):
 
         backupfn = join(opts.backup_dir, relfn)
 
+        if opts.verbose >= 0 and exists(backupfn):
+            logs.write("(Warning: Overwriting existing file in backup '%s')\n" %
+                       backupfn)
+        
     else: # opts.backup_type == 'none'
         backupfn = None
 
     if backupfn:
         # Perform the backup
         if logs and opts.verbose >= 3:
-            logs.write( 'Backup: %s\n' % backupfn)
+            logs.write('Backup: %s\n' % backupfn)
 
         # Make sure that the destination directory exists
         ddn = dirname(backupfn)

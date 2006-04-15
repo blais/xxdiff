@@ -5,7 +5,7 @@
 # name cvsxxdiff.py.  This script was integrated in april 2006 in the xxdiff
 # scripts.
 
-"""xxdiff-cvs-revcomp [<options>] [FILE ...]
+"""xxdiff-cvs-revcmp [<options>] [FILE ...]
 
 Display file differences with the current or a previous CVS version.  Use one or
 two of the version selection options to select which fileset to compare.
@@ -29,14 +29,34 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
+def find_in_trunk( search_directories, fn ):
+    """
+    Recursively search for paths of all files whose basename matches 'fn' under
+    the directories from 'search_directories' and return a list of them.
+    """
+    # Make sure that fn is always just a basename.
+    assert os.pathsep not in fn
+
+    # Run the search.
+    files = []
+    for d in search_directories:
+        for root, dirs, files_in_dir in os.walk(d):
+            if 'CVS' in dirs:
+                dirs.remove('CVS')  # don't visit CVS directories
+            if fn in files_in_dir:
+                files.append(join(root, fn))
+    return files
+
+#-------------------------------------------------------------------------------
+#
 match_status = re.compile('File:\s*([^\s]+)\s*Status: (.*)')
 
-def collect_unupdated_files( diff_files, diff_directories, resolve_conflicts ):
+def collect_unupdated_files( diff_directories, resolve_conflicts ):
     """
     Collect all files that are not updated (compared to the repository).
-
-    **Important Note**: diff_files may be self-modified.
     """
+    assert diff_directories
+
     p = Popen(['cvs', 'status'] + diff_directories, stdout=PIPE)
     stdout, stderr = p.communicate()
     lines = stdout.splitlines()
@@ -55,27 +75,18 @@ def collect_unupdated_files( diff_files, diff_directories, resolve_conflicts ):
                 continue
         fn = m.group(1)
 
-        # FIXME: aren't you going to see the CVS/* files by doing this?
-        # FIXME: do this with os.walk() in Python rather than by calling
-        # 'find'.
-        p = Popen(['find', '.', '-name', fn, '-print'], stdout=PIPE)
-        stdout, stderr = p.communicate()
-        files = map(str.strip, stdout.splitlines())
+        # Run the search from the CWD if there are no diff dirs.
+        files = find_in_trunk(diff_directories, fn)
         if files:
             if len(files) > 1:
                 print '%s more than once' % fn
-
-            # Warning: we are modifying diff_files in-place.
-            collected_files.extend(map(str.strip, files))
+                # FIXME: if we find a file more than once,
+                # keep the unupdated.
+            collected_files.extend(files)
         else:
             print '%s: No such file' % fn
 
-    diff_files.extend(collected_files)
-
-    ## FIXME: change the callers to remove their dependency on the in-outness of
-    ## diff_files parameter, only return the new files instead and concatenate
-    ## in the caller.
-    ## return collected_files
+    return collected_files
 
 #-------------------------------------------------------------------------------
 #
@@ -134,9 +145,7 @@ def get_revisions_between( r1, r2 ):
     try:
         beg = int(l_r1[-1])
         end = int(l_r2[-1])
-    except:  ### FIXME: do not catch everything here, catch only the exception
-             ### type that you're expecting.  This is very important!  Using
-             ### 'except:' leads to hard-to-find bugs.
+    except ValueError:  
         return rev
 
     if end <= beg:
@@ -159,7 +168,10 @@ def get_revision_log( filename, rev ):
     """
     log = []
 
-    p = Popen(['cvs', 'log', '-r', rev, filename], stdout=PIPE, stderr=PIPE)
+    # Note: watch out for the 'cvs log' command, the value of the -r option must
+    # not contain spaces before the value, it must be lumped together with the
+    # option.  This is a CVS options parsing bug.
+    p = Popen(['cvs', 'log', '-r%s' % rev, filename], stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
     # Note: we're simply throwing away stderr here.
 
@@ -292,12 +304,12 @@ def cvsxxdiff_ri_rj( diff_files, actions ):
             for r in revs:
                 print '\n'.join(get_revision_log(fn, r))
 
-##         # Launch xxdiff.
-##         xxdiff.invoke.xxdiff_display(
-##             opts,
-##             '--title1', "%s ( %s )" % (fn, revisions[0]),
-##             '--title2', "%s ( %s )" % (fn, revisions[1]),
-##             *[x.name for x in tmpfiles])
+        # Launch xxdiff.
+        xxdiff.invoke.xxdiff_display(
+            opts,
+            '--title1', "%s ( %s )" % (fn, revisions[0]),
+            '--title2', "%s ( %s )" % (fn, revisions[1]),
+            *[x.name for x in tmpfiles])
 
 #-------------------------------------------------------------------------------
 #
@@ -372,7 +384,7 @@ def parse_options():
 
     group.add_option('-b', '--nb-revisions-before', action='append', type='int',
                      metavar='NBREVS', dest='before', default=[],
-                     help="The number of previous CVS revisions from HEAD.")
+                     help="The number of previous CVS revisions from BASE.")
 
     parser.add_option_group(group)
 
@@ -419,18 +431,24 @@ def revcomp_main():
             diff_directories.append(fn)
 
     # Collect files.
-    # FIXME: (add a better comment here.)
+    #
+    # If no files were given on the command line or command was invoked on 
+    # specific directories, search for unupdated files recursively in
+    # o) in the specified directories or
+    # o) the current dir
     if len(diff_files) == 0 or len(diff_directories) :
-        collect_unupdated_files(diff_files, diff_directories,
-                                opts.resolve_conflicts)
+        collected_files = collect_unupdated_files(diff_directories or ['.'],
+                                                  opts.resolve_conflicts)
+        diff_files.extend(collected_files)
 
-    elif len(diff_files) > 1 :
+    if len(diff_files) > 1 :
         # Print a message to the user about the list of files to diff.
+        # Print it in a single line. This allows to copy paste the output to
+        # ex. a 'cvs commit' command.
         print '%d files to diff:' % len(diff_files)
-        print '=' * 80 + '\n'
-        for fn in diff_files:
-            print fn
-        print '=' * 80 + '\n'
+        print '=' * 80
+        print ' '.join(diff_files)
+        print '=' * 80
 
     # Dispatch to the appropriate method.
     if opts.resolve_conflicts:

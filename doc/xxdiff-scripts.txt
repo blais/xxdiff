@@ -49,8 +49,9 @@
     7   Encrypted Files
       7.1  ``xxdiff-encrypted``
     8   Pre-Visualizing And Cherry-Picking From Patches
-    9   Writing Your Own Scripts
-    10  Questions
+    9   Comparing SQL Schemas
+    10  Writing Your Own Scripts
+    11  Questions
 
 
 Introduction
@@ -183,6 +184,10 @@ All backup options::
     --backup-dir=BACKUP_DIR
                         Specify backup directory for type 'other'
 
+Note that if you're using the same directory for backups over multiple runs, if
+some files are the same, the backed up files get overwritten (a warning is
+displayed).
+
 
 Write Permissions / Checkout
 ----------------------------
@@ -227,7 +232,15 @@ loop in, for example, Bourne shell::
          xxdiff-cond-replace /tmp/temp.$PID $i ; 
       done
 
+.. important:: 
 
+   Note that for this program the backups are not enabled by default.  Since
+   every invocation is separate, if the backups were on by default a unique
+   backup directory would be created for each invocation.  You can imagine that
+   this would create a lot of goo in the temporary directory.
+
+   If you want to backup all the files from a loop run to a single backup
+   directory root, make sure to use the ``--backup-dir`` option.
 
 
 Higher-Level Loops
@@ -710,6 +723,45 @@ issues:
 For these reasons, until I find a good solution for all of these problems, the
 ``xxdiff-patch`` code remains hidden in the codebase.  If you're interested in
 working on this let me know.
+
+
+Comparing SQL Schemas
+=====================
+
+One annoying problem is that of migrating a database from one schema to
+another.  A typical web application setup has the stable codebase running on the
+server, and test setup running the some other machine, on which the programmer
+makes changes and develops new features.
+
+In the course of doing so, a database-based application involves changing the
+database schema, that is, adding columns, changing types, tables, indexes, and
+the like.  In an ideal world, a developer would be careful to take note of all
+the required changes.  Oh, by the way, we're not living in an ideal world.
+
+One problem is that when upgrading the code of the application on the production
+machine, the existing database has to be migrated to fit the new schema that
+corresponds to the new code.  This is usually carried out “by hand” on the
+database's shell interface, or by writing a script (if you're a Python hacker),
+and can be quite tricky, it is very easy to forget some things and to make
+mistakes.
+
+Since we're in the business of comparing things, I wrote a script that fetches
+the schemas of two databases, parses the schema description, outputs two files
+with appropriate garbage so that corresponding objects line up when diffed, and
+I run xxdiff on them.  This results in a nice side-by-side view of the
+differences between the objects of the two schemas, and allows you to clearly
+view what needs to be carried out for the database migration task.
+
+Currently, only the PostgreSQL database is supported, but it would be
+quasi-trivial to add support for other databases.
+
+.. figure:: screenshot-sql-schema-compare.png
+
+   SQL Schema comparison.
+
+
+xxdiff can be used to compare pairs of corresponding objects, and I'm sure that
+there are many other exciting uses that people can apply it to.
 
 
 Writing Your Own Scripts

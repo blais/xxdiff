@@ -68,9 +68,10 @@ def parse_options():
 
     parser = optparse.OptionParser(__doc__.strip())
 
-    xxmodules = xxdiff.backup, xxdiff.checkout, xxdiff.invoke, xxdiff.condrepl
+    xxmodules = xxdiff.checkout, xxdiff.invoke, xxdiff.condrepl
     for mod in xxmodules:
         mod.options_graft(parser)
+    xxdiff.backup.options_graft(parser, deftype='none')
 
     parser.add_option('-v', '--verbose', action='count',
                       default=0,
@@ -137,10 +138,8 @@ def condreplace_main():
             raise SystemExit("Error: deleting modified file (%s)" % str(e))
 
     # repeat message at the end for convenience.
-    if opts.backup_type == 'other' and opts.backup_dir:
-        print
-        print "  Backup files:", opts.backup_dir
-        print
+    if opts.verbose > 0:
+        xxdiff.backup.print_reminder(opts)
 
     # Compute return value.
     rval = 0

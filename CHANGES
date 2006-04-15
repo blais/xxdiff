@@ -5,7 +5,19 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
-(Version 3.2b2)
+(Version 3.2b4)
+
+* Renamed all the xxdiff-* scripts to xx-* scripts, in order to mark
+
+* Integrated code from Michalis Giannakidis (cvsxxdiff.py author), so that
+  cvsxxdiff.py is now xxdiff-cvs-revcmp.  Thanks!
+
+* Applied bug fixes for xxdiff-cvs-diff from Michalis.
+
+* Added documentation for xxdiff-sql-schema
+
+
+(Version 3.2b3)
 
 * xxdiff/invoke.py: refactored the xxdiff invocation functions to accept open
   files as stdin.

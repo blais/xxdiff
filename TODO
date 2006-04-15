@@ -6,7 +6,6 @@
 The More Urgent
 ===============
 
-* Write documentation for SQL schema comparison!
 * Write documentation for the new revcomp script!
 
 
@@ -72,6 +71,9 @@ The More Urgent
 
     Isn't it annoying that xxdiff doesn't have any keybinding for "save as merged"?
     echo 'Accel.SaveAsMerged: "Ctrl+M"' >>~/.xxdiffrc
+
+* Define a clearer list of verbosity levels that is consistent across all the
+  scripts and change the levels.
 
 
 --------------------------------------------------------------------------------
