@@ -51,8 +51,8 @@ def get_module( modname ):
     Returns the appropriate module for the given SCM.
     """
     try:
-        mod = __import__("xxdiff.scm.%s" % 'cvs')
-        mod = getattr(mod.scm, 'cvs')
+        mod = __import__("xxdiff.scm.%s" % modname)
+        mod = getattr(mod.scm, modname)
     except ImportError, e:
         raise SystemExit("Internal Error: SCM module not found.")
     return mod

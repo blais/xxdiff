@@ -11,7 +11,7 @@ __author__ = "Martin Blais <blais@furius.ca>"
 
 
 # stdlib imports.
-import sys, os, re, tempfile
+import sys, os, tempfile
 from os.path import *
 
 # xxdiff imports.

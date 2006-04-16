@@ -81,13 +81,13 @@ def render_diffable_maps( opts, *maps ):
                      for x in xrange(opts.garbage_lines)])
 
         # Write the output to the files.
-        for map, tmpf in zip(maps, tmpfiles):
+        for dmap, tmpf in zip(maps, tmpfiles):
             tmpf.write('\n')
             for line in ranlines:
                 tmpf.write(line)
             tmpf.write('\n')
             try:
-                tmpf.write(map[key])
+                tmpf.write(dmap[key])
                 tmpf.write('\n\n')
             except KeyError:
                 pass

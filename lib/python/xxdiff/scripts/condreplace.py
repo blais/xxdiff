@@ -96,10 +96,16 @@ def parse_options():
     for mod in xxmodules:
         mod.options_validate(opts, parser, logs=sys.stdout)
 
-    if not args or len(args) > 2:
+    if len(args) != 2:
         raise parser.error("you must specify exactly two files.")
+    fromfn, tofn = args
 
-    return opts, args
+    if fromfn == '-' and opts.delete:
+        raise parser.error("no need to use --delete on file from stdin.")
+    if tofn == '-':
+        raise parser.error("cannot copy to stdin, this does not make sense.")
+        
+    return opts, fromfn, tofn
 
 
 #-------------------------------------------------------------------------------
@@ -108,13 +114,9 @@ def condreplace_main():
     """
     Main program for cond-replace script.
     """
-    opts, args = parse_options()
+    opts, fromfn, tofn = parse_options()
 
-    if len(args) == 1:
-        if opts.delete:
-            raise parser.error("no need to use --delete on file from stdin.")
-
-        origfn, = args
+    if fromfn == '-':
         intmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
         try:
             intmpf.write(sys.stdin.read())
@@ -123,17 +125,16 @@ def condreplace_main():
         except IOError, e:
             raise SystemExit(
                 "Error: saving stdin to temporary file (%s)" % str(e))
-        newfn = intmpf.name
-    else:
-        newfn, origfn = args
+        fromfn = intmpf.name
+
 
     # call xxdiff and perform the conditional replacement.
-    decision = xxdiff.condrepl.cond_replace(origfn, newfn, opts, sys.stdout,
+    decision = xxdiff.condrepl.cond_replace(tofn, fromfn, opts, sys.stdout,
                                             opts.exit_on_same)
 
     if opts.delete and not opts.dry_run:
         try:
-            os.unlink(newfn)
+            os.unlink(fromfn)
         except OSError, e:
             raise SystemExit("Error: deleting modified file (%s)" % str(e))
 

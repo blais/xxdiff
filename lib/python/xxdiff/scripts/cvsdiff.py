@@ -9,13 +9,14 @@ files and for each file it then spawns an xxdiff to preview each modified file
 separately.  This allows you to preview the current changes that are made in a
 cvs checkout.
 
-Optionally, you can decide to accept changed and they are committed file by file
-by this script.  In that case, the spawned xxdiff asks for a decision by the
-user, then the script takes the following actions upon the answer:
+Optionally, you can decide to modify or revert those changes and they are
+committed file by file by the script.  In that case, the spawned xxdiff asks for
+a decision by the user, then the script takes the following actions upon the
+answer:
 
-- ACCEPT: keep the new file as it is and commit
-- MERGED: copy the merged file on the new file and commit
-- REJECT: don't do anything, keep the new file as it but do not commit.
+- ACCEPT: keep the local changes and and commit the file
+- MERGED: merge by selecting diff hunmks and commit the merged file
+- REJECT: throw away the local changes (do not commit)
 
 For more generic behaviour about merging patches graphically, see also
 xx-patch.  The current script is really about committing "some" cvs changes.
@@ -26,7 +27,7 @@ __depends__ = ['xxdiff', 'Python-2.4', 'cvs', 'diffutils']
 
 
 # stdlib imports.
-import os, shutil
+import sys, os, shutil
 from subprocess import Popen, PIPE, STDOUT
 from tempfile import NamedTemporaryFile
 
@@ -34,6 +35,7 @@ from tempfile import NamedTemporaryFile
 import xxdiff.scripts
 import xxdiff.patches
 import xxdiff.invoke
+import xxdiff.backup
 import xxdiff.scm.cvs
 from xxdiff.scripts import tmpprefix
 
@@ -70,8 +72,11 @@ def cvsdiff_main():
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
     stdout, stderr = p.communicate()
     if p.returncode != 0 and not stdout:
-        raise SystemExit("Error: running cvs command (%s): %s" % (s, cmd))
+        raise SystemExit("Error: running cvs command (%s): %s" %
+                         (p.returncode, cmd))
     chunks = xxdiff.patches.splitpatch(stdout)
+
+    logs = sys.stdout
 
     #
     # For each subpatch, apply it individually
@@ -111,21 +116,25 @@ def cvsdiff_main():
             # print output of xxdiff command.
             print decision
 
-            # if the user merged, copy the merged file over the original.
-            if decision == 'MERGED':
-                # save a backup, in case.
-                shutil.copyfile(filename, "%s.bak" % filename)
-                shutil.copyfile(tmpf2.name, filename)
-
-            if decision == 'ACCEPT' or decision == 'MERGED':
-                # the user accepted, commit the file to CVS.
+            # ACCEPT: keep the changes and and commit the file
+            if decision == 'ACCEPT':
                 xxdiff.scm.cvs.commit(filename)
 
-            elif decision == 'REJECT' or decision == 'NODECISION':
-                pass # do nothing
-            else:
-                raise SystemExit(
-                        "Error: unexpected answer from xxdiff: %s" % decision)
+            # MERGED: merge by selecting diff hunmks and commit the merged file
+            elif decision == 'MERGED':
+                # Save a backup, in case.
+                xxdiff.backup.backup_file(filename, opts, logs)
+                shutil.copyfile(mergedf.name, filename)
+                xxdiff.scm.cvs.commit(filename)
+
+            # REJECT: throw away the local changes (do not commit)
+            elif decision == 'REJECT':
+                xxdiff.backup.backup_file(filename, opts, logs)
+                shutil.copyfile(tmpf.name, filename)
+            
+            # NODECISION: do nothing to the local file
+            elif decision == 'NODECISION':
+                pass
 
 
 #-------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import os, optparse, md5
+import os, optparse
 from os.path import *
 
 # xxdiff imports.
@@ -118,7 +118,7 @@ class History(object):
         """
         Support 'in' syntax.
         """
-        return self.seen(histitem)
+        return self.check(histitem)
 
     def check( self, histitem ):
         """

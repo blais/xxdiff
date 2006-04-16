@@ -19,7 +19,6 @@ __depends__ = ['xxdiff', 'Python-2.4', 'PostgreSQL']
 
 
 # stdlib imports.
-import os, optparse, re
 from os.path import *
 
 # xxdiff imports.

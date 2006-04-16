@@ -9,6 +9,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
+import os, re
 from subprocess import call
 
 

@@ -33,16 +33,16 @@ def options_graft( parser ):
             raise optparse.OptionValueError(
                 "compiling regular expression '%s': %s" % (value, e))
 
-    for short, long, help in (
+    for oshort, olong, ohelp in (
         ('-s', '--select',
          "Adds a regular expression for filenames to process."),
         ('-I', '--ignore',
          "Adds a regular expression for filenames to ignore."),
         ):
-        group.add_option(short, long, 
+        group.add_option(oshort, olong, 
                          action='callback', type='str', callback=regexp_cb,
                          metavar="REGEXP", default=[],
-                         help=help)
+                         help=ohelp)
 
     # Note: we could improve this as soon as Python will include a more recent
     # version of Optik, which implements the action 'append_const'.

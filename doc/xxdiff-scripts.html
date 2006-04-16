@@ -288,8 +288,7 @@ loop in, for example, Bourne shell:</p>
 <pre class="literal-block">
 # Remove all empty lines in files
 find . -name '*.txt' | while read i ; do
-      cat $i | tr -s \\n &gt; /tmp/temp.$PID ;
-      xx-cond-replace /tmp/temp.$PID $i ;
+      cat $i | tr -s \\n | xx-cond-replace - $i ;
    done
 </pre>
 <div class="important">

@@ -35,7 +35,7 @@ def checkout( filename ):
     """
     msg = 'Checked out by %s' % script_name
 
-    call(['cleartool', 'co', '-comment', msg, fn])
+    call(['cleartool', 'co', '-comment', msg, filename])
     # FIXME: TODO -- you need to check the return code.
 
 

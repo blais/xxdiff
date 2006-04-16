@@ -111,7 +111,7 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
                 print >> logs, "(Warning: no differences.)"
 
             if exitonsame:
-                print_decision('NODIFF', opts, logs)
+                print_decision('NODIFF', origfn, opts, logs)
                 return 'NODECISION'
     else:
         diff_output = None
@@ -121,14 +121,14 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
         do_replace_file(origfn, newfn, opts, logs)
         decision = 'NOCONFIRM'
 
-        print_decision(decision, opts, logs)
+        print_decision(decision, origfn, opts, logs)
         if opts.verbose >= 2 and diff_output: print_diffs(diff_output, logs)
     else:
         # Call xxdiff!
         decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(
             opts, '--title2', 'NEW FILE', origfn, newfn)
 
-        print_decision(decision, opts, logs)
+        print_decision(decision, origfn, opts, logs)
 
         if decision == 'ACCEPT':
             # Changes accepted, replace original with new..
@@ -156,7 +156,7 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
 
 #-------------------------------------------------------------------------------
 #
-def print_decision( decision, opts, logs ):
+def print_decision( decision, origfn, opts, logs ):
     """
     Print the decision string.
     """
@@ -257,7 +257,7 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None, extra=None ):
             if opts.verbose >= 2:
                 print >> logs, "(Warning: no differences.)"
 
-            print_decision('NODIFF', opts, logs)
+            print_decision('NODIFF', mine, opts, logs)
             return 'NODECISION'
     else:
         diff_output = None
@@ -273,7 +273,7 @@ def cond_resolve( mine, ancestor, yours, output, opts, logs=None, extra=None ):
     dargs.extend(files3)
     decision, mergedf, retcode = xxdiff.invoke.xxdiff_decision(opts, *dargs)
 
-    print_decision(decision, opts, logs)
+    print_decision(decision, mine, opts, logs)
 
     # Backup all 3 files and the destination output before overwriting.
     if decision != 'NODECISION' and not opts.dry_run:

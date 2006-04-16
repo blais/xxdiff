@@ -5,6 +5,15 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Fixed xx-cvs-diff review/accept mode (still need to test it more).
+
+* Changed the one-file input syntax from xx-cond-replace: You must now always
+  pass two parameters.  If you want to get input from stdin, use - as the first
+  argument.
+
+* Ran pychecker and fixed a ton of little latent bugs.
+
+
 (Version 3.2b4)
 
 * **ATTENTION ATTENTION** Renamed all the xxdiff-* scripts to their equivalent

@@ -364,7 +364,7 @@ def main():
     opts, args = parse_options()
 
     # Run the main loop...
-    if query_unregistered_svn_files(args, opts, sys.stdout) != True:
+    if query_unregistered_svn_files(args, opts, sys.stdout) is not True:
         # The user has quit.
         sys.exit(1)
 

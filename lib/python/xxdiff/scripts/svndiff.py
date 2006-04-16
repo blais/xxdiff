@@ -12,7 +12,7 @@ __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 
 # stdlib imports.
-import sys, os, tempfile, datetime, md5
+import sys, os, tempfile, datetime
 from os.path import *
 
 # xxdiff imports.
@@ -181,7 +181,7 @@ def svndiff_main():
     if opts.foreign:
         # Consider the unregistered files.
         if query_unregistered_svn_files(
-            args, opts, sys.stdout, ignore=ignofiles) != True:
+            args, opts, sys.stdout, ignore=ignofiles) is not True:
             # The user has quit, don't continue.
             sys.exit(0)
         print

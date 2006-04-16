@@ -62,6 +62,7 @@ from tempfile import NamedTemporaryFile
 # xxdiff imports.
 import xxdiff.scripts
 import xxdiff.invoke
+import xxdiff.scm.cvs
 from xxdiff.scripts import tmpprefix
 
 
@@ -212,7 +213,7 @@ def encrypted_main():
         for fn in args: # do all files specified on cmdline, why not.
             # Read input conflict file.
             text = open(fn, 'r').read()
-            text1, text2 = cvs_unmerge2(text)
+            text1, text2 = xxdiff.scm.cvs.unmerge2(text)
             diff_encrypted([text1, text2], fn)
     else:
         if len(args) <= 1:

@@ -126,7 +126,7 @@ def diffproxy_main():
         
     # Process return code
     if retcode not in [0, 3]:
-        raise SystemExit('Warning: Unexpected xxdiff exit code: %d' % exitcode)
+        raise SystemExit('Warning: Unexpected xxdiff exit code: %d' % retcode)
 
     return retcode
 

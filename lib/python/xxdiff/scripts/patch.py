@@ -228,7 +228,7 @@ def patch_main():
 
             elif decision == 'MERGED':
                 xxdiff.backup.backup_file(sfilename, opts)
-                shutil.copyfile(tmpfm.name, sfilename)
+                shutil.copyfile(tmpfp.name, sfilename)
 
             elif decision == 'NODECISION':
                 pass # do nothing

@@ -51,7 +51,7 @@ def parse_options():
     opts.verbose = 2
 
     for mod in xxmodules[1:]:
-        mod.options_validate(*vargs)
+        mod.options_validate(opts, parser)
 
     return opts, args
 
