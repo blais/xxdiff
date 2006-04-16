@@ -366,7 +366,7 @@ def main():
     # Run the main loop...
     if query_unregistered_svn_files(args, opts, sys.stdout) != True:
         # The user has quit.
-        sys.exit(0)
+        sys.exit(1)
 
     # Commit the files if requested.
     if opts.commit is not None:
@@ -387,4 +387,6 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         print
+        sys.exit(1)
+
 

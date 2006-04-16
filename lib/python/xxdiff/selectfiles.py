@@ -10,7 +10,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 # stdlib imports.
 import sys, os, re, optparse
-from os.path import join, isfile
+from os.path import join, isfile, exists
 
 
 #-------------------------------------------------------------------------------
@@ -125,6 +125,11 @@ def options_validate( opts, parser, logs=None ):
         # If no root directory has been specified, use the CWD.
         if not opts.roots:
             opts.roots.append(os.getcwd())
+        else:
+            missing = filter(lambda x: not exists(x), opts.roots)
+            if missing:
+                parser.error("Some root directories do not exist: %s" %
+                             ' '.join(missing))
 
         # By default ignore some common directories.
         if not opts.select_no_defaults:
@@ -141,8 +146,7 @@ def options_validate( opts, parser, logs=None ):
             try:
                 setattr(opts, regname, re.compile(regstr))
             except re.error, e:
-                raise SystemExit("Error: compiling regexp '%s':\n%s" %
-                                 (regstr, e))
+                parser.error("Error compiling regexp '%s':\n%s" % (regstr, e))
 
     # Create an appropriate generator for the "select" method
     if opts.select_from_file:
