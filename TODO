@@ -49,7 +49,6 @@ The More Urgent For the Release
 * Define a clearer list of verbosity levels that is consistent across all the
   scripts and change the levels.
 
-
 --------------------------------------------------------------------------------
 (Scripts)
 
@@ -57,6 +56,10 @@ The More Urgent For the Release
   number of diffs could accumulate in the background and be ready to diff while
   whatever is being done to produce the diffs keeps running.  Grab this from my
   good old exp preview.  Put this in ``lib/python/xxdiff/async.py``
+
+  (Note: this goes hand-in-hand with the diff'ing of arbitraty SVN revisions, as
+  we will have to fetch files from the network and this might be slow.
+  Implement both of these features at the same time.)
 
 * xx-svn-diff: When the parent process gets killed, make sure to kill the
   editor as well, otherwise it can be really annoying because this leaves swap
