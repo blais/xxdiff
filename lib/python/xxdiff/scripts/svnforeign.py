@@ -260,7 +260,14 @@ def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
                 continue
 
             # Get the file size.
-            size = os.lstat(fn).st_size
+            try:
+                size = os.lstat(fn).st_size
+            except OSError, e:
+                if e.errno == 2:
+                    continue # File not found, was probably a temp file.
+                else:
+                    raise
+
             ftype = ''
             if islink(fn):
                 ftype = '(symlink)'
