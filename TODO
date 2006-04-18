@@ -2,11 +2,23 @@
    TODO: xxdiff
 ==================
 
+The More Urgent For the Release
+===============================
 
-The More Urgent
-===============
+- In decision mode, if there are at least one selection from each side, if the
+  user leaves with A or R, pop a confirmation box.  This is important to avoid
+  errors.  It is way too easy to select for merge and exit with A.  I've been
+  caught many times. (dup: In decision mode, we should warn the user when
+  selections have been made and the user does not exit with "merged".)
 
-* Write documentation for the new revcomp script!
+- Write documentation for the new revcomp script!
+
+- From Monotone docs, easy fix::
+
+    Isn't it annoying that xxdiff doesn't have any keybinding for "save as merged"?
+    echo 'Accel.SaveAsMerged: "Ctrl+M"' >>~/.xxdiffrc
+
+--------------------------------------------------------------------------------
 
 * xx-svn-diff: Comments file: To add new files to the comments file:
 
@@ -17,14 +29,6 @@ The More Urgent
   file (with an empty line in between)
 
   c) otherwise we do not append the new statii lines
-
-
-* In decision mode, if there are at least one selection from each side, if the
-  user leaves with A or R, pop a confirmation box.  This is important to avoid
-  errors.  It is way too easy to select for merge and exit with A.  I've been
-  caught many times. (dup: In decision mode, we should warn the user when
-  selections have been made and the user exits with "merged".)
-
 
 * Bug: toggling "Format clipboard text" at runtime does not seem to have an
   effect.
@@ -41,20 +45,6 @@ The More Urgent
   are no conflicts, output the result file to the merged filename.
 
 * There is a slight rendering bug with my current font (see png file under /bugs)
-
-* xx-cond-replace: find a way to put a set of invocations in the same backup
-  directory rather than creating a new directory for each invocation (which is
-  really stupid if called inside a loop).
-
-* Create a xxdiff.history module that uses the same mechanisms as exp-preview
-  for maintaining a history of the files that have been reviewed, and that
-  allows you to interrupt and restart the diffing process where you left off.
-  That would *rock*!  Put that in xx-svn-diff.
-
-- From Monotone docs, easy fix::
-
-    Isn't it annoying that xxdiff doesn't have any keybinding for "save as merged"?
-    echo 'Accel.SaveAsMerged: "Ctrl+M"' >>~/.xxdiffrc
 
 * Define a clearer list of verbosity levels that is consistent across all the
   scripts and change the levels.

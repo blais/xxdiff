@@ -3134,9 +3134,9 @@ void XxApp::exit( int retcode, const char* decisionString )
 
    if ( _resources->getBoolOpt( BOOL_EXIT_WITH_MERGE_STATUS ) == true) {
      // Determine Merge Status
+      //
      // If NOT merges were selected, OR NOT all merge selection saved,
-     // merge is considered uncompleted
-     //
+     // merge is considered incomplete.
      if ((_diffs->isAllSelected() == false) ||
          ((_diffs.get() != 0) &&
           ((_diffs->isDirty() == true) &&
