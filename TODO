@@ -18,6 +18,10 @@ The More Urgent For the Release
     Isn't it annoying that xxdiff doesn't have any keybinding for "save as merged"?
     echo 'Accel.SaveAsMerged: "Ctrl+M"' >>~/.xxdiffrc
 
+- When the comments file has not changed, warn the user that he did not appear
+  to have saved the file.
+
+
 --------------------------------------------------------------------------------
 
 * xx-svn-diff: Comments file: To add new files to the comments file:
