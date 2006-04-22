@@ -52,9 +52,9 @@ def spawn_editor( initcontents=None, filename=None ):
             tmpf = open(filename, 'r')
             initcontents = None
         else:
-            tmpf = open(filename, 'w+')
+            tmpf = open(filename, 'w')
     else:
-        tmpf = tempfile.NamedTemporaryFile('w+', prefix=tmpprefix)
+        tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
         filename = tmpf.name
         
     # Initialize the contents of the file if requested.
@@ -92,8 +92,11 @@ def spawn_editor( initcontents=None, filename=None ):
         stdout, stderr = p.communicate()
         if stderr:
             raise RuntimeError("Error running editor:\n%s\n" % stderr)
-        tmpf.seek(0)
-        return tmpf.read()
+        writtenf = open(tmpf.name, 'r')
+        text = writtenf.read()
+        writtenf.close()
+        tmpf.close()
+        return text
 
     # Set the command string for the client to display if necessary.
     waiter.command = cmd

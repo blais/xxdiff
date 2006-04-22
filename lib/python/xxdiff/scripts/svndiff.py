@@ -285,7 +285,8 @@ def svndiff_main():
             print comments
             print '-' * 70
 
-        subversion.commit(args, comments=comments)
+##         subversion.commit(args, comments=comments)
+## FIXME: pu bac
 
         # Delete temporary comments flie if we created it.
         if not opts.comments_file:
