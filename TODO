@@ -53,6 +53,9 @@ The More Urgent For the Release
 * Define a clearer list of verbosity levels that is consistent across all the
   scripts and change the levels.
 
+* Automatically log output to a log file in the backups directory if the backups
+  are enabled, that would rock.
+
 --------------------------------------------------------------------------------
 (Scripts)
 

@@ -80,8 +80,8 @@ def sqlcompare_main():
 
     # Set displayed titles.
     titles = xxdiff.invoke.title_opts(
-        '%s (SCHEMA)' % db.dbspec for db in (db1, db2))
-
+        *['%s (SCHEMA)' % db.dbspec for db in (db1, db2)])
+    
     # Invoke xxdiff .
     xxargs = titles + [x.name for x in files]
     xxdiff.invoke.xxdiff_display(opts, *xxargs)
