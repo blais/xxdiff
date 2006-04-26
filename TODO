@@ -119,6 +119,9 @@ The More Urgent For the Release
 * Consider putting a check for binary files in xxdiff.invoke.* and raise a
   RuntimeError if the files aren't text.
 
+* xx-rename: We should able to read renames from a file, two names by line, or
+  something similar.
+
 --------------------------------------------------------------------------------
 
 * From Michalis Giannakidis, mgiann@beta-cae.gr
