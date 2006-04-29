@@ -1,0 +1,25 @@
+===========================
+   Note to RPM Producers
+===========================
+
+It's really a shame that RH does not have some kind of central repository of
+"official" rpm spec files, I really can't figure out which one is the one I
+should be providing anymore.  I've been freed from the RPM mess years ago when I
+moved to Gentoo (never looked back, it's been years), and I've given up on
+actually supporting the 1000 RPM spec files out there.  Everyone seems to be
+making their own spec files these days, so there is no "official" maintainer.
+
+Plus the format is so ambiguous and full of implicit rules that you need to
+become an RPM expert in order to bulid anything that many people can use.  For a
+while there were contradicting versions of the documentation on the internet.  I
+**really** can't be bothered with RPMs anymore.  I provide those files as
+examples.
+
+Now, if you submit a new RPM file, I will only put it aside the ones that are
+here.  
+
+If you REALLY want to make a meaningful contribution for everyone, consider
+reconciling all of those into a single one that will work
+everywhere-for-everyone.  Oh, and, BTW, good luck.  If you're an RPM expert,
+please consider becoming some kind of official maintainer for the package.
+
