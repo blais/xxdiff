@@ -75,10 +75,16 @@ def _run_xxdiff( cmd, opts, stdin ):
     else:
         intype = None
         
-    p = Popen(cmd,
-              stdout=PIPE,
-              stderr=PIPE,
-              stdin=intype)
+    try:
+        p = Popen(cmd,
+                  stdout=PIPE,
+                  stderr=PIPE,
+                  stdin=intype)
+    except OSError, e:
+        extramsg = ''
+        if e.errno == 2:
+            extramsg = '\nHint: Check if xxdiff is accessible in your path.'
+        raise SystemExit("Error: Running xxdiff '%s'" % e + extramsg)
 
     # Write the given text to stdin if necessary.
     if intype is PIPE:

@@ -5,6 +5,8 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Caught error gracefully when xxdiff is missing in the user's path.
+
 * Fixed xx-cvs-diff review/accept mode (still need to test it more).
 
 * Changed the one-file input syntax from xx-cond-replace: You must now always

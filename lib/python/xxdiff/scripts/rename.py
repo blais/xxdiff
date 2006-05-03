@@ -119,7 +119,10 @@ def parse_options():
     # Idify the arguments from the first rename pair and setup a backup suffix,
     # to make the default backup directory easier to identify.
     sfrom, sto = renames[0]
-    opts.backup_prefix = '%s.%s' % tuple(map(idify, (sfrom, sto)))
+
+    if opts.backup_prefix is None:
+        # Set a better default for the backup prefix.
+        opts.backup_prefix = '%s.%s' % tuple(map(idify, (sfrom, sto)))
 
     return renames, opts, selector
 

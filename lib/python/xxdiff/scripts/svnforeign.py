@@ -71,7 +71,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports
-import sys, os, termios, tty, tempfile
+import sys, os, termios, tty, tempfile, datetime
 from subprocess import Popen, PIPE, call
 from os.path import *
 
@@ -197,6 +197,11 @@ def parse_options():
 
     if backup is not None:
         backup.options_validate(opts, parser)
+
+    if opts.backup_prefix is None:
+        # Set a better default for the backup prefix.
+        opts.backup_prefix = (
+            datetime.datetime.now().replace(microsecond=0).isoformat('T'))
 
     if opts.comments and not opts.commit:
         parser.error("You cannot specify comments if you're not going to "
