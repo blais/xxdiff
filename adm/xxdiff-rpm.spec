@@ -1,7 +1,7 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
 Version: 3.2b4
-Release: 1
+Release: 2
 License: GNU GPL
 Group: Development/Tools
 Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.bz2
@@ -57,7 +57,13 @@ install -c -m 755 -s bin/xxdiff ${RPM_BUILD_ROOT}%{_bindir}/
 install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}%{_mandir}/man1/xxdiff.1
 
 # tools
+%ifarch x86_64
+# dodgy hack for x86_64
+pyver=`python -V 2>&1 | cut -d' ' -f2 | cut -d. -f-2`
+python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --install-lib=%{_libdir}/python${pyver}/site-packages/
+%else
 python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%endif
 
 %clean
 [ "${RPM_BUILD_ROOT}" != "/" ] && rm -rf ${RPM_BUILD_ROOT}
@@ -88,6 +94,8 @@ python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 %{_bindir}/xx-svn-resolve
 
 %changelog
+* Tue May 2 2006 Robin Humble
+- fc5, x86_64 hacks
 * Thu Apr 27 2006 Robin Humble
 - updated to 3.2b4
 - fc5, i386
