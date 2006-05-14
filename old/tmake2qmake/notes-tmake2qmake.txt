@@ -47,6 +47,10 @@ TODO
   the output file is always provided in the distribution.  We certainly don't
   want to introduce a dependency on docutils.
 
+* We need to remove resParser_lex.o and resParser_yacc.o from the build, we
+  don't actually need to build them.  An alternative would be to remove them as
+  includes to resParser.cpp and include their .h and use them the normal way.
+
 
 
 Done
