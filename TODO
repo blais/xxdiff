@@ -5,6 +5,8 @@
 The More Urgent For the Release
 ===============================
 
+- We need to complete the qmake port work before we release.
+
 - Remove the automatically inserted filenames from the comments file, Trac does
   a nice enough job, place that as an optional feature.
 
