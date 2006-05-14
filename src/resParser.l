@@ -26,7 +26,7 @@
 #include <resources.h>
 
 #ifndef INCL_XXDIFF_RESPARSER
-#include <resParser.y.h>
+#include <resParser_yacc.h>
 #define INCL_XXDIFF_RESPARSER
 #endif
 
@@ -42,6 +42,7 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 
 %option stack
 %option yylineno
+%option nounput
 
 %s GEOM_SC
 %s ACCEL_SC

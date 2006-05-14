@@ -299,7 +299,6 @@ QString XxMarkersFileDialog::getSaveFileName(
    XxMarkersFileDialog* dlg = new XxMarkersFileDialog(
       startWith, filter, parent, name, TRUE, threeWay
    );
-   CHECK_PTR( dlg );
    dlg->setCaption( QFileDialog::tr( "Save as" ) );
 
    QString result;

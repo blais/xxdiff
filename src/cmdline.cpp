@@ -30,7 +30,7 @@
 #include <help.h>
 
 #ifndef INCL_RESPARSER_Y
-#include <resParser.y.h> // For FONT_TEXT
+#include <resParser_yacc.h> // For FONT_TEXT
 #define INCL_RESPARSER_Y
 #endif
 

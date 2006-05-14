@@ -29,28 +29,54 @@
 TEMPLATE = app
 CONFIG = release qt warn_on thread
 
-# For KDE support, uncomment the following lines:
+# FIXME: Is this needed for Windows compile?
+#REQUIRES=full-config
+#REQUIRES=large-config
+
+
+# To enable KDE support, uncomment the following lines:
 #QMAKE_CFLAGS += -DXX_KDE -I/usr/include/kde
 #QMAKE_CXXFLAGS += -DXX_KDE -I/usr/include/kde
 #QMAKE_LIBS += -lkdeui -lkio -lqt-mt
 
+
+# Enable debugging modes within xxdiff.
 debug:QMAKE_CFLAGS += -DXX_DEBUG
 debug:QMAKE_CXXFLAGS += -DXX_DEBUG
 
-INCLUDEPATH += .
-
-LEXYACC  = resParser
-LEXYACC_OBJ  = $$LEXYACC.l.c $$LEXYACC.y.c $$LEXYACC.y.h
-QMAKE_CLEAN += $$LEXYACC_OBJ doc.h
-
-# Needed for Windows compile?
-#REQUIRES=full-config
-
 
 #
+# Parser/grammar generation.
+#
+QMAKE_LEX = flex
+QMAKE_YACC = bison
+
+linux-g++ {
+  QMAKE_YACCFLAGS = -d -o y.tab.c
+  QMAKE_YACC_HEADER =
+  QMAKE_YACC_SOURCE =
+}
+
+LEXSOURCES = resParser.l
+
+YACCSOURCES = resParser.y
+
+# We don't need to actually build the parser, we include it from resParser.o to
+# isolate it in its namespace, but this means that we do need to add appropriate
+# dependencies.
+
+
+
+# Clean up some of the generated files automatically.
+QMAKE_CLEAN += doc.h version.h
+
+
+
+#===============================================================================
+# platform-specific tweaks
+
+#----------------------------------------
 # irix-n32
-#
-
 irix-n32:QMAKE_CXXFLAGS += -woff 1375,1424,3201,1209,1110 -LANG:std
 
 # always disable full warnings for C code.
@@ -67,18 +93,16 @@ irix-n32:QMAKE_LIBS += -Wl,-rpath -Wl,$(QTDIR)/lib
 irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 
 
-#
+#----------------------------------------
 # linux-g++
-#
 
 # debugging memory problems
 #linux-g++:QMAKE_CXXFLAGS += -fcheck-memory-usage
 #linux-g++:QMAKE_LIBS += -lmpatrol -lbfd -liberty
 
 
-#===============================================================================
+#----------------------------------------
 # Max OS X with XFree86 port, macx-g++
-#
 
 # The following does not work with qmake-1.11
 
@@ -86,9 +110,8 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 ## macx-g++:QMAKE_CXXFLAGS -= -fno-exceptions
 
 
-#===============================================================================
+#----------------------------------------
 # win32-msvc
-#
 
 win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
 #win32-msvc:QMAKE_CFLAGS += -GX
@@ -97,28 +120,9 @@ win32-msvc:INCLUDEPATH += winfixes
 
 #win32-msvc:QMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
 
+
 #===============================================================================
-
-
-# Add diff files to link against directly
-DIFFUTILS_DIR = ../diffutils-2.7
-
-# QMAKE_LIBS +=  \
-# 	$$DIFFUTILS_DIR/analyze.o \
-# 	$$DIFFUTILS_DIR/cmpbuf.o \
-# 	$$DIFFUTILS_DIR/dir.o \
-# 	$$DIFFUTILS_DIR/io.o \
-# 	$$DIFFUTILS_DIR/util.o \
-# 	$$DIFFUTILS_DIR/context.o \
-# 	$$DIFFUTILS_DIR/ed.o \
-# 	$$DIFFUTILS_DIR/ifdef.o \
-# 	$$DIFFUTILS_DIR/normal.o \
-# 	$$DIFFUTILS_DIR/side.o \
-# 	$$DIFFUTILS_DIR/fnmatch.o \
-# 	$$DIFFUTILS_DIR/regex.o \
-# 	$$DIFFUTILS_DIR/proginfo.o \
-# 	$$DIFFUTILS_DIR/diff.o \
-# 	$$DIFFUTILS_DIR/diff3.o
+# source files and targets
 
 HEADERS = \
 	optionsDialog.h \
@@ -201,9 +205,7 @@ SOURCES = \
 	getopt1.c \
 	proginfo.c
 
-#	diffutils.cpp \
-
-INTERFACES = \
+FORMS = \
 	markersWidgetBase.ui \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
@@ -212,7 +214,30 @@ DESTDIR=../bin
 
 TARGET = xxdiff
 
-#DEPENDPATH=../../include
 
-#REQUIRES=large-config
+#===============================================================================
+# statically compiled diffutils experiment
+
+
+# Add diff files to link against directly
+# DIFFUTILS_DIR = ../diffutils-2.7
+
+# QMAKE_LIBS +=  \
+# 	$$DIFFUTILS_DIR/analyze.o \
+# 	$$DIFFUTILS_DIR/cmpbuf.o \
+# 	$$DIFFUTILS_DIR/dir.o \
+# 	$$DIFFUTILS_DIR/io.o \
+# 	$$DIFFUTILS_DIR/util.o \
+# 	$$DIFFUTILS_DIR/context.o \
+# 	$$DIFFUTILS_DIR/ed.o \
+# 	$$DIFFUTILS_DIR/ifdef.o \
+# 	$$DIFFUTILS_DIR/normal.o \
+# 	$$DIFFUTILS_DIR/side.o \
+# 	$$DIFFUTILS_DIR/fnmatch.o \
+# 	$$DIFFUTILS_DIR/regex.o \
+# 	$$DIFFUTILS_DIR/proginfo.o \
+# 	$$DIFFUTILS_DIR/diff.o \
+# 	$$DIFFUTILS_DIR/diff3.o
+
+# SOURCES += diffutils.cpp 
 

@@ -10,8 +10,10 @@
 .. contents::
 ..
     1  Porting xxdiff to qmake
-      1.1  Links
-      1.2  Lex/Yacc
+      1.1  TODO
+      1.2  Done
+      1.3  Links
+      1.4  Lex/Yacc
 
 
 Porting xxdiff to qmake
@@ -19,22 +21,19 @@ Porting xxdiff to qmake
 We're porting xxdiff to qmake 4.1.  Some notes of that process.
 
 
-
-We need rules for:
-
-
-* Building the lex/yacc files for resParser::
-
-    flex  -oresParser.l.c resParser.l
-    bison -d  -oresParser.y.c resParser.y
-
-* clean: Removing the lex/yacc object
-* clean: Removing doc.h
-
+TODO
+----
 
 * Automatically generating the version.h file from the xxdiff/VERSION file::
 
     echo "#define XX_VERSION \"`cat ../VERSION`\"" > version.h
+
+* Automatically generating the documentation input file with a sed
+  command needs to be done automatically although this only needs
+  be done once and ``doc.h`` could be saved if this is too
+  difficult::
+
+    sed -e 's/\"/\\\"/g;s/$/\\n\\/;1s/^/char text[]=\"/;$s/\\$/\"\;/' doc.html > doc.h
 
 
 * Converting the source txt document to produce the html document can be done
@@ -43,11 +42,26 @@ We need rules for:
     .txt.html:
             rst2html.py --output-encoding=iso-8859-1 $< $@
 
-* Automatically generating the doucmentation input file with a sed command needs
-  to be done automatically although this only needs be done once and ``doc.h`` could
-  be saved if this is too difficult::
+  We could remove this dependencny and place it in a simple makefile, because
+  only the author and people who would want modify the docs need to use it, and
+  the output file is always provided in the distribution.  We certainly don't
+  want to introduce a dependency on docutils.
 
-    sed -e 's/\"/\\\"/g;s/$/\\n\\/;1s/^/char text[]=\"/;$s/\\$/\"\;/' doc.html > doc.h
+
+
+Done
+----
+
+* We will need to change the source files somewhat, due to the following changes
+  imposed by qmake::
+
+    bison -d -o resParser.y.c resParser.y
+
+  becomes::
+
+    bison -d -o y.tab.c -p resParser -b resParser resParser.y
+
+  Relatively easily done.  Renamed symbols in resParser.cpp.
 
 
 * We may need to add an automatic dependency from cmdline.o to the yacc output
@@ -56,35 +70,55 @@ We need rules for:
     cmdline.o: $(YACCOUTH)
     cmdline.obj: $(YACCOUTH)
 
+  This was taken care of automatically by qmake.
+
+
+* We need to add a dependency from resParser.o which includes the .y.h, .y.c and
+  .l.c files::
+
+    $(LEXOUT): $(LEXIN)
+            $(LEX) $(LEXDEBUG) -o$(LEXOUT) $(LEXIN)
+
+    $(YACCOUTC) $(YACCOUTH): $(YACCIN) $(LEXOUT)
+            $(YACC) $(YACCDEBUG) -o$(YACCOUTC) $(YACCIN)
+
+    $(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
+
+  This was taken care of automatically by qmake.
+
+
+* clean: Add a rule for removing the lex/yacc output files (.l.c, .y.h, .y.c)
+
+  Easy: this is taken care of by the LEXSOURCES and YACCSOURCES.
+
+
+* clean: Removing doc.h version.h
+
+  Easy: we just added those to QMAKE_CLEAN.
+
+
+* Customize the lex/yacc files for resParser::
+
+    flex  -oresParser.l.c resParser.l
+    bison -d  -oresParser.y.c resParser.y
+
+  Easy: we use the following rules from `Undocumented Qmake`_
+
+    QMAKE_LEX = flex
+
+    QMAKE_YACC = bison
+
+    solaris-cc {  
+      QMAKE_YACCFLAGS_MANGLE = -o y.tab.c -p $base
+    }
+
+    linux-g++ {
+      QMAKE_YACCFLAGS = -d -o y.tab.c
+      QMAKE_YACC_HEADER =
+      QMAKE_YACC_SOURCE =
+    }
 
 
 
-
-
-
-Links
------
-
-Undocumented Qmake
-http://paulf.free.fr/undocumented_qmake.html
-
-
-Lex/Yacc
---------
-
-::
-
-  QMAKE_LEX = flex
-
-  QMAKE_YACC = bison
-
-  solaris-cc {  
-    QMAKE_YACCFLAGS_MANGLE = -o y.tab.c -p $base
-  }
-
-  linux-g++ {
-    QMAKE_YACCFLAGS = -d -o y.tab.c
-    QMAKE_YACC_HEADER =
-    QMAKE_YACC_SOURCE =
-  }
+.. _`Undocumented Qmake`: http://paulf.free.fr/undocumented_qmake.html
 

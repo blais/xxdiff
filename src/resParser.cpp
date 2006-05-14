@@ -32,7 +32,7 @@
 #include <help.h>
 
 #ifndef INCL_RESPARSER_Y
-#include <resParser.y.h>
+#include <resParser_yacc.h>
 #define INCL_RESPARSER_Y
 #endif
 
@@ -768,22 +768,11 @@ else {                                          \
    result = ii;					\
 }
 
-#define YY_NO_UNPUT
-
-#define yylex    __yylex
-#define yyback   __yyback
-#define yyinput  __yyinput
-#define yylook   __yylook
-#define yyoutput __yyoutput
-#define yyracc   __yyracc
-#define yyreject __yyreject
-#define yyunput __yyunput
-
 
 /*----- function prototypes -----*/
 
-void yyerror( const char* );
-int yywrap();
+void resParsererror( const char* );
+int resParserwrap();
 int parseFromKeywordList(
    const StringToken* llist,
    const int          nbmem,
@@ -803,14 +792,14 @@ QTextStream* is = 0;
 char lexerBuffer[ LEX_BUFFER_MAX ];
 
 #define YYPARSE_PARAM resources
-#define YY_DECL       int yylex( YYSTYPE* yylval )
+#define YY_DECL       int resParserlex( YYSTYPE* yylval )
 
-#include <resParser.l.c>
+#include <resParser_lex.cpp>
 
 #ifdef WINDOWS
 #  define std 
 #endif
-#include <resParser.y.c>
+#include <resParser_yacc.cpp>
 #ifdef WINDOWS
 #  undef std 
 #endif
@@ -832,7 +821,7 @@ char* dummy_full_match = yy_full_match;
 
 //------------------------------------------------------------------------------
 //
-void yyerror( const char* msg )
+void resParsererror( const char* msg )
 {
    // Send errors to stdout so we can filter out the debug info shmeglu while 
    // debugging parser.
@@ -842,12 +831,12 @@ void yyerror( const char* msg )
    std::cerr
 #endif
              << "Error parsing resource, (line " 
-             << yylineno << "): " << msg << std::endl;
+             << resParserlineno << "): " << msg << std::endl;
 }
 
 //------------------------------------------------------------------------------
 //
-int yywrap()
+int resParserwrap()
 {
    return 1;
 }
@@ -875,7 +864,7 @@ int parseFromKeywordList(
       QString os;
       QTextOStream oss( &os );
       oss << "Unknown " << errmsg << ": " << name << flush;
-      yyerror( os.latin1() ); 
+      resParsererror( os.latin1() ); 
    }
    num = ERROR_TOKEN;
    return ERROR_TOKEN;
@@ -983,19 +972,19 @@ void XxResParser::parse( const QString& filename, XxResources& resources )
 void XxResParser::parse( QTextStream& input, XxResources& resources )
 {
 #if YYDEBUG != 0
-   yydebug = 1;
+   resParserdebug = 1;
 #endif
 
    is = & input;
 
    try {
-      yylineno = 1; // Reset lineno.
+      resParserlineno = 1; // Reset lineno.
    
-      yyrestart( 0 );
+      resParserrestart( 0 );
       // YY_FLUSH_BUFFER is undef'ed, use its definition to flush the buffer.
-      yy_flush_buffer( YY_CURRENT_BUFFER );
+      resParser_flush_buffer( YY_CURRENT_BUFFER );
       BEGIN(INITIAL);
-      yyparse( &resources );
+      resParserparse( &resources );
    }
    catch ( ... ) {
       // Rethrow on error.
