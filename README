@@ -166,7 +166,6 @@ Dependencies
 Build dependencies are:
 
 - Qt-3.2 or higher
-- tmake
 - a C++ compiler, flex and yacc
 
 Runtime dependencies are:

@@ -28,25 +28,14 @@ Requirements
 
 - Qt-3.x
 
-- tmake-1.7 or more (old versions, e.g. tmake-1.4, have problems with the
-  INTERFACE keyword and don't generate appropriate rules for building the .ui
-  files). This won't work with qmake.
-
-  tmake can be found at http://www.trolltech.com/download/tmake.html
-
 Compiling
 ---------
 
-Compile xxdiff itself with tmake (http://www.trolltech.com).  tmake is
-the old build tool that Qt used to be building with, and we would be
-happy to switch to qmake but we're using features from tmake that are
-not supported in qmake.
-
-Make sure your ``TMAKEPATH`` is properly set to point to the
-architecture specific tmake directory::
+Compile xxdiff itself with qmake (http://www.trolltech.com).  xxdiff used to
+required the obsolete tmake tool, but has been ported to use qmake in may 2006.
 
    cd xxdiff/src
-   tmake xxdiff.pro > Makefile
+   qmake xxdiff.pro
    make
 
 Notes
@@ -56,9 +45,9 @@ Notes
 
 * you may have to edit CONFIG to include the option 'thread' or not, depending
   on if you have only the multi-threaded version of qt installed or not
-  (libqt-mt).
-  xxdiff does not specifically need it and can build and run without the
-  multi-threaded version of Qt.  Re-run take after making the change.
+  (libqt-mt).  xxdiff does not specifically need it and can build and run
+  without the multi-threaded version of Qt.  Re-run take after making the
+  change.
 
 
 Installation
@@ -104,8 +93,8 @@ The author's own release process
 --------------------------------
 
 0) check
-   1a) tmake makefile is in release
-   1b) version number is correct
+   1a) the doc files have been generated.
+   1b) the version number is correct
 
 1) apply release tag to cvs files
 
@@ -130,3 +119,4 @@ The author's own release process
    - wincvs list
    - sgi freeware
    - discreet
+

@@ -71,8 +71,3 @@ proginfo.obj: version.h
 cmdline.o: $(YACCOUTH)
 cmdline.obj: $(YACCOUTH)
 
-
-doc: xxdiff
-	echo "This is the user's manual for version: " > version.txt
-	xxdiff --version | head -n1 >> version.txt
-
