@@ -1,0 +1,90 @@
+===================
+   Build Systems
+===================
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2006-05-14
+:Abstract:
+
+    Notes related to build systems, make, Jam, etc.
+
+.. contents::
+..
+    1  Porting xxdiff to qmake
+      1.1  Links
+      1.2  Lex/Yacc
+
+
+Porting xxdiff to qmake
+=======================
+We're porting xxdiff to qmake 4.1.  Some notes of that process.
+
+
+
+We need rules for:
+
+
+* Building the lex/yacc files for resParser::
+
+    flex  -oresParser.l.c resParser.l
+    bison -d  -oresParser.y.c resParser.y
+
+* clean: Removing the lex/yacc object
+* clean: Removing doc.h
+
+
+* Automatically generating the version.h file from the xxdiff/VERSION file::
+
+    echo "#define XX_VERSION \"`cat ../VERSION`\"" > version.h
+
+
+* Converting the source txt document to produce the html document can be done
+  via another makefile, or if we can inject the following rule::
+
+    .txt.html:
+            rst2html.py --output-encoding=iso-8859-1 $< $@
+
+* Automatically generating the doucmentation input file with a sed command needs
+  to be done automatically although this only needs be done once and ``doc.h`` could
+  be saved if this is too difficult::
+
+    sed -e 's/\"/\\\"/g;s/$/\\n\\/;1s/^/char text[]=\"/;$s/\\$/\"\;/' doc.html > doc.h
+
+
+* We may need to add an automatic dependency from cmdline.o to the yacc output
+  files::
+
+    cmdline.o: $(YACCOUTH)
+    cmdline.obj: $(YACCOUTH)
+
+
+
+
+
+
+
+Links
+-----
+
+Undocumented Qmake
+http://paulf.free.fr/undocumented_qmake.html
+
+
+Lex/Yacc
+--------
+
+::
+
+  QMAKE_LEX = flex
+
+  QMAKE_YACC = bison
+
+  solaris-cc {  
+    QMAKE_YACCFLAGS_MANGLE = -o y.tab.c -p $base
+  }
+
+  linux-g++ {
+    QMAKE_YACCFLAGS = -d -o y.tab.c
+    QMAKE_YACC_HEADER =
+    QMAKE_YACC_SOURCE =
+  }
+

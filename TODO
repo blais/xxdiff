@@ -5,6 +5,9 @@
 The More Urgent For the Release
 ===============================
 
+- Remove the automatically inserted filenames from the comments file, Trac does
+  a nice enough job, place that as an optional feature.
+
 - In decision mode, if there are at least one selection from each side, if the
   user leaves with A or R, pop a confirmation box.  This is important to avoid
   errors.  It is way too easy to select for merge and exit with A.  I've been

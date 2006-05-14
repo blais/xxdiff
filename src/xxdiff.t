@@ -52,7 +52,6 @@ $(PARSOBJ): $(YACCOUTC) $(YACCOUTH) $(LEXOUT)
 
 .html.h: 
 	sed -e 's/\"/\\\"/g;s/$$/\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
-	echo 's/\"/\\\"/g;s/$$/\\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' 
 
 help.o: doc.h
 help.obj: doc.h
@@ -76,3 +75,4 @@ cmdline.obj: $(YACCOUTH)
 doc: xxdiff
 	echo "This is the user's manual for version: " > version.txt
 	xxdiff --version | head -n1 >> version.txt
+

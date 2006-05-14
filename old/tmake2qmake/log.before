@@ -1,0 +1,78 @@
+/usr/qt/3/bin/uic markersWidgetBase.ui -o ./markersWidgetBase.h
+/usr/qt/3/bin/uic optionsDialogBase.ui -o ./optionsDialogBase.h
+/usr/qt/3/bin/uic searchDialogBase.ui -o ./searchDialogBase.h
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o optionsDialog.o optionsDialog.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o searchDialog.o searchDialog.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o app.o app.cpp
+flex  -oresParser.l.c resParser.l
+bison -d  -oresParser.y.c resParser.y
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o cmdline.o cmdline.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o suicideMessageBox.o suicideMessageBox.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o main.o main.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o overview.o overview.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o copyLabel.o copyLabel.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o text.o text.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o scrollView.o scrollView.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o central.o central.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o merged.o merged.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o lineNumbers.o lineNumbers.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o util.o util.cpp
+sed -e 's/\"/\\\"/g;s/$/\\n\\/;1s/^/char text[]=\"/;$s/\\$/\"\;/' doc.html > doc.h
+echo 's/\"/\\\"/g;s/$/\\\n\\/;1s/^/char text[]=\"/;$s/\\$/\"\;/' 
+s/\"/\\\"/g;s/$/\\\n\\/;1s/^/char text[]=\"/;$s/\\$/\"\;/
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o help.o help.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o exceptions.o exceptions.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o builder.o builder.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o builderFiles2.o builderFiles2.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o builderFiles3.o builderFiles3.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o builderDirs2.o builderDirs2.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o builderUnmerge.o builderUnmerge.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o builderSingle.o builderSingle.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o diffs.o diffs.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o hordiffImp.o hordiffImp.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o line.o line.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o buffer.o buffer.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o resources.o resources.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o accelUtil.o accelUtil.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o resParser.o resParser.cpp
+resParser.l.c:1649: warning: `void XxResParserNS::__yyunput(int, char*)' 
+   defined but not used
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o markers.o markers.cpp
+gcc -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o getopt.o getopt.c
+gcc -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o getopt1.o getopt1.c
+gcc -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o proginfo.o proginfo.c
+/usr/qt/3/bin/uic markersWidgetBase.ui -i markersWidgetBase.h -o markersWidgetBase.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o markersWidgetBase.o markersWidgetBase.cpp
+/usr/qt/3/bin/uic optionsDialogBase.ui -i optionsDialogBase.h -o optionsDialogBase.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o optionsDialogBase.o optionsDialogBase.cpp
+/usr/qt/3/bin/uic searchDialogBase.ui -i searchDialogBase.h -o searchDialogBase.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o searchDialogBase.o searchDialogBase.cpp
+/usr/qt/3/bin/moc optionsDialog.h -o moc_optionsDialog.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_optionsDialog.o moc_optionsDialog.cpp
+/usr/qt/3/bin/moc searchDialog.h -o moc_searchDialog.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_searchDialog.o moc_searchDialog.cpp
+/usr/qt/3/bin/moc app.h -o moc_app.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_app.o moc_app.cpp
+/usr/qt/3/bin/moc diffs.h -o moc_diffs.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_diffs.o moc_diffs.cpp
+/usr/qt/3/bin/moc resources.h -o moc_resources.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_resources.o moc_resources.cpp
+/usr/qt/3/bin/moc copyLabel.h -o moc_copyLabel.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_copyLabel.o moc_copyLabel.cpp
+/usr/qt/3/bin/moc text.h -o moc_text.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_text.o moc_text.cpp
+/usr/qt/3/bin/moc scrollView.h -o moc_scrollView.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_scrollView.o moc_scrollView.cpp
+/usr/qt/3/bin/moc central.h -o moc_central.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_central.o moc_central.cpp
+/usr/qt/3/bin/moc merged.h -o moc_merged.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_merged.o moc_merged.cpp
+/usr/qt/3/bin/moc markers.h -o moc_markers.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_markers.o moc_markers.cpp
+/usr/qt/3/bin/moc markersWidgetBase.h -o moc_markersWidgetBase.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_markersWidgetBase.o moc_markersWidgetBase.cpp
+/usr/qt/3/bin/moc optionsDialogBase.h -o moc_optionsDialogBase.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_optionsDialogBase.o moc_optionsDialogBase.cpp
+/usr/qt/3/bin/moc searchDialogBase.h -o moc_searchDialogBase.cpp
+g++ -c -pipe -Wall -W -O2 -D_REENTRANT -DQT_THREAD_SUPPORT -DNO_DEBUG -I. -I/usr/qt/3/include -o moc_searchDialogBase.o moc_searchDialogBase.cpp
+g++  -o ../bin/xxdiff optionsDialog.o searchDialog.o app.o cmdline.o suicideMessageBox.o main.o overview.o copyLabel.o text.o scrollView.o central.o merged.o lineNumbers.o util.o help.o exceptions.o builder.o builderFiles2.o builderFiles3.o builderDirs2.o builderUnmerge.o builderSingle.o diffs.o hordiffImp.o line.o buffer.o resources.o accelUtil.o resParser.o markers.o getopt.o getopt1.o proginfo.o markersWidgetBase.o optionsDialogBase.o searchDialogBase.o moc_optionsDialog.o moc_searchDialog.o moc_app.o moc_diffs.o moc_resources.o moc_copyLabel.o moc_text.o moc_scrollView.o moc_central.o moc_merged.o moc_markers.o moc_markersWidgetBase.o moc_optionsDialogBase.o moc_searchDialogBase.o  -L/usr/qt/3/lib -L/usr/X11R6/lib -lpthread -lqt-mt -lXext -lX11 -lm
