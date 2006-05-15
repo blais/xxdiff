@@ -21,16 +21,68 @@
  ******************************************************************************/
 
 %{
-/*  #define YYSTYPE QString */
-
 #include <resources.h>
-
-#ifndef INCL_XXDIFF_RESPARSER
 #include <resParser_yacc.h>
-#define INCL_XXDIFF_RESPARSER
-#endif
 
 #include <iostream>
+
+
+namespace XxResParserNS {
+
+struct StringToken;
+
+int parseFromKeywordList(
+   const StringToken* llist,
+   const int          nbmem,
+   int                retval,
+   const char*        errmsg,
+   const char*        name,
+   int&               num,
+   bool               noerror = 0
+);
+
+extern StringToken kwdList[];
+extern StringToken boolkwdList[];
+extern StringToken accelList[];
+extern StringToken colorList[];
+extern StringToken commandList[];
+extern StringToken commandSwitchList[];
+extern StringToken showList[];
+extern StringToken tagList[];
+
+extern int kwdList_size;
+extern int boolkwdList_size;
+extern int accelList_size;
+extern int colorList_size;
+extern int commandList_size;
+extern int commandSwitchList_size;
+extern int showList_size;
+extern int tagList_size;
+
+}
+using namespace XxResParserNS;
+
+
+// Declare internal buffer for lexer.
+#define LEX_BUFFER_MAX	2048
+char lexerBuffer[ LEX_BUFFER_MAX ];
+
+
+// Override YY_INPUT to get the input from a Qt stream--setup as
+// the input file--rather than from a FILE*.
+#define YY_INPUT( buf, result, max_size )                              \
+QTextStream* input_stream_ptr = reinterpret_cast<QTextStream*>(resParserin); \
+if ( input_stream_ptr->atEnd() ) {                                     \
+   result = YY_NULL;                                                   \
+}                                                                      \
+else {                                                                 \
+   int ii = 0;                                                         \
+   for ( ; (ii < max_size) && (!input_stream_ptr->atEnd()); ++ii ) {   \
+	input_stream_ptr->readRawBytes( &buf[ii], 1 );                 \
+   }                                                                   \
+   result = ii;                                                        \
+}
+
 
 %}
 
@@ -43,6 +95,8 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 %option stack
 %option yylineno
 %option nounput
+%option bison-bridge
+%option never-interactive
 
 %s GEOM_SC
 %s ACCEL_SC
@@ -63,7 +117,7 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 
 <GEOM_SC>{
 
-{geomspec}	{ 
+{geomspec}	{
    int len = ::strlen( yytext );
    if ( len >= LEX_BUFFER_MAX ) {
       ::strncpy( lexerBuffer, yytext, LEX_BUFFER_MAX );
@@ -78,24 +132,26 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    return GEOMSPEC;
 }
 
-[M|m]aximize	{ 
+[M|m]aximize	{
    BEGIN(INITIAL);
    return GEOMFULL;
 }
 
 }
 
-<ACCEL_SC>{id}	{ 
+<ACCEL_SC>{id}	{
+   BEGIN(INITIAL);
    return parseFromKeywordList(
-      accelList, sizeof(accelList)/sizeof(StringToken),
+      accelList, accelList_size,
       ACCELNAME, "accel",
       yytext, yylval->num
    );
 }
 
-<COLOR_SC>{id}	{ 
+<COLOR_SC>{id}	{
+   BEGIN(INITIAL);
    int token = parseFromKeywordList(
-      colorList, sizeof(colorList)/sizeof(StringToken),
+      colorList, colorList_size,
       COLORNAME, "color",
       yytext, yylval->num
    );
@@ -105,31 +161,34 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    return token;
 }
 
-<COLORBF_SC>([bB]ack|[fF]ore)	{ 
+<COLORBF_SC>([bB]ack|[fF]ore)	{
    BEGIN(INITIAL);
    yylval->num = ( (yytext[0] == 'b') || (yytext[0] == 'B') ) ? BACK : FORE;
    return yylval->num;
 }
 
-<COMMAND_SC>{id}	{ 
+<COMMAND_SC>{id}	{
+   BEGIN(INITIAL);
    return parseFromKeywordList(
-      commandList, sizeof(commandList)/sizeof(StringToken),
+      commandList, commandList_size,
       COMMANDNAME, "command",
       yytext, yylval->num
    );
 }
 
-<COMMANDSW_SC>{id}	{ 
+<COMMANDSW_SC>{id}	{
+   BEGIN(INITIAL);
    return parseFromKeywordList(
-      commandSwitchList, sizeof(commandSwitchList)/sizeof(StringToken),
+      commandSwitchList, commandSwitchList_size,
       COMMANDSWNAME, "command option switch",
       yytext, yylval->num
    );
 }
 
-<INITSW_SC>{id}	{ 
+<INITSW_SC>{id}	{
+   BEGIN(INITIAL);
    int ret = parseFromKeywordList(
-      commandSwitchList, sizeof(commandSwitchList)/sizeof(StringToken),
+      commandSwitchList, commandSwitchList_size,
       INITSWNAME, "init command switch",
       yytext, yylval->num
    );
@@ -138,16 +197,18 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 }
 
 <TAG_SC>{iddot}		{
+   BEGIN(INITIAL);
    return parseFromKeywordList(
-      tagList, sizeof(tagList)/sizeof(StringToken),
+      tagList, tagList_size,
       TAGNAME, "tag",
       yytext, yylval->num
    );
 }
 
-<SHOW_SC>{id}		{ 
+<SHOW_SC>{id}		{
+   BEGIN(INITIAL);
    int ret = parseFromKeywordList(
-      showList, sizeof(showList)/sizeof(StringToken),
+      showList, showList_size,
       SHOWNAME, "show window",
       yytext, yylval->num
    );
@@ -155,7 +216,7 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    return ret;
 }
 
-<INITSWSTATE_SC>{ 
+<INITSWSTATE_SC>{
 ([Tt](rue|RUE))|1    { yylval->num = 1; BEGIN(INITIAL); return INITSWSTATE; }
 ([Ff](alse|ALSE))|0  { yylval->num = 0; BEGIN(INITIAL); return INITSWSTATE; }
 ([Nn](oo?p))|-1      { yylval->num = -1; BEGIN(INITIAL); return INITSWSTATE; }
@@ -173,8 +234,9 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 }
 
 {id}	{
+   BEGIN(INITIAL);
    parseFromKeywordList(
-      boolkwdList, sizeof(boolkwdList)/sizeof(StringToken),
+      boolkwdList, boolkwdList_size,
       1, "keyword",
       yytext, yylval->num,
       true
@@ -185,8 +247,9 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    }
    /* else */
 
+   BEGIN(INITIAL);
    parseFromKeywordList(
-      kwdList, sizeof(kwdList)/sizeof(StringToken),
+      kwdList, kwdList_size,
       1, "keyword",
       yytext, yylval->num
    );
@@ -204,7 +267,7 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
    return yylval->num;
 }
 
-{string}	{ 
+{string}	{
    /* strip the quotes */
    int len = ::strlen( yytext );
    if ( len >= LEX_BUFFER_MAX ) {
@@ -216,10 +279,10 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
       lexerBuffer[ len-2 ] = 0;
    }
    yylval->str = lexerBuffer;
-   return STRING; 
+   return STRING;
 }
 
-{number}	{ 
+{number}	{
    (void)sscanf( (char *)yytext, "%d", &yylval->num );
    return NUMBER;
 }
@@ -236,7 +299,7 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
                      oss << "ignoring char: " << yytext << flush;
                      yyerror( os.latin1() );
                      */
-                  } 
+                  }
                 }
 
 %%

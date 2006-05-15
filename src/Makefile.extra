@@ -1,0 +1,79 @@
+#!/usr/bin/env make
+#
+# Extra rules to be appended to the generated qmake makefile for xxdiff build.
+#
+
+# Extra targets.
+EXTRA_FILES = version.h doc.h 
+
+.SUFFIXES: .html .txt .h
+
+
+# 
+# resParser.o
+#
+
+# # Modified dependencies for the included lex/yacc generated files.
+# resParser.o: resParser_lex.cpp
+# resParser.o: resParser_yacc.h
+# resParser.o: resParser_yacc.cpp
+
+# print:
+# 	echo $(OBJECTS)
+
+
+
+
+#
+# version.h
+#
+
+# Automatically generate a simple include file with version number in it.
+version.h: ../VERSION
+	echo "#define XX_VERSION \"`cat ../VERSION`\"" > $@
+
+# Dependencies for the generated version file.
+proginfo.o: version.h
+proginfo.obj: version.h
+
+
+#
+# doc.h
+#
+
+# Convert the html/qml documentation to an C include file.
+# This needs to be automated.
+.html.h: 
+	sed -e 's/\"/\\\"/g;s/$$/\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
+
+# Dependencies for the generated documentation file.
+help.o: doc.h
+help.obj: doc.h
+
+# Convert the reStructuredText documentation to html.  (this is only used by the
+# author, directly, manually, not that important for xxdiff packagers.)
+.txt.html:
+	rst2html.py --output-encoding=iso-8859-1 $< $@
+
+#
+# clean_extra
+#
+
+# Clean up some of the generated files automatically.
+clean: clean_extra
+
+clean_extra:
+	rm -f $(EXTRA_FILES)
+
+
+# Override the qmake we use because the one in the path might be different.
+QMAKE = $(QTDIR)/bin/qmake
+
+
+# Note: we would need to add this to be correct.  Danger!  If the Makefile gets
+# remade, this file does not get appended again to the new makefile!
+all: Makefile
+
+Makefile: xxdiff.pro
+	$(MAKE) -f Makefile.bootstrap makefile
+

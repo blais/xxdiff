@@ -112,15 +112,9 @@ public:
    // Destructor.
    virtual ~XxResParser();
 
-private:
+   /*----- static data members -----*/
 
-   /*----- member functions -----*/
-
-   // Push/pop the parser stack.
-   // <group>
-   void push();
-   void pop();
-   // </group>
+   static const int BOOLKWD_BASE = 1000;
 
 };
 

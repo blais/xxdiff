@@ -5,8 +5,6 @@
 The More Urgent For the Release
 ===============================
 
-- We need to complete the qmake port work before we release.  Test build!
-
 - Remove the automatically inserted filenames from the comments file, Trac does
   a nice enough job, place that as an optional feature.
 
@@ -18,13 +16,10 @@ The More Urgent For the Release
 
 - Write documentation for the new revcomp script!
 
-- From Monotone docs, easy fix::
-
-    Isn't it annoying that xxdiff doesn't have any keybinding for "save as merged"?
-    echo 'Accel.SaveAsMerged: "Ctrl+M"' >>~/.xxdiffrc
-
 - When the comments file has not changed, warn the user that he did not appear
   to have saved the file.
+
+Sent email to Monotone docs owner about the Ctrl+M binding.
 
 
 --------------------------------------------------------------------------------

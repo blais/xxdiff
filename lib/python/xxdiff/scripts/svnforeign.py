@@ -326,12 +326,18 @@ def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
                     write(svnign)
                     write('----------------------------\n')
 
-                    write("Add pattern (! to cancel, default: [%s]):" % bn)
+                    write("Add pattern (! to cancel, * to edit, default: [%s]):"
+                          % bn)
                     pat = raw_input()
                     if pat == '':
                         pat = bn
+
                     if pat == '!':
                         print '(cancelled.)'
+
+                    elif pat == '*':
+                        call(['svn', 'propedit', 'svn:ignore', dn])
+
                     else:
                         svnign += pat + '\n'
                         ignore_prop(dn, svnign)

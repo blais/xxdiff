@@ -5,6 +5,11 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Added a default binding for SaveAsMerged on Ctrl+M, after I saw the comment
+  from the Monotone docs.
+
+* Finally ported the build system from tmake to qmake!
+
 * Caught error gracefully when xxdiff is missing in the user's path.
 
 * Fixed xx-cvs-diff review/accept mode (still need to test it more).

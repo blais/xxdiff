@@ -1,0 +1,30 @@
+#!/usr/bin/env make
+# 
+# Driver makefile for xxdiff that integrates some of the special custom rules
+# and that generates the qmake Makefile and delegates to it.
+#
+
+# Set QTDIR to a reasonable default if unset.
+QTDIR ?= /usr/qt/3
+
+# Rule to generate the qmake Makefile for building xxdiff.
+QMAKE = $(QTDIR)/bin/qmake
+
+
+# Rule to generate qmake and delegate to it.
+all: Makefile.qmake
+	$(MAKE) -f Makefile.qmake $(MAKEFLAGS)
+
+
+# Automatically rebuild Makefile when xxdiff.pro changes.
+#
+# This is a bit roundabout: the qmake-generated Makefile has a similar rule, but
+# it would not append the extra rules when xxdiff.pro would change.  Therefore,
+# we instead place it in Makefile.qmake, so that never hurts, and we define our
+# own regeneration rule.  Incidentally, in Makefile.extra, the regeneration rule 
+# calls back into this bootstrap makefile.  You should be able to just change 
+# xxdiff.pro and type "make" and for everything to work automatically.
+Makefile.qmake Makefile makefile:
+	$(QMAKE) -o Makefile.qmake xxdiff.pro
+	cat Makefile.qmake Makefile.extra > Makefile
+

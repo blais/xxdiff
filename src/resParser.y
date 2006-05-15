@@ -20,23 +20,48 @@
  *
  ******************************************************************************/
 
-%{
-#define RESOURCES  ( static_cast<XxResources*>(resources) )
-
-#define BOOLKWD_BASE                 1000
-
-
-/* define out second declaration because we're including the files. */
-#if 0
-%}
 %union
 {
     int   num;
     char* str;
 }
 %{
-#endif
+
+// xxdiff imports
+#include <resources.h>
+#include <resParser.h>
+
+// Qt imports
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qrect.h>
+#include <qstylefactory.h>
+
+// The parser input is the resources object to fill in.
+#define RESOURCES  ( static_cast<XxResources*>(resources) )
+#define YYPARSE_PARAM resources
+
+// Declare lexer from other compilation unit.
+int resParserlex( YYSTYPE* yylval );
+
+void resParsererror( const char* msg );
+
+// Declare some parser functions and data defined in resParser.cpp
+namespace XxResParserNS {
+
+bool readGeometry( const QString& val, QRect& geometry );
+
+extern XxBoolOpt* boolMap;
+
+}
+using namespace XxResParserNS; // Make sure we can use the above.
+
+
+
 %}
+
+/* generate header file */
+%defines
 
 /* generic */
 %token <num> COLON DOT ERROR_TOKEN
@@ -235,7 +260,7 @@ colorbf         : BACK
 boolopt		: boolkwd COLON BOOLEAN
 		{
                    /*printf( "==> boolopt %d: %d\n", $1, $3 );*/
-                   RESOURCES->setBoolOpt( boolMap[ $1 - BOOLKWD_BASE ], $3 );
+                   RESOURCES->setBoolOpt( boolMap[ $1 - XxResParser::BOOLKWD_BASE ], $3 );
                 }
 		;
 

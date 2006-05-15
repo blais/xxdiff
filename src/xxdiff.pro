@@ -48,7 +48,7 @@ debug:QMAKE_CXXFLAGS += -DXX_DEBUG
 #
 # Parser/grammar generation.
 #
-QMAKE_LEX = flex
+QMAKE_LEX = flex --header-file=resParser_lex.h
 QMAKE_YACC = bison
 
 linux-g++ {
@@ -67,8 +67,6 @@ YACCSOURCES = resParser.y
 
 
 
-# Clean up some of the generated files automatically.
-QMAKE_CLEAN += doc.h version.h
 
 
 
@@ -240,4 +238,6 @@ TARGET = xxdiff
 # 	$$DIFFUTILS_DIR/diff3.o
 
 # SOURCES += diffutils.cpp 
+
+
 

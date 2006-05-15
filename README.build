@@ -31,15 +31,18 @@ Requirements
 Compiling
 ---------
 
-Compile xxdiff itself with qmake (http://www.trolltech.com).  xxdiff used to
-required the obsolete tmake tool, but has been ported to use qmake in may 2006.
+Compile xxdiff with qmake (http://www.trolltech.com) ::
 
    cd xxdiff/src
-   qmake xxdiff.pro
-   make
+   make -f Makefile.bootstrap makefile     # Generate the qmake Makefile
+   make                                    # Build xxdiff
+
 
 Notes
 ~~~~~
+
+* Note: xxdiff used to require the obsolete tmake tool, but has been ported to
+  use qmake in may 2006.
 
 * you may have to set your QTDIR manually (e.g. to /usr/lib/qt3)
 
