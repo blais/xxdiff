@@ -73,6 +73,11 @@ Sent email to Monotone docs owner about the Ctrl+M binding.
   files around if we restart manually killing the editing window (which can
   happen if you leave it in the background).
 
+* Provide a way to invoke xxdiff with alternate diff programs.
+
+  - Using this code, provide code to create alternate diff programs that compare
+    pairs of things, with or without subdiffs, by outputting POSIX diff output.
+
 
 * xx-rename: With respect to case sensitivity, supports the smart
   replacement behaviour that is present in GNU emacs.
