@@ -95,8 +95,9 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 %option stack
 %option yylineno
 %option nounput
-%option bison-bridge
 %option never-interactive
+%option bison-bridge
+%option header-file="resParser_lex.h"
 
 %s GEOM_SC
 %s ACCEL_SC

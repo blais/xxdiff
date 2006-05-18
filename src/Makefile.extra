@@ -13,15 +13,8 @@ EXTRA_FILES = version.h doc.h
 # resParser.o
 #
 
-# # Modified dependencies for the included lex/yacc generated files.
-# resParser.o: resParser_lex.cpp
-# resParser.o: resParser_yacc.h
-# resParser.o: resParser_yacc.cpp
-
-# print:
-# 	echo $(OBJECTS)
-
-
+# Extra dependencies for the included lex/yacc generated files.
+resParser_lex.h: resParser_lex.cpp
 
 
 #
