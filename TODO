@@ -129,6 +129,15 @@ Sent email to Monotone docs owner about the Ctrl+M binding.
 
 --------------------------------------------------------------------------------
 
+* Idea: we could modify xxdiff so that when we reload, we could output RELOAD
+  and that could mean for the client to redo some task in the background, then
+  let xxdiff know to reload after that.  This would allow xxdiff to communicate
+  with the parent process.  This should actually be part of a larger protocol
+  for client to communicate with xxdiff and vice-versa.  This is a cool idea,
+  but a lot of work for very little benefit.
+
+
+
 * From Michalis Giannakidis, mgiann@beta-cae.gr
 
   Do this:
