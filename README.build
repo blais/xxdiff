@@ -24,7 +24,9 @@ Requirements
 
 - A C++ compiler with a decent STL (g++-2.96 or more will do).
 
-- flex and bison
+- flex >=2.5.31
+
+- bison
 
 - Qt-3.x
 

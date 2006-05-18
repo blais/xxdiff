@@ -48,6 +48,7 @@ debug:QMAKE_CXXFLAGS += -DXX_DEBUG
 #
 # Parser/grammar generation.
 #
+QMAKE_LEX = flex
 QMAKE_YACC = bison
 
 linux-g++ {
