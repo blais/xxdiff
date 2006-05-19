@@ -15,6 +15,7 @@ EXTRA_FILES = version.h doc.h
 
 # Extra dependencies for the included lex/yacc generated files.
 resParser_lex.h: resParser_lex.cpp
+resParser.cpp: resParser_lex.h
 
 
 #
