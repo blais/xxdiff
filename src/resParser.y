@@ -51,7 +51,7 @@ namespace XxResParserNS {
 
 bool readGeometry( const QString& val, QRect& geometry );
 
-extern XxBoolOpt* boolMap;
+extern XxBoolOpt boolMap[];
 
 }
 using namespace XxResParserNS; // Make sure we can use the above.
@@ -259,7 +259,10 @@ colorbf         : BACK
 
 boolopt		: boolkwd COLON BOOLEAN
 		{
-                   /*printf( "==> boolopt %d: %d\n", $1, $3 );*/
+                   /*printf( "==> boolopt %d: %d\n", $1, $3 );
+                   printf( "boolMap %p\n", boolMap );
+                   printf( "RESOURCES %p\n", RESOURCES );*/
+                    
                    RESOURCES->setBoolOpt( boolMap[ $1 - XxResParser::BOOLKWD_BASE ], $3 );
                 }
 		;
