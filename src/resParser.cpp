@@ -74,14 +74,14 @@ extern int resParserparse( void* );
 //
 void resParsererror( const char* msg )
 {
-   // Send errors to stdout so we can filter out the debug info shmeglu while 
+   // Send errors to stdout so we can filter out the debug info shmeglu while
    // debugging parser.
 #if YYDEBUG != 0
    std::cout
 #else
    std::cerr
 #endif
-             << "Error parsing resource, (line " 
+             << "Error parsing resource, (line "
              << resParserlineno << "): " << msg << std::endl;
 }
 
@@ -132,11 +132,11 @@ view." },
    { "FontText", FONT_TEXT,
      "Font to use for diff text view." },
 
-   { "Show", SHOW, 
+   { "Show", SHOW,
      "Set of options to determine if some UI display element is visible or not \
 upon startup." },
 
-   { "Command", COMMAND, 
+   { "Command", COMMAND,
      "Commands to use to generate diffs.  xxdiff is only an interface to \
 display diff results, it doesn't actually compute diffs itself, unless you use \
 the internal commands options, where it uses the same arguments as specified \
@@ -161,26 +161,26 @@ setting the appropriate switch in the command itself amounts to the same. \
 See also the CommandSwitch resources.  For the quality options, you should \
 just set a single one to 'true'." },
 
-   { "Tag", TAG, 
+   { "Tag", TAG,
      "Tags used for conditionals used for unselected regions, when that option \
 is used to save files." },
-   
-   { "TabWidth", TAB_WIDTH, 
+
+   { "TabWidth", TAB_WIDTH,
      "Tab character alignment width." },
 
-   { "OverviewFileWidth", OVERVIEW_FILE_WIDTH, 
+   { "OverviewFileWidth", OVERVIEW_FILE_WIDTH,
      "In overview area, width (in pixels) of each file." },
 
    { "OverviewSepWidth", OVERVIEW_SEP_WIDTH,
      "In overview area, width (in pixels) between each file." },
 
-   { "VerticalLinePosition", VERTICAL_LINE_POS, 
+   { "VerticalLinePosition", VERTICAL_LINE_POS,
      "Initial column to draw vertical alignment line." },
 
-   { "ClipboardHeaderFormat", CLIPBOARD_HEAD_FORMAT, 
+   { "ClipboardHeaderFormat", CLIPBOARD_HEAD_FORMAT,
      "Format of header for selection of text for formatted clipboard text." },
 
-   { "ClipboardLineFormat", CLIPBOARD_LINE_FORMAT, 
+   { "ClipboardLineFormat", CLIPBOARD_LINE_FORMAT,
      "Format of each selection line for formatted clipboard text." },
 
    { "HorizontalDiffType", HORDIFF_TYPE,
@@ -206,7 +206,7 @@ characters align, resulting in many small horizontal hunks, which can be \
 quite confusing.  Usually a value of 5 gives enough horizontal context for \
 the eye to figure out what happenened." },
 
-   { "ShowPaneMergedViewPercent", SHOW_PANE_MERGED_VIEW_PERCENT, 
+   { "ShowPaneMergedViewPercent", SHOW_PANE_MERGED_VIEW_PERCENT,
      "Initial vertical percentage size, between 0 and 100, of the pane merged \
 view on startup." },
 
@@ -230,40 +230,40 @@ StringToken boolkwdList[] = {
    { "AutoSelectMerge", SELECT_MERGE,
      "Pre-selected non-conflictual regions as an automatic merge would." },
 
-   { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS, 
+   { "IgnoreHorizontalWhitespace", IGNORE_HORIZONTAL_WS,
      "Ignore horizontal whitespace in horizontal diffs." },
 
-   { "IgnorePerHunkWhitespace", IGNORE_PERHUNK_WS, 
+   { "IgnorePerHunkWhitespace", IGNORE_PERHUNK_WS,
      "For each hunk, ignore hunk if there are only whitespace and line break \
 changes within that hunk. This can be useful for ignoring code reformatting \
 for certain source code languages that allow it (e.g. C++)." },
 
-   { "FormatClipboardText", FORMAT_CLIPBOARD_TEXT, 
+   { "FormatClipboardText", FORMAT_CLIPBOARD_TEXT,
      "Enables clipboard (copy-paste) formatting.  If disabled, text that goes \
 in the clipboard is simply left unformatted." },
 
    { "IgnoreErrors", IGNORE_ERRORS,
      "Disables diff errors reporting." },
 
-   { "WarnAboutUnsaved", WARN_ABOUT_UNSAVED, 
+   { "WarnAboutUnsaved", WARN_ABOUT_UNSAVED,
      "Enables warning upon exiting with unsaved selections." },
 
-   { "DisableCursorDisplay", DISABLE_CURSOR_DISPLAY, 
+   { "DisableCursorDisplay", DISABLE_CURSOR_DISPLAY,
      "Disables displaying the line cursor." },
 
-   { "DrawPatternInFillerLines", DRAW_PATTERN_IN_FILLER_LINES, 
+   { "DrawPatternInFillerLines", DRAW_PATTERN_IN_FILLER_LINES,
      "Some people like to have a pattern drawn for filler lines to make it \
 really dead obvious that they are not real lines, but just inserted for \
 display purpose. This setting enables it." },
 
-   { "HideCarriageReturns", HIDE_CR, 
+   { "HideCarriageReturns", HIDE_CR,
      "Hides CR characters found in files created under DOS/Windows." },
 
-   { "DirDiffIgnoreFileChanges", DIRDIFF_IGNORE_FILE_CHANGES, 
+   { "DirDiffIgnoreFileChanges", DIRDIFF_IGNORE_FILE_CHANGES,
      "In directory diffs, ignores file changes, show just additions and \
 deletions." },
 
-   { "DirDiffBuildSolelyFromOutput", DIRDIFF_BUILD_FROM_OUTPUT, 
+   { "DirDiffBuildSolelyFromOutput", DIRDIFF_BUILD_FROM_OUTPUT,
      "In directory diffs, building diffs only from output, not checking \
 against actual directory contents.  This is a self-verification feature \
 only, and unless you're doing development you should leave this to default \
@@ -346,7 +346,7 @@ StringToken accelList[] = {
    { "SelectGlobalUnselectedLeft", ACCEL_SELECT_GLOBAL_UNSELECTED_LEFT, 0 },
    { "SelectGlobalUnselectedMiddle", ACCEL_SELECT_GLOBAL_UNSELECTED_MIDDLE, 0 },
    { "SelectGlobalUnselectedRight", ACCEL_SELECT_GLOBAL_UNSELECTED_RIGHT, 0 },
-   { "SelectGlobalUnselectedNeither", ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER, 
+   { "SelectGlobalUnselectedNeither", ACCEL_SELECT_GLOBAL_UNSELECTED_NEITHER,
      0 },
    { "SelectGlobalMerge", ACCEL_SELECT_GLOBAL_MERGE, 0 },
    { "SelectRegionLeft", ACCEL_SELECT_REGION_LEFT, 0 },
@@ -425,7 +425,7 @@ StringToken colorList[] = {
      " Different in all files (only text on lines) " },
    { "DiffAllNonly", COLOR_DIFF_ALL_NONLY,
      " Different in all files (blank side) " },
-                                      
+
    { "DiffOne", COLOR_DIFF_ONE,
      " (diff3 only) Different in one file " },
    { "DiffOneSup", COLOR_DIFF_ONE_SUP,
@@ -447,7 +447,7 @@ StringToken colorList[] = {
      " (diff3 only) Delete text (side with text) " },
    { "DeleteBlank", COLOR_DELETE_BLANK,
      " (diff3 only) Delete text (blank side) " },
-                                      
+
    { "DiffDel", COLOR_DIFFDEL,
      " (diff3 only) Different and delete text " },
    { "DiffDelSup", COLOR_DIFFDEL_SUP,
@@ -458,7 +458,7 @@ StringToken colorList[] = {
      " (diff3 only) Different and delete text (blank side) " },
    { "DiffDelBlank", COLOR_DIFFDEL_BLANK,
      " (diff3 only) Different and delete text (empty side) " },
-                                      
+
    { "Selected", COLOR_SELECTED,
      " Selected text " },
    { "SelectedSup", COLOR_SELECTED_SUP,
@@ -472,7 +472,7 @@ StringToken colorList[] = {
      " Ignored for display purposes (only text on lines) " },
    { "IgnoreDisplayNonly", COLOR_IGNORE_DISPLAY_NONLY,
      " Ignored for display purposes (blank side) " },
-                                      
+
    { "Deleted", COLOR_DELETED,
      " Deleted text " },
    { "DeletedSup", COLOR_DELETED_SUP,
@@ -482,7 +482,7 @@ StringToken colorList[] = {
 
    { "Directories", COLOR_DIRECTORIES,
      " (dir.diffs only) Directories in directory diffs " },
-                                      
+
    { "MergedUndecided", COLOR_MERGED_UNDECIDED,
      " Merged view undecided text " },
    { "MergedDecided1", COLOR_MERGED_DECIDED_1,
@@ -511,19 +511,19 @@ StringToken colorList[] = {
 };
 
 StringToken commandList[] = {
-   { "DiffFiles2", CMD_DIFF_FILES_2, 
+   { "DiffFiles2", CMD_DIFF_FILES_2,
      "Command to use for comparing two files." },
 
-   { "DiffFiles3", CMD_DIFF_FILES_3, 
+   { "DiffFiles3", CMD_DIFF_FILES_3,
      "Command to use for comparing three files." },
-   
-   { "DiffDirectories", CMD_DIFF_DIRECTORIES, 
+
+   { "DiffDirectories", CMD_DIFF_DIRECTORIES,
      "Command to use for comparing two directories, non-recursively." },
-   
-   { "DiffDirectoriesRec", CMD_DIFF_DIRECTORIES_REC, 
+
+   { "DiffDirectoriesRec", CMD_DIFF_DIRECTORIES_REC,
      "Command to use for comparing two directories, recursively." },
-   
-   { "Edit", CMD_EDIT, 
+
+   { "Edit", CMD_EDIT,
      "Command to use to spawn an editor on a file." }
 };
 
@@ -538,19 +538,19 @@ StringToken commandSwitchList[] = {
 };
 
 StringToken showList[] = {
-   { "Toolbar", SHOW_TOOLBAR, 
+   { "Toolbar", SHOW_TOOLBAR,
      "Show toolbar on startup." },
 
-   { "LineNumbers", SHOW_LINE_NUMBERS, 
+   { "LineNumbers", SHOW_LINE_NUMBERS,
      "Show line numbers on startup." },
 
-   { "VerticalLine", SHOW_VERTICAL_LINE, 
+   { "VerticalLine", SHOW_VERTICAL_LINE,
      "Show vertical line on startup." },
 
-   { "Overview", SHOW_OVERVIEW, 
+   { "Overview", SHOW_OVERVIEW,
      "Show toolbar on startup." },
 
-   { "Filenames", SHOW_FILENAMES, 
+   { "Filenames", SHOW_FILENAMES,
      "Show toolbar on startup." },
 
    { "PaneMergedView", SHOW_PANE_MERGED_VIEW,
@@ -561,38 +561,38 @@ StringToken showList[] = {
 };
 
 StringToken tagList[] = {
-   { "Conflict.Separator", TAG_CONFLICT_SEPARATOR, 
+   { "Conflict.Separator", TAG_CONFLICT_SEPARATOR,
      "String used to separate chunks when saving with conflicts." },
 
-   { "Conflict.End", TAG_CONFLICT_END, 
+   { "Conflict.End", TAG_CONFLICT_END,
      "String used to end chunks when saving with conflicts." },
 
-   { "Conditional.Ifdef", TAG_CONDITIONAL_IF, 
+   { "Conditional.Ifdef", TAG_CONDITIONAL_IF,
      "Ifdef string used when saving with conditionals." },
 
-   { "Conditional.Elseif", TAG_CONDITIONAL_ELSEIF, 
+   { "Conditional.Elseif", TAG_CONDITIONAL_ELSEIF,
      "Elseif string used when saving with conditionals." },
 
-   { "Conditional.Else", TAG_CONDITIONAL_ELSE, 
+   { "Conditional.Else", TAG_CONDITIONAL_ELSE,
      "Else string used when saving with conditionals." },
 
-   { "Conditional.Endif", TAG_CONDITIONAL_ENDIF, 
+   { "Conditional.Endif", TAG_CONDITIONAL_ENDIF,
      "Endif string used when saving with conditionals." },
 
-   { "Unmerge.Start", TAG_UNMERGE_START, 
+   { "Unmerge.Start", TAG_UNMERGE_START,
      "Tag that appears at the beginning of a line in a merged file to indicate \
 the start of a merged merge conflict. Default is the CVS start tag." },
 
-   { "Unmerge.Sep", TAG_UNMERGE_SEP, 
+   { "Unmerge.Sep", TAG_UNMERGE_SEP,
      "Tag that appears at the beginning of a line in a merged file to separate \
 sides of a merged merge conflict. Default is the CVS start tag." },
 
-   { "Unmerge.SepExtra", TAG_UNMERGE_SEP_EXTRA, 
+   { "Unmerge.SepExtra", TAG_UNMERGE_SEP_EXTRA,
      "Tag that appears at the beginning of a line in a merged file to separate \
 sides of a merged 3-way merge conflict. Default is the tag generated by GNU \
 diff3." },
 
-   { "Unmerge.End", TAG_UNMERGE_END, 
+   { "Unmerge.End", TAG_UNMERGE_END,
      "Tag that appears at the beginning of a line in a merged file to indicate \
 the end of a merged merge conflict. Default is the CVS start tag." },
 
@@ -615,7 +615,7 @@ DECL_SIZE(tagList);
 //
 int compareTokensStrings( const void* v1, const void* v2 )
 {
-   return ::strcmp( 
+   return ::strcmp(
       const_cast<StringToken*>( static_cast<const StringToken*>(v1) )->_name,
       const_cast<StringToken*>( static_cast<const StringToken*>(v2) )->_name
    );
@@ -624,14 +624,14 @@ int compareTokensStrings( const void* v1, const void* v2 )
 
 //------------------------------------------------------------------------------
 //
-void sortTokens( StringToken* llist, const int nbmem ) 
+void sortTokens( StringToken* llist, const int nbmem )
 {
    qsort( llist, nbmem, sizeof(StringToken), compareTokensStrings );
 }
 
 //------------------------------------------------------------------------------
 //
-const StringToken* searchToken( 
+const StringToken* searchToken(
    const StringToken* llist,
    const int          nbmem,
    const int          token
@@ -664,7 +664,7 @@ const char* searchTokenName(
 
 //------------------------------------------------------------------------------
 //
-QString formatGeometry( const QRect& geom ) 
+QString formatGeometry( const QRect& geom )
 {
    return QString( "%1x%2" ).arg( geom.width() ).arg( geom.height() );
    // Note: don't write window position.
@@ -708,7 +708,7 @@ bool readGeometry( const QString& val, QRect& geometry )
 
    // Reads in a value.  Returns true if successful, false if the resource was
    // not the specified type and left untouched.
-   
+
    int l = -1;
    int t = -1;
    int w = -1;
@@ -744,7 +744,7 @@ bool readGeometry( const QString& val, QRect& geometry )
       QRect defGeom = XxResources::getDefaultGeometry();
       w = defGeom.width();
       h = defGeom.height();
-      geometry = QRect( dsize.width()-l-w, dsize.height()-t-h, 
+      geometry = QRect( dsize.width()-l-w, dsize.height()-t-h,
                         defGeom.width(), defGeom.height() );
    }
    else if ( sscanf( vchar, "%dx%d", &w, &h ) == 2 ) {
@@ -766,7 +766,7 @@ bool readGeometry( const QString& val, QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
-int searchTokenString( 
+int searchTokenString(
    const StringToken* llist,
    const int          nbmem,
    const char*        name
@@ -775,7 +775,7 @@ int searchTokenString(
    StringToken tok;
    tok._name = name;
 
-   void* ptr = 
+   void* ptr =
       bsearch( &tok, llist, nbmem, sizeof(StringToken), compareTokensStrings );
    if ( ptr != 0 ) {
       return static_cast<StringToken*>(ptr)->_token;
@@ -805,7 +805,7 @@ int parseFromKeywordList(
       QString os;
       QTextOStream oss( &os );
       oss << "Unknown " << errmsg << ": " << name << flush;
-      resParsererror( os.latin1() ); 
+      resParsererror( os.latin1() );
    }
    num = ERROR_TOKEN;
    return ERROR_TOKEN;
@@ -826,7 +826,7 @@ using namespace XxResParserNS;
  *============================================================================*/
 
 //------------------------------------------------------------------------------
-//              
+//
 void XxResParser::initialize()
 {
    // Sort maps for efficiency in lookup.
@@ -896,10 +896,10 @@ void XxResParser::parse( const QString& filename, XxResources& resources )
    QFile file( filename );
    if ( file.open( IO_ReadOnly ) ) {
       QTextStream filestr( &file );
-   
+
       // Parse the file.
       parse( filestr, resources );
-      
+
       file.close();
    }
    else {
@@ -913,7 +913,7 @@ void XxResParser::parse( QTextStream& input, XxResources& resources )
 {
    try {
       resParserlineno = 1; // Reset lineno.
- 
+
       resParserrestart( reinterpret_cast<FILE*>(&input) );
 
 //       // YY_FLUSH_BUFFER is undef'ed, use its definition to flush the buffer.
@@ -978,7 +978,7 @@ void XxResParser::genInitFile(
 
    QString styleKey = res1.getStyleKey();
    if ( styleKey != res2.getStyleKey() ) {
-      os << searchTokenName( kwdList, kwdList_size, STYLE ) 
+      os << searchTokenName( kwdList, kwdList_size, STYLE )
          << ": \"" << styleKey << "\"" << endl;
    }
 
@@ -1000,7 +1000,7 @@ void XxResParser::genInitFile(
    const QFont& fontApp = res1.getFontApp();
    if ( !XxResources::compareFonts( fontApp, res2.getFontApp() ) ) {
       os << searchTokenName( kwdList, kwdList_size, FONT_APP )
-         << ": \"" 
+         << ": \""
 #if (QT_VERSION >= 0x030000)
          << fontApp.toString()
 #else
@@ -1011,7 +1011,7 @@ void XxResParser::genInitFile(
 
    const QFont& fontText = res1.getFontText();
    if ( !XxResources::compareFonts( fontText, res2.getFontText() ) ) {
-      os << searchTokenName( kwdList, kwdList_size, FONT_TEXT ) 
+      os << searchTokenName( kwdList, kwdList_size, FONT_TEXT )
          << ": \""
 #if (QT_VERSION >= 0x030000)
          << fontText.toString()
@@ -1026,13 +1026,13 @@ void XxResParser::genInitFile(
    for ( ii = 0; ii < nbcolors; ++ii ) {
       XxColor color = XxColor( colorList[ii]._token );
 
-      if ( res1.getColor( color, true ) != 
+      if ( res1.getColor( color, true ) !=
            res2.getColor( color, true ) ) {
          os << colorStr << "." << colorList[ii]._name << ".Fore" << ": \""
             << res1.getColor( color, true ).name() << "\"" << endl;
       }
 
-      if ( res1.getColor( color, false ) != 
+      if ( res1.getColor( color, false ) !=
            res2.getColor( color, false ) ) {
          os << colorStr << "." << colorList[ii]._name << ".Back" << ": \""
             << res1.getColor( color, false ).name() << "\"" << endl;
@@ -1044,7 +1044,7 @@ void XxResParser::genInitFile(
       XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
       bool b1 = res1.getBoolOpt( bo );
       if ( b1 != res2.getBoolOpt( bo ) ) {
-         os << boolkwdList[ii]._name << ": " 
+         os << boolkwdList[ii]._name << ": "
             << ( b1 ? "True" : "False" ) << endl;
       }
    }
@@ -1064,7 +1064,7 @@ void XxResParser::genInitFile(
       os << searchTokenName( kwdList, kwdList_size, TAB_WIDTH ) << ": "
          << res1.getTabWidth() << endl;
    }
-   
+
    int nbcommand = sizeof(commandList)/sizeof(StringToken);
    const char* commandStr = searchTokenName( kwdList, kwdList_size, COMMAND );
    for ( ii = 0; ii < nbcommand; ++ii ) {
@@ -1178,7 +1178,7 @@ void XxResParser::listResources( QTextStream& os )
    os << searchTokenName( kwdList, kwdList_size, PREFGEOMETRY ) << ": "
       << formatGeometry( res.getPreferredGeometry() ) << endl;
 
-   os << searchTokenName( kwdList, kwdList_size, STYLE ) 
+   os << searchTokenName( kwdList, kwdList_size, STYLE )
       << ": \"" << res.getStyleKey() << "\"" << endl;
 
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
@@ -1196,7 +1196,7 @@ void XxResParser::listResources( QTextStream& os )
 
    const QFont& fontApp = res.getFontApp();
    os << searchTokenName( kwdList, kwdList_size, FONT_APP )
-      << ": \"" 
+      << ": \""
 #if (QT_VERSION >= 0x030000)
       << fontApp.toString()
 #else
@@ -1205,7 +1205,7 @@ void XxResParser::listResources( QTextStream& os )
       << "\"" << endl;
 
    const QFont& fontText = res.getFontText();
-   os << searchTokenName( kwdList, kwdList_size, FONT_TEXT ) 
+   os << searchTokenName( kwdList, kwdList_size, FONT_TEXT )
       << ": \""
 #if (QT_VERSION >= 0x030000)
       << fontText.toString()
@@ -1238,13 +1238,13 @@ void XxResParser::listResources( QTextStream& os )
    for ( ii = 0; ii < nbshow; ++ii ) {
       XxShowOpt bo = XxShowOpt(showList[ii]._token);
       bool b1 = res.getShowOpt( bo );
-      os << showStr << "." << showList[ii]._name << ": " 
+      os << showStr << "." << showList[ii]._name << ": "
          << ( b1 ? "True" : "False" ) << endl;
    }
 
    os << searchTokenName( kwdList, kwdList_size, TAB_WIDTH ) << ": "
       << res.getTabWidth() << endl;
-   
+
    int nbcommand = sizeof(commandList)/sizeof(StringToken);
    const char* commandStr = searchTokenName( kwdList, kwdList_size, COMMAND );
    for ( ii = 0; ii < nbcommand; ++ii ) {
@@ -1300,13 +1300,13 @@ void XxResParser::listResources( QTextStream& os )
    const char* hdtstr[3] = { "None", "Single", "Multiple" };
    os << searchTokenName( kwdList, kwdList_size, HORDIFF_TYPE ) << ": "
       << hdtstr[ int(res.getHordiffType()) ] << endl;
-   
+
    os << searchTokenName( kwdList, kwdList_size, HORDIFF_MAX ) << ": "
       << res.getHordiffMax() << endl;
 
    os << searchTokenName( kwdList, kwdList_size, HORDIFF_CONTEXT ) << ": "
       << res.getHordiffContext() << endl;
-   
+
    os << searchTokenName( kwdList, kwdList_size, SHOW_PANE_MERGED_VIEW_PERCENT )
       << ": " << res.getShowPaneMergedViewPercent() << endl;
 
@@ -1314,7 +1314,7 @@ void XxResParser::listResources( QTextStream& os )
       << res.getMergedFilename() << "\"" << endl;
 
    // Ignore file not saved (cannot be read).
-}   
+}
 
 //------------------------------------------------------------------------------
 //
@@ -1391,7 +1391,7 @@ QString XxResParser::getResourceRef()
       const QFont& fontApp = res.getFontApp();
       os << tok->_name << ": \"";
       if ( qApp != 0 ) {
-         os << XxHelp::xmlize( 
+         os << XxHelp::xmlize(
 #if (QT_VERSION >= 0x030000)
             fontApp.toString()
 #else
@@ -1454,7 +1454,7 @@ QString XxResParser::getResourceRef()
          if ( qApp != 0 ) {
             os << res.getColor( color, true ).name();
          }
-         else { 
+         else {
             os << "&lt;color&gt;";
          }
          os << "\"" << endl;
@@ -1463,7 +1463,7 @@ QString XxResParser::getResourceRef()
          if ( qApp != 0 ) {
             os << res.getColor( color, false ).name();
          }
-         else { 
+         else {
             os << "&lt;color&gt;";
          }
          os << "\"" << endl;
@@ -1726,7 +1726,7 @@ QString XxResParser::getResourceRef()
 
    os << flush;
    return resref;
-}   
+}
 
 //------------------------------------------------------------------------------
 //
@@ -1742,7 +1742,7 @@ QString XxResParser::getKwdName( int kwd )
 QString XxResParser::getShowOptName( XxShowOpt bo )
 {
    const char* stoken =
-      searchTokenName( kwdList, kwdList_size, int(bo) );
+      searchTokenName( showList, showList_size, int(bo) );
    return getKwdName( SHOW ) + "." + QString( stoken );
 }
 
@@ -1751,7 +1751,7 @@ QString XxResParser::getShowOptName( XxShowOpt bo )
 QString XxResParser::getBoolOptName( XxBoolOpt bo )
 {
    const char* stoken =
-      searchTokenName( kwdList, kwdList_size, int(bo) + BOOLKWD_BASE );
+      searchTokenName( boolkwdList, boolkwdList_size, int(bo) + BOOLKWD_BASE );
    return QString( stoken );
 }
 

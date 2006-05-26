@@ -27,7 +27,7 @@
 # special make rule defined to generate an include file for it.
 
 TEMPLATE = app
-CONFIG = release qt warn_on thread
+CONFIG = debug qt warn_on thread
 
 # FIXME: Is this needed for Windows compile?
 #REQUIRES=full-config
