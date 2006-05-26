@@ -151,6 +151,9 @@ def parse_options():
     if opts.comments_file and not opts.commit:
         print >> sys.stderr, "(Option '%s' ignored.) " % o.dest
 
+    # Add a verbose option for svnforeign to use.
+    opts.verbose = True
+
     return opts, args
 
 

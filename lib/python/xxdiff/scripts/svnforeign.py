@@ -226,6 +226,11 @@ def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
     """
     write = output.write
 
+    if not hasattr(opts, 'verbose'):
+        # svnforeign requires a verbose option.
+        raise RuntimeError(
+            "Internal Error: You are missing a 'verbose' option.")
+
     ignore = map(abspath, ignore)
 
     # If there are multiple args--such as *--filter out the non svn directories.
