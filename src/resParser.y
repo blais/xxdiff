@@ -51,8 +51,6 @@ namespace XxResParserNS {
 
 bool readGeometry( const QString& val, QRect& geometry );
 
-extern XxBoolOpt boolMap[];
-
 }
 using namespace XxResParserNS; // Make sure we can use the above.
 
@@ -98,7 +96,8 @@ using namespace XxResParserNS; // Make sure we can use the above.
 %token <num> DIRDIFF_IGNORE_FILE_CHANGES  1012
 %token <num> DIRDIFF_BUILD_FROM_OUTPUT    1013
 %token <num> DIRDIFF_RECURSIVE            1014
-%token <num> USE_INTERNAL_DIFF            1015
+%token <num> NULL_HORIZONTAL_MARKERS      1015
+%token <num> USE_INTERNAL_DIFF            1016
 
 /* Note: check that we do not exceed maximum in resParser.cpp */
 
@@ -259,11 +258,8 @@ colorbf         : BACK
 
 boolopt		: boolkwd COLON BOOLEAN
 		{
-                   /*printf( "==> boolopt %d: %d\n", $1, $3 );
-                   printf( "boolMap %p\n", boolMap );
-                   printf( "RESOURCES %p\n", RESOURCES );*/
-                    
-                   RESOURCES->setBoolOpt( boolMap[ $1 - XxResParser::BOOLKWD_BASE ], $3 );
+                   /* printf( "==> boolopt %d: %d\n", $1, $3 ); */
+                   RESOURCES->setBoolOpt( XxBoolOpt( $1 - XxResParser::BOOLKWD_BASE ), $3 );
                 }
 		;
 

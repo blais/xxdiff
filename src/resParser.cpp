@@ -278,26 +278,6 @@ diff program." }
 
 };
 
-/* Be careful: order must be the same as for token declaration. */
-XxBoolOpt boolMap[] = {
-   BOOL_EXIT_ON_SAME,
-   BOOL_EXIT_IF_NO_CONFLICTS,
-   BOOL_EXIT_WITH_MERGE_STATUS,
-   BOOL_SELECT_MERGE,
-   BOOL_IGNORE_HORIZONTAL_WS,
-   BOOL_IGNORE_PERHUNK_WS,
-   BOOL_FORMAT_CLIPBOARD_TEXT,
-   BOOL_IGNORE_ERRORS,
-   BOOL_WARN_ABOUT_UNSAVED,
-   BOOL_DISABLE_CURSOR_DISPLAY,
-   BOOL_DRAW_PATTERN_IN_FILLER_LINES,
-   BOOL_HIDE_CR,
-   BOOL_DIRDIFF_IGNORE_FILE_CHANGES,
-   BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
-   BOOL_DIRDIFF_RECURSIVE,
-   BOOL_USE_INTERNAL_DIFF
-};
-
 StringToken accelList[] = {
    { "Exit", ACCEL_EXIT, 0 },
    { "ExitAccept", ACCEL_EXIT_ACCEPT, 0 },
@@ -1041,7 +1021,7 @@ void XxResParser::genInitFile(
 
    int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
    for ( ii = 0; ii < nbbool; ++ii ) {
-      XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
+      XxBoolOpt bo = static_cast<XxBoolOpt>( boolkwdList[ii]._token - BOOLKWD_BASE );
       bool b1 = res1.getBoolOpt( bo );
       if ( b1 != res2.getBoolOpt( bo ) ) {
          os << boolkwdList[ii]._name << ": "
@@ -1228,7 +1208,7 @@ void XxResParser::listResources( QTextStream& os )
 
    int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
    for ( ii = 0; ii < nbbool; ++ii ) {
-      XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
+      XxBoolOpt bo = static_cast<XxBoolOpt>( boolkwdList[ii]._token - BOOLKWD_BASE );
       bool b1 = res.getBoolOpt( bo );
       os << boolkwdList[ii]._name << ": " << ( b1 ? "True" : "False" ) << endl;
    }
@@ -1479,7 +1459,7 @@ QString XxResParser::getResourceRef()
    {
       int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
       for ( ii = 0; ii < nbbool; ++ii ) {
-         XxBoolOpt bo = boolMap[ boolkwdList[ii]._token - BOOLKWD_BASE ];
+         XxBoolOpt bo = static_cast<XxBoolOpt>( boolkwdList[ii]._token - BOOLKWD_BASE );
          bool b1 = res.getBoolOpt( bo );
          const StringToken* tok = &( boolkwdList[ii] );
 

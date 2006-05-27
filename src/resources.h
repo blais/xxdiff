@@ -70,6 +70,7 @@ class XxApp;
  *============================================================================*/
 
 // Boolean options.
+// IMPORTANT! The order must be the same as for the tokens declaration.
 enum XxBoolOpt {
    BOOL_EXIT_ON_SAME,
    BOOL_EXIT_IF_NO_CONFLICTS,
@@ -86,8 +87,8 @@ enum XxBoolOpt {
    BOOL_DIRDIFF_IGNORE_FILE_CHANGES,
    BOOL_DIRDIFF_BUILD_FROM_OUTPUT,
    BOOL_DIRDIFF_RECURSIVE,
-   BOOL_USE_INTERNAL_DIFF,
    BOOL_NULL_HORIZONTAL_MARKERS,
+   BOOL_USE_INTERNAL_DIFF,
    BOOL_LAST // Not a real resource.
 };
 

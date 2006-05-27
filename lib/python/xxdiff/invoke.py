@@ -170,6 +170,11 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
         # Get the decision code from xxdiff.
         lines = stdout.splitlines()
+        if not lines:
+            raise SystemExit(
+                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
+                stderr)
+            
         decision = lines[0].strip()
         assert decision in decisions
 
