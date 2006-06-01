@@ -27,7 +27,7 @@
 # special make rule defined to generate an include file for it.
 
 TEMPLATE = app
-CONFIG = debug qt warn_on thread
+CONFIG += debug qt warn_on thread
 
 # FIXME: Is this needed for Windows compile?
 #REQUIRES=full-config
@@ -51,11 +51,9 @@ debug:QMAKE_CXXFLAGS += -DXX_DEBUG
 QMAKE_LEX = flex
 QMAKE_YACC = bison
 
-linux-g++ {
-  QMAKE_YACCFLAGS = -d -o y.tab.c
-  QMAKE_YACC_HEADER =
-  QMAKE_YACC_SOURCE =
-}
+QMAKE_YACCFLAGS = -d -o y.tab.c
+QMAKE_YACC_HEADER =
+QMAKE_YACC_SOURCE =
 
 LEXSOURCES = resParser.l
 

@@ -5,6 +5,8 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Applied Trevor Harmon's patch for xxdiff.pro for Mac OSX.
+
 * Added a default binding for SaveAsMerged on Ctrl+M, after I saw the comment
   from the Monotone docs.
 

@@ -24,6 +24,9 @@ Sent email to Monotone docs owner about the Ctrl+M binding.
 
 --------------------------------------------------------------------------------
 
+* For MAC OSX: if there are no files specified, invoke a special double- file
+  dialog chooser to graphically select which files to diff.
+
 * xx-svn-diff: Comments file: To add new files to the comments file:
 
   a) Check if at least one line of the comments file is the same as any line of

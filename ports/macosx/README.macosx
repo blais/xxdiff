@@ -9,6 +9,77 @@
    Notes on how to build xxdiff for MAC OSX. 
    I don't own an Apple computer yet, so I haven't done any of this myself.
 
+.. contents::
+..
+    1  From Trevor Harmon (2006-05-31)
+    2  Alexandre Feblot (2005-06-03)
+    3  Building under Mac OS X w/ XFree86 port (old)
+      3.1  Notes on Mac OSX from Rolf Boelens (old)
+
+
+From Trevor Harmon (2006-05-31)
+-------------------------------
+
+  From: Trevor Harmon <trevor@vocaro.com>	
+  To: Martin Blais <blais@furius.ca>
+  Date: May 31, 2006 7:43 PM
+  Subject: xxdiff for Mac
+
+  Hi,
+
+  I haven't started looking at a Qt4 port for xxdiff, but I did figure
+  out how to make it run natively on the Mac under Qt3 "out-of-the-
+  box". All that's needed is the patch I've attached for xxdiff.pro
+  (made against the 955 revision).
+
+  With the patch applied, here's how I built xxdiff on the Mac:
+
+  1. Install qt3, qt3mac, and flex-devel using Fink
+
+  2. Create a file called ~/.xxdiffrc and add the following line::
+
+       Style: "Macintosh (Aqua)"
+
+  3. Go to the Terminal and run the following commands::
+
+       export PATH="/sw/lib/flex/bin:$PATH"
+       export CPPFLAGS="-I/sw/lib/flex/include"
+       export LDFLAGS="-L/sw/lib/flex/lib"
+
+     This will cause flex 2.5.33 to be used instead of the built-in flex
+     2.5.4.
+
+  4. In the same Terminal, run the following commands::
+
+       export QTDIR=/sw/lib/qt3mac
+       export QMAKESPEC=macx-g++
+       export PATH="$QTDIR/bin:$PATH"
+
+     This will cause the Mac version of Qt to be used.
+
+  5. Switch to the xxdiff/src directory and run::
+
+       make -f Makefile.bootstrap makefile
+       make
+
+  6. You can now run xxdiff by specifying the absolute path to bin/
+     xxdiff.app/Contents/MacOS/xxdiff
+
+     Note that with this patch, the xxdiff.app directory in ports/macosx is no
+     longer necessary. It's generated automatically during the build
+     process. (Also, the __MACOSX directory should be removed, too.)
+
+  One other note: Even though the steps above generate an application
+  package for xxdiff, it can't be used directly. That is, you can only
+  run xxdiff by specifying the executable on the command line; double-
+  clicking on the app icon doesn't work. That's because if xxdiff is
+  run with no parameters, it immediately exits. Have you ever thought
+  about changing this? For instance, perhaps if no parameters are
+  given, xxdiff could prompt for the locations of the files/
+  directories. That would allow xxdiff to be used more easily in GUI
+  environments.
+
+  Trevor
 
 
 Alexandre Feblot (2005-06-03)
