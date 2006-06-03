@@ -5,6 +5,9 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Added Trevor Harmon changes to add new feature --prompt-for-files for Mac OSX
+  startup with file dialog asking the user what to diff.
+
 * Applied Trevor Harmon's patch for xxdiff.pro for Mac OSX.
 
 * Added a default binding for SaveAsMerged on Ctrl+M, after I saw the comment

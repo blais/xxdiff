@@ -208,6 +208,10 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "Copies the input streams/files into temporary files to perform diffing. "
      "This is useful if you want to diff FIFOs."
    },
+   { "prompt-for-files", 0, false, 'p',
+     "If no files are specified on the command line, show a file dialog so that "
+     "the user can select them. This option is ignored if any files are specified."
+   },
 };
 
 //
@@ -349,6 +353,7 @@ XxCmdline::XxCmdline() :
    _macNewlines( false ),
    _indicateInputProcessed( false ),
    _useTemporaryFiles( false ),
+   _promptForFiles( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -584,6 +589,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _macNewlines = true;
          } break;
          
+         case 'p': {
+            _promptForFiles = true;
+         } break;
+         
          //
          // GNU diff options.
          //
@@ -725,7 +734,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
       throw XxUsageError( XX_EXC_PARAMS, msg );
    }
 
-   if ( _nbFilenames < minfn ) {
+   // Turn off the prompt-for-files option if any files are specified
+   if ( _promptForFiles && _nbFilenames != 0 ) {
+      _promptForFiles = false;
+   }
+
+   if ( !_promptForFiles && _nbFilenames < minfn ) {
       QString msg;
       {
          QTextOStream oss( &msg );
@@ -750,9 +764,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 
    // Read filenames.
    int ii;
-   for ( ii = 0; ii < _nbFilenames; ++ii ) {
-      _filenames[ ii ].setLatin1( argv[ optind + ii ] );
-      _filenames[ ii ] = _filenames[ ii ].stripWhiteSpace();
+   if ( !_promptForFiles )
+   {
+      for ( ii = 0; ii < _nbFilenames; ++ii ) {
+         _filenames[ ii ].setLatin1( argv[ optind + ii ] );
+         _filenames[ ii ] = _filenames[ ii ].stripWhiteSpace();
+      }
    }
    
    // Detect qt options.

@@ -114,7 +114,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxApp( int& argc, char** argv, const XxCmdline& );
+   XxApp( int& argc, char** argv, XxCmdline& );
 
    // Destructor.
    virtual ~XxApp();
@@ -414,6 +414,9 @@ private:
    // Change the text's font size.
    void fontSizeChange( int increment );
 
+   // Show open file dialog boxes to get the filenames from the user
+   void promptForFiles( XxCmdline& cmdline );
+
    /*----- static member functions -----*/
 
    // Reads the file arguments, returns the number of files to be read, creates
@@ -477,7 +480,7 @@ private:
    XxResources*            _resources;
 
    // Data from parsing the cmdline.
-   const XxCmdline&        _cmdline;
+   XxCmdline&              _cmdline;
 
    // Char for splitting newlines.
    char                    _newlineChar;

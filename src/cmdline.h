@@ -141,6 +141,7 @@ private:
    bool          _macNewlines;
    bool          _indicateInputProcessed;
    bool          _useTemporaryFiles;
+   bool          _promptForFiles;
 
    /*----- static data members -----*/
 

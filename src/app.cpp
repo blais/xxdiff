@@ -73,6 +73,7 @@
 #include <qvaluelist.h>
 #include <qregexp.h>
 #include <qcheckbox.h>
+#include <qfiledialog.h>
 
 #ifdef XX_KDE
 #include <kmessagebox.h>
@@ -235,7 +236,7 @@ QSocketNotifier* XxApp::_socketNotifier = 0;
 
 //------------------------------------------------------------------------------
 //
-XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
+XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
 #ifdef XX_KDE
    KApplication( argc, argv, "xxdiff" ),
 #else
@@ -278,6 +279,10 @@ XxApp::XxApp( int& argc, char** argv, const XxCmdline& cmdline ) :
       setFont( _resources->getFontApp(), true );
    }
 #endif
+
+   if ( _cmdline._promptForFiles ) {
+      promptForFiles( _cmdline );
+   }
 
    // Read in the file names.
    QString filenames[3];
@@ -510,6 +515,32 @@ XxApp::~XxApp()
       ::close( _sockfd );
    }
    delete _resources;
+}
+
+//------------------------------------------------------------------------------
+// Side-effect: This modifies the cmdline.
+void XxApp::promptForFiles( XxCmdline& cmdline )
+{
+	cmdline._filenames[0] = QFileDialog::getOpenFileName(
+		QString::null,
+      QString::null,
+      0,
+      "open left file",
+      "Choose Left File" );
+
+	if ( cmdline._filenames[0] != QString::null ) {		
+
+		cmdline._filenames[1] = QFileDialog::getOpenFileName(
+			QString::null,
+	      QString::null,
+	      0,
+	      "open right file",
+	      "Choose Right File" );
+
+		if ( cmdline._filenames[1] != QString::null ) {
+			cmdline._nbFilenames = 2;
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
