@@ -31,10 +31,11 @@ def options_graft( parser ):
                      help="Specifies which xxdiff executable to use (default "
                      "is looked up in PATH.")
 
-    group.add_option('-O', '--xxdiff-options', '--xxdiff-opts',
-                     action='store', metavar="OPTS",
-                     default='',
-                     help="Additional options to pass on to xxdiff.")
+    group.add_option('-O', '--xxdiff-option', '--xxdiff-opt',
+                     action='append', metavar="OPTS", dest='xxdiff_options',
+                     default=[],
+                     help="Additional option to pass on to xxdiff.  You "
+                     "can invoke this many times.")
 
     group.add_option('-Y', '--xxdiff-verbose', action='store_true',
                      help="Output xxdiff commands on stdout, for debugging.")
@@ -137,9 +138,9 @@ def xxdiff_decision( opts, *arguments, **kwds ):
     mergedf = tempfile.NamedTemporaryFile('rw', prefix=tmpprefix)
 
     # Get the appropriate xxdiff executable and options.
-    xexec = getattr(opts, 'xxdiff_exec', None) or 'xxdiff'
-    options = getattr(opts, 'xxdiff_options', None) or []
-
+    xexec = getattr(opts, 'xxdiff_exec', 'xxdiff')
+    options = getattr(opts, 'xxdiff_options', [])
+        
     # Make sure that xxdiff is invoked with the decision switch.
     if '--decision' not in options:
         options.insert(0, '--decision')
@@ -230,8 +231,8 @@ def xxdiff_display( opts, *arguments, **kwds ):
                            "return code.")
 
     # Get the appropriate xxdiff executable and options.
-    xexec = getattr(opts, 'xxdiff_exec', None) or 'xxdiff'
-    options = getattr(opts, 'xxdiff_options', None) or []
+    xexec = getattr(opts, 'xxdiff_exec', 'xxdiff')
+    options = getattr(opts, 'xxdiff_options', [])
 
     alloptions = options + list(arguments)
 
