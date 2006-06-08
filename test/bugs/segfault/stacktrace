@@ -1,0 +1,97 @@
+$ gdb xxdiff
+GNU gdb 6.0
+Copyright 2003 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "i686-pc-linux-gnu"...Using host libthread_db library "/lib/libthread_db.so.1".
+
+(gdb) run --merge left ancestor right
+Starting program: /home/derek/bin/xxdiff --merge left ancestor right
+warning: Unable to find dynamic linker breakpoint function.
+GDB will be unable to debug shared library initializers
+and track explicitly loaded dynamic code.
+[Thread debugging using libthread_db enabled]
+[New Thread 16384 (LWP 11038)]
+Detaching after fork from child process 11041.
+
+Program received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 16384 (LWP 11038)]
+0x409a28a4 in mallopt () from /lib/libc.so.6
+(gdb) bt
+#0  0x409a28a4 in mallopt () from /lib/libc.so.6
+#1  0x409a16bd in free () from /lib/libc.so.6
+#2  0x4024535a in QPixmap::detach() () from /usr/qt/3/lib/libqt-mt.so.3
+#3  0x4024ee52 in QPainter::begin(QPaintDevice const*, bool) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#4  0x402f29ab in QPainter::QPainter(QPaintDevice const*, bool) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#5  0x4061371f in QSGIStyle::drawPrimitive(QStyle::PrimitiveElement, QPainter*, QRect const&, QColorGroup const&, unsigned, QStyleOption const&) const ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#6  0x406161e3 in QSGIStyle::drawComplexControl(QStyle::ComplexControl, QPainter*, QWidget const*, QRect const&, QColorGroup const&, unsigned, unsigned, unsigned, QStyleOption const&) const () from /usr/qt/3/lib/libqt-mt.so.3
+#7  0x40401d19 in QScrollBar::drawControls(unsigned, unsigned, QPainter*) const
+    () from /usr/qt/3/lib/libqt-mt.so.3
+#8  0x40401c15 in QScrollBar::drawControls(unsigned, unsigned) const ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#9  0x4040088d in QScrollBar::rangeChange() () from /usr/qt/3/lib/libqt-mt.so.3
+#10 0x403ffd9b in QRangeControl::setRange(int, int) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#11 0x0807a4e0 in XxScrollView::adjustVerticalScrollbars(QSize const&) ()
+#12 0x0807a2f1 in XxScrollView::adjustScrollbars() ()
+#13 0x080b9754 in XxScrollView::qt_invoke(int, QUObject*) ()
+---Type <return> to continue, or q <return> to quit---
+#14 0x080b9b10 in XxCentralFrame::qt_invoke(int, QUObject*) ()
+#15 0x402f0ca6 in QObject::activate_signal(QConnectionList*, QUObject*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#16 0x402f0b54 in QObject::activate_signal(int) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#17 0x080b7fbe in XxApp::textSizeChanged() ()
+#18 0x080b802a in XxApp::qt_invoke(int, QUObject*) ()
+#19 0x402f0d2c in QObject::activate_signal(QConnectionList*, QUObject*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#20 0x402f0b54 in QObject::activate_signal(int) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#21 0x080b892e in XxDiffs::nbLinesChanged() ()
+#22 0x08092e18 in XxDiffs::splitSwapJoin(int, unsigned) ()
+#23 0x0806e75d in XxApp::regionSplitSwapJoin() ()
+#24 0x080b82a7 in XxApp::qt_invoke(int, QUObject*) ()
+#25 0x402f0d2c in QObject::activate_signal(QConnectionList*, QUObject*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#26 0x4062f42a in QSignal::signal(QVariant const&) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#27 0x4030aedd in QSignal::activate() () from /usr/qt/3/lib/libqt-mt.so.3
+#28 0x403f3112 in QPopupMenu::accelActivated(int) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#29 0x40644d88 in QPopupMenu::qt_invoke(int, QUObject*) ()
+---Type <return> to continue, or q <return> to quit---
+   from /usr/qt/3/lib/libqt-mt.so.3
+#30 0x402f0d2c in QObject::activate_signal(QConnectionList*, QUObject*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#31 0x402f0e8d in QObject::activate_signal(int, int) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#32 0x406275f2 in QAccel::activated(int) () from /usr/qt/3/lib/libqt-mt.so.3
+#33 0x4028e381 in QAccelPrivate::activate(QAccelItem*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#34 0x4028cdcc in QAccelManager::dispatchAccelEvent(QWidget*, QKeyEvent*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#35 0x4028bece in qt_dispatchAccelEvent(QWidget*, QKeyEvent*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#36 0x40293c6c in QApplication::notify(QObject*, QEvent*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#37 0x4028c448 in QAccelManager::tryAccelEvent(QWidget*, QKeyEvent*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#38 0x4028be3e in qt_tryAccelEvent(QWidget*, QKeyEvent*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#39 0x4022c971 in QETWidget::translateKeyEvent(_XEvent const*, bool) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#40 0x40227cf7 in QApplication::x11ProcessEvent(_XEvent*) ()
+   from /usr/qt/3/lib/libqt-mt.so.3
+#41 0x4023ed64 in QEventLoop::processEvents(unsigned) ()
+---Type <return> to continue, or q <return> to quit---
+   from /usr/qt/3/lib/libqt-mt.so.3
+#42 0x402a6ab8 in QEventLoop::enterLoop() () from /usr/qt/3/lib/libqt-mt.so.3
+#43 0x402a6968 in QEventLoop::exec() () from /usr/qt/3/lib/libqt-mt.so.3
+#44 0x40294b41 in QApplication::exec() () from /usr/qt/3/lib/libqt-mt.so.3
+#45 0x080745a3 in main ()
+(gdb) 

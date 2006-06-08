@@ -1,0 +1,121 @@
+static void
+restrict_patch_set(patch_set & ps, work_set & restricted_work, app_state & app) 
+{
+  L(F("restricting changes between %s and %s\n") % ps.m_old % ps.m_new);
+
+  // remove restricted adds from f_adds and remove entry from m_new
+
+  set<patch_addition> included_adds;
+
+  for (set<patch_addition>::iterator i = ps.f_adds.begin();
+       i != ps.f_adds.end(); ++i)
+    {
+      if (app.in_restriction(i->path())) 
+        {
+          L(F("restriction includes add %s\n") % i->path());
+          included_adds.insert(*i);
+        }
+      else
+        {
+          L(F("restriction excludes add %s\n") % i->path());
+          ps.map_new.erase(i->path());
+          restricted_work.adds.insert(i->path());
+        }
+    }
+
+  ps.f_adds = included_adds;
+
+  // remove restricted dels from f_dels and put entry in m_new with entry from m_old
+
+  set<file_path> included_dels;
+
+  for (set<file_path>::iterator i = ps.f_dels.begin();
+       i != ps.f_dels.end(); ++i)
+    {
+      if (app.in_restriction((*i)())) 
+        {
+          L(F("restriction includes delete %s\n") % (*i)());
+          included_dels.insert(*i);
+        }
+      else
+        {
+          N(ps.map_old.find(*i) != ps.map_old.end(),
+            F("nothing known about %s") % *i);
+
+          L(F("restriction excludes delete %s\n") % (*i)());
+          path_id_pair old(ps.map_old.find(*i));
+          ps.map_new.insert(entry(old.path(), old.ident()));
+          restricted_work.dels.insert((*i)());
+        }
+    }
+
+  ps.f_dels = included_dels;
+
+  // remove restricted moves from f_moves and replace entry in m_new with entry from m_old
+
+  set<patch_move> included_moves;
+
+  for (set<patch_move>::iterator i = ps.f_moves.begin();
+       i != ps.f_moves.end(); ++i)
+    {
+      // is excluding both sides of a rename the right thing to do?
+      // or should we just fail if only one side of a move is restricted? (njs's idea)
+
+      if (app.in_restriction(i->path_old()) || app.in_restriction(i->path_new())) 
+        {
+          L(F("restriction includes move %s to %s\n") % i->path_old() % i->path_new());
+          included_moves.insert(*i);
+        }
+      else
+        {
+          N(ps.map_old.find(i->path_old()) != ps.map_old.end(),
+            F("nothing known about %s") % i->path_old());
+
+          L(F("restriction excludes move %s to %s\n") % i->path_old() % i->path_new());
+          ps.map_new.erase(i->path_new());
+          path_id_pair old(ps.map_old.find(i->path_old()));
+          ps.map_new.insert(entry(old.path(), old.ident()));
+          restricted_work.renames.insert(make_pair(i->path_old(), i->path_new()));
+        }
+    }
+
+  ps.f_moves = included_moves;
+
+  // remove restricted deltas from f_deltas and replace entry in m_new with entry from m_old
+
+  set<patch_delta> included_deltas;
+
+  for (set<patch_delta>::iterator i = ps.f_deltas.begin();
+       i != ps.f_deltas.end(); ++i)
+    {
+      if (app.in_restriction(i->path()))
+        {
+          L(F("restriction includes delta %s\n") % i->path());
+          included_deltas.insert(*i);
+        }
+      else
+        {
+          N(ps.map_old.find(i->path()) != ps.map_old.end(),
+            F("nothing known about %s") % i->path());
+
+          L(F("restriction excludes delta %s\n") % i->path());
+          ps.map_new.erase(i->path());
+          path_id_pair old(ps.map_old.find(i->path()));
+          ps.map_new.insert(entry(old.path(), old.ident()));
+        }
+    }
+
+  ps.f_deltas = included_deltas;
+
+  calculate_ident(ps.map_new, ps.m_new);
+
+  L(F("restricted changes between %s and %s\n") % ps.m_old % ps.m_new);
+
+}
+
+static void
+restrict_patch_set(patch_set & ps, app_state & app) 
+{
+  work_set work;
+  restrict_patch_set(ps, work, app);
+}

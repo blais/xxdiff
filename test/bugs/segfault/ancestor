@@ -1,0 +1,33 @@
+static void 
+calculate_new_manifest_map(manifest_map const & m_old, 
+			   manifest_map & m_new,
+			   rename_set & renames,
+			   app_state & app)
+{
+  path_set paths;
+  work_set work;
+  extract_path_set(m_old, paths);
+  get_work_set(work);
+  if (work.dels.size() > 0)
+    L(F("removing %d dead files from manifest\n") %
+      work.dels.size());
+  if (work.adds.size() > 0)
+    L(F("adding %d files to manifest\n") % 
+      work.adds.size());
+  if (work.renames.size() > 0)
+    L(F("renaming %d files in manifest\n") % 
+      work.renames.size());
+  apply_work_set(work, paths);
+  build_manifest_map(paths, m_new, app);
+  renames = work.renames;
+}
+
+
+static void 
+calculate_new_manifest_map(manifest_map const & m_old, 
+			   manifest_map & m_new,
+			   app_state & app)
+{
+  rename_set dummy;
+  calculate_new_manifest_map (m_old, m_new, dummy, app);
+}

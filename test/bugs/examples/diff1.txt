@@ -1,0 +1,53 @@
+function supply()
+{
+  //alert(cover.supplier.options[cover.supplier.selectedIndex].text)
+  if (cover.supplier.options[cover.supplier.selectedIndex].text == 'Southern Print')
+  {
+    cover.finish.disabled = false
+    cover.print.disabled = false 
+    cover.ifc.disabled = false
+    cover.ibc.disabled = false
+    cover.obc.disabled = false  
+    
+    cover.finish.style.background='#ffffff'
+    cover.print.style.background='#ffffff'
+    cover.ifc.style.background='#ffffff'
+    cover.ibc.style.background='#ffffff'
+    cover.obc.style.background='#ffffff'    			
+  }
+  
+  if (cover.supplier.options[cover.supplier.selectedIndex].text == 'Customer')
+  {
+    cover.finish.style.background='#C0C0C0'
+    cover.print.style.background='#C0C0C0'
+    cover.ifc.style.background='#C0C0C0'
+    cover.ibc.style.background='#C0C0C0'
+    cover.obc.style.background='#C0C0C0'
+       
+    cover.finish.disabled = true
+    cover.print.disabled = true
+    cover.ifc.disabled = true
+    cover.ibc.disabled = true
+    cover.obc.disabled = true
+  }
+  
+  if (cover.cover_type.options[cover.cover_type.selectedIndex].text == 'Self')
+  {
+    cover.ifc.style.background='#C0C0C0'
+    cover.ibc.style.background='#C0C0C0'
+    cover.obc.style.background='#C0C0C0'       
+    cover.ifc.disabled = true
+    cover.ibc.disabled = true
+    cover.obc.disabled = true
+  }  
+  
+  if (cover.cover_type.options[cover.cover_type.selectedIndex].text == 'None')
+  {   
+    cover.ifc.style.background='#C0C0C0'
+    cover.ibc.style.background='#C0C0C0'
+    cover.obc.style.background='#C0C0C0'
+    cover.ifc.disabled = true
+    cover.ibc.disabled = true
+    cover.obc.disabled = true
+  }
+}

@@ -2,6 +2,15 @@
    TODO: xxdiff
 ==================
 
+.. contents::
+..
+    1  The More Urgent For the Release
+    2  Less Urgent, but do it soon too
+    3  Goals for 4.0 stable release:
+    4  Promo
+    5  Other
+
+
 The More Urgent For the Release
 ===============================
 
@@ -23,8 +32,10 @@ The More Urgent For the Release
 
 Sent email to Monotone docs owner about the Ctrl+M binding.
 
+Less Urgent, but do it soon too
+===============================
 
---------------------------------------------------------------------------------
+* Look at fixing the bugs in xxdiff/test/bugs
 
 * For MAC OSX: if there are no files specified, invoke a special double- file
   dialog chooser to graphically select which files to diff.
@@ -290,14 +301,14 @@ New feature, ignore regexp patterns::
 
 
 Goals for 4.0 stable release:
-------------------------------
+=============================
 
    * Finish scrollbars resizing for paned merged view.
    * Improve error recovery in rcfile parsing.
 
 
 Promo
-~~~~~
+=====
 
 - promotion on xxdiff webpage before release:  ask ev and gd for a quote, how
   many developers, etc.
@@ -308,7 +319,8 @@ Promo
 
 
 
-
+Other
+=====
 
 * write a script that can preview ``xdelta patch``.
 
@@ -370,44 +382,6 @@ one, with the name changed to "Save".
 
 A similar problem is seen with the "Edit ..." menu items
 on the File menu.
-
-
-
-
-
-
-Mini-Project: cvs.py -related
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- put cvs.py out in the public and implement xxcvs properly.
-
-- xxcvs, try my quick implementation and publish it!
-
-- finish ignore blank lines support (check everything, write test cases)
-
-- CVS
-
-  * xxcvs update!
-
-  * python cvs lib, move some of xxcvs into a lib
-
-  * helper script for cvs (kind-of like cervisia, but text mode)
-     * cvsx lsvtree
-     * cvsx links --build  -> creates links from desc files
-     * cvsx links --link  -> creates desc files from links
-     * cvsx links --sync  =~ --build and --link
-     * cvsx grep/search for version no.
-  * series of scripts to try to emulate DL_ scripts in cvs
-
-- start cvspy sourceforge project
-- add python cvslib to future projects
-
-
-
-
-
-
-
 
 
 
