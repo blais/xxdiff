@@ -111,7 +111,7 @@ XxCentralFrame::XxCentralFrame(
 
       _lineNumberLabel[ii] =
          new QLabel( "9999", this, "lineNumberLabel" );
-      _lineNumberLabel[ii]->setAlignment( AlignCenter );
+      _lineNumberLabel[ii]->setAlignment( Qt::AlignCenter );
       _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _lineNumberLabel[ii]->setLineWidth( 2 );
       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );

@@ -74,6 +74,7 @@
 #include <qregexp.h>
 #include <qcheckbox.h>
 #include <qfiledialog.h>
+#include <qdatetime.h>
 
 #ifdef XX_KDE
 #include <kmessagebox.h>
@@ -1792,7 +1793,7 @@ std::auto_ptr<XxBuffer> XxApp::readFile(
 )
 {
    XX_ASSERT( 0 <= no && no <= 2 );
-   XX_ASSERT( filename && displayFilename );
+   XX_ASSERT( filename.length() != 0 && displayFilename.length() != 0 );
 
    //
    // Read in the file.
@@ -3056,7 +3057,7 @@ void XxApp::saveOptions()
 
    QString f;
    f = QkFileDialog::getSaveFileName(
-      getenv("HOME") + QString( "/.xxdiffrc" ), QString::null, _mainWindow
+      QString( getenv("HOME") ) + QString( "/.xxdiffrc" ), QString::null, _mainWindow
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.

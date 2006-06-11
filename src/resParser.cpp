@@ -52,6 +52,7 @@
 #if (QT_VERSION >= 0x030000)
 #include <qstylefactory.h>
 #endif
+#include <qdesktopwidget.h>
 
 #include <stdexcept>
 #include <iostream>

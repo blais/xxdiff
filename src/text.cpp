@@ -228,7 +228,6 @@ XxText::XxText(
    // We do this multiple times for nothing, but I'd rather have it here
    // localized where it is implemented. This doesn't hurt.
    QClipboard* cb = QkApplication::clipboard();
-   cb->setSelectionMode( true );
 
    // Bind clear to change signal.
    connect( cb, SIGNAL(selectionChanged()), this, SLOT(clearRegionSelect()) );
@@ -538,7 +537,7 @@ void XxText::drawContents( QPainter* pp )
             QRect brect = fm.boundingRect(
                -128, -128, 8192, 2048,
                Qt::AlignLeft | Qt::AlignTop | Qt::SingleLine,
-               chunk, rlen
+               chunk, rlen, 0, 0
             );
 
             if ( (xpx + brect.width()) > 0 ) {
@@ -782,7 +781,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
          _grabDeltaLineNo = dlineno;
 
          QClipboard* cb = QkApplication::clipboard();
-         cb->clear();
+         cb->clear( QClipboard::Selection );
 
          _regionSelect[0] = _grabTopLine + dlineno;
          _regionSelect[1] = -1;
@@ -883,7 +882,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
 
    QClipboard* cb = QkApplication::clipboard();
-   cb->setText( textCopy );
+   cb->setText( textCopy, QClipboard::Selection );
 
    if ( event->button() == LeftButton ||
         event->button() == MidButton ) {
@@ -997,7 +996,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
 
             _dontClearOnce = true;
             QClipboard* cb = QkApplication::clipboard();
-            cb->setText( textCopy );
+            cb->setText( textCopy, QClipboard::Selection );
          }
       }
    }

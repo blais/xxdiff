@@ -32,6 +32,7 @@
 #include <qtextstream.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
+#include <qdatetime.h>
 
 #include <iostream>
 #include <sys/types.h>

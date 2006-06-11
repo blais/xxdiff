@@ -116,7 +116,7 @@ XxBuffer::XxBuffer(
    _proxy( false ),
    _buffer( 0 )
 {
-   XX_ASSERT( filename != 0 );
+   XX_ASSERT( filename.length() != 0 );
 
    init();
 }
@@ -186,7 +186,7 @@ XxBuffer::XxBuffer(
    , _lengths( orig._lengths )
 #endif
 {
-   XX_ASSERT( filename != 0 );
+   XX_ASSERT( filename.length() != 0 );
 
    init();
 }

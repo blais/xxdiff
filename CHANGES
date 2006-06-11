@@ -5,6 +5,8 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Applied changes from Trevor Harmon for Qt4 compilation.
+
 * Added Trevor Harmon changes to add new feature --prompt-for-files for Mac OSX
   startup with file dialog asking the user what to diff.
 
