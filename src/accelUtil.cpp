@@ -287,7 +287,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 void XxAccelUtil::write( std::ostream& os, int accel )
 {
    QString str = QAccel::keyToString( accel );
-   os << str;
+   os << str.ascii();
 }
 
 XX_NAMESPACE_END

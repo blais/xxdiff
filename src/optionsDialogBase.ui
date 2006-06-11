@@ -989,15 +989,6 @@
                                         <height>0</height>
                                     </size>
                                 </property>
-                                <property name="frameShape">
-                                    <enum>Box</enum>
-                                </property>
-                                <property name="frameShadow">
-                                    <enum>Sunken</enum>
-                                </property>
-                                <property name="lineWidth">
-                                    <number>1</number>
-                                </property>
                                 <property name="title">
                                     <string>Foreground</string>
                                 </property>
