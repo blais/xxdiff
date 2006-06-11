@@ -4,12 +4,12 @@
 
 .. contents::
 ..
-    1  The More Urgent For the Release
-    2  Less Urgent, but do it soon too
-    3  Goals for 4.0 stable release:
-    4  Promo
-    5  Other
-
+    1  Next Release
+    2  The More Urgent For the Release
+    3  Less Urgent, but do it soon too
+    4  Goals for 4.0 stable release:
+    5  Promo
+    6  Other
 
 The More Urgent For the Release
 ===============================
@@ -32,8 +32,22 @@ The More Urgent For the Release
 
 Sent email to Monotone docs owner about the Ctrl+M binding.
 
+
+Next Release
+============
+
+- Apply Trevor Harmon's patch for the port to Qt4.
+
+
+
+
+
 Less Urgent, but do it soon too
 ===============================
+
+* It would be awesome if select.py had an option to select by file-type
+  (e.g. running “file”).  Open a child running a “file” command and feed it the
+  filenames one-by-one rather than starting a new one everytime.
 
 * Look at fixing the bugs in xxdiff/test/bugs
 

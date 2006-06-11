@@ -41,7 +41,7 @@ class PylineTransformer(xxdiff.xformloop.Transformer):
     Transformer that greps the file for a regular expression, and if it matches,
     runs it through a sed command.
     """
-    def __init__( self, opts, expr ):
+    def __init__(self, opts, expr):
         xxdiff.xformloop.Transformer.__init__(self, opts)
 
         # Try to compile the given expression.
@@ -51,7 +51,7 @@ class PylineTransformer(xxdiff.xformloop.Transformer):
             raise SystemExit("Error: could not compile expression:\n%s" %
                              traceback.format_exc(limit=0))
 
-    def transform( self, fn, outf ):
+    def transform(self, fn, outf):
         # Open and read input file in memory.
         try:
             inf = file(fn, 'r')

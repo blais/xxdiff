@@ -19,7 +19,7 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft(parser):
     """
     Graft options on given parser for invocations of xxdiff.
     """
@@ -45,7 +45,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate xxdiff options.
     """
@@ -54,7 +54,7 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def _run_xxdiff( cmd, opts, stdin ):
+def _run_xxdiff(cmd, opts, stdin):
     """
     Runs the given xxdiff command and return a Popen object.
     'stdin' is the optional stdin text or open file to send to xxdiff.
@@ -97,7 +97,7 @@ def _run_xxdiff( cmd, opts, stdin ):
 #
 decisions = ('ACCEPT', 'REJECT', 'MERGED', 'NODECISION')
 
-def xxdiff_decision( opts, *arguments, **kwds ):
+def xxdiff_decision(opts, *arguments, **kwds):
     """
     Runs xxdiff with the given arguments, passed directly to subprocess.call(),
     and return the decision code, the temporary file containing merged output,
@@ -209,7 +209,7 @@ def xxdiff_decision( opts, *arguments, **kwds ):
 
 #-------------------------------------------------------------------------------
 #
-def xxdiff_display( opts, *arguments, **kwds ):
+def xxdiff_display(opts, *arguments, **kwds):
     """
     Runs xxdiff with the given arguments, passed directly to subprocess.call().
     We do not run it in decision mode.  We return xxdiff's own return code (the
@@ -281,7 +281,7 @@ def xxdiff_display( opts, *arguments, **kwds ):
 
 #-------------------------------------------------------------------------------
 #
-def title_opts( *titles ):
+def title_opts(*titles):
     """
     Generate title options for each of the given titles.  This returns a list of
     the options to give xxdiff to set the titles in the given order.

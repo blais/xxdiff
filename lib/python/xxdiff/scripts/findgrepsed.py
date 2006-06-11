@@ -39,11 +39,11 @@ class GrepSedTransformer(xxdiff.xformloop.Transformer):
     Transformer that greps the file for a regular expression, and if it matches,
     runs it through a sed command.
     """
-    def __init__( self, opts, regexp, sedprog ):
+    def __init__(self, opts, regexp, sedprog):
         xxdiff.xformloop.Transformer.__init__(self, opts)
         self.regexp, self.sedprog = regexp, sedprog
 
-    def transform( self, fn, outf ):
+    def transform(self, fn, outf):
         # Grep the input file.
         try:
             text = open(fn, 'r').read()

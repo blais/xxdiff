@@ -60,7 +60,7 @@ import cvs
 
 #-------------------------------------------------------------------------------
 #
-def getFileContents( file ):
+def getFileContents(file):
     ( name, revision ) = file
     if not revision:
         return None
@@ -79,7 +79,7 @@ def getFileContents( file ):
 
 #-------------------------------------------------------------------------------
 #
-def getFileContentsTmp( file ):
+def getFileContentsTmp(file):
     ( name, revision ) = file
     if not revision:
         return None
@@ -105,7 +105,7 @@ def getFileContentsTmp( file ):
 
 #-------------------------------------------------------------------------------
 #
-def runDiff( cargs ):
+def runDiff(cargs):
     xargs = string.split( gopts.xxdiffargs ) + cargs
     run( gopts.xxdiff, xargs )
     if not gopts.nowait:
@@ -115,7 +115,7 @@ def runDiff( cargs ):
 
 ##------------------------------------------------------------------------------
 ##
-#def run( program, args, stdinn ):
+#def run(program, args, stdinn):
 #    if gopts.debug:
 #        print "running:", program, string.join( args )
 #    try:
@@ -134,7 +134,7 @@ def runDiff( cargs ):
 
 #-------------------------------------------------------------------------------
 #
-def run( program, args, stdinn = None ):
+def run(program, args, stdinn = None):
     command = string.join( [ program ] + filter( lambda x: x, args ) )
 
     if gopts.debug or gopts.fake:
@@ -155,7 +155,7 @@ def run( program, args, stdinn = None ):
 
 #-------------------------------------------------------------------------------
 #
-def checkEqualFiles( files ):
+def checkEqualFiles(files):
     """Compares filename to make sure that no two of them are the same."""
     # FIXME todo
     pass
@@ -170,11 +170,11 @@ def checkEqualFiles( files ):
 class ExtCmdBase(quickopts.CmdBase):
     """Base class for command classes."""
 
-    def __init__( self ):
+    def __init__(self):
         quickopts.CmdBase.__init__( self )
         self.child_stdin = None
         
-    def getFiles( self, names ):
+    def getFiles(self, names):
         # get files
         for f in names:
             ( name, revision ) = f
@@ -198,13 +198,13 @@ class CmdDiff(ExtCmdBase):
     _name = 'diff'
     _description = "diff files, graphically."
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
 
-    def usage( self ):
+    def usage(self):
         print self.__doc__
 
-    def execute( self, args ):
+    def execute(self, args):
         files = map( lambda x: cvs.File(x), args )
 
         if not args:
@@ -243,13 +243,13 @@ class CmdPrevious(ExtCmdBase):
     _name = 'previous'
     _description = "diffs each file with its previous revision."
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         
-    def usage( self ):
+    def usage(self):
         print self.__doc__
 
-    def execute( self, args ):
+    def execute(self, args):
         files = map( lambda x: cvs.File(x), args )
         for f in files:
             # First run a status to figure out if this file is up-to-date.
@@ -292,10 +292,10 @@ class CmdBranch(ExtCmdBase):
     _name = 'branch'
     _description = "diffs each file with the previous tagged revision."
 
-    def usage( self ):
+    def usage(self):
         print self.__doc__
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
 
     # FIXME todo
@@ -314,13 +314,13 @@ it is different. Diff hunks that can be resolved are automatically selected."""
     _name = 'merge'
     _description = "diff with each ancestor"
 
-    def usage( self ):
+    def usage(self):
         print self.__doc__
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         
-    def execute( self, args ):
+    def execute(self, args):
         # FIXME todo
         # Note: I've got this code already done in xxct for ccase
         pass
@@ -340,17 +340,17 @@ ancestor file to include in the graphical diff.  """
     _name = 'conflict'
     _description = "diff by splitting merge conflicts"
 
-    def usage( self ):
+    def usage(self):
         print self.__doc__
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         self.optmap[ 'ancrev' ] = [ 'r', 0, \
  "Specify an ancestor revision to show in the graphical diff." ]
         self.optmap[ 'ancfile' ] = [ 'a', 0, \
  "Specify an ancestor file to show in the graphical diff." ]
         
-    def execute( self, args ):
+    def execute(self, args):
         # FIXME todo
         # Note: I've got this code already done in xxct for ccase
         pass
@@ -367,13 +367,13 @@ invoke graphical diff/merge tool to resolve conflicts if any are present.  """
     _name = 'update'
     _description = "updates, with graphical merge where needed."
     
-    def usage( self ):
+    def usage(self):
         print self.__doc__
         
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         
-    def execute( self, args ):
+    def execute(self, args):
         # FIXME todo
         # first parse output of status or some benine update call to figure out
         # what to merge.
@@ -392,15 +392,15 @@ format: filename-rXXX, where XXX is the revision number.  """
     _name = 'coall'
     _description = "checks out all revisions of a file."
     
-    def usage( self ):
+    def usage(self):
         print self.__doc__
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         self.optmap[ 'dir' ] = [ 'd', 0, \
  "First create a subdirectory file-revisions before extracting revisions." ]
 
-    def execute( self, args ):
+    def execute(self, args):
         for file in args:
             pdir = ''
             if self.opts.dir:

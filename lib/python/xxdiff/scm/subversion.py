@@ -24,7 +24,7 @@ from xxdiff.scripts import script_name, tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-def is_checked_out( filename ):
+def is_checked_out(filename):
     """
     There is no real global mutual editing policy in Subversion.  The restricted
     locking mechanism that is available is not meant to be automated (on the
@@ -35,7 +35,7 @@ def is_checked_out( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def checkout( filename ):
+def checkout(filename):
     """
     Checkout the given filename from Subversion.
     """
@@ -44,7 +44,7 @@ def checkout( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def commit( filenames, comments=None ):
+def commit(filenames, comments=None):
     """
     Commit the given filename into CVS.
     """
@@ -71,7 +71,7 @@ def commit( filenames, comments=None ):
         
 #-------------------------------------------------------------------------------
 #
-def resolve( filename ):
+def resolve(filename):
     """
     Commit the given filename into CVS.
     """
@@ -88,7 +88,7 @@ class SvnStatus(object):
     Status result for a file in a subversion repository.
     """
 
-def status( rootdirs ):
+def status(rootdirs):
     """
     Obtains the status from all the given root directories.
     A list of status objects is returned.
@@ -193,7 +193,7 @@ def status( rootdirs ):
 
 #-------------------------------------------------------------------------------
 #
-def getinfo( filename ):
+def getinfo(filename):
     """
     Return the fields of 'svn info', in a dictionary.
     """
@@ -210,7 +210,7 @@ def getinfo( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def cat_revision_temp( filename, revision ):
+def cat_revision_temp(filename, revision):
     """
     Fetches a specific revision of a file and place it in a temporary file,
     which is returned.

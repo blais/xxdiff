@@ -29,7 +29,7 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-def find_in_trunk( search_directories, fn ):
+def find_in_trunk(search_directories, fn):
     """
     Recursively search for paths of all files whose basename matches 'fn' under
     the directories from 'search_directories' and return a list of them.
@@ -51,7 +51,7 @@ def find_in_trunk( search_directories, fn ):
 #
 match_status = re.compile('File:\s*([^\s]+)\s*Status: (.*)')
 
-def collect_unupdated_files( diff_directories, resolve_conflicts ):
+def collect_unupdated_files(diff_directories, resolve_conflicts):
     """
     Collect all files that are not updated (compared to the repository).
     """
@@ -90,7 +90,7 @@ def collect_unupdated_files( diff_directories, resolve_conflicts ):
 
 #-------------------------------------------------------------------------------
 #
-def get_local_trunk_version( filename ):
+def get_local_trunk_version(filename):
     """
     For filename, get the current revision number (of the local version).
     """
@@ -108,7 +108,7 @@ def get_local_trunk_version( filename ):
 #
 match_repository_rev = re.compile('Repository revision:\s([0-9\.]*)')
 
-def get_repository_revision( filename ):
+def get_repository_revision(filename):
     """
     Get the Repository revision of a file.
     """
@@ -122,7 +122,7 @@ def get_repository_revision( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def get_previous_revision( filename, back ):
+def get_previous_revision(filename, back):
     """
     For filename, get its previous revision number (compared to the local
     version).
@@ -134,7 +134,7 @@ def get_previous_revision( filename, back ):
 
 #-------------------------------------------------------------------------------
 #
-def get_revisions_between( r1, r2 ):
+def get_revisions_between(r1, r2):
     """
     Return a list with the CVS version strings between to releases.
     """
@@ -162,7 +162,7 @@ def get_revisions_between( r1, r2 ):
 #
 match_log_start = re.compile('^----------------------------')
 
-def get_revision_log( filename, rev ):
+def get_revision_log(filename, rev):
     """
     Get the CVS log of a filename given a revision.
     """
@@ -189,7 +189,7 @@ def get_revision_log( filename, rev ):
 
 #-------------------------------------------------------------------------------
 #
-def mkheader( filename ):
+def mkheader(filename):
     """
     Build a header for display.
     """
@@ -198,7 +198,7 @@ def mkheader( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def cvsxxdiff_bi_bj( diff_files, prevcounts ):
+def cvsxxdiff_bi_bj(diff_files, prevcounts):
     """
     Compare two relative revision numbers.
     """
@@ -229,7 +229,7 @@ def cvsxxdiff_bi_bj( diff_files, prevcounts ):
 
 #-------------------------------------------------------------------------------
 #
-def cvsxxdiff_bi( diff_files, prevcount ):
+def cvsxxdiff_bi(diff_files, prevcount):
     """
     Compare to one relative revision number.
     """
@@ -259,7 +259,7 @@ def cvsxxdiff_bi( diff_files, prevcount ):
 
 #-------------------------------------------------------------------------------
 #
-def cvsxxdiff_ri( diff_files, action ):
+def cvsxxdiff_ri(diff_files, action):
     """
     Compare to one absolute revision number.
     """
@@ -283,7 +283,7 @@ def cvsxxdiff_ri( diff_files, action ):
 
 #-------------------------------------------------------------------------------
 #
-def cvsxxdiff_ri_rj( diff_files, actions ):
+def cvsxxdiff_ri_rj(diff_files, actions):
     """
     Compare to two absolute revision numbers.
     """
@@ -313,7 +313,7 @@ def cvsxxdiff_ri_rj( diff_files, actions ):
 
 #-------------------------------------------------------------------------------
 #
-def cvsxxdiff_rep( diff_files ):
+def cvsxxdiff_rep(diff_files):
     """
     Compare checkout to repository.
     """
@@ -340,7 +340,7 @@ def cvsxxdiff_rep( diff_files ):
 
 #-------------------------------------------------------------------------------
 #
-def cvsxxdiff_c( diff_files ):
+def cvsxxdiff_c(diff_files):
     """
     Resolve conflicts.
     """

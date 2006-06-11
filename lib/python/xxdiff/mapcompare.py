@@ -23,7 +23,7 @@ from xxdiff.scripts import tmpprefix
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft(parser):
     """
     Graft options on given parser for diff maps.
     """
@@ -44,7 +44,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate backup options.
     """
@@ -52,7 +52,7 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def render_diffable_maps( opts, *maps ):
+def render_diffable_maps(opts, *maps):
     """
     Render the given maps in respective files in a way that they will diff
     nicely to be able to compare corresponding keys side-by-side.  We return the

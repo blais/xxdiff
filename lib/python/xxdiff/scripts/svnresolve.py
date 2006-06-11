@@ -58,7 +58,7 @@ def parse_options():
 
 #-------------------------------------------------------------------------------
 #
-def select_conflicts( statii ):
+def select_conflicts(statii):
     """
     A generator that selects only the conflictual files.
     """

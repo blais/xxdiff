@@ -53,7 +53,7 @@ import commands
 
 #-------------------------------------------------------------------------------
 #
-def runDiff( cargs ):
+def runDiff(cargs):
     xargs = string.split( gopts.xxdiffargs ) + cargs
     run( gopts.xxdiff, xargs )
     if not gopts.nowait:
@@ -61,7 +61,7 @@ def runDiff( cargs ):
 
 #-------------------------------------------------------------------------------
 #
-def run( program, args, stdinn = None ):
+def run(program, args, stdinn = None):
     command = string.join( [ program ] + filter( lambda x: x, args ) )
 
     if gopts.debug or gopts.fake:
@@ -82,7 +82,7 @@ def run( program, args, stdinn = None ):
 
 #-------------------------------------------------------------------------------
 #
-def runCt( cmd ):
+def runCt(cmd):
     if gopts.debug or gopts.fake:
         print "running: cleartool", cmd 
     if gopts.fake:
@@ -93,7 +93,7 @@ def runCt( cmd ):
 
 #-------------------------------------------------------------------------------
 #
-def checkEqualFiles( files ):
+def checkEqualFiles(files):
     """Compares filename to make sure that no two of them are the same."""
     # FIXME todo
     pass
@@ -112,7 +112,7 @@ revision, etc.
 
     _mre = re.compile( '([^@]*)@@(.*)' )
 
-    def __init__( self, origname ):
+    def __init__(self, origname):
         self.fullname = origname
         ( self.filename, self.rev ) = self.parseName( origname )
         self.rev_cur = None
@@ -121,7 +121,7 @@ revision, etc.
         self.rev_latest = None
         self.checkedout = None
 
-    def dump( self ):
+    def dump(self):
         print
         print "current", self.getCurrentRevision()
         print "previous", self.getPreviousRevision()
@@ -137,7 +137,7 @@ revision, etc.
         print "checkedout", self.checkedout
         print 
     
-    def parseName( self, fname ):
+    def parseName(self, fname):
         """Parses extended names and returns a list of ( filename, revision )
 pairs."""
         mo = CmFile._mre.match( fname )
@@ -145,17 +145,17 @@ pairs."""
             return mo.groups()
         return [fname, None]
 
-    def isCheckedOut( self ):
+    def isCheckedOut(self):
         self.getCurrentRevision()
         return self.checkedout
 
-    def getCurrent( self ):
+    def getCurrent(self):
         rev_cur = self.getCurrentRevision()
         if rev_cur:
             return self.filename + '@@' + rev_cur
         return self.filename
 
-    def getCurrentRevision( self ):
+    def getCurrentRevision(self):
         """Gets the current revision."""
         if not self.rev_cur:
             out = runCt( ' describe -s ' + self.filename  )
@@ -167,23 +167,23 @@ pairs."""
                     self.checkedout = 1
         return self.rev_cur
 
-    def getPrevious( self ):
+    def getPrevious(self):
         return self.filename + '@@' + self.getPreviousRevision()
 
-    def getPreviousRevision( self ):
+    def getPreviousRevision(self):
         """Gets the previous revision."""
         if not self.rev_pre:
             preout = runCt( ' describe -s -pre ' + self.filename )
             self.rev_pre = preout
         return self.rev_pre
 
-    def getAncestorRevision( self ):
+    def getAncestorRevision(self):
         """Gets the ancestor revision."""
         if not self.rev_anc:
             self.rev_anc = self.getAncestorRevisionFile( self.fullname )
         return self.rev_anc
 
-    def getAncestorRevisionFile( self, filename ):
+    def getAncestorRevisionFile(self, filename):
         """Gets the ancestor revision of a particular file."""
         out = runCt( ' describe -s -anc ' + \
                      filename + ' ' + self.getMainLatestSimple() )
@@ -192,16 +192,16 @@ pairs."""
             return mo.group( 2 )
         return None
 
-    def getAncestor( self ):
+    def getAncestor(self):
         return self.filename + '@@' + self.getAncestorRevision()
 
-    def getMainLatestSimple( self ):
+    def getMainLatestSimple(self):
         return self.filename + '@@/main/LATEST'
 
-    def getMainLatest( self ):
+    def getMainLatest(self):
         return self.filename + '@@' + self.getMainLatestRevision()
 
-    def getMainLatestRevision( self ):
+    def getMainLatestRevision(self):
         """Gets the revision for the latest in the main branch."""
         if not self.rev_latest:
             out = runCt( ' describe -s ' + self.getMainLatestSimple() )
@@ -221,10 +221,10 @@ class ExtCmdBase:
 
     FIXME do doc."""
     
-    def __init__( self ):
+    def __init__(self):
         self.child_stdin = None
 
-    def getFiles( self, names ):
+    def getFiles(self, names):
         files = map( lambda x: CmFile(x), names )
         return files
         
@@ -242,10 +242,10 @@ class CmdDiff(ExtCmdBase):
 
     name = 'diff'
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
 
-    def execute( self, args ):
+    def execute(self, args):
         args = self.getFiles( args )
         runDiff( map( lambda x: x.fullname, args ) )
 
@@ -263,10 +263,10 @@ class CmdPrevious(ExtCmdBase):
 
     name = 'previous'
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         
-    def execute( self, args ):
+    def execute(self, args):
         args = self.getFiles( args )
         for f in args:
             current = f.getCurrent()
@@ -295,10 +295,10 @@ class CmdBranch(ExtCmdBase):
     name = 'branch'
     optmap = []
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
 
-    def execute( self, args ):
+    def execute(self, args):
         args = self.getFiles( args )
         for f in args:
             current = f.getCurrent()
@@ -362,10 +362,10 @@ Use the one that suits you best.
         ( 'latest', 'l', "If file is still checked out, don't bother showing ancestor." ),
         ]
 
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
 
-    def execute( self, args ):
+    def execute(self, args):
         args = self.getFiles( args )
 
         s = 0
@@ -458,10 +458,10 @@ class CmdUpdate(ExtCmdBase):
     name = 'update'
     optmap = []
     
-    def __init__( self ):
+    def __init__(self):
         ExtCmdBase.__init__( self )
         
-    def execute( self, args ):
+    def execute(self, args):
         args = self.getFiles( args )
         pass
 
@@ -481,7 +481,7 @@ class CmdUpdate(ExtCmdBase):
 import distutils.fancy_getopt as fgetopt  # getopt()
 from distutils.errors import DistutilsArgError
 
-def parse_options_subcmds( optmap, subcmds=[] ):
+def parse_options_subcmds(optmap, subcmds=[]):
 
     optmap = [
         ( 'help', 'h', "Prints help message." ),

@@ -20,7 +20,7 @@ from xxdiff.utils import makedirs
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft(parser):
     """
     Graft options on given parser for invocations of xxdiff.
     """
@@ -43,7 +43,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate xxdiff options.
     """
@@ -71,7 +71,7 @@ class History(object):
     if the viewer loop is interrupted it can be restarted without having to
     review all the past differences.
     """
-    def __init__( self, opts, resilient_dir ):
+    def __init__(self, opts, resilient_dir):
         self.history = []
         "Existing history file lines."
 
@@ -84,7 +84,7 @@ class History(object):
         
         self._initialize(resilient_dir)
 
-    def _initialize( self, resilient_dir ):
+    def _initialize(self, resilient_dir):
         """
         Initialize the history module.
         """
@@ -114,13 +114,13 @@ class History(object):
             f.close()
             self.histf = open(histfn, 'a')
 
-    def __contains__( self, histitem ):
+    def __contains__(self, histitem):
         """
         Support 'in' syntax.
         """
         return self.check(histitem)
 
-    def check( self, histitem ):
+    def check(self, histitem):
         """
         Check if the given history item has already been seen.  Call this to
         check every item to be run on your process to be run and to skip it if
@@ -132,7 +132,7 @@ class History(object):
 
         return histitem in self.history
 
-    def append( self, histitem ):
+    def append(self, histitem):
         """
         Append the given history item to the current history and save the file.
         Call this for every succesfully completed item of your process
@@ -155,7 +155,7 @@ class History(object):
         self.histf.write('\n')
         self.histf.flush()
 
-    def delete( self ):
+    def delete(self):
         """
         Delete the history file.  (This also clears the history.)
         Call this when your process completed succesfully.

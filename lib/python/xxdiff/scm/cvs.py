@@ -15,7 +15,7 @@ from subprocess import call
 
 #-------------------------------------------------------------------------------
 #
-def is_checked_out( filename ):
+def is_checked_out(filename):
     """
     Return True if the file is checked out.
     """
@@ -24,7 +24,7 @@ def is_checked_out( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def checkout( filename ):
+def checkout(filename):
     """
     Checkout the given filename from CVS.
     """
@@ -33,7 +33,7 @@ def checkout( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def commit( filename ):
+def commit(filename):
     """
     Commit the given filename into CVS.
     """
@@ -43,7 +43,7 @@ def commit( filename ):
 #-------------------------------------------------------------------------------
 #
 # Note: this is cut-n-paste from cvs.py, for simplicity of distribution.
-def unmerge2( text ):
+def unmerge2(text):
     """
     Unmerges conflicts between two files and returns the two split original
     files.  This is not meant to work with three files.

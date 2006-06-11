@@ -61,16 +61,16 @@ class CmdStatus:
 
     name = ['status']
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         parser.add_option('-v', '--tags', action='store_true',
                           help="Include tags")
         parser.add_option('-R', '--recursive', action='store_true',
                           help="Recursive")
 
-    def __init__( self ):
+    def __init__(self):
         self.fmt = "%-50s %-12s %-16s %s"
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
         if len(subargs) > 1 or ( len(subargs) == 1 and os.path.isdir(subargs[0]) ):
             mstatii = cvs.MultipleStatii(subargs,
                                         self.opts.tags,
@@ -96,7 +96,7 @@ class CmdLog:
 
     name = ['log']
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
         for f in subargs:
             log = cvs.Log(f)
             print f
@@ -111,7 +111,7 @@ class CmdRootPath:
 
     name = ['rootpath']
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
         print cvs.getRootPath()
 
 #===============================================================================

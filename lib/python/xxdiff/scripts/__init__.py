@@ -26,7 +26,7 @@ if sys.version_info[:2] < (2, 4):
 
 #-------------------------------------------------------------------------------
 #
-def interruptible_main( mainfun ):
+def interruptible_main(mainfun):
     """
     Wrapper to allow keyboard interrupt signals.
     """
@@ -39,7 +39,7 @@ def interruptible_main( mainfun ):
 
 #-------------------------------------------------------------------------------
 #
-def install_autocomplete( parser ):
+def install_autocomplete(parser):
     """
     Install automatic programmable completion support if available.
     Scripts should work even if it's not there.
@@ -53,7 +53,7 @@ def install_autocomplete( parser ):
 
 #-------------------------------------------------------------------------------
 #
-def passthruopts( argv ):
+def passthruopts(argv):
     """
     Hack to allow passing some options.  This hack may fail when the given
     options are incorrect but has the advantage that it doesn't require

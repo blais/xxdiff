@@ -57,7 +57,7 @@ from pprint import pprint, pformat
 class Command:
     """Just a class to hold information about a command."""
 
-    def __init__( self, command ):
+    def __init__(self, command):
         self.command = command # this is in fact a list of arguments
         self.pid = None
         self.interruptible = 1
@@ -69,20 +69,20 @@ class Command:
 class CmdQueue:
     """Command queue object."""
 
-    def __init__( self, nbcmds=1 ):
+    def __init__(self, nbcmds=1):
         self.nbcmds = nbcmds
         self.waiting = []
         self.running = []
         self.done = []
         self.waitingForAll = 0
 
-    def __del__( self ):
+    def __del__(self):
         try:
             self.waitAll()
         except KeyboardInterrupt:
             pass
         
-    def queue( self, cmdl, cmdobj=None ):
+    def queue(self, cmdl, cmdobj=None):
         """Queues a command to be run.
         If cmdobj is specified, methods preRun() and postRun() are called before and after
         running the command, respectively."""
@@ -90,7 +90,7 @@ class CmdQueue:
         cmd.cmdobj = cmdobj
         self.waiting.append(cmd)
 
-    def poll( self ):
+    def poll(self):
         """Run this command periodically."""
         for cmd in self.running:
             if self.wait(cmd):
@@ -106,7 +106,7 @@ class CmdQueue:
             cmd.cmdobj.preRun(self)
             self.run(cmd)
 
-    def waitAll( self ):
+    def waitAll(self):
         self.waitingForAll = 1
         self.poll()
         while len(self.running) > 0 or len(self.waiting) > 0:
@@ -114,12 +114,12 @@ class CmdQueue:
             self.poll()
         self.waitingForAll = 0
             
-    def run( self, cmd ):
+    def run(self, cmd):
         cmd.pid = os.fork()
         if cmd.pid == 0:
             return os.execvp(cmd.command[0], cmd.command)
 
-    def wait( self, cmd ):
+    def wait(self, cmd):
         try:
             (id, status) = os.waitpid(cmd.pid, os.WNOHANG)
             if id:
@@ -139,10 +139,10 @@ class CmdQueue:
 class SyncFakeQueue:
     """Fake command queue which is in fact synchronous."""
 
-    def __init__( self, nbcmds=1 ):
+    def __init__(self, nbcmds=1):
         self.nbcmds = nbcmds
 
-    def queue( self, cmdl, cmdobj ):
+    def queue(self, cmdl, cmdobj):
         """Queues a command to be run."""
         pid = os.fork()
         cmdobj.preRun(self)
@@ -152,7 +152,7 @@ class SyncFakeQueue:
             os.waitpid(pid, 0)
         cmdobj.postRun(self)
 
-    def poll( self ):
+    def poll(self):
         pass
 
 

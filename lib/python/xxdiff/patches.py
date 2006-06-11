@@ -14,7 +14,7 @@ import re
 
 #-------------------------------------------------------------------------------
 #
-def splitpatch( text ):
+def splitpatch(text):
     """
     Split output in chunks starting with ^Index.  Returns a list of pairs
     (tuples), each with (filename, patch) contents.

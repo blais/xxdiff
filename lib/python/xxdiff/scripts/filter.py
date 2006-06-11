@@ -35,11 +35,11 @@ class FilterTransformer(xxdiff.xformloop.Transformer):
     Transformer that greps the file for a regular expression, and if it matches,
     runs it through a sed command.
     """
-    def __init__( self, opts, filtcmd ):
+    def __init__(self, opts, filtcmd):
         xxdiff.xformloop.Transformer.__init__(self, opts)
         self.filtcmd = filtcmd
 
-    def transform( self, fn, outf ):
+    def transform(self, fn, outf):
         # Open input file.
         inf = file(fn, 'r')
 

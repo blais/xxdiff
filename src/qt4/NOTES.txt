@@ -1,0 +1,35 @@
+DETAILS OF THE QT4 PATCH
+
+The patch is taken against the 960 revision of xxdiff and assumes that the
+qt4prep.patch has already been applied.
+
+To apply this patch, you must first switch to the src directory and run this
+command:
+
+  qt3to4 xxdiff.pro
+
+When prompted, tell the utility to convert all files. This will modify the
+source code to use the Qt3Support API in the places where it is necessary.
+
+You should then be able to apply the patch in the conventional way.
+
+Note that I'm unsure about the validity of some of the changes I made,
+particularly w.r.t. the writeRawBytes/readRawBytes modifications. I may have
+introduced some bugs.
+
+I also punted by simply removing the entire XxCopyLabel::Tip functionality. It
+seems that tooltips have been completely redesigned in Qt4, and it would have
+taken me too much time to figure out how to port the tooltip code to Qt4.
+
+You will also need to patch the generated file resParser_lex.cpp. To do so, go
+to line 808 and change this:
+
+    input_stream_ptr->readRawBytes( &buf[ii], 1 ); \
+
+to this:
+
+    (*input_stream_ptr) >> buf[ii]; \
+
+Again, I'm not 100% sure that this is correct, but it seems to be right (and it
+compiles, at least).
+

@@ -1,0 +1,175 @@
+diff -Naur xxdiff.snapshot-svn-960/src/app.cpp xxdiff.snapshot-svn-960.new/src/app.cpp
+--- xxdiff.snapshot-svn-960/src/app.cpp	2006-06-07 13:01:14.000000000 -0700
++++ xxdiff.snapshot-svn-960.new/src/app.cpp	2006-06-07 12:17:08.000000000 -0700
+@@ -2154,7 +2154,7 @@
+ 
+    if ( !_cmdline._cmdlineResources.isEmpty() ) {
+       try {
+-         QTextIStream cmdlineStream( _cmdline._cmdlineResources );
++         QTextIStream cmdlineStream( &_cmdline._cmdlineResources );
+          resParser.parse( cmdlineStream, *resources );
+       }
+       catch ( const XxIoError& ioerr ) {
+diff -Naur xxdiff.snapshot-svn-960/src/copyLabel.cpp xxdiff.snapshot-svn-960.new/src/copyLabel.cpp
+--- xxdiff.snapshot-svn-960/src/copyLabel.cpp	2006-06-07 13:01:15.000000000 -0700
++++ xxdiff.snapshot-svn-960.new/src/copyLabel.cpp	2006-06-07 12:24:25.000000000 -0700
+@@ -51,40 +51,40 @@
+ // <summary> a tooltip that only tips when the string of an associated label is
+ // too long.  </summary>
+ 
+-class XxCopyLabel::Tip : public QToolTip {
+-
+-public:
+-
+-   /*----- member functions -----*/
+-
+-   // Constructor.
+-   Tip( QLabel* parent );
+-
+-   // See base class.
+-   virtual void maybeTip( const QPoint& );
+-
+-};
++//class XxCopyLabel::Tip : public QToolTip {
++//
++//public:
++//
++//   /*----- member functions -----*/
++//
++//   // Constructor.
++//   Tip( QLabel* parent );
++//
++//   // See base class.
++//   virtual void maybeTip( const QPoint& );
++//
++//};
+ 
+ //------------------------------------------------------------------------------
+ //
+-XxCopyLabel::Tip::Tip( QLabel* parent ) :
+-   QToolTip( parent )
+-{
+-}
++//XxCopyLabel::Tip::Tip( QLabel* parent ) :
++//   QToolTip( parent )
++//{
++//}
+ 
+ //------------------------------------------------------------------------------
+ //
+-void XxCopyLabel::Tip::maybeTip( const QPoint& )
+-{
+-   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
+-   XX_CHECK( clabel != 0 );
+-   QString tex = clabel->getFullText();
+-   QFontMetrics fm = clabel->fontMetrics();
+-   QRect br = fm.boundingRect( tex );
+-   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
+-      tip( clabel->rect(), tex );
+-   }
+-}
++//void XxCopyLabel::Tip::maybeTip( const QPoint& )
++//{
++//   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
++//   XX_CHECK( clabel != 0 );
++//   QString tex = clabel->getFullText();
++//   QFontMetrics fm = clabel->fontMetrics();
++//   QRect br = fm.boundingRect( tex );
++//   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
++//      tip( clabel->rect(), tex );
++//   }
++//}
+ 
+ /*==============================================================================
+  * CLASS XxCopyLabel
+@@ -96,14 +96,14 @@
+    QLabel( parent )
+ {
+    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
+-   _tip = new Tip( this );
++//   _tip = new Tip( this );
+ }
+ 
+ //------------------------------------------------------------------------------
+ //
+ XxCopyLabel::~XxCopyLabel()
+ {
+-   delete _tip;
++//   delete _tip;
+ }
+ 
+ //------------------------------------------------------------------------------
+diff -Naur xxdiff.snapshot-svn-960/src/diffs.cpp xxdiff.snapshot-svn-960.new/src/diffs.cpp
+--- xxdiff.snapshot-svn-960/src/diffs.cpp	2006-06-07 13:01:16.000000000 -0700
++++ xxdiff.snapshot-svn-960.new/src/diffs.cpp	2006-06-07 13:12:23.000000000 -0700
+@@ -59,8 +59,9 @@
+       const char* text = files[no]->getTextLine( fline, len );
+       XX_ASSERT( text != 0 ); // make this one throw
+ 
+-      os.writeRawBytes( text, len );
+-      os << endl;
++      QString rawBytes( text );
++      rawBytes.truncate( len );
++      os << rawBytes << endl;
+       return 1;
+    }
+    return 0;
+@@ -904,7 +905,7 @@
+                                 conditionals[f].latin1() );
+ 
+                   QByteArray line;
+-                  QTextOStream oss( line );
++                  QTextOStream oss( &line );
+                   oss << cond << endl;
+ 
+                   int nbOutlines = 0;
+@@ -1011,8 +1012,9 @@
+             XX_ASSERT( text != 0 ); // make this one throw
+ 
+             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
+-            os.writeRawBytes( text, len );
+-            os << endl;
++            QString rawBytes( text );
++            rawBytes.truncate( len );
++            os << rawBytes << endl;
+ 
+             some = true;
+             prevOut = true;
+diff -Naur xxdiff.snapshot-svn-960/src/overview.cpp xxdiff.snapshot-svn-960.new/src/overview.cpp
+--- xxdiff.snapshot-svn-960/src/overview.cpp	2006-06-07 13:01:15.000000000 -0700
++++ xxdiff.snapshot-svn-960.new/src/overview.cpp	2006-06-07 12:22:09.000000000 -0700
+@@ -291,15 +291,17 @@
+          int pts1[6] = { _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
+                          _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
+                          _fileL[ii] - sepWidth, curppos[ii-1] };                
+-         Q3PointArray pa1( 3, pts1 );
+-         p.drawPolygon( pa1 );
++         QPolygon polygon1;
++         polygon1.setPoints( 3, pts1 );
++         p.drawPolygon( polygon1 );
+ 
+          // Draw right arrow.
+          int pts2[6] = { _fileL[ii] + dx, curppos[ii] - dyo2,
+                          _fileL[ii] + dx, curppos[ii] + dyo2,
+                          _fileL[ii], curppos[ii] };                
+-         Q3PointArray pa2( 3, pts2 );
+-         p.drawPolygon( pa2 );
++         QPolygon polygon2;
++         polygon2.setPoints( 3, pts2 );
++         p.drawPolygon( polygon2 );
+       }
+    }
+ 
+@@ -324,8 +326,9 @@
+                             _fileL[ii] + fw2, ypos + sdx,
+                             _fileL[ii] + fw2 + sdx, ypos,
+                             _fileL[ii] + fw2, ypos - sdx };
+-            Q3PointArray pa1( 4, pts1 );
+-            p.drawPolygon( pa1 );
++            QPolygon polygon1;
++            polygon1.setPoints( 4, pts1 );
++            p.drawPolygon( polygon1 );
+          }
+       }
+    }
+

@@ -21,7 +21,7 @@ from xxdiff.scripts import tmpprefix
 # Different kinds of backups.
 backup_choices = ['along', 'other', 'none']
 
-def options_graft( parser, msg=None, deftype='other' ):
+def options_graft(parser, msg=None, deftype='other'):
     """
     Graft options on given parser for automatic file backups.
     """
@@ -47,7 +47,7 @@ def options_graft( parser, msg=None, deftype='other' ):
     return group
 
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate backup options.
     """
@@ -58,7 +58,7 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def backup_file( fn, opts, logs=None ):
+def backup_file(fn, opts, logs=None):
     """
     Compute backup filename and copy backup file.
 
@@ -133,7 +133,7 @@ def backup_file( fn, opts, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def print_reminder( opts ):
+def print_reminder(opts):
     """
     Print a reminder of the location of the backup files.
     """

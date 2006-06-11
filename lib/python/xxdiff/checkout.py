@@ -19,7 +19,7 @@ import optparse
 #
 checkout_choices = ('clearcase',)
 
-def options_graft( parser ):
+def options_graft(parser):
     """
     Graft options on given parser for checkout options.
     """
@@ -37,7 +37,7 @@ def options_graft( parser ):
 
     return group
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate checkout options.
     """
@@ -46,7 +46,7 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def get_module( modname ):
+def get_module(modname):
     """
     Returns the appropriate module for the given SCM.
     """
@@ -59,7 +59,7 @@ def get_module( modname ):
 
 #-------------------------------------------------------------------------------
 #
-def insure_checkout( fn, opts, logs=None ):
+def insure_checkout(fn, opts, logs=None):
     """
     Check the file out from the SCM, if necessary.
     Returns 'True' if the file was checked out.

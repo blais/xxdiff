@@ -17,7 +17,7 @@ from xxdiff.scripts import script_name
 
 #-------------------------------------------------------------------------------
 #
-def is_checked_out( filename ):
+def is_checked_out(filename):
     """
     Check if the file is already checked out.
     """
@@ -29,7 +29,7 @@ def is_checked_out( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def checkout( filename ):
+def checkout(filename):
     """
     Checkout the given filename from ClearCase.
     """
@@ -41,7 +41,7 @@ def checkout( filename ):
 
 #-------------------------------------------------------------------------------
 #
-def commit( filename ):
+def commit(filename):
     """
     Commit the given filename into CVS.
     """

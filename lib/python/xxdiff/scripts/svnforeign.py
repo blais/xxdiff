@@ -106,7 +106,7 @@ def read_one():
 
 #-------------------------------------------------------------------------------
 #
-def add( fn ):
+def add(fn):
     """
     Add the file into Subversion.
     """
@@ -114,7 +114,7 @@ def add( fn ):
 
 #-------------------------------------------------------------------------------
 #
-def rmrf( fnodn ):
+def rmrf(fnodn):
     """
     Delete the given directory and all its contents.
     """
@@ -137,7 +137,7 @@ def rmrf( fnodn ):
 
 #-------------------------------------------------------------------------------
 #
-def ignore_prop( dn, ignores ):
+def ignore_prop(dn, ignores):
     """
     Set svn:ignore on directory 'dn'.
     """
@@ -150,7 +150,7 @@ def ignore_prop( dn, ignores ):
 
 #-------------------------------------------------------------------------------
 #
-def filter2( predicate, *arguments ):
+def filter2(predicate, *arguments):
     ein, eout = [], []
     for args in zip(*arguments):
         add_args = args
@@ -212,8 +212,8 @@ def parse_options():
 
 #-------------------------------------------------------------------------------
 #
-def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
-                                  ignore=[] ):
+def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
+                                  ignore=[]):
     """
     Runs an 'svn status' command, and then loops over all the files that are not
     registered, asking the user one-by-one what action to take (see this
@@ -301,9 +301,9 @@ def query_unregistered_svn_files( filenames, opts, output=sys.stdout,
                     if backup is not None:
                         backupfn = backup.backup_file(fn, opts, output)
                         if backupfn:
-                            write( "Backed up to: '%s'\n" % backupfn)
+                            write("Backed up to: '%s'\n" % backupfn)
                     elif opts.verbose >= 1:
-                        write( '(Warning: no backups.)\n')
+                        write('(Warning: no backups.)\n')
                     rmrf(fn)
                     break
 

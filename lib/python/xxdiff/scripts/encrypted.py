@@ -75,7 +75,7 @@ encodecmd = encodecmd_noarmor + '--armor '
 
 #-------------------------------------------------------------------------------
 #
-def diff_encrypted( textlist, outmerged=None ):
+def diff_encrypted(textlist, outmerged=None):
     """
     Run a comparison of the encrypted texts specified in textlists and if an
     'outmerged' filename is specified, encrypt the merged file into it.

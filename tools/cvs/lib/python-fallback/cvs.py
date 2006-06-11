@@ -74,13 +74,13 @@ class Error:
 
 #-------------------------------------------------------------------------------
 #
-def getRoot( dir=None ):
+def getRoot(dir=None):
     """Returns the CVS root for a command run from dir."""
     if not dir:
         dir = os.getcwd()
     subdir = os.path.join(dir, 'CVS')
     if os.path.exists(subdir):
-        f = open( os.path.join(subdir, 'Root'), 'r' )
+        f = open(os.path.join(subdir, 'Root'), 'r')
         root = f.readline().strip()
         f.close()
     else:
@@ -89,14 +89,14 @@ def getRoot( dir=None ):
 
 #-------------------------------------------------------------------------------
 #
-def rootPath( root ):
+def rootPath(root):
     """Returns the repository path on the server for a command run from dir."""
     comps = string.split(root, ':')
     return comps[-1]
 
 #-------------------------------------------------------------------------------
 #
-def run( command, chin_text=None, indir=None ):
+def run(command, chin_text=None, indir=None):
     """Run a CVS command and return (status, output, error output) of executing
     cmd in a shell. Command output is NOT bound to the terminal."""
 
@@ -106,7 +106,7 @@ def run( command, chin_text=None, indir=None ):
     if trace_level >= 1:
         print "== (cvs):", command
     
-    (chin, chout, cherr) = os.popen3( command, 'r' )
+    (chin, chout, cherr) = os.popen3(command, 'r')
 
     if chin_text:
         chin.write(chin_text)
@@ -132,7 +132,7 @@ def run( command, chin_text=None, indir=None ):
 
 #-------------------------------------------------------------------------------
 #
-def delegate( command, indir=None ):
+def delegate(command, indir=None):
     """Run a CVS command with output is bound to the terminal."""
 
     if indir:
@@ -142,12 +142,12 @@ def delegate( command, indir=None ):
         print "== (cvs):", command
 
     # This is the simplest way for now.
-    return os.system( command )
+    return os.system(command)
 
 
 #-------------------------------------------------------------------------------
 #
-def fetch( filename, revision=None, indir=None, module=None ):
+def fetch(filename, revision=None, indir=None, module=None):
     """Fetches a particular filename and revision from the repository and
     returns a pair of the buffer and the error output. None is returned for
     output if there was an error.
@@ -166,7 +166,7 @@ def fetch( filename, revision=None, indir=None, module=None ):
             command = '{ cd "' + indir + '" && ' + command + '; }'
     else:
         command = '%s checkout -p %s %s' % \
-                  (program, revstr, os.path.join(module, filename) )
+                  (program, revstr, os.path.join(module, filename))
         
     (sts, out, err) = run(command)
 
@@ -186,13 +186,13 @@ def fetch( filename, revision=None, indir=None, module=None ):
 
 #-------------------------------------------------------------------------------
 #
-def isRevisionNb( rev ):
+def isRevisionNb(rev):
     """Returns true if the string is in the revision number format."""
     return revre_re.match(rev)
     
 #-------------------------------------------------------------------------------
 #
-def isBranchRev( rev ):
+def isBranchRev(rev):
     """Returns true if the revision is a branch revision."""
 
     nb = string.count(rev, '.')
@@ -206,7 +206,7 @@ def isBranchRev( rev ):
 
 #-------------------------------------------------------------------------------
 #
-def normRev( rev ):
+def normRev(rev):
     """Normalizes the branch revision to a common format (without the 0 before
     the end."""
 
@@ -217,7 +217,7 @@ def normRev( rev ):
 
 #-------------------------------------------------------------------------------
 #
-def cmpRevisions( rev1, rev2 ):
+def cmpRevisions(rev1, rev2):
     """Comparison functor for revision strings.
     This method can be used to sort revision strings correctly numerically."""
 
@@ -229,7 +229,7 @@ def cmpRevisions( rev1, rev2 ):
         elif not rs2:
             return 1
         else:
-            c = cmp( int(rs1[0]), int(rs2[0]) )
+            c = cmp(int(rs1[0]), int(rs2[0]))
             if c != 0:
                 return c
             rs1 = rs1[1:]
@@ -239,26 +239,26 @@ def cmpRevisions( rev1, rev2 ):
 
 #-------------------------------------------------------------------------------
 #
-def sortRevisionList( list ):
+def sortRevisionList(list):
     """Sorts a revision list, a little faster than with comparing strings.
 
     The advantage of using this method is that one does not need to convert
-    to/from ints for every comparison ( O(n log(n)) ).
+    to/from ints for every comparison (O(n log(n))).
     """
     
-    nl = map( lambda x: map(int, x.split('.')), list )
+    nl = map(lambda x: map(int, x.split('.')), list)
     nl.sort()
-    return map( lambda x: string.join( map(repr, x), '.'), nl )
+    return map(lambda x: string.join(map(repr, x), '.'), nl)
     
 #-------------------------------------------------------------------------------
 #
-def getModule( dir ):
+def getModule(dir):
     """Returns the name of the module within the given directory."""
 
     # go cat the CVS/Repository file because only it is guaranteed to
     # contain the correct module name.
     try:
-        f = open( os.path.join(dir, 'CVS', 'Repository'), 'r' )
+        f = open(os.path.join(dir, 'CVS', 'Repository'), 'r')
         module = f.readline()
         f.close()
     except:
@@ -267,7 +267,7 @@ def getModule( dir ):
 
 #-------------------------------------------------------------------------------
 #
-def getTag( dir ):
+def getTag(dir):
     """Returns the name of the tag within the given directory.
     If no tag exists, return None."""
 
@@ -286,7 +286,7 @@ def getTag( dir ):
 
 #-------------------------------------------------------------------------------
 #
-def previousRev( rev ):
+def previousRev(rev):
     """Returns the previous revision number string or None if there aren't."""
     if rev:
         rn = rev.split('.')
@@ -302,7 +302,7 @@ def previousRev( rev ):
 
 #-------------------------------------------------------------------------------
 #
-def parentBranchRev( rev ):
+def parentBranchRev(rev):
     """Returns the parent revision of a branched revision or None if there isn't
     any."""
     if rev:
@@ -313,7 +313,7 @@ def parentBranchRev( rev ):
 
 #-------------------------------------------------------------------------------
 #
-def previousOrParent( rev ):
+def previousOrParent(rev):
     """Returns the previous revision or parent branch if there is one."""
     rev_prev = previousRev(rev)
     if rev_prev:
@@ -323,7 +323,7 @@ def previousOrParent( rev ):
     
 #-------------------------------------------------------------------------------
 #
-def isChildRev( rchld, rpar ):
+def isChildRev(rchld, rpar):
     """Returns 1 if rchld is a child branch or revision of rpar."""
 
     rnchld = rchld.split('.')
@@ -336,7 +336,7 @@ def isChildRev( rchld, rpar ):
 
 #-------------------------------------------------------------------------------
 #
-def isInAttic( fn ):
+def isInAttic(fn):
     """Removes the attic string in filenames (returns the filename without it)."""
     if fn.find(attic_pfx):
         return 1
@@ -344,7 +344,7 @@ def isInAttic( fn ):
 
 #-------------------------------------------------------------------------------
 #
-def removeAttic( fn ):
+def removeAttic(fn):
     """Removes the attic string in filenames (returns the filename without it)."""
     return string.replace(fn, attic_pfx, '', 1)
 
@@ -352,7 +352,7 @@ def removeAttic( fn ):
 #
 unkfile_re = re.compile('^\? (.*)$')
 
-def getUnknownFiles( dir ):
+def getUnknownFiles(dir):
     """Returns a list of the files that are not known or ignored to CVS."""
 
     cmd = '%s -n -q update %s' % (program, dir)
@@ -362,7 +362,7 @@ def getUnknownFiles( dir ):
     for line in output.splitlines():
         mo = unkfile_re.match(line)
         if mo:
-            unkfn.append( mo.group(1) )
+            unkfn.append(mo.group(1))
     return unkfn
 
 
@@ -386,7 +386,7 @@ class MultipleOutputs:
 
     unkre = re.compile('(^\? (.*)|^$\s*)%')
 
-    def __init__( self, command, separator, indir ):
+    def __init__(self, command, separator, indir):
         
         if indir:
             command = '{ cd "' + indir + '" && ' + command + '; }'
@@ -394,7 +394,7 @@ class MultipleOutputs:
         if trace_level >= 1:
             print "== (cvs):", command
 
-        (chin, self.chout, self.cherr) = os.popen3( command, 'r' )
+        (chin, self.chout, self.cherr) = os.popen3(command, 'r')
         chin.close()
         self.choutfd = self.chout.fileno()
         self.cherrfd = self.cherr.fileno()
@@ -410,7 +410,7 @@ class MultipleOutputs:
 
         self.separator = separator
 
-    def skipStart( self ):
+    def skipStart(self):
         """Skips the stuff that might be at the start of the status output."""
 
         while 1:
@@ -424,7 +424,7 @@ class MultipleOutputs:
         # Note: hoping there won't be too much that it'll block on stderr...
         # we could easily change this to read both pipes like below.
 
-    def next( self ):
+    def next(self):
         """Returns the next status. Return None when done."""
 
         if self.outeof:
@@ -433,7 +433,7 @@ class MultipleOutputs:
         output = ''
         nblines = 0
         while not self.outeof or not self.erreof:
-            ready = select.select( [self.choutfd, self.cherrfd], [], [] )
+            ready = select.select([self.choutfd, self.cherrfd], [], [])
 
             if self.choutfd in ready[0]:
                 line = self.chout.readline()
@@ -472,7 +472,7 @@ class MultipleOutputs:
             return self.processOne(self.separator + output)
      
     # FIXME this could be removed
-    def makeNonBlocking( self, fd ):
+    def makeNonBlocking(self, fd):
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         try:
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | fcntl.O_NDELAY)
@@ -486,7 +486,7 @@ class MultipleOutputs:
 class MultipleStatii(MultipleOutputs):
     """Get multiple statii."""
 
-    def __init__( self, files, with_tags=0, recursive=0, indir=None):
+    def __init__(self, files, with_tags=0, recursive=0, indir=None):
     
         self.files = files
         self.with_tags = with_tags
@@ -507,10 +507,10 @@ class MultipleStatii(MultipleOutputs):
         self.outputs = {}
         self.statii = {}
 
-    def processOne( self, output ):
+    def processOne(self, output):
         """Processes a status. Return None when done."""
         try:
-            status = Status( None, self.with_tags, output )
+            status = Status(None, self.with_tags, output)
             self.outputs[status.filename] = output
             self.statii[status.filename] = status
         except Error, e:
@@ -586,7 +586,7 @@ class Status:
     #    Sticky Options:      (none)
 
 
-    def __init__( self, filename=None, with_tags=0, status_output=None, indir=None ):
+    def __init__(self, filename=None, with_tags=0, status_output=None, indir=None):
         """Initializes a status object with full pathname."""
         if with_tags:
             gtsw = '-v'
@@ -598,7 +598,7 @@ class Status:
         if not status_output and filename:
             self.filename = filename
             (sts, out, err) = \
-                  run( '%s status %s %s' % (program, gtsw, self.filename), indir=indir )
+                  run('%s status %s %s' % (program, gtsw, self.filename), indir=indir)
             if sts:
                 raise Error('Error getting status.')
             error = Error('Error parsing status on file %s.' % self.filename)
@@ -614,7 +614,7 @@ class Status:
         if not mo: raise error
         self.status_filename = mo.group(1).strip()
         try:
-            self.status_id = Status.status_strings.index( mo.group(2).strip() )
+            self.status_id = Status.status_strings.index(mo.group(2).strip())
         except ValueError, e:
             raise error
 
@@ -638,7 +638,7 @@ class Status:
         else:
             mo1 = Status.wrre2.match(lines[3])
             mo2 = Status.wrre3.match(lines[3])
-            if not ( mo1 or mo2 ): raise error
+            if not (mo1 or mo2): raise error
             
         mo = Status.rrre.match(lines[4])
         if mo:
@@ -689,65 +689,65 @@ class Status:
                         self.symbolic_tags[tag] = mo.group(3).strip()
                     idx += 1
             
-    def status( self ):
+    def status(self):
         """Returns the status of the file."""
         return self.status_id
 
-    def statusStr( self ):
+    def statusStr(self):
         return Status.status_strings[self.status_id]
 
-    def workingRev( self ):
+    def workingRev(self):
         """Returns the working revision of the file."""
         return self.work_rev
 
-    def repositoryRev( self ):
+    def repositoryRev(self):
         """Returns the repository revision of the file."""
         return self.repo_rev
 
-    def repositoryFile( self ):
+    def repositoryFile(self):
         """Returns the repository file path."""
         return self.repo_rev
 
-    def stickyTag( self ):
+    def stickyTag(self):
         """Returns the sticky tag of the file."""
         return self.sticky_tag
 
-    def stickyRev( self ):
+    def stickyRev(self):
         """Returns the revision prefix for the sticky tag, whether it's a branch
         or a simple tag."""
         return self.sticky_rev
 
-    def stickyDate( self ):
+    def stickyDate(self):
         """Returns the sticky date of the file."""
         pass # FIXME todo
         assert(false)
 
-    def stickyOptions( self ):
+    def stickyOptions(self):
         """Returns the sticky options of the file."""
         pass # FIXME todo
         assert(false)
 
-    def symbolicTags( self ):
+    def symbolicTags(self):
         """Returns a map of the ordinary tags to their revisions."""
         return self.symbolic_tags
 
-    def branchTags( self ):
+    def branchTags(self):
         """Returns a map of the branch tags to their revisions."""
         return self.branch_tags
 
-    def tags( self ):
+    def tags(self):
         """Returns a map of all tags to their revisions."""
         nmap = {}
         nmap.update(self.symbolic_tags)
         nmap.update(self.branch_tags)
         return nmap
 
-    def inAttic( self ):
+    def inAttic(self):
         """Returns 1 if the file is in the Attic on the repository, 0 if not.
         Returns None if unknown."""
         return self.attic
 
-    def __repr__( self ):
+    def __repr__(self):
         """Prints out textural representation."""
         s = 'status = %s\n' % Status.status_strings[self.status_id]
         s += 'working revision = %s\n' % self.work_rev
@@ -769,30 +769,30 @@ class Status:
 
         return s
 
-    def previousRev( self, rev_or_tag ):
+    def previousRev(self, rev_or_tag):
         """Returns the previous revision number for revision or tag or None if
         there aren't."""
         if revre_re.match(rev_or_tag):
             return previousRev(rev_or_tag)
         elif rev_or_tag in self.symbolic_tags:
-            return previousRev( self.symbolic_tags[rev_or_tag] )
+            return previousRev(self.symbolic_tags[rev_or_tag])
         elif rev_or_tag in self.branch_tags:
             print rev_or_tag, self.branch_tags[rev_or_tag]
-            return previousRev( self.branch_tags[rev_or_tag] )
+            return previousRev(self.branch_tags[rev_or_tag])
         return None
     
-    def parentBranchRev( self, rev_or_tag ):
+    def parentBranchRev(self, rev_or_tag):
         """Returns the parent revision of a branched revision or None if there isn't
         any. This method accepts a tag."""
         if revre_re.match(rev_or_tag):
             return parentBranchRev(rev_or_tag)
         elif rev_or_tag in self.symbolic_tags:
-            return parentBranchRev( self.symbolic_tags[rev_or_tag] )
+            return parentBranchRev(self.symbolic_tags[rev_or_tag])
         elif rev_or_tag in self.branch_tags:
-            return parentBranchRev( self.branch_tags[rev_or_tag] )
+            return parentBranchRev(self.branch_tags[rev_or_tag])
         return None
    
-    def previousOrParent( self, rev_or_tag ):
+    def previousOrParent(self, rev_or_tag):
         """Returns the previous revision or parent branch if there is one.
         This method accepts a tag."""
         rev_prev = self.previousRev(rev_or_tag)
@@ -801,7 +801,7 @@ class Status:
         else:
             return self.parentBranchRev(rev_or_tag)
 
-    def isBranched( self ):
+    def isBranched(self):
         """Returns true if the current sticky tag of this status is a branch
         tag."""
         return isBranchRev(self.sticky_tag)
@@ -814,7 +814,7 @@ class Status:
 class MultipleLogs(MultipleOutputs):
     """Get multiple logs."""
 
-    def __init__( self, files, indir=None, remote=0, with_revisions=0 ):
+    def __init__(self, files, indir=None, remote=0, with_revisions=0):
     
         self.files = files
 
@@ -832,10 +832,10 @@ class MultipleLogs(MultipleOutputs):
         self.with_revisions = with_revisions
         self.remote = remote
         
-    def processOne( self, output ):
+    def processOne(self, output):
         """Processes a status. Return None when done."""
-        log = Log( None, self.remote, output,
-                   with_revisions=self.with_revisions )
+        log = Log(None, self.remote, output,
+                   with_revisions=self.with_revisions)
         self.outputs[log.filename] = output
         self.logs[log.filename] = log
         return log
@@ -863,7 +863,7 @@ class RevInfo:
     revire = re.compile('revision ('+revre+')')
     brre = re.compile('branches: ('+revre+');')
 
-    def __init__( self ):
+    def __init__(self):
         self.rev = None
         self.date = ''
         self.author = ''
@@ -871,7 +871,7 @@ class RevInfo:
         self.lines = ''
         self.branches = []
 
-    def __repr__( self ):
+    def __repr__(self):
         """Prints out textural representation."""
         s = '(revision = %s, fields = %s)' % (self.rev, self.fields)
         return s
@@ -905,7 +905,7 @@ class Log:
     symre = re.compile('^symbolic names:')
     tagre = re.compile('^\s+([^:]*):\s('+revre+')$')
 
-    def __init__( self, filename, remote=0, log_output=None, with_revisions=0 ):
+    def __init__(self, filename, remote=0, log_output=None, with_revisions=0):
         """Initializes a log object with full pathname."""
         
         self.filename = None
@@ -924,7 +924,7 @@ class Log:
                 wrsw = '-h'
 
             (sts, out, err) = \
-                  run( '%s %s %s %s' % (program, cmd, wrsw, filename) )
+                  run('%s %s %s %s' % (program, cmd, wrsw, filename))
             if sts or len(out) == 0:
                 raise Error('Error getting log.')
             error = Error('Error parsing log on file %s.' % self.filename)
@@ -991,7 +991,7 @@ class Log:
         else:
             self.revisions = {}
 
-    def parseRevisions( self, lines ):
+    def parseRevisions(self, lines):
         """Parses the revision info."""
 
         error = Error('Error parsing log revisions')
@@ -1034,46 +1034,46 @@ class Log:
                 mo = RevInfo.revire.match(rlines[0])
                 if not mo: raise error
                 revinfo.rev = mo.group(1)
-                revinfo.fields = map( string.strip, rlines[1].split(';') )
+                revinfo.fields = map(string.strip, rlines[1].split(';'))
                 
                 revisions[ revinfo.rev ] = revinfo
 
         return revisions
 
 
-    def rcsFile( self ):
+    def rcsFile(self):
         """Returns the path of the RCS file."""
         return self.rcsfile
     
-    def headRev( self ):
+    def headRev(self):
         """Returns the head revision of the file."""
         return self.head_rev
 
-    def headBranch( self ):
+    def headBranch(self):
         """Returns the branch for the head of the file."""
         return self.head_branch
 
-    def symbolicTags( self ):
+    def symbolicTags(self):
         """Returns a map of the ordinary tags to their revisions."""
         return self.symbolic_tags
 
-    def branchTags( self ):
+    def branchTags(self):
         """Returns a map of the branch tags to their revisions."""
         return self.branch_tags
 
-    def tags( self ):
+    def tags(self):
         """Returns a map of all tags to their revisions."""
         nmap = {}
         nmap.update(self.symbolic_tags)
         nmap.update(self.branch_tags)
         return nmap
 
-    def inAttic( self ):
+    def inAttic(self):
         """Returns 1 if the file is in the Attic on the repository, 0 if not.
         Returns None if unknown."""
         return self.attic
 
-    def __repr__( self ):
+    def __repr__(self):
         """Prints out textural representation."""
         s = 'RCS file = %s\n' % self.rcsfile
         s += 'working file = %s\n' % self.work_file
@@ -1099,12 +1099,12 @@ class Log:
         return s
 
 
-    def allRevisions( self ):
+    def allRevisions(self):
         """Returns a list of all the revisions.
         This only returns valids results if it was parsed."""
         return self.revisions
     
-    def getMainRevisions( self ):
+    def getMainRevisions(self):
         """Returns a list of the main revisions.
         This only returns valids results if it was parsed."""
         assert(false)
@@ -1126,38 +1126,38 @@ cvsroot = getRoot(os.getcwd())
 def selftest():
     """Self-test."""
     print "Performing tests."
-    assert( not isBranchRev('1.2') )
-    assert( isBranchRev('1.2.3') )
-    assert( isBranchRev('1.2.0.2') )
-    assert( normRev('1.2.3') == '1.2.3' )
-    assert( normRev('1.2.0.2') == '1.2.2' )
-    assert( previousRev('1.2.1.2') == '1.2.1.1' )
-    assert( previousRev('1.2.1.1') == None )
-    assert( not parentBranchRev('1') )
-    assert( not parentBranchRev('1.2') )
-    assert( parentBranchRev('1.2.3') == '1.2' )
-    assert( parentBranchRev('1.2.3.4') == '1.2' )
-    assert( parentBranchRev('1.2.3.4.5') == '1.2.3.4' )
-    assert( parentBranchRev('1.2.3.4.5.6') == '1.2.3.4' )
+    assert(not isBranchRev('1.2'))
+    assert(isBranchRev('1.2.3'))
+    assert(isBranchRev('1.2.0.2'))
+    assert(normRev('1.2.3') == '1.2.3')
+    assert(normRev('1.2.0.2') == '1.2.2')
+    assert(previousRev('1.2.1.2') == '1.2.1.1')
+    assert(previousRev('1.2.1.1') == None)
+    assert(not parentBranchRev('1'))
+    assert(not parentBranchRev('1.2'))
+    assert(parentBranchRev('1.2.3') == '1.2')
+    assert(parentBranchRev('1.2.3.4') == '1.2')
+    assert(parentBranchRev('1.2.3.4.5') == '1.2.3.4')
+    assert(parentBranchRev('1.2.3.4.5.6') == '1.2.3.4')
     
-    assert( cmpRevisions('1', '2') == -1 )
-    assert( cmpRevisions('1', '1') == 0 )
-    assert( cmpRevisions('2', '1') == 1 )
-    assert( cmpRevisions('1', '1.1') == -1 )
-    assert( cmpRevisions('1.1', '1.1') == 0 )
-    assert( cmpRevisions('1.1', '1') == 1 )
-    assert( cmpRevisions('1.2', '1.1') == 1 )
-    assert( cmpRevisions('1.2.1', '1.1') == 1 )
-    assert( cmpRevisions('1.2.1', '1.10') == -1 )
+    assert(cmpRevisions('1', '2') == -1)
+    assert(cmpRevisions('1', '1') == 0)
+    assert(cmpRevisions('2', '1') == 1)
+    assert(cmpRevisions('1', '1.1') == -1)
+    assert(cmpRevisions('1.1', '1.1') == 0)
+    assert(cmpRevisions('1.1', '1') == 1)
+    assert(cmpRevisions('1.2', '1.1') == 1)
+    assert(cmpRevisions('1.2.1', '1.1') == 1)
+    assert(cmpRevisions('1.2.1', '1.10') == -1)
 
-    #print sortRevisionList( ['1.3', '1.1.0', '1.10'] )
+    #print sortRevisionList(['1.3', '1.1.0', '1.10'])
 
-    assert( isChildRev('1.4', '1.6') == 0 )
-    assert( isChildRev('1.4.2', '1.5') == 0 )
-    assert( isChildRev('1.4.2', '1.4') == 1 )
-    assert( isChildRev('1.4.2.6', '1.4') == 1 )
+    assert(isChildRev('1.4', '1.6') == 0)
+    assert(isChildRev('1.4.2', '1.5') == 0)
+    assert(isChildRev('1.4.2', '1.4') == 1)
+    assert(isChildRev('1.4.2.6', '1.4') == 1)
 
-    #print getUnknownFiles( '.' )
+    #print getUnknownFiles('.')
 
 
 # Run main if loaded as a script

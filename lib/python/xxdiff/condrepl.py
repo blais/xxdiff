@@ -25,7 +25,7 @@ __all__ = ('cond_replace',)
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft(parser):
     """
     Graft options on given parser for automatic file backups.
     """
@@ -46,7 +46,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate replacement options.
     """
@@ -60,7 +60,7 @@ sbs_diff_cmd = ['diff', '--side-by-side', '--suppress-common-lines']
 
 #-------------------------------------------------------------------------------
 #
-def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
+def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
     """
     Given two filenames, spawn xxdiff for a decision, and conditionally replace
     the original file with the contents of the new file.  This supports options
@@ -156,7 +156,7 @@ def cond_replace( origfn, newfn, opts, logs, exitonsame=False ):
 
 #-------------------------------------------------------------------------------
 #
-def print_decision( decision, origfn, opts, logs ):
+def print_decision(decision, origfn, opts, logs):
     """
     Print the decision string.
     """
@@ -167,7 +167,7 @@ def print_decision( decision, origfn, opts, logs ):
 
 #-------------------------------------------------------------------------------
 #
-def print_diffs( diff_output, logs ):
+def print_diffs(diff_output, logs):
     """
     Format nicely and print the output of side-by-side diff.
     """
@@ -178,7 +178,7 @@ def print_diffs( diff_output, logs ):
 
 #-------------------------------------------------------------------------------
 #
-def do_replace_file( ofn, nfn, opts, logs ):
+def do_replace_file(ofn, nfn, opts, logs):
     """
     Function that performs the file replacement safely.  Replace the original
     file 'ofn' by 'nfn'.
@@ -205,7 +205,7 @@ diff3_cmd = ['diff3']
 
 proper_decisions = ('ACCEPT', 'REJECT', 'MERGED')
 
-def cond_resolve( mine, ancestor, yours, output, opts, logs=None, extra=None ):
+def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
     """
     Given three filenames, 'mine', 'ancestor', 'yours', spawn a 3-way xxdiff for
     a decision, and replace the 'original' file with the contents of the merged

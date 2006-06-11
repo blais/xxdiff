@@ -26,7 +26,7 @@ def_editor = ["xterm", "-e", '/usr/bin/vi "%s"']
 
 #-------------------------------------------------------------------------------
 #
-def spawn_editor( initcontents=None, filename=None ):
+def spawn_editor(initcontents=None, filename=None):
     """
     Spawns an editor window and returns a waitable object that will block until
     the editor is done and recuperate the text once it's done.  If you delete

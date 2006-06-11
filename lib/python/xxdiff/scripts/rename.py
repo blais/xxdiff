@@ -38,7 +38,7 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
     Transformer that greps the file for a regular expression, and if it matches,
     runs it through a sed command.
     """
-    def __init__( self, opts, renames ):
+    def __init__(self, opts, renames):
         """
         'renames' should be a list of (from, to) pairs.
         """
@@ -65,7 +65,7 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
 
             self.renames.append( (refrom, sto) )
 
-    def transform( self, fn, outf ):
+    def transform(self, fn, outf):
         # Open and read input file in memory.
         try:
             inf = file(fn, 'r')

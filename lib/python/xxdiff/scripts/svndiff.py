@@ -31,7 +31,7 @@ from xxdiff.scripts.svnforeign import query_unregistered_svn_files
 
 #-------------------------------------------------------------------------------
 #
-def review_file( sobj, opts ):
+def review_file(sobj, opts):
     """
     Check the given status object and if necessary, spawn xxdiff on it.
 

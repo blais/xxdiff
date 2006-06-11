@@ -33,7 +33,7 @@ class Transformer(object):
     """
     Base class for all transformers.
     """
-    def __init__( self, opts ):
+    def __init__(self, opts):
         """
         'opts': an options object -> Option
 
@@ -41,7 +41,7 @@ class Transformer(object):
         """
         self.opts = opts
         
-    def transform( self, fn, outf ):
+    def transform(self, fn, outf):
         """
         Process the file 'fn' and write the transformed contents to the
         temporary file 'tmpf' (this file object is already opened in 'w' mode.
@@ -54,7 +54,7 @@ class Transformer(object):
 
 #-------------------------------------------------------------------------------
 #
-def parse_args( parser ):
+def parse_args(parser):
     """
     Parse the options and return:
     - an options object -> Options
@@ -81,7 +81,7 @@ def parse_args( parser ):
 
 #-------------------------------------------------------------------------------
 #
-def transform_replace_loop( opts, selector, xformer, logs ):
+def transform_replace_loop(opts, selector, xformer, logs):
     """
     Run a loop through the selected files and conditionally transform them by
     applying the given Transformer and invoking xxdiff to confirm.  Return a map
@@ -111,7 +111,7 @@ def transform_replace_loop( opts, selector, xformer, logs ):
 
 #-------------------------------------------------------------------------------
 #
-def postloop_footer( opts, decision_map=None ):
+def postloop_footer(opts, decision_map=None):
     """
     Print some common stuff at the end of the looping scripts.
     You don't have to add this to your script, but it's convenient.

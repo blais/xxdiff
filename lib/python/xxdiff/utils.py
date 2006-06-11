@@ -17,7 +17,7 @@ from subprocess import Popen, PIPE
 
 #-------------------------------------------------------------------------------
 #
-def consepairs( seq ):
+def consepairs(seq):
     """
     Iterate over consecutive pairs.
     """
@@ -30,7 +30,7 @@ def consepairs( seq ):
 
 #-------------------------------------------------------------------------------
 #
-def idify( s, strip=True, preserve_chars=[] ):
+def idify(s, strip=True, preserve_chars=[]):
     """
     Removes non-alphanumeric characters from a string, morphing them into
     underscores.
@@ -61,7 +61,7 @@ guesscmd = ['file', '-b', '-L']
 text_re = re.compile('\\btext\\b')
 empty_re = re.compile('^empty$')
 
-def istextfile( fn ):
+def istextfile(fn):
     """
     Attempts to guess if the file indicated by the given filename is a text file
     or a binary file.
@@ -80,7 +80,7 @@ def istextfile( fn ):
 
 #-------------------------------------------------------------------------------
 #
-def makedirs( dirn, error_on_exist=True ):
+def makedirs(dirn, error_on_exist=True):
     """
     A replacement for os.makedirs() that has an option to avoid complaining if
     the destination directory already exists.

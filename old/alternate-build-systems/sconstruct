@@ -109,7 +109,7 @@ uic = os.path.join(os.environ['QTDIR'], 'bin', 'uic')
 IntHeaderBuilder = Builder(action='%s $SOURCE -o $TARGET' % uic, suffix='.cpp', src_suffix='.ui') 
 
 
-def buildIntSource( target, source, evn ):
+def buildIntSource(target, source, evn):
     print '=================', target, source, env
     #action='%s $SOURCE -o $TARGET' % uic
     
@@ -121,7 +121,7 @@ IntSourceBuilder = Builder(action=Action(buildIntSource), suffix='.cpp', src_suf
 
 #-------------------------------------------------------------------------------
 #
-def processInterface( interfaces ):
+def processInterface(interfaces):
     new_sources = []
     for interface in interfaces:
         header = interface.replace('.ui', '.h')

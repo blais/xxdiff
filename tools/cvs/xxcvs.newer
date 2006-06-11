@@ -78,7 +78,7 @@ class PrintCheckoutInfo:
 
     names = ['pww']
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         if subargs:
             raise Error('This command takes no arguments.')
@@ -103,7 +103,7 @@ class PrintBranches:
 
     names = ['lsbranches', 'listbranches', 'list_branches']
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         if not subargs:
             raise Error('You need to specify files.')
@@ -148,7 +148,7 @@ class List:
 
     names = ['ls', 'list', 'status']
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         parser.add_option('-s', '--short', action='store_true',
                           help="Output short format (default).")
         parser.add_option('-l', '--long', action='store_true',
@@ -182,7 +182,7 @@ class List:
     # FIXME when a files has been locally added and is in a subdir, we don't see
     # the intervening directory
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         if self.opts.all:
             self.opts.recursive = 1
@@ -275,10 +275,10 @@ class List:
 
         # write out final report
         if self.opts.final:
-            self.printFinal( self.res )
+            self.printFinal(self.res)
 
 
-    def printFinal( self, res ):
+    def printFinal(self, res):
 
         # final report: find longest pathname
         if self.opts.long:
@@ -300,14 +300,14 @@ class List:
             self.printEntry(s)
 
 
-    def resAppend( self, s ):
+    def resAppend(self, s):
         """Appends or prints the status or string, depending on it we're
         progressive."""
         if not self.opts.final:
             self.printEntry(s)
         self.res.append(s)
 
-    def printEntry( self, s ):
+    def printEntry(self, s):
         if self.opts.long:
             if type(s) != type(""):
                 print self.fmtf % (s.filename, s.lstag, s.workingRev(), s.statusStr())
@@ -320,7 +320,7 @@ class List:
             else:
                 print s
 
-    def printHeader( self ):
+    def printHeader(self):
         l = self.fmtf % ('filename', 'stamp', 'revision', 'status')
         print l
         print len(l) * '-'
@@ -341,7 +341,7 @@ class ListBranchFiles(List):
 
     names = ['getmodfiles', 'get_mod_files', 'list_brfiles']
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         self.opts.long = 1
         self.opts.recursive = 1
@@ -362,7 +362,7 @@ class ListBranchFiles(List):
 
         List.execute(self, subargs)
 
-    #def printFinal( self, res ):
+    #def printFinal(self, res):
     #    # FIXME todo, fancy it up
 
 
@@ -389,13 +389,13 @@ class RemoveBranch:
     names = ['rmbranch', 'removebranch', 'remove_branch',
             'deletebranch', 'delete_branch']
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         parser.add_option('-s', '--save', action='store_true',
                           help="Save backup files before reverting.")
         parser.add_option('--save-suffix', action='store_true',
                           help="Save format (default: %s)." % self.save_suffix)
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         if not self.opts.save_suffix:
             self.opts.save_suffix = Revert.save_suffix
@@ -425,8 +425,8 @@ class RemoveBranch:
                     shutil.copyfile(file, savefn)
                     print "Saved copy in '%s'" % savefn
                 except OSError, e:
-                    raise Error( "Cannot copy file %s into %s: %s",
-                                 (file, savefn, repr(e)) )
+                    raise Error("Cannot copy file %s into %s: %s",
+                                 (file, savefn, repr(e)))
             else:
                 if not self.gopts.expert:
                     if not yesOrNo("Changes on '%s' will be lost, are you sure?" \
@@ -442,7 +442,7 @@ class RemoveBranch:
 
             if self.gopts.verbose:
                 print "==> Updating file %s" % file
-            cvs.delegate( "%s update -r %s %s" % (cvs.program, branch, file) )
+            cvs.delegate("%s update -r %s %s" % (cvs.program, branch, file))
             #if sts[0]:
             #    raise Error("Moving tag.")
 
@@ -465,7 +465,7 @@ class Revert:
 
     names = ['revert', 'uncheckout', 'unco']
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         parser.add_option('-s', '--save', action='store_true',
                           help="Save backup files before reverting.")
         parser.add_option('--save-suffix', action='store_true',
@@ -473,7 +473,7 @@ class Revert:
                           "(default is %s)." % self.save_suffix)
         #('all', 'a', "Perform on all the modified files in the module.")
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
         if not self.opts.save_suffix:
             self.opts.save_suffix = Revert.save_suffix
 
@@ -502,8 +502,8 @@ class Revert:
                     os.rename(file, savefn)
                     print "Saved copy in '%s'" % savefn
                 except OSError, e:
-                    raise Error( "Cannot rename file %s into %s: %s",
-                                 (file, savefn, repr(e)) )
+                    raise Error("Cannot rename file %s into %s: %s",
+                                 (file, savefn, repr(e)))
             else:
                 if not self.gopts.expert:
                     if not yesOrNo("Changes on '%s' will be lost, are you sure?" \
@@ -512,7 +512,7 @@ class Revert:
                         continue
 
             if self.gopts.verbose: print "==> Reverting file"
-            cvs.run( '%s update -C %s' % (cvs.program, file) )
+            cvs.run('%s update -C %s' % (cvs.program, file))
 
             status.lstag = status.stickyTag()
             print "File '%s' reverted to revision %s (%s)" % \
@@ -543,7 +543,7 @@ class Fetch:
 
     stdout_sep1 = 79 * '='
     
-    def addopts( self, parser ):
+    def addopts(self, parser):
         parser.add_option('-p', '--stdout', action='store_true',
                           help="Output to stdout (don't write output file).")
         parser.add_option('-m', '--module', action='store',
@@ -553,7 +553,7 @@ class Fetch:
                           help="Specify which revision for filename.")
     
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         if self.gopts.verbose: print "==> Parsing arguments"
         if not subargs:
@@ -620,7 +620,7 @@ class Mani:
 
     # common diff options
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         parser.add_option('-w', '--ignore-all-space', action='store_true',
                           help="Option given to diff(1).")
         parser.add_option('-b', '--ignore-space-change', action='store_true',
@@ -635,19 +635,19 @@ class Mani:
     #===========================================================================
 
     class QueueCmd:
-        def __init__( self, cmd, filelist ):
+        def __init__(self, cmd, filelist):
             self.cmd = cmd
             self.filelist = filelist
             self.post_hooks = []
 
-        def preRun( self, queue ):
+        def preRun(self, queue):
             print >> sys.stderr, " ,------------------------------"
             print >> sys.stderr, " | Running diff with:"
             for file in self.filelist:
                 print >> sys.stderr, " |", file.print_name
             print >> sys.stderr, " '------------------------------"
 
-        def postRun( self, queue ):
+        def postRun(self, queue):
             self.filelist = None # release filelist and tempfile
             if self.post_hooks:
                 for hook in self.post_hooks:
@@ -663,7 +663,7 @@ class Mani:
     #===========================================================================
 
     class File:
-        def __init__( self, name, rev ):
+        def __init__(self, name, rev):
             self.name = name
             self.rev = rev
             self.print_rev = rev
@@ -673,14 +673,14 @@ class Mani:
             self.valid = 1
             self.empty = 0
 
-        def __del__( self ):
+        def __del__(self):
             if self.tempname and os.path.exists(self.tempname):
                 os.unlink(self.tempname)
 
-        def formatName( self ):
+        def formatName(self):
             self.print_name = self.doFormatName()
 
-        def doFormatName( self ):
+        def doFormatName(self):
             if self.print_rev:
                 return '%s (%s)' % (self.name, self.print_rev)
             elif self.print_rev:
@@ -688,14 +688,14 @@ class Mani:
             else:
                 return self.name
 
-    def __init__( self ):
+    def __init__(self):
         self.queue = None # we cannot create the queue before we parse the options.
 
-    def __del__( self ):
+    def __del__(self):
         if self.queue:
             self.queue = None # make sure we wait for queue here.
 
-    def computeOptionsString( self ):
+    def computeOptionsString(self):
         # compute diff options string
         options = []
         if self.opts.ignore_all_space:
@@ -707,7 +707,7 @@ class Mani:
         return ' '.join(options)
 
 
-    def parseFilename( self, fn ):
+    def parseFilename(self, fn):
         """Parses a filename and returns a File object."""
 
         if self.gopts.verbose: print "==> Parsing filename", fn
@@ -719,7 +719,7 @@ class Mani:
             rev = None
         return Mani.File(filename, rev)
 
-    def printDiffGroup( self, group ):
+    def printDiffGroup(self, group):
         if len(group) == 2:
             print "  Left:  ", group[0].print_name
             print "  Right: ", group[1].print_name
@@ -728,7 +728,7 @@ class Mani:
             print "  Middle:", group[1].print_name
             print "  Right: ", group[2].print_name
 
-    def fetchFile( self, file, workarea=None, module=None ):
+    def fetchFile(self, file, workarea=None, module=None):
         tempname = tempfile.mktemp() + Mani.temp_sfx
         if file.empty:
             if self.gopts.verbose:
@@ -752,7 +752,7 @@ class Mani:
         return tempname
 
 
-    def spawnDiff( self, filelist, graphical, merged_filename=None, root=None, hook=None):
+    def spawnDiff(self, filelist, graphical, merged_filename=None, root=None, hook=None):
 
         options = self.options
         if len(filelist) == 3:
@@ -839,7 +839,7 @@ class Diff(Mani):
     graphical_names = ['xdiff', 'xxdiff', 'graphical_diff']
     names = ['diff', 'cmp', 'compare'] + graphical_names
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         Mani.addopts(self, parser)
         parser.add_option('-m', '--module', action='store',
                           help="Fetch files from specified module (no need for workarea).")
@@ -864,7 +864,7 @@ class Diff(Mani):
     # files nor use the current repository at all. Otherwise, we assume that we
     # are in a checkout.
 
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         if self.gopts.verbose: print "==> Validating arguments"
         if not subargs:
@@ -941,7 +941,7 @@ class Diff(Mani):
                 if file.rev:
                     rev_pob = file.status.parentBranchRev(file.rev)
                 else:
-                    rev_pob = file.status.parentBranchRev( file.status.workingRev() )
+                    rev_pob = file.status.parentBranchRev(file.status.workingRev())
                     if file.status.status() == cvs.Status.LOCALLY_MODIFIED:
                         file.print_rev = 'Local: %s modified' % file.status.workingRev()
                     else:
@@ -959,7 +959,7 @@ class Diff(Mani):
 
             files = []
             for file in fileobjs:
-                files.append( file )
+                files.append(file)
             filegroups.append(files)
 
         for group in filegroups:
@@ -967,7 +967,7 @@ class Diff(Mani):
                 if file.rev:
                     file.tempname = self.fetchFile(file, module=self.opts.module)
 
-            assert( len(group) == 2 or len(group) == 3 )
+            assert(len(group) == 2 or len(group) == 3)
 
             for file in group:
                 file.formatName()
@@ -1000,7 +1000,7 @@ class DiffModified(Mani):
     names = ['diffmodfiles', 'diff_mod_files', 'moddiff']
 
 
-    def addopts( self, parser ):
+    def addopts(self, parser):
         Mani.addopts(self, parser)
         parser.add_option('-m', '--module', action='store',
                           help="Fetch files from specified module (no need for workarea).")
@@ -1013,7 +1013,7 @@ class DiffModified(Mani):
         parser.add_option('-r', '--reverse', action='store_true',
                           help="Reverse order of files (order is by default reversed).")
         
-    def execute( self, subargs ):
+    def execute(self, subargs):
 
         self.options = self.computeOptionsString()
         self.extra_options = ''
@@ -1085,7 +1085,7 @@ class DiffModified(Mani):
 
 #-------------------------------------------------------------------------------
 #
-def parse_subcommands( gparser, subcmds ):
+def parse_subcommands(gparser, subcmds):
 
     """Parse given global arguments, find subcommand from given list of
     subcommand objects, parse local arguments and return a tuple of global

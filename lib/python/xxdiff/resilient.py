@@ -34,7 +34,7 @@ from xxdiff.scripts import script_name
 #
 resilient_dir = join(os.environ['HOME'], '.%s' % script_name)
 
-def resilient_for_paths( paths ):
+def resilient_for_paths(paths):
     """
     Compute a unique file or directory name for a set of paths (considered
     unique as absolute) for a specific process.
@@ -47,7 +47,7 @@ def resilient_for_paths( paths ):
     resdir = join(resilient_dir, comhash.hexdigest())
     return resdir
 
-def resilient_remove( fn ):
+def resilient_remove(fn):
     """
     Removes a resilient file, and then checks if the resilient file's parent
     directory can be removed as well.

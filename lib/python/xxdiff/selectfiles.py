@@ -15,7 +15,7 @@ from os.path import join, isfile, exists
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft(parser):
     """
     Adds a new option group for file selection options to the given parser and
     returns this new group.
@@ -24,7 +24,7 @@ def options_graft( parser ):
                                  "These options affect which files are "
                                  "selected for grepping in the first place.")
 
-    def regexp_cb( option, opt_str, value, parser ):
+    def regexp_cb(option, opt_str, value, parser):
         "Compile and set the regular expression"
         try:
             regexp = re.compile(value)
@@ -46,9 +46,9 @@ def options_graft( parser ):
 
     # Note: we could improve this as soon as Python will include a more recent
     # version of Optik, which implements the action 'append_const'.
-    def append_const_cb( const ):
+    def append_const_cb(const):
         "Create callback to implement an append_const action via a callback."
-        def cb( option, opt_str, value, parser ):
+        def cb(option, opt_str, value, parser):
             getattr(parser.values, option.dest).append(const)
         return cb
 
@@ -106,7 +106,7 @@ def options_graft( parser ):
 #
 ignore_defaults = ('.svn', 'CVS')
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate and prepare the parsed options for the file selection option group.
     This method returns an appropriate generator for selecting files.
@@ -166,7 +166,7 @@ def options_validate( opts, parser, logs=None ):
 
 #-------------------------------------------------------------------------------
 #
-def select_patterns( rootdirs, opts ):
+def select_patterns(rootdirs, opts):
     """
     Generator that selects files to process by regexps.
 
@@ -236,7 +236,7 @@ def select_patterns( rootdirs, opts ):
 
 #-------------------------------------------------------------------------------
 #
-def select_from_file( fn ):
+def select_from_file(fn):
     """
     Generator that yields selected filenames read from a file.
 

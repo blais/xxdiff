@@ -22,7 +22,7 @@ from xxdiff.utils import consepairs
 
 #-------------------------------------------------------------------------------
 #
-def options_graft( parser ):
+def options_graft(parser):
     """
     Graft options on given parser for SQL connections.
     """
@@ -47,7 +47,7 @@ def options_graft( parser ):
     return group
 
 
-def options_validate( opts, parser, logs=None ):
+def options_validate(opts, parser, logs=None):
     """
     Validate replacement options.
     """
@@ -65,7 +65,7 @@ def options_validate( opts, parser, logs=None ):
 dbspec_re = re.compile(
     '^(?:([a-zA-Z0-9_]+)@)?([a-zA-Z0-9_]+)(?:/([a-zA-Z0-9_]+))?$')
 
-def parse_dbspec( dbspec, parser, opts ):
+def parse_dbspec(dbspec, parser, opts):
     """
     Parse the DB spec and return the user, dbname, schema components.
 
@@ -90,14 +90,14 @@ class Schema(object):
     """
     Container for all database schema-related things.
     """
-    def __init__( self, dbspec, user, dbname, schema ):
+    def __init__(self, dbspec, user, dbname, schema):
         self.dbspec = dbspec
         self.user, self.dbname, self.schema = user, dbname, schema
         self.dump = None
         
 #-------------------------------------------------------------------------------
 #
-def dump_schema( user, dbname, schema, opts ):
+def dump_schema(user, dbname, schema, opts):
     """
     Dump the schema for the given database.  Returns the dump text on output.
     """
@@ -125,7 +125,7 @@ sec_re = re.compile('^-- Name:\s*([^\s;]+);\s*Type:\s*([^\s;]+)(.*)$', re.M)
 com_re = re.compile('--.*$', re.M)
 ct_re = re.compile('^CREATE TABLE.*?(\\().*?(\\);)', re.M|re.S)
 
-def parse_dump( dbdump ):
+def parse_dump(dbdump):
     """
     Parse a PostgreSQL database dump, extracting all its section into a
     dictionary (returned).  The keys are built from the Name and Type fields in
@@ -134,7 +134,7 @@ def parse_dump( dbdump ):
 
     # Class to contain info about chunks.
     class Chunk:
-        def __init__( self, mo ):
+        def __init__(self, mo):
             self.mo = mo
             self.name, self.typ = mo.group(1, 2)
             
@@ -164,7 +164,7 @@ def parse_dump( dbdump ):
     return dict(((c.name, c.typ), (c.descline + '\n\n' + c.contents))
                 for c in chunks)
 
-def dump_chunks( chunks ):
+def dump_chunks(chunks):
     """
     Debug printout of chunks.
     """
