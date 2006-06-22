@@ -5,6 +5,8 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* Applied patch from Henry Nestler for qt-3.0 compat.
+
 * Applied changes from Trevor Harmon for Qt4 compilation.
 
 * Added Trevor Harmon changes to add new feature --prompt-for-files for Mac OSX
