@@ -155,7 +155,8 @@ def parse_dump(dbdump):
         if mo:
             pre, post = c.contents[:mo.end(1)], c.contents[mo.start(2):]
             columns = c.contents[mo.end(1):mo.start(2)].strip()
-            line_cols = map(str.strip, columns.splitlines())
+            line_cols = map(lambda x: x.endswith(',') and x or '%s,' % x,
+                            map(str.strip, columns.splitlines()))
             line_cols.sort()
             c.contents = (pre + '\n' +
                           ''.join('   %s\n' % x for x in line_cols) +
