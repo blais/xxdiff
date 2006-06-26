@@ -5,6 +5,12 @@ CHANGES: xxdiff
 Version 3.2: (major feature enhancements)
 -----------------------------------------
 
+* In decision mode, if there are at least one selection from each side, if the
+  user leaves with A or R, pop a confirmation box.  This is important to avoid
+  errors.  It is way too easy to select for merge and exit with A.  I've been
+  caught many times. (dup: In decision mode, we should warn the user when
+  selections have been made and the user does not exit with "merged".)
+
 * Applied patch from Henry Nestler for qt-3.0 compat.
 
 * Applied changes from Trevor Harmon for Qt4 compilation.

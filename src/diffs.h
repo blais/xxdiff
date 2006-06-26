@@ -239,6 +239,12 @@ public:
    // Returns true if is at least one line that has been selected.
    bool isSomeSelected() const;
 
+   // Returns true if there exists selections other than for the given file,
+   // meaning that there exists at least one line which has some side selected
+   // that is other than the given file and that does not also include the given
+   // file.
+   bool hasSelectionsOtherThan( XxFno no ) const;
+
    // Returns false if there are still some unselected lines.
    bool isAllSelected() const;
 

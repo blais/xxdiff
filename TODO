@@ -5,32 +5,10 @@
 .. contents::
 ..
     1  Next Release
-    2  The More Urgent For the Release
-    3  Less Urgent, but do it soon too
-    4  Goals for 4.0 stable release:
-    5  Promo
-    6  Other
-
-The More Urgent For the Release
-===============================
-
-- Remove the automatically inserted filenames from the comments file, Trac does
-  a nice enough job, place that as an optional feature.
-
-- In decision mode, if there are at least one selection from each side, if the
-  user leaves with A or R, pop a confirmation box.  This is important to avoid
-  errors.  It is way too easy to select for merge and exit with A.  I've been
-  caught many times. (dup: In decision mode, we should warn the user when
-  selections have been made and the user does not exit with "merged".)
-
-- Write documentation for the new revcomp script!
-
-- When the comments file has not changed, warn the user that he did not appear
-  to have saved the file.
-
-- Add a '-w' option to invoke.py, to ignore whitespace changes easily.
-
-Sent email to Monotone docs owner about the Ctrl+M binding.
+    2  Less Urgent, but do it soon too
+    3  Goals for 4.0 stable release:
+    4  Promo
+    5  Other
 
 
 Next Release
@@ -39,11 +17,13 @@ Next Release
 - Apply Trevor Harmon's patch for the port to Qt4.
 
 
-
-
-
 Less Urgent, but do it soon too
 ===============================
+
+* Add a '-w' option to invoke.py (!?), to ignore whitespace changes easily.
+
+* When the comments file has not changed, warn the user that he did not appear
+  to have saved the file.
 
 * It would be awesome if select.py had an option to select by file-type
   (e.g. running “file”).  Open a child running a “file” command and feed it the
@@ -57,10 +37,10 @@ Less Urgent, but do it soon too
 * xx-svn-diff: Comments file: To add new files to the comments file:
 
   a) Check if at least one line of the comments file is the same as any line of
-  the status OR if the file is empty
+     the status OR if the file is empty
 
   b) if so, add all the status lines tha tdiffer at thte end of the comments
-  file (with an empty line in between)
+     file (with an empty line in between)
 
   c) otherwise we do not append the new statii lines
 

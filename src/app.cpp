@@ -390,7 +390,7 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
                // Make a proxy for the other buffer.
                std::auto_ptr<XxBuffer> newbuf2(
                   new XxBuffer(
-                     (*_files[0]), filenames[0], 
+                     (*_files[0]), filenames[0],
                      displayFilenames[0], fileInfos[0]
                   )
                );
@@ -401,7 +401,7 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
       catch ( const std::exception& ex ) {
          throw XxIoError( XX_EXC_PARAMS, "Error opening input file." );
       }
-      
+
       succ = processDiff();
 
       // Here we just finished reading all the files and processing the diffs,
@@ -529,7 +529,7 @@ void XxApp::promptForFiles( XxCmdline& cmdline )
       "open left file",
       "Choose Left File" );
 
-	if ( cmdline._filenames[0] != QString::null ) {		
+	if ( cmdline._filenames[0] != QString::null ) {
 
 		cmdline._filenames[1] = QFileDialog::getOpenFileName(
 			QString::null,
@@ -2186,7 +2186,7 @@ uint XxApp::computeTextWidth() const
 {
    uint textWidth = 0;
    for ( XxFno ii = 0; ii < _nbFiles; ++ii ) {
-      textWidth = 
+      textWidth =
          std::max( textWidth,
                    _files[ii]->computeTextWidth(
                       _resources->getFontText(),
@@ -2783,7 +2783,7 @@ void XxApp::onRedoDiff()
       }
       catch ( const std::exception& ex ) {
          outputDiffErrors( ex.what() );
-         
+
          // Recover from backup.
          for ( int iii = 0; iii < 3; ++iii ) {
             _files[iii].reset( backup[iii] );
@@ -4493,6 +4493,23 @@ bool XxApp::computeAbsoluteDifference() const
 //
 void XxApp::quitAccept()
 {
+   // Confirm with the user if some incompatible selections were made.
+   if ( _diffs->hasSelectionsOtherThan( 
+           _nbFiles == 2 ? XxLine::SEL2 : XxLine::SEL3 ) ) {
+
+      int resp = QMessageBox::warning(
+         _mainWindow,
+         "xxdiff",
+         "Some selections are incompatible with your decision, confirm action.",
+         "Accept, discard selections", "Cancel", QString::null, 0, 1
+      );
+      if ( resp == 1 ) {
+         // User has canceled.
+         return;
+      }
+      // Discard selections.
+   }
+
    exit( _returnValue, "ACCEPT" );
    selectGlobalRight();
    bool saved =
@@ -4504,6 +4521,22 @@ void XxApp::quitAccept()
 //
 void XxApp::quitReject()
 {
+   // Confirm with the user if some incompatible selections were made.
+   if ( _diffs->hasSelectionsOtherThan( XxLine::SEL1 ) ) {
+
+      int resp = QMessageBox::warning(
+         _mainWindow,
+         "xxdiff",
+         "Some selections are incompatible with your decision, confirm action.",
+         "Accept, discard selections", "Cancel", QString::null, 0, 1
+      );
+      if ( resp == 1 ) {
+         // User has canceled.
+         return;
+      }
+      // Discard selections.
+   }
+
    exit( _returnValue, "REJECT" );
    selectGlobalLeft();
    bool saved =

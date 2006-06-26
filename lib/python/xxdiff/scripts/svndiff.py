@@ -219,7 +219,7 @@ def svndiff_main():
     # Spawn an editor if requested before starting the review.
     if opts.commit:
         m = {'date': datetime.datetime.now()}
-        comments = renstatus
+        comments = None # renstatus
         edit_waiter = xxdiff.editor.spawn_editor(comments, filename=comfn)
 
     # First print out the status to the user.

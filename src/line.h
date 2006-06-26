@@ -167,6 +167,11 @@ public:
    void setSelection( Selection selection );
    // </group>
 
+   // Return true if the given file is selected.  This takes care of checking
+   // for the line type, and if multiple sides end up being selected, it returns
+   // true for all of them.
+   bool isSelected( XxFno fno ) const;
+
    // Get/set ignore-display flag.
    // <group>
    bool getIgnoreDisplay() const;
@@ -274,6 +279,10 @@ private:
    // Table used to map types for changing colors for the "ignore one file"
    // feature. This is not related to the ignore-display feature.
    static Type _ignoreConvertTables[ 4 ][ NB_TYPES ];
+
+   // Table that specifies which columns are selected when a specific selection
+   // is made.
+   static int _selectMasks[ XxLine::NB_TYPES ][ 3 ];
 
    /*----- data members -----*/
 

@@ -102,6 +102,21 @@ inline XxLine::Selection XxLine::getSelection() const
 
 //------------------------------------------------------------------------------
 //
+inline bool XxLine::isSelected( XxFno fno ) const
+{
+   // If not selected, simply return false.
+   if ( _selection > 2 ) {
+      return false;
+   }
+
+   // Get seletion mask and check the mask against the requested file.
+   int mask = _selectMasks[ _type ][ _selection ];
+   return ( mask & ( 1 << fno ) ) != 0;
+}
+
+
+//------------------------------------------------------------------------------
+//
 inline void XxLine::setSelection( Selection selection )
 {
    if ( _type != SAME ) {

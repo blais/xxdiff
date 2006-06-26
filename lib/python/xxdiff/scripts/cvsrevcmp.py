@@ -8,8 +8,7 @@
 """xx-cvs-revcmp [<options>] [FILE ...]
 
 Display file differences with the current or a previous CVS version.  Use one or
-two of the version selection options to select which fileset to compare.
-
+two of the version selection options to select which filesets to compare.
 """
 
 __author__ = ('Michalis Giannakidis <mgiannakidis@gmail.com>',

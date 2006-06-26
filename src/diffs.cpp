@@ -758,6 +758,29 @@ bool XxDiffs::isSomeSelected() const
 
 //------------------------------------------------------------------------------
 //
+bool XxDiffs::hasSelectionsOtherThan( XxFno no ) const
+{
+   // Look for a selected line.
+   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+      const XxLine& line = getLine( ii );
+      XxLine::Type type = line.getType();
+      if ( type != XxLine::SAME &&
+           type != XxLine::DIRECTORIES ) {
+
+         if ( ! line.isSelected( no ) && 
+              ( line.getSelection() == XxLine::SEL1 ||
+                line.getSelection() == XxLine::SEL2 ||
+                line.getSelection() == XxLine::SEL3 ) ) {
+
+            return true;
+         }
+      }
+   }
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//
 bool XxDiffs::isAllSelected() const
 {
    // Make sure that there are no more unselected regions.

@@ -116,7 +116,6 @@ XX_NAMESPACE_BEGIN
  * CLASS XxLine
  *============================================================================*/
 
-
 XxLine::Type XxLine::_ignoreConvertTables[4][ XxLine::NB_TYPES ] = {
    // No ignore.
    {                 XxLine::SAME,
@@ -187,6 +186,25 @@ XxLine::Type XxLine::_ignoreConvertTables[4][ XxLine::NB_TYPES ] = {
      /*DIRECTORIES*/ XxLine::DIRECTORIES
    }
 };
+
+int XxLine::_selectMasks[ XxLine::NB_TYPES ][ 3 ] = {
+   /* SAME        */ { 7, 7, 7 },
+   /* DIFF_1      */ { 1, 6, 6 },
+   /* DIFF_2      */ { 5, 2, 5 },
+   /* DIFF_3      */ { 3, 3, 4 },
+   /* DELETE_1    */ { 1, 6, 6 },
+   /* DELETE_2    */ { 5, 2, 5 },
+   /* DELETE_3    */ { 3, 3, 4 },
+   /* INSERT_1    */ { 1, 6, 6 },
+   /* INSERT_2    */ { 5, 2, 5 },
+   /* INSERT_3    */ { 3, 3, 4 },
+   /* DIFF_ALL    */ { 1, 2, 4 },
+   /* DIFFDEL_1   */ { 1, 2, 4 },
+   /* DIFFDEL_2   */ { 1, 2, 4 },
+   /* DIFFDEL_3   */ { 1, 2, 4 },
+   /* DIRECTORIES */ { 0, 0, 0 },
+};
+
 
 //------------------------------------------------------------------------------
 //
