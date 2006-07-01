@@ -6,12 +6,12 @@ Version 3.2: (major feature enhancements)
 -----------------------------------------
 :Abstract:
 
-  Implemented an Python package that contains much code to write scripts around
-  xxdiff.  All the xxdiff-* scripts have been integrated in the Python package
-  and renamed for convenience.  New features: a warning is issued in decision
-  when accepting or rejecting, if incompatible selections have been made.  The
-  build system was converted from tmake to qmake.  Fixed a few minor bugs.
-
+  Implemented a Python package that contains much code to support writing
+  scripts around xxdiff.  All the xxdiff-* scripts have been integrated in this
+  Python package and renamed for convenience.  New features: a warning is now
+  issued in decision when accepting or rejecting, if incompatible selections
+  have been made.  The build system was converted from tmake to qmake.  Fixed a
+  few minor bugs.
 
 
 * In decision mode, if there are at least one selection from each side, if the
