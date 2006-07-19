@@ -869,7 +869,7 @@ Automatic generation of the resource file
 
 You can generate a resource file containing only the differences from the
 defaults from the "File -> Save Option..." menu command.  This can be
-used to "save" the current customizable options.
+used to "save" the current customizable options into ``~/.xxdiffrc``.
 
 
 

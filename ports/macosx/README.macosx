@@ -367,3 +367,73 @@ Also provided a DMG image file, which I uploaded.
 
      _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
 
+From Juan, bugs::
+
+  En ouvrant les options j'ai ceci dans la console:
+
+  Object::connect: No such signal QRadioButton::stateChanged(int)
+  Object::connect:  (sender name:   '_radiobuttonQualityNormal')
+  Object::connect:  (receiver name: 'XxOptionsDialogBase')
+  Object::connect: No such signal QRadioButton::stateChanged(int)
+  Object::connect:  (sender name:   '_radiobuttonQualityFastest')
+  Object::connect:  (receiver name: 'XxOptionsDialogBase')
+  Object::connect: No such signal QRadioButton::stateChanged(int)
+  Object::connect:  (sender name:   '_radiobuttonQualityHighest')
+  Object::connect:  (receiver name: 'XxOptionsDialogBase')
+
+
+More email::
+
+  > Also, could you explain why you need to have the --prompt-for-file
+  > accept and argument?  Who supplies this -psn_0_36306945 argument?
+
+  I think it is the OS X windowserver or something that
+  supplies the -psn_... argument - I'm not exactly sure of the
+  purpose, I think it's a process identifier of sorts. I gave
+  --prompt-for-file -p as a short flag and allowed it to
+  accept an argument, so it will see the equivalent of '-p
+  sn_0_36306945' (or --prompt-for-file=sn_0_36306945) when
+  doubleclicked. Running from a commandline it doesn't get
+  given the -psn...  argument. It's a hack, but works.
+
+
+
+Files included::
+
+- xxdiff-3.2-osx.diff
+- xxdiff.png
+
+Steps::
+
+  Steps to build in OS X 10.4, Intel. Compiled as a static
+  binary so that a self-contained xxdiff.app bundle is
+  produced.
+
+  tar jxvf xxdiff-3.2.tar.bz2
+
+  cd xxdiff-3.2
+  cat ../xxdiff-3.2-osx.diff|patch -p0
+
+  cd src
+  /usr/local/Trolltech/Qt-4.1.3-static/bin/qt3to4 xxdiff.pro
+  (confirm all)
+
+  make -f Makefile.bootstrap Makefile
+
+  * manually edit Makefile so that flex and bison point to /opt/local/bin (from
+   darwinports), since the os x versions don't seem to work.
+  * add "-arch i386 -arch ppc" to CFLAGS, CXXFLAGS, and LFLAGS in Makefile for a
+   universal binary.
+   (Qt was compiled as a universal binary with its appropriate configure flags)
+  * remove the _debug suffixes from -lQtGui_debug, -lQtCore_debug etc in
+   Makefile's LFLAGS line
+
+  make
+  cd ../bin
+  strip xxdiff.app/Contents/MacOS/xxdiff
+
+  Then combine it with the xxdiff.app bundle directory in the xxdiff ports/macosx
+  dir. Note that Resources should be xxdiff.app/Contents/Resources, not just
+  xxdiff.app/Resources. I replaced the .icns file with one made quickly in Gimp.
+
+
