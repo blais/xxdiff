@@ -86,12 +86,17 @@ Download
 ========
 
 * `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
-  
+
 * `Alternate Location and Snapshots </downloads/xxdiff>`_
 
 * A Windows build (with some minor bugs) can be found `here
   <http://xxdiff.sourceforge.net/download/2.9/windows>`_.  No support offered
   though.
+
+* A preliminary Qt4 port to Mac has been done by Matt Johnston, you can `find it
+  here <http://xxdiff.sourceforge.net/download/3.2/contrib>`_.  I don't have a
+  Mac, so questions will not be very useful.  The current xxdiff source code
+  does not reflect this build though.
 
 
 Tools
@@ -106,7 +111,7 @@ is now distributed with xxdiff, in an ``xxdiff`` Python package, which you can
 leverage to build your own file transformation scripts around xxdiff.
 
 See the document `Helper Scripts for xxdiff <doc/xxdiff-scripts.html>`_ for full
-details.  
+details.
 
 The scripts are available in the xxdiff distribution.  To install them and the
 accompanying Python package, use the standard distutils procedure::
