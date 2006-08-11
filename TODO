@@ -6,9 +6,10 @@
 ..
     1  Next Release
     2  Less Urgent, but do it soon too
-    3  Goals for 4.0 stable release:
-    4  Promo
-    5  Other
+    3  Look at ``wiggle`` integration, it seems like a great idea
+    4  Goals for 4.0 stable release:
+    5  Promo
+    6  Other
 
 
 Next Release
@@ -192,6 +193,63 @@ Less Urgent, but do it soon too
 
     One script to do it all.
 
+
+
+
+Look at ``wiggle`` integration, it seems like a great idea
+==========================================================
+
+  From: Ken.MacLeod@radisys.com <Ken.MacLeod@radisys.com>	
+  To: blais@furius.ca
+  Date: Aug 10, 2006 9:17 AM
+  Subject: xxdiff: patch wiggling
+  Reply | Reply to all | Forward | Print | Add sender to Contacts list | Delete this message | Report phishing | Show original | Message text garbled?
+  A long while back in 2003, you wrote,
+  http://www.uwsg.iu.edu/hypermail/linux/kernel/0203.2/1177.html
+
+  Not long after, Niel Brown announced 'wiggle',
+  http://www.uwsg.iu.edu/hypermail/linux/kernel/0305.2/0762.html
+
+  Niel mentions one of the shortcomings in wiggle is that you can't "see"
+  what it's done or will do.  Here's where xxdiff can pick that up.  These
+  are just thoughts off the top of my head, sorry I won't have patches
+  forthcoming with implementation :-/
+
+  I'd like to see the entire patch in the left pane, probably in the format
+  used by gitweb[1] or gitk[2, screenshot in 3].
+
+  Selecting a patch hunk on the left brings up the corresponding source in
+  the right pane, with the "new" changes highlighted (with horizontal diff,
+  natch :-).  The old changes are not necessary, though a three-pane view
+  could have them on the left.
+
+  The hunks in the patch pane should be marked according to their merge
+  status, ie. green for success, yellow for offset, orange for fuzz, and red
+  for failed.  A "check mark" would be nice for hunks that have been
+  confirmed and/or fixed up.
+
+  If a patch fails because the file cannot be found due to a rename, the
+  merge path should be editable.  (Auto-rename is possible if both trees are
+  available.)
+
+  Wiggle's algorithm is good for finding better matches.
+
+  Changes should not be applied until selected from a menu.
+
+  After wiggling, the patch should be saved so that it can be emailed.  The
+  updated patch should now cleanly apply against the tree it was wiggled to
+  (ie. counts and offsets corrected, a la recountdiff).
+
+  OK, that's all I can brain dump for now.  Of course, it wasn't until after
+  writing it that I see xx-patch, so, take whatever good bits seem to make
+  sense :-)
+
+   -- Ken
+
+  [1]
+  http://www.kernel.org/git/gitweb.cgi?p=linux/kernel/git/torvalds/linux-2.6.git;a=log
+  [2] http://ozlabs.org/~paulus/gitk/
+  [3] http://lwn.net/Articles/140350/
 
 
 
