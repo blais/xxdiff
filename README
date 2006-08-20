@@ -1,3 +1,5 @@
+.. -*- coding: utf-8 -*-
+
 ====================================================================
   xxdiff: Graphical File And Directories Comparator And Merge Tool
 ====================================================================
@@ -138,6 +140,9 @@ the relevant pages.  The author does not publish binaries anymore.
 
 - `Linux / Mandrake package (2) <http://www.roberto.foglietta.name/pub/xxdiff>`_
   (maintained by Roberto A. Foglietta)
+
+- `Linux / Fedore Core (1) <http://timeoff.wsisiz.edu.pl/rpms.html#xxdiff>`_
+  (maintained by Marcin Zajączkowski)
 
 - `Linux / Gentoo port <http://packages.gentoo.org/ebuilds/?xxdiff-3.1>`_
   (in the dev-utils category)
