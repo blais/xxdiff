@@ -417,6 +417,7 @@ def parse_options():
 
     xxdiff.invoke.options_graft(parser)
 
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
     xxdiff.invoke.options_validate(opts, parser)

@@ -67,6 +67,7 @@ class FilterTransformer(xxdiff.xformloop.Transformer):
 def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
+
     opts, args, selector = xxdiff.xformloop.parse_args(parser)
 
     # Check that we got two arguments

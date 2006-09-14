@@ -33,6 +33,7 @@ __depends__ = ['xxdiff', 'Python-2.4']
 import sys, os
 
 # xxdiff imports.
+import xxdiff.scripts
 import xxdiff.invoke
 
 
@@ -70,6 +71,8 @@ def parse_options():
 
     ## parser.add_option('--reverse', action='store_true',
     ##                   help="Reverse the display order of the files.")
+
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
     if len(args) > 3:
