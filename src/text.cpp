@@ -761,7 +761,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
       // Popup.
       const XxLine& line = diffs->getLine( lineno );
-      QkPopupMenu* popup = _app->getViewPopup( line );
+      QkPopupMenu* popup = _app->getViewPopup( _no, line );
       popup->popup( event->globalPos() );
       return;
    }

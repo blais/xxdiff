@@ -98,7 +98,8 @@ Download
 * A preliminary Qt4 port to Mac has been done by Matt Johnston, you can `find it
   here <http://xxdiff.sourceforge.net/download/3.2/contrib>`_.  I don't have a
   Mac, so questions will not be very useful.  The current xxdiff source code
-  does not reflect this build though.
+  does not reflect this build though.  Newer versions can be found at
+  http://matt.ucc.asn.au/xxdiff/.
 
 
 Tools

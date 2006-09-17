@@ -95,6 +95,9 @@ python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 %{_bindir}/xx-svn-resolve
 
 %changelog
+* Thu Sept 2006 Philippe Corbes <philippe.corbes@laposte.net>
+- released 3.2-1 Added contextuals menus on right click
+
 * Mon Jul 3 2006 Marcin Zajaczkowski <mszpak@wp.pl> - 3.2-1
 - updated to 3.2
 - default version doesn't use tmake (can be turn on by "--with tmake")

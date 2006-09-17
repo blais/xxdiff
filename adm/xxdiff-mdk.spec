@@ -61,6 +61,9 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 
 
 %changelog
+* Thu Sept 2006 Philippe Corbes <philippe.corbes@laposte.net>
+- released 3.2-1 Added contextuals menus on right click 
+
 * Thu Feb 14 2006 Philippe Corbes <philippe.corbes@laposte.net>
 - released 3.1-1 Compiled for a Mandrake 9.1 with QT3
 

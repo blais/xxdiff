@@ -1373,7 +1373,247 @@ void XxApp::createMenus()
       "Previous unselected", this, SLOT(previousUnselected()),
       _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
    );
-   _viewPopup = viewMenu;
+
+   //---------------------------------------------------------------------------
+
+   // Right click View menu for directories
+   if ( _filesAreDirectories == true ) {
+      _viewPopup[0] = new QkPopupMenu;
+      _menuids[ ID_View_DiffFilesAtCursor ] = _viewPopup[0]->insertItem(
+         "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
+         _resources->getAccelerator( ACCEL_DIFF_FILES_AT_CURSOR )
+      );
+      _menuids[ ID_View_NextAndDiffFiles ] = _viewPopup[0]->insertItem(
+         "Next and diff files", this, SLOT(nextAndDiffFiles()),
+         _resources->getAccelerator( ACCEL_NEXT_AND_DIFF_FILES )
+      );
+      _menuids[ ID_View_CopyLeftToRight ] = _viewPopup[0]->insertItem(
+         "Copy left file to right", this, SLOT(copyFileLeftToRight()),
+         _resources->getAccelerator( ACCEL_COPY_LEFT_TO_RIGHT )
+      );
+      _menuids[ ID_View_CopyRightToLeft ] = _viewPopup[0]->insertItem(
+         "Copy right file to left", this, SLOT(copyFileRightToLeft()),
+         _resources->getAccelerator( ACCEL_COPY_RIGHT_TO_LEFT )
+      );
+      _menuids[ ID_View_RemoveLeft ] = _viewPopup[0]->insertItem(
+         "Remove left file", this, SLOT(removeFileLeft()),
+         _resources->getAccelerator( ACCEL_REMOVE_LEFT )
+      );
+      _menuids[ ID_View_RemoveRight ] = _viewPopup[0]->insertItem(
+         "Remove right file", this, SLOT(removeFileRight()),
+         _resources->getAccelerator( ACCEL_REMOVE_RIGHT )
+      );
+      _viewPopup[0]->insertSeparator();
+
+      _viewPopup[0]->insertItem(
+         "Next difference", this, SLOT(nextDifference()),
+         _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+      );
+      _viewPopup[0]->insertItem(
+         "Previous difference", this, SLOT(previousDifference()),
+         _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+      );
+      _viewPopup[0]->insertSeparator();
+      _viewPopup[0]->insertItem(
+         "Next unselected", this, SLOT(nextUnselected()),
+         _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+      );
+      _viewPopup[0]->insertItem(
+         "Previous unselected", this, SLOT(previousUnselected()),
+         _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+      );
+   }
+
+   // Right click View menu for the left file
+   _viewPopup[1] = new QkPopupMenu;
+   _viewPopup[1]->insertItem(
+      "Replace left file...", this, SLOT(openLeft()),
+      _resources->getAccelerator( ACCEL_OPEN_LEFT )
+   );
+   _viewPopup[1]->insertItem(
+      "Edit left file", this, SLOT(editLeft()),
+      _resources->getAccelerator( ACCEL_EDIT_LEFT )
+   );
+   _viewPopup[1]->insertItem(
+         "Save as left", this, SLOT(saveAsLeft()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+      );
+   _viewPopup[1]->insertSeparator();
+
+   _viewPopup[1]->insertItem(
+      "Next difference", this, SLOT(nextDifference()),
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+   );
+   _viewPopup[1]->insertItem(
+      "Previous difference", this, SLOT(previousDifference()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+   );
+   _viewPopup[1]->insertSeparator();
+   _viewPopup[1]->insertItem(
+      "Next unselected", this, SLOT(nextUnselected()),
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+   );
+   _viewPopup[1]->insertItem(
+      "Previous unselected", this, SLOT(previousUnselected()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+   );
+   _viewPopup[1]->insertSeparator();
+
+   _viewPopup[1]->insertItem(
+      "Select left line", this, SLOT(selectLineLeft()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
+   );
+   if ( _nbFiles == 3 ) {
+      _viewPopup[1]->insertItem(
+         "Select middle line", this, SLOT(selectLineMiddle()),
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
+      );
+   }
+   _viewPopup[1]->insertItem(
+      "Select right line", this, SLOT(selectLineRight()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
+   );
+   _viewPopup[1]->insertItem(
+      "Select neither", this, SLOT(selectLineNeither()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
+   );
+   _viewPopup[1]->insertItem(
+      "Unselect", this, SLOT(selectLineUnselect()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
+   );
+
+   // Right click View menu for the middle or right file
+   _viewPopup[2] = new QkPopupMenu;
+   if ( _nbFiles == 3 ) {
+     _viewPopup[2]->insertItem(
+        "Replace middle file...", this, SLOT(openMiddle()),
+        _resources->getAccelerator( ACCEL_OPEN_MIDDLE )
+     );
+     _viewPopup[2]->insertItem(
+        "Edit middle file", this, SLOT(editMiddle()),
+        _resources->getAccelerator( ACCEL_EDIT_MIDDLE )
+     );
+     _viewPopup[2]->insertItem(
+        "Save as middle", this, SLOT(saveAsMiddle()),
+        _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
+     );
+   }
+   else
+   {
+     _viewPopup[2]->insertItem(
+        "Replace right file...", this, SLOT(openRight()),
+        _resources->getAccelerator( ACCEL_OPEN_RIGHT )
+     );
+     _viewPopup[2]->insertItem(
+        "Edit right file", this, SLOT(editRight()),
+        _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+     );
+     _viewPopup[2]->insertItem(
+        "Save as right", this, SLOT(saveAsRight()),
+        _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+     );
+   }
+   _viewPopup[2]->insertSeparator();
+
+   _viewPopup[2]->insertItem(
+      "Next difference", this, SLOT(nextDifference()),
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+   );
+   _viewPopup[2]->insertItem(
+      "Previous difference", this, SLOT(previousDifference()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+   );
+   _viewPopup[2]->insertSeparator();
+   _viewPopup[2]->insertItem(
+      "Next unselected", this, SLOT(nextUnselected()),
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+   );
+   _viewPopup[2]->insertItem(
+      "Previous unselected", this, SLOT(previousUnselected()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+   );
+   _viewPopup[2]->insertSeparator();
+
+   _viewPopup[2]->insertItem(
+      "Select left line", this, SLOT(selectLineLeft()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
+   );
+   if ( _nbFiles == 3 ) {
+      _viewPopup[2]->insertItem(
+         "Select middle line", this, SLOT(selectLineMiddle()),
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
+      );
+   }
+   _viewPopup[2]->insertItem(
+      "Select right line", this, SLOT(selectLineRight()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
+   );
+   _viewPopup[2]->insertItem(
+      "Select neither", this, SLOT(selectLineNeither()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
+   );
+   _viewPopup[2]->insertItem(
+      "Unselect", this, SLOT(selectLineUnselect()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
+   );
+
+   // Right click View menu for right file
+   _viewPopup[3] = new QkPopupMenu;
+   _viewPopup[3]->insertItem(
+      "Replace right file...", this, SLOT(openRight()),
+      _resources->getAccelerator( ACCEL_OPEN_RIGHT )
+   );
+   _viewPopup[3]->insertItem(
+      "Edit right file", this, SLOT(editRight()),
+      _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+   );
+   _viewPopup[3]->insertItem(
+      "Save as right", this, SLOT(saveAsRight()),
+      _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+   );
+   _viewPopup[3]->insertSeparator();
+
+   _viewPopup[3]->insertItem(
+      "Next difference", this, SLOT(nextDifference()),
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+   );
+   _viewPopup[3]->insertItem(
+      "Previous difference", this, SLOT(previousDifference()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+   );
+   _viewPopup[3]->insertSeparator();
+   _viewPopup[3]->insertItem(
+      "Next unselected", this, SLOT(nextUnselected()),
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+   );
+   _viewPopup[3]->insertItem(
+      "Previous unselected", this, SLOT(previousUnselected()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+   );
+   _viewPopup[3]->insertSeparator();
+
+   _viewPopup[3]->insertItem(
+      "Select left line", this, SLOT(selectLineLeft()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
+   );
+   if ( _nbFiles == 3 ) {
+      _viewPopup[3]->insertItem(
+         "Select middle line", this, SLOT(selectLineMiddle()),
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
+      );
+   }
+   _viewPopup[3]->insertItem(
+      "Select right line", this, SLOT(selectLineRight()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
+   );
+   _viewPopup[3]->insertItem(
+      "Select neither", this, SLOT(selectLineNeither()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
+   );
+   _viewPopup[3]->insertItem(
+      "Unselect", this, SLOT(selectLineUnselect()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
+   );
 
    //---------------------------------------------------------------------------
 
@@ -2234,7 +2474,7 @@ QRect XxApp::getMainWindowGeometry() const
 
 //------------------------------------------------------------------------------
 //
-QkPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
+QkPopupMenu* XxApp::getViewPopup( const int no, const XxLine& /*line*/ ) const
 {
    if ( _filesAreDirectories == true ) {
       XxDln cursorLine = getCursorLine();
@@ -2245,20 +2485,24 @@ QkPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
       // Note: can only have two files.
       bool dirs = line.getType() == XxLine::DIRECTORIES;
 
-      _viewPopup->setItemEnabled( _menuids[ ID_View_DiffFilesAtCursor ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_DiffFilesAtCursor ],
                                   ( no1 != -1 && no2 != -1 ) );
-      _viewPopup->setItemEnabled( _menuids[ ID_View_CopyRightToLeft ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_CopyRightToLeft ],
                                   ( no2 != -1 && !dirs ) );
-      _viewPopup->setItemEnabled( _menuids[ ID_View_CopyLeftToRight ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_CopyLeftToRight ],
                                   ( no1 != -1 && !dirs ) );
 
-      _viewPopup->setItemEnabled( _menuids[ ID_View_RemoveLeft ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_RemoveLeft ],
                                   ( no1 != -1 && !dirs ) );
-      _viewPopup->setItemEnabled( _menuids[ ID_View_RemoveRight ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_RemoveRight ],
                                   ( no2 != -1 && !dirs ) );
+      return _viewPopup[0];
+   }
+   else
+   {
+      return _viewPopup[no + 1];
    }
 
-   return _viewPopup;
 }
 
 //------------------------------------------------------------------------------

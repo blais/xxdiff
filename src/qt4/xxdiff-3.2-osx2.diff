@@ -1,0 +1,421 @@
+# 
+# old_revision [e1816f35ea3e14d8a28f42e3cc522580fa90ed9d]
+# 
+# patch "src/Makefile.bootstrap"
+#  from [14821dd94bc6e66a8ce56aab65d7b883aab32f6c]
+#    to [7fdc068108955ac1a448e5645450f2e236bc0ed7]
+# 
+# patch "src/app.cpp"
+#  from [db2ad1b158e32ce1aebd445e6c9ba5e70c001465]
+#    to [f95b2fc433fb941e5a35f00235039aa4aaf7c45e]
+# 
+# patch "src/central.cpp"
+#  from [21f535eb65bf999cf3ffddb9dc6f93b526ad4302]
+#    to [8f4b61197d98bf35a03e8644f7256a9e62ade87e]
+# 
+# patch "src/cmdline.cpp"
+#  from [65464e6537e86c5b928981d922ab7a1766bdcc8a]
+#    to [45ca3e402ec4353f07077eec9eb6c0d0136d6171]
+# 
+# patch "src/copyLabel.cpp"
+#  from [61569b49900cb7ce0695bacf5d3f176092082177]
+#    to [7a538b03c3796407f09b130d95be0eb88d637ddd]
+# 
+# patch "src/diffs.cpp"
+#  from [6eb9b9212f722ab99be1d19aa1622f87431ab371]
+#    to [069c28387e4056c67f6eab7b80d51e646e625e25]
+# 
+# patch "src/overview.cpp"
+#  from [b43979154c6fd42bf6b52e7862245651d82adc2c]
+#    to [b4468279db4948fe55c5f6dc02c711f5f43aa5dc]
+# 
+# patch "src/resParser.l"
+#  from [07cfa40e7fdd192ec045800923c1e4cac1579594]
+#    to [c69cfe5f4d49d427e51e17464e1397bc16a47384]
+# 
+# patch "src/resources.cpp"
+#  from [20fd9a815a266817694ddaa8764faab2acb36457]
+#    to [40d7fde72cbc6fc30e28d13bad34294284913e22]
+# 
+# patch "src/util.cpp"
+#  from [777b4d2b643199d03e4d75da12144675ea6f4121]
+#    to [63c7017a81443a38aa45fc9744eb78a5a8cf6729]
+# 
+# patch "src/xxdiff.pro"
+#  from [b5044fb33cae4ac8e745eeddd5eb3f32e6dec6cf]
+#    to [0ee5e91c89ee65d6ddf02a65c15227acdd6b7808]
+# 
+============================================================
+--- src/Makefile.bootstrap	14821dd94bc6e66a8ce56aab65d7b883aab32f6c
++++ src/Makefile.bootstrap	7fdc068108955ac1a448e5645450f2e236bc0ed7
+@@ -5,7 +5,7 @@
+ #
+ 
+ # Set QTDIR to a reasonable default if unset.
+-QTDIR ?= /usr/qt/3
++QTDIR ?= /usr/local/Trolltech/Qt-4.1.3-static/
+ 
+ # Rule to generate the qmake Makefile for building xxdiff.
+ QMAKE = $(QTDIR)/bin/qmake
+@@ -25,6 +25,6 @@ Makefile.qmake Makefile makefile:
+ # calls back into this bootstrap makefile.  You should be able to just change 
+ # xxdiff.pro and type "make" and for everything to work automatically.
+ Makefile.qmake Makefile makefile:
+-	$(QMAKE) -o Makefile.qmake xxdiff.pro
++	$(QMAKE) -o Makefile.qmake xxdiff.pro "CONFIG+=mystaticconfig"
+ 	cat Makefile.qmake Makefile.extra > Makefile
+ 
+============================================================
+--- src/app.cpp	db2ad1b158e32ce1aebd445e6c9ba5e70c001465
++++ src/app.cpp	f95b2fc433fb941e5a35f00235039aa4aaf7c45e
+@@ -2150,7 +2150,7 @@ XxResources* XxApp::buildResources() con
+ 
+    if ( !_cmdline._cmdlineResources.isEmpty() ) {
+       try {
+-         QTextIStream cmdlineStream( _cmdline._cmdlineResources );
++         QTextIStream cmdlineStream( &_cmdline._cmdlineResources );
+          resParser.parse( cmdlineStream, *resources );
+       }
+       catch ( const XxIoError& ioerr ) {
+============================================================
+--- src/central.cpp	21f535eb65bf999cf3ffddb9dc6f93b526ad4302
++++ src/central.cpp	8f4b61197d98bf35a03e8644f7256a9e62ade87e
+@@ -115,6 +115,7 @@ XxCentralFrame::XxCentralFrame( 
+       _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
+       _lineNumberLabel[ii]->setLineWidth( 2 );
+       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
++      _lineNumberLabel[ii]->setMaximumSize( _lineNumberLabel[ii]->sizeHint() );
+       _lineNumberLabel[ii]->setText( "" );
+ 
+       fnLayout->addWidget( _filenameLabel[ii], 10 );
+============================================================
+--- src/cmdline.cpp	65464e6537e86c5b928981d922ab7a1766bdcc8a
++++ src/cmdline.cpp	45ca3e402ec4353f07077eec9eb6c0d0136d6171
+@@ -208,7 +208,8 @@ XxCmdline::Option XxCmdline::_optionsXxd
+      "Copies the input streams/files into temporary files to perform diffing. "
+      "This is useful if you want to diff FIFOs."
+    },
+-   { "prompt-for-files", 0, false, 'p',
++// Hack for os x - programs are run with an argument line -psn_0_36306945
++   { "prompt-for-files", 'p', true, 'p',
+      "If no files are specified on the command line, show a file dialog so that "
+      "the user can select them. This option is ignored if any files are specified."
+    },
+@@ -481,25 +482,25 @@ bool XxCmdline::parseCommandLine( const 
+          } break;
+ 
+          case 'D': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getBoolOptName( BOOL_EXIT_ON_SAME )
+                 << ": true" << endl;
+          } break;
+ 
+          case 'E': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getBoolOptName( BOOL_EXIT_IF_NO_CONFLICTS )
+                 << ": true" << endl;
+          } break;
+ 
+          case 'X': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
+                 << ": true" << endl;
+          } break;
+ 
+          case 'm': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getBoolOptName( BOOL_SELECT_MERGE )
+                 << ": true" << endl;
+          } break;
+@@ -551,7 +552,7 @@ bool XxCmdline::parseCommandLine( const 
+             break;
+ 
+          case 'R': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << optarg << endl << flush;
+          } break;
+ 
+@@ -568,7 +569,7 @@ bool XxCmdline::parseCommandLine( const 
+          } break;
+ 
+          case 'c': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getShowOptName( SHOW_PANE_MERGED_VIEW ) 
+                 << ": true" << endl;
+          } break;
+@@ -610,7 +611,7 @@ bool XxCmdline::parseCommandLine( const 
+             break;
+ 
+          case 'r': {
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
+                 << ": true" << endl;
+          } break;
+@@ -690,7 +691,7 @@ bool XxCmdline::parseCommandLine( const 
+                                    "Missing argument for text font." );
+             }
+ 
+-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
++            QTextStream oss( &_cmdlineResources, IO_WriteOnly | IO_Append );
+             oss << XxResParser::getKwdName( FONT_TEXT )
+                 << ": \"" << optarg << "\"" << endl;
+          } break;
+============================================================
+--- src/copyLabel.cpp	61569b49900cb7ce0695bacf5d3f176092082177
++++ src/copyLabel.cpp	7a538b03c3796407f09b130d95be0eb88d637ddd
+@@ -63,23 +63,11 @@ public:
+ 
+ //------------------------------------------------------------------------------
+ //
+-XxCopyLabel::Tip::Tip( QLabel* parent ) :
+-   QToolTip( parent )
+-{
+-}
+ 
+ //------------------------------------------------------------------------------
+ //
+ void XxCopyLabel::Tip::maybeTip( const QPoint& )
+ {
+-   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
+-   XX_CHECK( clabel != 0 );
+-   QString tex = clabel->getFullText();
+-   QFontMetrics fm = clabel->fontMetrics();
+-   QRect br = fm.boundingRect( tex );
+-   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
+-      tip( clabel->rect(), tex );
+-   }
+ }
+ 
+ /*==============================================================================
+@@ -92,7 +80,7 @@ XxCopyLabel::XxCopyLabel( QWidget* paren
+    QLabel( parent )
+ {
+    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
+-   _tip = new Tip( this );
++   //_tip = new Tip( this );
+ }
+ 
+ //------------------------------------------------------------------------------
+============================================================
+--- src/diffs.cpp	6eb9b9212f722ab99be1d19aa1622f87431ab371
++++ src/diffs.cpp	069c28387e4056c67f6eab7b80d51e646e625e25
+@@ -28,7 +28,9 @@
+ #include <buffer.h>
+ #include <resources.h>
+ 
+-#include <qcstring.h>
++#include <q3cstring.h>
++//Added by qt3to4:
++#include <QTextStream>
+ 
+ #include <list>
+ #include <algorithm>
+@@ -57,7 +59,7 @@ int outputLine(
+       const char* text = files[no]->getTextLine( fline, len );
+       XX_ASSERT( text != 0 ); // make this one throw
+ 
+-      os.writeRawBytes( text, len );
++      os << QString::fromLocal8Bit(text, len);
+       os << endl;
+       return 1;
+    }
+@@ -925,7 +927,7 @@ bool XxDiffs::save(
+                                 conditionals[f].latin1() );
+ 
+                   QByteArray line;
+-                  QTextOStream oss( line );
++                  QTextOStream oss( &line );
+                   oss << cond << endl;
+ 
+                   int nbOutlines = 0;
+@@ -1032,7 +1034,7 @@ bool XxDiffs::saveSelectedOnly(
+             XX_ASSERT( text != 0 ); // make this one throw
+ 
+             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
+-            os.writeRawBytes( text, len );
++            os << QString::fromLocal8Bit(text, len);
+             os << endl;
+ 
+             some = true;
+============================================================
+--- src/overview.cpp	b43979154c6fd42bf6b52e7862245651d82adc2c
++++ src/overview.cpp	b4468279db4948fe55c5f6dc02c711f5f43aa5dc
+@@ -282,17 +282,19 @@ void XxOverview::drawContents( QPainter*
+       if ( ii > 0 ) {
+ 
+          // Draw left arrow.
+-         int pts1[6] = { _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
++         QPolygon pa1;
++         pa1.putPoints(0, 3, 
++                         _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
+                          _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
+-                         _fileL[ii] - sepWidth, curppos[ii-1] };                
+-         QPointArray pa1( 3, pts1 );
++                         _fileL[ii] - sepWidth, curppos[ii-1] );                
+          p.drawPolygon( pa1 );
+ 
+          // Draw right arrow.
+-         int pts2[6] = { _fileL[ii] + dx, curppos[ii] - dyo2,
++         QPolygon pa2;
++         pa2.putPoints(0, 3, 
++                         _fileL[ii] + dx, curppos[ii] - dyo2,
+                          _fileL[ii] + dx, curppos[ii] + dyo2,
+-                         _fileL[ii], curppos[ii] };                
+-         QPointArray pa2( 3, pts2 );
++                         _fileL[ii], curppos[ii] );                
+          p.drawPolygon( pa2 );
+       }
+    }
+@@ -314,11 +316,12 @@ void XxOverview::drawContents( QPainter*
+             int ypos =
+                _fileT[ii] +
+                int( (_fileDy[ii] * (ffline-1)) / float( flines[ii] ) );
+-            int pts1[8] = { _fileL[ii] + fw2 - sdx, ypos,
++            QPolygon pa1;
++            pa1.putPoints(0, 4, 
++                            _fileL[ii] + fw2 - sdx, ypos,
+                             _fileL[ii] + fw2, ypos + sdx,
+                             _fileL[ii] + fw2 + sdx, ypos,
+-                            _fileL[ii] + fw2, ypos - sdx };
+-            QPointArray pa1( 4, pts1 );
++                            _fileL[ii] + fw2, ypos - sdx );
+             p.drawPolygon( pa1 );
+          }
+       }
+============================================================
+--- src/resParser.l	07cfa40e7fdd192ec045800923c1e4cac1579594
++++ src/resParser.l	c69cfe5f4d49d427e51e17464e1397bc16a47384
+@@ -78,7 +78,7 @@ else {                                  
+ else {                                                                 \
+    int ii = 0;                                                         \
+    for ( ; (ii < max_size) && (!input_stream_ptr->atEnd()); ++ii ) {   \
+-	input_stream_ptr->readRawBytes( &buf[ii], 1 );                 \
++	(*input_stream_ptr) >> buf[ii]; \
+    }                                                                   \
+    result = ii;                                                        \
+ }
+============================================================
+--- src/resources.cpp	20fd9a815a266817694ddaa8764faab2acb36457
++++ src/resources.cpp	40d7fde72cbc6fc30e28d13bad34294284913e22
+@@ -208,56 +208,56 @@ void XxResources::initializeOriginalXdif
+ 
+    if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
+       setFbColors( COLOR_SAME                   , "grey", "black" );
+-      setFbColors( COLOR_SAME_BLANK             , "grey70", "black" );
++      setFbColors( COLOR_SAME_BLANK             , "#b2b2b2", "black" );
+       setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon", "black" );
+       setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon3", "black" );
+-      setFbColors( COLOR_DIFF_TWO               , "lightblue2", "black" );
+-      setFbColors( COLOR_DIFF_TWO_SUP           , "lightblue3", "black" );
+-      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue2",  "black" );
+-      setFbColors( COLOR_DIFF_TWO_NONLY         , "lightblue3", "black" );
++      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon", "black" );
++      setFbColors( COLOR_DIFF_TWO               , "lightblue", "black" );
++      setFbColors( COLOR_DIFF_TWO_SUP           , "skyblue", "black" );
++      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue",  "black" );
++      setFbColors( COLOR_DIFF_TWO_NONLY         , "skyblue", "black" );
+                                                 
+-      setFbColors( COLOR_DELETE                 , "lightblue2", "black" );
+-      setFbColors( COLOR_DELETE_BLANK           , "grey64", "black" );
++      setFbColors( COLOR_DELETE                 , "lightblue", "black" );
++      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "black" );
+                                                 
+-      setFbColors( COLOR_INSERT                 , "darkseagreen2", "black" );
+-      setFbColors( COLOR_INSERT_BLANK           , "grey64", "black" );
++      setFbColors( COLOR_INSERT                 , "darkseagreen", "black" );
++      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "black" );
+                                                 
+       setFbColors( COLOR_DIFF_ALL               , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon", "black" );
+       setFbColors( COLOR_DIFF_ALL_ONLY          , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon", "black" );
+                                                 
+       setFbColors( COLOR_DIFFDEL                , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon", "black" );
+       setFbColors( COLOR_DIFFDEL_ONLY           , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon3", "black" );
+-      setFbColors( COLOR_DIFFDEL_BLANK          , "grey64", "black" );
++      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon", "black" );
++      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "black" );
+                                                 
+       setFbColors( COLOR_SELECTED               , "plum", "black" );
+       setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
+                                                 
+-      setFbColors( COLOR_IGNORE_DISPLAY         , "grey85", "black" );
+-      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey80", "black" );
+-      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey80", "black" );
+-      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey80", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY         , "#d8d8d8", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "black" );
+ 
+       setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
+       setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
+                                                 
+-      setFbColors( COLOR_IGNORED                , "grey70", "grey30" );
++      setFbColors( COLOR_IGNORED                , "#b2b2b2", "#4c4c4c" );
+                                                 
+       setFbColors( COLOR_DIRECTORIES            , "mediumturquoise", "black" );
+                                                            
+-      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon3", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_1       , "grey60", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "grey70", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_2       , "grey60", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "grey70", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_3       , "grey60", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "grey70", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "grey70", "black" );
++      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b2b2b2", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b2b2b2", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b2b2b2", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b2b2b2", "black" );
+    }   
+              
+    _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
+============================================================
+--- src/util.cpp	777b4d2b643199d03e4d75da12144675ea6f4121
++++ src/util.cpp	63c7017a81443a38aa45fc9744eb78a5a8cf6729
+@@ -1040,7 +1040,7 @@ QString XxUtil::unescapeChars( const QSt
+ 	   break;
+        // use at() in case found+1 is past the end of the string
+        QChar escapedChar = newFormat.at( found+1 );
+-       switch( escapedChar ) {
++       switch( escapedChar.toAscii() ) {
+        case 'n':
+ 	   newFormat = newFormat.replace( found, 2, QChar( '\n' ) );
+ 	   break;
+============================================================
+--- src/xxdiff.pro	b5044fb33cae4ac8e745eeddd5eb3f32e6dec6cf
++++ src/xxdiff.pro	0ee5e91c89ee65d6ddf02a65c15227acdd6b7808
+@@ -21,6 +21,12 @@
+ #****************************************************************************/
+ #
+ # Generate with xxdiff.t template, as `qmake -t xxdiff.t xxdiff.pro > Makefile'
++
++    mystaticconfig {
++        QMAKE_LIBS_QT =
++        QMAKE_LIBS_QT_THREAD =
++        LIBS += -lz -framework Carbon -lQtNetwork
++    }
+ #
+ 
+ # Note: the version number is now in the VERSION file at the root and there is a
+

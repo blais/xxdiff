@@ -1,0 +1,77 @@
+# 
+# old_revision [0c11a13239c11c5a0cab7f485a7070ac7048458d]
+# 
+# patch "src/cmdline.cpp"
+#  from [6a74f1cf69a60d210c159ac12fb8c216746e10e5]
+#    to [057281a5f02f4ef18dd3b66bd7b202493ae715cd]
+# 
+============================================================
+--- src/cmdline.cpp	6a74f1cf69a60d210c159ac12fb8c216746e10e5
++++ src/cmdline.cpp	057281a5f02f4ef18dd3b66bd7b202493ae715cd
+@@ -484,25 +484,25 @@ bool XxCmdline::parseCommandLine( const 
+          } break;
+ 
+          case 'D': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getBoolOptName( BOOL_EXIT_ON_SAME )
+                 << ": true" << endl;
+          } break;
+ 
+          case 'E': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getBoolOptName( BOOL_EXIT_IF_NO_CONFLICTS )
+                 << ": true" << endl;
+          } break;
+ 
+          case 'X': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
+                 << ": true" << endl;
+          } break;
+ 
+          case 'm': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getBoolOptName( BOOL_SELECT_MERGE )
+                 << ": true" << endl;
+          } break;
+@@ -554,7 +554,7 @@ bool XxCmdline::parseCommandLine( const 
+             break;
+ 
+          case 'R': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << optarg << endl << flush;
+          } break;
+ 
+@@ -571,7 +571,7 @@ bool XxCmdline::parseCommandLine( const 
+          } break;
+ 
+          case 'c': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getShowOptName( SHOW_PANE_MERGED_VIEW ) 
+                 << ": true" << endl;
+          } break;
+@@ -613,7 +613,7 @@ bool XxCmdline::parseCommandLine( const 
+             break;
+ 
+          case 'r': {
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
+                 << ": true" << endl;
+          } break;
+@@ -693,7 +693,7 @@ bool XxCmdline::parseCommandLine( const 
+                                    "Missing argument for text font." );
+             }
+ 
+-            QTextStream oss( _cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
++            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+             oss << XxResParser::getKwdName( FONT_TEXT )
+                 << ": \"" << optarg << "\"" << endl;
+          } break;
+
