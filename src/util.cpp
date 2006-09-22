@@ -510,6 +510,9 @@ bool XxUtil::testFile(
       isDirectory = true;
       return true;
    }
+   else {
+      isDirectory = false;
+   }
 
    // Make sure file is not binary, we don't handle binary files.
    if ( testAscii ) {
@@ -1056,5 +1059,25 @@ QString XxUtil::unescapeChars( const QString& format )
    
    return newFormat;
 }
+
+//------------------------------------------------------------------------------
+//
+FILE* XxUtil::tempfile( char* tmplate )
+{
+   // Open the temporary file.
+   FILE *ftmp;
+#ifndef WINDOWS
+   int tfd = mkstemp( tmplate );
+   if ( ( ftmp = ::fdopen( tfd, "w" ) ) == NULL ) {
+#else
+   mktemp( tmplate );
+   if ( ( ftmp = ::fopen( tmplate, "w" ) ) == NULL ) {
+#endif
+      throw XxIoError( XX_EXC_PARAMS, 
+                       "Error opening temporary file." );
+   }
+   return ftmp;
+}
+
 
 XX_NAMESPACE_END

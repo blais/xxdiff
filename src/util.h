@@ -177,6 +177,9 @@ public:
    static QString unescapeChars( const QString& format );
    // </group>
 
+   // Create a new temporary file.
+   static FILE* tempfile( char* tmplate );
+
 };
 
 

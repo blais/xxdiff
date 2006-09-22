@@ -1206,7 +1206,7 @@ void XxApp::createMenus()
    );
    fileMenu->insertSeparator();
 
-   int ids[6];
+   int ids[9];
    if ( _cmdline._unmerge == false ) {
       /*ids[0] = */fileMenu->insertItem(
          "Save as left", this, SLOT(saveAsLeft()),
@@ -1245,6 +1245,34 @@ void XxApp::createMenus()
    );
 
    fileMenu->insertSeparator();
+
+   if ( _cmdline._unmerge == false ) {
+      /*ids[6] = */fileMenu->insertItem(
+         "Generate patch against left", this, SLOT(generatePatchFromLeft()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+      );
+      if ( _nbFiles == 3 ) {
+         /*ids[7] = */fileMenu->insertItem(
+            "Generate patch against middle", this, 
+            SLOT(generatePatchFromMiddle()),
+            _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
+         );
+      }
+      ids[8] = fileMenu->insertItem(
+         "Generate patch against right", this, SLOT(generatePatchFromRight()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+      );
+
+   }
+   else {
+      /*ids[0] = */fileMenu->insertItem(
+         "Generate patch against original", this, SLOT(generatePatchFromLeft()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+      );
+   }
+
+   fileMenu->insertSeparator();
+
    fileMenu->insertItem(
       "Redo diff", this, SLOT(redoDiff()),
       _resources->getAccelerator( ACCEL_REDO_DIFF )
@@ -2574,7 +2602,7 @@ bool XxApp::askOverwrite( const QString& filename ) const
 
 //------------------------------------------------------------------------------
 //
-bool XxApp::saveToFile(
+bool XxApp::saveMergedToFile(
    const QString& filename,
    const bool     ask,
    const bool     noCancel,
@@ -3079,7 +3107,7 @@ void XxApp::saveAsLeft()
    XxBuffer* file = getBuffer( 0 );
    if ( file != 0 && file->isTemporary() == false ) {
       if ( validateNeedToSave( 0 ) == true ) {
-         saveToFile( file->getName(), false );
+         saveMergedToFile( file->getName(), false );
       }
    }
 }
@@ -3091,7 +3119,7 @@ void XxApp::saveAsMiddle()
    XxBuffer* file = getBuffer( 1 );
    if ( file != 0 && file->isTemporary() == false ) {
       if ( validateNeedToSave( 1 ) == true ) {
-         saveToFile( file->getName(), false );
+         saveMergedToFile( file->getName(), false );
       }
    }
 }
@@ -3103,7 +3131,7 @@ void XxApp::saveAsRight()
    XxBuffer* file = getBuffer( _nbFiles == 2 ? 1 : 2 );
    if ( file != 0 && file->isTemporary() == false ) {
       if ( validateNeedToSave( _nbFiles == 2 ? 1 : 2 ) == true ) {
-         saveToFile( file->getName(), false );
+         saveMergedToFile( file->getName(), false );
       }
    }
 }
@@ -3115,7 +3143,7 @@ void XxApp::saveAsMerged()
    QString mergedName = getMergedFilename();
 
    // Note: overwrite automatically if merged filename as on the cmdline.
-   saveToFile( mergedName,
+   saveMergedToFile( mergedName,
                false,
                false /*default*/,
                ! _cmdline._mergedFilename.isEmpty() );
@@ -3126,7 +3154,58 @@ void XxApp::saveAsMerged()
 void XxApp::saveAs()
 {
    QString mergedName = getMergedFilename();
-   saveToFile( mergedName, true );
+   saveMergedToFile( mergedName, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::generatePatchFromLeft()
+{
+   // Save the original file.
+   char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
+   FILE* fout = XxUtil::tempfile( temporaryFilename );
+   saveMergedToFile( temporaryFilename, false, false, true );
+   ::fclose( fout );
+
+#if 0 
+   XxBuffer* file = getBuffer( 0 );
+   if ( file != 0 ) {
+      
+
+
+      saveMergedToFile( file->getName(), false );
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::generatePatchFromMiddle()
+{
+// FIXME: todo
+#if 0 
+   XxBuffer* file = getBuffer( 1 );
+   if ( file != 0 && file->isTemporary() == false ) {
+      if ( validateNeedToSave( 1 ) == true ) {
+         saveMergedToFile( file->getName(), false );
+      }
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::generatePatchFromRight()
+{
+// FIXME: todo
+#if 0 
+   XxBuffer* file = getBuffer( _nbFiles == 2 ? 1 : 2 );
+   if ( file != 0 && file->isTemporary() == false ) {
+      if ( validateNeedToSave( _nbFiles == 2 ? 1 : 2 ) == true ) {
+         saveMergedToFile( file->getName(), false );
+      }
+   }
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -4757,7 +4836,7 @@ void XxApp::quitAccept()
    exit( _returnValue, "ACCEPT" );
    selectGlobalRight();
    bool saved =
-      saveToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
+      saveMergedToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
    XX_ASSERT( saved );
 }
 
@@ -4784,7 +4863,7 @@ void XxApp::quitReject()
    exit( _returnValue, "REJECT" );
    selectGlobalLeft();
    bool saved =
-      saveToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
+      saveMergedToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
    XX_ASSERT( saved );
 }
 
@@ -4794,7 +4873,7 @@ void XxApp::quitMerged()
 {
    // Force saving a merged file.
    QString mergedName = getMergedFilename();
-   if ( ! saveToFile(
+   if ( ! saveMergedToFile(
            mergedName, false, !_mainWindow->isVisible(), true
         ) ) {
       return; // Don't quit! Output *IS* required.

@@ -15,12 +15,22 @@
 Next Release
 ============
 
+Qt4
+---
+
 - Apply Trevor Harmon's patch for the port to Qt4.
+
+- Finish half-started save-to-patch feature:
+
+  * Add an option to the xxdiff GUI to invert the selections, or to save the
+    negative of the selections to a file.  Using this, we could split a file in
+    half.  This should not be available in 3-way diffs mode.
 
 
 
 Less Urgent, but do it soon too
 ===============================
+
 
 * Add a '-w' option to invoke.py (!?), to ignore whitespace changes easily.
 

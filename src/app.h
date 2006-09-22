@@ -204,6 +204,9 @@ public slots:
    void saveAsRight();
    void saveAsMerged();
    void saveAs();
+   void generatePatchFromLeft();
+   void generatePatchFromMiddle();
+   void generatePatchFromRight();
    void saveSelectedOnly();
    void editLeft();
    void editMiddle();
@@ -365,7 +368,7 @@ private:
    // 'noCancel' disables the cancel button.
    //
    // Returns true if successfully saved, false if cancelled.
-   bool saveToFile(
+   bool saveMergedToFile(
       const QString& filename,
       const bool     ask,
       const bool     noCancel = false,
