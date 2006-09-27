@@ -55,6 +55,82 @@ override it in this function."
       (message "Restored buffer contents from xxdiff merged output."))
     ))
 
-(provide 'xxdiff)
 
+(defun xxdiff-compare-kill-ring ()
+  "Spawn an xxdiff to compare the last two entries on the
+kill-ring.  With prefix arg, compare the last three."
+  (interactive)
+
+  (let* ((idx (if mark-active -1 0))
+	 (selections (list (current-kill (+ idx 1) t)
+			   (if (= idx 0) 
+			       (current-kill idx t) 
+			     (buffer-substring (region-beginning) (region-end)))))
+	 files)
+    (when current-prefix-arg
+      (setq selections (append (list (current-kill (+ idx 2) t)) selections))
+      ;;(setcdr selections (cons (current-kill 2 t) (cdr selections)))
+      )
+
+    (setq files (mapcar 
+		 (lambda (sel) (let ((fn (make-temp-file "xxdiff-emacs.")))
+				 (with-temp-file fn (insert sel))
+				 fn))
+		 selections))
+
+      (apply 'call-process-region
+	     (append (list (point-min) (point-max) 
+			   "xxdiff" nil nil nil)
+		     files))
+      (dolist (fn files)
+	(when (file-exists-p fn) (delete-file fn)))
+      ))
+
+
+(defun xxdiff-compare-selections (beg end)
+  "If the secondary selection is active, compare that to the
+primary selection.  If not, compare the last entry in the
+kill-ring to the primary selection (the active region).  If the
+region is not active (we have no primary selection), use the two
+first entries on the kill-ring.  This actually writes the regions
+as temporary files and then invokes xxdiff."
+  (interactive "r")
+  (let (primary secondary)
+
+    (if mark-active
+	(setq primary 
+	      (buffer-substring (region-beginning) (region-end))
+
+	      secondary
+	      (condition-case nil 
+		  (prog1 (x-get-selection 'SECONDARY)
+		    (message "xxdiff: Comparing against the secondary selection."))
+		(error (progn
+			 (message "xxdiff: Comparing against the last value on the kill-ring.")
+			 (current-kill 0 t)))))
+
+      (setq primary 
+	    (current-kill 0 t)	      
+	    secondary
+	    (current-kill 1 t)))
+
+    (let ((opts (if current-prefix-arg xxdiff-options nil))
+	  (left (make-temp-file "xxdiff-emacs."))
+	  (right (make-temp-file "xxdiff-emacs.")))
+
+      (with-temp-file left (insert secondary))
+      (with-temp-file right (insert primary))
+
+      (apply 'call-process-region
+	     (append (list (point-min) (point-max) 
+			   "xxdiff" nil nil nil)
+		     opts
+		     (list "--title1" "(SECONDARY REGION)"
+			   "--title2" "(PRIMARY REGION)"
+			   left right)))
+      (when (file-exists-p left) (delete-file left))
+      (when (file-exists-p right) (delete-file right))
+      )))
+
+(provide 'xxdiff)
 
