@@ -31,7 +31,6 @@ Qt4
 Less Urgent, but do it soon too
 ===============================
 
-
 * Add a '-w' option to invoke.py (!?), to ignore whitespace changes easily.
 
 * When the comments file has not changed, warn the user that he did not appear

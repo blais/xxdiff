@@ -1249,25 +1249,25 @@ void XxApp::createMenus()
    if ( _cmdline._unmerge == false ) {
       /*ids[6] = */fileMenu->insertItem(
          "Generate patch against left", this, SLOT(generatePatchFromLeft()),
-         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+         _resources->getAccelerator( ACCEL_PATCH_FROM_LEFT )
       );
       if ( _nbFiles == 3 ) {
          /*ids[7] = */fileMenu->insertItem(
             "Generate patch against middle", this, 
             SLOT(generatePatchFromMiddle()),
-            _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
+            _resources->getAccelerator( ACCEL_PATCH_FROM_MIDDLE )
          );
       }
       ids[8] = fileMenu->insertItem(
          "Generate patch against right", this, SLOT(generatePatchFromRight()),
-         _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+         _resources->getAccelerator( ACCEL_PATCH_FROM_RIGHT )
       );
 
    }
    else {
       /*ids[0] = */fileMenu->insertItem(
          "Generate patch against original", this, SLOT(generatePatchFromLeft()),
-         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+         _resources->getAccelerator( ACCEL_PATCH_FROM_LEFT )
       );
    }
 
@@ -2713,6 +2713,113 @@ bool XxApp::saveMergedToFile(
 
 //------------------------------------------------------------------------------
 //
+void XxApp::saveBufferToFile( const XxFno no, const QString& filename )
+{
+// FIXME: TODO, and then use this in the generateFromPatch functions
+
+#if 0 
+
+   // Check if there are some unselected regions remaining.
+   bool allSelected = _diffs->isAllSelected();
+   if ( !allSelected ) {
+
+      // Bring the user to the first unselected region.
+      XxDln nextNo = _diffs->findNextUnselected( 0 );
+      XX_ASSERT( nextNo != -1 );
+      setCursorLine( nextNo, true );
+   }
+
+   QString cleanname = XxUtil::removeClearCaseExt( filename );
+
+   QString f;
+   bool useConditionals = false;
+   bool removeEmptyConditionals = false;
+   QString conditionals[3];
+   if ( ask == true ) {
+      if ( !allSelected ) {
+         f = XxMarkersFileDialog::getSaveFileName(
+            cleanname, QString::null, _mainWindow, "xxdiff save file",
+            _nbFiles == 3,
+            useConditionals,
+            removeEmptyConditionals,
+            conditionals
+         );
+         if ( f.isEmpty() ) {
+            // The user cancelled the dialog.
+            return false;
+         }
+      }
+      else {
+         f = QkFileDialog::getSaveFileName(
+            cleanname, QString::null, _mainWindow
+         );
+         if ( f.isEmpty() ) {
+            // The user cancelled the dialog.
+            return false;
+         }
+      }
+   }
+   else {
+      f = cleanname;
+
+      if ( !allSelected ) {
+         bool res = XxMarkersDialog::getMarkers(
+            _mainWindow, "xxdiff save file",
+            _nbFiles == 3,
+            useConditionals,
+            removeEmptyConditionals,
+            conditionals,
+            noCancel
+         );
+         if ( !res ) {
+            // The user cancelled the dialog.
+            return false;
+         }
+      }
+   }
+   XX_ASSERT( !f.isEmpty() );
+
+   if ( !overwrite ) {
+      if ( ! askOverwrite( f ) ) {
+         return false;
+      }
+   }
+
+   // Open a file.
+   try {
+      QFile outfile( f );
+      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
+      if ( !succ ) {
+         throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
+      }
+
+      // Save to the file.
+      {
+         QTextStream osstream( &outfile );
+         //osstream.setEncoding( QTextStream::Locale ); not necessary
+         _diffs->save( getResources(), osstream, getBuffers(),
+                       useConditionals, removeEmptyConditionals,
+                       conditionals );
+      }
+
+      outfile.close();
+      if ( outfile.status() != IO_Ok ) {
+         throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
+      }
+   }
+   catch ( const XxIoError& ioerr ) {
+      QMessageBox::critical(
+         _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
+      );
+   }
+
+   _diffs->clearDirty();
+   return true;
+#endif
+}
+
+//------------------------------------------------------------------------------
+//
 void XxApp::editFile( const QString& filename )
 {
    if ( _diffs.get() == 0 ) {
@@ -3161,8 +3268,12 @@ void XxApp::saveAs()
 //
 void XxApp::generatePatchFromLeft()
 {
+   std::cout << "PROUT" << std::endl;
+// FIXME: remove
+
+
    // Save the original file.
-   char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
+   char temporaryFilename[64] = "/var/tmp/xxdiff-tmp-patch.XXXXXX";
    FILE* fout = XxUtil::tempfile( temporaryFilename );
    saveMergedToFile( temporaryFilename, false, false, true );
    ::fclose( fout );
