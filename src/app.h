@@ -368,16 +368,12 @@ private:
    // 'noCancel' disables the cancel button.
    //
    // Returns true if successfully saved, false if cancelled.
-   void saveMergedToFile(
+   bool saveMergedToFile(
       const QString& filename,
       const bool     ask,
       const bool     noCancel = false,
       const bool     overwrite = false
    );
-
-   // Saves the content of one of the buffers to a file.  This function does not
-   // deal with the overwrite dialog, it is only meant for internal use.
-   bool saveBufferToFile( const XxFno no, const QString& filename );
 
    // Edits the said file, and add signal handler to catch children exit, and
    // notify.

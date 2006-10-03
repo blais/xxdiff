@@ -553,7 +553,7 @@ bool XxUtil::isAsciiText( const QString& filename )
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::spawnCommand(
+int XxUtil::spawnCommand(
    const char** argv,
    FILE** outf,
    FILE** errf,
@@ -588,7 +588,8 @@ void XxUtil::spawnCommand(
       }
    }
 
-   switch ( fork() ) {
+   int pid = fork();
+   switch ( pid ) {
       case 0: { // the child
 
          /*
@@ -647,7 +648,7 @@ void XxUtil::spawnCommand(
 
          if ( sigChldHandler ) {
             if ( installSigChldHandler( sigChldHandler ) == false ) {
-               return;
+               return -2;
             }
          }
 
@@ -702,6 +703,8 @@ void XxUtil::spawnCommand(
    }
 
 #else
+
+   int pid = -1;
 
    QString command;
    const char** arg;
@@ -761,17 +764,17 @@ void XxUtil::spawnCommand(
 #endif
 
    // Not reached.
-   return;
+   return pid;
 }
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::spawnCommand(
+int XxUtil::spawnCommand(
    const char** argv,
    void (*sigChldHandler)(int)
 )
 {
-   spawnCommand( argv, 0, 0, sigChldHandler );
+   return spawnCommand( argv, 0, 0, sigChldHandler );
 }
 
 //------------------------------------------------------------------------------

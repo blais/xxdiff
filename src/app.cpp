@@ -88,6 +88,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include <stdio.h>
 
@@ -2713,113 +2714,6 @@ bool XxApp::saveMergedToFile(
 
 //------------------------------------------------------------------------------
 //
-void XxApp::saveBufferToFile( const XxFno no, const QString& filename )
-{
-// FIXME: TODO, and then use this in the generateFromPatch functions
-
-#if 0 
-
-   // Check if there are some unselected regions remaining.
-   bool allSelected = _diffs->isAllSelected();
-   if ( !allSelected ) {
-
-      // Bring the user to the first unselected region.
-      XxDln nextNo = _diffs->findNextUnselected( 0 );
-      XX_ASSERT( nextNo != -1 );
-      setCursorLine( nextNo, true );
-   }
-
-   QString cleanname = XxUtil::removeClearCaseExt( filename );
-
-   QString f;
-   bool useConditionals = false;
-   bool removeEmptyConditionals = false;
-   QString conditionals[3];
-   if ( ask == true ) {
-      if ( !allSelected ) {
-         f = XxMarkersFileDialog::getSaveFileName(
-            cleanname, QString::null, _mainWindow, "xxdiff save file",
-            _nbFiles == 3,
-            useConditionals,
-            removeEmptyConditionals,
-            conditionals
-         );
-         if ( f.isEmpty() ) {
-            // The user cancelled the dialog.
-            return false;
-         }
-      }
-      else {
-         f = QkFileDialog::getSaveFileName(
-            cleanname, QString::null, _mainWindow
-         );
-         if ( f.isEmpty() ) {
-            // The user cancelled the dialog.
-            return false;
-         }
-      }
-   }
-   else {
-      f = cleanname;
-
-      if ( !allSelected ) {
-         bool res = XxMarkersDialog::getMarkers(
-            _mainWindow, "xxdiff save file",
-            _nbFiles == 3,
-            useConditionals,
-            removeEmptyConditionals,
-            conditionals,
-            noCancel
-         );
-         if ( !res ) {
-            // The user cancelled the dialog.
-            return false;
-         }
-      }
-   }
-   XX_ASSERT( !f.isEmpty() );
-
-   if ( !overwrite ) {
-      if ( ! askOverwrite( f ) ) {
-         return false;
-      }
-   }
-
-   // Open a file.
-   try {
-      QFile outfile( f );
-      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
-      if ( !succ ) {
-         throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
-      }
-
-      // Save to the file.
-      {
-         QTextStream osstream( &outfile );
-         //osstream.setEncoding( QTextStream::Locale ); not necessary
-         _diffs->save( getResources(), osstream, getBuffers(),
-                       useConditionals, removeEmptyConditionals,
-                       conditionals );
-      }
-
-      outfile.close();
-      if ( outfile.status() != IO_Ok ) {
-         throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
-      }
-   }
-   catch ( const XxIoError& ioerr ) {
-      QMessageBox::critical(
-         _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
-      );
-   }
-
-   _diffs->clearDirty();
-   return true;
-#endif
-}
-
-//------------------------------------------------------------------------------
-//
 void XxApp::editFile( const QString& filename )
 {
    if ( _diffs.get() == 0 ) {
@@ -3268,55 +3162,77 @@ void XxApp::saveAs()
 //
 void XxApp::generatePatchFromLeft()
 {
-   std::cout << "PROUT" << std::endl;
-// FIXME: remove
+   XxBuffer* buf = getBuffer( 0 );
+   if ( buf != 0 ) {
 
+      // Save the merged file.  
+      //
+      // Note: we don't really need to have the temporary file opened here, we
+      // just need its filename.
+      char temporaryFilename1[64] = "/var/tmp/xxdiff-tmp-patch.XXXXXX";
+      FILE* fout1 = XxUtil::tempfile( temporaryFilename1 );
+      saveMergedToFile( temporaryFilename1, false, false, true );
+      ::fclose( fout1 );
 
-   // Save the original file.
-   char temporaryFilename[64] = "/var/tmp/xxdiff-tmp-patch.XXXXXX";
-   FILE* fout = XxUtil::tempfile( temporaryFilename );
-   saveMergedToFile( temporaryFilename, false, false, true );
-   ::fclose( fout );
+      // Save the original file.
+      char temporaryFilename2[64] = "/var/tmp/xxdiff-tmp-patch.XXXXXX";
+      FILE* fout2 = XxUtil::tempfile( temporaryFilename2 );
+      uint sz;
+      const char* charbuf = buf->getBuffer( sz );
+      {
+         QTextOStream osstream( fout2 );
+         osstream.writeRawBytes( charbuf, sz );
+      }
+      ::fclose( fout2 );
 
-#if 0 
-   XxBuffer* file = getBuffer( 0 );
-   if ( file != 0 ) {
-      
+      // Run diff on the two temporary files.
+      QStringList filenames;
+      filenames.append( temporaryFilename1 );
+      filenames.append( temporaryFilename2 );
+      const char** out_args;
+      XxUtil::splitArgs( "diff -Naur", filenames, out_args );
 
+      FILE* fout;
+      FILE* ferr;
+      int pid = XxUtil::spawnCommand( out_args, &fout, &ferr );
+      if ( fout == 0 || ferr == 0 ) {
+         throw XxIoError( XX_EXC_PARAMS );
+      }
 
-      saveMergedToFile( file->getName(), false );
+// FIXME: TODO read the output and write it to some file.
+
+      ::fclose( fout );
+      ::fclose( ferr );
+
+      XxUtil::freeArgs( out_args );
+
+      if ( pid >= 0 ) {
+         int status;
+         ::waitpid( pid, &status, 0 );
+      }
+
+      // Delete the temporary files.
+      XxUtil::removeFile( temporaryFilename1 );
+      XxUtil::removeFile( temporaryFilename2 );
    }
-#endif
 }
 
 //------------------------------------------------------------------------------
 //
 void XxApp::generatePatchFromMiddle()
 {
-// FIXME: todo
-#if 0 
-   XxBuffer* file = getBuffer( 1 );
-   if ( file != 0 && file->isTemporary() == false ) {
-      if ( validateNeedToSave( 1 ) == true ) {
-         saveMergedToFile( file->getName(), false );
-      }
-   }
-#endif
+// FIXME: todo !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 }
 
 //------------------------------------------------------------------------------
 //
 void XxApp::generatePatchFromRight()
 {
-// FIXME: todo
-#if 0 
-   XxBuffer* file = getBuffer( _nbFiles == 2 ? 1 : 2 );
-   if ( file != 0 && file->isTemporary() == false ) {
-      if ( validateNeedToSave( _nbFiles == 2 ? 1 : 2 ) == true ) {
-         saveMergedToFile( file->getName(), false );
-      }
-   }
-#endif
+// FIXME: todo !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 }
 
 //------------------------------------------------------------------------------
