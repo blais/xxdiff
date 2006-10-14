@@ -33,8 +33,8 @@ you what to do with it::
 
    [a] add it
    [d] delete it
-   [m] mask it (sets an svn:ignore property on its parent directory)
-   [i] ignore it (leave it where it is)
+   [i] ignore/mask it (sets an svn:ignore property on its parent directory)
+   [s] skip it for now (leave it where it is)
 
 Other actions::
 
@@ -311,7 +311,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                     rmrf(fn)
                     break
 
-                elif c in ['m', 'I']: # Mask
+                elif c in ['m', 'i', 'I']: # Ignore (Mask, svn:ignore)
                     dn, bn = split(fn)
                     if dn == '':
                         dn = '.'
@@ -353,7 +353,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                         break
 
-                elif c == 'i': # Ignore
+                elif c == 's': # Skip
                     break
 
                 elif c in ['q', 'x']: # Quit/exit
