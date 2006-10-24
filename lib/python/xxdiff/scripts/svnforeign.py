@@ -213,7 +213,7 @@ def parse_options():
 #-------------------------------------------------------------------------------
 #
 def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
-                                  ignore=[]):
+                                 ignore=[]):
     """
     Runs an 'svn status' command, and then loops over all the files that are not
     registered, asking the user one-by-one what action to take (see this
@@ -284,7 +284,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
             # Command loop (one command)
             while True:
-                write('=> [Add|Del|Mask|Ign|View|Quit]  %10d  %s %s ? ' %
+                write('=> [Add|Delete|Ignore|Skip|View|Quit|Redo]  %10d  %s %s ? ' %
                       (size, fn, ftype))
 
                 # Read command
@@ -342,6 +342,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                     elif pat == '*':
                         call(['svn', 'propedit', 'svn:ignore', dn])
+                        break
 
                     else:
                         svnign += pat + '\n'
@@ -359,6 +360,9 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                 elif c in ['q', 'x']: # Quit/exit
                     write('(Quitting.)\n')
                     return False
+
+                elif c == 'r': # Restart from scratch (perhaps after an ignore)
+                    return query_unregistered_svn_files(filenames, opts, output, ignore)
 
                 elif c in 'v': # View
                     # Call on 'more' to view the file
