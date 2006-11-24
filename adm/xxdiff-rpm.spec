@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 3.2b4
+Version: 3.2
 Release: 2
 License: GNU GPL
 Group: Development/Tools
@@ -9,7 +9,7 @@ URL: http://furius.ca/xxdiff/
 Packager: Martin Blais <blais@furius.ca>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: qt >= 3.2, python
-BuildRequires: qt-devel >= 3.2, %{?_with_tmake:tmake >= 1.7}, flex, bison, python
+BuildRequires: qt-devel >= 3.2, %{?_with_tmake:tmake >= 1.7}, flex >= 2.5.31, bison, python
 
 %description
 xxdiff is a graphical browser for viewing the differences between two
@@ -36,9 +36,11 @@ fi
 cd src
 %{!?_with_tmake:make -f Makefile.bootstrap makefile}
 %ifarch x86_64
-%{?_with_tmake:tmake xxdiff.pro | sed s+X11R6/lib+lib64+ > Makefile}
+qmake -o Makefile.qmake xxdiff.pro
+cat Makefile.qmake Makefile.extra > Makefile
 %else
-%{?_with_tmake:tmake xxdiff.pro | sed s+X11R6/lib+lib+ > Makefile}
+qmake -o Makefile.qmake xxdiff.pro
+cat Makefile.qmake Makefile.extra > Makefile
 %endif
 
 make

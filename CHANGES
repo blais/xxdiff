@@ -5,6 +5,7 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+* Applied Bill Jones patches for RHEL/CentOS build.
 * Applied H.Nestler's patch to documentation.
 
 

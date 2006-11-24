@@ -25,7 +25,7 @@ mkdir -p $BUILDROOT/{SPECS,SOURCES,BUILD,SRPMS,RPMS}
 # cp adm/xxdiff-rpm.spec $BUILDROOT/SPECS/xxdiff-$VERSION.spec
 
 echo "== Copying pristine build to $BUILDROOT/SOURCES"
-PRISTINE=../xxdiff-$VERSION.tar.gz
+PRISTINE=../xxdiff-$VERSION.tar.bz2
 if [ ! -f "$PRISTINE" ]; then
      echo "Cannot find pristine sources in $PRISTINE"
 fi
@@ -46,7 +46,13 @@ rpmbuild -ba --nodeps --clean --rmsource adm/xxdiff-rpm.spec
 
 DEST=$HOME
 echo "== Copying source and binary packages to $DEST"
-cp $BUILDROOT/RPMS/i386/xxdiff-$VERSION*.i386.rpm $DEST
+if test `uname -m` = "x86_64"
+then
+  arch="x86_64"
+else
+  arch="i386"
+fi
+cp $BUILDROOT/RPMS/$arch/xxdiff-$VERSION*.$arch.rpm $DEST
 cp $BUILDROOT/SRPMS/xxdiff-$VERSION*.src.rpm $DEST
 
 echo "== Signing package files in $DEST"
