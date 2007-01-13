@@ -71,7 +71,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports
-import sys, os, termios, tty, tempfile, datetime
+import sys, os, termios, tty, tempfile, datetime, re
 from subprocess import Popen, PIPE, call
 from os.path import *
 
@@ -210,6 +210,13 @@ def parse_options():
     return opts, args
 
 
+def view(fn, write):
+    "Call on 'more' to view the file."
+    write('-' * 80 + '\n')
+    pager = os.environ.get('PAGER', '/bin/more')
+    call([pager, fn])
+
+
 #-------------------------------------------------------------------------------
 #
 def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
@@ -262,10 +269,47 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     write(out)
     write('\n')
 
+    # Figure out which files are in conflict so that we can ignore the unknown
+    # merge result files.
+    conflicts = []
+    for line in out.splitlines():
+        if line[0] == 'C':
+            fn = line[7:]
+            cre = re.compile('%s\\.(mine|r\\d+)' % re.escape(fn)).match
+            conflicts.append( (fn, cre) )
+
+            # Command loop (one command)
+            while True:
+                write('=> [Resolve|Skip|View|Quit|Redo]  %s ? ' % fn)
+
+                # Read command
+                c = read_one()
+                write(c)
+                write('\n')
+
+                if c == 'r': # Add
+                    call(['svn', 'resolved', fn])
+                    break
+
+                elif c == 's': # Skip
+                    break
+
+                elif c in 'v': # View
+                    view(fn, write)
+
+                elif c in ['q', 'x']: # Quit/exit
+                    write('(Quitting.)\n')
+                    return False
+
+                elif c == 'r': # Restart from scratch (perhaps after an ignore)
+                    return query_unregistered_svn_files(filenames, opts, output, ignore)
+
     # Process foreign files
     for line in out.splitlines():
         if line[0] == '?':
             fn = line[7:]
+            if filter(lambda x: x[1](fn), conflicts):
+                continue
             if abspath(fn) in ignore:
                 continue
 
@@ -365,11 +409,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                     return query_unregistered_svn_files(filenames, opts, output, ignore)
 
                 elif c in 'v': # View
-                    # Call on 'more' to view the file
-                    write('-' * 80 + '\n')
-                    pager = os.environ.get('PAGER', '/bin/more')
-                    call([pager, fn])
-                    # Look again
+                    view(fn, write)
 
                 elif c == chr(12): # Ctrl-L: Clear
                     # FIXME: is there a way to do this directly on the terminal?
@@ -377,7 +417,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                 else: # Loop again
                     write('(Invalid answer.)\n')
-
+            
     write('(Done.)\n')
     return True
 
