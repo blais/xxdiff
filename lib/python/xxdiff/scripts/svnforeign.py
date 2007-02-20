@@ -24,8 +24,10 @@
 
 """svn-foreign [<options>] [<dir> ...]
 
-This script deals with the common case where you have developed something using
-Subversion and you have forgotten some unregistered files before committing.
+This script allows you to quickly add or delete files that are foreign to a
+Subversion checkout, and to easily resolve conflicts.  It deals with the common
+case where you have developed something using Subversion and you have forgotten
+some unregistered files before committing.
 
 svn-foreign runs 'svn status' on the given Subversion-managed directories, to
 find out which files are unaccounted for and for each of these files, it asks
@@ -41,25 +43,22 @@ Other actions::
    [q] quit / [x] exit, this interrupts the process
    [D] delete with no backups (for large files)
    [v] view the file with a pager (more)
+   [r] resolve conflict (only valid on a file with an unresolved conflict)
 
 The script works interactively and is meant to allow you to quickly deal with
 the forgotten files in a subversion checkout.  It works with directories as
 well.
 
+Also, files in conflicts are properly ignored and not counted as foreign files.
+When unresolved conflicts are found, you are queried about them, answer with 'r'
+to resolve it and delete the temporary files.
+
 """
-# Notes
-# -----
-# We need to make sure that this file remains independently working from the
-# rest of xxdiff, i.e. even though some features may not be available, it should
-# always be working without xxdiff.  This is because this file may be
-# distributed under the simple name svn-foreign, and run independently, even if
-# you have not the xxdiff infrastructure.
-#
+
 # Future Work
 # -----------
 #
-# - We could implement backups for the deleted files (with lazy creation of
-#   backup directory).
+# - Make backups work without the xxdiff.backup module.
 #
 # Credits
 # -------
