@@ -59,6 +59,7 @@ to resolve it and delete the temporary files.
 # -----------
 #
 # - Make backups work without the xxdiff.backup module.
+# - svn-foreign: add support for editing conflictual file
 #
 # Credits
 # -------
