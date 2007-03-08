@@ -67,7 +67,7 @@ def insure_checkout(fn, opts, logs=None):
     scm_module = get_module(opts.checkout)
     
     # Verify if the file is already checked out.
-    if not scm_module.is_checked_out(fn):
+    if scm_module.is_checked_out(fn):
         return False
 
     # Checkout the file.

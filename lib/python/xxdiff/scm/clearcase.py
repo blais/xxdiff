@@ -9,7 +9,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-from subprocess import call 
+from subprocess import Popen, call, PIPE
 
 # xxdiff imports.
 from xxdiff.scripts import script_name
@@ -21,12 +21,16 @@ def is_checked_out(filename):
     """
     Check if the file is already checked out.
     """
+    p = Popen(['cleartool', 'desc', '-s', filename], stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate()
+    if p.returncode != 0:
+        raise SystemExit( stderr )
+    
+    if stdout.strip().endswith('CHECKEDOUT'):
+        return True
+    
     return False
-
-    # FIXME: TODO -- you need implement this using 'cleartool describe' the next
-    # time that you have access to a ClearCase system.
-
-
+    
 #-------------------------------------------------------------------------------
 #
 def checkout(filename):
