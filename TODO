@@ -28,6 +28,42 @@ Qt4
 
 
 
+- Fix this bug::
+
+    Grant McDorman <grmcdorman@gmail.com>:
+
+      I've got xxdiff running - with patches on Win32 with Qt Free 4.2.0 (and
+      mingw). Fixes were required, not suprisingly.
+
+      There was also what appears to be a real bug that showed up. In
+      hordiffimpl.cpp, there's a loop that starts like this:
+
+            while ( x > -1 && y > -1 ) {
+      #ifdef XX_LOCAL_HDIFF_DEBUG
+               cerr << x << " " << y << " = " << htable[ x + y*tlen0 ] << endl;
+      #endif
+
+               if (
+                  ( htable[ x + y*tlen0 ] == ( htable[ x-1 + (y-1)*tlen0 ] + 1 ) /*||
+                    htable[ x + y*tlen0 ] == htable[ x-1 + (y-1)*tlen0 ]*/ ) &&
+                  ctext0[x] == ctext1[y]
+
+      However, the problem is if x or y becomes 0, then one can have a negative
+      subscript on the second htable index. This can cause crashes. I fixed by
+      making it '> 0' instead of '> -1'.
+
+      There were also layout problems, such as the headers (filename/line number
+      way too bing); it's not clear to me if this is a Qt4 problem or a Win32
+      problem.
+
+      There are still a few minor problems: the file names start up blank (if
+      one does 'replace file' from the file menu, it's labelled correctly); and
+      the colour swatches in the display options dialog, Colors tab, don't
+      change colour at all. I haven't tracked those down yet.
+
+      I can send you the patch on request - or submit to SF.
+
+
 Less Urgent, but do it soon too
 ===============================
 
