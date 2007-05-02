@@ -82,12 +82,8 @@ except ImportError:
     backup = None
 
     
-#-------------------------------------------------------------------------------
-#
 debug = False
 
-#-------------------------------------------------------------------------------
-#
 def read_one():
     """
     Reads a single character from the terminal.
@@ -104,16 +100,12 @@ def read_one():
                           orig_term_attribs)
     return c
 
-#-------------------------------------------------------------------------------
-#
 def add(fn):
     """
     Add the file into Subversion.
     """
     call(['svn', 'add', fn])
 
-#-------------------------------------------------------------------------------
-#
 def rmrf(fnodn):
     """
     Delete the given directory and all its contents.
@@ -135,8 +127,6 @@ def rmrf(fnodn):
     else:
         os.remove(fnodn)
 
-#-------------------------------------------------------------------------------
-#
 def ignore_prop(dn, ignores):
     """
     Set svn:ignore on directory 'dn'.
@@ -148,8 +138,6 @@ def ignore_prop(dn, ignores):
     f.close()
 
 
-#-------------------------------------------------------------------------------
-#
 def filter2(predicate, *arguments):
     ein, eout = [], []
     for args in zip(*arguments):
@@ -164,8 +152,6 @@ def filter2(predicate, *arguments):
     return ein, eout
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -217,8 +203,6 @@ def view(fn, write):
     call([pager, fn])
 
 
-#-------------------------------------------------------------------------------
-#
 def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                                  ignore=[]):
     """
@@ -422,8 +406,6 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     return True
 
     
-#-------------------------------------------------------------------------------
-#
 def main():
     """
     Main program.
