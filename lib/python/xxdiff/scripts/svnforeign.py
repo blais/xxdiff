@@ -33,17 +33,18 @@ svn-foreign runs 'svn status' on the given Subversion-managed directories, to
 find out which files are unaccounted for and for each of these files, it asks
 you what to do with it::
 
-   [a] add it
-   [d] delete it
-   [i] ignore/mask it (sets an svn:ignore property on its parent directory)
-   [s] skip it for now (leave it where it is)
+- add it
+- delete it
+- ignore/mask it (sets an svn:ignore property on its parent directory)
+- skip it for now (leave it where it is)
 
 Other actions::
 
-   [q] quit / [x] exit, this interrupts the process
-   [D] delete with no backups (for large files)
-   [v] view the file with a pager (more)
-   [r] resolve conflict (only valid on a file with an unresolved conflict)
+- quit / [x] exit, this interrupts the process
+- delete with no backups (for large files)
+- view the file with a pager (more)
+- resolve conflict (only valid on a file with an unresolved conflict)
+- revert conflict (only valid on a file with an unresolved conflict)
 
 The script works interactively and is meant to allow you to quickly deal with
 the forgotten files in a subversion checkout.  It works with directories as
