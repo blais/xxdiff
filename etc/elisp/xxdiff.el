@@ -9,6 +9,9 @@
 
 (require 'ediff-util)
 
+(defvar xxdiff-exec "xxdiff"
+  "The xxdiff executable to run.")
+
 (defvar xxdiff-options '("-w" "-b")
   "A list of options to pass to xxdiff when called from emacs with a prefix argument.")
 
@@ -18,7 +21,7 @@
   (let ((opts (if current-prefix-arg xxdiff-options nil)))
     (apply 'call-process-region
 	   (append (list (point-min) (point-max) 
-			 "xxdiff" nil nil nil)
+			 xxdiff-exec nil nil nil)
 		   opts
 		   (list "--title1" (format "%s (FILE)" (buffer-file-name))
 			 "--title2" (format "%s (BUFFER)" (buffer-name))
@@ -42,7 +45,7 @@ override it in this function."
 
     (apply 'call-process-region
 	   (append (list (point-min) (point-max) 
-			 "xxdiff" nil nil nil)
+			 xxdiff-exec nil nil nil)
 		   opts
 		   (list "--title1" (format "%s (FILE)" latest)
 			 "--title2" (format "%s (BUFFER)" (buffer-name))
@@ -80,7 +83,7 @@ kill-ring.  With prefix arg, compare the last three."
 
       (apply 'call-process-region
 	     (append (list (point-min) (point-max) 
-			   "xxdiff" nil nil nil)
+			   xxdiff-exec nil nil nil)
 		     files))
       (dolist (fn files)
 	(when (file-exists-p fn) (delete-file fn)))
@@ -123,7 +126,7 @@ as temporary files and then invokes xxdiff."
 
       (apply 'call-process-region
 	     (append (list (point-min) (point-max) 
-			   "xxdiff" nil nil nil)
+			   xxdiff-exec nil nil nil)
 		     opts
 		     (list "--title1" "(SECONDARY REGION)"
 			   "--title2" "(PRIMARY REGION)"
