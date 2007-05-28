@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -23,8 +22,6 @@ import xxdiff.checkout
 __all__ = ('cond_replace',)
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Graft options on given parser for automatic file backups.
@@ -53,13 +50,9 @@ def options_validate(opts, parser, logs=None):
     pass
 
 
-#-------------------------------------------------------------------------------
-#
 # Side-by-side diff2 command.
 sbs_diff_cmd = ['diff', '--side-by-side', '--suppress-common-lines']
 
-#-------------------------------------------------------------------------------
-#
 def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
     """
     Given two filenames, spawn xxdiff for a decision, and conditionally replace
@@ -154,8 +147,6 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
     return decision
 
 
-#-------------------------------------------------------------------------------
-#
 def print_decision(decision, origfn, opts, logs):
     """
     Print the decision string.
@@ -165,8 +156,6 @@ def print_decision(decision, origfn, opts, logs):
     elif opts.verbose >= 1:
         print >> logs, '%-10s %s' % (decision, origfn)
 
-#-------------------------------------------------------------------------------
-#
 def print_diffs(diff_output, logs):
     """
     Format nicely and print the output of side-by-side diff.
@@ -176,8 +165,6 @@ def print_diffs(diff_output, logs):
         print >> logs, ' |', line
     print >> logs
 
-#-------------------------------------------------------------------------------
-#
 def do_replace_file(ofn, nfn, opts, logs):
     """
     Function that performs the file replacement safely.  Replace the original
@@ -199,8 +186,6 @@ def do_replace_file(ofn, nfn, opts, logs):
 
 
 
-#-------------------------------------------------------------------------------
-#
 diff3_cmd = ['diff3']
 
 proper_decisions = ('ACCEPT', 'REJECT', 'MERGED')
@@ -309,8 +294,6 @@ def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
     return decision
 
 
-#-------------------------------------------------------------------------------
-#
 def test():
     """
     Simple interactive test.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -20,8 +19,6 @@ from subprocess import Popen, PIPE
 from xxdiff.utils import consepairs
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Graft options on given parser for SQL connections.
@@ -60,8 +57,6 @@ def options_validate(opts, parser, logs=None):
     opts.pgsqlargs = args
 
 
-#-------------------------------------------------------------------------------
-#
 dbspec_re = re.compile(
     '^(?:([a-zA-Z0-9_]+)@)?([a-zA-Z0-9_]+)(?:/([a-zA-Z0-9_]+))?$')
 
@@ -84,8 +79,6 @@ def parse_dbspec(dbspec, parser, opts):
     return Schema(dbspec, user, db, schema)
 
 
-#-------------------------------------------------------------------------------
-#
 class Schema(object):
     """
     Container for all database schema-related things.
@@ -95,8 +88,6 @@ class Schema(object):
         self.user, self.dbname, self.schema = user, dbname, schema
         self.dump = None
         
-#-------------------------------------------------------------------------------
-#
 def dump_schema(user, dbname, schema, opts):
     """
     Dump the schema for the given database.  Returns the dump text on output.
@@ -119,8 +110,6 @@ def dump_schema(user, dbname, schema, opts):
     return dump
 
 
-#-------------------------------------------------------------------------------
-#
 sec_re = re.compile('^-- Name:\s*([^\s;]+);\s*Type:\s*([^\s;]+)(.*)$', re.M)
 com_re = re.compile('--.*$', re.M)
 ct_re = re.compile('^CREATE TABLE.*?(\\().*?(\\);)', re.M|re.S)

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -20,12 +19,8 @@ from xxdiff.scripts import tmpprefix
 __all__ = ('spawn_editor',)
 
 
-#-------------------------------------------------------------------------------
-#
 def_editor = ["xterm", "-e", '/usr/bin/vi "%s"']
 
-#-------------------------------------------------------------------------------
-#
 def spawn_editor(initcontents=None, filename=None):
     """
     Spawns an editor window and returns a waitable object that will block until

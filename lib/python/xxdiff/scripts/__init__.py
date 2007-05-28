@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -24,8 +23,6 @@ if sys.version_info[:2] < (2, 4):
         "Error: you need at least version 2.4 of Python or greater.")
 
 
-#-------------------------------------------------------------------------------
-#
 def interruptible_main(mainfun):
     """
     Wrapper to allow keyboard interrupt signals.
@@ -37,8 +34,6 @@ def interruptible_main(mainfun):
         raise SystemExit('Interrupted.')
 
 
-#-------------------------------------------------------------------------------
-#
 def install_autocomplete(parser):
     """
     Install automatic programmable completion support if available.
@@ -51,8 +46,6 @@ def install_autocomplete(parser):
         pass
 
 
-#-------------------------------------------------------------------------------
-#
 def passthruopts(argv):
     """
     Hack to allow passing some options.  This hack may fail when the given
@@ -70,8 +63,6 @@ def passthruopts(argv):
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 # Default prefix for temporary files uses the invoking script's name.
 script_name = basename(sys.argv[0])
 tmpprefix = '%s.' % script_name

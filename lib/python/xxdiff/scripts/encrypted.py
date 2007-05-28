@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-encrypted [<options>] <encrypted-file> [<encrypted file> ...]
@@ -66,15 +65,11 @@ import xxdiff.scm.cvs
 from xxdiff.scripts import tmpprefix
 
 
-#-------------------------------------------------------------------------------
-#
 decodecmd = '%(gpg)s --decrypt --use-agent '
 encodecmd_noarmor = '%(gpg)s --encrypt --use-agent '
 encodecmd = encodecmd_noarmor + '--armor '
 
 
-#-------------------------------------------------------------------------------
-#
 def diff_encrypted(textlist, outmerged=None):
     """
     Run a comparison of the encrypted texts specified in textlists and if an
@@ -150,8 +145,6 @@ def diff_encrypted(textlist, outmerged=None):
             raise e
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -189,8 +182,6 @@ def parse_options():
 
     return opts, args
 
-#-------------------------------------------------------------------------------
-#
 def encrypted_main():
     """
     Main program for cond-replace script.
@@ -226,8 +217,6 @@ def encrypted_main():
         diff_encrypted(textlist, opts.output)
 
 
-#-------------------------------------------------------------------------------
-#
 main = encrypted_main
 
 if __name__ == '__main__':

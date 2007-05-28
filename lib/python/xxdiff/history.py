@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -18,8 +17,6 @@ from xxdiff.scripts import script_name
 from xxdiff.utils import makedirs
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Graft options on given parser for invocations of xxdiff.
@@ -51,8 +48,6 @@ def options_validate(opts, parser, logs=None):
         parser.error("You cannot specify a history file and disable history.")
 
 
-#-------------------------------------------------------------------------------
-#
 class History(object):
     """
     A class that contains the runtime state of the history of some multi-item

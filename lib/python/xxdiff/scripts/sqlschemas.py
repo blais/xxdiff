@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-sql-schemas [<options>] <db1> <db2>
@@ -28,8 +27,6 @@ import xxdiff.mapcompare
 from xxdiff.db import postgresql
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -56,8 +53,6 @@ def parse_options():
             postgresql.parse_dbspec(dbspec1, parser, opts),
             postgresql.parse_dbspec(dbspec2, parser, opts))
 
-#-------------------------------------------------------------------------------
-#
 def sqlcompare_main():
     """
     Main program for schema comparison script.
@@ -87,8 +82,6 @@ def sqlcompare_main():
     xxdiff.invoke.xxdiff_display(opts, *xxargs)
 
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(sqlcompare_main)
 

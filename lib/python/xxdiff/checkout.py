@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -15,8 +14,6 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 import optparse
 
 
-#-------------------------------------------------------------------------------
-#
 checkout_choices = ('clearcase',)
 
 def options_graft(parser):
@@ -44,8 +41,6 @@ def options_validate(opts, parser, logs=None):
     pass # Nothing to do.
 
 
-#-------------------------------------------------------------------------------
-#
 def get_module(modname):
     """
     Returns the appropriate module for the given SCM.
@@ -57,8 +52,6 @@ def get_module(modname):
         raise SystemExit("Internal Error: SCM module not found.")
     return mod
 
-#-------------------------------------------------------------------------------
-#
 def insure_checkout(fn, opts, logs=None):
     """
     Check the file out from the SCM, if necessary.

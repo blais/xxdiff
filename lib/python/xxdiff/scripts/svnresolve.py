@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-svn-resolve [<options>] <file> <file> [<file>]
@@ -23,8 +22,6 @@ import xxdiff.condrepl
 from xxdiff.scm import subversion
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -56,8 +53,6 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 def select_conflicts(statii):
     """
     A generator that selects only the conflictual files.
@@ -66,8 +61,6 @@ def select_conflicts(statii):
         if s.status == 'C':
             yield s
 
-#-------------------------------------------------------------------------------
-#
 def svnresolve_main():
     """
     Main program for svn-resolve script.
@@ -117,8 +110,6 @@ def svnresolve_main():
     xxdiff.backup.print_reminder(opts)
 
             
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(svnresolve_main)
 

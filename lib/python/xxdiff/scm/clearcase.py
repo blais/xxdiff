@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -15,8 +14,6 @@ from subprocess import Popen, call, PIPE
 from xxdiff.scripts import script_name
 
 
-#-------------------------------------------------------------------------------
-#
 def is_checked_out(filename):
     """
     Check if the file is already checked out.
@@ -31,8 +28,6 @@ def is_checked_out(filename):
     
     return False
     
-#-------------------------------------------------------------------------------
-#
 def checkout(filename):
     """
     Checkout the given filename from ClearCase.
@@ -43,8 +38,6 @@ def checkout(filename):
     # FIXME: TODO -- you need to check the return code.
 
 
-#-------------------------------------------------------------------------------
-#
 def commit(filename):
     """
     Commit the given filename into CVS.

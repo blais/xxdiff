@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-patch [<options>] [<patchfile>]
@@ -73,8 +72,6 @@ import xxdiff.invoke
 import xxdiff.backup
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -117,8 +114,6 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 def patch_main():
     """
     Main program for patch script.
@@ -238,8 +233,6 @@ def patch_main():
                         "Error: unexpected answer from xxdiff: %s" % decision)
 
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(patch_main)
 

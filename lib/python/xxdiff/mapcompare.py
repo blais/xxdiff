@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -21,8 +20,6 @@ from os.path import *
 from xxdiff.scripts import tmpprefix
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Graft options on given parser for diff maps.
@@ -50,8 +47,6 @@ def options_validate(opts, parser, logs=None):
     """
 
 
-#-------------------------------------------------------------------------------
-#
 def render_diffable_maps(opts, *maps):
     """
     Render the given maps in respective files in a way that they will diff

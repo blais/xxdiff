@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-diff-proxy [<options>] <file> <file> [<file>]
@@ -37,8 +36,6 @@ import xxdiff.scripts
 import xxdiff.invoke
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -83,8 +80,6 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 def diffproxy_main():
     """
     Main program for cond-replace script.
@@ -134,8 +129,6 @@ def diffproxy_main():
     return retcode
 
 
-#-------------------------------------------------------------------------------
-#
 main = diffproxy_main
 
 if __name__ == '__main__':

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -17,8 +16,6 @@ from subprocess import Popen, PIPE
 from xxdiff.scripts import tmpprefix
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Graft options on given parser for invocations of xxdiff.
@@ -52,8 +49,6 @@ def options_validate(opts, parser, logs=None):
     pass
 
 
-#-------------------------------------------------------------------------------
-#
 def _run_xxdiff(cmd, opts, stdin):
     """
     Runs the given xxdiff command and return a Popen object.
@@ -93,8 +88,6 @@ def _run_xxdiff(cmd, opts, stdin):
     
     return p
 
-#-------------------------------------------------------------------------------
-#
 decisions = ('ACCEPT', 'REJECT', 'MERGED', 'NODECISION')
 
 def xxdiff_decision(opts, *arguments, **kwds):
@@ -207,8 +200,6 @@ def xxdiff_decision(opts, *arguments, **kwds):
     return waiter()
 
 
-#-------------------------------------------------------------------------------
-#
 def xxdiff_display(opts, *arguments, **kwds):
     """
     Runs xxdiff with the given arguments, passed directly to subprocess.call().
@@ -279,8 +270,6 @@ def xxdiff_display(opts, *arguments, **kwds):
     return waiter()
 
 
-#-------------------------------------------------------------------------------
-#
 def title_opts(*titles):
     """
     Generate title options for each of the given titles.  This returns a list of
@@ -294,8 +283,6 @@ def title_opts(*titles):
     return topts
 
 
-#-------------------------------------------------------------------------------
-#
 def test():
     """
     Test launcher.

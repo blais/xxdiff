@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -30,8 +29,6 @@ from os.path import *
 from xxdiff.scripts import script_name
 
 
-#-------------------------------------------------------------------------------
-#
 resilient_dir = join(os.environ['HOME'], '.%s' % script_name)
 
 def resilient_for_paths(paths):

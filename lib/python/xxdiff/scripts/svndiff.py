@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-svn-diff [<options>] <file> <file> [<file>]
@@ -29,8 +28,6 @@ from xxdiff.scm import subversion
 from xxdiff.scripts.svnforeign import query_unregistered_svn_files
 
 
-#-------------------------------------------------------------------------------
-#
 def review_file(sobj, opts):
     """
     Check the given status object and if necessary, spawn xxdiff on it.
@@ -106,8 +103,6 @@ def review_file(sobj, opts):
 
     return msg, waiter
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -157,8 +152,6 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 def svndiff_main():
     """
     Main program for svn-diff script.
@@ -302,8 +295,6 @@ def svndiff_main():
     hist.delete()
 
     
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(svndiff_main)
 
