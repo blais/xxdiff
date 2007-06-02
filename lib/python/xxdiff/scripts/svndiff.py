@@ -138,6 +138,8 @@ def parse_options():
                                 "These options affect automatic backup of "
                                 "deleted files, if enabled.")
     
+    xxdiff.scripts.install_autocomplete(parser)
+
     opts, args = parser.parse_args()
 
     for mod in xxdiff.backup, xxdiff.invoke, xxdiff.history:

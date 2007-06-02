@@ -42,6 +42,7 @@ def parse_options():
                       help="Do not resolve the conflicts even after a merge "
                       "decision has been made.")
 
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
     # Force to always perform a verbose diff on output.
