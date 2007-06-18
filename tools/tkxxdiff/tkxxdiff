@@ -3,7 +3,7 @@
 exec wish "$0" -- "$@"
 
 # tkxxdiff
-# V1.0, 13 Jun 2007
+# V1.0, 18 Jun 2007
 # A graphic file/directory selector for xxdiff
 # philippe.corbes@laposte.net
 #--------------------------------------------------
@@ -216,7 +216,7 @@ foreach i {1 2} {
 	set f [frame $frame.$i]
 	label $f.lab -text "Directory $i: " -anchor e
 	entry $f.ent -width 40
-	if [string compare $drd($i) $rootdir] { $f.ent insert 0 $drd($i) }
+	$f.ent insert 0 $drd($i)
 	button $f.but -text "Browse..." -command "directoryDialog $frame $f.ent $i"
 	pack $f.lab -side left
 	pack $f.ent -side left -expand yes -fill x
