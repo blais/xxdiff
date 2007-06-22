@@ -4851,7 +4851,7 @@ void XxApp::quitAccept()
          _mainWindow,
          "xxdiff",
          "Some selections are incompatible with your decision, confirm action.",
-         "Accept, discard selections", "Cancel", QString::null, 0, 1
+         "Discard selections", "Cancel", QString::null, 0, 1
       );
       if ( resp == 1 ) {
          // User has canceled.
