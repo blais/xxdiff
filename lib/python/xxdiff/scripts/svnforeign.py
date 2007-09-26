@@ -291,7 +291,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
     # Process foreign files
     for line in out.splitlines():
-        if line[0] == '?':
+        if line[0] in '?~':
             fn = line[7:]
             if filter(lambda x: x[1](fn), conflicts):
                 continue
