@@ -294,7 +294,7 @@ def svndiff_main():
     if opts.history:
         print 
         print '(Review complete, history cleared)'
-    hist.delete()
+        hist.delete()
 
     
 def main():
