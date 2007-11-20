@@ -18,6 +18,172 @@ Next Release
 Qt4
 ---
 
+- Bug with saving with ignored patterns: Which side gets selected?
+
+      Ah I see.
+      The problem is a definitional one.
+      When you say "Save as..", it is not clear what to do with the ignored regions, xxdiff should warn about that.
+      It's indeed a problem...
+
+      The issue is that xxdiff does not output sed commands... it selects the regions and saves the results directly.
+
+      You should probably not use the ignore switch with save... I never considered that case.
+      BTW, "Save As Right" does not mean anything about selecting text from the file on the right, it is the same as "Save As"
+      and selecting the filename of the file on the right.
+
+      THanks for the bug report, I'll add it to the TODO list.
+
+      cheers,
+
+      Lee Gramling wrote:
+      > > Martin,
+      > > Thanks for your quick response, I am sure its just my expectations that
+      > > are wrong but here is better description:
+      > > 
+      > > Run the following command on the files listed below:
+      > >  xxdiff d2.iv d1.iv -A "-I position.*"
+      > > 
+      > > xxdiff when show the following differences:
+      > > d2.iv                                     d1.iv
+      > > position 50 50 200                position 50 50 280     #these are
+      > > ignored and not highlighted
+      > > 
+      > > angle 3.19                            angle 1.57
+      > > 
+      > >  Text3 {
+      > >             string  =
+      > >                  GlobalField {
+      > >                      type    "SFTime"
+      > >                      realTime
+      > >                  }
+      > >                  . realTime
+      > >          }
+      > > 
+      > > Select the right angle 1.57
+      > > and the left Text3 block
+      > > 
+      > > Then do a File->Save as right
+      > > File->Redo diff
+      > > 
+      > > Now the files looks like this:
+      > > d2.iv                                     d1.iv
+      > > position 50 50 200                position 50 50 200     #d1.iv has the
+      > > wrong value for position
+      > > 
+      > > angle 3.19                            angle 1.57
+      > > 
+      > >  Text3 {                                    Text3 {
+      > > string  =                                   string =
+      > > GlobalField {                            GlobalField {
+      > > type    "SFTime"                       type    "SFTime"
+      > > realTime                                   realTime
+      > >  }                                               }
+      > >  . realTime                                .realTime
+      > >   }                                              }
+      > > 
+      > > The ignored position line has been copied to the right file (I would not
+      > > expect this).
+      > > The selected right angle 1.57 is correct and the left selected Text3
+      > > line has been added as expected.
+      > > 
+      > > I guess what I expect is more like what would happen if you ran diff
+      > > with the ignore
+      > >  diff d2.iv d1.iv "-I position.*"
+      > > 15c15
+      > > <             angle   3.19
+      > > ---
+      >> >>             angle   1.57
+      > > 25,32d24
+      > > <          Text3 {
+      > > <             string  =
+      > > <                 GlobalField {
+      > > <                     type    "SFTime"
+      > > <                     realTime
+      > > <                 }
+      > > <                 . realTime
+      > > <         }
+      > > 
+      > > The ignored lines do not get output as sed commands.
+      > > 
+      > > Thanks for your time.
+      > > 
+      > > Lee
+      > > 
+      > > 
+      > >  d1.iv:
+      > >  Separator {
+      > >         PerspectiveCamera {
+      > >             position 50 50 280
+      > >         }
+      > >         Text3 {
+      > >             string  "undefined" =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >         RotationXYZ {
+      > >             axis    Z
+      > >             angle   1.57
+      > >         }
+      > >         Text3 {
+      > >             string  =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >     }
+      > > 
+      > >  d2.iv
+      > >  Separator {
+      > >         PerspectiveCamera {
+      > >             position 50 50 200
+      > >         }
+      > >         Text3 {
+      > >             string  "undefined" =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >         RotationXYZ {
+      > >             axis    Z
+      > >             angle   3.19
+      > >         }
+      > >         Text3 {
+      > >             string  =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >          Text3 {
+      > >             string  =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >     }
+      > > 
+      > > 
+      > > 
+      > > On Nov 19, 2007 10:04 AM, Martin Blais <blais@furius.ca
+      > > <mailto:blais@furius.ca>> wrote:
+      > > 
+      > >     Hi Lee
+      > >     Can you send a step-by-step description to reproduce the problem?
+      > >     I don't quite understand your explanation below.
+      > >     (I would highly doubt a bug in that part of xxdiff at this point.)
+      > >     thx
+
+
 - Apply Trevor Harmon's patch for the port to Qt4.
 
 - Finish half-started save-to-patch feature:
