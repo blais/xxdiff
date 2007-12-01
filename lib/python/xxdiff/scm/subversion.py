@@ -95,9 +95,12 @@ def status(rootdirs):
 
     statii = []
     for line in stdout.splitlines():
+        if not line or re.match('^Performing', line):
+            continue
+
         status = SvnStatus()
         status.parsed_line = line
-        
+
         # The first six columns in the output are each one character wide:
         lc = iter(line)
 
