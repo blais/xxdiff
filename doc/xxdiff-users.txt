@@ -1,7 +1,7 @@
 ===================
    User Comments
 ===================
-:Author: Martin Blais <blais@ewtllc.com>
+:Author: Martin Blais <blais@furius.ca>
 :Date: 2006-11-21
 :Abstract:
 
