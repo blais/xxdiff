@@ -64,7 +64,9 @@ def sqlcompare_main():
         dump = postgresql.dump_schema(db.user, db.dbname, db.schema, opts)
 
         # Parse the dumps, produce an adequate map of its contained objects.
-        db.objmap = postgresql.parse_dump(dump)
+        dump_entries = postgresql.parse_dump(dump)
+        db.objmap = dict(((name, type), contents)
+                         for name, type, contents in dump_entries)
 
     # List all objects that were found.
     for key in sorted(set(db1.objmap.keys() + db2.objmap.keys())):

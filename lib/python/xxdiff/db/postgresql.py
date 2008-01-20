@@ -116,10 +116,16 @@ ct_re = re.compile('^CREATE TABLE.*?(\\().*?(\\);)', re.M|re.S)
 
 def parse_dump(dbdump):
     """
-    Parse a PostgreSQL database dump, extracting all its section into a
-    dictionary (returned).  The keys are built from the Name and Type fields in
-    the header comments.
+    Parse a PostgreSQL database dump, extracting all its section into a list of
+    (name, type, contents) tuples. The entries are built from the Name and Type
+    fields in the header comments. Contents of data chunks for tables are
+    returned as type 'DATA', so if you're going to turn this into a map, be
+    careful to filter out the 'data' entries or concatenate them to the schema
+    (whichever is appropriate for your application).
     """
+
+FIXME you need to parse Data for Name chunks.
+
 
     # Class to contain info about chunks.
     class Chunk:
@@ -151,7 +157,7 @@ def parse_dump(dbdump):
                           ''.join('   %s\n' % x for x in line_cols) +
                           post)
     
-    return dict(((c.name, c.typ), (c.descline + '\n\n' + c.contents))
+    return list((c.name, c.typ, c.descline + '\n\n' + c.contents)
                 for c in chunks)
 
 def dump_chunks(chunks):
