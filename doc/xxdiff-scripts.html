@@ -34,68 +34,69 @@
 xxdiff, to faciliate implementing processes requiring display and selection
 of differences.</p>
 </div>
-<div class="contents topic">
-<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference" href="#introduction" id="id6" name="id6">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
-<li><a class="reference" href="#history" id="id7" name="id7">1.1&nbsp;&nbsp;&nbsp;History</a></li>
+<li><a class="reference" href="#introduction" id="id6">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
+<li><a class="reference" href="#history" id="id7">1.1&nbsp;&nbsp;&nbsp;History</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#xxdiff-s-decision-mode" id="id8" name="id8">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></li>
-<li><a class="reference" href="#looping-and-confirming" id="id9" name="id9">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a><ul class="auto-toc">
-<li><a class="reference" href="#backups" id="id10" name="id10">3.1&nbsp;&nbsp;&nbsp;Backups</a></li>
-<li><a class="reference" href="#write-permissions-checkout" id="id11" name="id11">3.2&nbsp;&nbsp;&nbsp;Write Permissions / Checkout</a></li>
-<li><a class="reference" href="#running-without-graphical-diff" id="id12" name="id12">3.3&nbsp;&nbsp;&nbsp;Running Without Graphical Diff</a></li>
-<li><a class="reference" href="#per-file-conditional-replacement" id="id13" name="id13">3.4&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-cond-replace" id="id14" name="id14">3.4.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cond-replace</span></tt></a></li>
+<li><a class="reference" href="#xxdiff-s-decision-mode" id="id8">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></li>
+<li><a class="reference" href="#looping-and-confirming" id="id9">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a><ul class="auto-toc">
+<li><a class="reference" href="#backups" id="id10">3.1&nbsp;&nbsp;&nbsp;Backups</a></li>
+<li><a class="reference" href="#write-permissions-checkout" id="id11">3.2&nbsp;&nbsp;&nbsp;Write Permissions / Checkout</a></li>
+<li><a class="reference" href="#running-without-graphical-diff" id="id12">3.3&nbsp;&nbsp;&nbsp;Running Without Graphical Diff</a></li>
+<li><a class="reference" href="#per-file-conditional-replacement" id="id13">3.4&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a><ul class="auto-toc">
+<li><a class="reference" href="#xx-cond-replace" id="id14">3.4.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cond-replace</span></tt></a></li>
 </ul>
 </li>
-<li><a class="reference" href="#higher-level-loops" id="id15" name="id15">3.5&nbsp;&nbsp;&nbsp;Higher-Level Loops</a><ul class="auto-toc">
-<li><a class="reference" href="#selecting-files" id="id16" name="id16">3.5.1&nbsp;&nbsp;&nbsp;Selecting Files</a><ul class="auto-toc">
-<li><a class="reference" href="#selecting-by-filename" id="id17" name="id17">3.5.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></li>
-<li><a class="reference" href="#selecting-by-contents" id="id18" name="id18">3.5.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></li>
-<li><a class="reference" href="#selecting-from-a-fixed-list" id="id19" name="id19">3.5.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></li>
-<li><a class="reference" href="#all-options" id="id20" name="id20">3.5.1.4&nbsp;&nbsp;&nbsp;All Options</a></li>
-<li><a class="reference" href="#debugging-the-file-selection-process" id="id21" name="id21">3.5.1.5&nbsp;&nbsp;&nbsp;Debugging The File Selection Process</a></li>
+<li><a class="reference" href="#higher-level-loops" id="id15">3.5&nbsp;&nbsp;&nbsp;Higher-Level Loops</a><ul class="auto-toc">
+<li><a class="reference" href="#selecting-files" id="id16">3.5.1&nbsp;&nbsp;&nbsp;Selecting Files</a><ul class="auto-toc">
+<li><a class="reference" href="#selecting-by-filename" id="id17">3.5.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></li>
+<li><a class="reference" href="#selecting-by-contents" id="id18">3.5.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></li>
+<li><a class="reference" href="#selecting-from-a-fixed-list" id="id19">3.5.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></li>
+<li><a class="reference" href="#all-options" id="id20">3.5.1.4&nbsp;&nbsp;&nbsp;All Options</a></li>
+<li><a class="reference" href="#debugging-the-file-selection-process" id="id21">3.5.1.5&nbsp;&nbsp;&nbsp;Debugging The File Selection Process</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#xx-filter" id="id22" name="id22">3.5.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-filter</span></tt></a></li>
-<li><a class="reference" href="#xx-rename" id="id23" name="id23">3.5.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-rename</span></tt></a></li>
-<li><a class="reference" href="#xx-find-grep-sed" id="id24" name="id24">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></li>
-<li><a class="reference" href="#xx-pyline" id="id25" name="id25">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></li>
-<li><a class="reference" href="#writing-other-transformation-loops" id="id26" name="id26">3.5.6&nbsp;&nbsp;&nbsp;Writing Other Transformation Loops</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference" href="#xx-match" id="id27" name="id27">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-match</span></tt></a></li>
-<li><a class="reference" href="#cvs-support" id="id28" name="id28">5&nbsp;&nbsp;&nbsp;CVS Support</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-cvs-diff" id="id29" name="id29">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cvs-diff</span></tt></a></li>
-<li><a class="reference" href="#resolving-cvs-conflicts" id="id30" name="id30">5.2&nbsp;&nbsp;&nbsp;Resolving CVS Conflicts</a></li>
-</ul>
-</li>
-<li><a class="reference" href="#subversion-support" id="id31" name="id31">6&nbsp;&nbsp;&nbsp;Subversion Support</a><ul class="auto-toc">
-<li><a class="reference" href="#ignoring-svn-files-in-loops" id="id32" name="id32">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></li>
-<li><a class="reference" href="#xx-diff-proxy" id="id33" name="id33">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-diff-proxy</span></tt></a></li>
-<li><a class="reference" href="#xx-svn-diff" id="id34" name="id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt></a><ul class="auto-toc">
-<li><a class="reference" href="#future-features" id="id35" name="id35">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></li>
-</ul>
-</li>
-<li><a class="reference" href="#xx-svn-resolve" id="id36" name="id36">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-resolve</span></tt></a></li>
-<li><a class="reference" href="#handling-unregistered-files" id="id37" name="id37">6.5&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a><ul class="auto-toc">
-<li><a class="reference" href="#svn-foreign" id="id38" name="id38">6.5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></li>
+<li><a class="reference" href="#xx-filter" id="id22">3.5.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-filter</span></tt></a></li>
+<li><a class="reference" href="#xx-rename" id="id23">3.5.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-rename</span></tt></a></li>
+<li><a class="reference" href="#xx-find-grep-sed" id="id24">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></li>
+<li><a class="reference" href="#xx-pyline" id="id25">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></li>
+<li><a class="reference" href="#writing-other-transformation-loops" id="id26">3.5.6&nbsp;&nbsp;&nbsp;Writing Other Transformation Loops</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference" href="#encrypted-files" id="id39" name="id39">7&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-encrypted" id="id40" name="id40">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></li>
+<li><a class="reference" href="#xx-match" id="id27">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-match</span></tt></a></li>
+<li><a class="reference" href="#cvs-support" id="id28">5&nbsp;&nbsp;&nbsp;CVS Support</a><ul class="auto-toc">
+<li><a class="reference" href="#xx-cvs-diff" id="id29">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cvs-diff</span></tt></a></li>
+<li><a class="reference" href="#resolving-cvs-conflicts" id="id30">5.2&nbsp;&nbsp;&nbsp;Resolving CVS Conflicts</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id41" name="id41">8&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
-<li><a class="reference" href="#comparing-sql-schemas" id="id42" name="id42">9&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></li>
-<li><a class="reference" href="#writing-your-own-scripts" id="id43" name="id43">10&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
-<li><a class="reference" href="#questions" id="id44" name="id44">11&nbsp;&nbsp;&nbsp;Questions</a></li>
+<li><a class="reference" href="#subversion-support" id="id31">6&nbsp;&nbsp;&nbsp;Subversion Support</a><ul class="auto-toc">
+<li><a class="reference" href="#ignoring-svn-files-in-loops" id="id32">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></li>
+<li><a class="reference" href="#xx-diff-proxy" id="id33">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-diff-proxy</span></tt></a></li>
+<li><a class="reference" href="#xx-svn-diff" id="id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt></a><ul class="auto-toc">
+<li><a class="reference" href="#future-features" id="id35">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#xx-svn-resolve" id="id36">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-resolve</span></tt></a></li>
+<li><a class="reference" href="#handling-unregistered-files" id="id37">6.5&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a><ul class="auto-toc">
+<li><a class="reference" href="#svn-foreign" id="id38">6.5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference" href="#mercurial-support" id="id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a></li>
+<li><a class="reference" href="#encrypted-files" id="id40">8&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
+<li><a class="reference" href="#xx-encrypted" id="id41">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id42">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
+<li><a class="reference" href="#comparing-sql-schemas" id="id43">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></li>
+<li><a class="reference" href="#writing-your-own-scripts" id="id44">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
+<li><a class="reference" href="#questions" id="id45">12&nbsp;&nbsp;&nbsp;Questions</a></li>
 </ul>
 </div>
 <!-- 1   Introduction
@@ -131,14 +132,15 @@ of differences.</p>
   6.4  ``xx-svn-resolve``
   6.5  Handling Unregistered Files
     6.5.1  ``svn-foreign``
-7   Encrypted Files
-  7.1  ``xx-encrypted``
-8   Pre-Visualizing And Cherry-Picking From Patches
-9   Comparing SQL Schemas
-10  Writing Your Own Scripts
-11  Questions -->
-<div class="section">
-<h1><a class="toc-backref" href="#id6" id="introduction" name="introduction">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
+7   Mercurial Support
+8   Encrypted Files
+  8.1  ``xx-encrypted``
+9   Pre-Visualizing And Cherry-Picking From Patches
+10  Comparing SQL Schemas
+11  Writing Your Own Scripts
+12  Questions -->
+<div class="section" id="introduction">
+<h1><a class="toc-backref" href="#id6">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
 <p>xxdiff is a computer program that allows a user (usually a software developer of
 some sort) to easily visualize the differences between files.  The manner and
 goal for which this process is applied over multiple files is highly dependent
@@ -149,8 +151,8 @@ changes in files for the purpose of accepting or rejecting a submitted changeset
 to a codebase.  Another example is that of a developer wishing to review the
 changes he made to a checkout of files from a source-code management system such
 as CVS, Subversion, ClearCase, Perforce, etc.</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id7" id="history" name="history">1.1&nbsp;&nbsp;&nbsp;History</a></h2>
+<div class="section" id="history">
+<h2><a class="toc-backref" href="#id7">1.1&nbsp;&nbsp;&nbsp;History</a></h2>
 <p>xxdiff has been developed in a corporate environment with hundreds of users.
 Over time, it has been progressively augmented with features to allow it to
 better interact with caller scripts, and many of Python scripts were provided as
@@ -162,8 +164,8 @@ other, new, custom scripts.</p>
 with xxdiff, implemented using the same code.</p>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id8" id="xxdiff-s-decision-mode" name="xxdiff-s-decision-mode">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></h1>
+<div class="section" id="xxdiff-s-decision-mode">
+<h1><a class="toc-backref" href="#id8">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></h1>
 <p>The prototypical task of carrying out a merge is that of visualizing and
 accepting or rejecting all or some changes to a file, changes from a source file
 (e.g. in the case of an update, these are changes forced by other developers) to
@@ -183,19 +185,19 @@ either files to produce a merged output file.</p>
 <p>Therefore, in order to answer the needs above in the context of a script
 querying the user for actions to be carried out, a special mode was added to
 xxdiff, that <em>forces</em> the user to answer with either &#8220;accept&#8221;, &#8220;reject&#8221; or
-&#8220;merge&#8221; <a class="footnote-reference" href="#id2" id="id1" name="id1">[1]</a>.  xxdiff takes special precautions to ensure that the file you
+&#8220;merge&#8221; <a class="footnote-reference" href="#id2" id="id1">[1]</a>.  xxdiff takes special precautions to ensure that the file you
 decide to output is complete, for example, if you answer with <em>merge</em>, it
 insures that you have made a decision about all the diff hunks.</p>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1" name="id2">[1]</a></td><td>This mode is invoked with the <tt class="docutils literal"><span class="pre">--decision</span></tt> switch, and the corresponding
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>This mode is invoked with the <tt class="docutils literal"><span class="pre">--decision</span></tt> switch, and the corresponding
 keys are <tt class="docutils literal"><span class="pre">A</span></tt>, <tt class="docutils literal"><span class="pre">R</span></tt> and <tt class="docutils literal"><span class="pre">M</span></tt>.</td></tr>
 </tbody>
 </table>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id9" id="looping-and-confirming" name="looping-and-confirming">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a></h1>
+<div class="section" id="looping-and-confirming">
+<h1><a class="toc-backref" href="#id9">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a></h1>
 <p>A very commonly occuring case is that of having to loop over multiple files for
 changes, either from an update from a source code repository, or applying a set
 of modifications to a file via a program--such as sed--and reviewing and
@@ -228,8 +230,8 @@ the files.</li>
 </ol>
 <p>The provided scripts allow you to carry out some of these tasks in different
 combinations.</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id10" id="backups" name="backups">3.1&nbsp;&nbsp;&nbsp;Backups</a></h2>
+<div class="section" id="backups">
+<h2><a class="toc-backref" href="#id10">3.1&nbsp;&nbsp;&nbsp;Backups</a></h2>
 <p>File backups are automatically created.  There are a few options about where to
 put the backup files:</p>
 <ul>
@@ -258,13 +260,13 @@ File backup options:
 some files are the same, the backed up files get overwritten (a warning is
 displayed).</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id11" id="write-permissions-checkout" name="write-permissions-checkout">3.2&nbsp;&nbsp;&nbsp;Write Permissions / Checkout</a></h2>
+<div class="section" id="write-permissions-checkout">
+<h2><a class="toc-backref" href="#id11">3.2&nbsp;&nbsp;&nbsp;Write Permissions / Checkout</a></h2>
 <p>Some SCM systems require the user to <em>checkout</em> files to make them writable,
 like ClearCase (under certain configurations).  There are options to do that.</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id12" id="running-without-graphical-diff" name="running-without-graphical-diff">3.3&nbsp;&nbsp;&nbsp;Running Without Graphical Diff</a></h2>
+<div class="section" id="running-without-graphical-diff">
+<h2><a class="toc-backref" href="#id12">3.3&nbsp;&nbsp;&nbsp;Running Without Graphical Diff</a></h2>
 <p>There is a <tt class="docutils literal"><span class="pre">--no-confirm</span></tt> option that runs the transformation, accepting the
 changes on all the files, producing a nice log of all the changes applied,
 without querying the user with a graphical diff at all.  This is useful when
@@ -273,11 +275,11 @@ confident that your transformation code will not fail.  If you have a large
 codebase to process, you may prefer to just apply unconditionally and them
 visualize the changes in the textual side-by-side diff log.</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id13" id="per-file-conditional-replacement" name="per-file-conditional-replacement">3.4&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a></h2>
+<div class="section" id="per-file-conditional-replacement">
+<h2><a class="toc-backref" href="#id13">3.4&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a></h2>
 <p>We can easily implement the (c) part without embedding it in a loop.</p>
-<div class="section">
-<h3><a class="toc-backref" href="#id14" id="xx-cond-replace" name="xx-cond-replace">3.4.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cond-replace</span></tt></a></h3>
+<div class="section" id="xx-cond-replace">
+<h3><a class="toc-backref" href="#id14">3.4.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cond-replace</span></tt></a></h3>
 <p>This program is akin to the UNIX command <tt class="docutils literal"><span class="pre">cp</span></tt>, but its actions are conditional
 to your feedback within xxdiff.  If you <em>accept</em>, the target file is overwritten
 with the contents of the source file.  If you <em>reject</em>, nothing happens to the
@@ -302,19 +304,19 @@ directory root, make sure to use the <tt class="docutils literal"><span class="p
 </div>
 </div>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id15" id="higher-level-loops" name="higher-level-loops">3.5&nbsp;&nbsp;&nbsp;Higher-Level Loops</a></h2>
+<div class="section" id="higher-level-loops">
+<h2><a class="toc-backref" href="#id15">3.5&nbsp;&nbsp;&nbsp;Higher-Level Loops</a></h2>
 <p>Many of the find-loops that occur in practice are very simple, e.g. replace a
 string in all the files ending with <tt class="docutils literal"><span class="pre">.h</span></tt> and <tt class="docutils literal"><span class="pre">.cpp</span></tt>.  For this purpose, we
 have implemented a few scripts that perform the loop for you.  This is the
 functionality mentioned as (a) in the introduction.</p>
-<div class="section">
-<h3><a class="toc-backref" href="#id16" id="selecting-files" name="selecting-files">3.5.1&nbsp;&nbsp;&nbsp;Selecting Files</a></h3>
+<div class="section" id="selecting-files">
+<h3><a class="toc-backref" href="#id16">3.5.1&nbsp;&nbsp;&nbsp;Selecting Files</a></h3>
 <p>These scripts all work from the same loop: a recursive walk of all the files in
 a set of root directories, by default the current directory.  The selection
 process embodies common patterns for selecting files.</p>
-<div class="section">
-<h4><a class="toc-backref" href="#id17" id="selecting-by-filename" name="selecting-by-filename">3.5.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></h4>
+<div class="section" id="selecting-by-filename">
+<h4><a class="toc-backref" href="#id17">3.5.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></h4>
 <p>You can restrict and ignore files by filename, for example, to select all the
 .html and .htm files, you could use:</p>
 <pre class="literal-block">
@@ -326,16 +328,16 @@ xx-rename -I \.svn --select='.*.htm$' --select='.*.html$' ...
 do not.</p>
 </div>
 </div>
-<div class="section">
-<h4><a class="toc-backref" href="#id18" id="selecting-by-contents" name="selecting-by-contents">3.5.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></h4>
+<div class="section" id="selecting-by-contents">
+<h4><a class="toc-backref" href="#id18">3.5.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></h4>
 <p>There are switches that allow you to <em>grep</em> the files for some patterns in order
 to determine if they should be processed or not, e.g.:</p>
 <pre class="literal-block">
 xx-rename --select-grep='^#include' FROM TO
 </pre>
 </div>
-<div class="section">
-<h4><a class="toc-backref" href="#id19" id="selecting-from-a-fixed-list" name="selecting-from-a-fixed-list">3.5.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></h4>
+<div class="section" id="selecting-from-a-fixed-list">
+<h4><a class="toc-backref" href="#id19">3.5.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></h4>
 <p>You can also instruct the scripts to work on a fixed set of filenames, which you
 provide via a file:</p>
 <pre class="literal-block">
@@ -344,8 +346,8 @@ xx-rename --select-from-file=/tmp/procfiles FROM TO
 <p>Where <tt class="docutils literal"><span class="pre">/tmp/procfiles</span></tt> would have been generated by your beforehand, in any
 way you like.</p>
 </div>
-<div class="section">
-<h4><a class="toc-backref" href="#id20" id="all-options" name="all-options">3.5.1.4&nbsp;&nbsp;&nbsp;All Options</a></h4>
+<div class="section" id="all-options">
+<h4><a class="toc-backref" href="#id20">3.5.1.4&nbsp;&nbsp;&nbsp;All Options</a></h4>
 <p>Here is the full set of options (as of [2006-03-31]):</p>
 <pre class="literal-block">
 File selection options:
@@ -377,8 +379,8 @@ File selection options:
                       roots.
 </pre>
 </div>
-<div class="section">
-<h4><a class="toc-backref" href="#id21" id="debugging-the-file-selection-process" name="debugging-the-file-selection-process">3.5.1.5&nbsp;&nbsp;&nbsp;Debugging The File Selection Process</a></h4>
+<div class="section" id="debugging-the-file-selection-process">
+<h4><a class="toc-backref" href="#id21">3.5.1.5&nbsp;&nbsp;&nbsp;Debugging The File Selection Process</a></h4>
 <p>To test which files are going to be selected before running your modification
 command, you can use the <tt class="docutils literal"><span class="pre">--select-debug</span></tt> switch (or <tt class="docutils literal"><span class="pre">-&#64;</span></tt>) to view the list,
 e.g.:</p>
@@ -397,8 +399,8 @@ xx-rename --cpp 'Application', 'LargeApplication' -&#64;
 </pre>
 </div>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id22" id="xx-filter" name="xx-filter">3.5.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-filter</span></tt></a></h3>
+<div class="section" id="xx-filter">
+<h3><a class="toc-backref" href="#id22">3.5.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-filter</span></tt></a></h3>
 <p>This script invokes the selection loop (a), runs a command that you specify and
 invokes xxdiff on each result (c).  It basically directs the process, and runs
 should UNIX filter command in a shell for you.  You command must be a filter,
@@ -410,8 +412,8 @@ xx-filter 'tr -s \\n'
 <p>The output will be a log of all the decisions that were made and all
 the changes that were applied, as a side-by-side log.</p>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id23" id="xx-rename" name="xx-rename">3.5.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-rename</span></tt></a></h3>
+<div class="section" id="xx-rename">
+<h3><a class="toc-backref" href="#id23">3.5.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-rename</span></tt></a></h3>
 <p>By far, the most common use case for this kind of process is that of renaming a
 string or text matched by a regular expression by another string.  This works
 similarly to the <strong>sed</strong> <tt class="docutils literal"><span class="pre">s/FROM/TO/g</span></tt> program expression.</p>
@@ -426,8 +428,8 @@ command-line:</p>
 xx-rename from1 to1 from2 to2 from3 to3
 </pre>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id24" id="xx-find-grep-sed" name="xx-find-grep-sed">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></h3>
+<div class="section" id="xx-find-grep-sed">
+<h3><a class="toc-backref" href="#id24">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></h3>
 <p>This script is a relic of the past, the actual ancestor to all of this.  You
 see, this used to be a Bourne shell script, before it became something called
 <tt class="docutils literal"><span class="pre">cc_multi</span></tt>--its first Python incarnation.  We then used to perform a grep in a
@@ -445,8 +447,8 @@ xx-filter --select-grep='class Frobni.*' &quot;sed -e 's/Frobnica/Brofnica/g'&qu
 and I provide it to support those who already have it in their process, but
 really, it should go.</p>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id25" id="xx-pyline" name="xx-pyline">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></h3>
+<div class="section" id="xx-pyline">
+<h3><a class="toc-backref" href="#id25">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></h3>
 <p>In the Python cookbook, <a class="reference" href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/437932">this recipe</a> proposes to compile and run a Python
 expression on lines, similar to sed, but just using Python code.  With the new
 scripting infrastructure, it was trivial to build another transformation program
@@ -455,8 +457,8 @@ that uses that method.  Here is an example:</p>
 xx-pyline -m os &quot;os.stat(line).st_size &gt; 1024 and line&quot;
 </pre>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id26" id="writing-other-transformation-loops" name="writing-other-transformation-loops">3.5.6&nbsp;&nbsp;&nbsp;Writing Other Transformation Loops</a></h3>
+<div class="section" id="writing-other-transformation-loops">
+<h3><a class="toc-backref" href="#id26">3.5.6&nbsp;&nbsp;&nbsp;Writing Other Transformation Loops</a></h3>
 <p>With the provided Python package, it is quite easy to create a new program to
 process a file in your own very customly way and to use the visualization and
 confirmation loop described above.  You need to do the following:</p>
@@ -504,8 +506,8 @@ the scripts provided with the package as examples, they all follow that pattern.
 </div>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id27" id="xx-match" name="xx-match">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-match</span></tt></a></h1>
+<div class="section" id="xx-match">
+<h1><a class="toc-backref" href="#id27">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-match</span></tt></a></h1>
 <p>One day, a silly man asked me the following question via email:</p>
 <blockquote>
 &#8220;Why is it that when I call <tt class="docutils literal"><span class="pre">xxdiff</span> <span class="pre">dir1/*.c</span> <span class="pre">dir2/*.c</span></tt> it doesn't work?&#8221;</blockquote>
@@ -524,10 +526,10 @@ a more generic version of this available in my <a class="reference" href="http:/
 match-files -x '--single' dir1/*.c dir2/*.c | xargs -n2 xxdiff
 </pre>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id28" id="cvs-support" name="cvs-support">5&nbsp;&nbsp;&nbsp;CVS Support</a></h1>
-<div class="section">
-<h2><a class="toc-backref" href="#id29" id="xx-cvs-diff" name="xx-cvs-diff">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cvs-diff</span></tt></a></h2>
+<div class="section" id="cvs-support">
+<h1><a class="toc-backref" href="#id28">5&nbsp;&nbsp;&nbsp;CVS Support</a></h1>
+<div class="section" id="xx-cvs-diff">
+<h2><a class="toc-backref" href="#id29">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cvs-diff</span></tt></a></h2>
 <p>I wanted to be able to preview the changes that I had made in a CVS checkout.
 This script does it.  It pulls the original versions from the server by using
 <tt class="docutils literal"><span class="pre">cvs</span> <span class="pre">diff</span></tt>, which is very efficient as it provides a single file with all the
@@ -537,20 +539,20 @@ changes.</p>
 packaged architecture of xxdiff Python code it should be easy to create new
 scripts for it if you need to.</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id30" id="resolving-cvs-conflicts" name="resolving-cvs-conflicts">5.2&nbsp;&nbsp;&nbsp;Resolving CVS Conflicts</a></h2>
+<div class="section" id="resolving-cvs-conflicts">
+<h2><a class="toc-backref" href="#id30">5.2&nbsp;&nbsp;&nbsp;Resolving CVS Conflicts</a></h2>
 <p>Back in the days where xxdiff did not have any scripts, I implemented unmerging
 of CVS conflict markers directly in xxdiff itself (should I have to do this
 today I would definitely implement that in a script instead).  Just can just
 invoke xxdiff with the <tt class="docutils literal"><span class="pre">--unmerge</span></tt> or <tt class="docutils literal"><span class="pre">--unmerge3</span></tt> options to do that.</p>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id31" id="subversion-support" name="subversion-support">6&nbsp;&nbsp;&nbsp;Subversion Support</a></h1>
+<div class="section" id="subversion-support">
+<h1><a class="toc-backref" href="#id31">6&nbsp;&nbsp;&nbsp;Subversion Support</a></h1>
 <p>Since 2005, I have switched my repository of files to Subversion and I will
 therefore begin producing more support for this SCM.</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id32" id="ignoring-svn-files-in-loops" name="ignoring-svn-files-in-loops">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></h2>
+<div class="section" id="ignoring-svn-files-in-loops">
+<h2><a class="toc-backref" href="#id32">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></h2>
 <p>If you use any of the looping scripts described before in a Subversion checkout,
 you can avoid changing the administrative files stored in the .svn directories
 by using the following ignore option:</p>
@@ -560,8 +562,8 @@ xx-rename -I .svn   ...
 <p>Note that by default Subversion and CVS directories are ignored (you can disable
 that with an option).</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id33" id="xx-diff-proxy" name="xx-diff-proxy">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-diff-proxy</span></tt></a></h2>
+<div class="section" id="xx-diff-proxy">
+<h2><a class="toc-backref" href="#id33">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-diff-proxy</span></tt></a></h2>
 <p>Subversion has a diff subcommand:;</p>
 <blockquote>
 svn diff</blockquote>
@@ -584,8 +586,8 @@ need to investigate in which cases it breaks down because I have
 not had problems with it yet, I have not experienced bugs.</p>
 </div>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id34" id="xx-svn-diff" name="xx-svn-diff">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt></a></h2>
+<div class="section" id="xx-svn-diff">
+<h2><a class="toc-backref" href="#id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt></a></h2>
 <p>In my opinion, Subversion provides a diff loop that is rather weak.  I want more
 options in the ways that I can review my changes.  <tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt> runs
 <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">status</span></tt> and then loops over the files using xxdiff.</p>
@@ -602,8 +604,8 @@ select that option, it opens a file editor with the list of files to be
 committed, which allows you to write up your merge comments to be used on the
 subsequent commit.</li>
 </ul>
-<div class="section">
-<h3><a class="toc-backref" href="#id35" id="future-features" name="future-features">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></h3>
+<div class="section" id="future-features">
+<h3><a class="toc-backref" href="#id35">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></h3>
 <ul class="simple">
 <li>It would be nice to be able to optionally automatically spawn a 3-way diff for
 those files which have a newer version on the server.  This would allow you to
@@ -620,8 +622,8 @@ view, in which order I want.</li>
 </ul>
 </div>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id36" id="xx-svn-resolve" name="xx-svn-resolve">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-resolve</span></tt></a></h2>
+<div class="section" id="xx-svn-resolve">
+<h2><a class="toc-backref" href="#id36">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-resolve</span></tt></a></h2>
 <p>Subversion provides a fancier version of conflict resolution: all three files--
 yours, the other and the ancestor--are provided in your checkout to help you
 figure out what happened.  This is a perfect situation for xxdiff: I simply can
@@ -635,13 +637,13 @@ used to resolve the conflict are backed up before the files are removed.</p>
 finds and loops through all the conflicting files recursively to resolve them
 graphically.</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id37" id="handling-unregistered-files" name="handling-unregistered-files">6.5&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a></h2>
+<div class="section" id="handling-unregistered-files">
+<h2><a class="toc-backref" href="#id37">6.5&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a></h2>
 <p>After a long session of work in various checkouts, having to type up commands to
 decide what to do with each unregistered file is a bit tiresome.  I wrote an
 interactive script to handle that.</p>
-<div class="section">
-<h3><a class="toc-backref" href="#id38" id="svn-foreign" name="svn-foreign">6.5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></h3>
+<div class="section" id="svn-foreign">
+<h3><a class="toc-backref" href="#id38">6.5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></h3>
 <p>This script runs an <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">status</span></tt>, outputs that for you to see, and then
 queries the user for what to do with each file that is not registered with
 Subversion.  You can add it, delete the file (with or without backups), mask it
@@ -683,8 +685,31 @@ the xxdiff scripts.  You can copy its file separately and it will still work
 </div>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id39" id="encrypted-files" name="encrypted-files">7&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
+<div class="section" id="mercurial-support">
+<h1><a class="toc-backref" href="#id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a></h1>
+<p>xxdiff already works pretty well with Mercurial for viewing
+differences, all you have to do is to add the following to your
+<tt class="docutils literal"><span class="pre">.hgrc</span></tt> file to view diffs graphically:</p>
+<pre class="literal-block">
+[extensions]
+extdiff =
+
+[extdiff]
+cmd.xdiff = xxdiff
+opts.xdiff = -r
+</pre>
+<p>However, graphical conflict resolution during merging requires a
+wrapper script that will invoke xxdiff in decision mode and that will
+automatically save the merge results where Mercurial expects them. The
+script is called <tt class="docutils literal"><span class="pre">xxdiff-hgmerge</span></tt>, and you will need to add the
+following to your <tt class="docutils literal"><span class="pre">.hgrc</span></tt>:</p>
+<pre class="literal-block">
+[ui]
+merge = xxdiff-hgmerge
+</pre>
+</div>
+<div class="section" id="encrypted-files">
+<h1><a class="toc-backref" href="#id40">8&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
 <p>I maintain some of my more sensitive personal data in ascii-armored encrypted
 files in an CVS/Subversion repository.  I can open, modify and save the files
 from within Emacs without ever writing a non-encrypted version on disk.  This
@@ -703,14 +728,14 @@ from disk</em>.  If the files are encrypted, there is a reason, and you don't wa
 to leave plaintext version of the data on disk.</li>
 </ul>
 <p>This is quite time-consuming.  Let's automate!</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id40" id="xx-encrypted" name="xx-encrypted">7.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></h2>
+<div class="section" id="xx-encrypted">
+<h2><a class="toc-backref" href="#id41">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></h2>
 <p>This script will do all of the above for two encryped files, and it also
 attempts to minimize the amount of time that a decrypted file will live on
 disk--if needed at all.  In the cases where it needs to temporarily write
 decrypted text to disk, as soon as xxdiff finished gulping the files in, it
 deletes them right away.   This is not the super-dooper safest way of doing
-this, but it sure beats doing it all by hand <a class="footnote-reference" href="#id5" id="id4" name="id4">[2]</a>.</p>
+this, but it sure beats doing it all by hand <a class="footnote-reference" href="#id5" id="id4">[2]</a>.</p>
 <p>It also supports unmerging CVS conflict markers in order to obtain the original
 and the new file automatically.  For example:</p>
 <pre class="literal-block">
@@ -719,15 +744,15 @@ xx-encrypted --unmerge  my_secrets.asc
 <table class="docutils footnote" frame="void" id="id5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4" name="id5">[2]</a></td><td>xxdiff could be enhanced to accept input from multiple file descriptors
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>xxdiff could be enhanced to accept input from multiple file descriptors
 to avoid having to use temporary files in most cases.  This just has not
 been done yet.</td></tr>
 </tbody>
 </table>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id41" id="pre-visualizing-and-cherry-picking-from-patches" name="pre-visualizing-and-cherry-picking-from-patches">8&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></h1>
+<div class="section" id="pre-visualizing-and-cherry-picking-from-patches">
+<h1><a class="toc-backref" href="#id42">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></h1>
 <p>I would like to be able to apply a patch to a temporary copy of a set of files,
 and then to visualize the patch's changes, pick and choose the ones that we want
 using xxdiff, and apply them to the original files.  I have started doing some
@@ -744,8 +769,8 @@ correctly?</li>
 <tt class="docutils literal"><span class="pre">xx-patch</span></tt> code remains hidden in the codebase.  If you're interested in
 working on this let me know.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id42" id="comparing-sql-schemas" name="comparing-sql-schemas">9&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></h1>
+<div class="section" id="comparing-sql-schemas">
+<h1><a class="toc-backref" href="#id43">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></h1>
 <p>One annoying problem is that of migrating a database from one schema to
 another.  A typical web application setup has the stable codebase running on the
 server, and test setup running the some other machine, on which the programmer
@@ -775,14 +800,14 @@ quasi-trivial to add support for other databases.</p>
 <p>xxdiff can be used to compare pairs of corresponding objects, and I'm sure that
 there are many other exciting uses that people can apply it to.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id43" id="writing-your-own-scripts" name="writing-your-own-scripts">10&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></h1>
+<div class="section" id="writing-your-own-scripts">
+<h1><a class="toc-backref" href="#id44">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></h1>
 <p>Use the provided scripts as examples.  There are many convenient functions in
 the package that you can leverage from to write your own processing scripts
 around xxdiff.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id44" id="questions" name="questions">11&nbsp;&nbsp;&nbsp;Questions</a></h1>
+<div class="section" id="questions">
+<h1><a class="toc-backref" href="#id45">12&nbsp;&nbsp;&nbsp;Questions</a></h1>
 <p>Any questions should be directed to Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;.
 Contributions appreciated.  If you find these programs useful, drop me a note.</p>
 </div>

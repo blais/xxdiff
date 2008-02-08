@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+"""
+A wrapper script that implements an interface compatible with hgmerge.
+
+From mercurial.merge, this program is invoked like tihs::
+
+    r = util.system('%s "%s" "%s" "%s"' % (cmd, a, b, c), cwd=repo.root,
+                    environ={'HG_FILE': fd,
+                             'HG_MY_NODE': str(wctx.parents()[0]),
+                             'HG_OTHER_NODE': str(mctx),
+                             'HG_MY_ISLINK': fcm.islink(),
+                             'HG_OTHER_ISLINK': fco.islink(),
+                             'HG_BASE_ISLINK': fca.islink(),})
+
+  HG_FILE: the destination filename
+  HG_MY_NODE:
+  HG_OTHER_NODE:
+  HG_MY_ISLINK:
+  HG_OTHER_ISLINK:
+  HG_BASE_ISLINK:
+
+"""
+
+# stdlib imports
+import sys, os, shutil
+
+# xxdiff imports
+from xxdiff import invoke
+
+
+def main():
+    import optparse
+    parser = optparse.OptionParser(__doc__.strip())
+    invoke.options_graft(parser)
+    opts, args = parser.parse_args()
+    invoke.options_validate(opts, parser)
+
+    if len(args) != 3:
+        parser.error("You need to provide 3 arguments.")
+    fl, fb, fr = args
+    
+    # Invoke xxdiff.
+    decision, mergedf, retcode = invoke.xxdiff_decision(
+        '--title1=Current',
+        '--title2=Ancestor',
+        '--title3=Merging',
+        fl, fb, fr)
+
+    # If the user exited normally, copy the merged results to the left file
+    # (because that's what the Mercurial merge.py code expects).
+    if decision != 'NODECISION':
+        shutil.copyfile(mergedf.name, fl)
+        ret = 0
+    else:
+        ret = 1
+
+    mergedf.close()
+    return ret
+
+## FIXME: todo / exit with 0 on success, 1 on error
+
+if __name__ == '__main__':
+    sys.exit(main())
+

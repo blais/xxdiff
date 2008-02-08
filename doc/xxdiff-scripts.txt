@@ -46,12 +46,13 @@
       6.4  ``xx-svn-resolve``
       6.5  Handling Unregistered Files
         6.5.1  ``svn-foreign``
-    7   Encrypted Files
-      7.1  ``xx-encrypted``
-    8   Pre-Visualizing And Cherry-Picking From Patches
-    9   Comparing SQL Schemas
-    10  Writing Your Own Scripts
-    11  Questions
+    7   Mercurial Support
+    8   Encrypted Files
+      8.1  ``xx-encrypted``
+    9   Pre-Visualizing And Cherry-Picking From Patches
+    10  Comparing SQL Schemas
+    11  Writing Your Own Scripts
+    12  Questions
 
 
 Introduction
@@ -664,6 +665,30 @@ Here is an example session::
 internally by some of the them, and also because it reuses the backup module of
 the xxdiff scripts.  You can copy its file separately and it will still work
 (minus the backups).
+
+
+Mercurial Support
+=================
+
+xxdiff already works pretty well with Mercurial for viewing
+differences, all you have to do is to add the following to your
+``.hgrc`` file to view diffs graphically::
+
+  [extensions]
+  extdiff =
+
+  [extdiff]
+  cmd.xdiff = xxdiff
+  opts.xdiff = -r
+
+However, graphical conflict resolution during merging requires a
+wrapper script that will invoke xxdiff in decision mode and that will
+automatically save the merge results where Mercurial expects them. The
+script is called ``xxdiff-hgmerge``, and you will need to add the
+following to your ``.hgrc``::
+
+  [ui]
+  merge = xxdiff-hgmerge
 
 
 Encrypted Files
