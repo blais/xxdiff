@@ -684,7 +684,7 @@ differences, all you have to do is to add the following to your
 However, graphical conflict resolution during merging requires a
 wrapper script that will invoke xxdiff in decision mode and that will
 automatically save the merge results where Mercurial expects them. The
-script is called ``xx-hgmerge``, and you will need to add the
+script is called ``xx-hg-merge``, and you will need to add the
 following to your ``.hgrc``::
 
   [ui]

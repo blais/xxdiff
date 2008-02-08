@@ -3,26 +3,6 @@
 A wrapper script that implements an interface compatible with hgmerge.
 Basically, it needs to exit with 0 on success, and to place the results of the
 merge in the 'left' file.
-
-From mercurial.merge, this program is invoked like tihs::
-
-    r = util.system('%s "%s" "%s" "%s"' % (cmd, a, b, c), cwd=repo.root,
-                    environ={'HG_FILE': fd,
-                             'HG_MY_NODE': str(wctx.parents()[0]),
-                             'HG_OTHER_NODE': str(mctx),
-                             'HG_MY_ISLINK': fcm.islink(),
-                             'HG_OTHER_ISLINK': fco.islink(),
-                             'HG_BASE_ISLINK': fca.islink(),})
-
-The 
-
-  HG_FILE: the destination filename
-  HG_MY_NODE:
-  HG_OTHER_NODE:
-  HG_MY_ISLINK:
-  HG_OTHER_ISLINK:
-  HG_BASE_ISLINK:
-
 """
 
 # stdlib imports
@@ -65,3 +45,22 @@ def main():
 if __name__ == '__main__':
     sys.exit(main())
 
+
+# From mercurial.merge, this program is invoked like tihs::
+# 
+#     r = util.system('%s "%s" "%s" "%s"' % (cmd, a, b, c), cwd=repo.root,
+#                     environ={'HG_FILE': fd,
+#                              'HG_MY_NODE': str(wctx.parents()[0]),
+#                              'HG_OTHER_NODE': str(mctx),
+#                              'HG_MY_ISLINK': fcm.islink(),
+#                              'HG_OTHER_ISLINK': fco.islink(),
+#                              'HG_BASE_ISLINK': fca.islink(),})
+# 
+# The following environment variables are defined by the caller script:
+#
+#   HG_FILE: the destination filename
+#   HG_MY_NODE: ?
+#   HG_OTHER_NODE: ?
+#   HG_MY_ISLINK: ?
+#   HG_OTHER_ISLINK: ?
+#   HG_BASE_ISLINK: ?
