@@ -25,6 +25,7 @@ def main():
     
     # Invoke xxdiff.
     decision, mergedf, retcode = invoke.xxdiff_decision(
+        opts,
         '--title1=Current',
         '--title2=Ancestor',
         '--title3=Merging',

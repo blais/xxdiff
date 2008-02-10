@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+"""
+Test a mercurial merge.
+"""
+
+import sys, os, logging, tempfile, shutil, re
+from subprocess import *
+from os.path import *
+
+
+
+def run_hg(cmd, *args, **kwds):
+    kwds['shell'] = 1
+    return call('hg ' + cmd, *args, **kwds)
+
+def main():
+    import optparse
+    parser = optparse.OptionParser(__doc__.strip())
+    opts, args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO)
+
+    # Delete all previous test directories.
+    tmproot = tempfile.gettempdir()
+    for fn in os.listdir(tmproot):
+        if re.match('hgtest\.', fn):
+            dn = join(tmproot, fn)
+            logging.info('Deleting %s' % dn)
+            shutil.rmtree(dn, ignore_errors=1)
+
+    tmpdir = tempfile.mkdtemp(prefix='hgtest.')
+    logging.info('Temporary directory: %s' % tmpdir)
+
+    # Create a repository.
+    repo1 = join(tmpdir, 'repo1')
+    os.mkdir(repo1)
+    os.chdir(repo1)
+    open('file', 'w').write('**\noriginal\n**\n')
+
+    run_hg('init')
+    run_hg('addremove')
+    run_hg('commit -m "Initial commit"')
+
+    # Edit the repository.
+    open('file', 'w').write('**\nleft\n**\n')
+    run_hg('commit -m "edit 1"', shell=True)
+
+    # Edit on the other side.
+    run_hg('update -C -r 0')
+
+    open('file', 'w').write('**\nright\n**\n')
+    run_hg('commit -m "edit 2"')
+
+    run_hg('update -C -r 1')
+    run_hg('merge -r 2')
+
+    run_hg('commit -m "merged"')
+
+    run_hg('view')
+
+    print
+    print open('file', 'r').read()
+    print
+
+    print
+    print 'cd %s' % repo1
+
+
+if __name__ == '__main__':
+    main()
+
+
