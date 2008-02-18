@@ -88,15 +88,19 @@ of differences.</p>
 </li>
 </ul>
 </li>
-<li><a class="reference" href="#mercurial-support" id="id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a></li>
-<li><a class="reference" href="#encrypted-files" id="id40">8&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-encrypted" id="id41">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></li>
+<li><a class="reference" href="#mercurial-support" id="id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a><ul class="auto-toc">
+<li><a class="reference" href="#after-version-0-9-5" id="id40">7.1&nbsp;&nbsp;&nbsp;After version 0.9.5</a></li>
+<li><a class="reference" href="#before-version-0-9-5" id="id41">7.2&nbsp;&nbsp;&nbsp;Before version 0.9.5</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id42">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
-<li><a class="reference" href="#comparing-sql-schemas" id="id43">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></li>
-<li><a class="reference" href="#writing-your-own-scripts" id="id44">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
-<li><a class="reference" href="#questions" id="id45">12&nbsp;&nbsp;&nbsp;Questions</a></li>
+<li><a class="reference" href="#encrypted-files" id="id42">8&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
+<li><a class="reference" href="#xx-encrypted" id="id43">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id44">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
+<li><a class="reference" href="#comparing-sql-schemas" id="id45">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></li>
+<li><a class="reference" href="#writing-your-own-scripts" id="id46">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
+<li><a class="reference" href="#questions" id="id47">12&nbsp;&nbsp;&nbsp;Questions</a></li>
 </ul>
 </div>
 <!-- 1   Introduction
@@ -133,6 +137,8 @@ of differences.</p>
   6.5  Handling Unregistered Files
     6.5.1  ``svn-foreign``
 7   Mercurial Support
+  7.1  After version 0.9.5
+  7.2  Before version 0.9.5
 8   Encrypted Files
   8.1  ``xx-encrypted``
 9   Pre-Visualizing And Cherry-Picking From Patches
@@ -687,6 +693,15 @@ the xxdiff scripts.  You can copy its file separately and it will still work
 </div>
 <div class="section" id="mercurial-support">
 <h1><a class="toc-backref" href="#id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a></h1>
+<div class="section" id="after-version-0-9-5">
+<h2><a class="toc-backref" href="#id40">7.1&nbsp;&nbsp;&nbsp;After version 0.9.5</a></h2>
+<p>[2008-02-15] Apparently there is a new version of the merge code that
+supports invoking xxdiff directly for doing merges. I have not tried
+it yet, but this should become the way to go once it is released and
+stable.</p>
+</div>
+<div class="section" id="before-version-0-9-5">
+<h2><a class="toc-backref" href="#id41">7.2&nbsp;&nbsp;&nbsp;Before version 0.9.5</a></h2>
 <p>xxdiff already works pretty well with Mercurial for viewing
 differences, all you have to do is to add the following to your
 <tt class="docutils literal"><span class="pre">.hgrc</span></tt> file to view diffs graphically:</p>
@@ -708,8 +723,9 @@ following to your <tt class="docutils literal"><span class="pre">.hgrc</span></t
 merge = xx-hg-merge
 </pre>
 </div>
+</div>
 <div class="section" id="encrypted-files">
-<h1><a class="toc-backref" href="#id40">8&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
+<h1><a class="toc-backref" href="#id42">8&nbsp;&nbsp;&nbsp;Encrypted Files</a></h1>
 <p>I maintain some of my more sensitive personal data in ascii-armored encrypted
 files in an CVS/Subversion repository.  I can open, modify and save the files
 from within Emacs without ever writing a non-encrypted version on disk.  This
@@ -729,7 +745,7 @@ to leave plaintext version of the data on disk.</li>
 </ul>
 <p>This is quite time-consuming.  Let's automate!</p>
 <div class="section" id="xx-encrypted">
-<h2><a class="toc-backref" href="#id41">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></h2>
+<h2><a class="toc-backref" href="#id43">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></h2>
 <p>This script will do all of the above for two encryped files, and it also
 attempts to minimize the amount of time that a decrypted file will live on
 disk--if needed at all.  In the cases where it needs to temporarily write
@@ -752,7 +768,7 @@ been done yet.</td></tr>
 </div>
 </div>
 <div class="section" id="pre-visualizing-and-cherry-picking-from-patches">
-<h1><a class="toc-backref" href="#id42">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></h1>
+<h1><a class="toc-backref" href="#id44">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></h1>
 <p>I would like to be able to apply a patch to a temporary copy of a set of files,
 and then to visualize the patch's changes, pick and choose the ones that we want
 using xxdiff, and apply them to the original files.  I have started doing some
@@ -770,7 +786,7 @@ correctly?</li>
 working on this let me know.</p>
 </div>
 <div class="section" id="comparing-sql-schemas">
-<h1><a class="toc-backref" href="#id43">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></h1>
+<h1><a class="toc-backref" href="#id45">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></h1>
 <p>One annoying problem is that of migrating a database from one schema to
 another.  A typical web application setup has the stable codebase running on the
 server, and test setup running the some other machine, on which the programmer
@@ -801,13 +817,13 @@ quasi-trivial to add support for other databases.</p>
 there are many other exciting uses that people can apply it to.</p>
 </div>
 <div class="section" id="writing-your-own-scripts">
-<h1><a class="toc-backref" href="#id44">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></h1>
+<h1><a class="toc-backref" href="#id46">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></h1>
 <p>Use the provided scripts as examples.  There are many convenient functions in
 the package that you can leverage from to write your own processing scripts
 around xxdiff.</p>
 </div>
 <div class="section" id="questions">
-<h1><a class="toc-backref" href="#id45">12&nbsp;&nbsp;&nbsp;Questions</a></h1>
+<h1><a class="toc-backref" href="#id47">12&nbsp;&nbsp;&nbsp;Questions</a></h1>
 <p>Any questions should be directed to Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;.
 Contributions appreciated.  If you find these programs useful, drop me a note.</p>
 </div>

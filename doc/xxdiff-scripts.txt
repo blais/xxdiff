@@ -47,6 +47,8 @@
       6.5  Handling Unregistered Files
         6.5.1  ``svn-foreign``
     7   Mercurial Support
+      7.1  After version 0.9.5
+      7.2  Before version 0.9.5
     8   Encrypted Files
       8.1  ``xx-encrypted``
     9   Pre-Visualizing And Cherry-Picking From Patches
@@ -669,6 +671,18 @@ the xxdiff scripts.  You can copy its file separately and it will still work
 
 Mercurial Support
 =================
+
+After version 0.9.5
+-------------------
+
+[2008-02-15] Apparently there is a new version of the merge code that
+supports invoking xxdiff directly for doing merges. I have not tried
+it yet, but this should become the way to go once it is released and
+stable.
+
+
+Before version 0.9.5
+--------------------
 
 xxdiff already works pretty well with Mercurial for viewing
 differences, all you have to do is to add the following to your
