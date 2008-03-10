@@ -289,7 +289,8 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                     write('(Quitting.)\n')
                     return False
 
-                elif c == 'r': # Restart from scratch (perhaps after an ignore)
+                elif c == 'r': # Restart from scratch
+                    # (perhaps you invoke that after adding an ignore wildcard.)
                     return query_unregistered_svn_files(filenames, opts, output, ignore)
 
     # Process foreign files
@@ -396,7 +397,8 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                     write('(Quitting.)\n')
                     return False
 
-                elif c == 'r': # Restart from scratch (perhaps after an ignore)
+                elif c == 'r': # Restart from scratch
+                    # (perhaps you invoke that after adding an ignore wildcard.)
                     return query_unregistered_svn_files(filenames, opts, output, ignore)
 
                 elif c in 'v': # View

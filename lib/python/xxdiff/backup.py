@@ -61,7 +61,9 @@ def backup_file(fn, opts, logs=None):
     - 'fn': filename to backup -> string
     - 'opts': program options -> Options instance
     """
-
+    if hasattr(logs, 'write'):
+        logs = logs.write
+        
     # Compute destination backup filename
     if opts.backup_type == 'along':
         # Search for a non-existing backup filename alongside the original
@@ -97,9 +99,9 @@ def backup_file(fn, opts, logs=None):
 
         backupfn = join(opts.backup_dir, relfn)
 
-        if opts.verbose >= 0 and exists(backupfn):
-            logs.write("(Warning: Overwriting existing file in backup '%s')\n" %
-                       backupfn)
+        if opts.verbose >= 0 and exists(backupfn) and logs:
+            logs("(Warning: Overwriting existing file in backup '%s')\n" %
+                 backupfn)
         
     else: # opts.backup_type == 'none'
         backupfn = None
@@ -107,7 +109,7 @@ def backup_file(fn, opts, logs=None):
     if backupfn:
         # Perform the backup
         if logs and opts.verbose >= 3:
-            logs.write('Backup: %s\n' % backupfn)
+            logs('Backup: %s\n' % backupfn)
 
         # Make sure that the destination directory exists
         ddn = dirname(backupfn)
