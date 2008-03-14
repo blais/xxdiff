@@ -66,7 +66,7 @@ def istextfile(fn):
     p = Popen(guesscmd + [fn], stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
     if p.returncode != 0 or stderr or stdout.startswith('cannot open'):
-        raise RuntimeError("Error: Running 'file' on '%s'." % fn)
+        raise RuntimeError("Error: running 'file' on '%s'." % fn)
 
     return bool(text_re.search(stdout) or empty_re.match(stdout))
 

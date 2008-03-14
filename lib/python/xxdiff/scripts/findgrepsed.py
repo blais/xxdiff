@@ -64,7 +64,7 @@ class GrepSedTransformer(xxdiff.xformloop.Transformer):
         try:
             stdout, stderr = p.communicate(text)
         except OSError, e:
-            raise SystemExit("Error: Running sed command '%s':\n%s" %
+            raise SystemExit("Error: running sed command '%s':\n%s" %
                              (self.sedprog, p.stderr.read()))
 
         if p.returncode != 0:

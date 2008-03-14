@@ -86,7 +86,7 @@ def spawn_editor(initcontents=None, filename=None):
         "Waiter closure."
         stdout, stderr = p.communicate()
         if stderr:
-            raise RuntimeError("Error running editor:\n%s\n" % stderr)
+            raise RuntimeError("Error: running editor:\n%s\n" % stderr)
         writtenf = open(tmpf.name, 'r')
         text = writtenf.read()
         writtenf.close()

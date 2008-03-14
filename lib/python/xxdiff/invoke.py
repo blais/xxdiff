@@ -8,7 +8,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import os, optparse, tempfile
+import os, optparse, tempfile, logging
 from os.path import *
 from subprocess import Popen, PIPE
 
@@ -80,7 +80,7 @@ def _run_xxdiff(cmd, opts, stdin):
         extramsg = ''
         if e.errno == 2:
             extramsg = '\nHint: Check if xxdiff is accessible in your path.'
-        raise SystemExit("Error: Running xxdiff '%s'" % e + extramsg)
+        raise SystemExit("Error: running xxdiff '%s'" % e + extramsg)
 
     # Write the given text to stdin if necessary.
     if intype is PIPE:
@@ -158,17 +158,17 @@ def xxdiff_decision(opts, *arguments, **kwds):
 
         # If xxdiff failed, we bail out of the script.
         if p.returncode == 2:
-            raise SystemExit(
-                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
-                stderr)
+            logging.error("Error: running xxdiff as '%s'.\n" %
+                          ' '.join(cmd) + stderr)
+            return 'NODECISION', None, -1
 
         # Get the decision code from xxdiff.
         lines = stdout.splitlines()
         if not lines:
-            raise SystemExit(
-                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
-                stderr)
-            
+            logging.error("Error: running xxdiff as '%s'.\n" %
+                          ' '.join(cmd) + stderr)
+            return 'NODECISION', None, -1
+
         decision = lines[0].strip()
         assert decision in decisions
 
@@ -190,9 +190,8 @@ def xxdiff_decision(opts, *arguments, **kwds):
         line = p.stdout.readline().strip()
         if line != 'INPUT-PROCESSED':
             stdout, stderr = p.communicate()
-            raise SystemExit(
-                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
-                stderr)
+            logging.error("Error: running xxdiff as '%s'.\n" %
+                          ' '.join(cmd) + stderr)
             
         return waiter
 
@@ -244,9 +243,9 @@ def xxdiff_display(opts, *arguments, **kwds):
 
         # If xxdiff failed, we bail out of the script.
         if p.returncode == 2:
-            raise SystemExit(
-                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
-                stderr)
+            logging.error("Error: running xxdiff as '%s'.\n" %
+                          ' '.join(cmd) + stderr)
+            return -1
 
         return p.returncode
 
@@ -260,9 +259,8 @@ def xxdiff_display(opts, *arguments, **kwds):
         line = p.stdout.readline().strip()
         if line != 'INPUT-PROCESSED':
             stdout, stderr = p.communicate()
-            raise SystemExit(
-                "Error: Running xxdiff as '%s'. Aborting.\n" % ' '.join(cmd) +
-                stderr)
+            logging.error("Error: running xxdiff as '%s'.\n" %
+                          ' '.join(cmd) + stderr)
             
         return waiter
 
