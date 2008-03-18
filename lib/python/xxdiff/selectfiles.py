@@ -99,7 +99,7 @@ def options_graft(parser):
     return group
 
 
-ignore_defaults = ('.svn', 'CVS')
+ignore_defaults = ('CVS', '.svn', '.hg')
 
 def options_validate(opts, parser, logs=None):
     """
