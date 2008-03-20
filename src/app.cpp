@@ -1254,7 +1254,7 @@ void XxApp::createMenus()
       );
       if ( _nbFiles == 3 ) {
          /*ids[7] = */fileMenu->insertItem(
-            "Generate patch against middle", this, 
+            "Generate patch against middle", this,
             SLOT(generatePatchFromMiddle()),
             _resources->getAccelerator( ACCEL_PATCH_FROM_MIDDLE )
          );
@@ -3165,7 +3165,7 @@ void XxApp::generatePatchFromLeft()
    XxBuffer* buf = getBuffer( 0 );
    if ( buf != 0 ) {
 
-      // Save the merged file.  
+      // Save the merged file.
       //
       // Note: we don't really need to have the temporary file opened here, we
       // just need its filename.
@@ -3676,6 +3676,12 @@ void XxApp::diffFilesAtCursor()
          // FIXME: it would be nice here to be able to say that the file should
          // display on the right side if this is an insert hunk in a directory
          // diff.
+
+         // If the file is a directory, do nothing.
+         QFileInfo finfo( filenames[0] );
+         if ( finfo.isDir() ) {
+            return;
+         }
       }
 
       const char** args;
@@ -4844,7 +4850,7 @@ bool XxApp::computeAbsoluteDifference() const
 void XxApp::quitAccept()
 {
    // Confirm with the user if some incompatible selections were made.
-   if ( _diffs->hasSelectionsOtherThan( 
+   if ( _diffs->hasSelectionsOtherThan(
            _nbFiles == 2 ? XxLine::SEL2 : XxLine::SEL3 ) ) {
 
       int resp = QMessageBox::warning(
