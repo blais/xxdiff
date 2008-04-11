@@ -8,10 +8,10 @@ This script wraps around xxdiff, first decrypting the input files to temporary
 files (for a short time) and running xxdiff on these files.  There are two
 typical uses of this program:
 
-1) it is used to compare two encrypted files.  With the --merge option, a
+1) it is used to compare two encrypted files.  With the --output option, a
    decision is required and an encrypted version of the merged file is output to
    the specified file and the merged file deleted promptly.  Note that without
-   the --merge option, even if the merged file is saved, it is deleted once
+   the --output option, even if the merged file is saved, it is deleted once
    xxdiff exits.
 
 2) it is used to split and resolve CVS conflicts in an armored encrypted file
