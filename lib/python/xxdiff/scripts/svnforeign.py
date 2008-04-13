@@ -107,6 +107,12 @@ def add(fn):
     """
     call(['svn', 'add', fn])
 
+def delete(fn):
+    """
+    Delete the file from Subversion.
+    """
+    call(['svn', 'delete', fn])
+
 def rmrf(fnodn):
     """
     Delete the given directory and all its contents.
@@ -410,7 +416,42 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                 else: # Loop again
                     write('(Invalid answer.)\n')
-            
+
+        elif line[0] == '!':
+            fn = line[7:]
+            if abspath(fn) in ignore:
+                continue
+
+            # Command loop (one command)
+            while True:
+                write('=> [Delete|Skip|Quit]  %10d  %s %s ? ' %
+                      (-1, fn, ''))
+
+                # Read command
+                c = read_one()
+                write(c)
+                write('\n')
+
+                if c == 'd': # Delete
+                    delete(abspath(fn))
+                    break
+
+                elif c == 's': # Skip
+                    break
+
+                elif c in ['q', 'x']: # Quit/exit
+                    write('(Quitting.)\n')
+                    return False
+
+                elif c == chr(12): # Ctrl-L: Clear
+                    # FIXME: is there a way to do this directly on the terminal?
+                    call(['clear'])
+
+                else: # Loop again
+                    write('(Invalid answer.)\n')
+
+
+
     write('(Done.)\n')
     return True
 
