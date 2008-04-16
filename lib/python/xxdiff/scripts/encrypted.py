@@ -144,6 +144,8 @@ def diff_encrypted(textlist, outmerged=None):
                   'Error: cannot write to encoded merged file.'
             raise e
 
+    return decision
+
 
 def parse_options():
     """

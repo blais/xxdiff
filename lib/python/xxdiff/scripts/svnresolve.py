@@ -20,6 +20,7 @@ import xxdiff.scripts
 import xxdiff.backup
 import xxdiff.condrepl
 from xxdiff.scm import subversion
+from xxdiff.scripts.encrypted import diff_encrypted
 
 
 def parse_options():
@@ -37,7 +38,7 @@ def parse_options():
                       help="Print the commands that would be executed " +
                       "but don't really run them.")
 
-    parser.add_option('-R', '--no-resolve', '--dont-resolve', 
+    parser.add_option('-R', '--no-resolve', '--dont-resolve',
                       action='store_true',
                       help="Do not resolve the conflicts even after a merge "
                       "decision has been made.")
@@ -70,7 +71,7 @@ def svnresolve_main():
 
     # Get the status of the working copy.
     statii = subversion.status(args)
-    
+
     # First print out the list/status of the conflicting files to the user.
     for s in select_conflicts(statii):
         print s.parsed_line
@@ -84,14 +85,18 @@ def svnresolve_main():
         # Get the three files before the merge conflicts.
         info = subversion.getinfo(s.filename)
         dn = dirname(s.filename)
-        ancestor, mine, yours = [join(dn, info[x]) for x in 
+        ancestor, mine, yours = [join(dn, info[x]) for x in
                                  ('Conflict Previous Base File',
                                   'Conflict Previous Working File',
                                   'Conflict Current Base File')]
 
-        # Spawn xxdiff in decision mode on the three files.
-        decision = xxdiff.condrepl.cond_resolve(
-            mine, ancestor, yours, s.filename, opts, logs, extra=('--merge',))
+        # Spawn xxdiff in decision mode on the three files. We dispatch to the
+        # encrypted version if necessary.
+        if re.match('.*\.asc', s.filename):
+            decision = diff_encrypted([mine, ancestor, yours], outmerged=s.filename)
+        else:
+            decision = xxdiff.condrepl.cond_resolve(
+                mine, ancestor, yours, s.filename, opts, logs, extra=('--merge',))
 
         # Backup all the other files that will get when the file gets resolved,
         # whether by this script or later by the user by hand.
@@ -110,7 +115,7 @@ def svnresolve_main():
 
     xxdiff.backup.print_reminder(opts)
 
-            
+
 def main():
     xxdiff.scripts.interruptible_main(svnresolve_main)
 
