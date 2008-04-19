@@ -12,7 +12,7 @@ __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 
 # stdlib imports.
-import sys, os
+import sys, os, re
 from os.path import *
 
 # xxdiff imports.
@@ -42,6 +42,14 @@ def parse_options():
                       action='store_true',
                       help="Do not resolve the conflicts even after a merge "
                       "decision has been made.")
+
+    # Some of the GPG options duplicated here.
+    parser.add_option('-g', '--gpg', default="gpg",
+                      help="Specify path to gpg program to use.")
+    parser.add_option('-A', '--dont-armor', action='store_true',
+                      help="Create output file in binary format.")
+    parser.add_option('-r', '--recipient', action='store',
+                      help="Encrypt for user id name.")
 
     xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
@@ -93,7 +101,10 @@ def svnresolve_main():
         # Spawn xxdiff in decision mode on the three files. We dispatch to the
         # encrypted version if necessary.
         if re.match('.*\.asc', s.filename):
-            decision = diff_encrypted([mine, ancestor, yours], outmerged=s.filename)
+            tmine = open(mine).read()
+            tancestor = open(ancestor).read()
+            tyours = open(yours).read()
+            decision = diff_encrypted([tmine, tancestor, tyours], opts, outmerged=s.filename)
         else:
             decision = xxdiff.condrepl.cond_resolve(
                 mine, ancestor, yours, s.filename, opts, logs, extra=('--merge',))

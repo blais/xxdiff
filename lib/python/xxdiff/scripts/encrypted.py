@@ -70,10 +70,11 @@ encodecmd_noarmor = '%(gpg)s --encrypt --use-agent '
 encodecmd = encodecmd_noarmor + '--armor '
 
 
-def diff_encrypted(textlist, outmerged=None):
+def diff_encrypted(textlist, opts, outmerged=None):
     """
     Run a comparison of the encrypted texts specified in textlists and if an
-    'outmerged' filename is specified, encrypt the merged file into it.
+    'outmerged' filename is specified, encrypt the merged file into it. Note
+    that the texts are not filenames, but actual contents of files.
     """
     # Create temporary files.
     tempfiles = []
@@ -207,7 +208,7 @@ def encrypted_main():
             # Read input conflict file.
             text = open(fn, 'r').read()
             text1, text2 = xxdiff.scm.cvs.unmerge2(text)
-            diff_encrypted([text1, text2], fn)
+            diff_encrypted([text1, text2], opts, fn)
     else:
         if len(args) <= 1:
             raise SystemExit("Error: you need to specify 2 or 3 arguments.")
@@ -216,7 +217,7 @@ def encrypted_main():
         for fn in args:
             text = open(fn, 'r').read()
             textlist.append(text)
-        diff_encrypted(textlist, opts.output)
+        diff_encrypted(textlist, opts, opts.output)
 
 
 main = encrypted_main
