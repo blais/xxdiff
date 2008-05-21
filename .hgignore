@@ -18,3 +18,4 @@ src/searchDialogBase.cpp
 src/searchDialogBase.h
 src/version.h
 
+src/core
