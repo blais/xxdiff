@@ -6,40 +6,64 @@ merge in the 'left' file.
 """
 
 # stdlib imports
-import sys, os, shutil
+import sys, os, shutil, re
 
 # xxdiff imports
 from xxdiff import invoke
+from xxdiff.scripts import encrypted
 
 
 def main():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
     invoke.options_graft(parser)
+
+    parser.add_option('-g', '--gpg', default="gpg",
+                      help="Specify path to gpg program to use.")
+
+    parser.add_option('-r', '--recipient', action='store',
+                      help="Encrypt for user id name.")
+
+    parser.add_option('-A', '--dont-armor', action='store_true',
+                      help="Create output file in binary format.")
+
     opts, args = parser.parse_args()
     invoke.options_validate(opts, parser)
 
     if len(args) != 3:
         parser.error("You need to provide 3 arguments.")
     fl, fb, fr = args
-    
+
     # Invoke xxdiff.
-    decision, mergedf, retcode = invoke.xxdiff_decision(
-        opts,
-        '--title1=Current',
-        '--title2=Ancestor',
-        '--title3=Merging',
-        fl, fb, fr)
+    mergedf = None
+    if not re.match('.*\\.asc$', fl):
+        decision, mergedf, __retcode = invoke.xxdiff_decision(
+            opts,
+            '--title1=Current',
+            '--title2=Ancestor',
+            '--title3=Merging',
+            fl, fb, fr)
+        merged_name = mergedf.name
+    else:
+        merged_name = '%s.merged' % fl
+        textlist = [open(n).read() for n in (fl, fb, fr)]
+        decision = encrypted.diff_encrypted(textlist, opts, merged_name)
 
     # If the user exited normally, copy the merged results to the left file
     # (because that's what the Mercurial merge.py code expects).
     if decision != 'NODECISION':
-        shutil.copyfile(mergedf.name, fl)
+        shutil.copyfile(merged_name, fl)
         ret = 0
     else:
         ret = 1
 
-    mergedf.close()
+    if mergedf is not None:
+        mergedf.close()
+    try:
+        os.remove(merged_name)
+    except (IOError, OSError):
+        pass
+
     return ret
 
 
@@ -48,7 +72,7 @@ if __name__ == '__main__':
 
 
 # From mercurial.merge, this program is invoked like tihs::
-# 
+#
 #     r = util.system('%s "%s" "%s" "%s"' % (cmd, a, b, c), cwd=repo.root,
 #                     environ={'HG_FILE': fd,
 #                              'HG_MY_NODE': str(wctx.parents()[0]),
@@ -56,7 +80,7 @@ if __name__ == '__main__':
 #                              'HG_MY_ISLINK': fcm.islink(),
 #                              'HG_OTHER_ISLINK': fco.islink(),
 #                              'HG_BASE_ISLINK': fca.islink(),})
-# 
+#
 # The following environment variables are defined by the caller script:
 #
 #   HG_FILE: the destination filename

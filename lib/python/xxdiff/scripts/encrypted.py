@@ -116,7 +116,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
         # Read the decoded merged output file from xxdiff.
         textm = mergedf.read()
         assert textm
-    
+
         # Close and automatically delete the decoded merged output file.
         mergedf.close()
 
