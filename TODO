@@ -5,6 +5,8 @@
 .. contents::
 ..
     1  Next Release
+      1.1  Priorities
+      1.2  Qt4
     2  Less Urgent, but do it soon too
     3  Look at ``wiggle`` integration, it seems like a great idea
     4  Goals for 4.0 stable release:
@@ -14,6 +16,23 @@
 
 Next Release
 ============
+
+Priorities
+----------
+
+- xxdiff: Make xxdiff recursive able to list all the files when a
+  directory is only on one side. Walk and enumerate the files of an
+  inserted or deleted directory.
+
+- xxdiff: Fix geometry window sizing problem.
+
+- xxdiff: Convert it to port to Qt4 and support unicode
+
+  - Windows port, use the patch from Trevor Harmon
+  - MAC port
+  - Patch output support?
+
+
 
 Qt4
 ---
