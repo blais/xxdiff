@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Install script for tengis.
+# Install script for xxdiff Python code.
 #
 
 __version__ = "$Revision$"
