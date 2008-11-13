@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>Helper Scripts for xxdiff</title>
 <meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
 <meta name="date" content="2006-03-30" />
@@ -23,7 +23,7 @@
 <col class="docinfo-content" />
 <tbody valign="top">
 <tr><th class="docinfo-name">Author:</th>
-<td>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
+<td>Martin Blais &lt;<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
 <tr><th class="docinfo-name">Date:</th>
 <td>2006-03-30</td></tr>
 </tbody>
@@ -37,70 +37,70 @@ of differences.</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference" href="#introduction" id="id6">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
-<li><a class="reference" href="#history" id="id7">1.1&nbsp;&nbsp;&nbsp;History</a></li>
+<li><a class="reference internal" href="#introduction" id="id6">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
+<li><a class="reference internal" href="#history" id="id7">1.1&nbsp;&nbsp;&nbsp;History</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#xxdiff-s-decision-mode" id="id8">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></li>
-<li><a class="reference" href="#looping-and-confirming" id="id9">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a><ul class="auto-toc">
-<li><a class="reference" href="#backups" id="id10">3.1&nbsp;&nbsp;&nbsp;Backups</a></li>
-<li><a class="reference" href="#write-permissions-checkout" id="id11">3.2&nbsp;&nbsp;&nbsp;Write Permissions / Checkout</a></li>
-<li><a class="reference" href="#running-without-graphical-diff" id="id12">3.3&nbsp;&nbsp;&nbsp;Running Without Graphical Diff</a></li>
-<li><a class="reference" href="#per-file-conditional-replacement" id="id13">3.4&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-cond-replace" id="id14">3.4.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cond-replace</span></tt></a></li>
+<li><a class="reference internal" href="#xxdiff-s-decision-mode" id="id8">2&nbsp;&nbsp;&nbsp;xxdiff's Decision Mode</a></li>
+<li><a class="reference internal" href="#looping-and-confirming" id="id9">3&nbsp;&nbsp;&nbsp;Looping and Confirming</a><ul class="auto-toc">
+<li><a class="reference internal" href="#backups" id="id10">3.1&nbsp;&nbsp;&nbsp;Backups</a></li>
+<li><a class="reference internal" href="#write-permissions-checkout" id="id11">3.2&nbsp;&nbsp;&nbsp;Write Permissions / Checkout</a></li>
+<li><a class="reference internal" href="#running-without-graphical-diff" id="id12">3.3&nbsp;&nbsp;&nbsp;Running Without Graphical Diff</a></li>
+<li><a class="reference internal" href="#per-file-conditional-replacement" id="id13">3.4&nbsp;&nbsp;&nbsp;Per-File Conditional Replacement</a><ul class="auto-toc">
+<li><a class="reference internal" href="#xx-cond-replace" id="id14">3.4.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cond-replace</span></tt></a></li>
 </ul>
 </li>
-<li><a class="reference" href="#higher-level-loops" id="id15">3.5&nbsp;&nbsp;&nbsp;Higher-Level Loops</a><ul class="auto-toc">
-<li><a class="reference" href="#selecting-files" id="id16">3.5.1&nbsp;&nbsp;&nbsp;Selecting Files</a><ul class="auto-toc">
-<li><a class="reference" href="#selecting-by-filename" id="id17">3.5.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></li>
-<li><a class="reference" href="#selecting-by-contents" id="id18">3.5.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></li>
-<li><a class="reference" href="#selecting-from-a-fixed-list" id="id19">3.5.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></li>
-<li><a class="reference" href="#all-options" id="id20">3.5.1.4&nbsp;&nbsp;&nbsp;All Options</a></li>
-<li><a class="reference" href="#debugging-the-file-selection-process" id="id21">3.5.1.5&nbsp;&nbsp;&nbsp;Debugging The File Selection Process</a></li>
+<li><a class="reference internal" href="#higher-level-loops" id="id15">3.5&nbsp;&nbsp;&nbsp;Higher-Level Loops</a><ul class="auto-toc">
+<li><a class="reference internal" href="#selecting-files" id="id16">3.5.1&nbsp;&nbsp;&nbsp;Selecting Files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#selecting-by-filename" id="id17">3.5.1.1&nbsp;&nbsp;&nbsp;Selecting By Filename</a></li>
+<li><a class="reference internal" href="#selecting-by-contents" id="id18">3.5.1.2&nbsp;&nbsp;&nbsp;Selecting By Contents</a></li>
+<li><a class="reference internal" href="#selecting-from-a-fixed-list" id="id19">3.5.1.3&nbsp;&nbsp;&nbsp;Selecting From A Fixed List</a></li>
+<li><a class="reference internal" href="#all-options" id="id20">3.5.1.4&nbsp;&nbsp;&nbsp;All Options</a></li>
+<li><a class="reference internal" href="#debugging-the-file-selection-process" id="id21">3.5.1.5&nbsp;&nbsp;&nbsp;Debugging The File Selection Process</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#xx-filter" id="id22">3.5.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-filter</span></tt></a></li>
-<li><a class="reference" href="#xx-rename" id="id23">3.5.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-rename</span></tt></a></li>
-<li><a class="reference" href="#xx-find-grep-sed" id="id24">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></li>
-<li><a class="reference" href="#xx-pyline" id="id25">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></li>
-<li><a class="reference" href="#writing-other-transformation-loops" id="id26">3.5.6&nbsp;&nbsp;&nbsp;Writing Other Transformation Loops</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference" href="#xx-match" id="id27">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-match</span></tt></a></li>
-<li><a class="reference" href="#cvs-support" id="id28">5&nbsp;&nbsp;&nbsp;CVS Support</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-cvs-diff" id="id29">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cvs-diff</span></tt></a></li>
-<li><a class="reference" href="#resolving-cvs-conflicts" id="id30">5.2&nbsp;&nbsp;&nbsp;Resolving CVS Conflicts</a></li>
-</ul>
-</li>
-<li><a class="reference" href="#subversion-support" id="id31">6&nbsp;&nbsp;&nbsp;Subversion Support</a><ul class="auto-toc">
-<li><a class="reference" href="#ignoring-svn-files-in-loops" id="id32">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></li>
-<li><a class="reference" href="#xx-diff-proxy" id="id33">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-diff-proxy</span></tt></a></li>
-<li><a class="reference" href="#xx-svn-diff" id="id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt></a><ul class="auto-toc">
-<li><a class="reference" href="#future-features" id="id35">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></li>
-</ul>
-</li>
-<li><a class="reference" href="#xx-svn-resolve" id="id36">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-resolve</span></tt></a></li>
-<li><a class="reference" href="#handling-unregistered-files" id="id37">6.5&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a><ul class="auto-toc">
-<li><a class="reference" href="#svn-foreign" id="id38">6.5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></li>
+<li><a class="reference internal" href="#xx-filter" id="id22">3.5.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-filter</span></tt></a></li>
+<li><a class="reference internal" href="#xx-rename" id="id23">3.5.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-rename</span></tt></a></li>
+<li><a class="reference internal" href="#xx-find-grep-sed" id="id24">3.5.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-find-grep-sed</span></tt></a></li>
+<li><a class="reference internal" href="#xx-pyline" id="id25">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></li>
+<li><a class="reference internal" href="#writing-other-transformation-loops" id="id26">3.5.6&nbsp;&nbsp;&nbsp;Writing Other Transformation Loops</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference" href="#mercurial-support" id="id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a><ul class="auto-toc">
-<li><a class="reference" href="#after-version-0-9-5" id="id40">7.1&nbsp;&nbsp;&nbsp;After version 0.9.5</a></li>
-<li><a class="reference" href="#before-version-0-9-5" id="id41">7.2&nbsp;&nbsp;&nbsp;Before version 0.9.5</a></li>
+<li><a class="reference internal" href="#xx-match" id="id27">4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-match</span></tt></a></li>
+<li><a class="reference internal" href="#cvs-support" id="id28">5&nbsp;&nbsp;&nbsp;CVS Support</a><ul class="auto-toc">
+<li><a class="reference internal" href="#xx-cvs-diff" id="id29">5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-cvs-diff</span></tt></a></li>
+<li><a class="reference internal" href="#resolving-cvs-conflicts" id="id30">5.2&nbsp;&nbsp;&nbsp;Resolving CVS Conflicts</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#encrypted-files" id="id42">8&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
-<li><a class="reference" href="#xx-encrypted" id="id43">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></li>
+<li><a class="reference internal" href="#subversion-support" id="id31">6&nbsp;&nbsp;&nbsp;Subversion Support</a><ul class="auto-toc">
+<li><a class="reference internal" href="#ignoring-svn-files-in-loops" id="id32">6.1&nbsp;&nbsp;&nbsp;Ignoring .svn Files In Loops</a></li>
+<li><a class="reference internal" href="#xx-diff-proxy" id="id33">6.2&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-diff-proxy</span></tt></a></li>
+<li><a class="reference internal" href="#xx-svn-diff" id="id34">6.3&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-diff</span></tt></a><ul class="auto-toc">
+<li><a class="reference internal" href="#future-features" id="id35">6.3.1&nbsp;&nbsp;&nbsp;Future Features</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#pre-visualizing-and-cherry-picking-from-patches" id="id44">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
-<li><a class="reference" href="#comparing-sql-schemas" id="id45">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></li>
-<li><a class="reference" href="#writing-your-own-scripts" id="id46">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
-<li><a class="reference" href="#questions" id="id47">12&nbsp;&nbsp;&nbsp;Questions</a></li>
+<li><a class="reference internal" href="#xx-svn-resolve" id="id36">6.4&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-svn-resolve</span></tt></a></li>
+<li><a class="reference internal" href="#handling-unregistered-files" id="id37">6.5&nbsp;&nbsp;&nbsp;Handling Unregistered Files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#svn-foreign" id="id38">6.5.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">svn-foreign</span></tt></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mercurial-support" id="id39">7&nbsp;&nbsp;&nbsp;Mercurial Support</a><ul class="auto-toc">
+<li><a class="reference internal" href="#after-version-0-9-5" id="id40">7.1&nbsp;&nbsp;&nbsp;After version 0.9.5</a></li>
+<li><a class="reference internal" href="#before-version-0-9-5" id="id41">7.2&nbsp;&nbsp;&nbsp;Before version 0.9.5</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#encrypted-files" id="id42">8&nbsp;&nbsp;&nbsp;Encrypted Files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#xx-encrypted" id="id43">8.1&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-encrypted</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pre-visualizing-and-cherry-picking-from-patches" id="id44">9&nbsp;&nbsp;&nbsp;Pre-Visualizing And Cherry-Picking From Patches</a></li>
+<li><a class="reference internal" href="#comparing-sql-schemas" id="id45">10&nbsp;&nbsp;&nbsp;Comparing SQL Schemas</a></li>
+<li><a class="reference internal" href="#writing-your-own-scripts" id="id46">11&nbsp;&nbsp;&nbsp;Writing Your Own Scripts</a></li>
+<li><a class="reference internal" href="#questions" id="id47">12&nbsp;&nbsp;&nbsp;Questions</a></li>
 </ul>
 </div>
 <!-- 1   Introduction
@@ -455,7 +455,7 @@ really, it should go.</p>
 </div>
 <div class="section" id="xx-pyline">
 <h3><a class="toc-backref" href="#id25">3.5.5&nbsp;&nbsp;&nbsp;<tt class="docutils literal"><span class="pre">xx-pyline</span></tt></a></h3>
-<p>In the Python cookbook, <a class="reference" href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/437932">this recipe</a> proposes to compile and run a Python
+<p>In the Python cookbook, <a class="reference external" href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/437932">this recipe</a> proposes to compile and run a Python
 expression on lines, similar to sed, but just using Python code.  With the new
 scripting infrastructure, it was trivial to build another transformation program
 that uses that method.  Here is an example:</p>
@@ -527,7 +527,7 @@ matching basenames.  The result: it mostly works like the gentleman wanted it.</
 <p>I provide the script for educational value more than anything else (or for those
 who really like that syntax).</p>
 <p>Note that the matching algorithm can be implemented separately, and therefore is
-a more generic version of this available in my <a class="reference" href="http://furius.ca/pubcode">pubcode</a> directory: <a class="reference" href="http://furius.ca/pubcode/pub/conf/common/bin/match-files.html">match-files</a>, e.g.:</p>
+a more generic version of this available in my <a class="reference external" href="http://furius.ca/pubcode">pubcode</a> directory: <a class="reference external" href="http://furius.ca/pubcode/pub/conf/common/bin/match-files.html">match-files</a>, e.g.:</p>
 <pre class="literal-block">
 match-files -x '--single' dir1/*.c dir2/*.c | xargs -n2 xxdiff
 </pre>
@@ -824,7 +824,7 @@ around xxdiff.</p>
 </div>
 <div class="section" id="questions">
 <h1><a class="toc-backref" href="#id47">12&nbsp;&nbsp;&nbsp;Questions</a></h1>
-<p>Any questions should be directed to Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;.
+<p>Any questions should be directed to Martin Blais &lt;<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;.
 Contributions appreciated.  If you find these programs useful, drop me a note.</p>
 </div>
 </div>
