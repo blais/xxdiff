@@ -38,6 +38,9 @@ def parse_options():
     postgresql.options_graft(parser)
     xxdiff.invoke.options_graft(parser)
 
+    parser.add_option('-t', '--text-only', action='store_true',
+                      help="Render as text files to disk instead of graphical diff.")
+
     opts, args = parser.parse_args()
 
     xxdiff.mapcompare.options_validate(opts, parser)
@@ -76,12 +79,18 @@ def sqlcompare_main():
     files = xxdiff.mapcompare.render_diffable_maps(opts, db1.objmap, db2.objmap)
 
     # Set displayed titles.
-    titles = xxdiff.invoke.title_opts(
-        *['%s (SCHEMA)' % db.dbspec for db in (db1, db2)])
-    
-    # Invoke xxdiff .
-    xxargs = titles + [x.name for x in files]
-    xxdiff.invoke.xxdiff_display(opts, *xxargs)
+    if opts.text_only:
+        for db, f in zip([db1, db2], files):
+            targetfn = '%s.schema' % db.dbname
+            logging.info("Writing out %s" % targetfn)
+            shutil.copyfile(f.name, targetfn)
+    else:
+        titles = xxdiff.invoke.title_opts(
+            *['%s (SCHEMA)' % db.dbspec for db in (db1, db2)])
+
+        # Invoke xxdiff .
+        xxargs = titles + [x.name for x in files]
+        xxdiff.invoke.xxdiff_display(opts, *xxargs)
 
 
 def main():
