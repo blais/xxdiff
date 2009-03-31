@@ -1,8 +1,0 @@
-@import url("/docutils-style.css");
-@import url("/project.css");
-
-div#project-header {
-  background-image: url("etc/header-background.jpg");
-  background-color: rgb(173,173,173);
-}
-
