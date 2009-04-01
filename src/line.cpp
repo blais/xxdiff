@@ -36,7 +36,7 @@
 
 namespace {
 
-const char* typeString[ 16 ] = { 
+const char* typeString[ 16 ] = {
    "SAME",
    "DIFF_1",
    "DIFF_2",
@@ -55,7 +55,7 @@ const char* typeString[ 16 ] = {
    "DIRECTORIES"
 };
 
-const char* selectionString[ 5 ] = { 
+const char* selectionString[ 5 ] = {
    "SEL1",
    "SEL2",
    "SEL3",
@@ -94,7 +94,7 @@ inline const int* copyHordiffs( const int* src )
    int cc = 0;
    while ( pp[cc] != -1 ) { ++cc; }
    int* ll = new int[cc+1];
-   
+
    cc = 0;
    while ( pp[cc] != -1 ) {
       ll[cc] = pp[cc];
@@ -208,7 +208,7 @@ int XxLine::_selectMasks[ XxLine::NB_TYPES ][ 3 ] = {
 
 //------------------------------------------------------------------------------
 //
-XxLine::XxLine( 
+XxLine::XxLine(
    Type  type,
    XxFln fline0,
    XxFln fline1,
@@ -262,7 +262,7 @@ XxLine::XxLine(
       case DIFF_ALL:
          XX_ASSERT( fline0 != -1 || fline1 != -1 || fline2 != -1 );
          break;
-      case DIFFDEL_1: 
+      case DIFFDEL_1:
          XX_ASSERT( fline0 == -1 && ( fline1 != -1 || fline2 != -1 ) );
          break;
       case DIFFDEL_2:
@@ -283,9 +283,9 @@ XxLine::XxLine(
 
 //------------------------------------------------------------------------------
 //
-std::ostream& operator << ( 
-   std::ostream& os, 
-   const XxLine& line 
+std::ostream& operator << (
+   std::ostream& os,
+   const XxLine& line
 )
 {
    os << "Line: type=" << typeString[ int( line.getType() ) ] << "  ";
@@ -309,7 +309,7 @@ bool XxLine::isSameRegion( Type type1, Type type2 )
 
 //------------------------------------------------------------------------------
 //
-void XxLine::initializeHorizontalDiff( 
+void XxLine::initializeHorizontalDiff(
    const XxResources& resources,
    const char*        text[3],
    const uint         len[3]
@@ -323,7 +323,7 @@ void XxLine::initializeHorizontalDiff(
    }
 
    // Don't waste time in here.
-   if ( _type == SAME || 
+   if ( _type == SAME ||
         _type == DELETE_1 || _type == DELETE_2 || _type == DELETE_3 ||
         _type == INSERT_1 || _type == INSERT_2 || _type == INSERT_3 ||
         _type == DIRECTORIES ) {
@@ -361,12 +361,14 @@ void XxLine::initializeHorizontalDiff(
    // Remove current horizontal diffs.
    int ii;
    for ( ii = 0; ii < 3; ++ii ) {
+      if ( _hordiffs[ii] != 0 ) {
 #ifndef WINDOWS
-      delete[] _hordiffs[ii];
+         delete[] _hordiffs[ii];
 #else
-      delete[] const_cast<int*>( _hordiffs[ii] );
+         delete[] const_cast<int*>( _hordiffs[ii] );
 #endif
-      _hordiffs[ii] = 0;
+         _hordiffs[ii] = 0;
+      }
    }
 
    // Count nb. of potentially different non-empty files.
@@ -374,37 +376,37 @@ void XxLine::initializeHorizontalDiff(
    int icopyfrom = -1;
    int icopyto = -1;
    switch ( _type ) {
-      case DIFF_1:    { 
+      case DIFF_1:    {
          idiff[0] = 0; idiff[1] = 1;
          icopyfrom = 1; icopyto = 2;
       } break;
 
-      case DIFF_2:    { 
+      case DIFF_2:    {
          idiff[0] = 1; idiff[1] = 0;
          icopyfrom = 0; icopyto = 2;
       } break;
 
-      case DIFF_3:    { 
+      case DIFF_3:    {
          idiff[0] = 2; idiff[1] = 0;
          icopyfrom = 0; icopyto = 1;
       } break;
 
-      case DIFFDEL_1: { 
+      case DIFFDEL_1: {
          idiff[0] = 1; idiff[1] = 2;
       } break;
 
-      case DIFFDEL_2: { 
+      case DIFFDEL_2: {
          idiff[0] = 0; idiff[1] = 2;
       } break;
 
-      case DIFFDEL_3: { 
+      case DIFFDEL_3: {
          idiff[0] = 0; idiff[1] = 1;
       } break;
-      
+
       case DIFF_ALL: {
          idiff[0] = 0; idiff[1] = 1; idiff[2] = 2;
       } break;
-      
+
       case SAME:
       case DELETE_1:
       case DELETE_2:
@@ -490,7 +492,7 @@ void XxLine::initializeHorizontalDiff(
             }
          }
       }
-      
+
       // Copy to third region if requested.
       if ( icopyfrom != -1 ) {
          _hordiffs[ icopyto ] = copyHordiffs( _hordiffs[ icopyfrom ] );
@@ -635,7 +637,7 @@ XxLine XxLine::join(
 
    XxLine::Type type1 = line1.getType();
    XxLine::Type type2 = line2.getType();
-    
+
    XxLine ll1 = line1;
    XxLine ll2 = line2;
    if ( ( type1 == DELETE_1 && type2 == INSERT_1 ) ||
@@ -676,7 +678,7 @@ XxLine XxLine::join(
       joined = XxLine( DIFFDEL_1,
                        -1, ll1._lineNo[1], ll2._lineNo[2] );
    }
-   else { 
+   else {
       XX_ASSERT( false );
    }
 
@@ -714,7 +716,7 @@ XxLine XxLine::join(
    XxLine::Type type1 = line1.getType();
    XxLine::Type type2 = line2.getType();
    XxLine::Type type3 = line3.getType();
-    
+
    // Order lines.
    XxLine ll1 = line1;
    XxLine ll2 = line2;
@@ -735,7 +737,7 @@ XxLine XxLine::join(
       type2 = ll2.getType();
       type3 = ll3.getType();
    }
-   
+
    XxLine joined( DIFF_ALL, ll1._lineNo[0], ll2._lineNo[1], ll3._lineNo[2] );
 
    if ( ll1.getSelection() == ll2.getSelection() &&
@@ -743,8 +745,8 @@ XxLine XxLine::join(
       joined.setSelection( ll1.getSelection() );
    }
    joined.setHunkId( ll1.getHunkId() );
-   joined.setIgnoreDisplay( line1.getIgnoreDisplay() && 
-                            line2.getIgnoreDisplay() && 
+   joined.setIgnoreDisplay( line1.getIgnoreDisplay() &&
+                            line2.getIgnoreDisplay() &&
                             line3.getIgnoreDisplay() );
    return joined;
 }
@@ -792,7 +794,7 @@ void XxLine::getLineColorType(
          dtype = dtypeSup = COLOR_IGNORED;
       }
       else {
-         XxLine::Type newType = 
+         XxLine::Type newType =
             _ignoreConvertTables[ int(ignoreFile) ][ getType() ];
          getLineColorTypeStd( newType, no, dtype, dtypeSup, perHunkWsEnabled );
       }
@@ -817,21 +819,21 @@ bool XxLine::getLineColorIfSelected(
          dtypeSup = COLOR_SELECTED_SUP;
          return true;
       }
-      else if ( 
-         ( ( getType() == XxLine::DELETE_1 || 
+      else if (
+         ( ( getType() == XxLine::DELETE_1 ||
              getType() == XxLine::DIFF_1 ||
-             getType() == XxLine::INSERT_1 ) && 
+             getType() == XxLine::INSERT_1 ) &&
            no != 0 && int(sel) != XxLine::SEL1 ) ||
 
-         ( ( getType() == XxLine::DELETE_2 || 
-             getType() == XxLine::DIFF_2 || 
+         ( ( getType() == XxLine::DELETE_2 ||
+             getType() == XxLine::DIFF_2 ||
              getType() == XxLine::INSERT_2 ) &&
            no != 1 && int(sel) != XxLine::SEL2 ) ||
 
-         ( ( getType() == XxLine::DELETE_3 || 
+         ( ( getType() == XxLine::DELETE_3 ||
              getType() == XxLine::DIFF_3 ||
-             getType() == XxLine::INSERT_3 ) && 
-           no != 2 && int(sel) != XxLine::SEL3 ) 
+             getType() == XxLine::INSERT_3 ) &&
+           no != 2 && int(sel) != XxLine::SEL3 )
       ) {
          // For regions that are not selected but whose text is the same as the
          // ones that are selected, color as selected as well.
@@ -889,8 +891,8 @@ void XxLine::getLineColorTypeStd(
          return;
       }
 
-      case XxLine::DIFF_1: 
-      case XxLine::DIFF_2: 
+      case XxLine::DIFF_1:
+      case XxLine::DIFF_2:
       case XxLine::DIFF_3: {
          if ( no == lno ) {
             if ( getLineNo(no) == -1 ) {
@@ -924,7 +926,7 @@ void XxLine::getLineColorTypeStd(
          }
       }
 
-      case XxLine::DELETE_1: 
+      case XxLine::DELETE_1:
       case XxLine::DELETE_2:
       case XxLine::DELETE_3: {
          if ( no == lno ) {
