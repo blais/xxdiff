@@ -281,8 +281,6 @@ Less Urgent, but do it soon too
 
 * Fix [1200496] Diff Errors reported with certain text files
 
-* Fix [1079038] Split Bug.
-
 * xx-svn-diff: Implement fetching any two revisions and displaying the filelist
   and the diffs graphically for those changes.
 
