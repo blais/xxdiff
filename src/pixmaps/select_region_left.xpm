@@ -1,5 +1,5 @@
 /* XPM */
-static char * select_region_left_xpm[] = {
+static const char * select_region_left_xpm[] = {
 "32 32 2 1",
 " 	c None",
 ".	c #000000",

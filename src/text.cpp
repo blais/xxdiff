@@ -88,9 +88,11 @@ const int xch_draw_delta = 100;
 enum SkipType { SK_NOSKIP = 0, SK_UNSEL = 1, SK_NEITHER = 2, SK_EMPTY = 3 };
 
 
-bool flag = 0;
 
 #ifdef XX_DEBUG_TEXT
+
+bool flag = 0;
+
 //------------------------------------------------------------------------------
 //
 void traceFontMetrics( const QFontMetrics& fm )

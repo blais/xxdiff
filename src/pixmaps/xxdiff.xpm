@@ -1,5 +1,5 @@
 /* XPM */
-static char * xxdiff_xpm[] = {
+static const char * xxdiff_xpm[] = {
 "190 75 2931 2",
 "  	c None",
 ". 	c #B8CFDD",

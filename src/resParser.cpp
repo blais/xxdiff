@@ -1074,7 +1074,7 @@ void XxResParser::genInitFile(
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       int b1 = res1.getInitSwitch( bo );
       XX_CHECK( -1 <= b1 && b1 <= 1 );
-      char* bmap[3] = { "Nop", "False", "True" };
+      const char* bmap[3] = { "Nop", "False", "True" };
       if ( b1 != res2.getInitSwitch( bo ) ) {
          os << initSwitchStr << "." << commandSwitchList[ii]._name << ": "
             << bmap[b1+1] << endl;
@@ -1250,7 +1250,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       int b1 = res.getInitSwitch( bo );
       XX_CHECK( -1 <= b1 && b1 <= 1 );
-      char* bmap[3] = { "Nop", "False", "True" };
+      const char* bmap[3] = { "Nop", "False", "True" };
       os << initSwitchStr << "." << commandSwitchList[ii]._name << ": "
          << bmap[b1+1] << endl;
    }
@@ -1558,7 +1558,7 @@ QString XxResParser::getResourceRef()
          XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
          int b1 = res.getInitSwitch( bo );
          XX_CHECK( -1 <= b1 && b1 <= 1 );
-         char* bmap[3] = { "Nop", "False", "True" };
+         const char* bmap[3] = { "Nop", "False", "True" };
          os << tok->_name << "." << commandSwitchList[ii]._name << ": "
             << bmap[b1+1] << "" << endl;
       }
