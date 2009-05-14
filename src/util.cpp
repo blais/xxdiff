@@ -795,8 +795,8 @@ int XxUtil::interruptibleSystem( const QString& command )
    }
    if ( pid == 0 ) {
       char* argv[4];
-      argv[0] = "sh";
-      argv[1] = "-c";
+      argv[0] = const_cast<char*>( "sh" );
+      argv[1] = const_cast<char*>( "-c" );
       argv[2] = const_cast<char*>( command.latin1() );
       argv[3] = 0;
       execve( "/bin/sh", argv, environ );

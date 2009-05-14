@@ -767,7 +767,7 @@ bool XxDiffs::hasSelectionsOtherThan( XxFno no ) const
       if ( type != XxLine::SAME &&
            type != XxLine::DIRECTORIES ) {
 
-         if ( ! line.isSelected( no ) && 
+         if ( ! line.isSelected( no ) &&
               ( line.getSelection() == XxLine::SEL1 ||
                 line.getSelection() == XxLine::SEL2 ||
                 line.getSelection() == XxLine::SEL3 ) ) {
@@ -1450,13 +1450,10 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
    }
 
    // Erase old lines.
-   std::vector<XxLine>::iterator istart = _lines.begin();
-   istart += lstart.front();
-   std::vector<XxLine>::iterator iend = _lines.begin();
-   iend += lend.back();
-
-   _lines.erase( istart, iend + 1 );
-   _lines.insert( istart, newLines.begin(), newLines.end() );
+   std::vector<XxLine>::iterator istart2 =
+      _lines.erase( _lines.begin() + lstart.front(),
+                    _lines.begin() + lend.back() + 1 );
+   _lines.insert( istart2, newLines.begin(), newLines.end() );
 
    emit nbLinesChanged();
    _dirty = true;

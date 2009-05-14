@@ -17,6 +17,22 @@ def read_version():
         raise SystemExit(
             "Error: you must run setup from the root directory (%s)" % str(e))
 
+
+# Include all files without having to create MANIFEST.in
+def add_all_files(fun):
+    import os, os.path
+    from os.path import abspath, dirname, join
+    def f(self):
+        for root, dirs, files in os.walk('.'):
+            if '.hg' in dirs: dirs.remove('.hg')
+            self.filelist.extend(join(root[2:], fn) for fn in files
+                                 if not fn.endswith('.pyc'))
+        return fun(self)
+    return f
+from distutils.command.sdist import sdist
+sdist.add_defaults = add_all_files(sdist.add_defaults)
+
+
 allscripts = [join('bin', x) for x in os.listdir('bin')
               if x.startswith('xx-')]
 allscripts.append(join('bin', 'svn-foreign'))

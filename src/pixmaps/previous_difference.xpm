@@ -1,5 +1,5 @@
 /* XPM */
-static char * previous_difference_xpm[] = {
+static const char * previous_difference_xpm[] = {
 "32 32 2 1",
 " 	c None",
 ".	c #000000",

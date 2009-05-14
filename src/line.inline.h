@@ -55,6 +55,13 @@ inline XxLine::XxLine() :
 //
 inline XxLine::XxLine( const XxLine& copy )
 {
+   *this = copy;
+}
+
+//------------------------------------------------------------------------------
+//
+inline const XxLine& XxLine::operator=( const XxLine& copy )
+{
    _type = copy._type;
    _selection = copy._selection;
    _hunkId = copy._hunkId;
@@ -64,6 +71,7 @@ inline XxLine::XxLine( const XxLine& copy )
       _lineNo[ii] = copy._lineNo[ii];
       _hordiffs[ii] = 0; // Don't copy pointers.
    }
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -71,11 +79,14 @@ inline XxLine::XxLine( const XxLine& copy )
 inline XxLine::~XxLine()
 {
    for ( int ii = 0; ii < 3; ++ii ) {
+      if ( _hordiffs[ii] != 0 ) {
 #ifndef WINDOWS
-      delete[] _hordiffs[ii];
+         delete[] _hordiffs[ii];
 #else
-      delete[] const_cast<int*>( _hordiffs[ii] );
+         delete[] const_cast<int*>( _hordiffs[ii] );
 #endif
+         _hordiffs[ii] = 0;
+      }
    }
 }
 
@@ -194,7 +205,7 @@ inline const int* XxLine::getHorDiffs( const XxFno no ) const
 inline bool XxLine::hasHorizontalDiffs( const XxFno no ) const
 {
    XX_CHECK( no == 0 || no == 1 || no == 2 );
-   return _hordiffs[no] != 0;
+   return _hordiffs[ no ] != 0;
 }
 
 //------------------------------------------------------------------------------

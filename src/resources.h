@@ -56,6 +56,11 @@
 #define INCL_STD_MAP
 #endif
 
+#ifndef INCL_STD_CSTDLIB
+#include <cstdlib>
+#define INCL_STD_CSTDLIB
+#endif
+
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
