@@ -19,7 +19,7 @@ __depends__ = ['xxdiff', 'Python-2.4', 'PostgreSQL']
 
 # stdlib imports.
 from os.path import *
-import logging
+import logging, shutil
 
 # xxdiff imports.
 import xxdiff.scripts
