@@ -1,0 +1,5 @@
+#!/bin/sh
+# diff is called by git with 7 parameters:
+#echo path old-file old-hex old-mode new-file new-hex new-mode
+# essential: /opt/local/bin/xxdiff -w --title1="revision\ $3" --title2="$5" "$2" "$5" | cat
+xxdiff -w --style platinum --textfont 'Bitstream Vera Sans Mono,11,-1,5,50,0,0,0,0,0' --title1="revision\ $3" --title2="$5" "$2" "$5" | cat
