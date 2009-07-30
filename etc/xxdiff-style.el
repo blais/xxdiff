@@ -1,7 +1,8 @@
 ;; -*- lisp-interaction -*-
 ;;; xxdiff-style.el --- Emacs settings for editing xxdiff code.
 ;;;
-;;; $RCSfile$
+;;; $Source: /home/blais/repos/cvsroot/conf/common/elisp/blais/xxdiff-style.el,v $
+;;; $Id: xxdiff-style.el,v 1.2 2002/05/26 09:28:02 blais Exp $
 ;;;
 
 ;; Indentation controls
@@ -124,6 +125,14 @@
 		  (innamespace           . 0)))) )
     tmp-xxdiff-style )
   "Discreet Logic Style Guide")
+
+(require 'font-lock)
+(custom-set-variables
+ '(c++-font-lock-extra-types
+   ;; '(c++-font-lock-keywords-2
+   (append '( "Q[A-Z][a-zA-Z0-9]+" )
+	   c++-font-lock-extra-types)
+   ))
 
 (c-add-style "xxdiff" xxdiff-style)
 
