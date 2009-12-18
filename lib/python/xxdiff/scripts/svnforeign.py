@@ -268,7 +268,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
             continue
         
         if line[0] == 'C':
-            fn = line[7:]
+            fn = line[8:]
             cre = re.compile('%s\\.(mine|r\\d+)' % re.escape(fn)).match
             conflicts.append( (fn, cre) )
 
@@ -301,11 +301,11 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
     # Process foreign files
     for line in out.splitlines():
-        if not line or re.match('^Performing', line):
+        if not line or re.match('^(Performing|Status)', line):
             continue
 
         if line[0] in '?~':
-            fn = line[7:]
+            fn = line[8:]
             if filter(lambda x: x[1](fn), conflicts):
                 continue
             if abspath(fn) in ignore:
@@ -418,7 +418,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                     write('(Invalid answer.)\n')
 
         elif line[0] == '!':
-            fn = line[7:]
+            fn = line[8:]
             if abspath(fn) in ignore:
                 continue
 
