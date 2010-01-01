@@ -158,6 +158,13 @@ def status(rootdirs):
         #     'B' not locked in repository, lock token present but Broken
         status.locktoken = lc.next()
 
+        #   Seventh column: Repository lock token
+        #     'C'   (conflict on merged files)
+        #     '>'   (conflict comments)
+        status.mconflict = lc.next()
+        if status.mconflict == '>':
+            continue
+        
         # There is a space and the rest is a filename:
         status.filename = line[7:].strip()
         assert isabs(status.filename)

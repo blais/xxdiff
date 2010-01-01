@@ -22,7 +22,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import os, md5
+import os, hashlib
 from os.path import *
 
 # xxdiff imports.
@@ -38,7 +38,7 @@ def resilient_for_paths(paths):
     """
 
     # Compute a unique hash from the given absolute paths.
-    comhash = md5.new()
+    comhash = hashlib.md5()
     for p in paths:
         comhash.update(abspath(p))
     resdir = join(resilient_dir, comhash.hexdigest())
