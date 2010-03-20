@@ -53,7 +53,7 @@ def options_validate(opts, parser, logs=None):
 # Side-by-side diff2 command.
 sbs_diff_cmd = ['diff', '--side-by-side', '--suppress-common-lines']
 
-def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
+def cond_replace(origfn, newfn, opts, logs, exitonsame=False, replfn=None):
     """
     Given two filenames, spawn xxdiff for a decision, and conditionally replace
     the original file with the contents of the new file.  This supports options
@@ -65,6 +65,8 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
 
     - 'newfn': the new filename to compare -> string
 
+    - 'replfn': if specified, the target filename to replace.
+    
     - 'opts': program options object -> Options instance
 
       The options that are used are:
@@ -109,9 +111,12 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
     else:
         diff_output = None
 
+    if replfn is None:
+        replfn = origfn
+
     if opts.no_confirm:
         # No graphical diff, just replace the files without asking.
-        do_replace_file(origfn, newfn, opts, logs)
+        do_replace_file(replfn, newfn, opts, logs)
         decision = 'NOCONFIRM'
 
         print_decision(decision, origfn, opts, logs)
@@ -124,13 +129,19 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
         print_decision(decision, origfn, opts, logs)
 
         if decision == 'ACCEPT':
-            # Changes accepted, replace original with new..
-            do_replace_file(origfn, newfn, opts, logs)
-
+            # Changes accepted.
+            if replfn != newfn:
+                do_replace_file(replfn, newfn, opts, logs)
             if opts.verbose >= 2 and diff_output: print_diffs(diff_output, logs)
 
-        elif decision == 'REJECT' or decision == 'NODECISION':
-            # Rejected change (or program killed), do not replace
+        elif decision == 'REJECT':
+            # Rejected change (or program killed).
+            if replfn != origfn:
+                do_replace_file(replfn, origfn, opts, logs)
+            if opts.verbose >= 2 and diff_output: print_diffs(diff_output, logs)
+
+        elif decision == 'NODECISION':
+            # Program killed, do nothing.
             pass
 
         elif decision == 'MERGED':
@@ -142,7 +153,7 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False):
 
                 if diff_output: print_diffs(diff_output, logs)
 
-            do_replace_file(origfn, mergedf.name, opts, logs)
+            do_replace_file(replfn, mergedf.name, opts, logs)
 
     return decision
 

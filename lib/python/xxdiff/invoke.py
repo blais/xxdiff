@@ -138,7 +138,7 @@ def xxdiff_decision(opts, *arguments, **kwds):
     if '--decision' not in options:
         options.insert(0, '--decision')
 
-    assert '--merged-filename' not in (list(arguments) + options)
+    assert '--merged-filename' not in (list(arguments) + options), (list(arguments) + options)
     alloptions = options + ['--merged-filename', mergedf.name] + list(arguments)
 
     # If we're not waiting, we only want to return after all the input has been

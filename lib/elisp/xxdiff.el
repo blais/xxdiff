@@ -20,12 +20,13 @@
   (interactive)
   (let ((opts (if current-prefix-arg xxdiff-options nil)))
     (apply 'call-process-region
-	   (append (list (point-min) (point-max) 
+	   (append (list (point-min) (point-max)
 			 xxdiff-exec nil nil nil)
 		   opts
 		   (list "--title1" (format "%s (FILE)" (buffer-file-name))
 			 "--title2" (format "%s (BUFFER)" (buffer-name))
 			 (buffer-file-name) "-")))))
+
 
 (defun xxdiff-svn-diff ()
   "Diffs the current buffer and the latest Subversion file.
@@ -34,21 +35,22 @@ make the diff program selectable as a dynamic variable and
 override it in this function."
   ;; FIXME: change vc.el :: vc-diff-internal instead, see below.
   (interactive)
-
-  (let ((merged-fn (concat "/tmp/xxdiff.merged." 
-			   (prin1-to-string (emacs-pid)) "." (buffer-name)))
-	(latest (concat (file-name-directory (buffer-file-name))
-			".svn/text-base/"
-			(file-name-nondirectory (buffer-file-name))
-			".svn-base"))
-	(opts (if current-prefix-arg xxdiff-options nil)))
+  (let* ((name (buffer-name))
+	 (fn (buffer-file-name))
+	 (merged-fn (concat "/tmp/xxdiff.merged."
+			    (prin1-to-string (emacs-pid)) "." name))
+	 (latest (concat (file-name-directory fn)
+			 ".svn/text-base/"
+			 (file-name-nondirectory fn)
+			 ".svn-base"))
+	 (opts (if current-prefix-arg xxdiff-options nil)))
 
     (apply 'call-process-region
-	   (append (list (point-min) (point-max) 
+	   (append (list (point-min) (point-max)
 			 xxdiff-exec nil nil nil)
 		   opts
 		   (list "--title1" (format "%s (FILE)" latest)
-			 "--title2" (format "%s (BUFFER)" (buffer-name))
+			 "--title2" (format "%s (BUFFER)" name)
 			 "--merged-filename" merged-fn
 			 latest "-")))
     (when (file-exists-p merged-fn)
@@ -66,8 +68,8 @@ kill-ring.  With prefix arg, compare the last three."
 
   (let* ((idx (if mark-active -1 0))
 	 (selections (list (current-kill (+ idx 1) t)
-			   (if (= idx 0) 
-			       (current-kill idx t) 
+			   (if (= idx 0)
+			       (current-kill idx t)
 			     (buffer-substring (region-beginning) (region-end)))))
 	 files)
     (when current-prefix-arg
@@ -75,14 +77,14 @@ kill-ring.  With prefix arg, compare the last three."
       ;;(setcdr selections (cons (current-kill 2 t) (cdr selections)))
       )
 
-    (setq files (mapcar 
+    (setq files (mapcar
 		 (lambda (sel) (let ((fn (make-temp-file "xxdiff-emacs.")))
 				 (with-temp-file fn (insert sel))
 				 fn))
 		 selections))
 
       (apply 'call-process-region
-	     (append (list (point-min) (point-max) 
+	     (append (list (point-min) (point-max)
 			   xxdiff-exec nil nil nil)
 		     files))
       (dolist (fn files)
@@ -101,19 +103,19 @@ as temporary files and then invokes xxdiff."
   (let (primary secondary)
 
     (if mark-active
-	(setq primary 
+	(setq primary
 	      (buffer-substring (region-beginning) (region-end))
 
 	      secondary
-	      (condition-case nil 
+	      (condition-case nil
 		  (prog1 (x-get-selection 'SECONDARY)
 		    (message "xxdiff: Comparing against the secondary selection."))
 		(error (progn
 			 (message "xxdiff: Comparing against the last value on the kill-ring.")
 			 (current-kill 0 t)))))
 
-      (setq primary 
-	    (current-kill 0 t)	      
+      (setq primary
+	    (current-kill 0 t)
 	    secondary
 	    (current-kill 1 t)))
 
@@ -125,7 +127,7 @@ as temporary files and then invokes xxdiff."
       (with-temp-file right (insert primary))
 
       (apply 'call-process-region
-	     (append (list (point-min) (point-max) 
+	     (append (list (point-min) (point-max)
 			   xxdiff-exec nil nil nil)
 		     opts
 		     (list "--title1" "(SECONDARY REGION)"
