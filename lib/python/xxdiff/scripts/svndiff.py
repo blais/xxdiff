@@ -3,7 +3,7 @@
 """xx-svn-diff [<options>] <file> <file> [<file>]
 
 Script that invokes xxdiff for all modified files in the given Subversion
-checkout area.
+checkout area. Optionally replace the output file by decision mode.
 """
 
 __author__ = "Martin Blais <blais@furius.ca>"
@@ -23,6 +23,7 @@ import xxdiff.resilient
 import xxdiff.utils
 from xxdiff.utils import makedirs
 import xxdiff.history
+import xxdiff.condrepl
 from xxdiff.scripts import tmpprefix, script_name
 from xxdiff.scm import subversion
 from xxdiff.scripts.svnforeign import query_unregistered_svn_files
@@ -94,12 +95,17 @@ def review_file(sobj, opts):
     # Check for non-text files.
     if not xxdiff.utils.istextfile(left) or not xxdiff.utils.istextfile(right):
         return ('non-text', 'skip'), None
-        
+
     # Run xxdiff on the files.
-    assert left and right
-    if merged is not None:
-        dopts.extend(['--merged-filename', merged])
-    waiter = xxdiff.invoke.xxdiff_display(opts, left, right, nowait=1, *dopts)
+    if opts.review:
+        dopts.extend(['--decision'])
+        opts.no_confirm = False
+        opts.dry_run = False
+        decision = xxdiff.condrepl.cond_replace(left, right, opts, sys.stdout,
+                                                False, replfn=right)
+        waiter = None
+    else:
+        waiter = xxdiff.invoke.xxdiff_display(opts, left, right, nowait=1, *dopts)
 
     return msg, waiter
 
@@ -109,6 +115,12 @@ def parse_options():
     """
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
+
+    parser.add_option('-r', '--review', '--replace', action='store_true',
+                      help="Review/replace mode: diff the file and replace"
+                      "the target file by the output of the diff. Runs in "
+                      "decision mode. This is useful in order to remove "
+                      "selected changes before committing in.")
 
     parser.add_option('-c', '--commit', '--commit-with-comments',
                       action='store_true',
@@ -137,7 +149,7 @@ def parse_options():
     xxdiff.backup.options_graft(parser,
                                 "These options affect automatic backup of "
                                 "deleted files, if enabled.")
-    
+
     xxdiff.scripts.install_autocomplete(parser)
 
     opts, args = parser.parse_args()
@@ -190,7 +202,7 @@ def svndiff_main():
 
     # Ignore the comments file from the svn status output.
     statii = [s for s in statii if abspath(s.filename) not in ignofiles]
-            
+
     if not statii:
         print '(Nothing to do, exiting.)'
         hist.delete()
@@ -200,7 +212,7 @@ def svndiff_main():
     renstatus = os.linesep.join(x.parsed_line for x in statii)
 
     if opts.commit:
-        # File to delete after a succesful commit.
+        # File to delete after a successful commit.
         if opts.comments_file:
             comfn = abspath(opts.comments_file)
         else:
@@ -240,7 +252,7 @@ def svndiff_main():
             elif islink(s.filename):
                 kind, action = 'symlink', 'skip'
                 continue
-                
+
             # Compute unique string for history recorder.  We use the size, last
             # modification time, and status info to hash on this.
             if exists(s.filename):
@@ -292,11 +304,11 @@ def svndiff_main():
     # The entire list of files has been reviewed (and possibly committed), clear
     # the history file.
     if opts.history:
-        print 
+        print
         print '(Review complete, history cleared)'
         hist.delete()
 
-    
+
 def main():
     xxdiff.scripts.interruptible_main(svndiff_main)
 
