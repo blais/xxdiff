@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
+Usage: REV1 REV2
 Export two SVN revisions and review them.
 """
-import sys, os, tempfile, logging, re
+import sys, os, tempfile, logging, re, shutil
 from subprocess import *
 from os.path import *
 
@@ -17,9 +18,13 @@ def main():
     opts, args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format='%(levelname)-8s: %(message)s')
 
-    if len(args) != 2:
-        parser.error("Usage: REV1 REV2")
-    r1, r2 = args
+    if len(args) == 1:
+        r2 = int(args[0])
+        r1 = r2 - 1
+    elif len(args) == 2:
+        r1, r2 = map(int, args)
+    else:
+        parser.error("Usage: [REV1] REV2")
 
     if not opts.url:
         if not isdir(join(os.getcwd(), '.svn')):
@@ -33,12 +38,15 @@ def main():
     for r in r1, r2:
         logging.info('Checking out %s' % r)
         ret = call(('svn', 'checkout', '-r%s' % r, url, join(tempdir, 'r%s' % r)),
-                 shell=0, cwd=tempdir)
+                   shell=0, cwd=tempdir)
         if ret != 0:
             raise SystemExit("Error: checking out revision '%s'" % r)
+
+    r = call(('xxdiff', '--exclude=.svn', '-r', join(tempdir, 'r%s' % r1), join(tempdir, 'r%s' % r2)),
+             shell=0, cwd=tempdir)
+
+    shutil.rmtree(tempdir)
         
-    call(('xxdiff', '-I', '.svn', '-r', join(tempdir, 'r%s' % r1), join(tempdir, 'r%s' % r2)),
-         shell=0, cwd=tempdir)
-          
+
 if __name__ == '__main__':
     main()
