@@ -61,6 +61,32 @@ override it in this function."
     ))
 
 
+
+(defun xxdiff-log-view-diff-changeset (beg end)
+  "Get the diff between two revisions.
+If the mark is not active or the mark is on the revision at point,
+get the diff between the revision at point and its previous revision.
+Otherwise, get the diff between the revisions where the region starts
+and ends.
+Contrary to `log-view-diff', it will show the whole changeset including
+the changes that affected other files than the currently considered file(s)."
+  (interactive
+   (list (if mark-active (region-beginning) (point))
+         (if mark-active (region-end) (point))))
+  (when (eq (vc-call-backend log-view-vc-backend 'revision-granularity) 'file)
+    (error "The %s backend does not support changeset diffs" log-view-vc-backend))
+  (let ((fr (log-view-current-tag beg))
+        (to (log-view-current-tag end)))
+    (when (string-equal fr to)
+      ;; TO and FR are the same, look at the previous revision.
+      (setq to (vc-call-backend log-view-vc-backend 'previous-revision nil fr)))
+    (let ((procname "xx-svn-review"))
+      (call-process procname nil nil nil to fr)
+      (message (format "Launched %s." procname))
+    )))
+
+
+
 (defun xxdiff-compare-kill-ring ()
   "Spawn an xxdiff to compare the last two entries on the
 kill-ring.  With prefix arg, compare the last three."
