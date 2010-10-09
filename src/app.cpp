@@ -765,6 +765,7 @@ void XxApp::createUI()
    //QHBoxLayout* hlayout = new QHBoxLayout;
    _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
    _remUnselView->setAlignment( Qt::AlignCenter );
+   _remUnselView->setMaximumHeight( _remUnselView->sizeHint().height() );
    //hlayout->addWidget( _remUnselView, 100 );
 
    //QCheckBox* _equalCheckBox = new QCheckBox( _overviewArea );
