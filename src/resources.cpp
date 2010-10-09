@@ -207,57 +207,57 @@ void XxResources::initializeOriginalXdiff()
    //---------------------------------------------------------------------------
 
    if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
-      setFbColors( COLOR_SAME                   , "grey", "black" );
-      setFbColors( COLOR_SAME_BLANK             , "#b2b2b2", "black" );
-      setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon", "black" );
-      setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon", "black" );
-      setFbColors( COLOR_DIFF_TWO               , "lightblue", "black" );
-      setFbColors( COLOR_DIFF_TWO_SUP           , "skyblue", "black" );
-      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue",  "black" );
-      setFbColors( COLOR_DIFF_TWO_NONLY         , "skyblue", "black" );
+      setFbColors( COLOR_SAME                   , "#bebebe", "#000000" );
+      setFbColors( COLOR_SAME_BLANK             , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_DIFF_ONE               , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ONE_SUP           , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFF_ONE_ONLY          , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ONE_NONLY         , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFF_TWO               , "#b2dfee", "#000000" );
+      setFbColors( COLOR_DIFF_TWO_SUP           , "#9ac0cd", "#000000" );
+      setFbColors( COLOR_DIFF_TWO_ONLY          , "#b2dfee",  "#000000" );
+      setFbColors( COLOR_DIFF_TWO_NONLY         , "#9ac0cd", "#000000" );
                                                 
-      setFbColors( COLOR_DELETE                 , "lightblue", "black" );
-      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "black" );
+      setFbColors( COLOR_DELETE                 , "#b2dfee", "#000000" );
+      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "#000000" );
                                                 
-      setFbColors( COLOR_INSERT                 , "darkseagreen", "black" );
-      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "black" );
+      setFbColors( COLOR_INSERT                 , "#b4eeb4", "#000000" );
+      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "#000000" );
                                                 
-      setFbColors( COLOR_DIFF_ALL               , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon", "black" );
-      setFbColors( COLOR_DIFF_ALL_ONLY          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon", "black" );
+      setFbColors( COLOR_DIFF_ALL               , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ALL_SUP           , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFF_ALL_ONLY          , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ALL_NONLY         , "#cdc9a5", "#000000" );
                                                 
-      setFbColors( COLOR_DIFFDEL                , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon", "black" );
-      setFbColors( COLOR_DIFFDEL_ONLY           , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon", "black" );
-      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "black" );
+      setFbColors( COLOR_DIFFDEL                , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFFDEL_SUP            , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFFDEL_ONLY           , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFFDEL_NONLY          , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "#000000" );
                                                 
-      setFbColors( COLOR_SELECTED               , "plum", "black" );
-      setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
+      setFbColors( COLOR_SELECTED               , "#dda0dd", "#000000" );
+      setFbColors( COLOR_SELECTED_SUP           , "#d8bfd8", "#000000" );
                                                 
-      setFbColors( COLOR_IGNORE_DISPLAY         , "#d8d8d8", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY         , "#d9d9d9", "#000000" );
+      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "#000000" );
+      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "#000000" );
+      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "#000000" );
 
-      setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
-      setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
+      setFbColors( COLOR_DELETED                , "#778899", "#000000" );
+      setFbColors( COLOR_DELETED_SUP            , "#708090", "#000000" );
                                                 
-      setFbColors( COLOR_IGNORED                , "#b2b2b2", "#4c4c4c" );
+      setFbColors( COLOR_IGNORED                , "#b3b3b3", "#4d4d4d" );
                                                 
-      setFbColors( COLOR_DIRECTORIES            , "mediumturquoise", "black" );
+      setFbColors( COLOR_DIRECTORIES            , "#48d1cc", "#000000" );
                                                            
-      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b2b2b2", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b2b2b2", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b2b2b2", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b2b2b2", "black" );
+      setFbColors( COLOR_MERGED_UNDECIDED       , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b3b3b3", "#000000" );
    }   
              
    _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
