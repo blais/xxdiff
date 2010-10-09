@@ -1,0 +1,320 @@
+--- src/Makefile.bootstrap	14821dd94bc6e66a8ce56aab65d7b883aab32f6c
++++ src/Makefile.bootstrap	7fdc068108955ac1a448e5645450f2e236bc0ed7
+@@ -5,7 +5,7 @@
+ #
+ 
+ # Set QTDIR to a reasonable default if unset.
+-QTDIR ?= /usr/qt/3
++QTDIR ?= /usr/local/Trolltech/Qt-4.1.3-static/
+ 
+ # Rule to generate the qmake Makefile for building xxdiff.
+ QMAKE = $(QTDIR)/bin/qmake
+@@ -25,6 +25,6 @@
+ # calls back into this bootstrap makefile.  You should be able to just change 
+ # xxdiff.pro and type "make" and for everything to work automatically.
+ Makefile.qmake Makefile makefile:
+-	$(QMAKE) -o Makefile.qmake xxdiff.pro
++	$(QMAKE) -o Makefile.qmake xxdiff.pro "CONFIG+=mystaticconfig"
+ 	cat Makefile.qmake Makefile.extra > Makefile
+ 
+============================================================
+--- src/cmdline.cpp	65464e6537e86c5b928981d922ab7a1766bdcc8a
++++ src/cmdline.cpp	6a74f1cf69a60d210c159ac12fb8c216746e10e5
+@@ -208,7 +210,8 @@
+      "Copies the input streams/files into temporary files to perform diffing. "
+      "This is useful if you want to diff FIFOs."
+    },
+-   { "prompt-for-files", 0, false, 'p',
++// Hack for os x - programs are run with an argument line -psn_0_36306945
++   { "prompt-for-files", 'p', true, 'p',
+      "If no files are specified on the command line, show a file dialog so that "
+      "the user can select them. This option is ignored if any files are specified."
+    },
+============================================================
+--- src/copyLabel.cpp	61569b49900cb7ce0695bacf5d3f176092082177
++++ src/copyLabel.cpp	2a20abc46208ddd4a4f5734247770e210a3cc13e
+@@ -63,23 +67,11 @@
+ 
+ //------------------------------------------------------------------------------
+ //
+-XxCopyLabel::Tip::Tip( QLabel* parent ) :
+-   QToolTip( parent )
+-{
+-}
+ 
+ //------------------------------------------------------------------------------
+ //
+ void XxCopyLabel::Tip::maybeTip( const QPoint& )
+ {
+-   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
+-   XX_CHECK( clabel != 0 );
+-   QString tex = clabel->getFullText();
+-   QFontMetrics fm = clabel->fontMetrics();
+-   QRect br = fm.boundingRect( tex );
+-   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
+-      tip( clabel->rect(), tex );
+-   }
+ }
+ 
+ /*==============================================================================
+@@ -92,7 +84,7 @@
+    QLabel( parent )
+ {
+    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
+-   _tip = new Tip( this );
++   //_tip = new Tip( this );
+ }
+ 
+ //------------------------------------------------------------------------------
+============================================================
+--- src/diffs.cpp	6eb9b9212f722ab99be1d19aa1622f87431ab371
++++ src/diffs.cpp	069c28387e4056c67f6eab7b80d51e646e625e25
+@@ -28,7 +28,9 @@
+ #include <buffer.h>
+ #include <resources.h>
+ 
+-#include <qcstring.h>
++#include <q3cstring.h>
++//Added by qt3to4:
++#include <QTextStream>
+ 
+ #include <list>
+ #include <algorithm>
+@@ -57,7 +59,7 @@
+       const char* text = files[no]->getTextLine( fline, len );
+       XX_ASSERT( text != 0 ); // make this one throw
+ 
+-      os.writeRawBytes( text, len );
++      os << QString::fromLocal8Bit(text, len);
+       os << endl;
+       return 1;
+    }
+@@ -925,7 +927,7 @@
+                                 conditionals[f].latin1() );
+ 
+                   QByteArray line;
+-                  QTextOStream oss( line );
++                  QTextOStream oss( &line );
+                   oss << cond << endl;
+ 
+                   int nbOutlines = 0;
+@@ -1032,7 +1034,7 @@
+             XX_ASSERT( text != 0 ); // make this one throw
+ 
+             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
+-            os.writeRawBytes( text, len );
++            os << QString::fromLocal8Bit(text, len);
+             os << endl;
+ 
+             some = true;
+============================================================
+--- src/resParser.l	07cfa40e7fdd192ec045800923c1e4cac1579594
++++ src/resParser.l	c69cfe5f4d49d427e51e17464e1397bc16a47384
+@@ -78,7 +78,7 @@
+ else {                                                                 \
+    int ii = 0;                                                         \
+    for ( ; (ii < max_size) && (!input_stream_ptr->atEnd()); ++ii ) {   \
+-	input_stream_ptr->readRawBytes( &buf[ii], 1 );                 \
++	(*input_stream_ptr) >> buf[ii]; \
+    }                                                                   \
+    result = ii;                                                        \
+ }
+============================================================
+--- src/resources.cpp	20fd9a815a266817694ddaa8764faab2acb36457
++++ src/resources.cpp	eea1f0859945130a6058a0a4c2c983079dce262a
+@@ -208,56 +208,56 @@
+ 
+    if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
+       setFbColors( COLOR_SAME                   , "grey", "black" );
+-      setFbColors( COLOR_SAME_BLANK             , "grey70", "black" );
++      setFbColors( COLOR_SAME_BLANK             , "#b2b2b2", "black" );
+       setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon", "black" );
+       setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon3", "black" );
+-      setFbColors( COLOR_DIFF_TWO               , "lightblue2", "black" );
+-      setFbColors( COLOR_DIFF_TWO_SUP           , "lightblue3", "black" );
+-      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue2",  "black" );
+-      setFbColors( COLOR_DIFF_TWO_NONLY         , "lightblue3", "black" );
++      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon", "black" );
++      setFbColors( COLOR_DIFF_TWO               , "lightblue", "black" );
++      setFbColors( COLOR_DIFF_TWO_SUP           , "skyblue", "black" );
++      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue",  "black" );
++      setFbColors( COLOR_DIFF_TWO_NONLY         , "skyblue", "black" );
+                                                 
+-      setFbColors( COLOR_DELETE                 , "lightblue2", "black" );
+-      setFbColors( COLOR_DELETE_BLANK           , "grey64", "black" );
++      setFbColors( COLOR_DELETE                 , "lightblue", "black" );
++      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "black" );
+                                                 
+-      setFbColors( COLOR_INSERT                 , "darkseagreen2", "black" );
+-      setFbColors( COLOR_INSERT_BLANK           , "grey64", "black" );
++      setFbColors( COLOR_INSERT                 , "darkseagreen", "black" );
++      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "black" );
+                                                 
+       setFbColors( COLOR_DIFF_ALL               , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon", "black" );
+       setFbColors( COLOR_DIFF_ALL_ONLY          , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon", "black" );
+                                                 
+       setFbColors( COLOR_DIFFDEL                , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon3", "black" );
++      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon", "black" );
+       setFbColors( COLOR_DIFFDEL_ONLY           , "palegoldenrod", "black" );
+-      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon3", "black" );
+-      setFbColors( COLOR_DIFFDEL_BLANK          , "grey64", "black" );
++      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon", "black" );
++      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "black" );
+                                                 
+       setFbColors( COLOR_SELECTED               , "plum", "black" );
+       setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
+                                                 
+-      setFbColors( COLOR_IGNORE_DISPLAY         , "grey85", "black" );
+-      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey80", "black" );
+-      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey80", "black" );
+-      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey80", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY         , "#d8d8d8", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "black" );
++      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "black" );
+ 
+       setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
+       setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
+                                                 
+-      setFbColors( COLOR_IGNORED                , "grey70", "grey30" );
++      setFbColors( COLOR_IGNORED                , "#b2b2b2", "#4c4c4c" );
+                                                 
+       setFbColors( COLOR_DIRECTORIES            , "mediumturquoise", "black" );
+                                                            
+-      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon3", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_1       , "grey60", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "grey70", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_2       , "grey60", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "grey70", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_3       , "grey60", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "grey70", "black" );
+-      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "grey70", "black" );
++      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b2b2b2", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b2b2b2", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b2b2b2", "black" );
++      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b2b2b2", "black" );
+    }   
+              
+    _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
+============================================================
+--- src/xxdiff.pro	b5044fb33cae4ac8e745eeddd5eb3f32e6dec6cf
++++ src/xxdiff.pro	889dfba7427270ac9bea3ea4406ff356f32d8153
+@@ -21,6 +21,12 @@
+ #****************************************************************************/
+ #
+ # Generate with xxdiff.t template, as `qmake -t xxdiff.t xxdiff.pro > Makefile'
++
++    mystaticconfig {
++        QMAKE_LIBS_QT =
++        QMAKE_LIBS_QT_THREAD =
++        LIBS += -lz -framework Carbon -lQtNetwork
++    }
+ #
+ 
+ # Note: the version number is now in the VERSION file at the root and there is a
+# 
+# old_revision [e1816f35ea3e14d8a28f42e3cc522580fa90ed9d]
+# 
+# patch "src/central.cpp"
+#  from [21f535eb65bf999cf3ffddb9dc6f93b526ad4302]
+#    to [8f4b61197d98bf35a03e8644f7256a9e62ade87e]
+# 
+============================================================
+--- src/central.cpp	21f535eb65bf999cf3ffddb9dc6f93b526ad4302
++++ src/central.cpp	8f4b61197d98bf35a03e8644f7256a9e62ade87e
+@@ -115,6 +115,7 @@
+       _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
+       _lineNumberLabel[ii]->setLineWidth( 2 );
+       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
++      _lineNumberLabel[ii]->setMaximumSize( _lineNumberLabel[ii]->sizeHint() );
+       _lineNumberLabel[ii]->setText( "" );
+ 
+       fnLayout->addWidget( _filenameLabel[ii], 10 );
+# 
+# old_revision [e1816f35ea3e14d8a28f42e3cc522580fa90ed9d]
+# 
+# patch "src/app.cpp"
+#  from [db2ad1b158e32ce1aebd445e6c9ba5e70c001465]
+#    to [f95b2fc433fb941e5a35f00235039aa4aaf7c45e]
+# 
+============================================================
+--- src/app.cpp	db2ad1b158e32ce1aebd445e6c9ba5e70c001465
++++ src/app.cpp	f95b2fc433fb941e5a35f00235039aa4aaf7c45e
+@@ -2150,7 +2150,7 @@
+ 
+    if ( !_cmdline._cmdlineResources.isEmpty() ) {
+       try {
+-         QTextIStream cmdlineStream( _cmdline._cmdlineResources );
++         QTextIStream cmdlineStream( &_cmdline._cmdlineResources );
+          resParser.parse( cmdlineStream, *resources );
+       }
+       catch ( const XxIoError& ioerr ) {
+--- src/overview.cpp	b43979154c6fd42bf6b52e7862245651d82adc2c
++++ src/overview.cpp	e8fcab371175a1d05571a029ce3388471946b4c8
+@@ -282,17 +288,19 @@
+       if ( ii > 0 ) {
+ 
+          // Draw left arrow.
+-         int pts1[6] = { _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
++         QPolygon pa1;
++         pa1.putPoints(0, 3, 
++                         _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
+                          _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
+-                         _fileL[ii] - sepWidth, curppos[ii-1] };                
+-         QPointArray pa1( 3, pts1 );
++                         _fileL[ii] - sepWidth, curppos[ii-1] );                
+          p.drawPolygon( pa1 );
+ 
+          // Draw right arrow.
+-         int pts2[6] = { _fileL[ii] + dx, curppos[ii] - dyo2,
++         QPolygon pa2;
++         pa2.putPoints(0, 3, 
++                         _fileL[ii] + dx, curppos[ii] - dyo2,
+                          _fileL[ii] + dx, curppos[ii] + dyo2,
+-                         _fileL[ii], curppos[ii] };                
+-         QPointArray pa2( 3, pts2 );
++                         _fileL[ii], curppos[ii] );                
+          p.drawPolygon( pa2 );
+       }
+    }
+@@ -314,11 +322,12 @@
+             int ypos =
+                _fileT[ii] +
+                int( (_fileDy[ii] * (ffline-1)) / float( flines[ii] ) );
+-            int pts1[8] = { _fileL[ii] + fw2 - sdx, ypos,
++            QPolygon pa1;
++            pa1.putPoints(0, 4, 
++                            _fileL[ii] + fw2 - sdx, ypos,
+                             _fileL[ii] + fw2, ypos + sdx,
+                             _fileL[ii] + fw2 + sdx, ypos,
+-                            _fileL[ii] + fw2, ypos - sdx };
+-            QPointArray pa1( 4, pts1 );
++                            _fileL[ii] + fw2, ypos - sdx );
+             p.drawPolygon( pa1 );
+          }
+       }
+============================================================
+--- src/util.cpp	777b4d2b643199d03e4d75da12144675ea6f4121
++++ src/util.cpp	0b1514592f40fe50b5246015b5543d656c7c552e
+@@ -1040,7 +1040,7 @@
+ 	   break;
+        // use at() in case found+1 is past the end of the string
+        QChar escapedChar = newFormat.at( found+1 );
+-       switch( escapedChar ) {
++       switch( escapedChar.toAscii() ) {
+        case 'n':
+ 	   newFormat = newFormat.replace( found, 2, QChar( '\n' ) );
+ 	   break;
+

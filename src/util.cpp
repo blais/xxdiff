@@ -510,6 +510,9 @@ bool XxUtil::testFile(
       isDirectory = true;
       return true;
    }
+   else {
+      isDirectory = false;
+   }
 
    // Make sure file is not binary, we don't handle binary files.
    if ( testAscii ) {
@@ -550,7 +553,7 @@ bool XxUtil::isAsciiText( const QString& filename )
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::spawnCommand(
+int XxUtil::spawnCommand(
    const char** argv,
    FILE** outf,
    FILE** errf,
@@ -585,7 +588,8 @@ void XxUtil::spawnCommand(
       }
    }
 
-   switch ( fork() ) {
+   int pid = fork();
+   switch ( pid ) {
       case 0: { // the child
 
          /*
@@ -644,7 +648,7 @@ void XxUtil::spawnCommand(
 
          if ( sigChldHandler ) {
             if ( installSigChldHandler( sigChldHandler ) == false ) {
-               return;
+               return -2;
             }
          }
 
@@ -699,6 +703,8 @@ void XxUtil::spawnCommand(
    }
 
 #else
+
+   int pid = -1;
 
    QString command;
    const char** arg;
@@ -758,17 +764,17 @@ void XxUtil::spawnCommand(
 #endif
 
    // Not reached.
-   return;
+   return pid;
 }
 
 //------------------------------------------------------------------------------
 //
-void XxUtil::spawnCommand(
+int XxUtil::spawnCommand(
    const char** argv,
    void (*sigChldHandler)(int)
 )
 {
-   spawnCommand( argv, 0, 0, sigChldHandler );
+   return spawnCommand( argv, 0, 0, sigChldHandler );
 }
 
 //------------------------------------------------------------------------------
@@ -789,8 +795,8 @@ int XxUtil::interruptibleSystem( const QString& command )
    }
    if ( pid == 0 ) {
       char* argv[4];
-      argv[0] = "sh";
-      argv[1] = "-c";
+      argv[0] = const_cast<char*>( "sh" );
+      argv[1] = const_cast<char*>( "-c" );
       argv[2] = const_cast<char*>( command.latin1() );
       argv[3] = 0;
       execve( "/bin/sh", argv, environ );
@@ -1056,5 +1062,25 @@ QString XxUtil::unescapeChars( const QString& format )
    
    return newFormat;
 }
+
+//------------------------------------------------------------------------------
+//
+FILE* XxUtil::tempfile( char* tmplate )
+{
+   // Open the temporary file.
+   FILE *ftmp;
+#ifndef WINDOWS
+   int tfd = mkstemp( tmplate );
+   if ( ( ftmp = ::fdopen( tfd, "w" ) ) == NULL ) {
+#else
+   mktemp( tmplate );
+   if ( ( ftmp = ::fopen( tmplate, "w" ) ) == NULL ) {
+#endif
+      throw XxIoError( XX_EXC_PARAMS, 
+                       "Error opening temporary file." );
+   }
+   return ftmp;
+}
+
 
 XX_NAMESPACE_END

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -23,15 +22,13 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports.
-import os, md5
+import os, hashlib
 from os.path import *
 
 # xxdiff imports.
 from xxdiff.scripts import script_name
 
 
-#-------------------------------------------------------------------------------
-#
 resilient_dir = join(os.environ['HOME'], '.%s' % script_name)
 
 def resilient_for_paths(paths):
@@ -41,7 +38,7 @@ def resilient_for_paths(paths):
     """
 
     # Compute a unique hash from the given absolute paths.
-    comhash = md5.new()
+    comhash = hashlib.md5()
     for p in paths:
         comhash.update(abspath(p))
     resdir = join(resilient_dir, comhash.hexdigest())

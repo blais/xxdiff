@@ -107,12 +107,13 @@ public:
 
    // Run a program with command line arguments and two pathname arguments via
    // fork/exec and return file descriptors into which standard output and
-   // standard error have been redirected.
+   // standard error have been redirected.  Return the child's pid or -1 if it
+   // already finished.
    //
    // If you don't want the pipes, let outf and/or errf be null.
    //
    // If cstdin is not null, it is piped into the subprocess standard input.
-   static void spawnCommand( 
+   static int spawnCommand( 
       const char** argv,
       FILE** outf,
       FILE** errf,
@@ -121,7 +122,7 @@ public:
    );
 
    // Convenience for above method, without output.
-   static void spawnCommand( 
+   static int spawnCommand( 
       const char** argv,
       void (*sigChldHandler)(int) = 0
    );
@@ -176,6 +177,9 @@ public:
    static QString escapeChars( const QString& format );
    static QString unescapeChars( const QString& format );
    // </group>
+
+   // Create a new temporary file.
+   static FILE* tempfile( char* tmplate );
 
 };
 

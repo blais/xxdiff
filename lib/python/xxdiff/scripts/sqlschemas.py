@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-sql-schemas [<options>] <db1> <db2>
@@ -20,6 +19,7 @@ __depends__ = ['xxdiff', 'Python-2.4', 'PostgreSQL']
 
 # stdlib imports.
 from os.path import *
+import logging, shutil
 
 # xxdiff imports.
 import xxdiff.scripts
@@ -28,8 +28,6 @@ import xxdiff.mapcompare
 from xxdiff.db import postgresql
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -40,6 +38,9 @@ def parse_options():
     xxdiff.mapcompare.options_graft(parser)
     postgresql.options_graft(parser)
     xxdiff.invoke.options_graft(parser)
+
+    parser.add_option('-t', '--text-only', action='store_true',
+                      help="Render as text files to disk instead of graphical diff.")
 
     opts, args = parser.parse_args()
 
@@ -56,8 +57,6 @@ def parse_options():
             postgresql.parse_dbspec(dbspec1, parser, opts),
             postgresql.parse_dbspec(dbspec2, parser, opts))
 
-#-------------------------------------------------------------------------------
-#
 def sqlcompare_main():
     """
     Main program for schema comparison script.
@@ -69,7 +68,9 @@ def sqlcompare_main():
         dump = postgresql.dump_schema(db.user, db.dbname, db.schema, opts)
 
         # Parse the dumps, produce an adequate map of its contained objects.
-        db.objmap = postgresql.parse_dump(dump)
+        dump_entries = postgresql.parse_dump(dump)
+        db.objmap = dict(((name, type), contents)
+                         for name, type, contents in dump_entries)
 
     # List all objects that were found.
     for key in sorted(set(db1.objmap.keys() + db2.objmap.keys())):
@@ -79,16 +80,20 @@ def sqlcompare_main():
     files = xxdiff.mapcompare.render_diffable_maps(opts, db1.objmap, db2.objmap)
 
     # Set displayed titles.
-    titles = xxdiff.invoke.title_opts(
-        *['%s (SCHEMA)' % db.dbspec for db in (db1, db2)])
-    
-    # Invoke xxdiff .
-    xxargs = titles + [x.name for x in files]
-    xxdiff.invoke.xxdiff_display(opts, *xxargs)
+    if opts.text_only:
+        for db, f in zip([db1, db2], files):
+            targetfn = '%s.schema' % db.dbname
+            logging.info("Writing out %s" % targetfn)
+            shutil.copyfile(f.name, targetfn)
+    else:
+        titles = xxdiff.invoke.title_opts(
+            *['%s (SCHEMA)' % db.dbspec for db in (db1, db2)])
+
+        # Invoke xxdiff .
+        xxargs = titles + [x.name for x in files]
+        xxdiff.invoke.xxdiff_display(opts, *xxargs)
 
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(sqlcompare_main)
 

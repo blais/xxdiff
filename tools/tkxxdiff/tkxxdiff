@@ -1,0 +1,278 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" -- "$@"
+
+# tkxxdiff
+# V1.0, 18 Jun 2007
+# A graphic file/directory selector for xxdiff
+# philippe.corbes@laposte.net
+#--------------------------------------------------
+
+set name "TkxxDiff"
+set version "1.0"
+set diffappli xxdiff
+
+set font {Helvetica 12}
+array set drf {}
+array set drd {}
+
+#Init default paramaters
+set rootdir "./"
+set action "-f"
+
+#Check paramaters
+set i 0
+set idir 1
+while {$i < $argc} {
+	switch -exact -- [lindex $argv $i] {
+		"-h" {set action [lindex $argv $i]}
+		"-d" {set action [lindex $argv $i]}
+		"-f" {set action [lindex $argv $i]}
+		default {
+			set adir [lindex $argv $i]
+			if { [file isdirectory $adir] } {
+				set drf($idir) $adir
+				set drd($idir) $adir
+				incr idir
+			}
+		}
+	}
+	incr i
+}
+while {$idir <= 3} {
+	set drf($idir) $rootdir
+	set drd($idir) $rootdir
+	incr idir
+}
+#End of check parameters
+
+#Open a new window
+if {![info exists w]} {
+#	tk_messageBox -message "withdraw"
+	wm withdraw .
+	set w .tkxxdiff
+}
+
+## functions ##
+
+proc compareFiles w {
+	global diffappli
+	set n 0
+	if [string compare [$w.1.ent get] ""] { incr n }
+	if [string compare [$w.2.ent get] ""] { incr n }
+	if [string compare [$w.3.ent get] ""] { incr n }
+	if [expr $n > 1] {
+		set cmd "$diffappli [$w.1.ent get] [$w.2.ent get] [$w.3.ent get]"
+		catch {eval exec $cmd }
+	}
+}
+
+proc fileDialog {w ent op} {
+	global drf
+	#   Type names		Extension(s)
+	#--------------------------------------------
+	set types {
+		{"All files"		*		}
+		{"text files"		{.txt}		}
+		{"source C"		{.c} 		}
+		{"Include H"		{.h} 		}
+	}
+	set fsel [tk_getOpenFile -filetypes $types -parent $w -title "Select file $op" -initialdir $drf($op)]
+	if [string compare $fsel ""] {
+		set drf($op) [file dirname $fsel]
+		$ent delete 0 end
+		$ent insert 0 $fsel
+		$ent xview end
+	};
+}
+
+proc compareDirectories w {
+	global diffappli
+	set n 0
+	if [string compare [$w.1.ent get] ""] { incr n}
+	if [string compare [$w.2.ent get] ""] { incr n}
+	if [expr $n > 1] {
+		set cmd "$diffappli [$w.1.ent get] [$w.2.ent get]"
+		catch {eval exec $cmd }
+	}
+}
+
+proc directoryDialog {w ent op} {
+	global drd
+	set d $drd($op)
+	set fsel [tk_chooseDirectory -title "Select directory $op" -initialdir $d]
+	if [string compare $fsel ""] {
+		set drd($op) $fsel
+		$ent delete 0 end
+		$ent insert 0 $fsel
+		$ent xview end
+	};
+}
+
+proc selectPage {{frame {}}} {
+	global w
+
+	if {$frame == ""} { set frame $w.fFiles }
+	pack forget $w.fFiles
+	pack forget $w.fDirectories
+	pack forget $w.fAbout
+	pack $frame -side right -fill both -expand y
+
+	if {$frame == "$w.fFiles"} {
+		bind $w <F1> [list $w.fFiles.1.but invoke]
+		bind $w <F2> [list $w.fFiles.2.but invoke]
+		bind $w <F3> [list $w.fFiles.3.but invoke]
+		bind $w <Return> [list $w.fFiles.buttons.compare invoke]
+		bind $w <Escape> [list $w.fFiles.buttons.dismiss invoke]
+	} else {
+		if {$frame == "$w.fDirectories"} {
+			bind $w <F1> [list $w.fDirectories.1.but invoke]
+			bind $w <F2> [list $w.fDirectories.2.but invoke]
+			bind $w <F3> continue
+			bind $w <Return> [list $w.fDirectories.buttons.compare invoke]
+			bind $w <Escape> [list $w.fDirectories.buttons.dismiss invoke]
+		} else {
+			bind $w <F1> continue
+			bind $w <F2> continue
+			bind $w <F3> continue
+			bind $w <Return> continue
+			bind $w <Escape> [list $w.fDirectories.buttons.dismiss invoke]
+		}
+	}
+}
+
+
+## Start to build interface
+
+toplevel $w
+wm title $w "$name"
+wm iconname $w "$name"
+wm geometry $w +100+100
+
+# a series of checkbuttons to act as a poor mans notebook tab
+frame $w.notebook -bd 0
+pack $w.notebook -side top -fill x -pady 4
+set pagelist {}
+
+# Radiobuttons without indicators look rather sucky on MacOSX, so
+# we'll tweak the style for that platform
+if {$::tcl_platform(os) == "Darwin"} {
+  set indicatoron true
+} else {
+  set indicatoron false
+}
+
+foreach page [list Files Directories About] {
+	set frame $w.f$page
+	lappend pagelist $frame
+	set rb $w.notebook.f$page
+	radiobutton $rb -command "selectPage $frame" \
+		-value $frame -height 2 -text $page \
+		-indicatoron $indicatoron -width 10 -borderwidth 1
+	pack $rb -side left
+	frame $frame -bd 2 -relief groove
+}
+bind $w <Control-f> { $w.notebook.fFiles select; selectPage $w.fFiles}
+bind $w <Control-d> { $w.notebook.fDirectories select; selectPage $w.fDirectories}
+bind $w <Control-a> { $w.notebook.fAbout select; selectPage $w.fAbout}
+
+#Files panel
+set frame $w.fFiles
+
+frame $frame.infos
+pack $frame.infos -side top -fill x -pady 20
+label $frame.infos.msg -font $font -wraplength 7i -justify left -text "Click on \"Browse...\" buttons to select up to 3 files using a file selection dialog box.\nThen click \"Compare\""
+pack $frame.infos.msg -side left -padx 1c
+
+foreach i {1 2 3} {
+	set f [frame $frame.$i]
+	label $f.lab -text "File $i: " -anchor e
+	entry $f.ent -width 40
+	button $f.but -text "Browse..." -width 9 -command "fileDialog $frame $f.ent $i"
+	pack $f.lab -side left
+	pack $f.ent -side left -expand yes -fill x
+	pack $f.but -side left
+	pack $f -fill x -padx 1c -pady 3
+}
+
+frame $frame.buttons
+pack $frame.buttons -side bottom -fill x -pady 2m
+button $frame.buttons.dismiss -text Exit -width 8 -default normal -command { wm withdraw $w; exit 0 }
+button $frame.buttons.compare -text Compare -width 8 -default active -command "compareFiles $frame"
+pack $frame.buttons.compare -side right -padx 1c -pady 5
+pack $frame.buttons.dismiss -side right -padx 10 -pady 5
+
+pack forget $frame
+
+#Directories panel
+set frame $w.fDirectories
+
+frame $frame.infos
+pack $frame.infos -side top -fill x -pady 20
+label $frame.infos.msg -font $font -wraplength 7i -justify left -text "Click on \"Browse...\" buttons to select 2 directories using a selection dialog box.\nThen click \"Compare\""
+pack $frame.infos.msg -side left -padx 1c
+
+foreach i {1 2} {
+	set f [frame $frame.$i]
+	label $f.lab -text "Directory $i: " -anchor e
+	entry $f.ent -width 40
+	$f.ent insert 0 $drd($i)
+	button $f.but -text "Browse..." -command "directoryDialog $frame $f.ent $i"
+	pack $f.lab -side left
+	pack $f.ent -side left -expand yes -fill x
+	pack $f.but -side left
+	pack $f -fill x -padx 1c -pady 3
+}
+
+frame $frame.buttons
+pack $frame.buttons -side bottom -fill x -pady 2m
+button $frame.buttons.dismiss -text Exit -width 8 -default normal -command { wm withdraw $w; exit 0 }
+button $frame.buttons.compare -text Compare -width 8 -default active -command "compareDirectories $frame"
+pack $frame.buttons.compare -side right -padx 1c -pady 5
+pack $frame.buttons.dismiss -side right -padx 10 -pady 5
+
+pack forget $frame
+
+#About panel
+set frame $w.fAbout
+
+frame $frame.infos
+pack $frame.infos -side top -fill x -pady 20
+set text {$name $version
+Copyright (C) 2007
+Philippe Corbes
+
+$name is a Tcl/Tk front-end for xxdiff.
+
+Usage: 
+$argv0 [-f] [-d] [-a] [roots..]
+    -f	Start un file selection mode
+    -d	Star in directory selection mode
+    -h	Display this help
+    roots	Init up to 3 roots directories for file/directory selection
+
+You can use keys:
+- <Control-F>, <Control-D> and <Control-A> to switch panels,
+- <F1>, <F2> and <F3> to select files and directories,
+- <enter> to compare and <escape> to exit.
+
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+}
+
+set text [subst -nobackslashes -nocommands $text]
+label $frame.infos.msg -font $font -wraplength 6i -justify left -text "$text"
+pack $frame.infos.msg -side left -padx 1c
+
+pack forget $frame
+
+#Select asked panel
+switch -- $action {
+	"-f" {selectPage $w.fFiles ; $w.notebook.fFiles select }
+	"-d" {selectPage $w.fDirectories ; $w.notebook.fDirectories select}
+	default {selectPage $w.fAbout ; $w.notebook.fAbout select}
+}

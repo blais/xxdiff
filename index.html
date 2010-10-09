@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="iso-8859-1" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>xxdiff: Graphical File And Directories Comparator And Merge Tool</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
@@ -16,38 +16,55 @@
 
 <div class="document" id="xxdiff-graphical-file-and-directories-comparator-and-merge-tool">
 <h1 class="title">xxdiff: Graphical File And Directories Comparator And Merge Tool</h1>
-<div class="contents topic">
-<p class="topic-title first"><a id="table-of-contents" name="table-of-contents">Table of Contents</a></p>
+
+<!-- -*- coding: utf-8 -*- -->
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of Contents</p>
 <ul class="simple">
-<li><a class="reference" href="#description" id="id4" name="id4">Description</a><ul>
-<li><a class="reference" href="#features" id="id5" name="id5">Features</a><ul>
-<li><a class="reference" href="#unicode-and-inline-editing" id="id6" name="id6">Unicode and Inline Editing</a></li>
+<li><a class="reference internal" href="#description" id="id4">Description</a><ul>
+<li><a class="reference internal" href="#features" id="id5">Features</a><ul>
+<li><a class="reference internal" href="#unicode-and-inline-editing" id="id6">Unicode and Inline Editing</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference" href="#documentation" id="id7" name="id7">Documentation</a><ul>
-<li><a class="reference" href="#screenshots" id="id8" name="id8">Screenshots</a></li>
+<li><a class="reference internal" href="#documentation" id="id7">Documentation</a><ul>
+<li><a class="reference internal" href="#screenshots" id="id8">Screenshots</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#download" id="id9" name="id9">Download</a><ul>
-<li><a class="reference" href="#tools" id="id10" name="id10">Tools</a></li>
-<li><a class="reference" href="#packages" id="id11" name="id11">Packages</a></li>
+<li><a class="reference internal" href="#download" id="id9">Download</a><ul>
+<li><a class="reference internal" href="#tools" id="id10">Tools</a></li>
+<li><a class="reference internal" href="#packages" id="id11">Packages</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#reporting-bugs" id="id12" name="id12">Reporting Bugs</a></li>
-<li><a class="reference" href="#installation" id="id13" name="id13">Installation</a><ul>
-<li><a class="reference" href="#dependencies" id="id14" name="id14">Dependencies</a></li>
-<li><a class="reference" href="#portability" id="id15" name="id15">Portability</a></li>
+<li><a class="reference internal" href="#reporting-bugs" id="id12">Reporting Bugs</a></li>
+<li><a class="reference internal" href="#installation" id="id13">Installation</a><ul>
+<li><a class="reference internal" href="#dependencies" id="id14">Dependencies</a></li>
+<li><a class="reference internal" href="#portability" id="id15">Portability</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#external-links" id="id16" name="id16">External Links</a></li>
-<li><a class="reference" href="#copyright-and-license" id="id17" name="id17">Copyright and License</a></li>
-<li><a class="reference" href="#author" id="id18" name="id18">Author</a></li>
+<li><a class="reference internal" href="#external-links" id="id16">External Links</a></li>
+<li><a class="reference internal" href="#copyright-and-license" id="id17">Copyright and License</a></li>
+<li><a class="reference internal" href="#author" id="id18">Author</a></li>
 </ul>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id4" id="description" name="description">Description</a></h1>
+<!-- 1  Description
+  1.1  Features
+    1.1.1  Unicode and Inline Editing
+2  Documentation
+  2.1  Screenshots
+3  Download
+  3.1  Tools
+  3.2  Packages
+4  Reporting Bugs
+5  Installation
+  5.1  Dependencies
+  5.2  Portability
+6  External Links
+7  Copyright and License
+8  Author -->
+<div class="section" id="description">
+<h1><a class="toc-backref" href="#id4">Description</a></h1>
 <p>This is the official home of <strong>xxdiff</strong>, a graphical file and
 directories comparator and merge tool.</p>
 <p><strong>xxdiff</strong> is provided under the GNU GPL open source license. It has
@@ -55,8 +72,8 @@ reached stable state, and is known to run on many popular unices,
 including IRIX, Linux, Solaris, HP/UX, DEC Tru64.  It has been
 deployed inside many large organizations and is being actively
 maintained by its author (Martin Blais).</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id5" id="features" name="features">Features</a></h2>
+<div class="section" id="features">
+<h2><a class="toc-backref" href="#id5">Features</a></h2>
 <ul class="simple">
 <li>Comparing <strong>two</strong> files, <strong>three</strong> files, or two <strong>directories</strong>
 (shallow and recursive);</li>
@@ -75,7 +92,7 @@ agnostic (i.e. will work equally well with KDE or Gnome);</li>
 <li>Features and output that ease integration with scripts.</li>
 </ul>
 <p><strong>xxdiff</strong> was (and probably still is) tested daily in a merge
-reviewing/policing context by more than 50 engineers at <a class="reference" href="http://www.discreet.com">discreet</a>, and since this task is a
+reviewing/policing context by more than 50 engineers at <a class="reference external" href="http://www.discreet.com">discreet</a>, and since this task is a
 significant part of their development process, many of the features
 are a direct result of suggestions from these people while the author
 was working there.</p>
@@ -83,8 +100,8 @@ was working there.</p>
 for notification at either freshmeat or sourceforge.  xxdiff is
 implemented in C++ and its runtime dependencies is only the <strong>Qt UI
 toolkit</strong> from TrollTech.</p>
-<div class="section">
-<h3><a class="toc-backref" href="#id6" id="unicode-and-inline-editing" name="unicode-and-inline-editing">Unicode and Inline Editing</a></h3>
+<div class="section" id="unicode-and-inline-editing">
+<h3><a class="toc-backref" href="#id6">Unicode and Inline Editing</a></h3>
 <p><strong>xxdiff</strong> does not support comparing files encoded with Unicode.
 Also, it does not support inline editing of the diffed files.  If you
 need these features, you could try emacs or Meld (although both of
@@ -92,33 +109,38 @@ these lack some of the most interesting features of xxdiff).</p>
 </div>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id7" id="documentation" name="documentation">Documentation</a></h1>
+<div class="section" id="documentation">
+<h1><a class="toc-backref" href="#id7">Documentation</a></h1>
 <ul class="simple">
-<li><a class="reference" href="doc/xxdiff-doc.html">User's Manual</a> <em>(user's manual, all features, FAQ)</em></li>
-<li><a class="reference" href="doc/xxdiff-secrets.html">The almost secret nifty features of xxdiff</a></li>
-<li><a class="reference" href="doc/xxdiff-integration.html">Integrating xxdiff with scripts</a></li>
-<li><a class="reference" href="doc/xxdiff-scripts.html">Helper Scripts for xxdiff</a></li>
-<li><a class="reference" href="CHANGES">CHANGES</a> <em>(news, recent changes, history)</em></li>
-<li><a class="reference" href="TODO">TODO</a> <em>(future features, wishlist)</em></li>
+<li><a class="reference external" href="doc/xxdiff-doc.html">User's Manual</a> <em>(user's manual, all features, FAQ)</em></li>
+<li><a class="reference external" href="doc/xxdiff-secrets.html">The almost secret nifty features of xxdiff</a></li>
+<li><a class="reference external" href="doc/xxdiff-integration.html">Integrating xxdiff with scripts</a></li>
+<li><a class="reference external" href="doc/xxdiff-scripts.html">Helper Scripts for xxdiff</a></li>
+<li><a class="reference external" href="CHANGES">CHANGES</a> <em>(news, recent changes, history)</em></li>
+<li><a class="reference external" href="TODO">TODO</a> <em>(future features, wishlist)</em></li>
 </ul>
-<div class="section">
-<h2><a class="toc-backref" href="#id8" id="screenshots" name="screenshots">Screenshots</a></h2>
+<div class="section" id="screenshots">
+<h2><a class="toc-backref" href="#id8">Screenshots</a></h2>
 <ul class="simple">
-<li><a class="reference" href="doc/screenshots/dirindex.html">Screenshots</a></li>
+<li><a class="reference external" href="doc/screenshots/dirindex.html">Screenshots</a></li>
 </ul>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id9" id="download" name="download">Download</a></h1>
+<div class="section" id="download">
+<h1><a class="toc-backref" href="#id9">Download</a></h1>
 <ul class="simple">
-<li><a class="reference" href="http://sourceforge.net/project/showfiles.php?group_id=2198">Releases Download</a></li>
-<li><a class="reference" href="/downloads/xxdiff">Alternate Location and Snapshots</a></li>
-<li>A Windows build (with some minor bugs) can be found <a class="reference" href="http://xxdiff.sourceforge.net/download/2.9/windows">here</a>.  No support offered
+<li><a class="reference external" href="http://sourceforge.net/project/showfiles.php?group_id=2198">Releases Download</a></li>
+<li><a class="reference external" href="/downloads/xxdiff">Alternate Location and Snapshots</a></li>
+<li>A Windows build (with some minor bugs) can be found <a class="reference external" href="http://xxdiff.sourceforge.net/download/2.9/windows">here</a>.  No support offered
 though.</li>
+<li>A preliminary Qt4 port to Mac has been done by Matt Johnston, you can <a class="reference external" href="http://xxdiff.sourceforge.net/download/3.2/contrib">find it
+here</a>.  I don't have a
+Mac, so questions will not be very useful.  The current xxdiff source code
+does not reflect this build though.  Newer versions can be found at
+<a class="reference external" href="http://matt.ucc.asn.au/xxdiff/">http://matt.ucc.asn.au/xxdiff/</a>.</li>
 </ul>
-<div class="section">
-<h2><a class="toc-backref" href="#id10" id="tools" name="tools">Tools</a></h2>
+<div class="section" id="tools">
+<h2><a class="toc-backref" href="#id10">Tools</a></h2>
 <p><strong>xxdiff</strong> comes with a bunch of wrapper Python scripts that invoke xxdiff in
 creative ways.  The author has been using these for a long time now and decided
 for version 3.0 to clean them up and make them a little more generic so everyone
@@ -126,7 +148,7 @@ can use them.  As of version 3.2, the standalone scripts have been refactored a
 great deal, to share code together and to make them more stable.  All this code
 is now distributed with xxdiff, in an <tt class="docutils literal"><span class="pre">xxdiff</span></tt> Python package, which you can
 leverage to build your own file transformation scripts around xxdiff.</p>
-<p>See the document <a class="reference" href="doc/xxdiff-scripts.html">Helper Scripts for xxdiff</a> for full
+<p>See the document <a class="reference external" href="doc/xxdiff-scripts.html">Helper Scripts for xxdiff</a> for full
 details.</p>
 <p>The scripts are available in the xxdiff distribution.  To install them and the
 accompanying Python package, use the standard distutils procedure:</p>
@@ -138,30 +160,32 @@ python setup.py install
 <p>Other tools can be found in the distribution under the tools/ directory (CVS,
 ClearCase, etc.).</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id11" id="packages" name="packages">Packages</a></h2>
+<div class="section" id="packages">
+<h2><a class="toc-backref" href="#id11">Packages</a></h2>
 <p>Packages are available for some specific operating systems. Here are links to
 the relevant pages.  The author does not publish binaries anymore.</p>
 <ul class="simple">
-<li><a class="reference" href="http://www.sourcepole.ch/sources/software/xxdiff/">Linux / Debian package</a>
+<li><a class="reference external" href="http://www.sourcepole.ch/sources/software/xxdiff/">Linux / Debian package</a>
 (provided by Tomas Pospisek)</li>
-<li><a class="reference" href="http://www.geek.co.il/RPMS/xxdiff">Linux / Mandrake package (1)</a>
+<li><a class="reference external" href="http://www.geek.co.il/RPMS/xxdiff">Linux / Mandrake package (1)</a>
 (maintained by Oded Arbel)</li>
-<li><a class="reference" href="http://www.roberto.foglietta.name/pub/xxdiff">Linux / Mandrake package (2)</a>
+<li><a class="reference external" href="http://www.roberto.foglietta.name/pub/xxdiff">Linux / Mandrake package (2)</a>
 (maintained by Roberto A. Foglietta)</li>
-<li><a class="reference" href="http://packages.gentoo.org/ebuilds/?xxdiff-3.1">Linux / Gentoo port</a>
+<li><a class="reference external" href="http://timeoff.wsisiz.edu.pl/rpms.html#xxdiff">Linux / Fedore Core (1)</a>
+(maintained by Marcin Zajączkowski)</li>
+<li><a class="reference external" href="http://packages.gentoo.org/ebuilds/?xxdiff-3.1">Linux / Gentoo port</a>
 (in the dev-utils category)</li>
-<li><a class="reference" href="http://www.openbsd.org/ports.html">OpenBSD / ports tree</a> (maintained by Dan
+<li><a class="reference external" href="http://www.openbsd.org/ports.html">OpenBSD / ports tree</a> (maintained by Dan
 Weeks, available in the ports tree)</li>
-<li><a class="reference" href="http://freeware.sgi.com">IRIX / Tardist package</a> (provided by the
+<li><a class="reference external" href="http://freeware.sgi.com">IRIX / Tardist package</a> (provided by the
 SGI freeware team (version may be lagging behind))</li>
 </ul>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id12" id="reporting-bugs" name="reporting-bugs">Reporting Bugs</a></h1>
+<div class="section" id="reporting-bugs">
+<h1><a class="toc-backref" href="#id12">Reporting Bugs</a></h1>
 <ul class="simple">
-<li><a class="reference" href="http://sourceforge.net/tracker/?group_id=2198">Reporting Bugs</a>
+<li><a class="reference external" href="http://sourceforge.net/tracker/?group_id=2198">Reporting Bugs</a>
 <em>(bugs and feature requests)</em></li>
 </ul>
 <p><strong>PLEASE!</strong> report bugs using the bug tracker instead of email. It is extremely
@@ -170,14 +194,13 @@ account, and it allows me to track issues and desired features, as well as keep
 a history and dates.  Please do not send the author email about bugs.  Log them,
 you don't even need a SourceForge account. Thank you.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id13" id="installation" name="installation">Installation</a></h1>
-<div class="section">
-<h2><a class="toc-backref" href="#id14" id="dependencies" name="dependencies">Dependencies</a></h2>
+<div class="section" id="installation">
+<h1><a class="toc-backref" href="#id13">Installation</a></h1>
+<div class="section" id="dependencies">
+<h2><a class="toc-backref" href="#id14">Dependencies</a></h2>
 <p>Build dependencies are:</p>
 <ul class="simple">
 <li>Qt-3.2 or higher</li>
-<li>tmake</li>
 <li>a C++ compiler, flex and yacc</li>
 </ul>
 <p>Runtime dependencies are:</p>
@@ -185,31 +208,31 @@ you don't even need a SourceForge account. Thank you.</p>
 <li>Qt-3.2 or higher</li>
 </ul>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id15" id="portability" name="portability">Portability</a></h2>
+<div class="section" id="portability">
+<h2><a class="toc-backref" href="#id15">Portability</a></h2>
 <p>xxdiff is known to build and work on a great majority of UNIX platforms where Qt
-works.  It has also been ported it to Mac OSX.</p>
+works.  It has also been ported to Mac OS X.</p>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id16" id="external-links" name="external-links">External Links</a></h1>
+<div class="section" id="external-links">
+<h1><a class="toc-backref" href="#id16">External Links</a></h1>
 <ul class="simple">
-<li><a class="reference" href="http://sourceforge.net/projects/xxdiff">SourceForge Project Page</a></li>
-<li><a class="reference" href="http://freshmeat.net/projects/xxdiff">Freshmeat Application Index</a></li>
-<li><a class="reference" href="http://www.osdir.com/Downloads-req-viewdownloaddetails-lid-402-ttitle-xxdiff.html">Open Source Directory (OSDir) application index</a></li>
-<li>Other file comparison programs at <a class="reference" href="http://directory.google.com/Top/Computers/Software/File_Management/File_Comparison/">Google directory</a>,
-<a class="reference" href="http://dmoz.org/Computers/Software/File_Management/File_Comparison/">DMOZ</a></li>
-<li><a class="reference" href="http://furius.ca">Author's Homepage</a></li>
+<li><a class="reference external" href="http://sourceforge.net/projects/xxdiff">SourceForge Project Page</a></li>
+<li><a class="reference external" href="http://freshmeat.net/projects/xxdiff">Freshmeat Application Index</a></li>
+<li><a class="reference external" href="http://www.osdir.com/Downloads-req-viewdownloaddetails-lid-402-ttitle-xxdiff.html">Open Source Directory (OSDir) application index</a></li>
+<li>Other file comparison programs at <a class="reference external" href="http://directory.google.com/Top/Computers/Software/File_Management/File_Comparison/">Google directory</a>,
+<a class="reference external" href="http://dmoz.org/Computers/Software/File_Management/File_Comparison/">DMOZ</a></li>
+<li><a class="reference external" href="http://furius.ca">Author's Homepage</a></li>
 </ul>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id17" id="copyright-and-license" name="copyright-and-license">Copyright and License</a></h1>
+<div class="section" id="copyright-and-license">
+<h1><a class="toc-backref" href="#id17">Copyright and License</a></h1>
 <p>Copyright (C) 2001-2004  Martin Blais.  All Rights Reserved.</p>
-<p>This code is distributed under the <a class="reference" href="COPYING">GNU General Public License</a>;</p>
+<p>This code is distributed under the <a class="reference external" href="COPYING">GNU General Public License</a>;</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id18" id="author" name="author">Author</a></h1>
-<p>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</p>
+<div class="section" id="author">
+<h1><a class="toc-backref" href="#id18">Author</a></h1>
+<p>Martin Blais &lt;<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</p>
 <!-- official sourceforge logo code snippet -->
 <img alt="SourceForge Logo" src="http://sourceforge.net/sflogo.php?group_id=2198&amp;type=1" style="width: 88px; height: 31px;" />
 </div>

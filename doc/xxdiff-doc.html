@@ -3,14 +3,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.3.1: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
 <title>xxdiff documentation</title>
 <meta name="author" content="Martin Blais" />
 <meta name="date" content="2003-12-25" />
 <meta name="copyright" content="Copyright (C) 1999-2004, Martin Blais.  All Rights Reserved." />
-<link rel="stylesheet" href="default.css" type="text/css" />
+<link rel="stylesheet" href="/docutils-style.css" type="text/css" />
 </head>
 <body>
+<div class="document" id="xxdiff-documentation">
 <h1 class="title">xxdiff documentation</h1>
 <table class="docinfo" frame="void" rules="none">
 <col class="docinfo-name" />
@@ -26,102 +27,155 @@
 <td>Copyright (C) 1999-2004, Martin Blais.  All Rights Reserved.</td></tr>
 </tbody>
 </table>
-<div class="document" id="xxdiff-documentation">
 <div class="abstract topic">
-<p class="topic-title">Abstract</p>
+<p class="topic-title first">Abstract</p>
 <p>User's manual for xxdiff.  The official location of xxdiff on the internet is
 <a class="reference" href="http://xxdiff.sourceforge.net">http://xxdiff.sourceforge.net</a>.  If you're reading this page from the web, note
 that you can also access this document from the Help menu of xxdiff.</p>
 </div>
 <div class="contents topic" id="table-of-contents">
-<p class="topic-title"><a name="table-of-contents">Table of Contents</a></p>
+<p class="topic-title first">Table of Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference" href="#introduction" id="id5" name="id5">1   Introduction</a></li>
-<li><a class="reference" href="#version" id="id6" name="id6">2   Version</a></li>
-<li><a class="reference" href="#invocation" id="id7" name="id7">3   Invocation</a><ul class="auto-toc">
-<li><a class="reference" href="#return-value" id="id8" name="id8">3.1   Return Value</a></li>
-<li><a class="reference" href="#command-line-options" id="id9" name="id9">3.2   Command-line Options</a></li>
-<li><a class="reference" href="#using-xxdiff-as-a-short-lived-application" id="id10" name="id10">3.3   Using xxdiff as a short-lived application</a></li>
+<li><a class="reference" href="#introduction" id="id5">1&nbsp;&nbsp;&nbsp;Introduction</a></li>
+<li><a class="reference" href="#version" id="id6">2&nbsp;&nbsp;&nbsp;Version</a></li>
+<li><a class="reference" href="#invocation" id="id7">3&nbsp;&nbsp;&nbsp;Invocation</a><ul class="auto-toc">
+<li><a class="reference" href="#return-value" id="id8">3.1&nbsp;&nbsp;&nbsp;Return Value</a></li>
+<li><a class="reference" href="#command-line-options" id="id9">3.2&nbsp;&nbsp;&nbsp;Command-line Options</a></li>
+<li><a class="reference" href="#using-xxdiff-as-a-short-lived-application" id="id10">3.3&nbsp;&nbsp;&nbsp;Using xxdiff as a short-lived application</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#general-operation" id="id11" name="id11">4   General operation</a><ul class="auto-toc">
-<li><a class="reference" href="#the-text-area" id="id12" name="id12">4.1   The text area</a><ul class="auto-toc">
-<li><a class="reference" href="#horizontal-diffs" id="id13" name="id13">4.1.1   Horizontal diffs</a></li>
-<li><a class="reference" href="#per-hunk-ignore-whitespace" id="id14" name="id14">4.1.2   Per-hunk ignore whitespace</a></li>
-<li><a class="reference" href="#navigation" id="id15" name="id15">4.1.3   Navigation</a></li>
-<li><a class="reference" href="#pop-up-menu" id="id16" name="id16">4.1.4   Pop-up menu</a></li>
-<li><a class="reference" href="#searching" id="id17" name="id17">4.1.5   Searching</a></li>
-<li><a class="reference" href="#other-options" id="id18" name="id18">4.1.6   Other options</a></li>
-<li><a class="reference" href="#display-options" id="id19" name="id19">4.1.7   Display options</a></li>
+<li><a class="reference" href="#general-operation" id="id11">4&nbsp;&nbsp;&nbsp;General operation</a><ul class="auto-toc">
+<li><a class="reference" href="#the-text-area" id="id12">4.1&nbsp;&nbsp;&nbsp;The text area</a><ul class="auto-toc">
+<li><a class="reference" href="#horizontal-diffs" id="id13">4.1.1&nbsp;&nbsp;&nbsp;Horizontal diffs</a></li>
+<li><a class="reference" href="#per-hunk-ignore-whitespace" id="id14">4.1.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></li>
+<li><a class="reference" href="#navigation" id="id15">4.1.3&nbsp;&nbsp;&nbsp;Navigation</a></li>
+<li><a class="reference" href="#pop-up-menu" id="id16">4.1.4&nbsp;&nbsp;&nbsp;Pop-up menu</a></li>
+<li><a class="reference" href="#searching" id="id17">4.1.5&nbsp;&nbsp;&nbsp;Searching</a></li>
+<li><a class="reference" href="#other-options" id="id18">4.1.6&nbsp;&nbsp;&nbsp;Other options</a></li>
+<li><a class="reference" href="#display-options" id="id19">4.1.7&nbsp;&nbsp;&nbsp;Display options</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#redoing-the-diffs" id="id20" name="id20">4.2   Redoing the diffs</a></li>
-<li><a class="reference" href="#other-ui-elements" id="id21" name="id21">4.3   Other UI elements</a></li>
+<li><a class="reference" href="#redoing-the-diffs" id="id20">4.2&nbsp;&nbsp;&nbsp;Redoing the diffs</a></li>
+<li><a class="reference" href="#other-ui-elements" id="id21">4.3&nbsp;&nbsp;&nbsp;Other UI elements</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#comparing-two-files" id="id22" name="id22">5   Comparing two files</a><ul class="auto-toc">
-<li><a class="reference" href="#types-of-hunks" id="id23" name="id23">5.1   Types of hunks</a></li>
-<li><a class="reference" href="#options" id="id24" name="id24">5.2   Options</a></li>
+<li><a class="reference" href="#comparing-two-files" id="id22">5&nbsp;&nbsp;&nbsp;Comparing two files</a><ul class="auto-toc">
+<li><a class="reference" href="#types-of-hunks" id="id23">5.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
+<li><a class="reference" href="#options" id="id24">5.2&nbsp;&nbsp;&nbsp;Options</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#comparing-three-files" id="id25" name="id25">6   Comparing three files</a><ul class="auto-toc">
-<li><a class="reference" href="#id1" id="id26" name="id26">6.1   Types of hunks</a></li>
-<li><a class="reference" href="#ignoring-one-file" id="id27" name="id27">6.2   Ignoring one file</a></li>
+<li><a class="reference" href="#comparing-three-files" id="id25">6&nbsp;&nbsp;&nbsp;Comparing three files</a><ul class="auto-toc">
+<li><a class="reference" href="#id1" id="id26">6.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
+<li><a class="reference" href="#ignoring-one-file" id="id27">6.2&nbsp;&nbsp;&nbsp;Ignoring one file</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#comparing-two-directories" id="id28" name="id28">7   Comparing two directories</a><ul class="auto-toc">
-<li><a class="reference" href="#id2" id="id29" name="id29">7.1   Types of hunks</a></li>
-<li><a class="reference" href="#id3" id="id30" name="id30">7.2   Options</a></li>
-<li><a class="reference" href="#file-operations" id="id31" name="id31">7.3   File operations</a></li>
+<li><a class="reference" href="#comparing-two-directories" id="id28">7&nbsp;&nbsp;&nbsp;Comparing two directories</a><ul class="auto-toc">
+<li><a class="reference" href="#id2" id="id29">7.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
+<li><a class="reference" href="#id3" id="id30">7.2&nbsp;&nbsp;&nbsp;Options</a></li>
+<li><a class="reference" href="#file-operations" id="id31">7.3&nbsp;&nbsp;&nbsp;File operations</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#merging-files-and-resolving-conflicts" id="id32" name="id32">8   Merging files and resolving conflicts</a><ul class="auto-toc">
-<li><a class="reference" href="#selecting-regions" id="id33" name="id33">8.1   Selecting regions</a></li>
-<li><a class="reference" href="#saving-the-resulting-file" id="id34" name="id34">8.2   Saving the resulting file</a><ul class="auto-toc">
-<li><a class="reference" href="#forcing-output-of-a-merged-file-and-better-script-integration" id="id35" name="id35">8.2.1   Forcing Output of a Merged File and Better Script Integration</a></li>
+<li><a class="reference" href="#merging-files-and-resolving-conflicts" id="id32">8&nbsp;&nbsp;&nbsp;Merging files and resolving conflicts</a><ul class="auto-toc">
+<li><a class="reference" href="#selecting-regions" id="id33">8.1&nbsp;&nbsp;&nbsp;Selecting regions</a></li>
+<li><a class="reference" href="#saving-the-resulting-file" id="id34">8.2&nbsp;&nbsp;&nbsp;Saving the resulting file</a><ul class="auto-toc">
+<li><a class="reference" href="#forcing-output-of-a-merged-file-and-better-script-integration" id="id35">8.2.1&nbsp;&nbsp;&nbsp;Forcing Output of a Merged File and Better Script Integration</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#rapid-sequential-merge-conflict-resolution" id="id36" name="id36">8.3   Rapid, sequential merge conflict resolution</a></li>
-<li><a class="reference" href="#automatic-merge" id="id37" name="id37">8.4   Automatic merge</a><ul class="auto-toc">
-<li><a class="reference" href="#requiring-an-output-file" id="id38" name="id38">8.4.1   Requiring an output file</a></li>
+<li><a class="reference" href="#rapid-sequential-merge-conflict-resolution" id="id36">8.3&nbsp;&nbsp;&nbsp;Rapid, sequential merge conflict resolution</a></li>
+<li><a class="reference" href="#automatic-merge" id="id37">8.4&nbsp;&nbsp;&nbsp;Automatic merge</a><ul class="auto-toc">
+<li><a class="reference" href="#requiring-an-output-file" id="id38">8.4.1&nbsp;&nbsp;&nbsp;Requiring an output file</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#merging-directories" id="id39" name="id39">8.5   Merging directories</a></li>
-<li><a class="reference" href="#merged-view" id="id40" name="id40">8.6   Merged view</a></li>
+<li><a class="reference" href="#merging-directories" id="id39">8.5&nbsp;&nbsp;&nbsp;Merging directories</a></li>
+<li><a class="reference" href="#merged-view" id="id40">8.6&nbsp;&nbsp;&nbsp;Merged view</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#merge-review-features" id="id41" name="id41">9   Merge review features</a><ul class="auto-toc">
-<li><a class="reference" href="#variable-text-selection" id="id42" name="id42">9.1   Variable text selection</a></li>
-<li><a class="reference" href="#id4" id="id43" name="id43">9.2   Per-hunk ignore whitespace</a></li>
+<li><a class="reference" href="#merge-review-features" id="id41">9&nbsp;&nbsp;&nbsp;Merge review features</a><ul class="auto-toc">
+<li><a class="reference" href="#variable-text-selection" id="id42">9.1&nbsp;&nbsp;&nbsp;Variable text selection</a></li>
+<li><a class="reference" href="#id4" id="id43">9.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#unmerging-merge-conflicts" id="id44" name="id44">10   Unmerging merge conflicts</a><ul class="auto-toc">
-<li><a class="reference" href="#unmerging-merge-conflicts-with-three-files" id="id45" name="id45">10.1   Unmerging merge conflicts with three files</a></li>
+<li><a class="reference" href="#unmerging-merge-conflicts" id="id44">10&nbsp;&nbsp;&nbsp;Unmerging merge conflicts</a><ul class="auto-toc">
+<li><a class="reference" href="#unmerging-merge-conflicts-with-three-files" id="id45">10.1&nbsp;&nbsp;&nbsp;Unmerging merge conflicts with three files</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#editing-files" id="id46" name="id46">11   Editing files</a></li>
-<li><a class="reference" href="#customization-using-resource-file" id="id47" name="id47">12   Customization using resource file</a><ul class="auto-toc">
-<li><a class="reference" href="#automatic-generation-of-the-resource-file" id="id48" name="id48">12.1   Automatic generation of the resource file</a></li>
+<li><a class="reference" href="#editing-files" id="id46">11&nbsp;&nbsp;&nbsp;Editing files</a></li>
+<li><a class="reference" href="#customization-using-resource-file" id="id47">12&nbsp;&nbsp;&nbsp;Customization using resource file</a><ul class="auto-toc">
+<li><a class="reference" href="#automatic-generation-of-the-resource-file" id="id48">12.1&nbsp;&nbsp;&nbsp;Automatic generation of the resource file</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#resource-reference" id="id49" name="id49">13   Resource reference</a></li>
-<li><a class="reference" href="#frequently-asked-questions-faq" id="id50" name="id50">14   Frequently Asked Questions (FAQ)</a><ul class="auto-toc">
-<li><a class="reference" href="#can-i-diff-files-with-crlf-dos-characters-in-them" id="id51" name="id51">14.1   Can I diff files with CRLF DOS characters in them?</a></li>
-<li><a class="reference" href="#how-do-i-make-xxdiff-display-the-revision-number-of-a-file" id="id52" name="id52">14.2   How do I make xxdiff display the revision number of a file?</a></li>
+<li><a class="reference" href="#resource-reference" id="id49">13&nbsp;&nbsp;&nbsp;Resource reference</a></li>
+<li><a class="reference" href="#frequently-asked-questions-faq" id="id50">14&nbsp;&nbsp;&nbsp;Frequently Asked Questions (FAQ)</a><ul class="auto-toc">
+<li><a class="reference" href="#can-i-diff-files-with-crlf-dos-characters-in-them" id="id51">14.1&nbsp;&nbsp;&nbsp;Can I diff files with CRLF DOS characters in them?</a></li>
+<li><a class="reference" href="#how-do-i-make-xxdiff-display-the-revision-number-of-a-file" id="id52">14.2&nbsp;&nbsp;&nbsp;How do I make xxdiff display the revision number of a file?</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#author" id="id53" name="id53">15   Author</a></li>
-<li><a class="reference" href="#reporting-bugs" id="id54" name="id54">16   Reporting bugs</a></li>
-<li><a class="reference" href="#project-history" id="id55" name="id55">17   Project history</a><ul class="auto-toc">
-<li><a class="reference" href="#licensing" id="id56" name="id56">17.1   Licensing</a></li>
-<li><a class="reference" href="#dependencies" id="id57" name="id57">17.2   Dependencies</a></li>
-<li><a class="reference" href="#acknowledgements" id="id58" name="id58">17.3   Acknowledgements</a></li>
+<li><a class="reference" href="#author" id="id53">15&nbsp;&nbsp;&nbsp;Author</a></li>
+<li><a class="reference" href="#reporting-bugs" id="id54">16&nbsp;&nbsp;&nbsp;Reporting bugs</a></li>
+<li><a class="reference" href="#project-history" id="id55">17&nbsp;&nbsp;&nbsp;Project history</a><ul class="auto-toc">
+<li><a class="reference" href="#licensing" id="id56">17.1&nbsp;&nbsp;&nbsp;Licensing</a></li>
+<li><a class="reference" href="#dependencies" id="id57">17.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
+<li><a class="reference" href="#acknowledgements" id="id58">17.3&nbsp;&nbsp;&nbsp;Acknowledgements</a></li>
 </ul>
 </li>
 </ul>
 </div>
+<!-- 1   Introduction
+2   Version
+3   Invocation
+  3.1  Return Value
+  3.2  Command-line Options
+  3.3  Using xxdiff as a short-lived application
+4   General operation
+  4.1  The text area
+    4.1.1  Horizontal diffs
+    4.1.2  Per-hunk ignore whitespace
+    4.1.3  Navigation
+    4.1.4  Pop-up menu
+    4.1.5  Searching
+    4.1.6  Other options
+    4.1.7  Display options
+  4.2  Redoing the diffs
+  4.3  Other UI elements
+5   Comparing two files
+  5.1  Types of hunks
+  5.2  Options
+6   Comparing three files
+  6.1  Types of hunks
+  6.2  Ignoring one file
+7   Comparing two directories
+  7.1  Types of hunks
+  7.2  Options
+  7.3  File operations
+8   Merging files and resolving conflicts
+  8.1  Selecting regions
+  8.2  Saving the resulting file
+    8.2.1  Forcing Output of a Merged File and Better Script Integration
+  8.3  Rapid, sequential merge conflict resolution
+  8.4  Automatic merge
+    8.4.1  Requiring an output file
+  8.5  Merging directories
+  8.6  Merged view
+9   Merge review features
+  9.1  Variable text selection
+  9.2  Per-hunk ignore whitespace
+10  Unmerging merge conflicts
+  10.1  Unmerging merge conflicts with three files
+11  Editing files
+12  Customization using resource file
+  12.1  Automatic generation of the resource file
+13  Resource reference
+14  Frequently Asked Questions (FAQ)
+  14.1  Can I diff files with CRLF DOS characters in them?
+  14.2  How do I make xxdiff display the revision number of a file?
+15  Author
+16  Reporting bugs
+17  Project history
+  17.1  Licensing
+  17.2  Dependencies
+  17.3  Acknowledgements -->
 <div class="section" id="introduction">
-<h1><a class="toc-backref" href="#id5" name="introduction">1   Introduction</a></h1>
+<h1><a class="toc-backref" href="#id5">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
 <p>xxdiff is a <em>graphical file and directories comparison and merge
 tool</em>. This program is an essential software development tool that can be
 used to</p>
@@ -135,7 +189,7 @@ code changes before they get merged into a source tree).</li>
 <p>xxdiff doesn't itself compute the differences between files, it just displays
 them graphically (the rationale behind this is that you can use different tools
 to compute the actual diffs (for example using Rational ClearCase's cleardiff,
-which gives more sensible results than GNU diff in certain cases), 
+which gives more sensible results than GNU diff in certain cases),
 there is a relatively standard format for difference output (POSIX diff),
 so it is easy and efficient to parse diff output from different programs,
 under the UNIX dataflow paradigm, it is common for graphical tools to be
@@ -143,13 +197,13 @@ built on top of text tools. There are already many good tools to perform diffs,
 so there's no need to rewrite them.</p>
 </div>
 <div class="section" id="version">
-<h1><a class="toc-backref" href="#id6" name="version">2   Version</a></h1>
+<h1><a class="toc-backref" href="#id6">2&nbsp;&nbsp;&nbsp;Version</a></h1>
 <p>This documentation was generated for version:</p>
 <div id="version">
-  3.2b4
+  3.2
 </div></div>
 <div class="section" id="invocation">
-<h1><a class="toc-backref" href="#id7" name="invocation">3   Invocation</a></h1>
+<h1><a class="toc-backref" href="#id7">3&nbsp;&nbsp;&nbsp;Invocation</a></h1>
 <p>Usage:</p>
 <pre class="literal-block">
 xxdiff [OPTIONS] &lt;file1&gt; &lt;file2&gt; [&lt;file3&gt;]
@@ -163,9 +217,9 @@ For example, if you specify:</p>
 <pre class="literal-block">
 xxdiff dir1/bn1 dir2/bn2 dir3
 </pre>
-<p>xxdiff will be run on <tt class="literal"><span class="pre">dir1/bn1</span></tt>, <tt class="literal"><span class="pre">dir2/bn2</span></tt>, and <tt class="literal"><span class="pre">dir3/bn1</span></tt>.</p>
+<p>xxdiff will be run on <tt class="docutils literal"><span class="pre">dir1/bn1</span></tt>, <tt class="docutils literal"><span class="pre">dir2/bn2</span></tt>, and <tt class="docutils literal"><span class="pre">dir3/bn1</span></tt>.</p>
 <p>xxdiff can accept one of its inputs from stdin. You must replace the relevant
-filename by '<tt class="literal"><span class="pre">-</span></tt>' (a dash) to instruct xxdiff to use stdin for that file,
+filename by '<tt class="docutils literal"><span class="pre">-</span></tt>' (a dash) to instruct xxdiff to use stdin for that file,
 e.g.:</p>
 <pre class="literal-block">
 cat file2 | sort | xxdiff file1 - file3
@@ -175,12 +229,12 @@ xxdiff doesn't do three-way directory diffs.</p>
 <p>If the &quot;unmerge&quot; option is given, then xxdiff can only be invoked with a single
 file containing the conflicts.</p>
 <div class="section" id="return-value">
-<h2><a class="toc-backref" href="#id8" name="return-value">3.1   Return Value</a></h2>
+<h2><a class="toc-backref" href="#id8">3.1&nbsp;&nbsp;&nbsp;Return Value</a></h2>
 <p>xxdiff returns the same values that diff(1) or diff3(1) return. See the
 respective man pages of those utilities for details.</p>
 </div>
 <div class="section" id="command-line-options">
-<h2><a class="toc-backref" href="#id9" name="command-line-options">3.2   Command-line Options</a></h2>
+<h2><a class="toc-backref" href="#id9">3.2&nbsp;&nbsp;&nbsp;Command-line Options</a></h2>
 <div id="invocation">
 <h4>Generic options</h4>
 <table cellpadding=5 width="100%">
@@ -495,6 +549,13 @@ Copies the input streams/files into temporary files to perform diffing. This is 
 </td>
 </tr>
 
+<tr>
+<td width="30%"><tt>--prompt-for-files</tt></td>
+<td align=left>
+If no files are specified on the command line, show a file dialog so that the user can select them. This option is ignored if any files are specified.
+</td>
+</tr>
+
 </table>
 
 <h4>Display Options</h4>
@@ -552,7 +613,7 @@ compatible with old SGI scripts that use xdiff.  xxdiff options follow the GNU
 conventions for command-line options.</p>
 </div>
 <div class="section" id="using-xxdiff-as-a-short-lived-application">
-<h2><a class="toc-backref" href="#id10" name="using-xxdiff-as-a-short-lived-application">3.3   Using xxdiff as a short-lived application</a></h2>
+<h2><a class="toc-backref" href="#id10">3.3&nbsp;&nbsp;&nbsp;Using xxdiff as a short-lived application</a></h2>
 <p>xxdiff has not been designed with the intent of being used over multiple sets of
 files over the course of one execution---that is, it has been built around the
 idea that you would execute it once over a single set of inputs, use it, then
@@ -564,10 +625,10 @@ way.</p>
 </div>
 </div>
 <div class="section" id="general-operation">
-<h1><a class="toc-backref" href="#id11" name="general-operation">4   General operation</a></h1>
+<h1><a class="toc-backref" href="#id11">4&nbsp;&nbsp;&nbsp;General operation</a></h1>
 <p>This section describes general features and operation of xxdiff.</p>
 <div class="section" id="the-text-area">
-<h2><a class="toc-backref" href="#id12" name="the-text-area">4.1   The text area</a></h2>
+<h2><a class="toc-backref" href="#id12">4.1&nbsp;&nbsp;&nbsp;The text area</a></h2>
 <p>xxdiff shows up with two or three text regions that display the text of the
 files to compare, with color-coded blocks that indicate regions of text (lines)
 that have changes (specific sections contain a list and descriptions on what
@@ -590,7 +651,7 @@ special color to indicate that they are not really part of the text.</p>
 <p>In the text area, there is a cursor that in indicates the current line of text
 being worked on.  This cursor can be optionally hidden.</p>
 <div class="section" id="horizontal-diffs">
-<h3><a class="toc-backref" href="#id13" name="horizontal-diffs">4.1.1   Horizontal diffs</a></h3>
+<h3><a class="toc-backref" href="#id13">4.1.1&nbsp;&nbsp;&nbsp;Horizontal diffs</a></h3>
 <p>Each of the diff hunks is normally displayed in one color, but if horizontal
 diffs is enabled, for each line, xxdiff find the smallest differing part of the
 line that differs and displays that in a different, highlighted color.  This
@@ -609,7 +670,7 @@ ignored.  However, if whitespace has been added in the middle of a word, it will
 still be highlighted.</p>
 </div>
 <div class="section" id="per-hunk-ignore-whitespace">
-<h3><a class="toc-backref" href="#id14" name="per-hunk-ignore-whitespace">4.1.2   Per-hunk ignore whitespace</a></h3>
+<h3><a class="toc-backref" href="#id14">4.1.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></h3>
 <p>Diff Hunks with text on all sides but with just whitespace or line break
 differences will be detected by xxdiff and marked with a special flag. If the
 feature is enabled, those hunks will be drawn of a different color, thus
@@ -617,7 +678,7 @@ enabling the reviewer to quickly ignore those hunks. See the merge review
 features section for more details.</p>
 </div>
 <div class="section" id="navigation">
-<h3><a class="toc-backref" href="#id15" name="navigation">4.1.3   Navigation</a></h3>
+<h3><a class="toc-backref" href="#id15">4.1.3&nbsp;&nbsp;&nbsp;Navigation</a></h3>
 <p>xxdiff supports a subset of the emacs bindings, as well as support for most of
 the standard keys found on AT keyboards (PgUp, PgDown, arrow keys, Home, End).</p>
 <p>Default bindings include:</p>
@@ -632,13 +693,13 @@ the standard keys found on AT keyboards (PgUp, PgDown, arrow keys, Home, End).</
 customize all the key bindings using the resources.</p>
 </div>
 <div class="section" id="pop-up-menu">
-<h3><a class="toc-backref" href="#id16" name="pop-up-menu">4.1.4   Pop-up menu</a></h3>
+<h3><a class="toc-backref" href="#id16">4.1.4&nbsp;&nbsp;&nbsp;Pop-up menu</a></h3>
 <p>Using the third mouse button in the text area brings a popup menu that contains
 cursor-sensitive commands, as well as the common commands to navigate between
 hunks.</p>
 </div>
 <div class="section" id="searching">
-<h3><a class="toc-backref" href="#id17" name="searching">4.1.5   Searching</a></h3>
+<h3><a class="toc-backref" href="#id17">4.1.5&nbsp;&nbsp;&nbsp;Searching</a></h3>
 <p>You can search the text by bringing up the search dialog.  Type your search
 query and press enter, which will apply the search and display diamond shaped
 match locations in the overview area. You can then navigate the search results
@@ -648,20 +709,20 @@ have to reapply the search to search for something else.</p>
 dialog.</p>
 </div>
 <div class="section" id="other-options">
-<h3><a class="toc-backref" href="#id18" name="other-options">4.1.6   Other options</a></h3>
+<h3><a class="toc-backref" href="#id18">4.1.6&nbsp;&nbsp;&nbsp;Other options</a></h3>
 <p>Carriage returns (CR) characters in DOS files can be hidden in the text area.</p>
 <p>Tabs by default are rendered aligned at each 8 characters, but can be set to any
 value by changing the tab width option.</p>
 </div>
 <div class="section" id="display-options">
-<h3><a class="toc-backref" href="#id19" name="display-options">4.1.7   Display options</a></h3>
+<h3><a class="toc-backref" href="#id19">4.1.7&nbsp;&nbsp;&nbsp;Display options</a></h3>
 <p>The display options can be fully customized by bringing up the options dialog
 with the &quot;Display -&gt; Display Options...&quot; menu item.  From that dialog you can
 also customize the colors and fonts.</p>
 </div>
 </div>
 <div class="section" id="redoing-the-diffs">
-<h2><a class="toc-backref" href="#id20" name="redoing-the-diffs">4.2   Redoing the diffs</a></h2>
+<h2><a class="toc-backref" href="#id20">4.2&nbsp;&nbsp;&nbsp;Redoing the diffs</a></h2>
 <p>If a file has changed while xxdiff is up, and there is need to recompute the
 diffs, invoke the &quot;redo diff&quot; command from the edit menu.  The arguments used
 with the surrogate diff command can be changed by using the dialog provided by
@@ -669,7 +730,7 @@ the &quot;diff arguments&quot; command.  One can also replace a loaded file with
 different one by using the &quot;open&quot; commands from the &quot;file&quot; menu.</p>
 </div>
 <div class="section" id="other-ui-elements">
-<h2><a class="toc-backref" href="#id21" name="other-ui-elements">4.3   Other UI elements</a></h2>
+<h2><a class="toc-backref" href="#id21">4.3&nbsp;&nbsp;&nbsp;Other UI elements</a></h2>
 <p>The following other UI elements can be optionally hidden or displayed from the
 Windows menu or Display menu (use the resource file to display or hide them on
 startup):</p>
@@ -707,7 +768,7 @@ regions (see section on <a class="reference" href="#merged-view">Merged view</a>
 </div>
 </div>
 <div class="section" id="comparing-two-files">
-<h1><a class="toc-backref" href="#id22" name="comparing-two-files">5   Comparing two files</a></h1>
+<h1><a class="toc-backref" href="#id22">5&nbsp;&nbsp;&nbsp;Comparing two files</a></h1>
 <p>When invoking xxdiff with two files, we normally think of an old and a new file,
 where:</p>
 <pre class="literal-block">
@@ -716,7 +777,7 @@ xxdiff old new
 <p>The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.</p>
 <div class="section" id="types-of-hunks">
-<h2><a class="toc-backref" href="#id23" name="types-of-hunks">5.1   Types of hunks</a></h2>
+<h2><a class="toc-backref" href="#id23">5.1&nbsp;&nbsp;&nbsp;Types of hunks</a></h2>
 <p>The following hunk types can appear when comparing two files:</p>
 <ul class="simple">
 <li><strong>Same</strong>: no change in that region;</li>
@@ -729,7 +790,7 @@ not the case, then two different contiguous hunks would necessarily get merged
 into a single Diff hunk).</p>
 </div>
 <div class="section" id="options">
-<h2><a class="toc-backref" href="#id24" name="options">5.2   Options</a></h2>
+<h2><a class="toc-backref" href="#id24">5.2&nbsp;&nbsp;&nbsp;Options</a></h2>
 <p>You can ignore trailing blanks, whitespace, or case for two-way diffs.  See GNU
 diff(1) manual for information these features.  xxdiff provides menu items to
 access these diff options. Those items simply add or remove switches to the diff
@@ -739,7 +800,7 @@ convenience.</p>
 </div>
 </div>
 <div class="section" id="comparing-three-files">
-<h1><a class="toc-backref" href="#id25" name="comparing-three-files">6   Comparing three files</a></h1>
+<h1><a class="toc-backref" href="#id25">6&nbsp;&nbsp;&nbsp;Comparing three files</a></h1>
 <p>When invoking xxdiff with three files, we think of an ancestor file, a &quot;mine&quot;
 file, which the current user has been working on, and a &quot;yours&quot; file which
 someone else has merged in the main tree.  They are normally specified in the
@@ -750,7 +811,7 @@ xxdiff mine older yours
 <p>The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.</p>
 <div class="section" id="id1">
-<h2><a class="toc-backref" href="#id26" name="id1">6.1   Types of hunks</a></h2>
+<h2><a class="toc-backref" href="#id26">6.1&nbsp;&nbsp;&nbsp;Types of hunks</a></h2>
 <p>The following hunk types can appear when comparing two files:</p>
 <ul class="simple">
 <li><strong>Same</strong>: no change in that region;</li>
@@ -764,7 +825,7 @@ third.</li>
 </ul>
 </div>
 <div class="section" id="ignoring-one-file">
-<h2><a class="toc-backref" href="#id27" name="ignoring-one-file">6.2   Ignoring one file</a></h2>
+<h2><a class="toc-backref" href="#id27">6.2&nbsp;&nbsp;&nbsp;Ignoring one file</a></h2>
 <p>In three-way mode, it can be useful to temporarily ignore one of the three files
 to concentrate on the differences between the other two.  This feature is
 available from the Display menu and is performed by simply remapping colors at
@@ -773,7 +834,7 @@ ignored file will be displayed as grayed out.</p>
 </div>
 </div>
 <div class="section" id="comparing-two-directories">
-<h1><a class="toc-backref" href="#id28" name="comparing-two-directories">7   Comparing two directories</a></h1>
+<h1><a class="toc-backref" href="#id28">7&nbsp;&nbsp;&nbsp;Comparing two directories</a></h1>
 <p>When invoking xxdiff with two directories, we normally think of an old and a new
 directory, where:</p>
 <pre class="literal-block">
@@ -781,8 +842,15 @@ xxdiff olddir newdir
 </pre>
 <p>The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you want to compare the files within directories all at once, use
+the <tt class="docutils literal"><span class="pre">--recursive</span></tt> option and you will get a single xxdiff with
+all the file differences.  xxdiff accomplishes that by passing on
+the option to the subordinate diff program (e.g., GNU diff).</p>
+</div>
 <div class="section" id="id2">
-<h2><a class="toc-backref" href="#id29" name="id2">7.1   Types of hunks</a></h2>
+<h2><a class="toc-backref" href="#id29">7.1&nbsp;&nbsp;&nbsp;Types of hunks</a></h2>
 <p>The following hunk types can appear when comparing two directories:</p>
 <ul class="simple">
 <li><strong>Same</strong>: files are present in both directories and have no
@@ -796,14 +864,14 @@ don't know if they differ;</li>
 </ul>
 </div>
 <div class="section" id="id3">
-<h2><a class="toc-backref" href="#id30" name="id3">7.2   Options</a></h2>
+<h2><a class="toc-backref" href="#id30">7.2&nbsp;&nbsp;&nbsp;Options</a></h2>
 <p>The directories can be compared recursively, in which case no directories will
 be shown. You can activate this from the command-line or from the ui.</p>
 <p>You can also instruct xxdiff not to display the files that haved changed, just
 the insertions and deletions.</p>
 </div>
 <div class="section" id="file-operations">
-<h2><a class="toc-backref" href="#id31" name="file-operations">7.3   File operations</a></h2>
+<h2><a class="toc-backref" href="#id31">7.3&nbsp;&nbsp;&nbsp;File operations</a></h2>
 <p>In directory diffs mode, you can invoke an xxdiff on the pair of files or
 directories under the line cursor.  This allows you to start xxdiff on a pair of
 directories, and then to examine the pairs of files that have changed, all from
@@ -814,7 +882,7 @@ text area (right-click).</p>
 </div>
 </div>
 <div class="section" id="merging-files-and-resolving-conflicts">
-<h1><a class="toc-backref" href="#id32" name="merging-files-and-resolving-conflicts">8   Merging files and resolving conflicts</a></h1>
+<h1><a class="toc-backref" href="#id32">8&nbsp;&nbsp;&nbsp;Merging files and resolving conflicts</a></h1>
 <p>Merging files is the process of manually resolving conflicts when two files
 cannot be merged automatically.  This is a common problem when doing parallel
 software development where multiple developers could be working on the same
@@ -828,7 +896,7 @@ of a diff hunk should be killed and what side should be kept.  The user can take
 this decision on a line-by-line basis, and can decide to keep both sides as
 well, in any order.  xxdiff then allows the user to save the resulting file.</p>
 <div class="section" id="selecting-regions">
-<h2><a class="toc-backref" href="#id33" name="selecting-regions">8.1   Selecting regions</a></h2>
+<h2><a class="toc-backref" href="#id33">8.1&nbsp;&nbsp;&nbsp;Selecting regions</a></h2>
 <p>Selecting a diff hunk can be carried out by clicking on it.  The colors update
 to display which side is selected for output. You can select individual lines
 with the second button.  There are three types of selection that you can carry
@@ -848,7 +916,7 @@ the different ordering possibilities, and finally joining the regions again
 the lines that you want to select.</p>
 </div>
 <div class="section" id="saving-the-resulting-file">
-<h2><a class="toc-backref" href="#id34" name="saving-the-resulting-file">8.2   Saving the resulting file</a></h2>
+<h2><a class="toc-backref" href="#id34">8.2&nbsp;&nbsp;&nbsp;Saving the resulting file</a></h2>
 <p>The resulting file can be saved under one of the input filenames, under a
 computed &quot;merged&quot; filename, or under a new filename (from the File menu). The
 intended &quot;merged&quot; filename can be built from the input filenames and it's format
@@ -873,11 +941,11 @@ that no text will be forgotten.</p>
 <p>You could also decide to save only the selected regions, from the File menu.
 This can be useful for making comments when reviewing merges.</p>
 <div class="section" id="forcing-output-of-a-merged-file-and-better-script-integration">
-<h3><a class="toc-backref" href="#id35" name="forcing-output-of-a-merged-file-and-better-script-integration">8.2.1   Forcing Output of a Merged File and Better Script Integration</a></h3>
+<h3><a class="toc-backref" href="#id35">8.2.1&nbsp;&nbsp;&nbsp;Forcing Output of a Merged File and Better Script Integration</a></h3>
 <p>xxdiff is often used for merging conflicts, replacing some of the tools that are
 provided with popular configuration management systems. Sometime it is
 &quot;required&quot; that the conflict resolution tool output the merged file. To that
-extent, xxdiff has a special mode triggered with the option <tt class="literal"><span class="pre">--decision</span></tt> to
+extent, xxdiff has a special mode triggered with the option <tt class="docutils literal"><span class="pre">--decision</span></tt> to
 address specifically that need. When specified, the exit functionality is
 replaced with three functions:</p>
 <ul class="simple">
@@ -899,7 +967,7 @@ mode, if the merged file already exists, it gets overwritten without warning.</p
 </div>
 </div>
 <div class="section" id="rapid-sequential-merge-conflict-resolution">
-<h2><a class="toc-backref" href="#id36" name="rapid-sequential-merge-conflict-resolution">8.3   Rapid, sequential merge conflict resolution</a></h2>
+<h2><a class="toc-backref" href="#id36">8.3&nbsp;&nbsp;&nbsp;Rapid, sequential merge conflict resolution</a></h2>
 <p>Some people like to merge files within a guided process, where the visual diff
 program asks for a merge decision for each conflictual hunk one-by-one and then
 asks for a filename to use for saving the merged output.  For example, that is
@@ -910,7 +978,7 @@ automatically move the cursor to the next unselected region.  If there are no
 more unselected regions, the save dialog is brought up automatically.</p>
 </div>
 <div class="section" id="automatic-merge">
-<h2><a class="toc-backref" href="#id37" name="automatic-merge">8.4   Automatic merge</a></h2>
+<h2><a class="toc-backref" href="#id37">8.4&nbsp;&nbsp;&nbsp;Automatic merge</a></h2>
 <p>By default, xxdiff doesn't perform any selections.  You can instruct xxdiff to
 perform the initial selection of the non-conflictual regions automatically.
 This can be specified from the command-line or from the Global menu.</p>
@@ -925,7 +993,7 @@ and display their output. Besides, that would be the single case where xxdiff
 writes to a file without a file dialog.  You can very easily implement this from
 within a script using the return value of either diff or xxdiff.)</p>
 <div class="section" id="requiring-an-output-file">
-<h3><a class="toc-backref" href="#id38" name="requiring-an-output-file">8.4.1   Requiring an output file</a></h3>
+<h3><a class="toc-backref" href="#id38">8.4.1&nbsp;&nbsp;&nbsp;Requiring an output file</a></h3>
 <p>Sometimes we want to force the user into producing a merged output file (when
 calling xxdiff from an update script, for example). Thus there is a feature to
 put xxdiff in this mode (see resources or invocation section). In this mode, the
@@ -933,14 +1001,14 @@ user must save before exiting xxdiff (exiting will prompt for save filename).</p
 </div>
 </div>
 <div class="section" id="merging-directories">
-<h2><a class="toc-backref" href="#id39" name="merging-directories">8.5   Merging directories</a></h2>
+<h2><a class="toc-backref" href="#id39">8.5&nbsp;&nbsp;&nbsp;Merging directories</a></h2>
 <p>Selecting is disable in directory diffs mode, where the concept of &quot;saving&quot; a
 directory does not really make sense.  However, you can apply changes to a
 directory from xxdiff, such as copying and removing files under the line cursor.
 This can be invoked from the popup menu in the text area.</p>
 </div>
 <div class="section" id="merged-view">
-<h2><a class="toc-backref" href="#id40" name="merged-view">8.6   Merged view</a></h2>
+<h2><a class="toc-backref" href="#id40">8.6&nbsp;&nbsp;&nbsp;Merged view</a></h2>
 <p>During selection or before saving the selected regions into the result file, you
 might want to visualize what it would look like with the current selections.
 You can display the &quot;merged view&quot; for this purpose, an dedicated window
@@ -952,7 +1020,7 @@ decisions before commiting the file to output.</p>
 </div>
 </div>
 <div class="section" id="merge-review-features">
-<h1><a class="toc-backref" href="#id41" name="merge-review-features">9   Merge review features</a></h1>
+<h1><a class="toc-backref" href="#id41">9&nbsp;&nbsp;&nbsp;Merge review features</a></h1>
 <p>One of the most important uses of xxdiff is to assist the merge review process,
 where one developer visualizes the file changes of another and approves or
 rejects those changes, making comments along the way.</p>
@@ -965,14 +1033,14 @@ them distinct from the merge comments.  This can be enabled using the &quot;form
 clipboard text&quot; option.  The clipboard line format is a string that contains
 format specifiers similar to printf for each line to be formatted prior to being
 put on the clipboard.  The following specifiers are allowed:</p>
-<dl>
-<dt><tt class="literal"><span class="pre">%N</span></tt></dt>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">%N</span></tt></dt>
 <dd>file line (0 is leftmost file)</dd>
-<dt><tt class="literal"><span class="pre">%L</span></tt></dt>
+<dt><tt class="docutils literal"><span class="pre">%L</span></tt></dt>
 <dd>line number</dd>
-<dt><tt class="literal"><span class="pre">%F</span></tt></dt>
+<dt><tt class="docutils literal"><span class="pre">%F</span></tt></dt>
 <dd>filename</dd>
-<dt><tt class="literal"><span class="pre">%s</span></tt></dt>
+<dt><tt class="docutils literal"><span class="pre">%s</span></tt></dt>
 <dd>line contents</dd>
 </dl>
 <p>There is also a &quot;clipboard header format&quot; resource for adding the filename at
@@ -982,14 +1050,14 @@ comments file.</p>
 clipboard for similar cut-n-paste action.  This can be useful when reviewing
 ClearCase revision files, which often have very long p-names.</p>
 <div class="section" id="variable-text-selection">
-<h2><a class="toc-backref" href="#id42" name="variable-text-selection">9.1   Variable text selection</a></h2>
+<h2><a class="toc-backref" href="#id42">9.1&nbsp;&nbsp;&nbsp;Variable text selection</a></h2>
 <p>You can press ALT and Button1 to select an arbitrary number of lines.  The
 selected lines will be marked with a special border to show what gets put in the
 clipboard. This is very useful when you don't want to quote an entire diff hunk,
 or a section of text that straddles hunks.</p>
 </div>
 <div class="section" id="id4">
-<h2><a class="toc-backref" href="#id43" name="id4">9.2   Per-hunk ignore whitespace</a></h2>
+<h2><a class="toc-backref" href="#id43">9.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></h2>
 <p>Many source code changes often just reindent or reorganize blocks of code, and
 result in many isolated hunks with no relevant changes to look at (for languages
 that don't use whitespace semantics anyway). For merge police duties, this can
@@ -1007,7 +1075,7 @@ fear.</p>
 </div>
 </div>
 <div class="section" id="unmerging-merge-conflicts">
-<h1><a class="toc-backref" href="#id44" name="unmerging-merge-conflicts">10   Unmerging merge conflicts</a></h1>
+<h1><a class="toc-backref" href="#id44">10&nbsp;&nbsp;&nbsp;Unmerging merge conflicts</a></h1>
 <p>Unmerging merge conflicts is a special input mode of xxdiff where a single file
 containing the result of an automatic merge of two files is split into two files
 and displayed as such.</p>
@@ -1046,7 +1114,7 @@ ancestor revision, the latest/head of the main branch and to invoke xxdiff with
 your file, the ancestor and the latest/head. You can also tell xxdiff to
 initially perform all non-conflictual selections automatically.</p>
 <div class="section" id="unmerging-merge-conflicts-with-three-files">
-<h2><a class="toc-backref" href="#id45" name="unmerging-merge-conflicts-with-three-files">10.1   Unmerging merge conflicts with three files</a></h2>
+<h2><a class="toc-backref" href="#id45">10.1&nbsp;&nbsp;&nbsp;Unmerging merge conflicts with three files</a></h2>
 <p>diff3 can be used to produce a merged file in which all the three files' regions
 are shown if there is a conflict. xxdiff can also parse these files and display
 them as a three-way diff. You then have to invoke xxdiff with the 'unmerge3'
@@ -1054,7 +1122,7 @@ command-line argument to let it know you want the file split in three.</p>
 </div>
 </div>
 <div class="section" id="editing-files">
-<h1><a class="toc-backref" href="#id46" name="editing-files">11   Editing files</a></h1>
+<h1><a class="toc-backref" href="#id46">11&nbsp;&nbsp;&nbsp;Editing files</a></h1>
 <p>There has been a conscious decision NOT to develop xxdiff into a fully-featured
 editing program.  Sometimes it could be handy to be able to edit a few lines of
 a difficult conflict.  However, that is a task best left to your own favorite
@@ -1065,10 +1133,10 @@ editor on the input files.  You can then redo the diff after your input file has
 changed.</p>
 </div>
 <div class="section" id="customization-using-resource-file">
-<h1><a class="toc-backref" href="#id47" name="customization-using-resource-file">12   Customization using resource file</a></h1>
+<h1><a class="toc-backref" href="#id47">12&nbsp;&nbsp;&nbsp;Customization using resource file</a></h1>
 <p>Much of the state of xxdiff can be customized through a resource file (actually,
 some of the features can only be changed through resource customization).
-By default, xxdiff looks for the file <tt class="literal"><span class="pre">.xxdiffrc</span></tt> located in the user's
+By default, xxdiff looks for the file <tt class="docutils literal"><span class="pre">.xxdiffrc</span></tt> located in the user's
 home directory (this file location can be overriden by setting the environment
 variable XXDIFFRC), and reads that file for resource definition.</p>
 <p>The format of the resource file is a fairly simple list of colon-separated
@@ -1081,7 +1149,7 @@ resourceName: &quot;value&quot;
 specification, but not all (see below).</p>
 <p>You can also specify additional resources on the command-line, which take
 precendence over the resources specified in the resource file.  To get a
-complete list of the available resources, use the <tt class="literal"><span class="pre">--list-resources</span></tt>
+complete list of the available resources, use the <tt class="docutils literal"><span class="pre">--list-resources</span></tt>
 command-line option (see Options section).</p>
 <p>Trick: you can use different resources files by invoking xxdiff like this in
 most shells:</p>
@@ -1089,14 +1157,14 @@ most shells:</p>
 XXDIFFRC=myrcfile xxdiff file1 file2
 </pre>
 <div class="section" id="automatic-generation-of-the-resource-file">
-<h2><a class="toc-backref" href="#id48" name="automatic-generation-of-the-resource-file">12.1   Automatic generation of the resource file</a></h2>
+<h2><a class="toc-backref" href="#id48">12.1&nbsp;&nbsp;&nbsp;Automatic generation of the resource file</a></h2>
 <p>You can generate a resource file containing only the differences from the
-defaults from the &quot;Help -&gt; Generate init file&quot; menu command.  This can be
-used to &quot;save&quot; the current customizable options.</p>
+defaults from the &quot;File -&gt; Save Option...&quot; menu command.  This can be
+used to &quot;save&quot; the current customizable options into <tt class="docutils literal"><span class="pre">~/.xxdiffrc</span></tt>.</p>
 </div>
 </div>
 <div class="section" id="resource-reference">
-<h1><a class="toc-backref" href="#id49" name="resource-reference">13   Resource reference</a></h1>
+<h1><a class="toc-backref" href="#id49">13&nbsp;&nbsp;&nbsp;Resource reference</a></h1>
 <p>This section contains a reference of the all the currently supported
 customizable resources in this version of xxdiff.</p>
 <div id="invocation">
@@ -1897,27 +1965,27 @@ Default merged filename. %L, %M, %R can be used as placeholders for left, middle
 
 </div></div>
 <div class="section" id="frequently-asked-questions-faq">
-<h1><a class="toc-backref" href="#id50" name="frequently-asked-questions-faq">14   Frequently Asked Questions (FAQ)</a></h1>
+<h1><a class="toc-backref" href="#id50">14&nbsp;&nbsp;&nbsp;Frequently Asked Questions (FAQ)</a></h1>
 <div class="section" id="can-i-diff-files-with-crlf-dos-characters-in-them">
-<h2><a class="toc-backref" href="#id51" name="can-i-diff-files-with-crlf-dos-characters-in-them">14.1   Can I diff files with CRLF DOS characters in them?</a></h2>
+<h2><a class="toc-backref" href="#id51">14.1&nbsp;&nbsp;&nbsp;Can I diff files with CRLF DOS characters in them?</a></h2>
 <p>If you want to diff files with CRLF characters in them, you can use the 'ignore
 whitespace option to GNU diff, which will work, even if only one of the files
 has the DOS characters in it.</p>
 </div>
 <div class="section" id="how-do-i-make-xxdiff-display-the-revision-number-of-a-file">
-<h2><a class="toc-backref" href="#id52" name="how-do-i-make-xxdiff-display-the-revision-number-of-a-file">14.2   How do I make xxdiff display the revision number of a file?</a></h2>
+<h2><a class="toc-backref" href="#id52">14.2&nbsp;&nbsp;&nbsp;How do I make xxdiff display the revision number of a file?</a></h2>
 <p>By default, the filenames window display the filename.  From the command-line,
 however, you can set it to display an arbitrary string, which could include your
 current revision number.</p>
 </div>
 </div>
 <div class="section" id="author">
-<h1><a class="toc-backref" href="#id53" name="author">15   Author</a></h1>
+<h1><a class="toc-backref" href="#id53">15&nbsp;&nbsp;&nbsp;Author</a></h1>
 <p>This program has been written from scratch and is being actively maintained by
 <strong>Martin Blais</strong> (<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>).</p>
 </div>
 <div class="section" id="reporting-bugs">
-<h1><a class="toc-backref" href="#id54" name="reporting-bugs">16   Reporting bugs</a></h1>
+<h1><a class="toc-backref" href="#id54">16&nbsp;&nbsp;&nbsp;Reporting bugs</a></h1>
 <p>All bug reports and feature requests should be submitted throught the
 SourceForge bug tracking system at the following URL
 <a class="reference" href="http://sourceforge.net/bugs/?group_id=2198">http://sourceforge.net/bugs/?group_id=2198</a>.  Please avoid sending the author
@@ -1925,7 +1993,7 @@ email about xxdiff bugs.  Please use this bug tracking system, it is extremely
 fast and simple to use.</p>
 </div>
 <div class="section" id="project-history">
-<h1><a class="toc-backref" href="#id55" name="project-history">17   Project history</a></h1>
+<h1><a class="toc-backref" href="#id55">17&nbsp;&nbsp;&nbsp;Project history</a></h1>
 <p>This program has been written and inspired after gdiff, mgdiff, and Rudy
 Wortel's xdiff under SGI. xxdiff aims to provide a lasting open-source
 replacement to these programs.  Writing this tool from scratch was originally
@@ -1935,17 +2003,17 @@ essential feature of this program.</p>
 engineers at discreet, that use it daily in their merge reviewing activities.
 It has reached a stable state.</p>
 <div class="section" id="licensing">
-<h2><a class="toc-backref" href="#id56" name="licensing">17.1   Licensing</a></h2>
+<h2><a class="toc-backref" href="#id56">17.1&nbsp;&nbsp;&nbsp;Licensing</a></h2>
 <p>This program is distributed under the GNU General Public License. See the
 <a class="reference" href="http://www.gnu.org">GNU project website</a> for full details.</p>
 </div>
 <div class="section" id="dependencies">
-<h2><a class="toc-backref" href="#id57" name="dependencies">17.2   Dependencies</a></h2>
+<h2><a class="toc-backref" href="#id57">17.2&nbsp;&nbsp;&nbsp;Dependencies</a></h2>
 <p>This program depends on the availability of a textual diff program (such as GNU
 diff) and the Qt UI toolkit (available at <a class="reference" href="http://trolltech.com">http://trolltech.com</a>).</p>
 </div>
 <div class="section" id="acknowledgements">
-<h2><a class="toc-backref" href="#id58" name="acknowledgements">17.3   Acknowledgements</a></h2>
+<h2><a class="toc-backref" href="#id58">17.3&nbsp;&nbsp;&nbsp;Acknowledgements</a></h2>
 <p>Thanks go to discreet, for letting me deploy my program there, and for not
 bothering me with the occasional bug fix that I did on the job.  Many more
 thanks to all the many engineers who tested it there and reported problems with

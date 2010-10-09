@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -34,8 +33,6 @@ import xxdiff.scripts
 import xxdiff.xformloop
 
 
-#-------------------------------------------------------------------------------
-#
 class PylineTransformer(xxdiff.xformloop.Transformer):
     """
     Transformer that greps the file for a regular expression, and if it matches,
@@ -88,8 +85,6 @@ class PylineTransformer(xxdiff.xformloop.Transformer):
         return modified
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
@@ -118,8 +113,6 @@ def parse_options():
     return expr, opts, selector
 
 
-#-------------------------------------------------------------------------------
-#
 def pyline_main():
     """
     Main program for pyline script.
@@ -136,8 +129,6 @@ def pyline_main():
     finally:
         xxdiff.xformloop.postloop_footer(opts)
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(pyline_main)
 

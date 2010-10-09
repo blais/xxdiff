@@ -164,7 +164,7 @@ public:
    QRect getMainWindowGeometry() const;
 
    // Returns a reference on the view popup menu.
-   QkPopupMenu* getViewPopup( const XxLine& line ) const;
+   QkPopupMenu* getViewPopup( const int no, const XxLine& line ) const;
 
    // Returns the return value to send back to caller.
    int getReturnValue() const;
@@ -206,6 +206,9 @@ public slots:
    void saveAsRight();
    void saveAsMerged();
    void saveAs();
+   void generatePatchFromLeft();
+   void generatePatchFromMiddle();
+   void generatePatchFromRight();
    void saveSelectedOnly();
    void editLeft();
    void editMiddle();
@@ -367,7 +370,7 @@ private:
    // 'noCancel' disables the cancel button.
    //
    // Returns true if successfully saved, false if cancelled.
-   bool saveToFile(
+   bool saveMergedToFile(
       const QString& filename,
       const bool     ask,
       const bool     noCancel = false,
@@ -453,7 +456,7 @@ private:
    XxMergedFrame*          _paneMergedView;
    XxMergedWindow*         _popupMergedView;
    XxCentralFrame*         _central;
-   QkPopupMenu*            _viewPopup;
+   QkPopupMenu*            _viewPopup[4];
    QkPopupMenu*            _optionsMenu;
    QkPopupMenu*            _displayMenu;
    QkPopupMenu*            _hordiffMenu;

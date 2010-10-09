@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -22,8 +21,6 @@ from os.path import abspath, isabs
 from xxdiff.scripts import script_name, tmpprefix
 
 
-#-------------------------------------------------------------------------------
-#
 def is_checked_out(filename):
     """
     There is no real global mutual editing policy in Subversion.  The restricted
@@ -33,8 +30,6 @@ def is_checked_out(filename):
     return True
 
 
-#-------------------------------------------------------------------------------
-#
 def checkout(filename):
     """
     Checkout the given filename from Subversion.
@@ -42,8 +37,6 @@ def checkout(filename):
     return
 
 
-#-------------------------------------------------------------------------------
-#
 def commit(filenames, comments=None):
     """
     Commit the given filename into CVS.
@@ -69,8 +62,6 @@ def commit(filenames, comments=None):
         call(['svn', 'commit', '--file', tmpf.name] + filenames)
 
         
-#-------------------------------------------------------------------------------
-#
 def resolve(filename):
     """
     Commit the given filename into CVS.
@@ -81,8 +72,6 @@ def resolve(filename):
         raise SystemExit("Error: Resolving file '%s':\n%s\n" %
                          (filename, stderr))
 
-#-------------------------------------------------------------------------------
-#
 class SvnStatus(object):
     """
     Status result for a file in a subversion repository.
@@ -106,9 +95,12 @@ def status(rootdirs):
 
     statii = []
     for line in stdout.splitlines():
+        if not line or re.match('^Performing', line):
+            continue
+
         status = SvnStatus()
         status.parsed_line = line
-        
+
         # The first six columns in the output are each one character wide:
         lc = iter(line)
 
@@ -166,6 +158,13 @@ def status(rootdirs):
         #     'B' not locked in repository, lock token present but Broken
         status.locktoken = lc.next()
 
+        #   Seventh column: Repository lock token
+        #     'C'   (conflict on merged files)
+        #     '>'   (conflict comments)
+        status.mconflict = lc.next()
+        if status.mconflict == '>':
+            continue
+        
         # There is a space and the rest is a filename:
         status.filename = line[7:].strip()
         assert isabs(status.filename)
@@ -191,8 +190,6 @@ def status(rootdirs):
 
         
 
-#-------------------------------------------------------------------------------
-#
 def getinfo(filename):
     """
     Return the fields of 'svn info', in a dictionary.
@@ -208,8 +205,6 @@ def getinfo(filename):
     return d
 
 
-#-------------------------------------------------------------------------------
-#
 def cat_revision_temp(filename, revision):
     """
     Fetches a specific revision of a file and place it in a temporary file,
@@ -230,8 +225,6 @@ def cat_revision_temp(filename, revision):
 
 
     
-#-------------------------------------------------------------------------------
-#
 def test():
     """
     Simple interactive test.

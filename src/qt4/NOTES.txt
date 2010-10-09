@@ -1,35 +1,69 @@
-DETAILS OF THE QT4 PATCH
+=============================
+   Patches for port to Qt4
+=============================
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2006-09-17
+:Abstract:
 
-The patch is taken against the 960 revision of xxdiff and assumes that the
-qt4prep.patch has already been applied.
+    Some patches send by people for Qt4 support.
 
-To apply this patch, you must first switch to the src directory and run this
-command:
+qt4.patch
+=========
+::
 
-  qt3to4 xxdiff.pro
+  DETAILS OF THE QT4 PATCH
 
-When prompted, tell the utility to convert all files. This will modify the
-source code to use the Qt3Support API in the places where it is necessary.
+  The patch is taken against the 960 revision of xxdiff and assumes that the
+  qt4prep.patch has already been applied.
 
-You should then be able to apply the patch in the conventional way.
+  To apply this patch, you must first switch to the src directory and run this
+  command:
 
-Note that I'm unsure about the validity of some of the changes I made,
-particularly w.r.t. the writeRawBytes/readRawBytes modifications. I may have
-introduced some bugs.
+    qt3to4 xxdiff.pro
 
-I also punted by simply removing the entire XxCopyLabel::Tip functionality. It
-seems that tooltips have been completely redesigned in Qt4, and it would have
-taken me too much time to figure out how to port the tooltip code to Qt4.
+  When prompted, tell the utility to convert all files. This will modify the
+  source code to use the Qt3Support API in the places where it is necessary.
 
-You will also need to patch the generated file resParser_lex.cpp. To do so, go
-to line 808 and change this:
+  You should then be able to apply the patch in the conventional way.
 
-    input_stream_ptr->readRawBytes( &buf[ii], 1 ); \
+  Note that I'm unsure about the validity of some of the changes I made,
+  particularly w.r.t. the writeRawBytes/readRawBytes modifications. I may have
+  introduced some bugs.
 
-to this:
+  I also punted by simply removing the entire XxCopyLabel::Tip functionality. It
+  seems that tooltips have been completely redesigned in Qt4, and it would have
+  taken me too much time to figure out how to port the tooltip code to Qt4.
 
-    (*input_stream_ptr) >> buf[ii]; \
+  You will also need to patch the generated file resParser_lex.cpp. To do so, go
+  to line 808 and change this:
 
-Again, I'm not 100% sure that this is correct, but it seems to be right (and it
-compiles, at least).
+      input_stream_ptr->readRawBytes( &buf[ii], 1 ); \
+
+  to this:
+
+      (*input_stream_ptr) >> buf[ii]; \
+
+  Again, I'm not 100% sure that this is correct, but it seems to be right (and it
+  compiles, at least).
+
+
+
+xxdiff-3.2-osx2.diff and xxdiff-cmdlineRes.diff
+===============================================
+
+Matt Johnston <matt at ucc.asn.au> ::
+
+  I've tracked down a problem in my mac qt4 port - in qt4
+  QTextStream(QByteArray) has different behaviour, and now
+  requires being passed a _pointer_ to a QByteArray if you
+  want to alter that byte array.  Passing it just the
+  QByteArray as a reference compiles and runs fine, but the
+  array doesn't get altered :(
+
+  This caused some arguments such as -X to simply be ignored.
+
+  I've attached a standalone patch (against the qt4 version)
+  and an updated version of the osx/qt4 patch. I've also put
+  an updated disk image at matt.ucc.asn.au/xxdiff/
+
 

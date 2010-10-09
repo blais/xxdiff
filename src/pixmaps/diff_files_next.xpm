@@ -1,5 +1,5 @@
 /* XPM */
-static char * diff_files_next_xpm[] = {
+static const char * diff_files_next_xpm[] = {
 "32 32 2 1",
 " 	c None",
 ".	c #000000",

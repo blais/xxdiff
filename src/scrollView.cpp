@@ -261,6 +261,7 @@ void XxScrollView::adjustVerticalScrollbars( const QSize& displaySize )
       _textHeight = textHeight;
 
       uint displayLines = getNbDisplayLines();
+
       _vscroll[0]->setSteps( 1, displayLines );
       if ( _vscroll[1] != 0 ) {
          _vscroll[1]->setSteps( 1, displayLines );

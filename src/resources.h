@@ -56,6 +56,11 @@
 #define INCL_STD_MAP
 #endif
 
+#ifndef INCL_STD_CSTDLIB
+#include <cstdlib>
+#define INCL_STD_CSTDLIB
+#endif
+
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
@@ -119,6 +124,9 @@ enum XxAccel {
    ACCEL_SAVE_AS_MERGED,
    ACCEL_SAVE_AS,
    ACCEL_SAVE_SELECTED_ONLY,
+   ACCEL_PATCH_FROM_LEFT,
+   ACCEL_PATCH_FROM_MIDDLE,
+   ACCEL_PATCH_FROM_RIGHT,
    ACCEL_EDIT_LEFT,
    ACCEL_EDIT_MIDDLE,
    ACCEL_EDIT_RIGHT,

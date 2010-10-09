@@ -569,7 +569,7 @@ void XxOptionsDialog::onApply()
    );
 
    if ( resources.getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES ) !=
-        _checkboxIgnoreFileChanges->isChecked() == true ) {
+        (_checkboxIgnoreFileChanges->isChecked() == true) ) {
       resources.setBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES, 
                             _checkboxIgnoreFileChanges->isChecked() );
       redoDiff = true;

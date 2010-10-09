@@ -5,10 +5,10 @@
 #
 
 # Set QTDIR to a reasonable default if unset.
-QTDIR ?= /usr/qt/4.x.x
+# QTDIR ?= /usr/qt/4.x.x
 
 # Rule to generate the qmake Makefile for building xxdiff.
-QMAKE = $(QTDIR)/bin/qmake
+QMAKE ?= /usr/bin/qmake
 
 
 # Rule to generate qmake and delegate to it.

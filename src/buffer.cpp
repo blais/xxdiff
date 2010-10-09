@@ -765,20 +765,9 @@ void XxBuffer::makeTemporary()
    // Write contents of the buffer into the temporary file.
    //
 
-   char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
-
    // Open the temporary file.
-   FILE *fout;
-#ifndef WINDOWS
-   int tfd = mkstemp( temporaryFilename );
-   if ( ( fout = ::fdopen( tfd, "w" ) ) == NULL ) {
-#else
-   mktemp( temporaryFilename );
-   if ( ( fout = ::fopen( temporaryFilename, "w" ) ) == NULL ) {
-#endif
-      throw XxIoError( XX_EXC_PARAMS, 
-                       "Error opening temporary file." );
-   }
+   char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
+   FILE* fout = XxUtil::tempfile( temporaryFilename );
    
    // Write contents.
    uint size;

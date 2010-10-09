@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 #
 # Note: this has originally been distributed by Michalis Giannakidis, under the
@@ -51,8 +50,6 @@ import xxdiff.invoke
 from xxdiff.scripts import tmpprefix
 
 
-#-------------------------------------------------------------------------------
-#
 def find_in_trunk(search_directories, fn):
     """
     Recursively search for paths of all files whose basename matches 'fn' under
@@ -71,8 +68,6 @@ def find_in_trunk(search_directories, fn):
                 files.append(join(root, fn))
     return files
 
-#-------------------------------------------------------------------------------
-#
 match_status = re.compile('File:\s*([^\s]+)\s*Status: (.*)')
 
 def collect_unupdated_files(diff_directories, resolve_conflicts):
@@ -112,8 +107,6 @@ def collect_unupdated_files(diff_directories, resolve_conflicts):
 
     return collected_files
 
-#-------------------------------------------------------------------------------
-#
 def get_local_trunk_version(filename):
     """
     For filename, get the current revision number (of the local version).
@@ -128,8 +121,6 @@ def get_local_trunk_version(filename):
             return m.group(1)
     return '1.1'
 
-#-------------------------------------------------------------------------------
-#
 match_repository_rev = re.compile('Repository revision:\s([0-9\.]*)')
 
 def get_repository_revision(filename):
@@ -144,8 +135,6 @@ def get_repository_revision(filename):
                 return m.group(1)
     return '1.1'
 
-#-------------------------------------------------------------------------------
-#
 def get_previous_revision(filename, back):
     """
     For filename, get its previous revision number (compared to the local
@@ -156,8 +145,6 @@ def get_previous_revision(filename, back):
     r = '.'.join(r)
     return r
 
-#-------------------------------------------------------------------------------
-#
 def get_revisions_between(r1, r2):
     """
     Return a list with the CVS version strings between to releases.
@@ -182,8 +169,6 @@ def get_revisions_between(r1, r2):
 
     return rev
 
-#-------------------------------------------------------------------------------
-#
 match_log_start = re.compile('^----------------------------')
 
 def get_revision_log(filename, rev):
@@ -211,8 +196,6 @@ def get_revision_log(filename, rev):
     return log
 
 
-#-------------------------------------------------------------------------------
-#
 def mkheader(filename):
     """
     Build a header for display.
@@ -220,8 +203,6 @@ def mkheader(filename):
     return ('>%s<' % filename).center(80).replace(' ', '_')
 
 
-#-------------------------------------------------------------------------------
-#
 def cvsxxdiff_bi_bj(diff_files, prevcounts):
     """
     Compare two relative revision numbers.
@@ -251,8 +232,6 @@ def cvsxxdiff_bi_bj(diff_files, prevcounts):
             '--title2', "%s ( %s )" % (fn, v2),
             *[x.name for x in tmpfiles])
 
-#-------------------------------------------------------------------------------
-#
 def cvsxxdiff_bi(diff_files, prevcount):
     """
     Compare to one relative revision number.
@@ -281,8 +260,6 @@ def cvsxxdiff_bi(diff_files, prevcount):
                          (fn, vl)),
             '-', fn, stdin=p.stdout)
 
-#-------------------------------------------------------------------------------
-#
 def cvsxxdiff_ri(diff_files, action):
     """
     Compare to one absolute revision number.
@@ -305,8 +282,6 @@ def cvsxxdiff_ri(diff_files, action):
                          (fn, get_local_trunk_version(fn))),
             '-', fn, stdin=p.stdout)
 
-#-------------------------------------------------------------------------------
-#
 def cvsxxdiff_ri_rj(diff_files, actions):
     """
     Compare to two absolute revision numbers.
@@ -335,8 +310,6 @@ def cvsxxdiff_ri_rj(diff_files, actions):
             '--title2', "%s ( %s )" % (fn, revisions[1]),
             *[x.name for x in tmpfiles])
 
-#-------------------------------------------------------------------------------
-#
 def cvsxxdiff_rep(diff_files):
     """
     Compare checkout to repository.
@@ -362,8 +335,6 @@ def cvsxxdiff_rep(diff_files):
             '--title2', '%s ( %s ) local version' % (fn, vl),
             '-', fn, stdin=p.stdout)
 
-#-------------------------------------------------------------------------------
-#
 def cvsxxdiff_c(diff_files):
     """
     Resolve conflicts.
@@ -383,8 +354,6 @@ def cvsxxdiff_c(diff_files):
             '--unmerge',
             fn)
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -417,6 +386,7 @@ def parse_options():
 
     xxdiff.invoke.options_graft(parser)
 
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
     xxdiff.invoke.options_validate(opts, parser)
@@ -437,8 +407,6 @@ def parse_options():
     return opts, actions, args
 
 
-#-------------------------------------------------------------------------------
-#
 def revcomp_main():
     """
     Command-line interface (looks at sys.argv to decide what to do).
@@ -517,8 +485,6 @@ def revcomp_main():
         cvsxxdiff_rep(diff_files)
 
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(revcomp_main)
 

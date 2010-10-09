@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -27,8 +26,6 @@ from xxdiff.scripts import tmpprefix
 __all__ = ['Transformer', 'parse_args', 'transform_replace_loop']
 
 
-#-------------------------------------------------------------------------------
-#
 class Transformer(object):
     """
     Base class for all transformers.
@@ -52,8 +49,6 @@ class Transformer(object):
         raise NotImplementedError
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_args(parser):
     """
     Parse the options and return:
@@ -79,8 +74,6 @@ def parse_args(parser):
     return opts, args, selector
 
 
-#-------------------------------------------------------------------------------
-#
 def transform_replace_loop(opts, selector, xformer, logs):
     """
     Run a loop through the selected files and conditionally transform them by
@@ -109,8 +102,6 @@ def transform_replace_loop(opts, selector, xformer, logs):
     return decision_map
 
 
-#-------------------------------------------------------------------------------
-#
 def postloop_footer(opts, decision_map=None):
     """
     Print some common stuff at the end of the looping scripts.

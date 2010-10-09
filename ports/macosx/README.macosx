@@ -1,6 +1,6 @@
-============================
-  Build xxdiff for MAC OSX
-============================
+==============================
+   Build xxdiff for MAC OSX
+==============================
 
 :Author: Martin Blais <blais@furius.ca>
 :Date: 2005-06-03
@@ -15,10 +15,11 @@
     2  Alexandre Feblot (2005-06-03)
     3  Building under Mac OS X w/ XFree86 port (old)
       3.1  Notes on Mac OSX from Rolf Boelens (old)
+    4  Matt Johnston <matt@ucc.asn.au>
 
 
 From Trevor Harmon (2006-05-31)
--------------------------------
+===============================
 
   From: Trevor Harmon <trevor@vocaro.com>	
   To: Martin Blais <blais@furius.ca>
@@ -83,7 +84,7 @@ From Trevor Harmon (2006-05-31)
 
 
 Alexandre Feblot (2005-06-03)
------------------------------
+=============================
 
 
                             How-To build xxdiff on Mac OSX with
@@ -172,7 +173,7 @@ path (or Qt will complain about this).
 
 
 Building under Mac OS X w/ XFree86 port (old)
----------------------------------------------
+=============================================
 
 The relevant part within the makefile is under macx-g++
 
@@ -182,7 +183,7 @@ The relevant part within the makefile is under macx-g++
 
 
 Notes on Mac OSX from Rolf Boelens (old)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 
 ::
 
@@ -224,3 +225,215 @@ Notes on Mac OSX from Rolf Boelens (old)
   I will try to post it at the sourceforge site as well, for your releif.
 
   With best regards, Rolf
+
+
+
+Matt Johnston
+=============
+:Email: matt@ucc.asn.au
+
+Also provided a DMG image file, which I uploaded.
+
+::
+
+  Firstly, many thanks for xxdiff - I've been using it a fair
+  bit with monotone, it's the most effective merge tool I've
+  come across.
+
+  I've compiled a xxdiff-3.2 binary for OS X, with statically
+  linked Qt 4.1.3 as a universal binary (intel and ppc in the
+  one image, should work for 10.3.9 upwards). It's at
+  http://matt.ucc.asn.au/xxdiff/xxdiff-3.2.dmg as a disk
+  image. I've made a small change to make it so that
+  --prompt-for-files is the default if it's run
+  double-clicked, and included a shellscript to run it from
+  the commandline. (Qt requires that programs are run by the
+  full path). I've also given it a quick-hack text-and-circle
+  icon, rather than just taking Apple's FileMerge one :)
+
+  The instructions in qt4/NOTES.txt worked fairly well, though
+  I had to also change diffs.cpp in a couple of places, from
+  os.writeRawBytes( text, len );
+     to
+  os << QString::fromLocal8Bit(text, len);
+
+  I also made the colour values SVG-compliant, since the Mac
+  Qt4 doesn't seem to recognise some of the X11 values (see
+  below).
+
+  Cheers,
+  Matt
+
+  --- src/cmdline.cpp     8edd50a734f6ecfdc098dadae42a3575e7f4df79
+  +++ src/cmdline.cpp     6a74f1cf69a60d210c159ac12fb8c216746e10e5
+  @@ -210,7 +210,8 @@
+       "Copies the input streams/files into temporary files to perform diffing. "
+       "This is useful if you want to diff FIFOs."
+     },
+  -   { "prompt-for-files", 0, false, 'p',
+  +// Hack for os x - programs are run with an argument line -psn_0_36306945
+  +   { "prompt-for-files", 'p', true, 'p',
+       "If no files are specified on the command line, show a file dialog so that "
+       "the user can select them. This option is ignored if any files are specified."
+     },
+
+
+  --- src/resources.cpp   40a7008adf559712f2e4996684bddf357caafcb8
+  +++ src/resources.cpp   eea1f0859945130a6058a0a4c2c983079dce262a
+  @@ -208,56 +208,56 @@
+
+     if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
+        setFbColors( COLOR_SAME                   , "grey", "black" );
+  -      setFbColors( COLOR_SAME_BLANK             , "grey70", "black" );
+  +      setFbColors( COLOR_SAME_BLANK             , "#b2b2b2", "black" );
+        setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
+  -      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon3", "black" );
+  +      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon", "black" );
+        setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
+  -      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon3", "black" );
+  -      setFbColors( COLOR_DIFF_TWO               , "lightblue2", "black" );
+  -      setFbColors( COLOR_DIFF_TWO_SUP           , "lightblue3", "black" );
+  -      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue2",  "black" );
+  -      setFbColors( COLOR_DIFF_TWO_NONLY         , "lightblue3", "black" );
+  +      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon", "black" );
+  +      setFbColors( COLOR_DIFF_TWO               , "lightblue", "black" );
+  +      setFbColors( COLOR_DIFF_TWO_SUP           , "skyblue", "black" );
+  +      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue",  "black" );
+  +      setFbColors( COLOR_DIFF_TWO_NONLY         , "skyblue", "black" );
+
+  -      setFbColors( COLOR_DELETE                 , "lightblue2", "black" );
+  -      setFbColors( COLOR_DELETE_BLANK           , "grey64", "black" );
+  +      setFbColors( COLOR_DELETE                 , "lightblue", "black" );
+  +      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "black" );
+
+  -      setFbColors( COLOR_INSERT                 , "darkseagreen2", "black" );
+  -      setFbColors( COLOR_INSERT_BLANK           , "grey64", "black" );
+  +      setFbColors( COLOR_INSERT                 , "darkseagreen", "black" );
+  +      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "black" );
+
+        setFbColors( COLOR_DIFF_ALL               , "palegoldenrod", "black" );
+  -      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon3", "black" );
+  +      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon", "black" );
+        setFbColors( COLOR_DIFF_ALL_ONLY          , "palegoldenrod", "black" );
+  -      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon3", "black" );
+  +      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon", "black" );
+
+        setFbColors( COLOR_DIFFDEL                , "palegoldenrod", "black" );
+  -      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon3", "black" );
+  +      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon", "black" );
+        setFbColors( COLOR_DIFFDEL_ONLY           , "palegoldenrod", "black" );
+  -      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon3", "black" );
+  -      setFbColors( COLOR_DIFFDEL_BLANK          , "grey64", "black" );
+  +      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon", "black" );
+  +      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "black" );
+
+        setFbColors( COLOR_SELECTED               , "plum", "black" );
+        setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
+
+  -      setFbColors( COLOR_IGNORE_DISPLAY         , "grey85", "black" );
+  -      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey80", "black" );
+  -      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey80", "black" );
+  -      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey80", "black" );
+  +      setFbColors( COLOR_IGNORE_DISPLAY         , "#d8d8d8", "black" );
+  +      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "black" );
+  +      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "black" );
+  +      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "black" );
+
+        setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
+        setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
+
+  -      setFbColors( COLOR_IGNORED                , "grey70", "grey30" );
+  +      setFbColors( COLOR_IGNORED                , "#b2b2b2", "#4c4c4c" );
+
+        setFbColors( COLOR_DIRECTORIES            , "mediumturquoise", "black" );
+
+  -      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon3", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_1       , "grey60", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "grey70", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_2       , "grey60", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "grey70", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_3       , "grey60", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "grey70", "black" );
+  -      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "grey70", "black" );
+  +      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b2b2b2", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b2b2b2", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b2b2b2", "black" );
+  +      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b2b2b2", "black" );
+     }
+
+     _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
+
+From Juan, bugs::
+
+  En ouvrant les options j'ai ceci dans la console:
+
+  Object::connect: No such signal QRadioButton::stateChanged(int)
+  Object::connect:  (sender name:   '_radiobuttonQualityNormal')
+  Object::connect:  (receiver name: 'XxOptionsDialogBase')
+  Object::connect: No such signal QRadioButton::stateChanged(int)
+  Object::connect:  (sender name:   '_radiobuttonQualityFastest')
+  Object::connect:  (receiver name: 'XxOptionsDialogBase')
+  Object::connect: No such signal QRadioButton::stateChanged(int)
+  Object::connect:  (sender name:   '_radiobuttonQualityHighest')
+  Object::connect:  (receiver name: 'XxOptionsDialogBase')
+
+
+More email::
+
+  > Also, could you explain why you need to have the --prompt-for-file
+  > accept and argument?  Who supplies this -psn_0_36306945 argument?
+
+  I think it is the OS X windowserver or something that
+  supplies the -psn_... argument - I'm not exactly sure of the
+  purpose, I think it's a process identifier of sorts. I gave
+  --prompt-for-file -p as a short flag and allowed it to
+  accept an argument, so it will see the equivalent of '-p
+  sn_0_36306945' (or --prompt-for-file=sn_0_36306945) when
+  doubleclicked. Running from a commandline it doesn't get
+  given the -psn...  argument. It's a hack, but works.
+
+
+
+Files included::
+
+- xxdiff-3.2-osx.diff
+- xxdiff.png
+
+Steps::
+
+  Steps to build in OS X 10.4, Intel. Compiled as a static
+  binary so that a self-contained xxdiff.app bundle is
+  produced.
+
+  tar jxvf xxdiff-3.2.tar.bz2
+
+  cd xxdiff-3.2
+  cat ../xxdiff-3.2-osx.diff|patch -p0
+
+  cd src
+  /usr/local/Trolltech/Qt-4.1.3-static/bin/qt3to4 xxdiff.pro
+  (confirm all)
+
+  make -f Makefile.bootstrap Makefile
+
+  * manually edit Makefile so that flex and bison point to /opt/local/bin (from
+   darwinports), since the os x versions don't seem to work.
+  * add "-arch i386 -arch ppc" to CFLAGS, CXXFLAGS, and LFLAGS in Makefile for a
+   universal binary.
+   (Qt was compiled as a universal binary with its appropriate configure flags)
+  * remove the _debug suffixes from -lQtGui_debug, -lQtCore_debug etc in
+   Makefile's LFLAGS line
+
+  make
+  cd ../bin
+  strip xxdiff.app/Contents/MacOS/xxdiff
+
+  Then combine it with the xxdiff.app bundle directory in the xxdiff ports/macosx
+  dir. Note that Resources should be xxdiff.app/Contents/Resources, not just
+  xxdiff.app/Resources. I replaced the .icns file with one made quickly in Gimp.
+
+

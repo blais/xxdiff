@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #******************************************************************************\
 #* $Source$
-#* $Id: cmdqueue.py 1001 2006-06-11 23:31:29Z blais $
+#* $Id$
 #*
 #* Copyright (C) 2001-2002, Martin Blais <blais@furius.ca>
 #*
@@ -34,7 +34,7 @@ destroyed. The queue empties itself (i.e. runs commands) automatically when
 destroyed.
 """
 
-__version__ = "$Revision: 1001 $"
+__version__ = "$Revision$"
 __author__ = "Martin Blais <blais@furius.ca>"
 
 #===============================================================================

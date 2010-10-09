@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -28,8 +27,6 @@ import xxdiff.scripts
 import xxdiff.xformloop
 
 
-#-------------------------------------------------------------------------------
-#
 class FilterTransformer(xxdiff.xformloop.Transformer):
     """
     Transformer that greps the file for a regular expression, and if it matches,
@@ -62,11 +59,10 @@ class FilterTransformer(xxdiff.xformloop.Transformer):
         return not filecmp.cmp(fn, outf.name)
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
+
     opts, args, selector = xxdiff.xformloop.parse_args(parser)
 
     # Check that we got two arguments
@@ -80,8 +76,6 @@ def parse_options():
     return filtcmd, opts, selector
 
 
-#-------------------------------------------------------------------------------
-#
 def filter_main():
     """
     Main program for find-grep-sed script.
@@ -99,8 +93,6 @@ def filter_main():
         xxdiff.xformloop.postloop_footer(opts)
 
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(filter_main)
 

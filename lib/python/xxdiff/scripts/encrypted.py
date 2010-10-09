@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-encrypted [<options>] <encrypted-file> [<encrypted file> ...]
@@ -9,10 +8,10 @@ This script wraps around xxdiff, first decrypting the input files to temporary
 files (for a short time) and running xxdiff on these files.  There are two
 typical uses of this program:
 
-1) it is used to compare two encrypted files.  With the --merge option, a
+1) it is used to compare two encrypted files.  With the --output option, a
    decision is required and an encrypted version of the merged file is output to
    the specified file and the merged file deleted promptly.  Note that without
-   the --merge option, even if the merged file is saved, it is deleted once
+   the --output option, even if the merged file is saved, it is deleted once
    xxdiff exits.
 
 2) it is used to split and resolve CVS conflicts in an armored encrypted file
@@ -66,19 +65,16 @@ import xxdiff.scm.cvs
 from xxdiff.scripts import tmpprefix
 
 
-#-------------------------------------------------------------------------------
-#
 decodecmd = '%(gpg)s --decrypt --use-agent '
 encodecmd_noarmor = '%(gpg)s --encrypt --use-agent '
 encodecmd = encodecmd_noarmor + '--armor '
 
 
-#-------------------------------------------------------------------------------
-#
-def diff_encrypted(textlist, outmerged=None):
+def diff_encrypted(textlist, opts, outmerged=None):
     """
     Run a comparison of the encrypted texts specified in textlists and if an
-    'outmerged' filename is specified, encrypt the merged file into it.
+    'outmerged' filename is specified, encrypt the merged file into it. Note
+    that the texts are not filenames, but actual contents of files.
     """
     # Create temporary files.
     tempfiles = []
@@ -120,7 +116,7 @@ def diff_encrypted(textlist, outmerged=None):
         # Read the decoded merged output file from xxdiff.
         textm = mergedf.read()
         assert textm
-    
+
         # Close and automatically delete the decoded merged output file.
         mergedf.close()
 
@@ -149,9 +145,9 @@ def diff_encrypted(textlist, outmerged=None):
                   'Error: cannot write to encoded merged file.'
             raise e
 
+    return decision
 
-#-------------------------------------------------------------------------------
-#
+
 def parse_options():
     """
     Parse the options.
@@ -189,8 +185,6 @@ def parse_options():
 
     return opts, args
 
-#-------------------------------------------------------------------------------
-#
 def encrypted_main():
     """
     Main program for cond-replace script.
@@ -214,7 +208,7 @@ def encrypted_main():
             # Read input conflict file.
             text = open(fn, 'r').read()
             text1, text2 = xxdiff.scm.cvs.unmerge2(text)
-            diff_encrypted([text1, text2], fn)
+            diff_encrypted([text1, text2], opts, fn)
     else:
         if len(args) <= 1:
             raise SystemExit("Error: you need to specify 2 or 3 arguments.")
@@ -223,11 +217,9 @@ def encrypted_main():
         for fn in args:
             text = open(fn, 'r').read()
             textlist.append(text)
-        diff_encrypted(textlist, opts.output)
+        diff_encrypted(textlist, opts, opts.output)
 
 
-#-------------------------------------------------------------------------------
-#
 main = encrypted_main
 
 if __name__ == '__main__':

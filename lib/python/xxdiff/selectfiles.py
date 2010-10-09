@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -13,8 +12,6 @@ import sys, os, re, optparse
 from os.path import join, isfile, exists
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Adds a new option group for file selection options to the given parser and
@@ -96,15 +93,13 @@ def options_graft(parser):
                      help="Do not setup default ignores (i.e. by default, "
                      "appropriate ignore patterns are set for Subversion "
                      "and CVS directories, etc.)")
-
+    
     parser.add_option_group(group)
 
     return group
 
 
-#-------------------------------------------------------------------------------
-#
-ignore_defaults = ('.svn', 'CVS')
+ignore_defaults = ('CVS', '\..*')
 
 def options_validate(opts, parser, logs=None):
     """
@@ -164,8 +159,6 @@ def options_validate(opts, parser, logs=None):
     return selector
 
 
-#-------------------------------------------------------------------------------
-#
 def select_patterns(rootdirs, opts):
     """
     Generator that selects files to process by regexps.
@@ -234,8 +227,6 @@ def select_patterns(rootdirs, opts):
                 if add:
                     yield join(dn, fn)
 
-#-------------------------------------------------------------------------------
-#
 def select_from_file(fn):
     """
     Generator that yields selected filenames read from a file.
@@ -252,8 +243,6 @@ def select_from_file(fn):
         raise SystemExit("Error: cannot open/read file (%s)" % e)
 
 
-#-------------------------------------------------------------------------------
-#
 def test():
     """
     Test stub for selection options.

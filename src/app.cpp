@@ -92,6 +92,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include <stdio.h>
 
@@ -1210,7 +1211,7 @@ void XxApp::createMenus()
    );
    fileMenu->insertSeparator();
 
-   int ids[6];
+   int ids[9];
    if ( _cmdline._unmerge == false ) {
       /*ids[0] = */fileMenu->insertItem(
          "Save as left", this, SLOT(saveAsLeft()),
@@ -1249,6 +1250,34 @@ void XxApp::createMenus()
    );
 
    fileMenu->insertSeparator();
+
+   if ( _cmdline._unmerge == false ) {
+      /*ids[6] = */fileMenu->insertItem(
+         "Generate patch against left", this, SLOT(generatePatchFromLeft()),
+         _resources->getAccelerator( ACCEL_PATCH_FROM_LEFT )
+      );
+      if ( _nbFiles == 3 ) {
+         /*ids[7] = */fileMenu->insertItem(
+            "Generate patch against middle", this,
+            SLOT(generatePatchFromMiddle()),
+            _resources->getAccelerator( ACCEL_PATCH_FROM_MIDDLE )
+         );
+      }
+      ids[8] = fileMenu->insertItem(
+         "Generate patch against right", this, SLOT(generatePatchFromRight()),
+         _resources->getAccelerator( ACCEL_PATCH_FROM_RIGHT )
+      );
+
+   }
+   else {
+      /*ids[0] = */fileMenu->insertItem(
+         "Generate patch against original", this, SLOT(generatePatchFromLeft()),
+         _resources->getAccelerator( ACCEL_PATCH_FROM_LEFT )
+      );
+   }
+
+   fileMenu->insertSeparator();
+
    fileMenu->insertItem(
       "Redo diff", this, SLOT(redoDiff()),
       _resources->getAccelerator( ACCEL_REDO_DIFF )
@@ -1377,7 +1406,247 @@ void XxApp::createMenus()
       "Previous unselected", this, SLOT(previousUnselected()),
       _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
    );
-   _viewPopup = viewMenu;
+
+   //---------------------------------------------------------------------------
+
+   // Right click View menu for directories
+   if ( _filesAreDirectories == true ) {
+      _viewPopup[0] = new QkPopupMenu;
+      _menuids[ ID_View_DiffFilesAtCursor ] = _viewPopup[0]->insertItem(
+         "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
+         _resources->getAccelerator( ACCEL_DIFF_FILES_AT_CURSOR )
+      );
+      _menuids[ ID_View_NextAndDiffFiles ] = _viewPopup[0]->insertItem(
+         "Next and diff files", this, SLOT(nextAndDiffFiles()),
+         _resources->getAccelerator( ACCEL_NEXT_AND_DIFF_FILES )
+      );
+      _menuids[ ID_View_CopyLeftToRight ] = _viewPopup[0]->insertItem(
+         "Copy left file to right", this, SLOT(copyFileLeftToRight()),
+         _resources->getAccelerator( ACCEL_COPY_LEFT_TO_RIGHT )
+      );
+      _menuids[ ID_View_CopyRightToLeft ] = _viewPopup[0]->insertItem(
+         "Copy right file to left", this, SLOT(copyFileRightToLeft()),
+         _resources->getAccelerator( ACCEL_COPY_RIGHT_TO_LEFT )
+      );
+      _menuids[ ID_View_RemoveLeft ] = _viewPopup[0]->insertItem(
+         "Remove left file", this, SLOT(removeFileLeft()),
+         _resources->getAccelerator( ACCEL_REMOVE_LEFT )
+      );
+      _menuids[ ID_View_RemoveRight ] = _viewPopup[0]->insertItem(
+         "Remove right file", this, SLOT(removeFileRight()),
+         _resources->getAccelerator( ACCEL_REMOVE_RIGHT )
+      );
+      _viewPopup[0]->insertSeparator();
+
+      _viewPopup[0]->insertItem(
+         "Next difference", this, SLOT(nextDifference()),
+         _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+      );
+      _viewPopup[0]->insertItem(
+         "Previous difference", this, SLOT(previousDifference()),
+         _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+      );
+      _viewPopup[0]->insertSeparator();
+      _viewPopup[0]->insertItem(
+         "Next unselected", this, SLOT(nextUnselected()),
+         _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+      );
+      _viewPopup[0]->insertItem(
+         "Previous unselected", this, SLOT(previousUnselected()),
+         _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+      );
+   }
+
+   // Right click View menu for the left file
+   _viewPopup[1] = new QkPopupMenu;
+   _viewPopup[1]->insertItem(
+      "Replace left file...", this, SLOT(openLeft()),
+      _resources->getAccelerator( ACCEL_OPEN_LEFT )
+   );
+   _viewPopup[1]->insertItem(
+      "Edit left file", this, SLOT(editLeft()),
+      _resources->getAccelerator( ACCEL_EDIT_LEFT )
+   );
+   _viewPopup[1]->insertItem(
+         "Save as left", this, SLOT(saveAsLeft()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_LEFT )
+      );
+   _viewPopup[1]->insertSeparator();
+
+   _viewPopup[1]->insertItem(
+      "Next difference", this, SLOT(nextDifference()),
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+   );
+   _viewPopup[1]->insertItem(
+      "Previous difference", this, SLOT(previousDifference()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+   );
+   _viewPopup[1]->insertSeparator();
+   _viewPopup[1]->insertItem(
+      "Next unselected", this, SLOT(nextUnselected()),
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+   );
+   _viewPopup[1]->insertItem(
+      "Previous unselected", this, SLOT(previousUnselected()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+   );
+   _viewPopup[1]->insertSeparator();
+
+   _viewPopup[1]->insertItem(
+      "Select left line", this, SLOT(selectLineLeft()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
+   );
+   if ( _nbFiles == 3 ) {
+      _viewPopup[1]->insertItem(
+         "Select middle line", this, SLOT(selectLineMiddle()),
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
+      );
+   }
+   _viewPopup[1]->insertItem(
+      "Select right line", this, SLOT(selectLineRight()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
+   );
+   _viewPopup[1]->insertItem(
+      "Select neither", this, SLOT(selectLineNeither()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
+   );
+   _viewPopup[1]->insertItem(
+      "Unselect", this, SLOT(selectLineUnselect()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
+   );
+
+   // Right click View menu for the middle or right file
+   _viewPopup[2] = new QkPopupMenu;
+   if ( _nbFiles == 3 ) {
+     _viewPopup[2]->insertItem(
+        "Replace middle file...", this, SLOT(openMiddle()),
+        _resources->getAccelerator( ACCEL_OPEN_MIDDLE )
+     );
+     _viewPopup[2]->insertItem(
+        "Edit middle file", this, SLOT(editMiddle()),
+        _resources->getAccelerator( ACCEL_EDIT_MIDDLE )
+     );
+     _viewPopup[2]->insertItem(
+        "Save as middle", this, SLOT(saveAsMiddle()),
+        _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
+     );
+   }
+   else
+   {
+     _viewPopup[2]->insertItem(
+        "Replace right file...", this, SLOT(openRight()),
+        _resources->getAccelerator( ACCEL_OPEN_RIGHT )
+     );
+     _viewPopup[2]->insertItem(
+        "Edit right file", this, SLOT(editRight()),
+        _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+     );
+     _viewPopup[2]->insertItem(
+        "Save as right", this, SLOT(saveAsRight()),
+        _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+     );
+   }
+   _viewPopup[2]->insertSeparator();
+
+   _viewPopup[2]->insertItem(
+      "Next difference", this, SLOT(nextDifference()),
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+   );
+   _viewPopup[2]->insertItem(
+      "Previous difference", this, SLOT(previousDifference()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+   );
+   _viewPopup[2]->insertSeparator();
+   _viewPopup[2]->insertItem(
+      "Next unselected", this, SLOT(nextUnselected()),
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+   );
+   _viewPopup[2]->insertItem(
+      "Previous unselected", this, SLOT(previousUnselected()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+   );
+   _viewPopup[2]->insertSeparator();
+
+   _viewPopup[2]->insertItem(
+      "Select left line", this, SLOT(selectLineLeft()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
+   );
+   if ( _nbFiles == 3 ) {
+      _viewPopup[2]->insertItem(
+         "Select middle line", this, SLOT(selectLineMiddle()),
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
+      );
+   }
+   _viewPopup[2]->insertItem(
+      "Select right line", this, SLOT(selectLineRight()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
+   );
+   _viewPopup[2]->insertItem(
+      "Select neither", this, SLOT(selectLineNeither()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
+   );
+   _viewPopup[2]->insertItem(
+      "Unselect", this, SLOT(selectLineUnselect()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
+   );
+
+   // Right click View menu for right file
+   _viewPopup[3] = new QkPopupMenu;
+   _viewPopup[3]->insertItem(
+      "Replace right file...", this, SLOT(openRight()),
+      _resources->getAccelerator( ACCEL_OPEN_RIGHT )
+   );
+   _viewPopup[3]->insertItem(
+      "Edit right file", this, SLOT(editRight()),
+      _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+   );
+   _viewPopup[3]->insertItem(
+      "Save as right", this, SLOT(saveAsRight()),
+      _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+   );
+   _viewPopup[3]->insertSeparator();
+
+   _viewPopup[3]->insertItem(
+      "Next difference", this, SLOT(nextDifference()),
+      _resources->getAccelerator( ACCEL_NEXT_DIFFERENCE )
+   );
+   _viewPopup[3]->insertItem(
+      "Previous difference", this, SLOT(previousDifference()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_DIFFERENCE )
+   );
+   _viewPopup[3]->insertSeparator();
+   _viewPopup[3]->insertItem(
+      "Next unselected", this, SLOT(nextUnselected()),
+      _resources->getAccelerator( ACCEL_NEXT_UNSELECTED )
+   );
+   _viewPopup[3]->insertItem(
+      "Previous unselected", this, SLOT(previousUnselected()),
+      _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
+   );
+   _viewPopup[3]->insertSeparator();
+
+   _viewPopup[3]->insertItem(
+      "Select left line", this, SLOT(selectLineLeft()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_LEFT )
+   );
+   if ( _nbFiles == 3 ) {
+      _viewPopup[3]->insertItem(
+         "Select middle line", this, SLOT(selectLineMiddle()),
+         _resources->getAccelerator( ACCEL_SELECT_LINE_MIDDLE )
+      );
+   }
+   _viewPopup[3]->insertItem(
+      "Select right line", this, SLOT(selectLineRight()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_RIGHT )
+   );
+   _viewPopup[3]->insertItem(
+      "Select neither", this, SLOT(selectLineNeither()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_NEITHER )
+   );
+   _viewPopup[3]->insertItem(
+      "Unselect", this, SLOT(selectLineUnselect()),
+      _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
+   );
 
    //---------------------------------------------------------------------------
 
@@ -2238,7 +2507,7 @@ QRect XxApp::getMainWindowGeometry() const
 
 //------------------------------------------------------------------------------
 //
-QkPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
+QkPopupMenu* XxApp::getViewPopup( const int no, const XxLine& /*line*/ ) const
 {
    if ( _filesAreDirectories == true ) {
       XxDln cursorLine = getCursorLine();
@@ -2249,20 +2518,24 @@ QkPopupMenu* XxApp::getViewPopup( const XxLine& /*line*/ ) const
       // Note: can only have two files.
       bool dirs = line.getType() == XxLine::DIRECTORIES;
 
-      _viewPopup->setItemEnabled( _menuids[ ID_View_DiffFilesAtCursor ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_DiffFilesAtCursor ],
                                   ( no1 != -1 && no2 != -1 ) );
-      _viewPopup->setItemEnabled( _menuids[ ID_View_CopyRightToLeft ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_CopyRightToLeft ],
                                   ( no2 != -1 && !dirs ) );
-      _viewPopup->setItemEnabled( _menuids[ ID_View_CopyLeftToRight ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_CopyLeftToRight ],
                                   ( no1 != -1 && !dirs ) );
 
-      _viewPopup->setItemEnabled( _menuids[ ID_View_RemoveLeft ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_RemoveLeft ],
                                   ( no1 != -1 && !dirs ) );
-      _viewPopup->setItemEnabled( _menuids[ ID_View_RemoveRight ],
+      _viewPopup[0]->setItemEnabled( _menuids[ ID_View_RemoveRight ],
                                   ( no2 != -1 && !dirs ) );
+      return _viewPopup[0];
+   }
+   else
+   {
+      return _viewPopup[no + 1];
    }
 
-   return _viewPopup;
 }
 
 //------------------------------------------------------------------------------
@@ -2334,7 +2607,7 @@ bool XxApp::askOverwrite( const QString& filename ) const
 
 //------------------------------------------------------------------------------
 //
-bool XxApp::saveToFile(
+bool XxApp::saveMergedToFile(
    const QString& filename,
    const bool     ask,
    const bool     noCancel,
@@ -2839,7 +3112,7 @@ void XxApp::saveAsLeft()
    XxBuffer* file = getBuffer( 0 );
    if ( file != 0 && file->isTemporary() == false ) {
       if ( validateNeedToSave( 0 ) == true ) {
-         saveToFile( file->getName(), false );
+         saveMergedToFile( file->getName(), false );
       }
    }
 }
@@ -2851,7 +3124,7 @@ void XxApp::saveAsMiddle()
    XxBuffer* file = getBuffer( 1 );
    if ( file != 0 && file->isTemporary() == false ) {
       if ( validateNeedToSave( 1 ) == true ) {
-         saveToFile( file->getName(), false );
+         saveMergedToFile( file->getName(), false );
       }
    }
 }
@@ -2863,7 +3136,7 @@ void XxApp::saveAsRight()
    XxBuffer* file = getBuffer( _nbFiles == 2 ? 1 : 2 );
    if ( file != 0 && file->isTemporary() == false ) {
       if ( validateNeedToSave( _nbFiles == 2 ? 1 : 2 ) == true ) {
-         saveToFile( file->getName(), false );
+         saveMergedToFile( file->getName(), false );
       }
    }
 }
@@ -2875,7 +3148,7 @@ void XxApp::saveAsMerged()
    QString mergedName = getMergedFilename();
 
    // Note: overwrite automatically if merged filename as on the cmdline.
-   saveToFile( mergedName,
+   saveMergedToFile( mergedName,
                false,
                false /*default*/,
                ! _cmdline._mergedFilename.isEmpty() );
@@ -2886,7 +3159,84 @@ void XxApp::saveAsMerged()
 void XxApp::saveAs()
 {
    QString mergedName = getMergedFilename();
-   saveToFile( mergedName, true );
+   saveMergedToFile( mergedName, true );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::generatePatchFromLeft()
+{
+   XxBuffer* buf = getBuffer( 0 );
+   if ( buf != 0 ) {
+
+      // Save the merged file.
+      //
+      // Note: we don't really need to have the temporary file opened here, we
+      // just need its filename.
+      char temporaryFilename1[64] = "/var/tmp/xxdiff-tmp-patch.XXXXXX";
+      FILE* fout1 = XxUtil::tempfile( temporaryFilename1 );
+      saveMergedToFile( temporaryFilename1, false, false, true );
+      ::fclose( fout1 );
+
+      // Save the original file.
+      char temporaryFilename2[64] = "/var/tmp/xxdiff-tmp-patch.XXXXXX";
+      FILE* fout2 = XxUtil::tempfile( temporaryFilename2 );
+      uint sz;
+      const char* charbuf = buf->getBuffer( sz );
+      {
+         QTextOStream osstream( fout2 );
+         osstream.writeRawBytes( charbuf, sz );
+      }
+      ::fclose( fout2 );
+
+      // Run diff on the two temporary files.
+      QStringList filenames;
+      filenames.append( temporaryFilename1 );
+      filenames.append( temporaryFilename2 );
+      const char** out_args;
+      XxUtil::splitArgs( "diff -Naur", filenames, out_args );
+
+      FILE* fout;
+      FILE* ferr;
+      int pid = XxUtil::spawnCommand( out_args, &fout, &ferr );
+      if ( fout == 0 || ferr == 0 ) {
+         throw XxIoError( XX_EXC_PARAMS );
+      }
+
+// FIXME: TODO read the output and write it to some file.
+
+      ::fclose( fout );
+      ::fclose( ferr );
+
+      XxUtil::freeArgs( out_args );
+
+      if ( pid >= 0 ) {
+         int status;
+         ::waitpid( pid, &status, 0 );
+      }
+
+      // Delete the temporary files.
+      XxUtil::removeFile( temporaryFilename1 );
+      XxUtil::removeFile( temporaryFilename2 );
+   }
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::generatePatchFromMiddle()
+{
+// FIXME: todo !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::generatePatchFromRight()
+{
+// FIXME: todo !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -3330,6 +3680,12 @@ void XxApp::diffFilesAtCursor()
          // FIXME: it would be nice here to be able to say that the file should
          // display on the right side if this is an insert hunk in a directory
          // diff.
+
+         // If the file is a directory, do nothing.
+         QFileInfo finfo( filenames[0] );
+         if ( finfo.isDir() ) {
+            return;
+         }
       }
 
       const char** args;
@@ -4498,14 +4854,14 @@ bool XxApp::computeAbsoluteDifference() const
 void XxApp::quitAccept()
 {
    // Confirm with the user if some incompatible selections were made.
-   if ( _diffs->hasSelectionsOtherThan( 
+   if ( _diffs->hasSelectionsOtherThan(
            _nbFiles == 2 ? XxLine::SEL2 : XxLine::SEL3 ) ) {
 
       int resp = QMessageBox::warning(
          _mainWindow,
          "xxdiff",
          "Some selections are incompatible with your decision, confirm action.",
-         "Accept, discard selections", "Cancel", QString::null, 0, 1
+         "Discard selections", "Cancel", QString::null, 0, 1
       );
       if ( resp == 1 ) {
          // User has canceled.
@@ -4517,7 +4873,7 @@ void XxApp::quitAccept()
    exit( _returnValue, "ACCEPT" );
    selectGlobalRight();
    bool saved =
-      saveToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
+      saveMergedToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
    XX_ASSERT( saved );
 }
 
@@ -4544,7 +4900,7 @@ void XxApp::quitReject()
    exit( _returnValue, "REJECT" );
    selectGlobalLeft();
    bool saved =
-      saveToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
+      saveMergedToFile( getMergedFilename(), false, !_mainWindow->isVisible(), true );
    XX_ASSERT( saved );
 }
 
@@ -4554,7 +4910,7 @@ void XxApp::quitMerged()
 {
    // Force saving a merged file.
    QString mergedName = getMergedFilename();
-   if ( ! saveToFile(
+   if ( ! saveMergedToFile(
            mergedName, false, !_mainWindow->isVisible(), true
         ) ) {
       return; // Don't quit! Output *IS* required.

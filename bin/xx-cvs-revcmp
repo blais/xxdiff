@@ -5,6 +5,6 @@
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
-from xxdiff.scripts.cvsrevcomp import main
+from xxdiff.scripts.cvsrevcmp import main
 main()
 

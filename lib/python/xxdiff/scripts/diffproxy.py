@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-diff-proxy [<options>] <file> <file> [<file>]
@@ -33,11 +32,10 @@ __depends__ = ['xxdiff', 'Python-2.4']
 import sys, os
 
 # xxdiff imports.
+import xxdiff.scripts
 import xxdiff.invoke
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -70,6 +68,8 @@ def parse_options():
 
     ## parser.add_option('--reverse', action='store_true',
     ##                   help="Reverse the display order of the files.")
+
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
     if len(args) > 3:
@@ -80,8 +80,6 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 def diffproxy_main():
     """
     Main program for cond-replace script.
@@ -131,8 +129,6 @@ def diffproxy_main():
     return retcode
 
 
-#-------------------------------------------------------------------------------
-#
 main = diffproxy_main
 
 if __name__ == '__main__':

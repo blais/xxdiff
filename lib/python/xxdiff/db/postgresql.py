@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -20,8 +19,6 @@ from subprocess import Popen, PIPE
 from xxdiff.utils import consepairs
 
 
-#-------------------------------------------------------------------------------
-#
 def options_graft(parser):
     """
     Graft options on given parser for SQL connections.
@@ -60,8 +57,6 @@ def options_validate(opts, parser, logs=None):
     opts.pgsqlargs = args
 
 
-#-------------------------------------------------------------------------------
-#
 dbspec_re = re.compile(
     '^(?:([a-zA-Z0-9_]+)@)?([a-zA-Z0-9_]+)(?:/([a-zA-Z0-9_]+))?$')
 
@@ -84,8 +79,6 @@ def parse_dbspec(dbspec, parser, opts):
     return Schema(dbspec, user, db, schema)
 
 
-#-------------------------------------------------------------------------------
-#
 class Schema(object):
     """
     Container for all database schema-related things.
@@ -95,8 +88,6 @@ class Schema(object):
         self.user, self.dbname, self.schema = user, dbname, schema
         self.dump = None
         
-#-------------------------------------------------------------------------------
-#
 def dump_schema(user, dbname, schema, opts):
     """
     Dump the schema for the given database.  Returns the dump text on output.
@@ -119,25 +110,25 @@ def dump_schema(user, dbname, schema, opts):
     return dump
 
 
-#-------------------------------------------------------------------------------
-#
-sec_re = re.compile('^-- Name:\s*([^\s;]+);\s*Type:\s*([^\s;]+)(.*)$', re.M)
+sec_re = re.compile('^-- (?:Data for )?Name:\s*([^\s;]+);\s*Type:\s*([^;]+);(.*)$', re.M)
 com_re = re.compile('--.*$', re.M)
 ct_re = re.compile('^CREATE TABLE.*?(\\().*?(\\);)', re.M|re.S)
 
-def parse_dump(dbdump):
+def parse_dump(dbdump, sort_columns=False):
     """
-    Parse a PostgreSQL database dump, extracting all its section into a
-    dictionary (returned).  The keys are built from the Name and Type fields in
-    the header comments.
+    Parse a PostgreSQL database dump, extracting all its section into a list of
+    (name, type, contents) tuples. The entries are built from the Name and Type
+    fields in the header comments. Contents of data chunks for tables are
+    returned as type 'DATA', so if you're going to turn this into a map, be
+    careful to filter out the 'data' entries or concatenate them to the schema
+    (whichever is appropriate for your application).
     """
-
     # Class to contain info about chunks.
     class Chunk:
         def __init__(self, mo):
             self.mo = mo
             self.name, self.typ = mo.group(1, 2)
-            
+
     # Parse chunks.
     chunks = map(lambda mo: Chunk(mo), sec_re.finditer(dbdump))
     for c1, c2 in consepairs(chunks):
@@ -147,22 +138,23 @@ def parse_dump(dbdump):
     # Remove comments in the contents.
     for c in chunks:
         c.descline = c.mo.group(0)
-        c.contents = com_re.sub('', c.contents).strip()
+        c.contents = com_re.sub('', c.contents).strip() + '\n'
         c.mo = None # release the match objects
 
         # Sort columns in CREATE TABLE statements.
-        mo = ct_re.match(c.contents)
-        if mo:
-            pre, post = c.contents[:mo.end(1)], c.contents[mo.start(2):]
-            columns = c.contents[mo.end(1):mo.start(2)].strip()
-            line_cols = map(lambda x: x.endswith(',') and x or '%s,' % x,
-                            map(str.strip, columns.splitlines()))
-            line_cols.sort()
-            c.contents = (pre + '\n' +
-                          ''.join('   %s\n' % x for x in line_cols) +
-                          post)
-    
-    return dict(((c.name, c.typ), (c.descline + '\n\n' + c.contents))
+        if sort_columns:
+            mo = ct_re.match(c.contents)
+            if mo:
+                pre, post = c.contents[:mo.end(1)], c.contents[mo.start(2):]
+                columns = c.contents[mo.end(1):mo.start(2)].strip()
+                line_cols = map(lambda x: x.endswith(',') and x or '%s,' % x,
+                                map(str.strip, columns.splitlines()))
+                line_cols.sort()
+                c.contents = (pre + '\n' +
+                              ''.join('   %s\n' % x for x in line_cols) +
+                              post)
+
+    return list((c.name, c.typ, c.descline + '\n\n' + c.contents)
                 for c in chunks)
 
 def dump_chunks(chunks):

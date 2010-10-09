@@ -1,6 +1,6 @@
 Summary: A graphical front end to the diff command
 Name: xxdiff
-Version: 3.2b4
+Version: 3.2
 Release: 2
 License: GNU GPL
 Group: Development/Tools
@@ -9,7 +9,7 @@ URL: http://furius.ca/xxdiff/
 Packager: Martin Blais <blais@furius.ca>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: qt >= 3.2, python
-BuildRequires: qt-devel >= 3.2, tmake >= 1.7, flex, bison, python
+BuildRequires: qt-devel >= 3.2, %{?_with_tmake:tmake >= 1.7}, flex >= 2.5.31, bison, python
 
 %description
 xxdiff is a graphical browser for viewing the differences between two
@@ -34,10 +34,13 @@ if [ -z "$QTDIR" ]; then
 fi
 
 cd src
+%{!?_with_tmake:make -f Makefile.bootstrap makefile}
 %ifarch x86_64
-tmake xxdiff.pro | sed s+X11R6/lib+lib64+ > Makefile
+qmake -o Makefile.qmake xxdiff.pro
+cat Makefile.qmake Makefile.extra > Makefile
 %else
-tmake xxdiff.pro | sed s+X11R6/lib+lib+ > Makefile
+qmake -o Makefile.qmake xxdiff.pro
+cat Makefile.qmake Makefile.extra > Makefile
 %endif
 
 make
@@ -94,8 +97,16 @@ python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 %{_bindir}/xx-svn-resolve
 
 %changelog
+* Thu Sept 2006 Philippe Corbes <philippe.corbes@laposte.net>
+- released 3.2-1 Added contextuals menus on right click
+
+* Mon Jul 3 2006 Marcin Zajaczkowski <mszpak@wp.pl> - 3.2-1
+- updated to 3.2
+- default version doesn't use tmake (can be turn on by "--with tmake")
+
 * Tue May 2 2006 Robin Humble
 - fc5, x86_64 hacks
+
 * Thu Apr 27 2006 Robin Humble
 - updated to 3.2b4
 - fc5, i386

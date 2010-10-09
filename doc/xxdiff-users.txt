@@ -1,0 +1,51 @@
+===================
+   User Comments
+===================
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2006-11-21
+:Abstract:
+
+    Some feel-good user comments submitted over the years.
+
+.. contents::
+..
+    1  Oracle
+    2  IBM
+    3  NASA
+    4  Others
+
+
+Oracle
+======
+
+FIXME: TODO, find old email
+
+
+
+IBM
+===
+
+FIXME: TODO, find old email
+
+
+
+NASA
+====
+
+  “Many of us here at NASA Langley Research Center use your tool for
+  graphical diffs during software development.  We also use
+  xxdiff-subversion integration into subversion.  I personally can no
+  longer read context diff output as I have gotten so used to xxdiff (well
+  at least that's what I tell people when I refuse to work without xxdiff).”
+
+  Thanks for the great work!
+
+  ---Bill Jones, NASA Langley Research Center
+
+
+
+Others
+======
+
+find other comments.
+

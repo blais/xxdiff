@@ -133,8 +133,9 @@ public:
    // Default constructor, initialize to an invalid line.
    XxLine();
 
-   // Copy constructor.
+   // Copy constructors.
    XxLine( const XxLine& copy );
+   const XxLine& operator=( const XxLine& copy );
 
    // Constructor (3-way).
    // For DIFF regions who have one side blank just specify -1 for that side.

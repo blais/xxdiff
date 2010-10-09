@@ -1,8 +1,27 @@
+.. -*- coding: utf-8 -*-
+
 ====================================================================
   xxdiff: Graphical File And Directories Comparator And Merge Tool
 ====================================================================
 
 .. contents:: Table of Contents
+..
+    1  Description
+      1.1  Features
+        1.1.1  Unicode and Inline Editing
+    2  Documentation
+      2.1  Screenshots
+    3  Download
+      3.1  Tools
+      3.2  Packages
+    4  Reporting Bugs
+    5  Installation
+      5.1  Dependencies
+      5.2  Portability
+    6  External Links
+    7  Copyright and License
+    8  Author
+
 
 Description
 ===========
@@ -86,12 +105,18 @@ Download
 ========
 
 * `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
-  
+
 * `Alternate Location and Snapshots </downloads/xxdiff>`_
 
 * A Windows build (with some minor bugs) can be found `here
   <http://xxdiff.sourceforge.net/download/2.9/windows>`_.  No support offered
   though.
+
+* A preliminary Qt4 port to Mac has been done by Matt Johnston, you can `find it
+  here <http://xxdiff.sourceforge.net/download/3.2/contrib>`_.  I don't have a
+  Mac, so questions will not be very useful.  The current xxdiff source code
+  does not reflect this build though.  Newer versions can be found at
+  http://matt.ucc.asn.au/xxdiff/.
 
 
 Tools
@@ -106,7 +131,7 @@ is now distributed with xxdiff, in an ``xxdiff`` Python package, which you can
 leverage to build your own file transformation scripts around xxdiff.
 
 See the document `Helper Scripts for xxdiff <doc/xxdiff-scripts.html>`_ for full
-details.  
+details.
 
 The scripts are available in the xxdiff distribution.  To install them and the
 accompanying Python package, use the standard distutils procedure::
@@ -133,6 +158,9 @@ the relevant pages.  The author does not publish binaries anymore.
 
 - `Linux / Mandrake package (2) <http://www.roberto.foglietta.name/pub/xxdiff>`_
   (maintained by Roberto A. Foglietta)
+
+- `Linux / Fedore Core (1) <http://timeoff.wsisiz.edu.pl/rpms.html#xxdiff>`_
+  (maintained by Marcin Zajączkowski)
 
 - `Linux / Gentoo port <http://packages.gentoo.org/ebuilds/?xxdiff-3.1>`_
   (in the dev-utils category)
@@ -177,7 +205,7 @@ Portability
 -----------
 
 xxdiff is known to build and work on a great majority of UNIX platforms where Qt
-works.  It has also been ported it to Mac OSX.
+works.  It has also been ported to Mac OS X.
 
 
 External Links
@@ -216,3 +244,4 @@ Martin Blais <blais@furius.ca>
    :width: 88
    :height: 31
    :alt: SourceForge Logo
+

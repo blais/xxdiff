@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-match [<options>] <file> <file> <file> <file> ...
@@ -46,8 +45,6 @@ import xxdiff.scripts
 import xxdiff.invoke
 
 
-#-------------------------------------------------------------------------------
-#
 def match_main():
     """
     Main program for match script.
@@ -81,8 +78,6 @@ def match_main():
         xxdiff.invoke.xxdiff_display(Opts, *(extra + filenames))
 
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(match_main)
 

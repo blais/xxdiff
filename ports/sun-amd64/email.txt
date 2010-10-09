@@ -1,0 +1,43 @@
+Hanna Mousa <hanna.mousa@gmail.com> 		 hide details	 12:51 am (6 hours ago) 
+	to		Martin Blais <blais@furius.ca>	 
+	date		Dec 6, 2006 12:51 AM	 
+	subject		Re: Compiling xxdiff on Sun AMD64 platform	 
+	signed-by		gmail.com	 
+Greetings Martin,
+ 
+I modified the Makefile adding an explicit rule for .y files. This is the only significant modification I did for it to work. Somehow - maybe it is a bug in make - make uses an implicit rule to produce .o from .y and therefore, because there is no such rule in the generated Makefile, I added a new one and guessed how this file should be built. You can see the changes in the Makefile attached.
+
+I want to note also that I compiled the project in 32bit. The g++, gcc I got doesn't support 64 yet. I need to build it again, and I need to build QT again to support 64bit. I intend to do that slowly because I don't have much time for it.
+
+I also compiled the project on my SUSE 10.1 machine on PC (Pentium D) without any modifications.
+
+Please tell me if you need anything else.
+
+thanks,
+Hanna
+
+ 
+- Hide quoted text -
+On 12/5/06, Martin Blais <blais@furius.ca> wrote:
+
+    hello Hanna
+    this is great
+    can you send me the patch/changes?
+    thx
+
+
+    On 12/5/06, Hanna Mousa < hanna.mousa@gmail.com> wrote:
+    > Hello Martin,
+    >
+    >  Thank you for your great tool and wish you all the success in improving and
+    > making it even greater.
+    >
+    >  I recently  managed to compile xxdiff on Sun AMD64 new platform and I just
+    > wanted to inform you so we can share this with other people.
+    >  It was a bit difficult because of this new platform but I made it all
+    > through.
+    >
+    >  best regards,
+    >  thanks again,
+    >  Hanna Mousa
+

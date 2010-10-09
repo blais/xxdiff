@@ -24,54 +24,55 @@
 
 """svn-foreign [<options>] [<dir> ...]
 
-This script deals with the common case where you have developed something using
-Subversion and you have forgotten some unregistered files before committing.
+This script allows you to quickly add or delete files that are foreign to a
+Subversion checkout, and to easily resolve conflicts.  It deals with the common
+case where you have developed something using Subversion and you have forgotten
+some unregistered files before committing.
 
 svn-foreign runs 'svn status' on the given Subversion-managed directories, to
 find out which files are unaccounted for and for each of these files, it asks
 you what to do with it::
 
-   [a] add it
-   [d] delete it
-   [m] mask it (sets an svn:ignore property on its parent directory)
-   [i] ignore it (leave it where it is)
+- add it
+- delete it
+- ignore/mask it (sets an svn:ignore property on its parent directory)
+- skip it for now (leave it where it is)
 
 Other actions::
 
-   [q] quit / [x] exit, this interrupts the process
-   [D] delete with no backups (for large files)
-   [v] view the file with a pager (more)
+- quit / [x] exit, this interrupts the process
+- delete with no backups (for large files)
+- view the file with a pager (more)
+- resolve conflict (only valid on a file with an unresolved conflict)
+- revert conflict (only valid on a file with an unresolved conflict)
 
 The script works interactively and is meant to allow you to quickly deal with
 the forgotten files in a subversion checkout.  It works with directories as
 well.
 
+Also, files in conflicts are properly ignored and not counted as foreign files.
+When unresolved conflicts are found, you are queried about them, answer with 'r'
+to resolve it and delete the temporary files.
+
 """
-# Notes
-# -----
-# We need to make sure that this file remains independently working from the
-# rest of xxdiff, i.e. even though some features may not be available, it should
-# always be working without xxdiff.  This is because this file may be
-# distributed under the simple name svn-foreign, and run independently, even if
-# you have not the xxdiff infrastructure.
-#
+
 # Future Work
 # -----------
 #
-# - We could implement backups for the deleted files (with lazy creation of
-#   backup directory).
+# - Make backups work without the xxdiff.backup module.
+# - svn-foreign: add support for editing conflictual file
 #
 # Credits
 # -------
 # * To Sean Reifschneider (Jafo) for providing example code for raw tty input
 
 
-__version__ = '$Revision: 1001 $'
+__version__ = '$Revision$'
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 
 # stdlib imports
-import sys, os, termios, tty, tempfile, datetime
+import sys, os, termios, tty, tempfile, datetime, re
 from subprocess import Popen, PIPE, call
 from os.path import *
 
@@ -82,12 +83,8 @@ except ImportError:
     backup = None
 
     
-#-------------------------------------------------------------------------------
-#
 debug = False
 
-#-------------------------------------------------------------------------------
-#
 def read_one():
     """
     Reads a single character from the terminal.
@@ -104,16 +101,18 @@ def read_one():
                           orig_term_attribs)
     return c
 
-#-------------------------------------------------------------------------------
-#
 def add(fn):
     """
     Add the file into Subversion.
     """
     call(['svn', 'add', fn])
 
-#-------------------------------------------------------------------------------
-#
+def delete(fn):
+    """
+    Delete the file from Subversion.
+    """
+    call(['svn', 'delete', fn])
+
 def rmrf(fnodn):
     """
     Delete the given directory and all its contents.
@@ -135,8 +134,6 @@ def rmrf(fnodn):
     else:
         os.remove(fnodn)
 
-#-------------------------------------------------------------------------------
-#
 def ignore_prop(dn, ignores):
     """
     Set svn:ignore on directory 'dn'.
@@ -148,8 +145,6 @@ def ignore_prop(dn, ignores):
     f.close()
 
 
-#-------------------------------------------------------------------------------
-#
 def filter2(predicate, *arguments):
     ein, eout = [], []
     for args in zip(*arguments):
@@ -164,8 +159,6 @@ def filter2(predicate, *arguments):
     return ein, eout
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -198,10 +191,10 @@ def parse_options():
     if backup is not None:
         backup.options_validate(opts, parser)
 
-    if opts.backup_prefix is None:
-        # Set a better default for the backup prefix.
-        opts.backup_prefix = (
-            datetime.datetime.now().replace(microsecond=0).isoformat('T'))
+        if opts.backup_prefix is None:
+            # Set a better default for the backup prefix.
+            opts.backup_prefix = (
+                datetime.datetime.now().replace(microsecond=0).isoformat('T'))
 
     if opts.comments and not opts.commit:
         parser.error("You cannot specify comments if you're not going to "
@@ -210,10 +203,15 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
+def view(fn, write):
+    "Call on 'more' to view the file."
+    write('-' * 80 + '\n')
+    pager = os.environ.get('PAGER', '/bin/more')
+    call([pager, fn])
+
+
 def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
-                                  ignore=[]):
+                                 ignore=[]):
     """
     Runs an 'svn status' command, and then loops over all the files that are not
     registered, asking the user one-by-one what action to take (see this
@@ -262,10 +260,54 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     write(out)
     write('\n')
 
+    # Figure out which files are in conflict so that we can ignore the unknown
+    # merge result files.
+    conflicts = []
+    for line in out.splitlines():
+        if not line or re.match('^Performing', line):
+            continue
+        
+        if line[0] == 'C':
+            fn = line[8:]
+            cre = re.compile('%s\\.(mine|r\\d+)' % re.escape(fn)).match
+            conflicts.append( (fn, cre) )
+
+            # Command loop (one command)
+            while True:
+                write('=> [Resolve|Skip|View|Quit|Redo]  %s ? ' % fn)
+
+                # Read command
+                c = read_one()
+                write(c)
+                write('\n')
+
+                if c == 'r': # Add
+                    call(['svn', 'resolved', fn])
+                    break
+
+                elif c == 's': # Skip
+                    break
+
+                elif c in 'v': # View
+                    view(fn, write)
+
+                elif c in ['q', 'x']: # Quit/exit
+                    write('(Quitting.)\n')
+                    return False
+
+                elif c == 'r': # Restart from scratch
+                    # (perhaps you invoke that after adding an ignore wildcard.)
+                    return query_unregistered_svn_files(filenames, opts, output, ignore)
+
     # Process foreign files
     for line in out.splitlines():
-        if line[0] == '?':
-            fn = line[7:]
+        if not line or re.match('^(Performing|Status)', line):
+            continue
+
+        if line[0] in '?~':
+            fn = line[8:]
+            if filter(lambda x: x[1](fn), conflicts):
+                continue
             if abspath(fn) in ignore:
                 continue
 
@@ -284,7 +326,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
             # Command loop (one command)
             while True:
-                write('=> [Add|Del|Mask|Ign|View|Quit]  %10d  %s %s ? ' %
+                write('=> [Add|Delete|Ignore|Skip|View|Quit|Redo]  %10d  %s %s ? ' %
                       (size, fn, ftype))
 
                 # Read command
@@ -311,7 +353,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                     rmrf(fn)
                     break
 
-                elif c in ['m', 'I']: # Mask
+                elif c in ['m', 'i', 'I']: # Ignore (Mask, svn:ignore)
                     dn, bn = split(fn)
                     if dn == '':
                         dn = '.'
@@ -342,6 +384,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                     elif pat == '*':
                         call(['svn', 'propedit', 'svn:ignore', dn])
+                        break
 
                     else:
                         svnign += pat + '\n'
@@ -353,19 +396,19 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                         break
 
-                elif c == 'i': # Ignore
+                elif c == 's': # Skip
                     break
 
                 elif c in ['q', 'x']: # Quit/exit
                     write('(Quitting.)\n')
                     return False
 
+                elif c == 'r': # Restart from scratch
+                    # (perhaps you invoke that after adding an ignore wildcard.)
+                    return query_unregistered_svn_files(filenames, opts, output, ignore)
+
                 elif c in 'v': # View
-                    # Call on 'more' to view the file
-                    write('-' * 80 + '\n')
-                    pager = os.environ.get('PAGER', '/bin/more')
-                    call([pager, fn])
-                    # Look again
+                    view(fn, write)
 
                 elif c == chr(12): # Ctrl-L: Clear
                     # FIXME: is there a way to do this directly on the terminal?
@@ -374,12 +417,45 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                 else: # Loop again
                     write('(Invalid answer.)\n')
 
+        elif line[0] == '!':
+            fn = line[8:]
+            if abspath(fn) in ignore:
+                continue
+
+            # Command loop (one command)
+            while True:
+                write('=> [Delete|Skip|Quit]  %10d  %s %s ? ' %
+                      (-1, fn, ''))
+
+                # Read command
+                c = read_one()
+                write(c)
+                write('\n')
+
+                if c == 'd': # Delete
+                    delete(abspath(fn))
+                    break
+
+                elif c == 's': # Skip
+                    break
+
+                elif c in ['q', 'x']: # Quit/exit
+                    write('(Quitting.)\n')
+                    return False
+
+                elif c == chr(12): # Ctrl-L: Clear
+                    # FIXME: is there a way to do this directly on the terminal?
+                    call(['clear'])
+
+                else: # Loop again
+                    write('(Invalid answer.)\n')
+
+
+
     write('(Done.)\n')
     return True
 
     
-#-------------------------------------------------------------------------------
-#
 def main():
     """
     Main program.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -15,8 +14,6 @@ from curses.ascii import isalnum
 from subprocess import Popen, PIPE
 
 
-#-------------------------------------------------------------------------------
-#
 def consepairs(seq):
     """
     Iterate over consecutive pairs.
@@ -28,8 +25,6 @@ def consepairs(seq):
         prev = el
 
 
-#-------------------------------------------------------------------------------
-#
 def idify(s, strip=True, preserve_chars=[]):
     """
     Removes non-alphanumeric characters from a string, morphing them into
@@ -52,8 +47,6 @@ def idify(s, strip=True, preserve_chars=[]):
     return ss
 
 
-#-------------------------------------------------------------------------------
-#
 # Note: there has been a 'file' command for a long time under UNIX.  We favor
 # the short options to promote portability.  The --bried and --dereference
 # options were taken from Ian F. Darwin's file implementation.
@@ -73,13 +66,11 @@ def istextfile(fn):
     p = Popen(guesscmd + [fn], stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
     if p.returncode != 0 or stderr or stdout.startswith('cannot open'):
-        raise RuntimeError("Error: Running 'file' on '%s'." % fn)
+        raise RuntimeError("Error: running 'file' on '%s'." % fn)
 
     return bool(text_re.search(stdout) or empty_re.match(stdout))
 
 
-#-------------------------------------------------------------------------------
-#
 def makedirs(dirn, error_on_exist=True):
     """
     A replacement for os.makedirs() that has an option to avoid complaining if

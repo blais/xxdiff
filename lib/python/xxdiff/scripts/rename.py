@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """
@@ -31,8 +30,6 @@ import xxdiff.xformloop
 from xxdiff.utils import idify
 
 
-#-------------------------------------------------------------------------------
-#
 class RenameTransformer(xxdiff.xformloop.Transformer):
     """
     Transformer that greps the file for a regular expression, and if it matches,
@@ -87,8 +84,6 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
         return True
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())
@@ -127,11 +122,9 @@ def parse_options():
     return renames, opts, selector
 
 
-#-------------------------------------------------------------------------------
-#
 def rename_main():
     """
-    Main program for find-grep-sed script.
+    Main program for renaming script.
     """
     # Parse the options.
     renames, opts, selector = parse_options()
@@ -145,8 +138,6 @@ def rename_main():
     finally:
         xxdiff.xformloop.postloop_footer(opts)
 
-#-------------------------------------------------------------------------------
-#
 def main():
     xxdiff.scripts.interruptible_main(rename_main)
 

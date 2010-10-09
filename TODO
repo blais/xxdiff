@@ -5,16 +5,248 @@
 .. contents::
 ..
     1  Next Release
+      1.1  Priorities
+      1.2  Qt4
     2  Less Urgent, but do it soon too
-    3  Goals for 4.0 stable release:
-    4  Promo
-    5  Other
+    3  Look at ``wiggle`` integration, it seems like a great idea
+    4  Goals for 4.0 stable release:
+    5  Promo
+    6  Other
 
 
 Next Release
 ============
 
+Priorities
+----------
+
+- xxdiff: Make xxdiff recursive able to list all the files when a
+  directory is only on one side. Walk and enumerate the files of an
+  inserted or deleted directory.
+
+- xxdiff: Fix geometry window sizing problem.
+
+- xxdiff: Convert it to port to Qt4 and support unicode
+
+  - Windows port, use the patch from Trevor Harmon
+  - MAC port
+  - Patch output support?
+
+
+
+Qt4
+---
+
+- Bug with saving with ignored patterns: Which side gets selected?
+
+      Ah I see.
+      The problem is a definitional one.
+      When you say "Save as..", it is not clear what to do with the ignored regions, xxdiff should warn about that.
+      It's indeed a problem...
+
+      The issue is that xxdiff does not output sed commands... it selects the regions and saves the results directly.
+
+      You should probably not use the ignore switch with save... I never considered that case.
+      BTW, "Save As Right" does not mean anything about selecting text from the file on the right, it is the same as "Save As"
+      and selecting the filename of the file on the right.
+
+      THanks for the bug report, I'll add it to the TODO list.
+
+      cheers,
+
+      Lee Gramling wrote:
+      > > Martin,
+      > > Thanks for your quick response, I am sure its just my expectations that
+      > > are wrong but here is better description:
+      > > 
+      > > Run the following command on the files listed below:
+      > >  xxdiff d2.iv d1.iv -A "-I position.*"
+      > > 
+      > > xxdiff when show the following differences:
+      > > d2.iv                                     d1.iv
+      > > position 50 50 200                position 50 50 280     #these are
+      > > ignored and not highlighted
+      > > 
+      > > angle 3.19                            angle 1.57
+      > > 
+      > >  Text3 {
+      > >             string  =
+      > >                  GlobalField {
+      > >                      type    "SFTime"
+      > >                      realTime
+      > >                  }
+      > >                  . realTime
+      > >          }
+      > > 
+      > > Select the right angle 1.57
+      > > and the left Text3 block
+      > > 
+      > > Then do a File->Save as right
+      > > File->Redo diff
+      > > 
+      > > Now the files looks like this:
+      > > d2.iv                                     d1.iv
+      > > position 50 50 200                position 50 50 200     #d1.iv has the
+      > > wrong value for position
+      > > 
+      > > angle 3.19                            angle 1.57
+      > > 
+      > >  Text3 {                                    Text3 {
+      > > string  =                                   string =
+      > > GlobalField {                            GlobalField {
+      > > type    "SFTime"                       type    "SFTime"
+      > > realTime                                   realTime
+      > >  }                                               }
+      > >  . realTime                                .realTime
+      > >   }                                              }
+      > > 
+      > > The ignored position line has been copied to the right file (I would not
+      > > expect this).
+      > > The selected right angle 1.57 is correct and the left selected Text3
+      > > line has been added as expected.
+      > > 
+      > > I guess what I expect is more like what would happen if you ran diff
+      > > with the ignore
+      > >  diff d2.iv d1.iv "-I position.*"
+      > > 15c15
+      > > <             angle   3.19
+      > > ---
+      >> >>             angle   1.57
+      > > 25,32d24
+      > > <          Text3 {
+      > > <             string  =
+      > > <                 GlobalField {
+      > > <                     type    "SFTime"
+      > > <                     realTime
+      > > <                 }
+      > > <                 . realTime
+      > > <         }
+      > > 
+      > > The ignored lines do not get output as sed commands.
+      > > 
+      > > Thanks for your time.
+      > > 
+      > > Lee
+      > > 
+      > > 
+      > >  d1.iv:
+      > >  Separator {
+      > >         PerspectiveCamera {
+      > >             position 50 50 280
+      > >         }
+      > >         Text3 {
+      > >             string  "undefined" =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >         RotationXYZ {
+      > >             axis    Z
+      > >             angle   1.57
+      > >         }
+      > >         Text3 {
+      > >             string  =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >     }
+      > > 
+      > >  d2.iv
+      > >  Separator {
+      > >         PerspectiveCamera {
+      > >             position 50 50 200
+      > >         }
+      > >         Text3 {
+      > >             string  "undefined" =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >         RotationXYZ {
+      > >             axis    Z
+      > >             angle   3.19
+      > >         }
+      > >         Text3 {
+      > >             string  =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >          Text3 {
+      > >             string  =
+      > >                 GlobalField {
+      > >                     type    "SFTime"
+      > >                     realTime
+      > >                 }
+      > >                 . realTime
+      > >         }
+      > >     }
+      > > 
+      > > 
+      > > 
+      > > On Nov 19, 2007 10:04 AM, Martin Blais <blais@furius.ca
+      > > <mailto:blais@furius.ca>> wrote:
+      > > 
+      > >     Hi Lee
+      > >     Can you send a step-by-step description to reproduce the problem?
+      > >     I don't quite understand your explanation below.
+      > >     (I would highly doubt a bug in that part of xxdiff at this point.)
+      > >     thx
+
+
 - Apply Trevor Harmon's patch for the port to Qt4.
+
+- Finish half-started save-to-patch feature:
+
+  * Add an option to the xxdiff GUI to invert the selections, or to save the
+    negative of the selections to a file.  Using this, we could split a file in
+    half.  This should not be available in 3-way diffs mode.
+
+
+
+- Fix this bug::
+
+    Grant McDorman <grmcdorman@gmail.com>:
+
+      I've got xxdiff running - with patches on Win32 with Qt Free 4.2.0 (and
+      mingw). Fixes were required, not suprisingly.
+
+      There was also what appears to be a real bug that showed up. In
+      hordiffimpl.cpp, there's a loop that starts like this:
+
+            while ( x > -1 && y > -1 ) {
+      #ifdef XX_LOCAL_HDIFF_DEBUG
+               cerr << x << " " << y << " = " << htable[ x + y*tlen0 ] << endl;
+      #endif
+
+               if (
+                  ( htable[ x + y*tlen0 ] == ( htable[ x-1 + (y-1)*tlen0 ] + 1 ) /*||
+                    htable[ x + y*tlen0 ] == htable[ x-1 + (y-1)*tlen0 ]*/ ) &&
+                  ctext0[x] == ctext1[y]
+
+      However, the problem is if x or y becomes 0, then one can have a negative
+      subscript on the second htable index. This can cause crashes. I fixed by
+      making it '> 0' instead of '> -1'.
+
+      There were also layout problems, such as the headers (filename/line number
+      way too bing); it's not clear to me if this is a Qt4 problem or a Win32
+      problem.
+
+      There are still a few minor problems: the file names start up blank (if
+      one does 'replace file' from the file menu, it's labelled correctly); and
+      the colour swatches in the display options dialog, Colors tab, don't
+      change colour at all. I haven't tracked those down yet.
+
+      I can send you the patch on request - or submit to SF.
 
 
 Less Urgent, but do it soon too
@@ -48,8 +280,6 @@ Less Urgent, but do it soon too
   effect.
 
 * Fix [1200496] Diff Errors reported with certain text files
-
-* Fix [1079038] Split Bug.
 
 * xx-svn-diff: Implement fetching any two revisions and displaying the filelist
   and the diffs graphically for those changes.
@@ -191,6 +421,64 @@ Less Urgent, but do it soon too
 
     One script to do it all.
 
+
+
+
+
+Look at ``wiggle`` integration, it seems like a great idea
+==========================================================
+
+  From: Ken.MacLeod@radisys.com <Ken.MacLeod@radisys.com>	
+  To: blais@furius.ca
+  Date: Aug 10, 2006 9:17 AM
+  Subject: xxdiff: patch wiggling
+  Reply | Reply to all | Forward | Print | Add sender to Contacts list | Delete this message | Report phishing | Show original | Message text garbled?
+  A long while back in 2003, you wrote,
+  http://www.uwsg.iu.edu/hypermail/linux/kernel/0203.2/1177.html
+
+  Not long after, Niel Brown announced 'wiggle',
+  http://www.uwsg.iu.edu/hypermail/linux/kernel/0305.2/0762.html
+
+  Niel mentions one of the shortcomings in wiggle is that you can't "see"
+  what it's done or will do.  Here's where xxdiff can pick that up.  These
+  are just thoughts off the top of my head, sorry I won't have patches
+  forthcoming with implementation :-/
+
+  I'd like to see the entire patch in the left pane, probably in the format
+  used by gitweb[1] or gitk[2, screenshot in 3].
+
+  Selecting a patch hunk on the left brings up the corresponding source in
+  the right pane, with the "new" changes highlighted (with horizontal diff,
+  natch :-).  The old changes are not necessary, though a three-pane view
+  could have them on the left.
+
+  The hunks in the patch pane should be marked according to their merge
+  status, ie. green for success, yellow for offset, orange for fuzz, and red
+  for failed.  A "check mark" would be nice for hunks that have been
+  confirmed and/or fixed up.
+
+  If a patch fails because the file cannot be found due to a rename, the
+  merge path should be editable.  (Auto-rename is possible if both trees are
+  available.)
+
+  Wiggle's algorithm is good for finding better matches.
+
+  Changes should not be applied until selected from a menu.
+
+  After wiggling, the patch should be saved so that it can be emailed.  The
+  updated patch should now cleanly apply against the tree it was wiggled to
+  (ie. counts and offsets corrected, a la recountdiff).
+
+  OK, that's all I can brain dump for now.  Of course, it wasn't until after
+  writing it that I see xx-patch, so, take whatever good bits seem to make
+  sense :-)
+
+   -- Ken
+
+  [1]
+  http://www.kernel.org/git/gitweb.cgi?p=linux/kernel/git/torvalds/linux-2.6.git;a=log
+  [2] http://ozlabs.org/~paulus/gitk/
+  [3] http://lwn.net/Articles/140350/
 
 
 

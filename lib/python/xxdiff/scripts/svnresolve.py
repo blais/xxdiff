@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 """xx-svn-resolve [<options>] <file> <file> [<file>]
@@ -13,7 +12,7 @@ __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
 
 
 # stdlib imports.
-import sys, os
+import sys, os, re
 from os.path import *
 
 # xxdiff imports.
@@ -21,10 +20,9 @@ import xxdiff.scripts
 import xxdiff.backup
 import xxdiff.condrepl
 from xxdiff.scm import subversion
+from xxdiff.scripts.encrypted import diff_encrypted
 
 
-#-------------------------------------------------------------------------------
-#
 def parse_options():
     """
     Parse the options.
@@ -40,11 +38,20 @@ def parse_options():
                       help="Print the commands that would be executed " +
                       "but don't really run them.")
 
-    parser.add_option('-R', '--no-resolve', '--dont-resolve', 
+    parser.add_option('-R', '--no-resolve', '--dont-resolve',
                       action='store_true',
                       help="Do not resolve the conflicts even after a merge "
                       "decision has been made.")
 
+    # Some of the GPG options duplicated here.
+    parser.add_option('-g', '--gpg', default="gpg",
+                      help="Specify path to gpg program to use.")
+    parser.add_option('-A', '--dont-armor', action='store_true',
+                      help="Create output file in binary format.")
+    parser.add_option('-r', '--recipient', action='store',
+                      help="Encrypt for user id name.")
+
+    xxdiff.scripts.install_autocomplete(parser)
     opts, args = parser.parse_args()
 
     # Force to always perform a verbose diff on output.
@@ -56,8 +63,6 @@ def parse_options():
     return opts, args
 
 
-#-------------------------------------------------------------------------------
-#
 def select_conflicts(statii):
     """
     A generator that selects only the conflictual files.
@@ -66,8 +71,6 @@ def select_conflicts(statii):
         if s.status == 'C':
             yield s
 
-#-------------------------------------------------------------------------------
-#
 def svnresolve_main():
     """
     Main program for svn-resolve script.
@@ -76,7 +79,7 @@ def svnresolve_main():
 
     # Get the status of the working copy.
     statii = subversion.status(args)
-    
+
     # First print out the list/status of the conflicting files to the user.
     for s in select_conflicts(statii):
         print s.parsed_line
@@ -90,14 +93,21 @@ def svnresolve_main():
         # Get the three files before the merge conflicts.
         info = subversion.getinfo(s.filename)
         dn = dirname(s.filename)
-        ancestor, mine, yours = [join(dn, info[x]) for x in 
+        ancestor, mine, yours = [join(dn, info[x]) for x in
                                  ('Conflict Previous Base File',
                                   'Conflict Previous Working File',
                                   'Conflict Current Base File')]
 
-        # Spawn xxdiff in decision mode on the three files.
-        decision = xxdiff.condrepl.cond_resolve(
-            mine, ancestor, yours, s.filename, opts, logs, extra=('--merge',))
+        # Spawn xxdiff in decision mode on the three files. We dispatch to the
+        # encrypted version if necessary.
+        if re.match('.*\.asc', s.filename):
+            tmine = open(mine).read()
+            tancestor = open(ancestor).read()
+            tyours = open(yours).read()
+            decision = diff_encrypted([tmine, tancestor, tyours], opts, outmerged=s.filename)
+        else:
+            decision = xxdiff.condrepl.cond_resolve(
+                mine, ancestor, yours, s.filename, opts, logs, extra=('--merge',))
 
         # Backup all the other files that will get when the file gets resolved,
         # whether by this script or later by the user by hand.
@@ -116,9 +126,7 @@ def svnresolve_main():
 
     xxdiff.backup.print_reminder(opts)
 
-            
-#-------------------------------------------------------------------------------
-#
+
 def main():
     xxdiff.scripts.interruptible_main(svnresolve_main)
 

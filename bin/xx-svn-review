@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+"""
+Usage: REV1 REV2
+Export two SVN revisions and review them.
+"""
+import sys, os, tempfile, logging, re, shutil
+from StringIO import StringIO
+from subprocess import *
+from os.path import *
+from xml.etree import ElementTree
+from urlparse import urljoin
+
+
+
+
+def get_repository_root():
+    "Get the root URL of the repository."
+    p = Popen(('svn', 'info', '--xml'), shell=0, stdout=PIPE)
+    out, _ = p.communicate()
+    doc = ElementTree.XML(out)
+    return doc.find('.//root').text
+
+
+def get_changeset_files(r1, r2):
+    "Get the list of files affected between two revisions."
+    if r1 > r2:
+        r1, r2 = r2, r1
+    logcmd = ('svn', 'log', '-r%d:%d' % (r1+1, r2), '-v', '--xml')
+    p = Popen(logcmd, shell=0, stdout=PIPE)
+    out, _ = p.communicate()
+    doc = ElementTree.XML(out)
+    return set(node.text for node in doc.findall('.//path'))
+
+def insuredir(dn):
+    if not exists(dn):
+        os.makedirs(dn)
+
+
+
+def main():
+    import optparse
+    parser = optparse.OptionParser(__doc__.strip())
+
+    parser.add_option('-u', '--url', action='store_true',
+                      help="Specify the external URL to checkout.")
+
+    parser.add_option('-f', '--full', action='store_true',
+                      help="Checkout the full list of files, not just the files affected.")
+
+    opts, args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format='%(levelname)-8s: %(message)s')
+
+    if len(args) < 2:
+        parser.error("Usage: REV1 REV2 [FILE ...]")
+    r1, r2 = map(int, args[0:2])
+    filenames = args[2:]
+
+    if not opts.url:
+        if not isdir(join(os.getcwd(), '.svn')):
+            parser.error("You must invoke this command from a working directory.")
+        p = Popen(('svn', 'info'), shell=0, stdout=PIPE)
+        out, _ = p.communicate()
+        mo = re.search('^URL: (.*)', out, re.MULTILINE)
+        url = mo.group(1)
+
+    if not opts.full:
+        repo_root = get_repository_root()
+        filenames = get_changeset_files(r1, r2)
+
+    try:
+        tempdir = tempfile.mkdtemp(prefix=basename(sys.argv[0]))
+        for r in r1, r2:
+            rootdir = join(tempdir, 'r%s' % r)
+            logging.info("Checking out %s in '%s'" % (r, rootdir))
+
+            # Simple full checkout.
+            if opts.full:
+                cmd = ('svn', 'checkout', '-r%s' % r, url, rootdir)
+                ret = call(cmd, shell=0, cwd=tempdir)
+                if ret != 0:
+                    raise SystemExit("Error: checking out revision '%s'" % r)
+
+            else:
+                for fn in sorted(filenames):
+                    outfn = rootdir + fn
+                    url = repo_root + fn
+                    logging.info(url)
+                    insuredir(dirname(outfn))
+                    cmd = ('svn', 'export', '-q', '-r%s' % r, url, outfn)
+                    logging.debug(cmd)
+                    if call(cmd, cwd=tempdir, stderr=PIPE) != 0:
+                        logging.warn("Error on file '%s'." % url)
+
+        diffcmd = ('xxdiff', '--exclude=.svn', '-r', join(tempdir, 'r%s' % r1), join(tempdir, 'r%s' % r2))
+        logging.debug(' '.join(diffcmd))
+        r = call(diffcmd, shell=0, cwd=tempdir)
+
+    finally:
+        shutil.rmtree(tempdir)
+
+
+if __name__ == '__main__':
+    main()
