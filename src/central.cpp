@@ -132,8 +132,8 @@ XxCentralFrame::XxCentralFrame(
       _lineNumbers[ii] =
          new XxLineNumbers( _app, this, ii, this, "lineNumbers" );
 
-      fnLayout2->addWidget( _lineNumbers[ii] );
-      fnLayout2->addWidget( _text[ii] );
+      fnLayout2->addWidget( _lineNumbers[ii], 1 );
+      fnLayout2->addWidget( _text[ii], 10 );
    }
 
    _hscroll = new QScrollBar( Qt::Horizontal, this, "hscroll" );
