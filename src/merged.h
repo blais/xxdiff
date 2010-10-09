@@ -49,7 +49,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <q3frame.h>
+#include <QFrame>
 #define INCL_QT_QFRAME
 #endif
 
