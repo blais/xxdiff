@@ -775,7 +775,7 @@ void XxApp::createUI()
    //overviewLayout->addLayout( hlayout );
    overviewLayout->addWidget( _remUnselView );
 
-   _overview = new XxOverview( this, _central, _overviewArea, "overview" );
+   _overview = new XxOverview( this, _central, _overviewArea );
    _overviewArea->setFixedWidth( _overview->width() );
    overviewLayout->addWidget( _overview );
 

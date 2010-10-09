@@ -40,7 +40,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <q3frame.h>
+#include <QFrame>
 #define INCL_QT_QFRAME
 #endif
 
@@ -59,7 +59,7 @@ class XxScrollView;
 
 // <summary> a text widget that can display diffs </summary>
 
-class XxText : public Q3Frame {
+class XxText : public QFrame {
    
    Q_OBJECT
 
@@ -73,8 +73,7 @@ public:
       XxApp*        app,
       XxScrollView* sv,
       const XxFno   no = -1,
-      QWidget*      parent = 0,
-      const char*   name = 0 
+      QWidget*      parent = 0
    );
 
    // Destructor.
@@ -85,7 +84,7 @@ public:
    virtual QSizePolicy sizePolicy() const;
 
    // See base class.
-   virtual void drawContents( QPainter* );
+   virtual void paintEvent( QPaintEvent* );
 
    // Returns the number of lines that can be displayed.
    uint computeDisplayLines() const;

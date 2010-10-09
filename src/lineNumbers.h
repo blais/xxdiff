@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <q3frame.h>
+#include <QFrame>
 #define INCL_QT_QFRAME
 #endif
 
@@ -55,7 +55,7 @@ class XxCentralFrame;
 
 // <summary> a widget that can display line numbers </summary>
 
-class XxLineNumbers : public Q3Frame {
+class XxLineNumbers : public QFrame {
 
 public:
 
@@ -67,15 +67,14 @@ public:
       XxApp*          app, 
       XxCentralFrame* central, 
       const XxFno     no = -1,
-      QWidget*        parent = 0,
-      const char*     name = 0 
+      QWidget*        parent = 0
    );
 
    // Destructor.
    virtual ~XxLineNumbers();
 
    // See base class.
-   virtual void drawContents( QPainter* );
+   virtual void paintEvent( QPaintEvent* );
 
 
 private:

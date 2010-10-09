@@ -49,7 +49,7 @@
 #include <qclipboard.h>
 //Added by qt3to4:
 #include <Q3HBoxLayout>
-#include <Q3Frame>
+#include <QFrame>
 #include <QLabel>
 #include <Q3VBoxLayout>
 
@@ -110,14 +110,14 @@ XxCentralFrame::XxCentralFrame(
       Q3HBoxLayout* fnLayout = new Q3HBoxLayout( layout, -1, "fnLayout" );
       _filenameLabel[ii] = new XxCopyLabel( this );
       _filenameLabel[ii]->setFont( smaller );
-      _filenameLabel[ii]->setFrameStyle( Q3Frame::Panel | Q3Frame::Raised );
+      _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _filenameLabel[ii]->setMinimumWidth( 1 );
       _filenameLabel[ii]->setLineWidth( 2 );
 
       _lineNumberLabel[ii] =
          new QLabel( "9999", this, "lineNumberLabel" );
       _lineNumberLabel[ii]->setAlignment( Qt::AlignCenter );
-      _lineNumberLabel[ii]->setFrameStyle( Q3Frame::Panel | Q3Frame::Raised );
+      _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _lineNumberLabel[ii]->setLineWidth( 2 );
       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
       _lineNumberLabel[ii]->setMaximumSize( _lineNumberLabel[ii]->sizeHint() );
@@ -128,9 +128,9 @@ XxCentralFrame::XxCentralFrame(
 
       // Create linenumbers widget and text widget.
       Q3HBoxLayout* fnLayout2 = new Q3HBoxLayout( layout, -1, "fnLayout2" );
-      _text[ii] = new XxText( _app, this, ii, this, "text" );
+      _text[ii] = new XxText( _app, this, ii, this );
       _lineNumbers[ii] =
-         new XxLineNumbers( _app, this, ii, this, "lineNumbers" );
+         new XxLineNumbers( _app, this, ii, this );
 
       fnLayout2->addWidget( _lineNumbers[ii], 1 );
       fnLayout2->addWidget( _text[ii], 10 );

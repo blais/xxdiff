@@ -39,7 +39,7 @@
 #include <qapplication.h>
 #include <qclipboard.h>
 //Added by qt3to4:
-#include <Q3Frame>
+#include <QFrame>
 
 #include <math.h>
 #include <stdio.h>
@@ -61,17 +61,16 @@ XxLineNumbers::XxLineNumbers(
    XxApp*          app, 
    XxCentralFrame* central, 
    const XxFno     no, 
-   QWidget*        parent, 
-   const char*     name 
+   QWidget*        parent
 ) :
-   Q3Frame( parent, name, Qt::WResizeNoErase ),
+   QFrame( parent, Qt::WResizeNoErase ),
    _app( app ),
    _central( central ),
    _no( no )
 {
    // This must be set equal to the one in XxText for proper vertical alignment
    // of text.
-   setFrameStyle( Q3Frame::Panel | Q3Frame::Sunken );
+   setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
 
    setSizePolicy(
@@ -87,13 +86,13 @@ XxLineNumbers::~XxLineNumbers()
 
 //------------------------------------------------------------------------------
 //
-void XxLineNumbers::drawContents( QPainter* pp )
+void XxLineNumbers::paintEvent( QPaintEvent *e )
 {
    //XX_TRACE( "painting!" );
 
-   // QPainter p;
-   // p.begin( this );
-   QPainter& p = *pp;
+   QFrame::paintEvent(e);
+
+   QPainter p( this );
    QRect rect = contentsRect();
 
    // We want 1:1 pixel/coord ratio.
@@ -164,8 +163,6 @@ void XxLineNumbers::drawContents( QPainter* pp )
          p.drawText( x, y + fm.ascent(), renderedNums );
       }
    }
-
-   // p.end();
 }
 
 XX_NAMESPACE_END

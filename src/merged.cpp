@@ -67,7 +67,7 @@ XxMergedFrame::XxMergedFrame(
    Q3VBoxLayout* vlayout = new Q3VBoxLayout( this );
    Q3HBoxLayout* hlayout = new Q3HBoxLayout( vlayout );
    
-   _text = new XxText( _app, this, -1, this, "text in merged frame" );
+   _text = new XxText( _app, this, -1, this );
 
    hlayout->addWidget( _text );
    

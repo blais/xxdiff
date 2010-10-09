@@ -39,7 +39,7 @@
 #include <Q3PointArray>
 #include <QWheelEvent>
 #include <QResizeEvent>
-#include <Q3Frame>
+#include <QFrame>
 #include <QMouseEvent>
 
 #include <math.h>
@@ -63,15 +63,14 @@ XX_NAMESPACE_BEGIN
 XxOverview::XxOverview(
    XxApp*          app,
    XxCentralFrame* central,
-   QWidget *       parent,
-   const char*     name
+   QWidget *       parent
 ) :
-   Q3Frame( parent, name, Qt::WResizeNoErase ),
+   QFrame( parent, Qt::WResizeNoErase ),
    _app( app ),
    _central( central ),
    _manipNo( -1 )
 {
-   setFrameStyle( Q3Frame::Panel | Q3Frame::Sunken );
+   setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
    setBackgroundMode( Qt::NoBackground );
 
@@ -103,11 +102,11 @@ QSizePolicy XxOverview::sizePolicy() const
 
 //------------------------------------------------------------------------------
 //
-void XxOverview::drawContents( QPainter* pp )
+void XxOverview::paintEvent( QPaintEvent* e )
 {
-   // QPainter p;
-   // p.begin( this );
-   QPainter& p = *pp;
+   QFrame::paintEvent(e);
+
+   QPainter p( this );
    QRect rect = contentsRect();
 
    // We want 1:1 pixel/coord ratio.
@@ -127,7 +126,6 @@ void XxOverview::drawContents( QPainter* pp )
    if ( nbFiles == 0 || diffs == 0 ) {
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
-      //p.end();
       return;
    }
 
@@ -147,7 +145,6 @@ void XxOverview::drawContents( QPainter* pp )
    if ( maxlines == 0 ) {
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
-      //p.end();
       return;
    }
 
@@ -334,7 +331,6 @@ void XxOverview::drawContents( QPainter* pp )
    }
 
    p.resetXForm();
-   // p.end();
 }
 
 //------------------------------------------------------------------------------

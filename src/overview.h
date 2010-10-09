@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <q3frame.h>
+#include <QFrame>
 #define INCL_QT_QFRAME
 #endif
 
@@ -57,13 +57,13 @@ class XxCentralFrame;
 
 // <summary> overview area </summary>
 
-class XxOverview : public Q3Frame {
+class XxOverview : public QFrame {
 
 public:
 
    /*----- types and enumerations -----*/
 
-   typedef Q3Frame BaseClass;
+   typedef QFrame BaseClass;
 
    /*----- member functions -----*/
 
@@ -71,15 +71,14 @@ public:
    XxOverview(
       XxApp*          app,
       XxCentralFrame* central,
-      QWidget *       parent = 0,
-      const char*     name = 0
+      QWidget *       parent = 0
    );
 
    // Destructor.
    virtual ~XxOverview();
 
    // See base class.
-   virtual void drawContents( QPainter* );
+   virtual void paintEvent( QPaintEvent* );
 
    // Override to expand.
    virtual QSizePolicy sizePolicy() const;

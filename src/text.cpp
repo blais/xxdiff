@@ -43,7 +43,7 @@
 #include <qapplication.h>
 #include <qclipboard.h>
 //Added by qt3to4:
-#include <Q3Frame>
+#include <QFrame>
 #include <QResizeEvent>
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -208,10 +208,9 @@ XxText::XxText(
    XxApp*        app,
    XxScrollView* sv,
    const XxFno   no,
-   QWidget*      parent,
-   const char*   name
+   QWidget*      parent
 ) :
-   Q3Frame( parent, name, Qt::WResizeNoErase ),
+   QFrame( parent, Qt::WResizeNoErase ),
    _app( app ),
    _sv( sv ),
    _no( no ),
@@ -221,7 +220,7 @@ XxText::XxText(
    _regionSelect[0] = -1;
    _regionSelect[1] = -1;
 
-   setFrameStyle( Q3Frame::Panel | Q3Frame::Sunken );
+   setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
 #ifdef XX_DEBUG_TEXT
    setBackgroundColor( Qt::red );
@@ -263,7 +262,7 @@ QSizePolicy XxText::sizePolicy() const
 
 //------------------------------------------------------------------------------
 //
-void XxText::drawContents( QPainter* pp )
+void XxText::paintEvent( QPaintEvent *e )
 {
    // Note: if only QPainter had a way to draw text which is not a QString, or
    // if there was a way to allocate a QString with shallow copy of non-unicode
@@ -271,9 +270,9 @@ void XxText::drawContents( QPainter* pp )
 
    //XX_LOCAL_TRACE( "painting!" );
 
-   // QPainter p;
-   // p.begin( this );
-   QPainter& p = *pp;
+   QFrame::paintEvent(e);
+
+   QPainter p( this );
    QRect rect = contentsRect();
 
    // We want 1:1 pixel/coord ratio.
@@ -298,7 +297,6 @@ void XxText::drawContents( QPainter* pp )
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
-      p.end();
       return;
    }
 
@@ -730,8 +728,6 @@ void XxText::drawContents( QPainter* pp )
       p.setPen( vlineColor );
       p.drawLine( posx, 0, posx, h );
    }
-
-   // p.end();
 }
 
 //------------------------------------------------------------------------------
