@@ -22,13 +22,6 @@
 #
 # Generate with xxdiff.t template, as `qmake -t xxdiff.t xxdiff.pro > Makefile'
 
-    mystaticconfig {
-        QMAKE_LIBS_QT =
-        QMAKE_LIBS_QT_THREAD =
-        LIBS += $(QTDIR)/lib/libqt.a -lz -framework Carbon
-    }
-#
-
 # Note: the version number is now in the VERSION file at the root and there is a
 # special make rule defined to generate an include file for it.
 
