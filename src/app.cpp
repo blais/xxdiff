@@ -60,7 +60,7 @@
 #include <qfont.h>
 #include <qmessagebox.h>
 #include <q3filedialog.h>
-#include <q3accel.h>
+#include <QShortcut>
 #include <qlabel.h>
 #include <q3whatsthis.h>
 #include <qclipboard.h>
@@ -79,6 +79,7 @@
 #include <QPixmap>
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
+
 
 #ifdef XX_KDE
 #include <kmessagebox.h>
@@ -799,35 +800,22 @@ void XxApp::createUI()
    //
    // Note: these have effect at the top level only, they are not bound specific
    // to a particular widget.
-   Q3Accel* a = new Q3Accel( _mainWindow );
-   a->connectItem( a->insertItem(Qt::Key_Delete),
-                   this, SLOT(selectRegionNeither()) );
+
+   connect ( new QShortcut( Qt::Key_Delete, _mainWindow ), SIGNAL(activated()), SLOT(selectRegionNeither()) );
 
    //
    // Cursor motion.
    //
-   a->connectItem( a->insertItem(Qt::Key_Down), this, SLOT(cursorDown()) );
-   a->connectItem( a->insertItem(Qt::Key_Up), this, SLOT(cursorUp()) );
+   connect ( new QShortcut( Qt::Key_Down, _mainWindow ), SIGNAL(activated()), SLOT(cursorDown()) );
+   connect ( new QShortcut( Qt::Key_Up,   _mainWindow ), SIGNAL(activated()), SLOT(cursorUp()) );
 
-   a->connectItem( a->insertItem(Qt::Key_Home), this, SLOT(cursorTop()) );
-   a->connectItem( a->insertItem(Qt::Key_End), this, SLOT(cursorBottom()) );
+   connect ( new QShortcut( Qt::Key_Home, _mainWindow ), SIGNAL(activated()), SLOT(cursorTop()) );
+   connect ( new QShortcut( Qt::Key_End,  _mainWindow ), SIGNAL(activated()), SLOT(cursorBottom()) );
 
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_DOWN ) ),
-      this, SLOT(cursorDown())
-   );
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_UP ) ),
-      this, SLOT(cursorUp())
-   );
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_TOP ) ),
-      this, SLOT(cursorTop())
-   );
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ) ),
-      this, SLOT(cursorBottom())
-   );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_DOWN ),   _mainWindow ), SIGNAL(activated()), SLOT(cursorDown()) );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_UP ),     _mainWindow ), SIGNAL(activated()), SLOT(cursorUp()) );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_TOP ),    _mainWindow ), SIGNAL(activated()), SLOT(cursorTop()) );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ), _mainWindow ), SIGNAL(activated()), SLOT(cursorBottom()) );
 
    //
    // Page motion.
@@ -837,29 +825,17 @@ void XxApp::createUI()
    // a->connectItem( a->insertItem(Key_Space), this, SLOT(pageDown()) );
    // a->connectItem( a->insertItem(Key_Backspace), this, SLOT(pageUp()) );
 
-   a->connectItem( a->insertItem(Qt::Key_PageUp), this, SLOT(pageUp()) );
-   a->connectItem( a->insertItem(Qt::Key_PageDown), this, SLOT(pageDown()) );
+   connect ( new QShortcut( Qt::Key_PageDown, _mainWindow ), SIGNAL(activated()), SLOT(pageDown()) );
+   connect ( new QShortcut( Qt::Key_PageUp,   _mainWindow ), SIGNAL(activated()), SLOT(pageUp()) );
 
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_PAGE_DOWN ) ),
-      this, SLOT(pageDown())
-   );
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_PAGE_UP ) ),
-      this, SLOT(pageUp())
-   );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_PAGE_DOWN ), _mainWindow ), SIGNAL(activated()), SLOT(pageDown()) );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_PAGE_UP ),   _mainWindow ), SIGNAL(activated()), SLOT(pageUp()) );
 
    //
    // Interactive font resize.
    //
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_FONT_RESIZE_BIGGER ) ),
-      this, SLOT(fontSizeIncrease())
-   );
-   a->connectItem(
-      a->insertItem( _resources->getAccelerator( ACCEL_FONT_RESIZE_SMALLER ) ),
-      this, SLOT(fontSizeDecrease())
-   );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_FONT_RESIZE_BIGGER ),  _mainWindow ), SIGNAL(activated()), SLOT(fontSizeIncrease()) );
+   connect ( new QShortcut( _resources->getAccelerator( ACCEL_FONT_RESIZE_SMALLER ), _mainWindow ), SIGNAL(activated()), SLOT(fontSizeDecrease()) );
 
    // Make some connections.
    connect( this, SIGNAL(cursorChanged(int)),
