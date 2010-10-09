@@ -35,7 +35,7 @@
 //Added by qt3to4:
 #include <QPixmap>
 #include <QTextStream>
-#include <Q3VBoxLayout>
+#include <QVBoxLayout>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
 #ifndef WINDOWS
@@ -51,7 +51,7 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qpalette.h>
-#include <q3textbrowser.h>
+#include <QTextBrowser>
 #include <q3scrollview.h>
 
 #include <iostream>
@@ -312,9 +312,10 @@ XxManPageDialog::XxManPageDialog(
 ) :
    QDialog( parent )
 {
-   Q3VBoxLayout* toplay = new Q3VBoxLayout( this );
-   QkTextBrowser* tv = new QkTextBrowser( this, "name" );
-   tv->setText( text, QString::null );
+   QVBoxLayout* toplay = new QVBoxLayout( this );
+   toplay->setMargin( 0 );
+   QkTextBrowser* tv = new QkTextBrowser();
+   tv->setText( text );
    tv->setMinimumSize( 500, 700 );
    toplay->addWidget( tv );
    

@@ -69,7 +69,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxCopyLabel( QWidget* parent );
+   XxCopyLabel( QWidget* parent = 0 );
 
    // Destructor.
    virtual ~XxCopyLabel();

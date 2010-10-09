@@ -48,10 +48,10 @@
 #include <qapplication.h>
 #include <qclipboard.h>
 //Added by qt3to4:
-#include <Q3HBoxLayout>
+#include <QHBoxLayout>
 #include <QFrame>
 #include <QLabel>
-#include <Q3VBoxLayout>
+#include <QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
@@ -81,41 +81,38 @@ XxCentralFrame::XxCentralFrame(
    // Texts widget (texts).
    //
 
-   Q3VBoxLayout* textAndSbLayout =
-      new Q3VBoxLayout( this, 0, -1, "textAndSbLayout" );
-   Q3HBoxLayout* textLayout =
-      new Q3HBoxLayout( textAndSbLayout, -1, "textLayout" );
+   QVBoxLayout* textAndSbLayout = new QVBoxLayout( this, 0, -1 );
+   QHBoxLayout* textLayout = new QHBoxLayout( textAndSbLayout, -1 );
 
    QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
 
    for ( uint ii = 0; ii < nbTextWidgets; ++ii ) {
       if ( ii == 1 ) {
-         _vscroll[0] = new QScrollBar( this, "vscroll[0]" );
+         _vscroll[0] = new QScrollBar;
          textLayout->addWidget( _vscroll[0] );
          connect( _vscroll[0], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll(int)) );
       }
       if ( ii == 2 ) {
-         _vscroll[1] = new QScrollBar( this, "vscroll[1]" );
+         _vscroll[1] = new QScrollBar;
          textLayout->addWidget( _vscroll[1] );
          connect( _vscroll[1], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll2(int)) );
       }
 
-      Q3VBoxLayout* layout = new Q3VBoxLayout( textLayout, -1, "layout" );
+      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1 );
       //textLayout->setStretchFactor( layout, 1 ); useless to make equal
 
       // Create filename and line number labels.
-      Q3HBoxLayout* fnLayout = new Q3HBoxLayout( layout, -1, "fnLayout" );
-      _filenameLabel[ii] = new XxCopyLabel( this );
+      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1 );
+      _filenameLabel[ii] = new XxCopyLabel();
       _filenameLabel[ii]->setFont( smaller );
       _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _filenameLabel[ii]->setMinimumWidth( 1 );
       _filenameLabel[ii]->setLineWidth( 2 );
 
-      _lineNumberLabel[ii] =
-         new QLabel( "9999", this, "lineNumberLabel" );
+      _lineNumberLabel[ii] = new QLabel( "9999" );
       _lineNumberLabel[ii]->setAlignment( Qt::AlignCenter );
       _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _lineNumberLabel[ii]->setLineWidth( 2 );
@@ -127,16 +124,15 @@ XxCentralFrame::XxCentralFrame(
       fnLayout->addWidget( _lineNumberLabel[ii], 1 );
 
       // Create linenumbers widget and text widget.
-      Q3HBoxLayout* fnLayout2 = new Q3HBoxLayout( layout, -1, "fnLayout2" );
-      _text[ii] = new XxText( _app, this, ii, this );
-      _lineNumbers[ii] =
-         new XxLineNumbers( _app, this, ii, this );
+      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1 );
+      _text[ii] = new XxText( _app, this, ii );
+      _lineNumbers[ii] = new XxLineNumbers( _app, this, ii );
 
       fnLayout2->addWidget( _lineNumbers[ii], 1 );
       fnLayout2->addWidget( _text[ii], 10 );
    }
 
-   _hscroll = new QScrollBar( Qt::Horizontal, this, "hscroll" );
+   _hscroll = new QScrollBar( Qt::Horizontal );
    connect( _hscroll, SIGNAL(valueChanged(int)),
             this, SLOT(horizontalScroll(int)) );
 

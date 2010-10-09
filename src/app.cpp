@@ -77,8 +77,8 @@
 #include <qdatetime.h>
 //Added by qt3to4:
 #include <QPixmap>
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 
 #ifdef XX_KDE
@@ -724,12 +724,12 @@ void XxApp::createUI()
    // Central widget.
    //
    QWidget* topCentralWidget = new QWidget( _mainWindow );
-   Q3HBoxLayout* topLayout =
-      new Q3HBoxLayout( topCentralWidget, 0, -1, "topLayout" );
+   QHBoxLayout* topLayout =
+      new QHBoxLayout( topCentralWidget, 0, -1 );
 
    // Pane merged widget.
    //
-   _splitter = new QSplitter( topCentralWidget, "splitter" );
+   _splitter = new QSplitter;
    _splitter->setOrientation( Qt::Vertical );
 
    topLayout->addWidget( _splitter );
@@ -759,12 +759,12 @@ void XxApp::createUI()
 
    // Overview and remaining unselected regions indicator area.
    //
-   _overviewArea = new QWidget( topCentralWidget );
-   Q3VBoxLayout* overviewLayout =
-      new Q3VBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
+   _overviewArea = new QWidget;
+   QVBoxLayout* overviewLayout =
+      new QVBoxLayout( _overviewArea, 0, -1 );
 
    //QHBoxLayout* hlayout = new QHBoxLayout;
-   _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
+   _remUnselView = new QLabel( "remaining unselected" );
    _remUnselView->setAlignment( Qt::AlignCenter );
    _remUnselView->setMaximumHeight( _remUnselView->sizeHint().height() );
    //hlayout->addWidget( _remUnselView, 100 );
@@ -775,7 +775,7 @@ void XxApp::createUI()
    //overviewLayout->addLayout( hlayout );
    overviewLayout->addWidget( _remUnselView );
 
-   _overview = new XxOverview( this, _central, _overviewArea );
+   _overview = new XxOverview( this, _central );
    _overviewArea->setFixedWidth( _overview->width() );
    overviewLayout->addWidget( _overview );
 
@@ -2618,11 +2618,12 @@ bool XxApp::saveMergedToFile(
    if ( ask == true ) {
       if ( !allSelected ) {
          f = XxMarkersFileDialog::getSaveFileName(
-            cleanname, QString::null, _mainWindow, "xxdiff save file",
+            cleanname, QString::null,
             _nbFiles == 3,
             useConditionals,
             removeEmptyConditionals,
-            conditionals
+            conditionals,
+            _mainWindow
          );
          if ( f.isEmpty() ) {
             // The user cancelled the dialog.
@@ -2644,12 +2645,12 @@ bool XxApp::saveMergedToFile(
 
       if ( !allSelected ) {
          bool res = XxMarkersDialog::getMarkers(
-            _mainWindow, "xxdiff save file",
             _nbFiles == 3,
             useConditionals,
             removeEmptyConditionals,
             conditionals,
-            noCancel
+            noCancel,
+            _mainWindow
          );
          if ( !res ) {
             // The user cancelled the dialog.

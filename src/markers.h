@@ -72,8 +72,8 @@ public:
 
    // Constructor.
    XxMarkersWidget( 
-      QWidget* parent,
-      bool     threeWay
+      bool     threeWay,
+      QWidget* parent = 0
    );
 
    // Queries.
@@ -115,9 +115,8 @@ public:
 
    // Constructor.
    XxMarkersDialog(
-      QWidget*    parent,
-      const char* name,
-      const bool  threeWay
+      const bool  threeWay,
+      QWidget*    parent = 0
    );
 
    // Disable the cancel button.
@@ -131,13 +130,12 @@ public:
    // Run the dialog and get the markers.
    // Returns true on success.
    static bool getMarkers(
-      QWidget*    parent,
-      const char* name,
       bool        threeWay,
       bool&       useConditionals,
       bool&       removeEmptyConditionals,
       QString     conditionals[3],
-      bool        noCancel
+      bool        noCancel,
+      QWidget*    parent = 0
    );
 
 private:
@@ -173,10 +171,9 @@ public:
    XxMarkersFileDialog( 
       const QString& dirName,
       const QString& filter,
-      QWidget*       parent,
-      const char*    name,
       bool           modal,
-      bool           threeWay
+      bool           threeWay,
+      QWidget*       parent = 0
    );
 
    /*----- static member functions -----*/
@@ -185,12 +182,11 @@ public:
    static QString getSaveFileName( 
       const QString& startWith,
       const QString& filter,
-      QWidget*       parent,
-      const char*    name,
       bool           threeWay,
       bool&          useConditionals,
       bool&          removeEmptyConditionals,
-      QString        conditionals[3]
+      QString        conditionals[3],
+      QWidget*       parent = 0
    );
 
 private:

@@ -69,7 +69,7 @@ typedef class Q3ToolBar         QkToolBar;
 typedef class QMenuBar         QkMenuBar;
 typedef class QDialog          QkDialog;
 typedef class Q3FileDialog      QkFileDialog;
-typedef class Q3TextBrowser     QkTextBrowser;
+typedef class QTextBrowser     QkTextBrowser;
 typedef class QPushButton      QkPushButton;
 typedef class QLineEdit        QkLineEdit;
 typedef class Q3ListBox         QkListBox;

@@ -41,8 +41,8 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 //Added by qt3to4:
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 XX_NAMESPACE_BEGIN
 
@@ -57,8 +57,8 @@ XX_NAMESPACE_BEGIN
 //------------------------------------------------------------------------------
 //
 XxMarkersWidget::XxMarkersWidget( 
-   QWidget* parent,
-   bool     threeWay
+   bool     threeWay,
+   QWidget* parent
 ) :
    BaseClass( parent )
 {
@@ -145,28 +145,27 @@ QString XxMarkersWidget::getConditionalVariable3() const
 //------------------------------------------------------------------------------
 //
 XxMarkersDialog::XxMarkersDialog(
-   QWidget*    parent,
-   const char* name,
-   const bool  threeWay
+   const bool  threeWay,
+   QWidget*    parent
 ) :
-   BaseClass( parent, name, true )
+   BaseClass( parent )
 {
-   Q3VBoxLayout* vlayout;
-   Q3HBoxLayout* hlayout;
-
    //resize( 627, 262 ); 
    //setCaption( trUtf8( "Form1" ) );
-   vlayout = new Q3VBoxLayout( this, 11, 6, "vlayout"); 
+   QVBoxLayout* vlayout = new QVBoxLayout( this );
+   vlayout->setMargin(11);
+   vlayout->setSpacing(6);
 
-   _markersWidget = new XxMarkersWidget( this, threeWay );
+   _markersWidget = new XxMarkersWidget( threeWay );
    vlayout->addWidget( _markersWidget );
 
-   hlayout = new Q3HBoxLayout( 0, 0, 6, "hlayout");
-   QSpacerItem* spacer =
-      new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-   hlayout->addItem( spacer );
+   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   hlayout->setMargin(0);
+   hlayout->setSpacing(6);
 
-   _buttonOk = new QPushButton( this, "_buttonOk" );
+   hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
+
+   _buttonOk = new QPushButton;
 #if (QT_VERSION >= 0x030000)
    _buttonOk->setText( trUtf8( "Ok" ) );
 #else
@@ -174,21 +173,16 @@ XxMarkersDialog::XxMarkersDialog(
 #endif
    _buttonOk->setDefault( TRUE );
    hlayout->addWidget( _buttonOk );
-   QSpacerItem* spacer_2 =
-      new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-   hlayout->addItem( spacer_2 );
+   hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
-   _buttonCancel = new QPushButton( this, "_buttonCancel" );
+   _buttonCancel = new QPushButton;
 #if (QT_VERSION >= 0x030000)
    _buttonCancel->setText( trUtf8( "Cancel" ) );
 #else
    _buttonCancel->setText( "Cancel" );
 #endif
    hlayout->addWidget( _buttonCancel );
-   QSpacerItem* spacer_3 =
-      new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-   hlayout->addItem( spacer_3 );
-   vlayout->addLayout( hlayout );
+   hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
    QObject::connect( _buttonOk, SIGNAL(clicked()), this, SLOT(accept()) );
    QObject::connect( _buttonCancel, SIGNAL(clicked()), this, SLOT(reject()) );
@@ -214,18 +208,17 @@ void XxMarkersDialog::reject()
 //------------------------------------------------------------------------------
 //
 bool XxMarkersDialog::getMarkers(
-   QWidget*    parent,
-   const char* name,
    bool        threeWay,
    bool&       useConditionals,
    bool&       removeEmptyConditionals,
    QString     conditionals[3],
-   bool        noCancel
+   bool        noCancel,
+   QWidget*    parent
 )
 {
    bool result = false;
 
-   XxMarkersDialog* dlg = new XxMarkersDialog( parent, name, threeWay );
+   XxMarkersDialog* dlg = new XxMarkersDialog( threeWay, parent );
    if ( noCancel ) {
       dlg->disableCancel();
    }
@@ -257,14 +250,13 @@ bool XxMarkersDialog::getMarkers(
 XxMarkersFileDialog::XxMarkersFileDialog( 
    const QString& dirName,
    const QString& filter,
-   QWidget*       parent,
-   const char*    name,
    bool           modal,
-   bool           threeWay
+   bool           threeWay,
+   QWidget*       parent
 ) :
-   BaseClass( dirName, filter, parent, name, modal )
+   BaseClass( dirName, filter, parent, "XxMarkersFileDialog", modal )
 {
-   _markersWidget = new XxMarkersWidget( this, threeWay );
+   _markersWidget = new XxMarkersWidget( threeWay, this );
    addWidgets( 0, _markersWidget, 0 );
 }
 
@@ -273,12 +265,11 @@ XxMarkersFileDialog::XxMarkersFileDialog(
 QString XxMarkersFileDialog::getSaveFileName( 
    const QString& startWith,
    const QString& filter,
-   QWidget*       parent,
-   const char*    name,
    bool           threeWay,
    bool&          useConditionals,
    bool&          removeEmptyConditionals,
-   QString        conditionals[3]
+   QString        conditionals[3],
+   QWidget*       parent
 )
 {
    // From Qt's source code:
@@ -300,7 +291,7 @@ QString XxMarkersFileDialog::getSaveFileName(
 
 
    XxMarkersFileDialog* dlg = new XxMarkersFileDialog(
-      startWith, filter, parent, name, TRUE, threeWay
+      startWith, filter, TRUE, threeWay, parent
    );
    dlg->setCaption( Q3FileDialog::tr( "Save as" ) );
 

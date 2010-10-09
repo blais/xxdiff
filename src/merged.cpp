@@ -43,8 +43,8 @@
 #include <qapplication.h>
 #include <qclipboard.h>
 //Added by qt3to4:
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
@@ -64,19 +64,24 @@ XxMergedFrame::XxMergedFrame(
 ) :
    BaseClass( app, parent, name )
 {
-   Q3VBoxLayout* vlayout = new Q3VBoxLayout( this );
-   Q3HBoxLayout* hlayout = new Q3HBoxLayout( vlayout );
+   QVBoxLayout* vlayout = new QVBoxLayout( this );
+   vlayout->setSpacing( 0 );
+   vlayout->setMargin( 0 );
+
+   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   hlayout->setSpacing( 0 );
+   hlayout->setMargin( 0 );
    
-   _text = new XxText( _app, this, -1, this );
+   _text = new XxText( _app, this, -1 );
 
    hlayout->addWidget( _text );
    
-   _vscroll[0] = new QScrollBar( this );
-   _vscroll[0]->setFixedWidth( 20 );
+   _vscroll[0] = new QScrollBar;
+  // _vscroll[0]->setFixedWidth( 20 ); to be removed, at least on OSX
    hlayout->addWidget( _vscroll[0] );
 
-   _hscroll = new QScrollBar( Qt::Horizontal, this );
-   _hscroll->setFixedHeight( 20 );
+   _hscroll = new QScrollBar( Qt::Horizontal );
+   //_hscroll->setFixedHeight( 20 ); to be removed, at least on OSX
 
    vlayout->addWidget( _hscroll );
 
