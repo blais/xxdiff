@@ -3185,7 +3185,7 @@ void XxApp::generatePatchFromLeft()
       const char* charbuf = buf->getBuffer( sz );
       {
          QTextOStream osstream( fout2 );
-         osstream.writeRawBytes( charbuf, sz );
+         osstream << QString::fromLocal8Bit( charbuf, sz );
       }
       ::fclose( fout2 );
 
