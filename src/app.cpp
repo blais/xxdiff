@@ -510,6 +510,10 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
    if ( !_dontShow ) {
       // Update the widgets the first time.
       updateWidgets();
+#ifdef Q_OS_MAC
+      // Or the window would appear under other application windows
+      _mainWindow->raise();
+#endif
    }
 }
 
