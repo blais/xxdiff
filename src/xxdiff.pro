@@ -51,8 +51,8 @@ QMAKE_LEX = flex
 QMAKE_YACC = bison
 
 QMAKE_YACCFLAGS = -d -o y.tab.c
-QMAKE_YACC_HEADER =
-QMAKE_YACC_SOURCE =
+QMAKE_YACC_HEADER = y.tab.h
+QMAKE_YACC_SOURCE = y.tab.c
 
 LEXSOURCES = resParser.l
 
