@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <QWheelEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$

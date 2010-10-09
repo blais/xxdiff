@@ -48,8 +48,8 @@
 #include <resParser.h>
 #include <central.h>
 
-#include <qmainwindow.h>
-#include <qpopupmenu.h>
+#include <q3mainwindow.h>
+#include <q3popupmenu.h>
 #include <qmenubar.h>
 #include <qlayout.h>
 #include <qscrollbar.h>
@@ -59,22 +59,26 @@
 #endif
 #include <qfont.h>
 #include <qmessagebox.h>
-#include <qfiledialog.h>
-#include <qaccel.h>
+#include <q3filedialog.h>
+#include <q3accel.h>
 #include <qlabel.h>
-#include <qwhatsthis.h>
+#include <q3whatsthis.h>
 #include <qclipboard.h>
 #include <qsocketnotifier.h>
-#include <qtoolbar.h>
+#include <q3toolbar.h>
 #include <qtoolbutton.h>
 #include <qtextstream.h>
 #include <qfile.h>
 #include <qsplitter.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qregexp.h>
 #include <qcheckbox.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qdatetime.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 #ifdef XX_KDE
 #include <kmessagebox.h>
@@ -193,7 +197,7 @@ public:
       XxApp*      app,
       QWidget*    parent = 0,
       const char* name = 0,
-      WFlags      f = WType_TopLevel
+      Qt::WFlags      f = Qt::WType_TopLevel
    );
 
 
@@ -212,7 +216,7 @@ XxMainWindow::XxMainWindow(
    XxApp*      app,
    QWidget*    parent,
    const char* name,
-   WFlags      f
+   Qt::WFlags      f
 ) :
    QkMainWindow( parent, name, f ),
    _app( app )
@@ -522,7 +526,7 @@ XxApp::~XxApp()
 // Side-effect: This modifies the cmdline.
 void XxApp::promptForFiles( XxCmdline& cmdline )
 {
-	cmdline._filenames[0] = QFileDialog::getOpenFileName(
+	cmdline._filenames[0] = Q3FileDialog::getOpenFileName(
 		QString::null,
       QString::null,
       0,
@@ -531,7 +535,7 @@ void XxApp::promptForFiles( XxCmdline& cmdline )
 
 	if ( cmdline._filenames[0] != QString::null ) {
 
-		cmdline._filenames[1] = QFileDialog::getOpenFileName(
+		cmdline._filenames[1] = Q3FileDialog::getOpenFileName(
 			QString::null,
 	      QString::null,
 	      0,
@@ -714,8 +718,8 @@ void XxApp::createUI()
    // Central widget.
    //
    QWidget* topCentralWidget = new QWidget( _mainWindow );
-   QHBoxLayout* topLayout =
-      new QHBoxLayout( topCentralWidget, 0, -1, "topLayout" );
+   Q3HBoxLayout* topLayout =
+      new Q3HBoxLayout( topCentralWidget, 0, -1, "topLayout" );
 
    // Pane merged widget.
    //
@@ -741,7 +745,7 @@ void XxApp::createUI()
 
    // Adjust splitter (after we've create two children for it to contain).
    uint smpp = _resources->getShowPaneMergedViewPercent();
-   QValueList<int> vl;
+   Q3ValueList<int> vl;
    vl.append( smpp );
    vl.append( 100 - smpp );
    _splitter->setSizes( vl );
@@ -750,8 +754,8 @@ void XxApp::createUI()
    // Overview and remaining unselected regions indicator area.
    //
    _overviewArea = new QWidget( topCentralWidget );
-   QVBoxLayout* overviewLayout =
-      new QVBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
+   Q3VBoxLayout* overviewLayout =
+      new Q3VBoxLayout( _overviewArea, 0, -1, "overview vert. layout" );
 
    //QHBoxLayout* hlayout = new QHBoxLayout;
    _remUnselView = new QLabel( _overviewArea, "remaining unselected" );
@@ -789,18 +793,18 @@ void XxApp::createUI()
    //
    // Note: these have effect at the top level only, they are not bound specific
    // to a particular widget.
-   QAccel* a = new QAccel( _mainWindow );
-   a->connectItem( a->insertItem(Key_Delete),
+   Q3Accel* a = new Q3Accel( _mainWindow );
+   a->connectItem( a->insertItem(Qt::Key_Delete),
                    this, SLOT(selectRegionNeither()) );
 
    //
    // Cursor motion.
    //
-   a->connectItem( a->insertItem(Key_Down), this, SLOT(cursorDown()) );
-   a->connectItem( a->insertItem(Key_Up), this, SLOT(cursorUp()) );
+   a->connectItem( a->insertItem(Qt::Key_Down), this, SLOT(cursorDown()) );
+   a->connectItem( a->insertItem(Qt::Key_Up), this, SLOT(cursorUp()) );
 
-   a->connectItem( a->insertItem(Key_Home), this, SLOT(cursorTop()) );
-   a->connectItem( a->insertItem(Key_End), this, SLOT(cursorBottom()) );
+   a->connectItem( a->insertItem(Qt::Key_Home), this, SLOT(cursorTop()) );
+   a->connectItem( a->insertItem(Qt::Key_End), this, SLOT(cursorBottom()) );
 
    a->connectItem(
       a->insertItem( _resources->getAccelerator( ACCEL_CURSOR_DOWN ) ),
@@ -827,8 +831,8 @@ void XxApp::createUI()
    // a->connectItem( a->insertItem(Key_Space), this, SLOT(pageDown()) );
    // a->connectItem( a->insertItem(Key_Backspace), this, SLOT(pageUp()) );
 
-   a->connectItem( a->insertItem(Key_Prior), this, SLOT(pageUp()) );
-   a->connectItem( a->insertItem(Key_Next), this, SLOT(pageDown()) );
+   a->connectItem( a->insertItem(Qt::Key_PageUp), this, SLOT(pageUp()) );
+   a->connectItem( a->insertItem(Qt::Key_PageDown), this, SLOT(pageDown()) );
 
    a->connectItem(
       a->insertItem( _resources->getAccelerator( ACCEL_PAGE_DOWN ) ),
@@ -891,9 +895,9 @@ void XxApp::createUI()
 QkToolBar* XxApp::createToolbar()
 {
 #ifdef XX_KDE
-   KToolBar* toolbar = new KToolBar( _mainWindow, QMainWindow::Top );
+   KToolBar* toolbar = new KToolBar( _mainWindow, Qt::DockTop );
 #else
-   QToolBar* toolbar = new QToolBar( "Tools", _mainWindow );
+   Q3ToolBar* toolbar = new Q3ToolBar( "Tools", _mainWindow );
 #endif
 
    QPixmap pmSaveAsMerged(
@@ -1181,7 +1185,7 @@ QkToolBar* XxApp::createToolbar()
 //
 void XxApp::createOnContextHelp()
 {
-   QWhatsThis::add( _overview, XxHelp::getWhatsThisText( XxHelp::OVERVIEW ) );
+   Q3WhatsThis::add( _overview, XxHelp::getWhatsThisText( XxHelp::OVERVIEW ) );
 }
 
 //------------------------------------------------------------------------------
@@ -2150,7 +2154,7 @@ XxResources* XxApp::buildResources() const
 
    if ( !_cmdline._cmdlineResources.isEmpty() ) {
       try {
-         QTextIStream cmdlineStream( _cmdline._cmdlineResources );
+         QTextIStream cmdlineStream( &_cmdline._cmdlineResources );
          resParser.parse( cmdlineStream, *resources );
       }
       catch ( const XxIoError& ioerr ) {
@@ -2410,7 +2414,7 @@ bool XxApp::saveToFile(
    // Open a file.
    try {
       QFile outfile( f );
-      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
+      bool succ = outfile.open( QIODevice::Truncate | QIODevice::WriteOnly );
       if ( !succ ) {
          throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
       }
@@ -2983,7 +2987,7 @@ void XxApp::saveSelectedOnly()
    }
 
    QFile outfile( f );
-   bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
+   bool succ = outfile.open( QIODevice::Truncate | QIODevice::WriteOnly );
    if ( !succ ) {
       throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
    }
@@ -3039,7 +3043,7 @@ void XxApp::saveOptions()
    QString outstr;
    {
       // Save to the stream the differences with the default resources.
-      QTextStream outs( &outstr, IO_WriteOnly );
+      QTextStream outs( &outstr, QIODevice::WriteOnly );
       std::auto_ptr<XxResources> defres(
          new XxResources( _cmdline._originalXdiff )
       );
@@ -3072,7 +3076,7 @@ void XxApp::saveOptions()
    // Open a file.
    try {
       QFile outfile( f );
-      bool succ = outfile.open( IO_Truncate | IO_WriteOnly );
+      bool succ = outfile.open( QIODevice::Truncate | QIODevice::WriteOnly );
       if ( !succ ) {
          throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
       }

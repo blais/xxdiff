@@ -9,6 +9,31 @@
 
 Display file differences with the current or a previous CVS version.  Use one or
 two of the version selection options to select which filesets to compare.
+
+
+Here is the original submission email description:
+
+  What, here in our company, find useful about cvsxxdiff is:
+
+  - cvsxxdiff is one file. No python module directory or initialization is
+    required.
+
+  - Do a 'cvs up; cvsxxdiff' before commit to see all the local changes we have
+    made.
+
+  - Do 'cvs up; cvsxxdiff -b 1 file.c' to see the last chages that were made on
+    a file by a colleague.
+
+  - We often need to track bugs in our code. This means going back to previous
+    revisions, thus doing ex: 'cvsxxdiff -b 1 -b 2 file.c' to compare the
+    previous with the 2nd previous revision. (similar with cvsxxdiff -r 1.1 -r
+    1.2 file.c)
+
+  - The utility prints  in the standard output the logs between revisions i
+    and j ( ex: cvsxxdif -b i -b j file.c)
+
+  One script to do it all.
+
 """
 
 __author__ = ('Michalis Giannakidis <mgiannakidis@gmail.com>',

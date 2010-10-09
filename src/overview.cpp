@@ -34,7 +34,13 @@
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
+//Added by qt3to4:
+#include <Q3PointArray>
+#include <QWheelEvent>
+#include <QResizeEvent>
+#include <Q3Frame>
+#include <QMouseEvent>
 
 #include <math.h>
 
@@ -60,14 +66,14 @@ XxOverview::XxOverview(
    QWidget *       parent,
    const char*     name
 ) :
-   QFrame( parent, name, WResizeNoErase ),
+   Q3Frame( parent, name, Qt::WResizeNoErase ),
    _app( app ),
    _central( central ),
    _manipNo( -1 )
 {
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
+   setFrameStyle( Q3Frame::Panel | Q3Frame::Sunken );
    setLineWidth( 2 );
-   setBackgroundMode( NoBackground );
+   setBackgroundMode( Qt::NoBackground );
 
    const XxResources& resources = _app->getResources();
    uint nbFiles = _app->getNbFiles();
@@ -158,7 +164,7 @@ void XxOverview::drawContents( QPainter* pp )
    QPen pen;
    pen.setColor( Qt::black );
    p.setPen( pen );
-   QBrush brush( QBrush::SolidPattern );
+   QBrush brush( Qt::SolidPattern );
 
    for ( ii = 0; ii < nbFiles; ++ii ) {
       // Draw both ends.
@@ -282,17 +288,19 @@ void XxOverview::drawContents( QPainter* pp )
       if ( ii > 0 ) {
 
          // Draw left arrow.
-         int pts1[6] = { _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
+         QPolygon pa1;
+         pa1.putPoints(0, 3, 
+                         _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
                          _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
-                         _fileL[ii] - sepWidth, curppos[ii-1] };                
-         QPointArray pa1( 3, pts1 );
+                         _fileL[ii] - sepWidth, curppos[ii-1] );                
          p.drawPolygon( pa1 );
 
          // Draw right arrow.
-         int pts2[6] = { _fileL[ii] + dx, curppos[ii] - dyo2,
+         QPolygon pa2;
+         pa2.putPoints(0, 3, 
+                         _fileL[ii] + dx, curppos[ii] - dyo2,
                          _fileL[ii] + dx, curppos[ii] + dyo2,
-                         _fileL[ii], curppos[ii] };                
-         QPointArray pa2( 3, pts2 );
+                         _fileL[ii], curppos[ii] );                
          p.drawPolygon( pa2 );
       }
    }
@@ -314,11 +322,12 @@ void XxOverview::drawContents( QPainter* pp )
             int ypos =
                _fileT[ii] +
                int( (_fileDy[ii] * (ffline-1)) / float( flines[ii] ) );
-            int pts1[8] = { _fileL[ii] + fw2 - sdx, ypos,
+            QPolygon pa1;
+            pa1.putPoints(0, 4, 
+                            _fileL[ii] + fw2 - sdx, ypos,
                             _fileL[ii] + fw2, ypos + sdx,
                             _fileL[ii] + fw2 + sdx, ypos,
-                            _fileL[ii] + fw2, ypos - sdx };
-            QPointArray pa1( 4, pts1 );
+                            _fileL[ii] + fw2, ypos - sdx );
             p.drawPolygon( pa1 );
          }
       }

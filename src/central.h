@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <QLabel>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -40,12 +42,12 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <qmainwindow.h>
+#include <q3mainwindow.h>
 #define INCL_QT_QMAINWINDOW
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <q3frame.h>
 #define INCL_QT_QFRAME
 #endif
 

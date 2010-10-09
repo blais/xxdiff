@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <q3frame.h>
 #define INCL_QT_QFRAME
 #endif
 
@@ -55,7 +55,7 @@ class XxCentralFrame;
 
 // <summary> a widget that can display line numbers </summary>
 
-class XxLineNumbers : public QFrame {
+class XxLineNumbers : public Q3Frame {
 
 public:
 

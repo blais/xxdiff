@@ -27,7 +27,7 @@
 #include <hordiffImp.h>
 #include <resources.h>
 
-#include <qcstring.h>
+#include <q3cstring.h>
 
 #ifndef COMPILER_MIPSPRO
 #include <cctype> // isspace()
@@ -439,8 +439,8 @@ void XxHordiffImp::multipleHordiffs2(
 
 #ifdef XX_LOCAL_HDIFF_DEBUG
    {
-      QCString s1( text0 + 1, len0+1 );
-      QCString s2( text1 + 1, len1+1 );
+      Q3CString s1( text0 + 1, len0+1 );
+      Q3CString s2( text1 + 1, len1+1 );
       cerr << "Comparing " << s1 << " to " << s2 << endl;
    }
 #endif
@@ -474,11 +474,11 @@ void XxHordiffImp::multipleHordiffs2(
 
 #ifdef XX_LOCAL_HDIFF_DEBUG
       cerr << "==============================" << endl;
-      QCString stext0( text0+1, len0+1 );
+      Q3CString stext0( text0+1, len0+1 );
       cerr << stext0 << endl;
       cerr << ctext0+1 << endl;
       cerr << "------------------------------" << endl;
-      QCString stext1( text1+1, len1+1 );
+      Q3CString stext1( text1+1, len1+1 );
       cerr << stext1 << endl;
       cerr << ctext1+1 << endl;
       cerr << "------------------------------" << endl;

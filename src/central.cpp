@@ -34,19 +34,24 @@
 #include <lineNumbers.h>
 #include <help.h>
 
-#include <qscrollview.h>
+#include <q3scrollview.h>
 #include <qpainter.h>
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qmenubar.h>
 #include <qlayout.h>
-#include <qwhatsthis.h>
-#include <qaccel.h>
+#include <q3whatsthis.h>
+#include <q3accel.h>
 
 #include <qapplication.h>
 #include <qclipboard.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3Frame>
+#include <QLabel>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
@@ -76,10 +81,10 @@ XxCentralFrame::XxCentralFrame(
    // Texts widget (texts).
    //
 
-   QVBoxLayout* textAndSbLayout =
-      new QVBoxLayout( this, 0, -1, "textAndSbLayout" );
-   QHBoxLayout* textLayout =
-      new QHBoxLayout( textAndSbLayout, -1, "textLayout" );
+   Q3VBoxLayout* textAndSbLayout =
+      new Q3VBoxLayout( this, 0, -1, "textAndSbLayout" );
+   Q3HBoxLayout* textLayout =
+      new Q3HBoxLayout( textAndSbLayout, -1, "textLayout" );
 
    QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
@@ -98,30 +103,31 @@ XxCentralFrame::XxCentralFrame(
                   this, SLOT(verticalScroll2(int)) );
       }
 
-      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1, "layout" );
+      Q3VBoxLayout* layout = new Q3VBoxLayout( textLayout, -1, "layout" );
       //textLayout->setStretchFactor( layout, 1 ); useless to make equal
 
       // Create filename and line number labels.
-      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1, "fnLayout" );
+      Q3HBoxLayout* fnLayout = new Q3HBoxLayout( layout, -1, "fnLayout" );
       _filenameLabel[ii] = new XxCopyLabel( this );
       _filenameLabel[ii]->setFont( smaller );
-      _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
+      _filenameLabel[ii]->setFrameStyle( Q3Frame::Panel | Q3Frame::Raised );
       _filenameLabel[ii]->setMinimumWidth( 1 );
       _filenameLabel[ii]->setLineWidth( 2 );
 
       _lineNumberLabel[ii] =
          new QLabel( "9999", this, "lineNumberLabel" );
       _lineNumberLabel[ii]->setAlignment( Qt::AlignCenter );
-      _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
+      _lineNumberLabel[ii]->setFrameStyle( Q3Frame::Panel | Q3Frame::Raised );
       _lineNumberLabel[ii]->setLineWidth( 2 );
       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
+      _lineNumberLabel[ii]->setMaximumSize( _lineNumberLabel[ii]->sizeHint() );
       _lineNumberLabel[ii]->setText( "" );
 
       fnLayout->addWidget( _filenameLabel[ii], 10 );
       fnLayout->addWidget( _lineNumberLabel[ii], 1 );
 
       // Create linenumbers widget and text widget.
-      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1, "fnLayout2" );
+      Q3HBoxLayout* fnLayout2 = new Q3HBoxLayout( layout, -1, "fnLayout2" );
       _text[ii] = new XxText( _app, this, ii, this, "text" );
       _lineNumbers[ii] =
          new XxLineNumbers( _app, this, ii, this, "lineNumbers" );
@@ -139,10 +145,10 @@ XxCentralFrame::XxCentralFrame(
    createOnContextHelp();
 
    // Add some extra accelerators.
-   QAccel* a = new QAccel( this );
+   Q3Accel* a = new Q3Accel( this );
 
-   a->connectItem( a->insertItem(Key_Right), this, SLOT(scrollRight()) );
-   a->connectItem( a->insertItem(Key_Left), this, SLOT(scrollLeft()) );
+   a->connectItem( a->insertItem(Qt::Key_Right), this, SLOT(scrollRight()) );
+   a->connectItem( a->insertItem(Qt::Key_Left), this, SLOT(scrollLeft()) );
 
    // Watch cursor changes.
    connect( app, SIGNAL(cursorChanged(int)), this, SLOT(onCursorChanged(int)) );
@@ -152,21 +158,21 @@ XxCentralFrame::XxCentralFrame(
 //
 void XxCentralFrame::createOnContextHelp()
 {
-   QWhatsThis::add( _vscroll[0], XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+   Q3WhatsThis::add( _vscroll[0], XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
    if ( _vscroll[1] != 0 ) {
-      QWhatsThis::add( _vscroll[1],
+      Q3WhatsThis::add( _vscroll[1],
                        XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
    }
-   QWhatsThis::add( _hscroll, XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
+   Q3WhatsThis::add( _hscroll, XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
 
    for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
-      QWhatsThis::add(
+      Q3WhatsThis::add(
          _filenameLabel[ii], XxHelp::getWhatsThisText( XxHelp::FILENAME )
       );
-      QWhatsThis::add(
+      Q3WhatsThis::add(
          _lineNumberLabel[ii], XxHelp::getWhatsThisText( XxHelp::LINENO )
       );
-      QWhatsThis::add(
+      Q3WhatsThis::add(
          _text[ii], XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW )
       );
    }

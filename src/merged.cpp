@@ -31,17 +31,20 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qscrollview.h>
+#include <q3scrollview.h>
 #include <qpainter.h>
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qmenubar.h>
 #include <qlayout.h>
 
 #include <qapplication.h>
 #include <qclipboard.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
@@ -61,8 +64,8 @@ XxMergedFrame::XxMergedFrame(
 ) :
    BaseClass( app, parent, name )
 {
-   QVBoxLayout* vlayout = new QVBoxLayout( this );
-   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   Q3VBoxLayout* vlayout = new Q3VBoxLayout( this );
+   Q3HBoxLayout* hlayout = new Q3HBoxLayout( vlayout );
    
    _text = new XxText( _app, this, -1, this, "text in merged frame" );
 

@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <Q3PopupMenu>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -61,16 +63,16 @@ typedef class KListBox         QkListBox;
 #else
 
 typedef class QApplication     QkApplication;
-typedef class QMainWindow      QkMainWindow;
-typedef class QPopupMenu       QkPopupMenu;
-typedef class QToolBar         QkToolBar;
+typedef class Q3MainWindow      QkMainWindow;
+typedef class Q3PopupMenu       QkPopupMenu;
+typedef class Q3ToolBar         QkToolBar;
 typedef class QMenuBar         QkMenuBar;
 typedef class QDialog          QkDialog;
-typedef class QFileDialog      QkFileDialog;
-typedef class QTextBrowser     QkTextBrowser;
+typedef class Q3FileDialog      QkFileDialog;
+typedef class Q3TextBrowser     QkTextBrowser;
 typedef class QPushButton      QkPushButton;
 typedef class QLineEdit        QkLineEdit;
-typedef class QListBox         QkListBox;
+typedef class Q3ListBox         QkListBox;
 
 #endif
 

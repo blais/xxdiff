@@ -33,14 +33,14 @@
 #include <kdeSupport.h>
 
 #include <qtabwidget.h>
-#include <qtextview.h>
+#include <q3textview.h>
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <qradiobutton.h>
 #include <qpushbutton.h>
-#include <qgroupbox.h>
+#include <q3groupbox.h>
 #include <qspinbox.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
 #include <qcolor.h>
 #include <qcolordialog.h>
 #include <qfontdialog.h>
@@ -80,7 +80,7 @@ const char* pangrams[] = {
  * CLASS XxColoredItem
  *============================================================================*/
 
-class XxColoredItem : public QListBoxText {
+class XxColoredItem : public Q3ListBoxText {
 
 public:
 
@@ -99,7 +99,7 @@ protected:
    /*----- member functions -----*/
    
    // Overriden height to use our own text font.
-   virtual int height( const QListBox* lb ) const;
+   virtual int height( const Q3ListBox* lb ) const;
 
    // Overriden paint to setup the colors right.
    virtual void paint( QPainter* painter );
@@ -125,7 +125,7 @@ public: // let the dialog access all of this
 //------------------------------------------------------------------------------
 //
 XxColoredItem::XxColoredItem( const XxResources* resources, XxColor color ) :
-   QListBoxText( XxResParser::getColorName( color ) ),
+   Q3ListBoxText( XxResParser::getColorName( color ) ),
    _resources( resources ),
    _color( color ),
    _modified( false ),
@@ -150,7 +150,7 @@ inline XxColor XxColoredItem::getColor() const
 
 //------------------------------------------------------------------------------
 //
-int XxColoredItem::height( const QListBox* /*lb*/ ) const
+int XxColoredItem::height( const Q3ListBox* /*lb*/ ) const
 {
    const QFont& font = _resources->getFontText();
    QFontMetrics fm( font );
@@ -274,7 +274,7 @@ XxOptionsDialog::XxOptionsDialog(
    // Fill up listbox with color names.
    const XxResources* resourcesPtr = &(_app->getResources());
    for ( int ii = 0; ii < int(COLOR_LAST); ++ii ) {
-      QListBoxItem* lbi = 
+      Q3ListBoxItem* lbi = 
          new XxColoredItem( resourcesPtr, XxColor(ii) );
       _listboxColors->insertItem( lbi );
    }

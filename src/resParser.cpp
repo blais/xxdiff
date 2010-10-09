@@ -43,7 +43,7 @@
 
 #include <kdeSupport.h>
 
-#include <qaccel.h>
+#include <q3accel.h>
 #include <qapplication.h>
 #include <qfont.h>
 #include <qfile.h>
@@ -53,6 +53,8 @@
 #include <qstylefactory.h>
 #endif
 #include <qdesktopwidget.h>
+//Added by qt3to4:
+#include <QTextStream>
 
 #include <stdexcept>
 #include <iostream>
@@ -875,7 +877,7 @@ void XxResParser::parse( const QString& filename, XxResources& resources )
    }
 
    QFile file( filename );
-   if ( file.open( IO_ReadOnly ) ) {
+   if ( file.open( QIODevice::ReadOnly ) ) {
       QTextStream filestr( &file );
 
       // Parse the file.
@@ -971,7 +973,7 @@ void XxResParser::genInitFile(
          int aval = res1.getAccelerator( accel );
          QString astr("");
          if ( aval != 0 ) {
-            astr = QAccel::keyToString( aval );
+            astr = Q3Accel::keyToString( aval );
          }
          os << accelStr << "." << accelList[ii]._name << ": \""
             << astr << "\"" << endl;
@@ -1169,7 +1171,7 @@ void XxResParser::listResources( QTextStream& os )
       int aval = res.getAccelerator( accel );
       QString astr("");
       if ( aval != 0 ) {
-         astr = QAccel::keyToString( aval );
+         astr = Q3Accel::keyToString( aval );
       }
       os << accelStr << "." << accelList[ii]._name << ": \""
          << astr.latin1() << "\"" << endl;
@@ -1353,7 +1355,7 @@ QString XxResParser::getResourceRef()
          QString astr("");
             if ( qApp != 0 ) {
                if ( aval != 0 ) {
-                  astr = QAccel::keyToString( aval );
+                  astr = Q3Accel::keyToString( aval );
                }
             }
             else {

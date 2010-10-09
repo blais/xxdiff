@@ -26,20 +26,23 @@
 
 #include <markers.h>
 
-#include <qfiledialog.h>
-#include <qurloperator.h>
+#include <q3filedialog.h>
+#include <q3urloperator.h>
 #include <qfileinfo.h>
 #include <qstring.h>
 #include <qdir.h>
 
 #include <qradiobutton.h>
 #include <qlineedit.h>
-#include <qbuttongroup.h>
+#include <q3buttongroup.h>
 #include <qlabel.h>
 #include <qcheckbox.h>
 
 #include <qlayout.h>
 #include <qpushbutton.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 XX_NAMESPACE_BEGIN
 
@@ -148,17 +151,17 @@ XxMarkersDialog::XxMarkersDialog(
 ) :
    BaseClass( parent, name, true )
 {
-   QVBoxLayout* vlayout;
-   QHBoxLayout* hlayout;
+   Q3VBoxLayout* vlayout;
+   Q3HBoxLayout* hlayout;
 
    //resize( 627, 262 ); 
    //setCaption( trUtf8( "Form1" ) );
-   vlayout = new QVBoxLayout( this, 11, 6, "vlayout"); 
+   vlayout = new Q3VBoxLayout( this, 11, 6, "vlayout"); 
 
    _markersWidget = new XxMarkersWidget( this, threeWay );
    vlayout->addWidget( _markersWidget );
 
-   hlayout = new QHBoxLayout( 0, 0, 6, "hlayout");
+   hlayout = new Q3HBoxLayout( 0, 0, 6, "hlayout");
    QSpacerItem* spacer =
       new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
    hlayout->addItem( spacer );
@@ -282,7 +285,7 @@ QString XxMarkersFileDialog::getSaveFileName(
    QString initialSelection;
    static QString workingDirectory;
    if ( !startWith.isEmpty() ) {
-      QUrlOperator u( startWith );
+      Q3UrlOperator u( startWith );
       if ( u.isLocalFile() && QFileInfo( u.path() ).isDir() ) {
          //workingDirectory = startWith;
       }
@@ -299,10 +302,10 @@ QString XxMarkersFileDialog::getSaveFileName(
    XxMarkersFileDialog* dlg = new XxMarkersFileDialog(
       startWith, filter, parent, name, TRUE, threeWay
    );
-   dlg->setCaption( QFileDialog::tr( "Save as" ) );
+   dlg->setCaption( Q3FileDialog::tr( "Save as" ) );
 
    QString result;
-   dlg->setMode( QFileDialog::AnyFile );
+   dlg->setMode( Q3FileDialog::AnyFile );
 
    if ( !initialSelection.isEmpty() ) {
       dlg->setSelection( initialSelection );

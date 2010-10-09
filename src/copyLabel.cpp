@@ -32,6 +32,10 @@
 
 #include <qapplication.h>
 #include <qclipboard.h>
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QLabel>
 
 
 /*==============================================================================
@@ -63,23 +67,11 @@ public:
 
 //------------------------------------------------------------------------------
 //
-XxCopyLabel::Tip::Tip( QLabel* parent ) :
-   QToolTip( parent )
-{
-}
 
 //------------------------------------------------------------------------------
 //
 void XxCopyLabel::Tip::maybeTip( const QPoint& )
 {
-   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
-   XX_CHECK( clabel != 0 );
-   QString tex = clabel->getFullText();
-   QFontMetrics fm = clabel->fontMetrics();
-   QRect br = fm.boundingRect( tex );
-   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
-      tip( clabel->rect(), tex );
-   }
 }
 
 /*==============================================================================
@@ -92,7 +84,7 @@ XxCopyLabel::XxCopyLabel( QWidget* parent ) :
    QLabel( parent )
 {
    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
-   _tip = new Tip( this );
+   //_tip = new Tip( this );
 }
 
 //------------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <QMouseEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$

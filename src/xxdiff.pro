@@ -21,6 +21,12 @@
 #****************************************************************************/
 #
 # Generate with xxdiff.t template, as `qmake -t xxdiff.t xxdiff.pro > Makefile'
+
+    mystaticconfig {
+        QMAKE_LIBS_QT =
+        QMAKE_LIBS_QT_THREAD =
+        LIBS += $(QTDIR)/lib/libqt.a -lz -framework Carbon
+    }
 #
 
 # Note: the version number is now in the VERSION file at the root and there is a
@@ -201,7 +207,8 @@ SOURCES = \
 	getopt1.c \
 	proginfo.c
 
-FORMS = \
+#The following line was changed from FORMS to FORMS3 by qt3to4
+FORMS3 = \
 	markersWidgetBase.ui \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
@@ -238,4 +245,9 @@ TARGET = xxdiff
 # SOURCES += diffutils.cpp 
 
 
+
+#The following line was inserted by qt3to4
+QT +=  qt3support 
+#The following line was inserted by qt3to4
+CONFIG += uic3
 

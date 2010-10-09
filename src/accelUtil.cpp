@@ -27,7 +27,7 @@
 #include <accelUtil.h>
 #include <resources.h>
 
-#include <qaccel.h>
+#include <q3accel.h>
 
 #include <iostream>
 #include <string.h>
@@ -87,8 +87,8 @@ const KeyPair keycodes[] = {
    { "at", Qt::Key_At },
    { "b", Qt::Key_B },
    { "backslash", Qt::Key_Backslash },
-   { "backspace", Qt::Key_BackSpace },
-   { "backtab", Qt::Key_BackTab },
+   { "backspace", Qt::Key_Backspace },
+   { "backtab", Qt::Key_Backtab },
    { "bar", Qt::Key_Bar },
    { "braceleft", Qt::Key_BraceLeft },
    { "braceright", Qt::Key_BraceRight },
@@ -159,7 +159,7 @@ const KeyPair keycodes[] = {
    { "menu", Qt::Key_Menu },
    { "minus", Qt::Key_Minus },
    { "n", Qt::Key_N },
-   { "next", Qt::Key_Next },
+   { "next", Qt::Key_PageDown },
    { "numbersign", Qt::Key_NumberSign },
    { "o", Qt::Key_O },
    { "p", Qt::Key_P },
@@ -172,7 +172,7 @@ const KeyPair keycodes[] = {
    { "period", Qt::Key_Period },
    { "plus", Qt::Key_Plus },
    { "print", Qt::Key_Print },
-   { "prior", Qt::Key_Prior },
+   { "prior", Qt::Key_PageUp },
    { "q", Qt::Key_Q },
    { "question", Qt::Key_Question },
    { "quotedbl", Qt::Key_QuoteDbl },
@@ -286,7 +286,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 //
 void XxAccelUtil::write( std::ostream& os, int accel )
 {
-   QString str = QAccel::keyToString( accel );
+   QString str = Q3Accel::keyToString( accel );
    os << str.ascii();
 }
 

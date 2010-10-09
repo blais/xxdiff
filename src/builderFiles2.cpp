@@ -193,7 +193,7 @@ XxParseDiffError::XxParseDiffError(
    XxError( file, line ),
    std::runtime_error( "Parse diff output error." )
 {
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing diff output: file1:" 
        << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: " 
        << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
@@ -274,7 +274,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    XxFln fline2 = 1;
 
    QFile qfout;
-   qfout.open( IO_ReadOnly, fout );
+   qfout.open( QIODevice::ReadOnly, fout );
    QTextStream outputs( &qfout );
 
    QTextOStream errors( &_errors );
@@ -409,7 +409,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
    // Collect stderr.
    QFile qferr;
-   qferr.open( IO_ReadOnly, ferr );
+   qferr.open( QIODevice::ReadOnly, ferr );
    {
       QTextStream errorss( &qferr );
       QString errstr = errorss.read();

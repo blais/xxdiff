@@ -66,7 +66,7 @@ well.
 # * To Sean Reifschneider (Jafo) for providing example code for raw tty input
 
 
-__version__ = '$Revision$'
+__version__ = '$Revision: 1001 $'
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 

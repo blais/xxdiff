@@ -150,6 +150,25 @@ Less Urgent, but do it soon too
   for client to communicate with xxdiff and vice-versa.  This is a cool idea,
   but a lot of work for very little benefit.
 
+* Check if this bug is gone::
+
+    I set up xxdiff-subversion on my workstation following web page at
+    http://xxdiff.sourceforge.net/local/doc/xxdiff-subversion.html. It works
+    just fine for svn diff command. But for svn up, if there is a conflict,
+    xxdiff will pop up showing three way difference. When I close xxdiff
+    window, I found my working copy of that conflicting file became blank!
+    So I lost all my changes in that file!
+
+    My current solution is not to set diff3-cmd in ~/.subversion/config file.
+
+    --Long
+
+    PS: I am using FreeBSD.
+    pkg_info -Ix xxdiff
+    xxdiff-3.0.3        QT interface to view/merge differences between 2 or
+    3 files
+    pkg_info -Ix subversion
+    subversion-1.3.0_3  Version control system
 
 
 * From Michalis Giannakidis, mgiann@beta-cae.gr

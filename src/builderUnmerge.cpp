@@ -29,7 +29,7 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <qcstring.h>
+#include <q3cstring.h>
 #include <qtextstream.h>
 #include <qregexp.h>
 
@@ -90,7 +90,7 @@ XxConflictFormatError::XxConflictFormatError(
    XxError( file, line ),
    std::runtime_error( "Conflicts format error." )
 {
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing conflicts file:"
        << " (" << f1n1 << "," << f1n2 << ")  file2: " 
        << " (" << f2n1 << "," << f2n2 << ")  file3: " 
@@ -228,7 +228,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    for ( XxFln l = 1; l <= nbLines; ++l ) {
       uint len;
       const char* textlineOrig = buffer.getTextLine( l, len );
-      QCString textline( textlineOrig, len+1 ); // This copy sucks...
+      Q3CString textline( textlineOrig, len+1 ); // This copy sucks...
 
       if ( inConflict == OUTSIDE ) {
          XX_LOCAL_TRACE( "===> " << reStart.pattern() << " " << textline );
@@ -414,7 +414,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
       uint len;
       const char* textlineOrig = buffer.getTextLine( l, len );
-      QCString textline( textlineOrig, len+1 ); // This copy sucks...
+      Q3CString textline( textlineOrig, len+1 ); // This copy sucks...
       XX_LOCAL_TRACE( "<" << inConflict << "> " << 
                       l << " textline = " << textline );
 

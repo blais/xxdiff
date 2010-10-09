@@ -28,7 +28,9 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <qcstring.h>
+#include <q3cstring.h>
+//Added by qt3to4:
+#include <QTextStream>
 
 #include <list>
 #include <algorithm>
@@ -57,7 +59,7 @@ int outputLine(
       const char* text = files[no]->getTextLine( fline, len );
       XX_ASSERT( text != 0 ); // make this one throw
 
-      os.writeRawBytes( text, len );
+      os << QString::fromLocal8Bit(text, len);
       os << endl;
       return 1;
    }
@@ -925,7 +927,7 @@ bool XxDiffs::save(
                                 conditionals[f].latin1() );
 
                   QByteArray line;
-                  QTextOStream oss( line );
+                  QTextOStream oss( &line );
                   oss << cond << endl;
 
                   int nbOutlines = 0;
@@ -1032,7 +1034,7 @@ bool XxDiffs::saveSelectedOnly(
             XX_ASSERT( text != 0 ); // make this one throw
 
             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
-            os.writeRawBytes( text, len );
+            os << QString::fromLocal8Bit(text, len);
             os << endl;
 
             some = true;

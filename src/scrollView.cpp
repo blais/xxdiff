@@ -31,6 +31,8 @@
 #include <qsize.h>
 #include <qfont.h>
 #include <qfontmetrics.h>
+//Added by qt3to4:
+#include <QWheelEvent>
 
 XX_NAMESPACE_BEGIN
 
@@ -310,7 +312,7 @@ void XxScrollView::verticalScroll2( int value )
 //
 void XxScrollView::wheelEvent( QWheelEvent* e )
 {
-   if ( e->state() & Qt::ControlButton ) {
+   if ( e->state() & Qt::ControlModifier ) {
       // Interactive font resize feature with mouse wheel.
       if ( e->delta() > 0 ) {
          _app->fontSizeDecrease();

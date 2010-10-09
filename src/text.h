@@ -1,3 +1,7 @@
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <QWheelEvent>
+#include <QMouseEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -36,7 +40,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <q3frame.h>
 #define INCL_QT_QFRAME
 #endif
 
@@ -55,7 +59,7 @@ class XxScrollView;
 
 // <summary> a text widget that can display diffs </summary>
 
-class XxText : public QFrame {
+class XxText : public Q3Frame {
    
    Q_OBJECT
 

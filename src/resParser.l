@@ -78,7 +78,7 @@ if ( input_stream_ptr->atEnd() ) {                                     \
 else {                                                                 \
    int ii = 0;                                                         \
    for ( ; (ii < max_size) && (!input_stream_ptr->atEnd()); ++ii ) {   \
-	input_stream_ptr->readRawBytes( &buf[ii], 1 );                 \
+	(*input_stream_ptr) >> buf[ii]; \
    }                                                                   \
    result = ii;                                                        \
 }

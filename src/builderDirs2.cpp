@@ -114,7 +114,7 @@ XxParseDiffError::XxParseDiffError(
    XxError( file, line ),
    std::runtime_error( "Parse diff output error." )
 {
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing diff output: " << endl
        << buf << endl;
 }
@@ -323,7 +323,7 @@ void buildSolelyFromOutput(
    const int len2 = path2.length();
 
    QFile qfout;
-   qfout.open( IO_ReadOnly, fout );
+   qfout.open( QIODevice::ReadOnly, fout );
    QTextStream outputs( &qfout );
 
    while ( true ) {
@@ -425,7 +425,7 @@ void buildAgainstReadDirectory(
    const int len2 = path2.length();
 
    QFile qfout;
-   qfout.open( IO_ReadOnly, fout );
+   qfout.open( QIODevice::ReadOnly, fout );
    QTextStream outputs( &qfout );
 
    while ( true ) {
@@ -685,7 +685,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    // Collect stderr.
    QFile qferr;
-   qferr.open( IO_ReadOnly, ferr );
+   qferr.open( QIODevice::ReadOnly, ferr );
    {
       QTextStream errorss( &qferr );
       QString errstr = errorss.read();

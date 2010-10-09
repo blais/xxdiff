@@ -1,3 +1,7 @@
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QWheelEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -32,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <q3frame.h>
 #define INCL_QT_QFRAME
 #endif
 
@@ -53,13 +57,13 @@ class XxCentralFrame;
 
 // <summary> overview area </summary>
 
-class XxOverview : public QFrame {
+class XxOverview : public Q3Frame {
 
 public:
 
    /*----- types and enumerations -----*/
 
-   typedef QFrame BaseClass;
+   typedef Q3Frame BaseClass;
 
    /*----- member functions -----*/
 

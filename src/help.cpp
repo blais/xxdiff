@@ -32,6 +32,10 @@
 #include <resParser.h>
 
 #include <kdeSupport.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QTextStream>
+#include <Q3VBoxLayout>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
 #ifndef WINDOWS
@@ -47,8 +51,8 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qpalette.h>
-#include <qtextbrowser.h>
-#include <qscrollview.h>
+#include <q3textbrowser.h>
+#include <q3scrollview.h>
 
 #include <iostream>
 #include <stdio.h>
@@ -308,7 +312,7 @@ XxManPageDialog::XxManPageDialog(
 ) :
    QDialog( parent )
 {
-   QVBoxLayout* toplay = new QVBoxLayout( this );
+   Q3VBoxLayout* toplay = new Q3VBoxLayout( this );
    QkTextBrowser* tv = new QkTextBrowser( this, "name" );
    tv->setText( text, QString::null );
    tv->setMinimumSize( 500, 700 );
@@ -363,7 +367,7 @@ QString XxHelp::getUsage( int helpMask, bool plain )
 
    QString usage;
    if ( plain ) {
-      QTextStream oss( &usage, IO_WriteOnly | IO_Append );
+      QTextStream oss( &usage, QIODevice::WriteOnly | QIODevice::Append );
       oss << "Usage: "
           << "xxdiff [OPTIONS] file1 file2 [file3]" << endl
           << endl
@@ -411,7 +415,7 @@ QString XxHelp::getUsage( int helpMask, bool plain )
           << endl;
    }
    else {
-      QTextStream oss( &usage, IO_WriteOnly | IO_Append );
+      QTextStream oss( &usage, QIODevice::WriteOnly | QIODevice::Append );
       if ( helpMask & (1 << XxCmdline::OPT_GENERIC) ) {
          oss << "<h4>Generic options</h4>" << endl;
          options =

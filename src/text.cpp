@@ -38,10 +38,15 @@
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 
 #include <qapplication.h>
 #include <qclipboard.h>
+//Added by qt3to4:
+#include <Q3Frame>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 #include <math.h>
 #include <stdio.h>
@@ -204,7 +209,7 @@ XxText::XxText(
    QWidget*      parent,
    const char*   name
 ) :
-   QFrame( parent, name, WResizeNoErase ),
+   Q3Frame( parent, name, Qt::WResizeNoErase ),
    _app( app ),
    _sv( sv ),
    _no( no ),
@@ -214,12 +219,12 @@ XxText::XxText(
    _regionSelect[0] = -1;
    _regionSelect[1] = -1;
 
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
+   setFrameStyle( Q3Frame::Panel | Q3Frame::Sunken );
    setLineWidth( 2 );
 #ifdef XX_DEBUG_TEXT
    setBackgroundColor( Qt::red );
 #else
-   setBackgroundMode( NoBackground );
+   setBackgroundMode( Qt::NoBackground );
 #endif
 
 #if (QT_VERSION >= 0x030000)
@@ -396,7 +401,7 @@ void XxText::drawContents( QPainter* pp )
                               brush );
 
                   brush.setColor( fcolor );
-                  brush.setStyle( QBrush::BDiagPattern );
+                  brush.setStyle( Qt::BDiagPattern );
                   p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
                               brush );
 
@@ -536,7 +541,7 @@ void XxText::drawContents( QPainter* pp )
             // rendered measure.
             QRect brect = fm.boundingRect(
                -128, -128, 8192, 2048,
-               Qt::AlignLeft | Qt::AlignTop | Qt::SingleLine,
+               Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
                chunk, rlen, 0, 0
             );
 
@@ -682,7 +687,7 @@ void XxText::drawContents( QPainter* pp )
 
       ++irenline;
    }
-   p.setBackgroundMode( TransparentMode );
+   p.setBackgroundMode( Qt::TransparentMode );
 
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
@@ -756,7 +761,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->button() == RightButton && event->state() == 0 ) {
+   if ( event->button() == Qt::RightButton && event->state() == 0 ) {
       // Activate popup in third button.
 
       // Popup.
@@ -766,15 +771,15 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->state() & ControlButton ) {
-      if ( event->button() == RightButton ) {
+   if ( event->state() & Qt::ControlModifier ) {
+      if ( event->button() == Qt::RightButton ) {
 
          _grabMode = MOUSE_DRAG;
          _grabTopLine = _sv->getTopLine();
          _grabDeltaLineNo = dlineno;
          return;
       }
-      else if ( event->button() == LeftButton ) {
+      else if ( event->button() == Qt::LeftButton ) {
 
          _grabMode = REGION_SELECT;
          _grabTopLine = _sv->getTopLine();
@@ -792,8 +797,8 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    // Interactive toggling of debug drawing structures.
 #ifdef XX_DEBUG_TEXT
-   if ( event->button() == MidButton ) {
-      if ( event->state() & ControlButton ) {
+   if ( event->button() == Qt::MidButton ) {
+      if ( event->state() & Qt::ControlModifier ) {
          flag = !flag;
       }
    }
@@ -814,13 +819,13 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    // Perform the selection and create cut text.
    QString textCopy;
-   if ( event->button() == MidButton ) {
+   if ( event->button() == Qt::MidButton ) {
       // Line event.
-      if ( event->state() & ShiftButton ) {
+      if ( event->state() & Qt::ShiftModifier ) {
          // Unselect line.
          diffs->selectLine( lineno, XxLine::UNSELECTED );
       }
-      else if ( event->state() & ControlButton ) {
+      else if ( event->state() & Qt::ControlModifier ) {
          // Delete line.
          diffs->selectLine( lineno, XxLine::NEITHER );
       }
@@ -860,12 +865,12 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
    else {
       // Region event.
-      if ( event->state() & ShiftButton ) {
-         if ( event->button() == LeftButton ) {
+      if ( event->state() & Qt::ShiftModifier ) {
+         if ( event->button() == Qt::LeftButton ) {
             // Unselect region.
             diffs->selectRegion( lineno, XxLine::UNSELECTED );
          }
-         else if ( event->button() == RightButton ) {
+         else if ( event->button() == Qt::RightButton ) {
             // Unselect region.
             diffs->selectRegion( lineno, XxLine::NEITHER );
          }
@@ -884,8 +889,8 @@ void XxText::mousePressEvent( QMouseEvent* event )
    QClipboard* cb = QkApplication::clipboard();
    cb->setText( textCopy, QClipboard::Selection );
 
-   if ( event->button() == LeftButton ||
-        event->button() == MidButton ) {
+   if ( event->button() == Qt::LeftButton ||
+        event->button() == Qt::MidButton ) {
       _app->setCursorLine( lineno );
    }
 }
@@ -1030,7 +1035,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->button() == LeftButton ) {
+   if ( event->button() == Qt::LeftButton ) {
       if ( diffs->isDirectoryDiff() ) {
          // The cursor is moved by the previous normal clicks.
          _app->diffFilesAtCursor();

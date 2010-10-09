@@ -32,7 +32,7 @@
 #include <util.h>
 
 #include <qcolor.h>
-#include <qaccel.h>
+#include <q3accel.h>
 #include <qobject.h>
 #include <qnamespace.h>
 #include <qapplication.h> // to get desktop
@@ -208,56 +208,56 @@ void XxResources::initializeOriginalXdiff()
 
    if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
       setFbColors( COLOR_SAME                   , "grey", "black" );
-      setFbColors( COLOR_SAME_BLANK             , "grey70", "black" );
+      setFbColors( COLOR_SAME_BLANK             , "#b2b2b2", "black" );
       setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon", "black" );
       setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_TWO               , "lightblue2", "black" );
-      setFbColors( COLOR_DIFF_TWO_SUP           , "lightblue3", "black" );
-      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue2",  "black" );
-      setFbColors( COLOR_DIFF_TWO_NONLY         , "lightblue3", "black" );
+      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon", "black" );
+      setFbColors( COLOR_DIFF_TWO               , "lightblue", "black" );
+      setFbColors( COLOR_DIFF_TWO_SUP           , "skyblue", "black" );
+      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue",  "black" );
+      setFbColors( COLOR_DIFF_TWO_NONLY         , "skyblue", "black" );
                                                 
-      setFbColors( COLOR_DELETE                 , "lightblue2", "black" );
-      setFbColors( COLOR_DELETE_BLANK           , "grey64", "black" );
+      setFbColors( COLOR_DELETE                 , "lightblue", "black" );
+      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "black" );
                                                 
-      setFbColors( COLOR_INSERT                 , "darkseagreen2", "black" );
-      setFbColors( COLOR_INSERT_BLANK           , "grey64", "black" );
+      setFbColors( COLOR_INSERT                 , "darkseagreen", "black" );
+      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "black" );
                                                 
       setFbColors( COLOR_DIFF_ALL               , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon", "black" );
       setFbColors( COLOR_DIFF_ALL_ONLY          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon", "black" );
                                                 
       setFbColors( COLOR_DIFFDEL                , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon", "black" );
       setFbColors( COLOR_DIFFDEL_ONLY           , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFFDEL_BLANK          , "grey64", "black" );
+      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon", "black" );
+      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "black" );
                                                 
       setFbColors( COLOR_SELECTED               , "plum", "black" );
       setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
                                                 
-      setFbColors( COLOR_IGNORE_DISPLAY         , "grey85", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey80", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey80", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey80", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY         , "#d8d8d8", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "black" );
 
       setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
       setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
                                                 
-      setFbColors( COLOR_IGNORED                , "grey70", "grey30" );
+      setFbColors( COLOR_IGNORED                , "#b2b2b2", "#4c4c4c" );
                                                 
       setFbColors( COLOR_DIRECTORIES            , "mediumturquoise", "black" );
                                                            
-      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon3", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1       , "grey60", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2       , "grey60", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3       , "grey60", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "grey70", "black" );
+      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b2b2b2", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b2b2b2", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b2b2b2", "black" );
+      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b2b2b2", "black" );
    }   
              
    _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );

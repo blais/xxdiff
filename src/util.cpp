@@ -123,15 +123,15 @@ char* qfiToHPerm( char* buf, const QFileInfo& qfi )
     char* p = buf;
     // we only support dir option
     *p++ = qfi.isDir() ? 'd' : '-';
-    *p++ = qfi.permission( QFileInfo::ReadUser )   ? 'r' : '-';
-    *p++ = qfi.permission( QFileInfo::WriteUser )  ? 'w' : '-';
-    *p++ = qfi.permission( QFileInfo::ExeUser )    ? 'x' : '-';
-    *p++ = qfi.permission( QFileInfo::ReadGroup )  ? 'r' : '-';
-    *p++ = qfi.permission( QFileInfo::WriteGroup ) ? 'w' : '-';
-    *p++ = qfi.permission( QFileInfo::ExeGroup )   ? 'x' : '-';
-    *p++ = qfi.permission( QFileInfo::ReadOther )  ? 'r' : '-';
-    *p++ = qfi.permission( QFileInfo::WriteOther ) ? 'w' : '-';
-    *p++ = qfi.permission( QFileInfo::ExeOther )   ? 'x' : '-';
+    *p++ = qfi.permission( QFile::ReadUser )   ? 'r' : '-';
+    *p++ = qfi.permission( QFile::WriteUser )  ? 'w' : '-';
+    *p++ = qfi.permission( QFile::ExeUser )    ? 'x' : '-';
+    *p++ = qfi.permission( QFile::ReadGroup )  ? 'r' : '-';
+    *p++ = qfi.permission( QFile::WriteGroup ) ? 'w' : '-';
+    *p++ = qfi.permission( QFile::ExeGroup )   ? 'x' : '-';
+    *p++ = qfi.permission( QFile::ReadOther )  ? 'r' : '-';
+    *p++ = qfi.permission( QFile::WriteOther ) ? 'w' : '-';
+    *p++ = qfi.permission( QFile::ExeOther )   ? 'x' : '-';
     *p = 0;
     return buf;
 }
@@ -145,23 +145,23 @@ int qfiToPerm( const QFileInfo& qfi )
     // This is not nice, but there's no direct way in qfi...
     // also, stat only reports 3 decimals wether it's a file or whatever
     int rv = 0;
-    if ( qfi.permission( QFileInfo::ReadUser ) )
+    if ( qfi.permission( QFile::ReadUser ) )
         rv += 400;
-    if ( qfi.permission( QFileInfo::WriteUser ) )
+    if ( qfi.permission( QFile::WriteUser ) )
         rv += 200;
-    if ( qfi.permission( QFileInfo::ExeUser ) )
+    if ( qfi.permission( QFile::ExeUser ) )
         rv += 100;
-    if ( qfi.permission( QFileInfo::ReadGroup ) )
+    if ( qfi.permission( QFile::ReadGroup ) )
         rv += 40;
-    if ( qfi.permission( QFileInfo::WriteGroup ) )
+    if ( qfi.permission( QFile::WriteGroup ) )
         rv += 20;
-    if ( qfi.permission( QFileInfo::ExeGroup ) )
+    if ( qfi.permission( QFile::ExeGroup ) )
         rv += 10;
-    if ( qfi.permission( QFileInfo::ReadOther ) )
+    if ( qfi.permission( QFile::ReadOther ) )
         rv += 4;
-    if ( qfi.permission( QFileInfo::WriteOther ) )
+    if ( qfi.permission( QFile::WriteOther ) )
         rv += 2;
-    if ( qfi.permission( QFileInfo::ExeOther ) )
+    if ( qfi.permission( QFile::ExeOther ) )
         rv += 1;
     return rv;
 }
@@ -1040,7 +1040,7 @@ QString XxUtil::unescapeChars( const QString& format )
 	   break;
        // use at() in case found+1 is past the end of the string
        QChar escapedChar = newFormat.at( found+1 );
-       switch( escapedChar ) {
+       switch( escapedChar.toAscii() ) {
        case 'n':
 	   newFormat = newFormat.replace( found, 2, QChar( '\n' ) );
 	   break;

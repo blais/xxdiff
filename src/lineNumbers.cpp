@@ -38,6 +38,8 @@
 
 #include <qapplication.h>
 #include <qclipboard.h>
+//Added by qt3to4:
+#include <Q3Frame>
 
 #include <math.h>
 #include <stdio.h>
@@ -62,14 +64,14 @@ XxLineNumbers::XxLineNumbers(
    QWidget*        parent, 
    const char*     name 
 ) :
-   QFrame( parent, name, WResizeNoErase ),
+   Q3Frame( parent, name, Qt::WResizeNoErase ),
    _app( app ),
    _central( central ),
    _no( no )
 {
    // This must be set equal to the one in XxText for proper vertical alignment
    // of text.
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
+   setFrameStyle( Q3Frame::Panel | Q3Frame::Sunken );
    setLineWidth( 2 );
 
    setSizePolicy(

@@ -3,7 +3,7 @@
 # Install script for tengis.
 #
 
-__version__ = "$Revision$"
+__version__ = "$Revision: 791 $"
 __author__ = "Martin Blais <blais@furius.ca>"
 
 import os
