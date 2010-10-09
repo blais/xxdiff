@@ -56,7 +56,8 @@ XxScrollView::XxScrollView(
    _displayWidth( 0 ),
    _displayHeight( 0 ),
    _textWidth( 0 ),
-   _textHeight( 0 )
+   _textHeight( 0 ),
+   _managingWheelEvent( 0 )
 {
    // Initialize to null.  The derived classes create them.
    _hscroll = 0;
@@ -323,8 +324,10 @@ void XxScrollView::wheelEvent( QWheelEvent* e )
       }
    }
    else {
-      if (e->spontaneous()) {
-         QApplication::sendEvent( _vscroll[0], e );
+      if ( ! _managingWheelEvent ) {
+          _managingWheelEvent = true;
+          QApplication::sendEvent( _vscroll[0], e );
+          _managingWheelEvent = false;
       }
    }
 }
