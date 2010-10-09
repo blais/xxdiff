@@ -323,7 +323,10 @@ void XxScrollView::wheelEvent( QWheelEvent* e )
       }
    }
    else {
-      QApplication::sendEvent( _vscroll[0], e );
+      if (e->spontaneous()) {
+         QApplication::sendEvent( _vscroll[0], e );
+
+      }
    }
 }
 
