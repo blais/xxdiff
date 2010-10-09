@@ -32,7 +32,6 @@
 #include <util.h>
 
 #include <qcolor.h>
-#include <q3accel.h>
 #include <qobject.h>
 #include <qnamespace.h>
 #include <qapplication.h> // to get desktop

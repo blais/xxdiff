@@ -27,7 +27,7 @@
 #include <accelUtil.h>
 #include <resources.h>
 
-#include <q3accel.h>
+#include <QKeySequence>
 
 #include <iostream>
 #include <string.h>
@@ -286,8 +286,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 //
 void XxAccelUtil::write( std::ostream& os, int accel )
 {
-   QString str = Q3Accel::keyToString( accel );
-   os << str.ascii();
+   os << QKeySequence( accel ).toString().ascii();
 }
 
 XX_NAMESPACE_END

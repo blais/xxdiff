@@ -43,7 +43,7 @@
 #include <qmenubar.h>
 #include <qlayout.h>
 #include <q3whatsthis.h>
-#include <q3accel.h>
+#include <QShortcut>
 
 #include <qapplication.h>
 #include <qclipboard.h>
@@ -141,10 +141,8 @@ XxCentralFrame::XxCentralFrame(
    createOnContextHelp();
 
    // Add some extra accelerators.
-   Q3Accel* a = new Q3Accel( this );
-
-   a->connectItem( a->insertItem(Qt::Key_Right), this, SLOT(scrollRight()) );
-   a->connectItem( a->insertItem(Qt::Key_Left), this, SLOT(scrollLeft()) );
+   new QShortcut( Qt::Key_Right, this, SLOT(scrollRight()) );
+   new QShortcut( Qt::Key_Left,  this, SLOT(scrollLeft())  );
 
    // Watch cursor changes.
    connect( app, SIGNAL(cursorChanged(int)), this, SLOT(onCursorChanged(int)) );

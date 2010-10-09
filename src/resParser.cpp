@@ -43,7 +43,7 @@
 
 #include <kdeSupport.h>
 
-#include <q3accel.h>
+#include <QKeySequence>
 #include <qapplication.h>
 #include <qfont.h>
 #include <qfile.h>
@@ -973,7 +973,7 @@ void XxResParser::genInitFile(
          int aval = res1.getAccelerator( accel );
          QString astr("");
          if ( aval != 0 ) {
-            astr = Q3Accel::keyToString( aval );
+            astr = QKeySequence( aval ).toString();
          }
          os << accelStr << "." << accelList[ii]._name << ": \""
             << astr << "\"" << endl;
@@ -1171,7 +1171,7 @@ void XxResParser::listResources( QTextStream& os )
       int aval = res.getAccelerator( accel );
       QString astr("");
       if ( aval != 0 ) {
-         astr = Q3Accel::keyToString( aval );
+         astr = QKeySequence( aval ).toString();
       }
       os << accelStr << "." << accelList[ii]._name << ": \""
          << astr.latin1() << "\"" << endl;
@@ -1355,7 +1355,7 @@ QString XxResParser::getResourceRef()
          QString astr("");
             if ( qApp != 0 ) {
                if ( aval != 0 ) {
-                  astr = Q3Accel::keyToString( aval );
+                  astr = QKeySequence( aval ).toString();
                }
             }
             else {
