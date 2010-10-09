@@ -325,7 +325,6 @@ void XxScrollView::wheelEvent( QWheelEvent* e )
    else {
       if (e->spontaneous()) {
          QApplication::sendEvent( _vscroll[0], e );
-
       }
    }
 }
