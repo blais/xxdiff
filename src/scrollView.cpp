@@ -57,7 +57,7 @@ XxScrollView::XxScrollView(
    _displayHeight( 0 ),
    _textWidth( 0 ),
    _textHeight( 0 ),
-   _managingWheelEvent( 0 )
+   _managingWheelEvent( false )
 {
    // Initialize to null.  The derived classes create them.
    _hscroll = 0;
