@@ -164,7 +164,7 @@ public:
    QRect getMainWindowGeometry() const;
 
    // Returns a reference on the view popup menu.
-   QkPopupMenu* getViewPopup( const int no, const XxLine& line ) const;
+   QkMenu* getViewPopup( const int no, const XxLine& line ) const;
 
    // Returns the return value to send back to caller.
    int getReturnValue() const;
@@ -456,12 +456,12 @@ private:
    XxMergedFrame*          _paneMergedView;
    XxMergedWindow*         _popupMergedView;
    XxCentralFrame*         _central;
-   QkPopupMenu*            _viewPopup[4];
-   QkPopupMenu*            _optionsMenu;
-   QkPopupMenu*            _displayMenu;
-   QkPopupMenu*            _hordiffMenu;
-   QkPopupMenu*            _windowsMenu;
-   int                     _menuids[ MAX_MENUIDS ];
+   QkMenu*                 _viewPopup[4];
+   QkMenu*                 _optionsMenu;
+   QkMenu*                 _displayMenu;
+   QkMenu*                 _hordiffMenu;
+   QkMenu*                 _windowsMenu;
+   QAction*                _menuactions[ MAX_MENUIDS ];
    QWidget*                _overviewArea;
    QLabel*                 _remUnselView;
    XxOverview*             _overview;

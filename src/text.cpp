@@ -38,7 +38,7 @@
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <q3popupmenu.h>
+#include <QMenu>
 
 #include <qapplication.h>
 #include <qclipboard.h>
@@ -764,7 +764,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
       // Popup.
       const XxLine& line = diffs->getLine( lineno );
-      QkPopupMenu* popup = _app->getViewPopup( _no, line );
+      QkMenu* popup = _app->getViewPopup( _no, line );
       popup->popup( event->globalPos() );
       return;
    }

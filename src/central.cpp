@@ -39,8 +39,6 @@
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <q3popupmenu.h>
-#include <qmenubar.h>
 #include <qlayout.h>
 #include <q3whatsthis.h>
 #include <QShortcut>

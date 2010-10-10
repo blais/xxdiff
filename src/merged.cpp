@@ -36,8 +36,8 @@
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <q3popupmenu.h>
-#include <qmenubar.h>
+#include <QMenu>
+#include <QMenuBar>
 #include <qlayout.h>
 
 #include <qapplication.h>
@@ -153,14 +153,11 @@ XxMergedWindow::XxMergedWindow(
 {
    const XxResources& resources = app->getResources();
 
-   QkPopupMenu* menu = new QkPopupMenu;
-   menu->insertItem( 
+   QkMenu* menu = menuBar()->addMenu( "W&indow" );
+   menu->addAction( 
       "Close", this, SLOT(hide()),
       resources.getAccelerator( ACCEL_MERGED_CLOSE )
    );
-
-   QkMenuBar* m = menuBar();
-   m->insertItem( "W&indow", menu );
 
    _frame = new XxMergedFrame( app, this, "merged_frame" );
 

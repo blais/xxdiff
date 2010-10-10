@@ -1,5 +1,3 @@
-//Added by qt3to4:
-#include <Q3PopupMenu>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -33,7 +31,7 @@
 
 #include <kapplication.h>
 #include <kmainwindow.h>
-#include <kpopupmenu.h>
+#include <kmenu.h>
 #include <ktoolbar.h>
 #include <kmenubar.h>
 #include <kcmdlineargs.h>
@@ -50,7 +48,7 @@
 
 typedef class KApplication     QkApplication;
 typedef class KMainWindow      QkMainWindow;
-typedef class KPopupMenu       QkPopupMenu;
+typedef class KMenu            QkMenu;
 typedef class KToolBar         QkToolBar;
 typedef class KMenuBar         QkMenuBar;
 typedef class KDialogBase      QkDialog;
@@ -64,7 +62,7 @@ typedef class KListBox         QkListBox;
 
 typedef class QApplication     QkApplication;
 typedef class QMainWindow      QkMainWindow;
-typedef class Q3PopupMenu       QkPopupMenu;
+typedef class QMenu            QkMenu;
 typedef class QToolBar         QkToolBar;
 typedef class QMenuBar         QkMenuBar;
 typedef class QDialog          QkDialog;

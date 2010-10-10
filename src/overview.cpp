@@ -34,7 +34,6 @@
 #include <qbrush.h>
 #include <qpen.h>
 #include <qcolor.h>
-#include <q3popupmenu.h>
 //Added by qt3to4:
 #include <Q3PointArray>
 #include <QWheelEvent>
