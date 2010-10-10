@@ -72,6 +72,7 @@ XX_NAMESPACE_BEGIN
 
 class XxApp;
 class XxText;
+class QCloseEvent;
 
 /*==============================================================================
  * CLASS XxMergedFrame
@@ -151,6 +152,8 @@ public slots:
    void hide();
    // </group>
 
+protected:
+   virtual void closeEvent( QCloseEvent* );
 
 private:
 

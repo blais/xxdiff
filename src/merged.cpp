@@ -39,6 +39,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <qlayout.h>
+#include <QCloseEvent>
 
 #include <qapplication.h>
 #include <qclipboard.h>
@@ -170,6 +171,14 @@ void XxMergedWindow::hide()
 {
    BaseClass::hide();
    _app->synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::closeEvent( QCloseEvent *e)
+{
+   e->ignore();
+   hide();
 }
 
 XX_NAMESPACE_END
