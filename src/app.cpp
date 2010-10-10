@@ -48,7 +48,7 @@
 #include <resParser.h>
 #include <central.h>
 
-#include <q3mainwindow.h>
+#include <QMainWindow>
 #include <q3popupmenu.h>
 #include <qmenubar.h>
 #include <qlayout.h>
@@ -65,8 +65,9 @@
 #include <q3whatsthis.h>
 #include <qclipboard.h>
 #include <qsocketnotifier.h>
-#include <q3toolbar.h>
-#include <qtoolbutton.h>
+#include <QToolBar>
+#include <qtoolbutton.h>         /////////////// A VIRER
+#include <QAction>
 #include <qtextstream.h>
 #include <qfile.h>
 #include <qsplitter.h>
@@ -198,7 +199,6 @@ public:
    XxMainWindow(
       XxApp*      app,
       QWidget*    parent = 0,
-      const char* name = 0,
       Qt::WFlags      f = Qt::WType_TopLevel
    );
 
@@ -217,10 +217,9 @@ private:
 XxMainWindow::XxMainWindow(
    XxApp*      app,
    QWidget*    parent,
-   const char* name,
    Qt::WFlags      f
 ) :
-   QkMainWindow( parent, name, f ),
+   QkMainWindow( parent, f ),
    _app( app )
 {}
 
@@ -719,7 +718,7 @@ void XxApp::createUI()
    // Create widgets.
    //
 
-   _mainWindow = new XxMainWindow( this, 0, "xxdiff main window" );
+   _mainWindow = new XxMainWindow( this, 0 );
 
    // Central widget.
    //
@@ -877,56 +876,50 @@ void XxApp::createUI()
 QkToolBar* XxApp::createToolbar()
 {
 #ifdef XX_KDE
-   KToolBar* toolbar = new KToolBar( _mainWindow, Qt::DockTop );
+   KToolBar* toolbar = _mainWindow->addToolBar( "Tools" );
 #else
-   Q3ToolBar* toolbar = new Q3ToolBar( "Tools", _mainWindow );
+   QToolBar* toolbar = _mainWindow->addToolBar( "Tools" );
 #endif
 
    QPixmap pmSaveAsMerged(
       const_cast<const char**>( save_as_merged_xpm )
    );
-   /*QToolButton* butSaveAsMerged = */new QToolButton(
-      pmSaveAsMerged,
-      "Save as merged",
-      "Save as merged",
-      this, SLOT(saveAsMerged()), toolbar
-   );
+  toolbar->addAction(
+     pmSaveAsMerged,
+     "Save as merged",
+     this, SLOT(saveAsMerged())
+  );
 
-   QToolButton* butSaveAsLeft = 0;
-   QToolButton* butSaveAsMiddle = 0;
-   QToolButton* butSaveAsRight = 0;
+   QAction* actSaveAsRight = 0;
    if ( _cmdline._unmerge == false ) {
 
       QPixmap pmSaveAsLeft(
          const_cast<const char**>( save_as_left_xpm )
       );
-      butSaveAsLeft = new QToolButton(
+      toolbar->addAction(
          pmSaveAsLeft,
          "Save as left",
-         "Save as left",
-         this, SLOT(saveAsLeft()), toolbar
+         this, SLOT(saveAsLeft())
       );
 
       if ( _nbFiles == 3 ) {
          QPixmap pmSaveAsMiddle(
             const_cast<const char**>( save_as_middle_xpm )
          );
-         butSaveAsMiddle = new QToolButton(
+         toolbar->addAction(
             pmSaveAsMiddle,
             "Save as middle",
-            "Save as middle",
-            this, SLOT(saveAsMiddle()), toolbar
+            this, SLOT(saveAsMiddle())
          );
       }
 
       QPixmap pmSaveAsRight(
          const_cast<const char**>( save_as_right_xpm )
       );
-      butSaveAsRight = new QToolButton(
+      actSaveAsRight = toolbar->addAction(
          pmSaveAsRight,
          "Save as right",
-         "Save as right",
-         this, SLOT(saveAsRight()), toolbar
+         this, SLOT(saveAsRight())
       );
 
    }
@@ -935,11 +928,10 @@ QkToolBar* XxApp::createToolbar()
       QPixmap pmSaveAsMiddle(
          const_cast<const char**>( save_as_middle_xpm )
       );
-      /*butSaveAsMiddle = */new QToolButton(
+      toolbar->addAction(
          pmSaveAsMiddle,
          "Save as original",
-         "Save as original",
-         this, SLOT(saveAsLeft()), toolbar
+         this, SLOT(saveAsLeft())
       );
 
    }
@@ -947,16 +939,15 @@ QkToolBar* XxApp::createToolbar()
    QPixmap pmSaveAs(
       const_cast<const char**>( save_as_xpm )
    );
-   /*QToolButton* butSaveAs = */new QToolButton(
+   toolbar->addAction(
       pmSaveAs,
       "Save as ...",
-      "Save as ...",
-      this, SLOT(saveAs()), toolbar
+      this, SLOT(saveAs())
    );
 
    if ( _cmdline._single == true ) {
-      XX_CHECK( butSaveAsRight );
-      butSaveAsRight->setEnabled( false );
+      XX_CHECK( actSaveAsRight );
+      actSaveAsRight->setEnabled( false );
    }
 
    toolbar->addSeparator();
@@ -964,41 +955,37 @@ QkToolBar* XxApp::createToolbar()
    QPixmap pmPreviousUnselectedDifference(
       const_cast<const char**>( previous_unselected_difference_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmPreviousUnselectedDifference,
       "Previous unselected difference",
-      "Previous unselected difference",
-      this, SLOT(previousUnselected()), toolbar
+      this, SLOT(previousUnselected())
    );
 
    QPixmap pmPreviousDifference(
       const_cast<const char**>( previous_difference_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmPreviousDifference,
       "Previous difference",
-      "Previous difference",
-      this, SLOT(previousDifference()), toolbar
+      this, SLOT(previousDifference())
    );
 
    QPixmap pmNextDifference(
       const_cast<const char**>( next_difference_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmNextDifference,
       "Next difference",
-      "Next difference",
-      this, SLOT(nextDifference()), toolbar
+      this, SLOT(nextDifference())
    );
 
    QPixmap pmNextUnselectedDifference(
       const_cast<const char**>( next_unselected_difference_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmNextUnselectedDifference,
       "Next unselected difference",
-      "Next unselected difference",
-      this, SLOT(nextUnselected()), toolbar
+      this, SLOT(nextUnselected())
    );
 
    toolbar->addSeparator();
@@ -1006,31 +993,28 @@ QkToolBar* XxApp::createToolbar()
    QPixmap pmSearch(
       const_cast<const char**>( search_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmSearch,
       "Search",
-      "Search",
-      this, SLOT(search()), toolbar
+      this, SLOT(search())
    );
 
    QPixmap pmSearchBackward(
       const_cast<const char**>( search_backward_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmSearchBackward,
       "Search backward",
-      "Search backward",
-      this, SLOT(searchBackward()), toolbar
+      this, SLOT(searchBackward())
    );
 
    QPixmap pmSearchForward(
       const_cast<const char**>( search_forward_xpm )
    );
-   new QToolButton(
+   toolbar->addAction(
       pmSearchForward,
       "Search forward",
-      "Search forward",
-      this, SLOT(searchForward()), toolbar
+      this, SLOT(searchForward())
    );
 
    if ( _filesAreDirectories == false ) {
@@ -1039,53 +1023,48 @@ QkToolBar* XxApp::createToolbar()
       QPixmap pmSelectRegionLeft(
          const_cast<const char**>( select_region_left_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmSelectRegionLeft,
          "Select region left",
-         "Select region left",
-         this, SLOT(selectRegionLeft()), toolbar
+         this, SLOT(selectRegionLeft())
       );
 
       if ( _nbFiles == 3 ) {
          QPixmap pmSelectRegionMiddle(
             const_cast<const char**>( select_region_middle_xpm )
          );
-         new QToolButton(
+         toolbar->addAction(
             pmSelectRegionMiddle,
             "Select region middle",
-            "Select region middle",
-            this, SLOT(selectRegionMiddle()), toolbar
+            this, SLOT(selectRegionMiddle())
          );
       }
 
       QPixmap pmSelectRegionRight(
          const_cast<const char**>( select_region_right_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmSelectRegionRight,
          "Select region right",
-         "Select region right",
-         this, SLOT(selectRegionRight()), toolbar
+         this, SLOT(selectRegionRight())
       );
 
       QPixmap pmSelectRegionNeither(
          const_cast<const char**>( select_region_neither_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmSelectRegionNeither,
          "Select region neither",
-         "Select region neither",
-         this, SLOT(selectRegionNeither()), toolbar
+         this, SLOT(selectRegionNeither())
       );
 
       QPixmap pmSelectRegionUnselect(
          const_cast<const char**>( select_region_unselect_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmSelectRegionUnselect,
          "Unselect region",
-         "Unselect region",
-         this, SLOT(selectRegionUnselect()), toolbar
+         this, SLOT(selectRegionUnselect())
       );
 
       toolbar->addSeparator();
@@ -1093,11 +1072,10 @@ QkToolBar* XxApp::createToolbar()
       QPixmap pmSplitSwapJoin(
          const_cast<const char**>( split_swap_join_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmSplitSwapJoin,
          "Split/swap/join",
-         "Split/swap/join",
-         this, SLOT(regionSplitSwapJoin()), toolbar
+         this, SLOT(regionSplitSwapJoin())
       );
    }
    else {
@@ -1106,21 +1084,19 @@ QkToolBar* XxApp::createToolbar()
       QPixmap pmDiffFiles(
          const_cast<const char**>( diff_files_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmDiffFiles,
          "Diff files at cursor",
-         "Diff files at cursor",
-         this, SLOT(diffFilesAtCursor()), toolbar
+         this, SLOT(diffFilesAtCursor())
       );
 
       QPixmap pmNextAndDiffFiles(
          const_cast<const char**>( diff_files_next_xpm )
       );
-      new QToolButton(
+      toolbar->addAction(
          pmNextAndDiffFiles,
          "Move to next difference and diff files at cursor",
-         "Move to next difference and diff files at cursor",
-         this, SLOT(nextAndDiffFiles()), toolbar
+         this, SLOT(nextAndDiffFiles())
       );
    }
 
@@ -1132,32 +1108,29 @@ QkToolBar* XxApp::createToolbar()
       QPixmap pmQuitReject(
          const_cast<const char**>( return_reject_xpm )
       );
-      /*butQuitReject = */new QToolButton(
+      toolbar->addAction(
          pmQuitReject,
          "Exit with output indicating rejection of the change.",
-         "Quit Reject",
-         this, SLOT(quitReject()), toolbar
-      );
+         this, SLOT(quitReject())
+      )->setStatusTip( "Quit Reject" );
 
       QPixmap pmQuitMerged(
          const_cast<const char**>( return_merged_xpm )
       );
-      /*butQuitMerged = */new QToolButton(
+      toolbar->addAction(
          pmQuitMerged,
          "Exit with output indicating changes have been merged manually.",
-         "Quit Merged",
-         this, SLOT(quitMerged()), toolbar
-      );
+         this, SLOT(quitMerged())
+      )->setStatusTip( "Quit Merged" );
 
       QPixmap pmQuitAccept(
          const_cast<const char**>( return_accept_xpm )
       );
-      /*butQuitAccept = */new QToolButton(
+      toolbar->addAction(
          pmQuitAccept,
          "Exit with output indicating acceptance of the change.",
-         "Quit Accept",
-         this, SLOT(quitAccept()), toolbar
-      );
+         this, SLOT(quitAccept())
+      )->setStatusTip( "Quit Accept" );
    }
 
    return toolbar;
@@ -2008,10 +1981,11 @@ void XxApp::createMenus()
       "User's manual...", this, SLOT(helpManPage()),
       _resources->getAccelerator( ACCEL_HELP_MAN_PAGE )
    );
-   helpMenu->insertItem(
-      "On context", _mainWindow, SLOT(whatsThis()),
-      _resources->getAccelerator( ACCEL_HELP_ON_CONTEXT )
-   );
+
+   QAction * actOnContext = QWhatsThis::createAction();
+   actOnContext->setShortcut( _resources->getAccelerator( ACCEL_HELP_ON_CONTEXT ) );
+   helpMenu->addAction( actOnContext );
+
    helpMenu->insertSeparator();
    helpMenu->insertItem(
       "About...", this, SLOT(helpAbout()),
@@ -4313,9 +4287,7 @@ void XxApp::togglePopupMergedView()
 
    // Create popup merge view if it does not exist.
    if ( _popupMergedView == 0 ) {
-      _popupMergedView = new XxMergedWindow(
-         this, _mainWindow, "xxdiff merged window"
-      );
+      _popupMergedView = new XxMergedWindow( this, _mainWindow );
    }
 
    // Show it or hide it.

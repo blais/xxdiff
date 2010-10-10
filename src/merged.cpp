@@ -146,10 +146,9 @@ void XxMergedFrame::onCursorChanged( int cursorLine )
 //
 XxMergedWindow::XxMergedWindow( 
    XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+   QWidget*    parent
 ) :
-   BaseClass( parent, name ),
+   BaseClass( parent ),
    _app( app )
 {
    const XxResources& resources = app->getResources();

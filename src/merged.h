@@ -44,7 +44,7 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <q3mainwindow.h>
+#include <QMainWindow>
 #define INCL_QT_QMAINWINDOW
 #endif
 
@@ -142,8 +142,7 @@ public:
    // Constructor.
    XxMergedWindow( 
       XxApp*          app, 
-      QWidget*        parent = 0,
-      const char*     name = 0 
+      QWidget*        parent = 0
    );
 
    // See base class.

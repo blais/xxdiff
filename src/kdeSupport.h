@@ -63,9 +63,9 @@ typedef class KListBox         QkListBox;
 #else
 
 typedef class QApplication     QkApplication;
-typedef class Q3MainWindow      QkMainWindow;
+typedef class QMainWindow      QkMainWindow;
 typedef class Q3PopupMenu       QkPopupMenu;
-typedef class Q3ToolBar         QkToolBar;
+typedef class QToolBar         QkToolBar;
 typedef class QMenuBar         QkMenuBar;
 typedef class QDialog          QkDialog;
 typedef class Q3FileDialog      QkFileDialog;

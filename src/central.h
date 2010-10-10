@@ -42,7 +42,7 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <q3mainwindow.h>
+#include <QMainWindow>
 #define INCL_QT_QMAINWINDOW
 #endif
 
