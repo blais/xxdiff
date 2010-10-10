@@ -63,6 +63,7 @@
  *============================================================================*/
 
 class QScrollBar;
+class QCloseEvent;
 
 XX_NAMESPACE_BEGIN
 
@@ -72,7 +73,6 @@ XX_NAMESPACE_BEGIN
 
 class XxApp;
 class XxText;
-class QCloseEvent;
 
 /*==============================================================================
  * CLASS XxMergedFrame
