@@ -247,8 +247,10 @@ public:
    XxAboutDialog( QWidget* parent, QString& text );
 #endif
 
+#ifdef XX_KDE
    // See base class.
    virtual void done( int r );
+#endif
 
 };
 
@@ -266,22 +268,26 @@ XxAboutDialog::XxAboutDialog( QWidget* parent, const KAboutData* aboutData ) :
 
 XxAboutDialog::XxAboutDialog( QWidget* parent, QString& text ) :
    QMessageBox( 
-      "About xxdiff.", text, QMessageBox::Information, 
-      1, 0, 0, parent, 0, false 
+      QMessageBox::Information, "About xxdiff.", text,
+      QMessageBox::Close, parent
    )
 {
    QPixmap pm_xxdiff_logo( const_cast<const char**>( xxdiff_xpm ) );
    setIconPixmap( pm_xxdiff_logo );
+   setWindowModality( Qt::NonModal );
+   setAttribute( Qt::WA_DeleteOnClose );
 }
 
 #endif
 
 //------------------------------------------------------------------------------
 //
+#ifdef XX_KDE
 void XxAboutDialog::done( int )
 {
-   delete this;
+   delete this; // Will probably crash too in KDE, as it does in Qt4
 }
+#endif
 
 /*==============================================================================
  * LOCAL CLASS XxManPageDialog
