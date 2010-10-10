@@ -147,9 +147,8 @@ public:
 
    // See base class.
    // <group>
-   virtual void update();
-   virtual void show();
-   virtual void hide();
+public slots:
+   void hide();
    // </group>
 
 

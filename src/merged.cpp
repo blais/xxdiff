@@ -166,22 +166,6 @@ XxMergedWindow::XxMergedWindow(
 
 //------------------------------------------------------------------------------
 //
-void XxMergedWindow::update()
-{
-   BaseClass::update();
-   _frame->update(); // FIXME do we really need this?
-}
-
-//------------------------------------------------------------------------------
-//
-void XxMergedWindow::show()
-{
-   BaseClass::show();
-   // Nop for now.
-}
-
-//------------------------------------------------------------------------------
-//
 void XxMergedWindow::hide()
 {
    BaseClass::hide();
