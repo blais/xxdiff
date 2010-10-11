@@ -72,7 +72,6 @@
 #include <qsplitter.h>
 #include <qregexp.h>
 #include <qcheckbox.h>
-#include <q3filedialog.h>
 #include <qdatetime.h>
 //Added by qt3to4:
 #include <QPixmap>
