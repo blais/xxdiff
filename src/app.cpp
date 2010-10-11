@@ -70,7 +70,6 @@
 #include <qtextstream.h>
 #include <qfile.h>
 #include <qsplitter.h>
-#include <q3valuelist.h>
 #include <qregexp.h>
 #include <qcheckbox.h>
 #include <q3filedialog.h>
@@ -741,10 +740,8 @@ void XxApp::createUI()
 
    // Adjust splitter (after we've create two children for it to contain).
    uint smpp = _resources->getShowPaneMergedViewPercent();
-   Q3ValueList<int> vl;
-   vl.append( smpp );
-   vl.append( 100 - smpp );
-   _splitter->setSizes( vl );
+   _splitter->setStretchFactor( 0, smpp );
+   _splitter->setStretchFactor( 1, 100-smpp );
 
 
    // Overview and remaining unselected regions indicator area.
