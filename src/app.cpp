@@ -62,7 +62,7 @@
 #include <QFileDialog>
 #include <QShortcut>
 #include <qlabel.h>
-#include <q3whatsthis.h>
+#include <QWhatsThis>
 #include <qclipboard.h>
 #include <qsocketnotifier.h>
 #include <QToolBar>
@@ -1131,7 +1131,7 @@ QkToolBar* XxApp::createToolbar()
 //
 void XxApp::createOnContextHelp()
 {
-   Q3WhatsThis::add( _overview, XxHelp::getWhatsThisText( XxHelp::OVERVIEW ) );
+   _overview->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::OVERVIEW ) );
 }
 
 //------------------------------------------------------------------------------

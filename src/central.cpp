@@ -40,7 +40,6 @@
 #include <qpen.h>
 #include <qcolor.h>
 #include <qlayout.h>
-#include <q3whatsthis.h>
 #include <QShortcut>
 
 #include <qapplication.h>
@@ -150,23 +149,16 @@ XxCentralFrame::XxCentralFrame(
 //
 void XxCentralFrame::createOnContextHelp()
 {
-   Q3WhatsThis::add( _vscroll[0], XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+    _vscroll[0]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
    if ( _vscroll[1] != 0 ) {
-      Q3WhatsThis::add( _vscroll[1],
-                       XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+      _vscroll[1]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
    }
-   Q3WhatsThis::add( _hscroll, XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
+    _hscroll->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
 
    for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
-      Q3WhatsThis::add(
-         _filenameLabel[ii], XxHelp::getWhatsThisText( XxHelp::FILENAME )
-      );
-      Q3WhatsThis::add(
-         _lineNumberLabel[ii], XxHelp::getWhatsThisText( XxHelp::LINENO )
-      );
-      Q3WhatsThis::add(
-         _text[ii], XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW )
-      );
+      _filenameLabel[ii]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::FILENAME ) );
+      _lineNumberLabel[ii]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::LINENO ) );
+      _text[ii]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW ) );
    }
 }
 
