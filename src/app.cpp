@@ -59,7 +59,7 @@
 #endif
 #include <qfont.h>
 #include <qmessagebox.h>
-#include <q3filedialog.h>
+#include <QFileDialog>
 #include <QShortcut>
 #include <qlabel.h>
 #include <q3whatsthis.h>
@@ -530,21 +530,13 @@ XxApp::~XxApp()
 // Side-effect: This modifies the cmdline.
 void XxApp::promptForFiles( XxCmdline& cmdline )
 {
-	cmdline._filenames[0] = Q3FileDialog::getOpenFileName(
-		QString::null,
-      QString::null,
-      0,
-      "open left file",
-      "Choose Left File" );
+	cmdline._filenames[0] = QFileDialog::getOpenFileName(
+      0, "Choose Left File" );
 
 	if ( cmdline._filenames[0] != QString::null ) {
 
-		cmdline._filenames[1] = Q3FileDialog::getOpenFileName(
-			QString::null,
-	      QString::null,
-	      0,
-	      "open right file",
-	      "Choose Right File" );
+		cmdline._filenames[1] = QFileDialog::getOpenFileName(
+          0, "Choose Right File" );
 
 		if ( cmdline._filenames[1] != QString::null ) {
 			cmdline._nbFilenames = 2;
