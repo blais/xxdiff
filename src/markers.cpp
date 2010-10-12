@@ -27,7 +27,6 @@
 #include <markers.h>
 
 #include <QFileDialog>
-#include <q3urloperator.h>
 #include <qfileinfo.h>
 #include <qstring.h>
 #include <qdir.h>
@@ -279,24 +278,6 @@ QString XxMarkersFileDialog::getSaveFileName(
    QWidget*       parent
 )
 {
-   // From Qt's source code:
-   QString initialSelection;
-   static QString workingDirectory;
-   if ( !startWith.isEmpty() ) {
-      Q3UrlOperator u( startWith );
-      if ( u.isLocalFile() && QFileInfo( u.path() ).isDir() ) {
-         //workingDirectory = startWith;
-      }
-      else {
-         //workingDirectory = u.toString();
-         initialSelection = QString::null;//u.fileName();
-      }
-   }
-   //if ( workingDirectory.isNull() ) {
-   //   workingDirectory = QDir::currentDirPath();
-   //}
-
-
    XxMarkersFileDialog* dlg = new XxMarkersFileDialog(
       startWith, filter, TRUE, threeWay, parent
    );
@@ -304,13 +285,8 @@ QString XxMarkersFileDialog::getSaveFileName(
    QString result;
    dlg->setFileMode( QFileDialog::AnyFile );
 
-   if ( !initialSelection.isEmpty() ) {
-      dlg->selectFile( initialSelection );
-   }
-
    if ( dlg->exec() == QDialog::Accepted ) {
       result = dlg->selectedFiles().first();
-      //workingDirectory = dlg->d->url;
    }
 
    //XxMarkersWidget* markers = dlg->getMarkersWidget();
