@@ -1168,11 +1168,12 @@ void XxApp::createMenus()
             _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
          );
       }
-      ids[2] = fileMenu->addAction(
-         "Save as right", this, SLOT(saveAsRight()),
-         _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
-      );
-
+      if ( _cmdline._single == false ) {
+         ids[2] = fileMenu->addAction(
+            "Save as right", this, SLOT(saveAsRight()),
+            _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+         );
+      }
    }
    else {
       /*ids[0] = */fileMenu->addAction(
@@ -1238,20 +1239,17 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_EDIT_MIDDLE )
       );
    }
-   ids[5] = fileMenu->addAction(
-      "Edit right file", this, SLOT(editRight()),
-      _resources->getAccelerator( ACCEL_EDIT_RIGHT )
-   );
+   if ( _cmdline._unmerge == false && _cmdline._single == false ) {
+      ids[5] = fileMenu->addAction(
+         "Edit right file", this, SLOT(editRight()),
+         _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+      );
+  }
 
    fileMenu->addAction(
       "Save Options...", this, SLOT(saveOptions()),
       _resources->getAccelerator( ACCEL_SAVE_OPTIONS )
    );
-
-   if ( _cmdline._unmerge == true || _cmdline._single == true ) {
-      ids[2]->setEnabled( false );
-      ids[5]->setEnabled( false );
-   }
 
    fileMenu->addSeparator();
 
@@ -4520,7 +4518,9 @@ void XxApp::helpAbout()
 void XxApp::synchronizeUI()
 {
    if ( _filesAreDirectories == false ) {
-      if ( _nbFiles == 2 ) {
+      if ( _nbFiles == 2 &&
+           _cmdline._unmerge == false &&
+           _cmdline._single == false ) {
          XxCommand cmdResId =
             (_nbFiles == 2) ? CMD_DIFF_FILES_2 : CMD_DIFF_FILES_3;
          // Note: useless, this is only valid for two-way file diffs.
