@@ -29,7 +29,7 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <q3cstring.h>
+#include <QByteArray>
 #include <qtextstream.h>
 #include <qregexp.h>
 
@@ -228,11 +228,11 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    for ( XxFln l = 1; l <= nbLines; ++l ) {
       uint len;
       const char* textlineOrig = buffer.getTextLine( l, len );
-      Q3CString textline( textlineOrig, len+1 ); // This copy sucks...
+      QByteArray textline( textlineOrig, len+1 ); // This copy sucks...
 
       if ( inConflict == OUTSIDE ) {
          XX_LOCAL_TRACE( "===> " << reStart.pattern() << " " << textline );
-         if ( reStart.search( textline ) != -1 ) {
+         if ( reStart.indexIn( textline ) != -1 ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
             createIgnoreBlock( f1n1, f1n1, l - f1n1 );
@@ -251,7 +251,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN1 ) {
-         if ( reSep.search( textline ) != -1 ) {
+         if ( reSep.indexIn( textline ) != -1 ) {
             f1n2 = l;
             f2n1 = l + 1;
             inConflict = IN2;
@@ -261,7 +261,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN2 ) {
-         if ( reEnd.search( textline ) != -1 ) {
+         if ( reEnd.indexIn( textline ) != -1 ) {
             f2n2 = l;
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;
@@ -414,12 +414,12 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
       uint len;
       const char* textlineOrig = buffer.getTextLine( l, len );
-      Q3CString textline( textlineOrig, len+1 ); // This copy sucks...
+      QByteArray textline( textlineOrig, len+1 ); // This copy sucks...
       XX_LOCAL_TRACE( "<" << inConflict << "> " << 
                       l << " textline = " << textline );
 
       if ( inConflict == OUTSIDE ) {
-         if ( reStart.search( textline ) != -1 ) {
+         if ( reStart.indexIn( textline ) != -1 ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
             createIgnoreBlock( f1n1, f1n1, f1n1, l - f1n1 );
@@ -438,7 +438,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN1 ) {
-         if ( reSep1.search( textline ) != -1 ) {
+         if ( reSep1.indexIn( textline ) != -1 ) {
             f1n2 = l;
             f2n1 = l + 1;
             inConflict = IN2;
@@ -450,7 +450,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                outFileMiddle = texts.front().stripWhiteSpace();
             }
          }
-         else if ( reSep2.search( textline ) != -1 ) {
+         else if ( reSep2.indexIn( textline ) != -1 ) {
             f1n2 = l;
             f3n1 = l + 1;
             inConflict = IN3;
@@ -460,7 +460,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN2 ) {
-         if ( reSep2.search( textline ) != -1 ) {
+         if ( reSep2.indexIn( textline ) != -1 ) {
             f2n2 = l;
             f3n1 = l + 1;
             inConflict = IN3;
@@ -470,7 +470,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN3 ) {
-         if ( reEnd.search( textline ) != -1 ) {
+         if ( reEnd.indexIn( textline ) != -1 ) {
             f3n2 = l;
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;

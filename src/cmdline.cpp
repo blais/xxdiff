@@ -37,7 +37,7 @@
 #include <kdeSupport.h>
 
 #include <qapplication.h>
-#include <q3cstring.h>
+#include <QByteArray>
 //Added by qt3to4:
 #include <QTextStream>
 
@@ -620,12 +620,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 
          case 'e': {
             _extraDiffArgs.append( " --exclude=" );
-            _extraDiffArgs.append( Q3CString( optarg ) );
+            _extraDiffArgs.append( QByteArray( optarg ) );
          } break;
 
          case 'f': {
             _extraDiffArgs.append( " --exclude-from=" );
-            _extraDiffArgs.append( Q3CString( optarg ) );
+            _extraDiffArgs.append( QByteArray( optarg ) );
          } break;
 
          //
@@ -633,20 +633,20 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          //
          case 'Q': {
             // Split string to spaces and add as individual options.
-            Q3CString qtopts( optarg );
+            QByteArray qtopts( optarg );
             qtopts.simplifyWhiteSpace();
             int previdx = 0;
             int idx = -1;
             while ( ( idx = qtopts.find( ' ', idx+1 ) ) != -1 ) {
-               Q3CString qtopt = qtopts.mid( previdx, idx - previdx );
+               QByteArray qtopt = qtopts.mid( previdx, idx - previdx );
                _qtOptions[ _nbQtOptions++ ] = 
-                  qstrdup( static_cast<const char*>( qtopt ) );
+                  qstrdup( qtopt.constData() );
                XX_ASSERT( _nbQtOptions < 64 ); // just check
                previdx = idx+1;
             }
-            Q3CString qtopt = qtopts.mid( previdx );
+            QByteArray qtopt = qtopts.mid( previdx );
             _qtOptions[ _nbQtOptions++ ] = 
-               qstrdup( static_cast<const char*>( qtopt ) );
+               qstrdup( qtopt.constData() );
             XX_ASSERT( _nbQtOptions < (64-1) ); // just check
          } break;
 
@@ -666,14 +666,14 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             );
             XX_ASSERT( oidx != -1 );
 
-            Q3CString qtopt( "-" );
+            QByteArray qtopt( "-" );
             qtopt += _optionsQt[ oidx ]._longname;
 
             // Add argument too.
 
             if ( _optionsQt[ oidx ]._has_arg == true ) {
                _qtOptions[ _nbQtOptions++ ] =
-                  qstrdup( static_cast<const char*>( qtopt ) );
+                  qstrdup( qtopt.constData() );
                XX_ASSERT( _nbQtOptions < (64-1) ); // just check
                
                _qtOptions[ _nbQtOptions++ ] = qstrdup( optarg );
@@ -681,7 +681,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             }
             else {
                _qtOptions[ _nbQtOptions++ ] =
-                  qstrdup( static_cast<const char*>( qtopt ) );
+                  qstrdup( qtopt.constData() );
                XX_ASSERT( _nbQtOptions < (64-1) ); // just check
             }
 

@@ -28,7 +28,6 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <q3cstring.h>
 //Added by qt3to4:
 #include <QTextStream>
 
