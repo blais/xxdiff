@@ -37,7 +37,7 @@
 #endif
 
 #ifndef INCL_STD_QFILEDIALOG
-#include <q3filedialog.h>
+#include <QFileDialog>
 #define INCL_STD_QFILEDIALOG
 #endif
 
@@ -155,13 +155,13 @@ private:
 
 // <summary> a file dialog with markers added to it </summary>
 
-class XxMarkersFileDialog : public Q3FileDialog {
+class XxMarkersFileDialog : public QFileDialog {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef Q3FileDialog BaseClass;
+   typedef QFileDialog BaseClass;
 
 public:
 

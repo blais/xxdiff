@@ -274,7 +274,7 @@ XxAboutDialog::XxAboutDialog( QWidget* parent, QString& text ) :
 {
    QPixmap pm_xxdiff_logo( const_cast<const char**>( xxdiff_xpm ) );
    setIconPixmap( pm_xxdiff_logo );
-   setWindowModality( Qt::NonModal );
+   setModal( 0 );
    setAttribute( Qt::WA_DeleteOnClose );
 }
 

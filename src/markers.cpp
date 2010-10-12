@@ -26,7 +26,7 @@
 
 #include <markers.h>
 
-#include <q3filedialog.h>
+#include <QFileDialog>
 #include <q3urloperator.h>
 #include <qfileinfo.h>
 #include <qstring.h>
@@ -254,10 +254,17 @@ XxMarkersFileDialog::XxMarkersFileDialog(
    bool           threeWay,
    QWidget*       parent
 ) :
-   BaseClass( dirName, filter, parent, "XxMarkersFileDialog", modal )
+   BaseClass( parent, tr("Save as"), dirName, filter)
 {
-   _markersWidget = new XxMarkersWidget( threeWay, this );
-   addWidgets( 0, _markersWidget, 0 );
+   setModal( modal );
+   setAcceptMode( QFileDialog::AcceptSave );
+   
+   // Hack to embed XxMarkersWidget into the QFileDialog, since the
+   // convenient Qt3 addWidgets doesn't exist anymore
+   QVBoxLayout *l = qFindChild<QVBoxLayout*>(this);
+   Q_ASSERT(l);
+   _markersWidget = new XxMarkersWidget( threeWay );
+   l->addWidget(_markersWidget);
 }
 
 //------------------------------------------------------------------------------
@@ -293,17 +300,16 @@ QString XxMarkersFileDialog::getSaveFileName(
    XxMarkersFileDialog* dlg = new XxMarkersFileDialog(
       startWith, filter, TRUE, threeWay, parent
    );
-   dlg->setCaption( Q3FileDialog::tr( "Save as" ) );
 
    QString result;
-   dlg->setMode( Q3FileDialog::AnyFile );
+   dlg->setFileMode( QFileDialog::AnyFile );
 
    if ( !initialSelection.isEmpty() ) {
-      dlg->setSelection( initialSelection );
+      dlg->selectFile( initialSelection );
    }
 
    if ( dlg->exec() == QDialog::Accepted ) {
-      result = dlg->selectedFile();
+      result = dlg->selectedFiles().first();
       //workingDirectory = dlg->d->url;
    }
 

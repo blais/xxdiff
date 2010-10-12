@@ -66,7 +66,7 @@ typedef class QMenu            QkMenu;
 typedef class QToolBar         QkToolBar;
 typedef class QMenuBar         QkMenuBar;
 typedef class QDialog          QkDialog;
-typedef class Q3FileDialog      QkFileDialog;
+typedef class QFileDialog      QkFileDialog;
 typedef class QTextBrowser     QkTextBrowser;
 typedef class QPushButton      QkPushButton;
 typedef class QLineEdit        QkLineEdit;
