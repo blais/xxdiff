@@ -35,7 +35,6 @@
 #include <qpen.h>
 #include <qcolor.h>
 //Added by qt3to4:
-#include <Q3PointArray>
 #include <QWheelEvent>
 #include <QResizeEvent>
 #include <QFrame>
