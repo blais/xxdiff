@@ -1168,11 +1168,12 @@ void XxApp::createMenus()
             _resources->getAccelerator( ACCEL_SAVE_AS_MIDDLE )
          );
       }
-      if ( _cmdline._single == false ) {
-         ids[2] = fileMenu->addAction(
-            "Save as right", this, SLOT(saveAsRight()),
-            _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
-         );
+      ids[2] = fileMenu->addAction(
+         "Save as right", this, SLOT(saveAsRight()),
+         _resources->getAccelerator( ACCEL_SAVE_AS_RIGHT )
+      );
+      if ( _cmdline._single == true ) {
+          ids[2]->setEnabled( false );
       }
    }
    else {
@@ -1239,12 +1240,13 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_EDIT_MIDDLE )
       );
    }
-   if ( _cmdline._unmerge == false && _cmdline._single == false ) {
-      ids[5] = fileMenu->addAction(
-         "Edit right file", this, SLOT(editRight()),
-         _resources->getAccelerator( ACCEL_EDIT_RIGHT )
-      );
-  }
+   ids[5] = fileMenu->addAction(
+      "Edit right file", this, SLOT(editRight()),
+      _resources->getAccelerator( ACCEL_EDIT_RIGHT )
+   );
+   if ( _cmdline._unmerge == true || _cmdline._single == true ) {
+       ids[5]->setEnabled( false );
+   }
 
    fileMenu->addAction(
       "Save Options...", this, SLOT(saveOptions()),
@@ -4633,12 +4635,14 @@ void XxApp::synchronizeUI()
 
    //---------------------------------------------------------------------------
 
-   _menuactions[ ID_TogglePaneMergedView ]->setChecked( 
-      ( _paneMergedView != 0 && _paneMergedView->isVisible() )
-   );
-   _menuactions[ ID_TogglePopupMergedView ]->setChecked( 
-      ( _popupMergedView != 0 && _popupMergedView->isVisible() )
-   );
+   if ( _filesAreDirectories == false ) {
+      _menuactions[ ID_TogglePaneMergedView ]->setChecked( 
+         ( _paneMergedView != 0 && _paneMergedView->isVisible() )
+      );
+      _menuactions[ ID_TogglePopupMergedView ]->setChecked( 
+         ( _popupMergedView != 0 && _popupMergedView->isVisible() )
+      );
+  }
    _menuactions[ ID_ToggleToolbar ]->setChecked( 
       _resources->getShowOpt( SHOW_TOOLBAR )
    );
