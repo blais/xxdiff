@@ -886,7 +886,7 @@
                     <property name="spacing">
                         <number>6</number>
                     </property>
-                    <widget class="QListBox">
+                    <widget class="QListWidget">
                         <property name="name">
                             <cstring>_listboxColors</cstring>
                         </property>

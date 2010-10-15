@@ -70,7 +70,7 @@ typedef class QFileDialog      QkFileDialog;
 typedef class QTextBrowser     QkTextBrowser;
 typedef class QPushButton      QkPushButton;
 typedef class QLineEdit        QkLineEdit;
-typedef class Q3ListBox         QkListBox;
+typedef class QListWidget      QkListBox;
 
 #endif
 

@@ -166,7 +166,7 @@ public slots:
    //---------------------------------------------------------------------------
    // Colors
 
-   void listboxColors( const QString& );
+   void listboxColors( QListWidgetItem*, QListWidgetItem* );
    void editColorFore();
    void editColorBack();
 
