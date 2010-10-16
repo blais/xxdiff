@@ -40,7 +40,7 @@
                 <number>6</number>
               </property>
               <item>
-                <widget class="Q3GroupBox" name="GroupBox10">
+                <widget class="QGroupBox" name="GroupBox10">
                   <property name="title">
                     <string>2-way diff</string>
                   </property>
@@ -75,7 +75,7 @@
                       </layout>
                     </item>
                     <item>
-                      <widget class="Q3GroupBox" name="_groupBoxGnuDiffOptions">
+                      <widget class="QGroupBox" name="_groupBoxGnuDiffOptions">
                         <property name="title">
                           <string>GNU diff options</string>
                         </property>
@@ -170,7 +170,7 @@
                 </widget>
               </item>
               <item>
-                <widget class="Q3GroupBox" name="GroupBox11">
+                <widget class="QGroupBox" name="GroupBox11">
                   <property name="title">
                     <string>3-way diff</string>
                   </property>
@@ -271,7 +271,7 @@
                 </layout>
               </item>
               <item>
-                <widget class="Q3GroupBox" name="GroupBox62">
+                <widget class="QGroupBox" name="GroupBox62">
                   <property name="title">
                     <string>Options</string>
                   </property>
@@ -312,7 +312,7 @@
                     <number>6</number>
                   </property>
                   <item>
-                    <widget class="Q3GroupBox" name="_groupboxFileDiffs">
+                    <widget class="QGroupBox" name="_groupboxFileDiffs">
                       <property name="title">
                         <string>File diffs</string>
                       </property>
@@ -610,7 +610,7 @@
                     </widget>
                   </item>
                   <item>
-                    <widget class="Q3GroupBox" name="_groupboxDirectoryDiffs">
+                    <widget class="QGroupBox" name="_groupboxDirectoryDiffs">
                       <property name="title">
                         <string>Directory diffs</string>
                       </property>
@@ -660,7 +660,7 @@
                 </layout>
               </item>
               <item>
-                <widget class="Q3GroupBox" name="GroupBox8_2_2">
+                <widget class="QGroupBox" name="GroupBox8_2_2">
                   <property name="title">
                     <string>Common</string>
                   </property>
@@ -745,7 +745,7 @@
                     <number>6</number>
                   </property>
                   <item>
-                    <widget class="Q3GroupBox" name="GroupBox7">
+                    <widget class="QGroupBox" name="GroupBox7">
                       <property name="sizePolicy">
                         <sizepolicy>
                           <hsizetype>7</hsizetype>
@@ -808,7 +808,7 @@
                     </widget>
                   </item>
                   <item>
-                    <widget class="Q3GroupBox" name="GroupBox7_2">
+                    <widget class="QGroupBox" name="GroupBox7_2">
                       <property name="sizePolicy">
                         <sizepolicy>
                           <hsizetype>7</hsizetype>
@@ -877,7 +877,7 @@
                     </widget>
                   </item>
                   <item>
-                    <widget class="Q3GroupBox" name="GroupBox2">
+                    <widget class="QGroupBox" name="GroupBox2">
                       <property name="sizePolicy">
                         <sizepolicy>
                           <hsizetype>7</hsizetype>
@@ -934,7 +934,7 @@
                 <number>6</number>
               </property>
               <item>
-                <widget class="Q3GroupBox" name="GroupBox25_3">
+                <widget class="QGroupBox" name="GroupBox25_3">
                   <property name="title">
                     <string>Text Font</string>
                   </property>
@@ -1008,7 +1008,7 @@
                 </widget>
               </item>
               <item>
-                <widget class="Q3GroupBox" name="GroupBox25_2_2">
+                <widget class="QGroupBox" name="GroupBox25_2_2">
                   <property name="title">
                     <string>App Font</string>
                   </property>
