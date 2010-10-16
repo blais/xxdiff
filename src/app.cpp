@@ -2393,7 +2393,7 @@ XxResources* XxApp::buildResources() const
       }
       catch ( const XxIoError& ioerr ) {
          QMessageBox::critical(
-            _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
+            _mainWindow, "xxdiff", ioerr.getMsg()
          );
       }
    }
@@ -2405,7 +2405,7 @@ XxResources* XxApp::buildResources() const
       }
       catch ( const XxIoError& ioerr ) {
          QMessageBox::critical(
-            _mainWindow, "xxdiff cmdline resources", ioerr.getMsg(), 1,0,0
+            _mainWindow, "xxdiff cmdline resources", ioerr.getMsg()
          );
       }
    }
