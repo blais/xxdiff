@@ -439,7 +439,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    while ( true ) {
       int c = getopt_long( argc,
                            argv,
-                           shortOptions.latin1(),
+                           shortOptions.toLatin1(),
                            longOptions,
                            &optionIndex );
       if ( c == -1 ) {
@@ -451,15 +451,15 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          // Generic options.
          //
          case 'h':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, OPT_DEFAULT );
+            throw XxUsageError( XX_EXC_PARAMS, QString(), OPT_DEFAULT );
 
          case 'Z':
             throw XxUsageError( XX_EXC_PARAMS,
-                                QString::null, 
+                                QString(), 
                                 1 << OPT_GENERIC | 1 << OPT_QT );
 
          case 'Y':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, OPT_ALL );
+            throw XxUsageError( XX_EXC_PARAMS, QString(), OPT_ALL );
 
          case 'H': {
             printHtmlHelp();
@@ -634,10 +634,10 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'Q': {
             // Split string to spaces and add as individual options.
             QByteArray qtopts( optarg );
-            qtopts.simplifyWhiteSpace();
+            qtopts = qtopts.simplified();
             int previdx = 0;
             int idx = -1;
-            while ( ( idx = qtopts.find( ' ', idx+1 ) ) != -1 ) {
+            while ( ( idx = qtopts.indexOf( ' ', idx+1 ) ) != -1 ) {
                QByteArray qtopt = qtopts.mid( previdx, idx - previdx );
                _qtOptions[ _nbQtOptions++ ] = 
                   qstrdup( qtopt.constData() );
@@ -731,7 +731,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( _unmerge && _single ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "You cannot ask for both unmerge and single.";
       }
       throw XxUsageError( XX_EXC_PARAMS, msg );
@@ -745,7 +745,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( !_promptForFiles && _nbFilenames < minfn ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "You must specify at least " << minfn << " filenames.";
       }
       throw XxUsageError( XX_EXC_PARAMS, msg );
@@ -754,7 +754,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( _nbFilenames > maxfn ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "You can specify at most " << maxfn << " filenames." << endl;
          oss << "Extra arguments: \"";
          for ( int ii = maxfn; ii < _nbFilenames; ++ii ) {
@@ -770,8 +770,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( !_promptForFiles )
    {
       for ( ii = 0; ii < _nbFilenames; ++ii ) {
-         _filenames[ ii ].setLatin1( argv[ optind + ii ] );
-         _filenames[ ii ] = _filenames[ ii ].stripWhiteSpace();
+         _filenames[ ii ] = QString::fromLatin1( argv[ optind + ii ] ).trimmed();
       }
    }
    

@@ -88,7 +88,7 @@ int main( int argc, char** argv, char** envp )
       }
    }
    catch ( const XxError& ex ) {
-      std::cerr << static_cast<const char*>( ex.getMsg() ) << std::endl;
+      std::cerr << ex.getMsg().toAscii().constData() << std::endl;
       // Note: we're casting for Windows MSVC streams which are broken.
    }
    catch ( const std::exception& ex ) {

@@ -259,13 +259,10 @@ void XxResources::initializeOriginalXdiff()
       setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b3b3b3", "#000000" );
    }   
              
-   _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
-   _backColors[ COLOR_CURSOR ] =
-      QColor( 0xff, 0xff, 0xff, QColor::Rgb ); // white
-   _backColors[ COLOR_VERTICAL_LINE ] = 
-      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
-   _backColors[ COLOR_TEXT_SELECTION ] = 
-      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
+   _backColors[ COLOR_BACKGROUND ] =      QColor( 0x40, 0x61, 0x6a );
+   _backColors[ COLOR_CURSOR ] =          QColor( 0xff, 0xff, 0xff ); // white
+   _backColors[ COLOR_VERTICAL_LINE ] =   QColor( 0xff, 0x00, 0x00 ); // red
+   _backColors[ COLOR_TEXT_SELECTION ] =  QColor( 0xff, 0x00, 0x00 ); // red
    // Note: we don't use the fore colors for these guys.
 
    //---------------------------------------------------------------------------
@@ -317,7 +314,7 @@ void XxResources::initializeOriginalXdiff()
    // "cmp -s" barfs on directories.
    const char* editor = getenv( "EDITOR" );
    if ( editor != 0 ) {
-      _commands[ CMD_EDIT ].setLatin1( editor );
+      _commands[ CMD_EDIT ] = QString::fromLatin1( editor );
    }
    else {
       _commands[ CMD_EDIT ] = "xterm -e vi";
@@ -413,7 +410,7 @@ void XxResources::setPreferredGeometry( const QRect& geometry )
 void XxResources::setStyleKey( const QString& styleKey )
 {
    QStringList styles = QStyleFactory::keys();
-   XX_ASSERT( styles.find( styleKey ) != styles.end() );
+   XX_ASSERT( styles.indexOf( styleKey ) != -1 );
    _styleKey = styleKey;
    emit changed();
 }

@@ -33,7 +33,6 @@
 
 #include <qradiobutton.h>
 #include <qlineedit.h>
-#include <q3buttongroup.h>
 #include <qlabel.h>
 #include <qcheckbox.h>
 
@@ -160,7 +159,8 @@ XxMarkersDialog::XxMarkersDialog(
    _markersWidget = new XxMarkersWidget( threeWay );
    vlayout->addWidget( _markersWidget );
 
-   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   QHBoxLayout* hlayout = new QHBoxLayout;
+   vlayout->addLayout( hlayout );
    hlayout->setMargin(0);
    hlayout->setSpacing(6);
 

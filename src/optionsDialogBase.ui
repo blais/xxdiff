@@ -910,8 +910,8 @@
                             <property name="frameShadow">
                               <enum>QFrame::Plain</enum>
                             </property>
-                            <property name="textFormat">
-                              <enum>Qt::RichText</enum>
+                            <property name="acceptRichText">
+                              <bool>true</bool>
                             </property>
                           </widget>
                         </item>

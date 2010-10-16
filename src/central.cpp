@@ -34,7 +34,6 @@
 #include <lineNumbers.h>
 #include <help.h>
 
-#include <q3scrollview.h>
 #include <qpainter.h>
 #include <qbrush.h>
 #include <qpen.h>
@@ -78,8 +77,11 @@ XxCentralFrame::XxCentralFrame(
    // Texts widget (texts).
    //
 
-   QVBoxLayout* textAndSbLayout = new QVBoxLayout( this, 0, -1 );
-   QHBoxLayout* textLayout = new QHBoxLayout( textAndSbLayout, -1 );
+   QVBoxLayout* textAndSbLayout = new QVBoxLayout( this );
+   textAndSbLayout->setMargin( 0 );
+   textAndSbLayout->setSpacing( 0 );
+   QHBoxLayout* textLayout = new QHBoxLayout;
+   textAndSbLayout->addLayout( textLayout );
 
    QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
@@ -98,11 +100,14 @@ XxCentralFrame::XxCentralFrame(
                   this, SLOT(verticalScroll2(int)) );
       }
 
-      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1 );
+      QVBoxLayout* layout = new QVBoxLayout;
+      textLayout->addLayout( layout );
       //textLayout->setStretchFactor( layout, 1 ); useless to make equal
 
       // Create filename and line number labels.
-      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1 );
+      QHBoxLayout* fnLayout = new QHBoxLayout;
+      layout->addLayout( fnLayout );
+
       _filenameLabel[ii] = new XxCopyLabel();
       _filenameLabel[ii]->setFont( smaller );
       _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
@@ -121,7 +126,8 @@ XxCentralFrame::XxCentralFrame(
       fnLayout->addWidget( _lineNumberLabel[ii], 1 );
 
       // Create linenumbers widget and text widget.
-      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1 );
+      QHBoxLayout* fnLayout2 = new QHBoxLayout;
+      layout->addLayout( fnLayout2 );
       _text[ii] = new XxText( _app, this, ii );
       _lineNumbers[ii] = new XxLineNumbers( _app, this, ii );
 
@@ -325,14 +331,14 @@ void XxCentralFrame::verticalScroll( int value )
 //
 void XxCentralFrame::scrollRight()
 {
-   _hscroll->setValue( _hscroll->value() + _hscroll->lineStep() * 10 );
+   _hscroll->setValue( _hscroll->value() + _hscroll->singleStep() * 10 );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxCentralFrame::scrollLeft()
 {
-   _hscroll->setValue( _hscroll->value() - _hscroll->lineStep() * 10 );
+   _hscroll->setValue( _hscroll->value() - _hscroll->singleStep() * 10 );
 }
 
 XX_NAMESPACE_END

@@ -31,7 +31,6 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <q3scrollview.h>
 #include <qpainter.h>
 #include <qbrush.h>
 #include <qpen.h>
@@ -69,7 +68,8 @@ XxMergedFrame::XxMergedFrame(
    vlayout->setSpacing( 0 );
    vlayout->setMargin( 0 );
 
-   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   QHBoxLayout* hlayout = new QHBoxLayout;
+   vlayout->addLayout( hlayout );
    hlayout->setSpacing( 0 );
    hlayout->setMargin( 0 );
    

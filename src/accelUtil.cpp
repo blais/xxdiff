@@ -245,26 +245,26 @@ bool XxAccelUtil::read( const QString& val, int& accel )
    }
 
    // Remove whitespace.
-   QString cval = val.stripWhiteSpace().lower();
+   QString cval = val.trimmed().toLower();
 
    // Read modifier, if present.
    const int notfound = -1;
    int modifier = 0;
-   if ( cval.find( "alt" ) != notfound || 
-        cval.find( "meta" ) != notfound ) {
+   if ( cval.indexOf( "alt" ) != notfound || 
+        cval.indexOf( "meta" ) != notfound ) {
       modifier |= Qt::ALT;
    }
-   if ( cval.find( "ctrl" ) != notfound || 
-        cval.find( "control" ) != notfound ) {
+   if ( cval.indexOf( "ctrl" ) != notfound || 
+        cval.indexOf( "control" ) != notfound ) {
       modifier |= Qt::CTRL;
    }
-   if ( cval.find( "shift" ) != notfound ) {
+   if ( cval.indexOf( "shift" ) != notfound ) {
       modifier |= Qt::SHIFT;
    }
 
    // Read non-modifier.
-   int fomin = cval.findRev( '-' );
-   int foplus = cval.findRev( '+' );
+   int fomin = cval.lastIndexOf( '-' );
+   int foplus = cval.lastIndexOf( '+' );
    int xpos = (fomin > foplus) ? fomin : foplus;
    if ( xpos != notfound ) {
       cval = cval.mid( ++xpos );
@@ -272,7 +272,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 
    // Search in list.
    int key = searchToken( 
-      keycodes, sizeof(keycodes)/sizeof(KeyPair), cval.latin1()
+      keycodes, sizeof(keycodes)/sizeof(KeyPair), cval.toLatin1().constData()
    );
    if ( key == -1 ) {
       return false;
@@ -286,7 +286,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 //
 void XxAccelUtil::write( std::ostream& os, int accel )
 {
-   os << QKeySequence( accel ).toString().ascii();
+   os << QKeySequence( accel ).toString().toAscii().constData();
 }
 
 XX_NAMESPACE_END

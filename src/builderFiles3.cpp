@@ -31,6 +31,7 @@
 #include <buffer.h>
 
 #include <qstring.h>
+#include <QByteArray>
 #include <qtextstream.h>
 #include <qfile.h>
 
@@ -207,7 +208,8 @@ bool parseDiffLine(
       ); \
   }
 
-   const char* buf = line.latin1();
+   QByteArray lineBa = line.toLatin1();
+   const char* buf = lineBa.constData();
 
    XX_LOCAL_TRACE( "" );
    XX_LOCAL_TRACE( "" );
@@ -449,12 +451,12 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    XxFln fline3 = 1;
 
    bool foundDifferences = false;
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
    int sno;
    XxFln f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
 
    QFile qfout;
-   qfout.open( QIODevice::ReadOnly, fout );
+   qfout.open( fout, QIODevice::ReadOnly );
    QTextStream outputs( &qfout );
 
    while ( true ) {
@@ -474,7 +476,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
 
 #ifdef XX_DEBUG
       XX_LOCAL_TRACE( "ParseDiffLine results: " );
-      XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+      XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
       XX_LOCAL_TRACE( "  sno=" << sno );
       XX_LOCAL_TRACE( "  f1n1=" << f1n1 << "  f1n2=" << f1n2 );
       XX_LOCAL_TRACE( "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
@@ -540,10 +542,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    
    // Collect stderr.
    QFile qferr;
-   qferr.open( QIODevice::ReadOnly, ferr );
+   qferr.open( ferr, QIODevice::ReadOnly );
    {
       QTextStream errorss( &qferr );
-      QString errstr = errorss.read();
+      QString errstr = errorss.readAll();
       if ( !errstr.isNull() ) {
          errors << errstr << endl;
       }

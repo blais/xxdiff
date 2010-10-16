@@ -63,7 +63,7 @@ XxLineNumbers::XxLineNumbers(
    const XxFno     no, 
    QWidget*        parent
 ) :
-   QFrame( parent, Qt::WResizeNoErase ),
+   QFrame( parent ),
    _app( app ),
    _central( central ),
    _no( no )
@@ -97,7 +97,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
 
    // We want 1:1 pixel/coord ratio.
    p.setViewport( rect );
-   rect.moveBy( -rect.x(), -rect.y() );
+   rect.translate( -rect.x(), -rect.y() );
    p.setWindow( rect );
 //#define BACK_COLORING
 #ifdef BACK_COLORING

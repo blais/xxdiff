@@ -189,7 +189,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    enum InConflict { OUTSIDE = 0, IN1 = 1, IN2 = 2 };
    InConflict inConflict = OUTSIDE;
 
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
 
    XxFln f1n1 = -1;
    XxFln f1n2 = -1;
@@ -202,19 +202,19 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    QRegExp reEnd = QRegExp( resources.getTag( TAG_UNMERGE_END ) );
    if ( !reStart.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reSep.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_SEP is invalid: " << reSep.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reEnd.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
@@ -243,7 +243,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
             // Note that we only take the first such tag to appear in the file.
             QStringList texts = reStart.capturedTexts();
             if ( texts.size() > 0 ) {
-               outFileLeft = texts.front().stripWhiteSpace();
+               outFileLeft = texts.front().trimmed();
             }
          }
          else {
@@ -291,7 +291,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
             // Note that we only take the first such tag to appear in the file.
             QStringList texts = reEnd.capturedTexts();
             if ( texts.size() > 0 ) {
-               outFileRight = texts.front().stripWhiteSpace();
+               outFileRight = texts.front().trimmed();
             }
          }
          else {
@@ -362,7 +362,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    enum InConflict { OUTSIDE = 0, IN1 = 1, IN2 = 2, IN3 = 3 };
    InConflict inConflict = OUTSIDE;
 
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
 
    XxFln f1n1 = -1;
    XxFln f1n2 = -1;
@@ -378,25 +378,25 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    QRegExp reEnd = QRegExp( resources.getTag( TAG_UNMERGE_END ) );
    if ( !reStart.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reSep1.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_SEP_EXTRA is invalid: " << reSep1.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reSep2.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_SEP is invalid: " << reSep2.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reEnd.isValid() ) {
       QString str;
-      QTextOStream oss( &str );
+      QTextStream oss( &str );
       oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
@@ -430,7 +430,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
             // Note that we only take the first such tag to appear in the file.
             QStringList texts = reStart.capturedTexts();
             if ( texts.size() > 0 ) {
-               fileFirst = texts.front().stripWhiteSpace();
+               fileFirst = texts.front().trimmed();
             }
          }
          else {
@@ -447,7 +447,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
             // Note that we only take the first such tag to appear in the file.
             QStringList texts = reSep1.capturedTexts();
             if ( texts.size() > 0 ) {
-               outFileMiddle = texts.front().stripWhiteSpace();
+               outFileMiddle = texts.front().trimmed();
             }
          }
          else if ( reSep2.indexIn( textline ) != -1 ) {
@@ -573,7 +573,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
             // Note that we only take the first such tag to appear in the file.
             QStringList texts = reEnd.capturedTexts();
             if ( texts.size() > 0 ) {
-               outFileRight = texts.front().stripWhiteSpace();
+               outFileRight = texts.front().trimmed();
             }
          }
          else {

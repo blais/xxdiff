@@ -61,7 +61,7 @@ XxError::XxError(
    const QString& msg
 )
 {
-   QTextOStream oss( &_msg );
+   QTextStream oss( &_msg );
    oss << "xxdiff (" << file << ":" << line << "): " << endl;
    if ( !msg.isEmpty() ) {
       oss << msg;
@@ -161,7 +161,7 @@ XxInternalError::XxInternalError(
 // I'll know what's going on at least when developing in debug mode.
 #ifdef XX_DEBUG
    std::cerr << "Throwing exception:" << std::endl;
-   std::cerr << _msg.latin1() << std::endl;
+   std::cerr << _msg.toLatin1().constData() << std::endl;
 #endif
 }
 

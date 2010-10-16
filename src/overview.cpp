@@ -63,14 +63,13 @@ XxOverview::XxOverview(
    XxCentralFrame* central,
    QWidget *       parent
 ) :
-   QFrame( parent, Qt::WResizeNoErase ),
+   QFrame( parent ),
    _app( app ),
    _central( central ),
    _manipNo( -1 )
 {
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
-   setBackgroundMode( Qt::NoBackground );
 
    const XxResources& resources = _app->getResources();
    uint nbFiles = _app->getNbFiles();
@@ -109,7 +108,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
 
    // We want 1:1 pixel/coord ratio.
    p.setViewport( rect );
-   rect.moveBy( -rect.x(), -rect.y() );
+   rect.translate( -rect.x(), -rect.y() );
    p.setWindow( rect );
    // int w = rect.width();
    int h = rect.height();
@@ -328,7 +327,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
       }
    }
 
-   p.resetXForm();
+   p.resetTransform();
 }
 
 //------------------------------------------------------------------------------

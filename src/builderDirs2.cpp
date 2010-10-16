@@ -31,6 +31,7 @@
 #include <buffer.h>
 
 #include <qstring.h>
+#include <QByteArray>
 #include <qstringlist.h>
 #include <qtextstream.h>
 #include <qfile.h>
@@ -136,7 +137,8 @@ bool parseDiffLine(
    int&           onlyDir
 )
 {
-   const char* buf = line.latin1();
+   QByteArray lineBa = line.toLatin1();
+   const char* buf = lineBa.constData();
 
    bool error;
    const char* bufPtr = buf;
@@ -149,8 +151,10 @@ bool parseDiffLine(
       }
       
       //int len = colonPtr - bufPtr;
-      int cmp1 = ::strncmp( bufPtr, dir1.latin1(), len1 );
-      int cmp2 = ::strncmp( bufPtr, dir2.latin1(), len2 );
+      QByteArray dir1Ba = dir1.toLatin1();
+      QByteArray dir2Ba = dir2.toLatin1();
+      int cmp1 = ::strncmp( bufPtr, dir1Ba.constData(), len1 );
+      int cmp2 = ::strncmp( bufPtr, dir2Ba.constData(), len2 );
       // Note: you cannot compare the lengths because these might be directory
       // diffs.
       if ( cmp1 == 0 && cmp2 == 0 ) {
@@ -176,17 +180,15 @@ bool parseDiffLine(
          ++dnamePtr;
       }
       if ( colonPtr - dnamePtr > 0 ) {
-         QString aname; 
-         aname.setLatin1( dnamePtr, colonPtr - dnamePtr );
+         QString aname( QString::fromLatin1( dnamePtr, colonPtr - dnamePtr ) );
          filename += aname;
-         if ( filename.constref( filename.length() - 1 ) != '/' ) {
+         if ( filename.at( filename.length() - 1 ) != '/' ) {
             filename.append( '/' );
          }
       }
 
       // Note: need to remove \n
-      QString bname;
-      bname.setLatin1( colonPtr + 2 );
+       QString bname( QString::fromLatin1( colonPtr + 2 ) );
 
       filename += bname;
       type = ONLY_IN;
@@ -204,7 +206,7 @@ bool parseDiffLine(
       }
       int mlen = andPtr - filenamePtr;
       if ( mlen > 0 ) {
-         filename.setLatin1( filenamePtr, mlen );
+         filename = QString::fromLatin1( filenamePtr, mlen );
       }
       else {
          filename = QString();
@@ -235,7 +237,7 @@ bool parseDiffLine(
       }
       int mlen = andPtr - filenamePtr;
       if ( mlen > 0 ) {
-         filename.setLatin1( filenamePtr, mlen );
+         filename = QString::fromLatin1( filenamePtr, mlen );
       }
       else {
          filename = QString();
@@ -260,13 +262,13 @@ void setType(
    DirDiffType               type
 )
 {
-   int index = entries.findIndex( filename );
+   int index = entries.indexOf( filename );
    if ( index == -1 ) {
 #ifdef LOCAL_TRACE
       for ( unsigned int ii = 0; ii < entries.count(); ++ii ) {
          XX_TRACE( entries[ii] );
       }
-      XX_TRACE( "filename \"" << filename.latin1() << "\"" );
+      XX_TRACE( "filename \"" << filename.toLatin1().constData() << "\"" );
 #endif
       throw XxInternalError( XX_EXC_PARAMS );
    }
@@ -288,7 +290,7 @@ void patchUpMissingTypes(
 {
    for ( uint ii = 0; ii < types1.size(); ++ii ) {
       if ( types1[ii] == UNKNOWN ) {
-         int index = entries2.findIndex( entries1[ii] );
+         int index = entries2.indexOf( entries1[ii] );
          if ( index != -1 ) {
             types1[ ii ] = IDENTICAL;
             types2[ index ] = IDENTICAL;
@@ -304,7 +306,7 @@ void patchUpMissingTypes(
 //
 void buildSolelyFromOutput(
    FILE*                     fout,
-   QTextOStream&             errors,
+   QTextStream&              errors,
    XxBuffer&                 buffer1,
    XxBuffer&                 buffer2,
    std::vector<DirDiffType>& types1,
@@ -323,7 +325,7 @@ void buildSolelyFromOutput(
    const int len2 = path2.length();
 
    QFile qfout;
-   qfout.open( QIODevice::ReadOnly, fout );
+   qfout.open( fout, QIODevice::ReadOnly );
    QTextStream outputs( &qfout );
 
    while ( true ) {
@@ -347,7 +349,7 @@ void buildSolelyFromOutput(
 #ifdef LOCAL_TRACE
       XX_TRACE( line 
                 << typeString[ type ] << "   " 
-                << filename.latin1() << "   "
+                << filename.toLatin1().constData() << "   "
                 << onlyDir );
       if ( type == UNKNOWN ) {
          throw XxInternalError( XX_EXC_PARAMS );
@@ -391,7 +393,7 @@ void buildSolelyFromOutput(
 //
 void buildAgainstReadDirectory(
    FILE*                     fout,
-   QTextOStream&             errors,
+   QTextStream&              errors,
    const XxBuffer&           buffer1,
    const XxBuffer&           buffer2,
    std::vector<DirDiffType>& types1,
@@ -404,11 +406,11 @@ void buildAgainstReadDirectory(
    {
       for ( QStringList::ConstIterator iter = entries1.begin();
             iter != entries1.end(); ++iter ) {
-         XX_TRACE( (*iter).latin1() );
+         XX_TRACE( (*iter).toLatin1().constData() );
       }
       for ( QStringList::ConstIterator iter = entries2.begin();
             iter != entries2.end(); ++iter ) {
-         XX_TRACE( (*iter).latin1() );
+         XX_TRACE( (*iter).toLatin1().constData() );
       }
    }
 #endif
@@ -425,7 +427,7 @@ void buildAgainstReadDirectory(
    const int len2 = path2.length();
 
    QFile qfout;
-   qfout.open( QIODevice::ReadOnly, fout );
+   qfout.open( fout, QIODevice::ReadOnly );
    QTextStream outputs( &qfout );
 
    while ( true ) {
@@ -449,7 +451,7 @@ void buildAgainstReadDirectory(
 #ifdef LOCAL_TRACE
       XX_TRACE( line
                 << typeString[ type ] << "   " 
-                << filename.latin1() << "   "
+                << filename.toLatin1().constData() << "   "
                 << onlyDir );
       if ( type == UNKNOWN ) {
          throw XxInternalError( XX_EXC_PARAMS );
@@ -566,7 +568,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    std::vector<DirDiffType> types1;
    std::vector<DirDiffType> types2;
 
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
 
    // Note: for now we don't support recursive diffs built against a directory.
    if ( _buildSolelyFromOutput || _isDiffRecursive ) {
@@ -685,10 +687,10 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    // Collect stderr.
    QFile qferr;
-   qferr.open( QIODevice::ReadOnly, ferr );
+   qferr.open( ferr, QIODevice::ReadOnly );
    {
       QTextStream errorss( &qferr );
-      QString errstr = errorss.read();
+      QString errstr = errorss.readAll();
       if ( !errstr.isNull() ) {
          errors << errstr << endl;
       }

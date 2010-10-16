@@ -91,8 +91,8 @@ void XxSearchDialog::onGotoLine()
    int gline = _lineeditGotoLine->text().toInt( &ok );
    
    static int ind[3] = { 0, 2, 1 };
-   XX_ASSERT( _comboGotoWhichFile->currentItem() < 3 );
-   XxFno fno = ind[ _comboGotoWhichFile->currentItem() ];
+   XX_ASSERT( _comboGotoWhichFile->currentIndex() < 3 );
+   XxFno fno = ind[ _comboGotoWhichFile->currentIndex() ];
    if ( fno == 2 && _app->getNbFiles() == 2 ) {
       fno = 1;
    }

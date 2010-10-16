@@ -52,7 +52,7 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #include <qpushbutton.h>
 #include <qpalette.h>
 #include <QTextBrowser>
-#include <q3scrollview.h>
+#include <QByteArray>
 
 #include <iostream>
 #include <stdio.h>
@@ -114,7 +114,7 @@ QString formatOptionsPlain(
 )
 {
    QString outs;
-   QTextOStream oss( &outs );
+   QTextStream oss( &outs );
 
    // Compute maximum width of long-option.
    unsigned int maxw = 0;
@@ -156,7 +156,7 @@ QString formatOptionsPlain(
       // Output formatted help.
       {
          QString helpstr( options[ii]._help );
-         QTextIStream iss( &helpstr );
+         QTextStream iss( &helpstr );
          QString word;
          int cch = startw;
          while ( !iss.atEnd() ) {
@@ -193,7 +193,7 @@ QString formatOptionsQml(
 )
 {
    QString outs;
-   QTextOStream oss( &outs );
+   QTextStream oss( &outs );
 
    oss << "<table cellpadding=5 width=\"100%\">" << endl << endl;
    for ( int ii = 0; ii < nbOptions; ++ii ) {
@@ -473,7 +473,7 @@ QString XxHelp::getManual()
 
    // Fill in the invocation section.
    QString vertag( "<version/>" );
-   int idxver = srcManual.find( vertag, idx );
+   int idxver = srcManual.indexOf( vertag, idx );
    if ( idxver != -1 ) {
       manual += srcManual.mid( idx, idxver );
       manual += getVersion();
@@ -486,7 +486,7 @@ QString XxHelp::getManual()
 
    // Fill in the invocation section.
    QString invtag( "<invocation/>" );
-   int idxinv = srcManual.find( invtag, idx );
+   int idxinv = srcManual.indexOf( invtag, idx );
    if ( idxinv != -1 ) {
       manual += srcManual.mid( idx, idxinv - idx );
       manual += getUsage( XxCmdline::OPT_ALL, false );
@@ -499,7 +499,7 @@ QString XxHelp::getManual()
 
    // Fill in the resource reference section.
    QString restag( "<resourceref/>" );
-   int idxres = srcManual.find( restag, idx );
+   int idxres = srcManual.indexOf( restag, idx );
    if ( idxres != -1 ) {
       manual += srcManual.mid( idx, idxres - idx );
       manual += XxResParser::getResourceRef();
@@ -547,7 +547,7 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
 #else
    
    QString text;
-   QTextOStream oss( &text );
+   QTextStream oss( &text );
    oss << xx_name << endl 
        << endl
        << xx_description << endl
@@ -569,7 +569,7 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
 {
    QString docstr;
    {
-      QTextOStream oss( &docstr );
+      QTextStream oss( &docstr );
       oss << "<qt title=\"xxdiff documentation\">" << endl
           << getManual() << endl
           << "</qt" << endl;
@@ -582,7 +582,8 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
 //
 QString XxHelp::xmlize( const QString& in )
 {
-   const char* inc = in.latin1();
+   QByteArray inBa =  in.toLatin1();
+   const char* inc = inBa.constData();
    QString out;
    for ( unsigned int ii = 0; ii < in.length(); ++ii ) {
       if ( inc[ii] == '<' ) {

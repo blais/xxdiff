@@ -82,7 +82,7 @@ public:
 
    XxError( 
       XX_EXC_PARAMS_DECL(file,line),
-      const QString& msg = QString::null 
+      const QString& msg = QString() 
    );
    virtual ~XxError() XX_THROW_NOTHING;
 
@@ -115,7 +115,7 @@ public:
    // error code.
    XxUsageError( 
       XX_EXC_PARAMS_DECL(file,line),
-      const QString& msg = QString::null,
+      const QString& msg = QString(),
       int            helpMask = 0
    );
    virtual ~XxUsageError() XX_THROW_NOTHING {}
@@ -137,7 +137,7 @@ public:
    // Constructor with a string.
    XxIoError( 
       XX_EXC_PARAMS_DECL(file,line),
-      const QString& msg = QString::null // use errno string only.
+      const QString& msg = QString() // use errno string only.
    );
    virtual ~XxIoError() XX_THROW_NOTHING {}
 

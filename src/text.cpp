@@ -138,7 +138,7 @@ inline void rentxt(
    if ( renNulHorizMarkers && xch == xend ) {
       p.fillRect(
          XX_RED_RECT( xpx - 1, y, 1, fm.lineSpacing() ),
-         p.backgroundColor()
+         p.background().color()
       );
       return;
    }
@@ -149,9 +149,8 @@ inline void rentxt(
          rlen = xend - xch;
       }
 
-      QString str;
       XX_CHECK( rlen > 0 ); // always true, because xch < xend
-      str.setLatin1( renderedText + xch, rlen );
+      QString str( QString::fromLatin1( renderedText + xch, rlen ) );
       int nw = fm.width( str, rlen );
 
 #ifndef XX_DRAWTEXT_DRAWS_BACKGROUND
@@ -163,7 +162,7 @@ inline void rentxt(
       p.drawText(
          XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() ),
          Qt::AlignLeft | Qt::AlignTop,
-         str, rlen,
+         str.left( rlen ),
          &brect
       );
 
@@ -210,7 +209,7 @@ XxText::XxText(
    const XxFno   no,
    QWidget*      parent
 ) :
-   QFrame( parent, Qt::WResizeNoErase ),
+   QFrame( parent ),
    _app( app ),
    _sv( sv ),
    _no( no ),
@@ -223,9 +222,9 @@ XxText::XxText(
    setFrameStyle( QFrame::Panel | QFrame::Sunken );
    setLineWidth( 2 );
 #ifdef XX_DEBUG_TEXT
-   setBackgroundColor( Qt::red );
-#else
-   setBackgroundMode( Qt::NoBackground );
+   QPalette palette;
+   palette.setCOlor( backgroundRole(), Qt::red );
+   setPalette( palette );
 #endif
 
 #if (QT_VERSION >= 0x030000)
@@ -278,7 +277,7 @@ void XxText::paintEvent( QPaintEvent *e )
    // We want 1:1 pixel/coord ratio.
    QPoint offset = rect.topLeft();
    p.setViewport( rect );
-   rect.moveBy( -offset.x(), -offset.y() );
+   rect.translate( -offset.x(), -offset.y() );
    p.setWindow( rect );
    const int w = rect.width();
    const int h = rect.height();
@@ -394,7 +393,7 @@ void XxText::paintEvent( QPaintEvent *e )
                   resources.getRegionColor( COLOR_MERGED_UNDECIDED,
                                             bcolor, fcolor );
 
-                  p.setBackgroundColor( bcolor );
+                  p.setBackground( bcolor );
                   QBrush brush( bcolor );
 
                   p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
@@ -536,13 +535,13 @@ void XxText::paintEvent( QPaintEvent *e )
             }
 
             XX_CHECK( rlen > 0 ); // always true, because xch < xend
-            chunk.setLatin1( renderedText + xch, rlen );
+            chunk = QString::fromLatin1( renderedText + xch, rlen );
             // FIXME check somehow that this actually corresponds to the
             // rendered measure.
             QRect brect = fm.boundingRect(
-               -128, -128, 8192, 2048,
+               QRect( -128, -128, 8192, 2048 ),
                Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
-               chunk, rlen, 0, 0
+               chunk.left( rlen ), 0, 0
             );
 
             if ( (xpx + brect.width()) > 0 ) {
@@ -579,11 +578,11 @@ void XxText::paintEvent( QPaintEvent *e )
 
                if ( (c % 2) == 0 ) {
                   p.setPen( fcolorSup );
-                  p.setBackgroundColor( bcolorSup );
+                  p.setBackground( bcolorSup );
                }
                else {
                   p.setPen( fcolor );
-                  p.setBackgroundColor( bcolor );
+                  p.setBackground( bcolor );
                }
 
                rentxt(
@@ -611,7 +610,7 @@ void XxText::paintEvent( QPaintEvent *e )
             //
 
             p.setPen( fcolor );
-            p.setBackgroundColor( bcolor );
+            p.setBackground( bcolor );
             rentxt(
                p, renderedText,
                xch, ehd,
@@ -759,7 +758,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->button() == Qt::RightButton && event->state() == 0 ) {
+   if ( event->button() == Qt::RightButton && event->modifiers() == Qt::NoModifier ) {
       // Activate popup in third button.
 
       // Popup.
@@ -769,7 +768,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->state() & Qt::ControlModifier ) {
+   if ( event->modifiers() & Qt::ControlModifier ) {
       if ( event->button() == Qt::RightButton ) {
 
          _grabMode = MOUSE_DRAG;
@@ -796,7 +795,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    // Interactive toggling of debug drawing structures.
 #ifdef XX_DEBUG_TEXT
    if ( event->button() == Qt::MidButton ) {
-      if ( event->state() & Qt::ControlModifier ) {
+      if ( event->modifiers() & Qt::ControlModifier ) {
          flag = !flag;
       }
    }
@@ -819,11 +818,11 @@ void XxText::mousePressEvent( QMouseEvent* event )
    QString textCopy;
    if ( event->button() == Qt::MidButton ) {
       // Line event.
-      if ( event->state() & Qt::ShiftModifier ) {
+      if ( event->modifiers() & Qt::ShiftModifier ) {
          // Unselect line.
          diffs->selectLine( lineno, XxLine::UNSELECTED );
       }
-      else if ( event->state() & Qt::ControlModifier ) {
+      else if ( event->modifiers() & Qt::ControlModifier ) {
          // Delete line.
          diffs->selectLine( lineno, XxLine::NEITHER );
       }
@@ -844,7 +843,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
             if ( text != 0 ) {
                QString adt;
                if ( len > 0 ) {
-                  adt.setLatin1( text, len );
+                  adt = QString::fromLatin1( text, len );
                }
                if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                     == true ) {
@@ -863,7 +862,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
    else {
       // Region event.
-      if ( event->state() & Qt::ShiftModifier ) {
+      if ( event->modifiers() & Qt::ShiftModifier ) {
          if ( event->button() == Qt::LeftButton ) {
             // Unselect region.
             diffs->selectRegion( lineno, XxLine::UNSELECTED );
@@ -930,7 +929,7 @@ QString XxText::getRegionText( XxDln start, XxDln end ) const
          if ( text != 0 ) {
             QString adt;
             if ( len > 0 ) {
-               adt.setLatin1( text, len );
+               adt = QString::fromLatin1( text, len );
             }
             if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                  == true ) {
@@ -1193,7 +1192,7 @@ QString XxText::formatClipboard(
 
    // Fileno.
    while ( 1 ) {
-      PosType spos = forline.find( "%N", pos );
+      PosType spos = forline.indexOf( "%N", pos );
       if ( spos == notfound ) {
          break;
       }
@@ -1206,7 +1205,7 @@ QString XxText::formatClipboard(
    // Lineno.
    pos = 0;
    while ( 1 ) {
-      PosType spos = forline.find( "%L", pos );
+      PosType spos = forline.indexOf( "%L", pos );
       if ( spos == notfound ) {
          break;
       }
@@ -1219,7 +1218,7 @@ QString XxText::formatClipboard(
    // Filename.
    pos = 0;
    while ( 1 ) {
-      PosType spos = forline.find( "%F", pos );
+      PosType spos = forline.indexOf( "%F", pos );
       if ( spos == notfound ) {
          break;
       }
@@ -1230,7 +1229,7 @@ QString XxText::formatClipboard(
    // Line contents.
    pos = 0;
    while ( 1 ) {
-      PosType spos = forline.find( "%s", pos );
+      PosType spos = forline.indexOf( "%s", pos );
       if ( spos == notfound ) {
          break;
       }

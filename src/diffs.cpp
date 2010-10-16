@@ -880,13 +880,13 @@ bool XxDiffs::save(
    }
 
    for ( int ii = 0; ii < nbFiles; ++ii ) {
-      int pos = tags[ii].find( "%d" );
+      int pos = tags[ii].indexOf( "%d" );
       if ( pos != -1 ) {
          tags[ii].replace( pos, 2, QString::number( ii+1 ) );
       }
 
       if ( ! useConditionals ) {
-         pos = tags[ii].find( "%s" );
+         pos = tags[ii].indexOf( "%s" );
          if ( pos != -1 ) {
             tags[ii].replace( pos, 2, files[ii]->getDisplayName() );
          }
@@ -922,11 +922,11 @@ bool XxDiffs::save(
                   // Note: I know this is lame, but SGI STL doesn't support
                   // formatted output from ostream.
                   QString cond;
-                  cond.sprintf( tags[state].latin1(),
-                                conditionals[f].latin1() );
+                  cond.sprintf( tags[state].toLatin1().constData(),
+                                conditionals[f].toLatin1().constData() );
 
                   QByteArray line;
-                  QTextOStream oss( &line );
+                  QTextStream oss( &line );
                   oss << cond << endl;
 
                   int nbOutlines = 0;

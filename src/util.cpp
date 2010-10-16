@@ -29,6 +29,7 @@
 #include <main.h>
 
 #include <qstring.h>
+#include <QByteArray>
 #include <qtextstream.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
@@ -194,14 +195,14 @@ void formatPrintFunc(
       case 'n': { // - File name
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat, filename.latin1() );
+         tmp.sprintf( pformat, filename.toLatin1().constData() );
          target.append( tmp );
       } break;
 
       case 'N': { // - Quoted File name with dereference if symbolic link
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat, filename.latin1() );
+         tmp.sprintf( pformat, filename.toLatin1().constData() );
          if ( qfi.isSymLink() ) {
             tmp.append( "' -> `" );
             tmp.append( qfi.readLink() );
@@ -239,7 +240,7 @@ void formatPrintFunc(
       case 'U': { // - User name of owner
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.owner().ascii() );
+         tmp.sprintf( pformat,qfi.owner().toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -253,7 +254,7 @@ void formatPrintFunc(
       case 'G': { // - Group name of owner
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.group().ascii() );
+         tmp.sprintf( pformat,qfi.group().toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -284,7 +285,7 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastRead().toString( DATEFORMAT ).ascii() );
+                      qfi.lastRead().toString( DATEFORMAT ).toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -301,7 +302,7 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastModified().toString( DATEFORMAT ).ascii() );
+                      qfi.lastModified().toString( DATEFORMAT ).toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -387,7 +388,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).ascii()
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toAscii().constData()
          );
          target.append( tmp );
       } break;
@@ -407,7 +408,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).ascii() );
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -452,7 +453,7 @@ int XxUtil::copyFile( const QString& src, const QString& dest )
 {
    QString cmd = QString("cp '") + src + QString("' '") + dest + QString("'");
 
-   FILE* f = popen( cmd.latin1(), "r" );
+   FILE* f = popen( cmd.toLatin1().constData(), "r" );
    int r = pclose( f );
    return r;
 }
@@ -462,7 +463,7 @@ int XxUtil::copyFile( const QString& src, const QString& dest )
 int XxUtil::removeFile( const QString& src )
 {
    XX_ASSERT( !src.isEmpty() );
-   return unlink( src.latin1() );
+   return unlink( src.toLatin1().constData() );
 }
 
 //------------------------------------------------------------------------------
@@ -488,7 +489,7 @@ bool XxUtil::testFile(
 {
    if ( !finfo.exists() || !finfo.isReadable() ) {
       QString s;
-      QTextOStream oss( & s );
+      QTextStream oss( & s );
       oss << "Cannot access file: " << filename;
       throw XxIoError( XX_EXC_PARAMS, s );
    }
@@ -500,7 +501,7 @@ bool XxUtil::testFile(
    // // Check if file is a regular file or a directory.
    // if ( !( finfo.isFile() || finfo.isDir() ) ) {
    //    QString os;
-   //    QTextOStream oss( &os );
+   //    QTextStream oss( &os );
    //    oss << "Error: not an ordinary file or a directory";
    //    throw XxIoError( XX_EXC_PARAMS, os );
    // }
@@ -518,7 +519,7 @@ bool XxUtil::testFile(
    if ( testAscii ) {
       if ( !isAsciiText( filename ) ) {
          QString os;
-         QTextOStream oss( &os );
+         QTextStream oss( &os );
          oss << "Error: file is not a text file";
          throw XxIoError( XX_EXC_PARAMS, os );
       }
@@ -534,7 +535,7 @@ bool XxUtil::isAsciiText( const QString& filename )
    int fd, bytes, i;
    char buffer[1024];
 
-   fd = open( filename.latin1(), O_RDONLY );
+   fd = open( filename.toLatin1().constData(), O_RDONLY );
    bytes = read( fd, (void *)buffer, 1024 );
    close( fd );
 
@@ -627,10 +628,10 @@ int XxUtil::spawnCommand(
             // Send parent some output telling it we couldn't exec.
             QString errs;
             {
-               QTextOStream errss( &errs );
+               QTextStream errss( &errs );
                errss << "Cannot exec process " << argv[0] << endl << flush;
             }
-            fwrite( errs.latin1(), errs.length(), 1, stderr );
+            fwrite( errs.toLatin1().constData(), errs.length(), 1, stderr );
             fwrite( "\n", 1, 1, stderr );
 
             exit( 1 );
@@ -711,7 +712,7 @@ int XxUtil::spawnCommand(
    for ( arg = argv; *arg != 0; ++arg ) {
       command += QString(*arg) + QString(" ");
    }
-   XX_TRACE( "Command: " << command.latin1() );
+   XX_TRACE( "Command: " << command.toLatin1().constData() );
 
 //    /*
 //     * N**xed up version with Windows calls. Consider yourself lucky if this
@@ -722,10 +723,10 @@ int XxUtil::spawnCommand(
 //       // Send parent some output telling it we couldn't exec.
 //       QString errs;
 //       {
-//          QTextOStream errss( &errs );
+//          QTextStream errss( &errs );
 //          errss << "Error spawning process " << argv[0] << endl << flush;
 //       }
-//       fwrite( errs.latin1(), errs.length(), 1, stderr );
+//       fwrite( errs.toLatin1().constData(), errs.length(), 1, stderr );
 //       fwrite( "\n", 1, 1, stderr );
 
 //       exit( 1 );
@@ -738,7 +739,7 @@ int XxUtil::spawnCommand(
     * Run command so that it writes its output to a pipe. Open this pipe with
     * read text attribute so that we can read it like a text file.
     */
-   if( (outputf = popen( command.latin1(), "rt" )) == NULL ) {
+   if( (outputf = popen( command.toLatin1().constData(), "rt" )) == NULL ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
    errorf = stderr;
@@ -794,10 +795,11 @@ int XxUtil::interruptibleSystem( const QString& command )
       return -1;
    }
    if ( pid == 0 ) {
+      QByteArray commandBa = command.toLatin1();
       char* argv[4];
       argv[0] = const_cast<char*>( "sh" );
       argv[1] = const_cast<char*>( "-c" );
-      argv[2] = const_cast<char*>( command.latin1() );
+      argv[2] = const_cast<char*>( commandBa.constData() );
       argv[3] = 0;
       execve( "/bin/sh", argv, environ );
       exit( 127 );
@@ -870,7 +872,7 @@ int XxUtil::splitArgs(
     * spaces will break this.
     */
 
-   QStringList args = QStringList::split( QRegExp( "\\s" ), command );
+   QStringList args = command.split( QRegExp( "\\s" ) );
    args += filenames;
    int argc = 0;
    // It doesn't hurt to reserve space for 3 slots even though we may
@@ -881,11 +883,11 @@ int XxUtil::splitArgs(
          it != args.end();
          ++it ) {
 
-      argv[argc++] = strdup( (*it).latin1() );
+      argv[argc++] = strdup( (*it).toLatin1().constData() );
    }
    for (int i=0; i<3; i++)
       if (titles[i]) {
-         argv[argc++] = strdup( titles[i]->latin1() );
+         argv[argc++] = strdup( titles[i]->toLatin1().constData() );
       }
    argv[argc] = 0;
 
@@ -924,7 +926,7 @@ void XxUtil::freeArgs( const char**& out_args )
 QString XxUtil::removeClearCaseExt( const QString& filename )
 {
    // Remove ClearCase extended syntax if it is there.
-   int bpos = filename.find( "@@" );
+   int bpos = filename.indexOf( "@@" );
    QString cleanname;
    if ( bpos != -1 ) {
       cleanname = filename.mid( 0, bpos );
@@ -952,7 +954,7 @@ bool XxUtil::formatFilename(
    //
    // Including anyway for now, because I absolutely don't have time right now.
 
-   char* format = strdup( masterformat.latin1() );
+   char* format = strdup( masterformat.toLatin1().constData() );
    char* dest = (char*) malloc( strlen( format ) + 1 );
    char* b = format;
    target = "";
@@ -1038,10 +1040,10 @@ QString XxUtil::escapeChars( const QString& format )
 QString XxUtil::unescapeChars( const QString& format )
 {
    QString newFormat = format;
-   uint ix = 0;
+   int ix = 0;
 
    while ( ix < newFormat.length() ) {
-       int found = newFormat.find( QChar( '\\' ), ix );
+       int found = newFormat.indexOf( QChar( '\\' ), ix );
        if ( found < 0 )
 	   break;
        // use at() in case found+1 is past the end of the string

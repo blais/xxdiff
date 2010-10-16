@@ -51,7 +51,7 @@ XxScrollView::XxScrollView(
    QWidget*    parent,
    const char* name
 ) :
-   BaseClass( parent, name ),
+   BaseClass( parent ),
    _app( app ),
    _displayWidth( 0 ),
    _displayHeight( 0 ),
@@ -232,7 +232,8 @@ void XxScrollView::adjustHorizontalScrollbars( const QSize& displaySize )
          // This will generate a resize event for the text widgets.
       }
       else {
-         _hscroll->setSteps( 1, _displayWidth );
+         _hscroll->setSingleStep( 1 );
+         _hscroll->setPageStep( _displayWidth );
          _hscroll->setRange( 0, textWidth - _displayWidth );
          _hscroll->show();
       }
@@ -263,9 +264,11 @@ void XxScrollView::adjustVerticalScrollbars( const QSize& displaySize )
 
       uint displayLines = getNbDisplayLines();
 
-      _vscroll[0]->setSteps( 1, displayLines );
+      _vscroll[0]->setSingleStep( 1 );
+      _vscroll[0]->setPageStep( displayLines );
       if ( _vscroll[1] != 0 ) {
-         _vscroll[1]->setSteps( 1, displayLines );
+         _vscroll[1]->setSingleStep( 1 );
+         _vscroll[1]->setPageStep( displayLines );
       }
       
       if ( diffs == 0 ) {
@@ -314,7 +317,7 @@ void XxScrollView::verticalScroll2( int value )
 //
 void XxScrollView::wheelEvent( QWheelEvent* e )
 {
-   if ( e->state() & Qt::ControlModifier ) {
+   if ( e->modifiers() & Qt::ControlModifier ) {
       // Interactive font resize feature with mouse wheel.
       if ( e->delta() > 0 ) {
          _app->fontSizeDecrease();

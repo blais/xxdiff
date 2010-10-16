@@ -33,12 +33,11 @@
 #include <kdeSupport.h>
 
 #include <qtabwidget.h>
-#include <q3textview.h>
+#include <QTextEdit>
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <qradiobutton.h>
 #include <qpushbutton.h>
-#include <q3groupbox.h>
 #include <qspinbox.h>
 #include <QListWidgetItem>
 #include <QListWidget>
@@ -522,7 +521,7 @@ void XxOptionsDialog::synchronize()
    //---------------------------------------------------------------------------
    // Display
 
-   _comboHordiffType->setCurrentItem( int( resources.getHordiffType() ) );
+   _comboHordiffType->setCurrentIndex( int( resources.getHordiffType() ) );
    _spinboxHordiffContext->setValue( resources.getHordiffContext() );
 
    _checkboxIgnoreHorizontalWhitespace->setChecked(
@@ -538,7 +537,7 @@ void XxOptionsDialog::synchronize()
       resources.getShowOpt( SHOW_VERTICAL_LINE )
    );
 
-   _comboIgnoreFile->setCurrentItem( int( resources.getIgnoreFile() ) );
+   _comboIgnoreFile->setCurrentIndex( int( resources.getIgnoreFile() ) );
 
 
    _checkboxIgnoreFileChanges->setChecked(
@@ -590,14 +589,14 @@ void XxOptionsDialog::synchronize()
 //
 void XxOptionsDialog::selectDiffOptions()
 {
-   _tabWidget->setCurrentPage( getDiffPageIndex() );
+   _tabWidget->setCurrentIndex( getDiffPageIndex() );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::selectDisplayOptions()
 {
-   _tabWidget->setCurrentPage( 2 );
+   _tabWidget->setCurrentIndex( 2 );
 }
 
 //------------------------------------------------------------------------------
@@ -653,7 +652,7 @@ void XxOptionsDialog::onApply()
    // Display
 
    bool reinitHorizontalDiffs = false;
-   XxHordiff newhdtype = XxHordiff( _comboHordiffType->currentItem() );
+   XxHordiff newhdtype = XxHordiff( _comboHordiffType->currentIndex() );
    if ( resources.getHordiffType() != newhdtype ) {
       resources.setHordiffType( newhdtype );
       reinitHorizontalDiffs = true;
@@ -683,7 +682,7 @@ void XxOptionsDialog::onApply()
    resources.setVerticalLinePos( _spinboxVlinePos->value() );
 
    resources.setIgnoreFile(
-      XxIgnoreFile(_comboIgnoreFile->currentItem())
+      XxIgnoreFile(_comboIgnoreFile->currentIndex())
    );
 
    if ( resources.getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES ) !=
@@ -705,7 +704,7 @@ void XxOptionsDialog::onApply()
    if ( !XxResources::compareFonts( _fontApp,
                                     resources.getFontApp() ) ) {
       resources.setFontApp( _fontApp );
-      _app->setFont( _fontApp, true );
+      _app->setFont( _fontApp );
    }
    if ( !XxResources::compareFonts( _fontText,
                                     resources.getFontText() ) ) {
@@ -1005,7 +1004,7 @@ bool XxOptionsDialog::isInCommand(
    const QString& option
 )
 {
-   return command.find( option ) != -1;
+   return command.indexOf( option ) != -1;
 }
 
 //------------------------------------------------------------------------------
@@ -1016,12 +1015,12 @@ void XxOptionsDialog::addToCommand(
 )
 {
    // Look for option in command, if not found, add it to command.
-   int pos = command.find( option );
+   int pos = command.indexOf( option );
    if ( pos == -1 ) {
       command.append( " " );
       command.append( option );
    }
-   command = command.simplifyWhiteSpace();
+   command = command.simplified();
 }
 
 //------------------------------------------------------------------------------
@@ -1032,11 +1031,11 @@ void XxOptionsDialog::removeFromCommand(
 )
 {
    // Look for option in command, if found, remove it from command.
-   int pos = command.find( option );
+   int pos = command.indexOf( option );
    if ( pos != -1 ) {
       command.remove( pos, option.length() );
    }
-   command = command.simplifyWhiteSpace();
+   command = command.simplified();
 }
 
 //------------------------------------------------------------------------------

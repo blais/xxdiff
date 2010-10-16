@@ -60,7 +60,7 @@ std::auto_ptr<XxDiffs> XxBuilderSingle::process( const XxBuffer& buffer )
 {
    initLines();
 
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
 
    _curHunk = 0;
    createInsertLeftBlock( 1, buffer.getNbLines() );

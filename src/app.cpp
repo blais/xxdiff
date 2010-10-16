@@ -67,7 +67,7 @@
 #include <qsocketnotifier.h>
 #include <QToolBar>
 #include <QAction>
-#include <qtextstream.h>
+#include <QTextStream>
 #include <qfile.h>
 #include <qsplitter.h>
 #include <qregexp.h>
@@ -196,7 +196,7 @@ public:
    XxMainWindow(
       XxApp*      app,
       QWidget*    parent = 0,
-      Qt::WFlags      f = Qt::WType_TopLevel
+      Qt::WFlags      f = Qt::Window
    );
 
 
@@ -279,7 +279,7 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
 
 #ifndef XX_KDE
    if ( _cmdline._forceFont == false ) {
-      setFont( _resources->getFontApp(), true );
+      setFont( _resources->getFontApp() );
    }
 #endif
 
@@ -450,17 +450,17 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
       QString str =
          QString(_files[0]->getDisplayName()) + " <-> " +
          QString(_files[1]->getDisplayName());
-      _mainWindow->setCaption( str );
+      _mainWindow->setWindowTitle( str );
    }
    else if ( _nbFiles == 3 ) {
       QString str =
          QString(_files[0]->getDisplayName()) + " <-> " +
          QString(_files[1]->getDisplayName()) + " <-> " +
          QString(_files[2]->getDisplayName());
-      _mainWindow->setCaption( str );
+      _mainWindow->setWindowTitle( str );
    }
    else {
-      _mainWindow->setCaption( "xxdiff" );
+      _mainWindow->setWindowTitle( "xxdiff" );
    }
 
    // Call post creation actions before showing.
@@ -531,12 +531,12 @@ void XxApp::promptForFiles( XxCmdline& cmdline )
 	cmdline._filenames[0] = QFileDialog::getOpenFileName(
       0, "Choose Left File" );
 
-	if ( cmdline._filenames[0] != QString::null ) {
+	if ( ! cmdline._filenames[0].isNull() ) {
 
 		cmdline._filenames[1] = QFileDialog::getOpenFileName(
           0, "Choose Right File" );
 
-		if ( cmdline._filenames[1] != QString::null ) {
+		if ( ! cmdline._filenames[1].isNull() ) {
 			cmdline._nbFilenames = 2;
 		}
 	}
@@ -677,7 +677,7 @@ uint XxApp::processFileNames(
 
    for ( XxFno iii = 0; iii < cmdline._nbFilenames; ++iii ) {
       if ( ! cmdline._userFilenames[iii].isEmpty() ) {
-         if ( 0 > cmdline._userFilenames[iii].find('%') ) {
+         if ( 0 > cmdline._userFilenames[iii].indexOf('%') ) {
             displayFilenames[iii] = cmdline._userFilenames[iii];
          }
          else {
@@ -713,7 +713,9 @@ void XxApp::createUI()
    //
    QWidget* topCentralWidget = new QWidget( _mainWindow );
    QHBoxLayout* topLayout =
-      new QHBoxLayout( topCentralWidget, 0, -1 );
+      new QHBoxLayout( topCentralWidget );
+   topLayout->setMargin( 0 );
+   topLayout->setSpacing( 0 );
 
    // Pane merged widget.
    //
@@ -747,7 +749,9 @@ void XxApp::createUI()
    //
    _overviewArea = new QWidget;
    QVBoxLayout* overviewLayout =
-      new QVBoxLayout( _overviewArea, 0, -1 );
+      new QVBoxLayout( _overviewArea );
+   overviewLayout->setMargin( 0 );
+   overviewLayout->setSpacing( 0 );
 
    //QHBoxLayout* hlayout = new QHBoxLayout;
    _remUnselView = new QLabel( "remaining unselected" );
@@ -853,7 +857,6 @@ void XxApp::createUI()
    //
    topCentralWidget->updateGeometry();
    _mainWindow->setCentralWidget( topCentralWidget );
-   setMainWidget( _mainWindow );
 
    _isUICreated = true;
 }
@@ -1824,8 +1827,6 @@ void XxApp::createMenus()
       _menuactions[ ID_ToggleDirDiffsRecursive ]->setCheckable( true );
    }
 
-   _optionsMenu->setCheckable( true );
-
    //---------------------------------------------------------------------------
 
    _displayMenu = menubar->addMenu( "&Display" );
@@ -1972,9 +1973,6 @@ void XxApp::createMenus()
       _menuactions[ ID_IgnoreFileRight ]->setCheckable( true );
    }
 
-
-   _displayMenu->setCheckable( true );
-
    //---------------------------------------------------------------------------
 
    // Windows menu
@@ -2012,8 +2010,6 @@ void XxApp::createMenus()
       _resources->getAccelerator( ACCEL_TOGGLE_SHOW_FILENAMES )
    );
    _menuactions[ ID_ToggleShowFilenames ]->setCheckable( true );
-   
-   _windowsMenu->setCheckable( true );
 
    //---------------------------------------------------------------------------
 
@@ -2128,7 +2124,7 @@ bool XxApp::processDiff()
       }
       catch ( const XxError& ex ) {
          QString str;
-         QTextOStream oss( &str );
+         QTextStream oss( &str );
          oss << "Error processing single file:" << ex.getMsg() << endl;
          outputDiffErrors( str );
          _returnValue = builder->getStatus();
@@ -2199,7 +2195,7 @@ bool XxApp::processDiff()
       }
       catch ( const XxError& ex ) {
          QString str;
-         QTextOStream oss( &str );
+         QTextStream oss( &str );
          oss << "Error unmerging file:" << ex.getMsg() << endl;
          outputDiffErrors( str );
          _returnValue = builder->getStatus();
@@ -2229,7 +2225,7 @@ bool XxApp::processDiff()
          }
          catch ( const XxError& ex ) {
             QString str;
-            QTextOStream oss( &str );
+            QTextStream oss( &str );
             oss << "Error executing \""
                 << _resources->getCommand( CMD_DIFF_FILES_2 )
                 << "\" command, could not build diffs:" << endl
@@ -2259,7 +2255,7 @@ bool XxApp::processDiff()
          }
          catch ( const XxError& ex ) {
             QString str;
-            QTextOStream oss( &str );
+            QTextStream oss( &str );
             oss << "Error executing \""
                 << _resources->getCommand( CMD_DIFF_FILES_3 )
                 << "\" command, could not build diffs:" << endl
@@ -2297,12 +2293,12 @@ bool XxApp::processDiff()
          if ( _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ) ) {
             dirdiff_command = _resources->getCommand(
                CMD_DIFF_DIRECTORIES_REC
-            );
+            ).toAscii().constData();
          }
          else {
             dirdiff_command = _resources->getCommand(
                CMD_DIFF_DIRECTORIES
-            );
+            ).toAscii().constData();
          }
          std::auto_ptr<XxDiffs> tmp(
             dirsBuilder->process( dirdiff_command, *_files[0], *_files[1] )
@@ -2312,7 +2308,7 @@ bool XxApp::processDiff()
       }
       catch ( const XxError& ex ) {
          QString str;
-         QTextOStream oss( &str );
+         QTextStream oss( &str );
          oss << "Error executing \""
              << dirdiff_command
              << "\" command, could not build diffs:" << endl
@@ -2404,7 +2400,7 @@ XxResources* XxApp::buildResources() const
 
    if ( !_cmdline._cmdlineResources.isEmpty() ) {
       try {
-         QTextIStream cmdlineStream( &_cmdline._cmdlineResources );
+         QTextStream cmdlineStream( &_cmdline._cmdlineResources );
          resParser.parse( cmdlineStream, *resources );
       }
       catch ( const XxIoError& ioerr ) {
@@ -2560,7 +2556,7 @@ bool XxApp::askOverwrite( const QString& filename ) const
    if ( finfo.exists() ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "File \"" << filename << "\" exists";
          if ( ! finfo.isWritable() ) {
             oss << " (AND IS NOT WRITABLE)";
@@ -2569,7 +2565,7 @@ bool XxApp::askOverwrite( const QString& filename ) const
       }
 
       int resp = QMessageBox::warning(
-         _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString::null, 0, 1
+         _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString(), 0, 1
       );
       if ( resp == 1 ) {
          // User has canceled.
@@ -2612,7 +2608,7 @@ bool XxApp::saveMergedToFile(
    if ( ask == true ) {
       if ( !allSelected ) {
          f = XxMarkersFileDialog::getSaveFileName(
-            cleanname, QString::null,
+            cleanname, QString(),
             _nbFiles == 3,
             useConditionals,
             removeEmptyConditionals,
@@ -2626,7 +2622,7 @@ bool XxApp::saveMergedToFile(
       }
       else {
          f = QkFileDialog::getSaveFileName(
-            cleanname, QString::null, _mainWindow
+            _mainWindow, QString(), cleanname
          );
          if ( f.isEmpty() ) {
             // The user cancelled the dialog.
@@ -2678,13 +2674,13 @@ bool XxApp::saveMergedToFile(
       }
 
       outfile.close();
-      if ( outfile.status() != IO_Ok ) {
+      if ( outfile.error() != QFile::NoError ) {
          throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
       }
    }
    catch ( const XxIoError& ioerr ) {
       QMessageBox::critical(
-         _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
+         _mainWindow, "xxdiff", ioerr.getMsg()
       );
    }
 
@@ -2790,7 +2786,7 @@ void XxApp::editFile( const QString& filename )
    catch ( const XxIoError& ioerr ) {
       QString text;
       {
-         QTextOStream oss( &text );
+         QTextStream oss( &text );
          oss << "There has been an error spawning the editor:"
              << ioerr.getMsg() << endl;
       }
@@ -2834,13 +2830,13 @@ void XxApp::openFile( const XxFno no )
       isTemporary[ii] = _files[ii]->isTemporary();
    }
 
-   QString startWith = QString::null;
+   QString startWith;
    XX_ASSERT( _files[no].get() != 0 );
    if ( !isTemporary[no] ) {
       startWith = filenames[no];
    }
    QString f =
-      QkFileDialog::getOpenFileName( startWith, QString::null, _mainWindow );
+      QkFileDialog::getOpenFileName( _mainWindow, QString(), startWith );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
       return;
@@ -2887,7 +2883,7 @@ void XxApp::openFile( const XxFno no )
       }
       else {
          QString str;
-         QTextOStream oss( &str );
+         QTextStream oss( &str );
          oss << "Error: could not open file." << endl;
          outputDiffErrors( str );
       }
@@ -3160,7 +3156,7 @@ void XxApp::generatePatchFromLeft()
       uint sz;
       const char* charbuf = buf->getBuffer( sz );
       {
-         QTextOStream osstream( fout2 );
+         QTextStream osstream( fout2 );
          osstream << QString::fromLocal8Bit( charbuf, sz );
       }
       ::fclose( fout2 );
@@ -3232,16 +3228,16 @@ bool XxApp::validateNeedToSave( uint no ) const
       // Pop a dialog.
       QString text;
       {
-         QTextOStream oss( &text );
+         QTextStream oss( &text );
          oss << "The selections are all on this file." << endl
              << "Save anyway?";
       }
 
-      int resp = QMessageBox::warning(
+      QMessageBox::StandardButton resp = QMessageBox::warning(
          _mainWindow, "xxdiff", text,
-         "Ok", "Cancel", QString::null, 0, 1
+         QMessageBox::Ok | QMessageBox::Cancel
       );
-      if ( resp == 1 ) {
+      if ( resp == QMessageBox::Cancel ) {
          // User has canceled.
          return false;
       }
@@ -3300,7 +3296,7 @@ void XxApp::saveSelectedOnly()
    }
 
    QString f = QkFileDialog::getSaveFileName(
-      QString::null, QString::null, _mainWindow
+      _mainWindow
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
@@ -3326,7 +3322,7 @@ void XxApp::saveSelectedOnly()
    }
 
    outfile.close();
-   if ( outfile.status() != IO_Ok ) {
+   if ( outfile.error() != QFile::NoError ) {
       throw XxIoError( XX_EXC_PARAMS, "Error opening output file." );
    }
 }
@@ -3379,7 +3375,7 @@ void XxApp::saveOptions()
       QMessageBox::warning(
          _mainWindow, "xxdiff",
          "There is nothing to write as init file\n(nothing has been changed).",
-         "Ok"
+         QMessageBox::Ok
       );
       return;
    }
@@ -3387,7 +3383,7 @@ void XxApp::saveOptions()
 
    QString f;
    f = QkFileDialog::getSaveFileName(
-      QString( getenv("HOME") ) + QString( "/.xxdiffrc" ), QString::null, _mainWindow
+      _mainWindow, QString(), QString( getenv("HOME") ) + QString( "/.xxdiffrc" ) 
    );
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
@@ -3414,13 +3410,13 @@ void XxApp::saveOptions()
       }
 
       outfile.close();
-      if ( outfile.status() != IO_Ok ) {
+      if ( outfile.error() != QFile::NoError ) {
          throw XxIoError( XX_EXC_PARAMS, "Error closing output file." );
       }
    }
    catch ( const XxIoError& ioerr ) {
       QMessageBox::critical(
-         _mainWindow, "xxdiff", ioerr.getMsg(), 1,0,0
+         _mainWindow, "xxdiff", ioerr.getMsg()
       );
    }
 }
@@ -3478,13 +3474,13 @@ void XxApp::exit( int retcode, const char* decisionString )
          if ( _resources->getBoolOpt( BOOL_WARN_ABOUT_UNSAVED ) == true &&
               _diffs->isDirty() == true &&
               _diffs->isSomeSelected() == true ) {
-            int resp = QMessageBox::warning(
+            QMessageBox::StandardButton resp = QMessageBox::warning(
                _mainWindow,
                "xxdiff",
                "Some selections changed and unsaved, quit anyway?",
-               "Ok", "Cancel", QString::null, 0, 1
+               QMessageBox::Yes | QMessageBox::No
             );
-            if ( resp == 1 ) {
+            if ( resp == QMessageBox::No ) {
                // User has canceled.
                exited = false;
                return;
@@ -3620,11 +3616,11 @@ void XxApp::diffFilesAtCursor()
          filenames.append( _files[ii]->getBufferAtLine( fline ) );
 
          // Add the title there if we have it.
-         if ( 0 > _cmdline._userFilenames[ii].find('%') ) {
+         if ( 0 > _cmdline._userFilenames[ii].indexOf('%') ) {
              QString * tmpTitle = new QString();
              tmpTitle->sprintf( "--title%d=%s",
                                 ii+1,
-                                _cmdline._userFilenames[ii].latin1() );
+                                _cmdline._userFilenames[ii].toLatin1().constData() );
              titles[ii] = tmpTitle;
          }
       }
@@ -3673,7 +3669,7 @@ void XxApp::diffFilesAtCursor()
       catch ( const XxIoError& ioerr ) {
          QString text;
          {
-            QTextOStream oss( &text );
+            QTextStream oss( &text );
             oss << "There has been an error spawning diff program:"
                 << ioerr.getMsg() << endl;
          }
@@ -3817,11 +3813,11 @@ void XxApp::removeFile( XxFno nnno ) const
    }
    QString filesrc = _files[nosrc]->getBufferAtLine( fline );
 
-   int resp = QMessageBox::warning(
+   QMessageBox::StandardButton resp = QMessageBox::warning(
       _mainWindow, "xxdiff", "Delete file... are you sure?",
-      "Ok", "Cancel", QString::null, 0, 1
+      QMessageBox::Yes | QMessageBox::No
    );
-   if ( resp == 1 ) {
+   if ( resp == QMessageBox::No ) {
       // User has canceled.
       return;
    }
@@ -4811,7 +4807,7 @@ void XxApp::quitAccept()
          _mainWindow,
          "xxdiff",
          "Some selections are incompatible with your decision, confirm action.",
-         "Discard selections", "Cancel", QString::null, 0, 1
+         "Discard selections", "Cancel", QString(), 0, 1
       );
       if ( resp == 1 ) {
          // User has canceled.
@@ -4838,7 +4834,7 @@ void XxApp::quitReject()
          _mainWindow,
          "xxdiff",
          "Some selections are incompatible with your decision, confirm action.",
-         "Accept, discard selections", "Cancel", QString::null, 0, 1
+         "Accept, discard selections", "Cancel", QString(), 0, 1
       );
       if ( resp == 1 ) {
          // User has canceled.

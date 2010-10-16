@@ -236,9 +236,3 @@ TARGET = xxdiff
 # 	$$DIFFUTILS_DIR/diff3.o
 
 # SOURCES += diffutils.cpp 
-
-
-
-#The following line was inserted by qt3to4
-QT +=  qt3support 
-

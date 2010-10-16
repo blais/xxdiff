@@ -32,6 +32,7 @@
 #include <buffer.h>
 
 #include <qstring.h>
+#include <QByteArray>
 #include <qtextstream.h>
 #include <qfile.h>
 
@@ -84,7 +85,8 @@ bool parseDiffLine(
     * this code taken from "ediff.c" by David MacKenzie, a published,
     * uncopyrighted program to translate diff output into plain English 
     */ 
-   const char* buf = line.latin1();
+   QByteArray lineBa = line.toLatin1();
+   const char* buf = lineBa.constData();
 
    bool error = true;
    if ( ( buf[0] == '<' ) || ( buf[0] == '>' ) || ( buf[0] == '-' ) ) {
@@ -274,10 +276,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    XxFln fline2 = 1;
 
    QFile qfout;
-   qfout.open( QIODevice::ReadOnly, fout );
+   qfout.open( fout, QIODevice::ReadOnly );
    QTextStream outputs( &qfout );
 
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
    XxFln f1n1, f1n2, f2n1, f2n2;
 
    while ( true ) {
@@ -306,7 +308,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
       switch ( type ) {
          case XxLine::INSERT_1: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -327,7 +329,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::INSERT_2: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -348,7 +350,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::DIFF_ALL: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -381,7 +383,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::SAME: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
          } break;
 
          /* Used to ignore a line */
@@ -409,10 +411,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
    // Collect stderr.
    QFile qferr;
-   qferr.open( QIODevice::ReadOnly, ferr );
+   qferr.open( ferr, QIODevice::ReadOnly );
    {
       QTextStream errorss( &qferr );
-      QString errstr = errorss.read();
+      QString errstr = errorss.readAll();
       if ( !errstr.isNull() ) {
          errors << errstr << endl;
       }

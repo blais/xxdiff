@@ -206,7 +206,7 @@ style		: STYLE COLON STRING
 #if (QT_VERSION >= 0x030000)
                    QStringList styles = QStyleFactory::keys();
                    QString styleKey( $3 );
-                   if ( styles.find( styleKey ) != styles.end() ) {
+                   if ( styles.indexOf( styleKey ) != -1 ) {
                       RESOURCES->setStyleKey( styleKey );
                    }
                    else {
@@ -216,7 +216,7 @@ style		: STYLE COLON STRING
                       err += QString( "\nValid styles are: " );
                       err += styles.join( ", " );
 #endif
-                      yyerror( err.latin1() );
+                      yyerror( err.toLatin1().constData() );
 #if (QT_VERSION >= 0x030000)
                    }
 #endif

@@ -48,6 +48,7 @@
 #include <qfont.h>
 #include <qfile.h>
 #include <qfileinfo.h>
+#include <QByteArray>
 #include <qstring.h>
 #if (QT_VERSION >= 0x030000)
 #include <qstylefactory.h>
@@ -696,7 +697,8 @@ bool readGeometry( const QString& val, QRect& geometry )
    int t = -1;
    int w = -1;
    int h = -1;
-   const char* vchar = val.latin1();
+   QByteArray valBa = val.toLatin1();
+   const char* vchar = valBa.constData();
    if ( sscanf( vchar, "%dx%d+%d+%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( l, t, w, h );
    }
@@ -786,9 +788,9 @@ int parseFromKeywordList(
 
    if ( !noerror ) {
       QString os;
-      QTextOStream oss( &os );
+      QTextStream oss( &os );
       oss << "Unknown " << errmsg << ": " << name << flush;
-      resParsererror( os.latin1() );
+      resParsererror( os.toLatin1().constData() );
    }
    num = ERROR_TOKEN;
    return ERROR_TOKEN;
@@ -829,7 +831,7 @@ QString XxResParser::getRcFilename()
 {
    // Decide on filename.
    const char* XXDIFFRC = getenv( "XXDIFFRC" );
-   QString filename = QString::null;
+   QString filename;
    if ( XXDIFFRC ) {
       filename = XXDIFFRC;
    }
@@ -924,7 +926,7 @@ QString XxResParser::getColorName( XxColor color )
          return QString( colorList[ii]._name );
       }
    }
-   return QString::null;
+   return QString();
 }
 
 //------------------------------------------------------------------------------
@@ -937,7 +939,7 @@ QString XxResParser::getColorDescription( XxColor color )
          return QString( colorList[ii]._desc );
       }
    }
-   return QString::null;
+   return QString();
 }
 
 //------------------------------------------------------------------------------
@@ -1174,7 +1176,7 @@ void XxResParser::listResources( QTextStream& os )
          astr = QKeySequence( aval ).toString();
       }
       os << accelStr << "." << accelList[ii]._name << ": \""
-         << astr.latin1() << "\"" << endl;
+         << astr.toLatin1().constData() << "\"" << endl;
    }
 
    const QFont& fontApp = res.getFontApp();
@@ -1234,7 +1236,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommand bo = XxCommand(commandList[ii]._token);
       const QString& b1 = res.getCommand( bo );
       os << commandStr << "." << commandList[ii]._name << ": \""
-         << b1.latin1() << "\"" << endl;
+         << b1.toLatin1().constData() << "\"" << endl;
    }
 
    int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
@@ -1244,7 +1246,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       const QString& b1 = res.getCommandSwitch( bo );
       os << commandSwitchStr << "." << commandSwitchList[ii]._name << ": \""
-         << b1.latin1() << "\"" << endl;
+         << b1.toLatin1().constData() << "\"" << endl;
    }
 
    const char* initSwitchStr = searchTokenName( kwdList, kwdList_size, INITSW );
@@ -1272,7 +1274,7 @@ void XxResParser::listResources( QTextStream& os )
       XxTag bo = XxTag(tagList[ii]._token);
       const QString& b1 = res.getTag( bo );
       os << tagStr << "." << tagList[ii]._name << ": \""
-         << b1.latin1() << "\"" << endl;
+         << b1.toLatin1().constData() << "\"" << endl;
    }
 
    os << searchTokenName( kwdList, kwdList_size, CLIPBOARD_HEAD_FORMAT ) << ": \""
@@ -1311,7 +1313,7 @@ QString XxResParser::getResourceRef()
    // rather have a constant documentation output than a varying one.
 
    QString resref;
-   QTextOStream os( &resref );
+   QTextStream os( &resref );
 
    // Output all resource names and documentation.
    const XxResources res( false );

@@ -213,7 +213,7 @@ XxBuffer::~XxBuffer()
    }
 
    if ( _deleteFile == true ) {
-      XxUtil::removeFile( _name.latin1() );
+      XxUtil::removeFile( _name.toLatin1().constData() );
    }
 }
 
@@ -282,7 +282,7 @@ void XxBuffer::loadStream( FILE* fin )
 void XxBuffer::loadFile( const QFileInfo& finfo )
 {
    // Read file into buffer.
-   FILE* fp = fopen( _name.latin1(), "r" );
+   FILE* fp = fopen( _name.toLatin1().constData(), "r" );
    if ( fp == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -348,8 +348,8 @@ void XxBuffer::loadDirectory()
    dir.setSorting( QDir::Unsorted );
    XX_CHECK( dir.exists() );
    QStringList directoryEntries = dir.entryList();
-   directoryEntries.remove( "." );
-   directoryEntries.remove( ".." );
+   directoryEntries.removeAll( "." );
+   directoryEntries.removeAll( ".." );
    setDirectoryEntries( directoryEntries );
 }
 
@@ -377,7 +377,7 @@ void XxBuffer::setDirectoryEntries(
          it != _directoryEntries.end();
          ++it ) {
       int len = (*it).length();
-      ::strncpy( bufferPtr, (*it).latin1(), len );
+      ::strncpy( bufferPtr, (*it).toLatin1().constData(), len );
       bufferPtr[len] = _newlineChar;
       bufferPtr += len + 1;
    }
@@ -547,7 +547,7 @@ uint XxBuffer::computeLineNumbersWidth( const QFont& font ) const
       ::snprintf( buffer, sizeof(buffer), lnFormat, fline );
       QString str( buffer );
 
-      QRect rect = fm.boundingRect( str, str.length() );
+      QRect rect = fm.boundingRect( str );
       longest = std::max( longest, (uint)rect.width() );
    }
    return longest;
@@ -710,7 +710,7 @@ const QString& XxBuffer::renderLineNumber(
    const QString& format
 )
 {
-   _lnBuffer.sprintf( format, lineNumber );
+   _lnBuffer.sprintf( format.toLatin1().constData(), lineNumber );
    return _lnBuffer;
 }
 
@@ -721,7 +721,7 @@ bool XxBuffer::searchLine( const XxFln lineno, const QString& searchText ) const
    bool found = false;
    uint len;
    const char* text = getTextLine( lineno, len );
-   if ( strnstr( text, len, searchText.latin1() ) != 0 ) {
+   if ( strnstr( text, len, searchText.toLatin1().constData() ) != 0 ) {
       found = true;
    }
    return found;
@@ -746,7 +746,7 @@ const QStringList& XxBuffer::getDirectoryEntries() const
 QString XxBuffer::getBufferAtLine( const XxFln lineno ) const
 {
    QString filename = _name;
-   if ( filename.constref( filename.length()-1 ) != '/' ) {
+   if ( filename.at( filename.length()-1 ) != '/' ) {
       filename.append( "/" );
    }
    

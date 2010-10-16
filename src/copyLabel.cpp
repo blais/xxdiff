@@ -141,11 +141,11 @@ void XxCopyLabel::resizeEvent( QResizeEvent* event )
       //
       // Note: also check for '\' in case we ever port to Windoze.
       int pos = -1;
-      if ( tex.find( "[...]/", 0 ) == 0 ) {
-         pos = tex.find( '/', 6 );
+      if ( tex.indexOf( "[...]/", 0 ) == 0 ) {
+         pos = tex.indexOf( '/', 6 );
       }
       else {
-         pos = tex.find( '/', 0 );
+         pos = tex.indexOf( '/', 0 );
       }
 
       if ( pos == -1 ) {

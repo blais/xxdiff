@@ -44,8 +44,10 @@ XxSuicideMessageBox::XxSuicideMessageBox(
    const QString& text, 
    Icon           icon 
 ) :
-   QMessageBox( caption, text, icon, 1, 0, 0, parent, 0, false )
-{}
+   QMessageBox( icon, caption, text, QMessageBox::Close, parent )
+{
+   setModal( false );
+}
 
 //------------------------------------------------------------------------------
 //
