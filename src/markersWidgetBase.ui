@@ -43,7 +43,7 @@
         </widget>
       </item>
       <item>
-        <widget class="Q3ButtonGroup" name="_buttongroup">
+        <widget class="QGroupBox" name="_groupbox">
           <property name="title">
             <string>Unselected lines</string>
           </property>

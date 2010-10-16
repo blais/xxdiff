@@ -74,7 +74,7 @@ XxMarkersWidget::XxMarkersWidget(
       _labelConditional3->hide();
    }
 
-   _buttongroup->setButton( _buttongroup->id( _checkboxConflicts ) );
+   _checkboxConflicts->setChecked( true );
    onConflicts();
 }
 

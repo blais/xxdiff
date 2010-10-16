@@ -128,7 +128,7 @@
                             </layout>
                           </item>
                           <item>
-                            <widget class="Q3ButtonGroup" name="ButtonGroup8">
+                            <widget class="QGroupBox" name="ButtonGroup8">
                               <property name="title">
                                 <string>Quality</string>
                               </property>
