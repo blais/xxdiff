@@ -136,9 +136,9 @@ public slots:
    void checkboxIgnoreWhitespace( int );
    void checkboxIgnoreCase( int );
    void checkboxIgnoreBlankLines( int );
-   void radiobuttonQualityNormal( int );
-   void radiobuttonQualityFastest( int );
-   void radiobuttonQualityHighest( int );
+   void radiobuttonQualityNormal( bool );
+   void radiobuttonQualityFastest( bool );
+   void radiobuttonQualityHighest( bool );
 
    //---------------------------------------------------------------------------
    // Files 3

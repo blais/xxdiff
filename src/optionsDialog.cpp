@@ -360,12 +360,12 @@ XxOptionsDialog::XxOptionsDialog(
    connect( _checkboxIgnoreBlankLines, SIGNAL( stateChanged(int) ), 
             this, SLOT( checkboxIgnoreBlankLines(int) ) );
 
-   connect( _radiobuttonQualityNormal, SIGNAL( stateChanged(int) ), 
-            this, SLOT( radiobuttonQualityNormal(int) ) );
-   connect( _radiobuttonQualityFastest, SIGNAL( stateChanged(int) ), 
-            this, SLOT( radiobuttonQualityFastest(int) ) );
-   connect( _radiobuttonQualityHighest, SIGNAL( stateChanged(int) ), 
-            this, SLOT( radiobuttonQualityHighest(int) ) );
+   connect( _radiobuttonQualityNormal, SIGNAL( clicked(bool) ), 
+            this, SLOT( radiobuttonQualityNormal(bool) ) );
+   connect( _radiobuttonQualityFastest, SIGNAL( clicked(bool) ), 
+            this, SLOT( radiobuttonQualityFastest(bool) ) );
+   connect( _radiobuttonQualityHighest, SIGNAL( clicked(bool) ), 
+            this, SLOT( radiobuttonQualityHighest(bool) ) );
 
    //---------------------------------------------------------------------------
    // Files 3
@@ -812,29 +812,23 @@ void XxOptionsDialog::setFileDiffOptions(
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::radiobuttonQualityNormal( int state )
+void XxOptionsDialog::radiobuttonQualityNormal( bool )
 {
-   if ( state != 0 ) {
-      setFileDiffQuality( QUALITY_NORMAL );
-   }
+   setFileDiffQuality( QUALITY_NORMAL );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::radiobuttonQualityFastest( int state )
+void XxOptionsDialog::radiobuttonQualityFastest( bool )
 {
-   if ( state != 0 ) {
-      setFileDiffQuality( QUALITY_FASTEST );
-   }
+   setFileDiffQuality( QUALITY_FASTEST );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::radiobuttonQualityHighest( int state )
+void XxOptionsDialog::radiobuttonQualityHighest( bool )
 {
-   if ( state != 0 ) {
-      setFileDiffQuality( QUALITY_HIGHEST );
-   }
+   setFileDiffQuality( QUALITY_HIGHEST );
 }
 
 //------------------------------------------------------------------------------
