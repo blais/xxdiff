@@ -201,7 +201,7 @@ SOURCES = \
 	proginfo.c
 
 #The following line was changed from FORMS to FORMS3 by qt3to4
-FORMS3 = \
+FORMS = \
 	markersWidgetBase.ui \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
@@ -241,6 +241,4 @@ TARGET = xxdiff
 
 #The following line was inserted by qt3to4
 QT +=  qt3support 
-#The following line was inserted by qt3to4
-CONFIG += uic3
 

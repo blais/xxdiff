@@ -61,6 +61,8 @@ XxMarkersWidget::XxMarkersWidget(
 ) :
    BaseClass( parent )
 {
+    setupUi( this );
+
    // Make connections.
    connect( _checkboxConflicts, SIGNAL( clicked() ),
             this, SLOT( onConflicts() ) );

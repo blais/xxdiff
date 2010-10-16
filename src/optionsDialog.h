@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_OPTIONSDIALOGBASE
-#include <optionsDialogBase.h>
+#include <ui_optionsDialogBase.h>
 #define INCL_OPTIONSDIALOGBASE
 #endif
 
@@ -54,13 +54,13 @@ class XxApp;
 
 // <summary> dialog for diff options </summary>
 
-class XxOptionsDialog : public XxOptionsDialogBase {
+class XxOptionsDialog : public QDialog, public Ui::XxOptionsDialogBase {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef XxOptionsDialogBase BaseClass;
+   typedef QDialog BaseClass;
 
 public:
 

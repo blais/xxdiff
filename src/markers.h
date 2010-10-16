@@ -32,7 +32,7 @@
 #endif
 
 #ifndef INCL_MARKERSWIDGETBASE
-#include <markersWidgetBase.h>
+#include <ui_markersWidgetBase.h>
 #define INCL_MARKERSWIDGETBASE
 #endif
 
@@ -58,13 +58,13 @@ XX_NAMESPACE_BEGIN
 // Note: although it should not be visible, this class must be present in the .h
 // because of moc generation requirements.
 
-class XxMarkersWidget : public XxMarkersWidgetBase {
+class XxMarkersWidget : public QWidget, public Ui::XxMarkersWidgetBase {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef XxMarkersWidgetBase BaseClass;
+   typedef QWidget BaseClass;
 
 public:
 

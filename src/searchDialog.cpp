@@ -52,6 +52,8 @@ XxSearchDialog::XxSearchDialog(
    BaseClass( parent ),
    _app( app )
 {
+    setupUi( this );
+
    // Make connections.
    connect( _buttonApply, SIGNAL( clicked() ),
             this, SLOT( onApply() ) );

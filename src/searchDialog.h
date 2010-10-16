@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_SEARCHDIALOGBASE
-#include <searchDialogBase.h>
+#include <ui_searchDialogBase.h>
 #define INCL_SEARCHDIALOGBASE
 #endif
 
@@ -54,13 +54,13 @@ class XxApp;
 
 // <summary> dialog for diff search </summary>
 
-class XxSearchDialog : public XxSearchDialogBase {
+class XxSearchDialog : public QDialog, public Ui::XxSearchDialogBase {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef XxSearchDialogBase BaseClass;
+   typedef QDialog BaseClass;
 
 public:
 

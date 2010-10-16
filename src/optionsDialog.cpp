@@ -312,6 +312,7 @@ XxOptionsDialog::XxOptionsDialog(
    _app( app )
 {
    XX_CHECK( _app != 0 );
+   setupUi( this );
    
    // This disables the irrelevant tabs.
    // Don't, let the user edit all fields.
