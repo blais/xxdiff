@@ -1358,8 +1358,8 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    // Right click View menu for directories
-   if ( _filesAreDirectories == false ) {
-      _viewPopup[0] = new QkMenu;
+   _viewPopup[0] = new QkMenu;
+   if ( _filesAreDirectories == true ) {
       _menuactions[ ID_View_DiffFilesAtCursor ] = _viewPopup[0]->addAction(
          "Diff files at cursor", this, SLOT(diffFilesAtCursor()),
          _resources->getAccelerator( ACCEL_DIFF_FILES_AT_CURSOR )
@@ -1385,6 +1385,7 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_REMOVE_RIGHT )
       );
       _viewPopup[0]->addSeparator();
+   }
 
       _viewPopup[0]->addAction(
          "Next difference", this, SLOT(nextDifference()),
@@ -1403,7 +1404,6 @@ void XxApp::createMenus()
          "Previous unselected", this, SLOT(previousUnselected()),
          _resources->getAccelerator( ACCEL_PREVIOUS_UNSELECTED )
       );
-   }
 
    // Right click View menu for the left file
    _viewPopup[1] = new QkMenu;
