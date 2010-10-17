@@ -439,7 +439,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    while ( true ) {
       int c = getopt_long( argc,
                            argv,
-                           shortOptions.toLatin1(),
+                           shortOptions.toLatin1().constData(),
                            longOptions,
                            &optionIndex );
       if ( c == -1 ) {

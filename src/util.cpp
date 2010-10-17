@@ -872,7 +872,7 @@ int XxUtil::splitArgs(
     * spaces will break this.
     */
 
-   QStringList args = command.split( QRegExp( "\\s" ) );
+   QStringList args = command.trimmed().split( QRegExp( "\\s" ) );
    args += filenames;
    int argc = 0;
    // It doesn't hurt to reserve space for 3 slots even though we may
@@ -882,7 +882,6 @@ int XxUtil::splitArgs(
    for ( QStringList::Iterator it = args.begin();
          it != args.end();
          ++it ) {
-
       argv[argc++] = strdup( (*it).toLatin1().constData() );
    }
    for (int i=0; i<3; i++)
