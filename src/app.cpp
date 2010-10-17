@@ -2286,20 +2286,20 @@ bool XxApp::processDiff()
       );
       std::auto_ptr<XxBuilder> builderTmp( dirsBuilder );
       builder = builderTmp;
-      const char* dirdiff_command = 0;
+      QByteArray dirdiff_command;
       try {
          if ( _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ) ) {
             dirdiff_command = _resources->getCommand(
                CMD_DIFF_DIRECTORIES_REC
-            ).toAscii().constData();
+            ).toAscii();
          }
          else {
             dirdiff_command = _resources->getCommand(
                CMD_DIFF_DIRECTORIES
-            ).toAscii().constData();
+            ).toAscii();
          }
          std::auto_ptr<XxDiffs> tmp(
-            dirsBuilder->process( dirdiff_command, *_files[0], *_files[1] )
+            dirsBuilder->process( dirdiff_command.constData(), *_files[0], *_files[1] )
          );
          _diffs = tmp;
          XX_ASSERT( _diffs.get() != 0 );
@@ -2308,7 +2308,7 @@ bool XxApp::processDiff()
          QString str;
          QTextStream oss( &str );
          oss << "Error executing \""
-             << dirdiff_command
+             << dirdiff_command.constData()
              << "\" command, could not build diffs:" << endl
              << ex.getMsg() << endl;
          outputDiffErrors( str );
