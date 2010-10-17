@@ -65,6 +65,7 @@ XX_NAMESPACE_BEGIN
 class XxApp;
 class XxLineNumbers;
 class XxText;
+class XxCopyLabel;
 
 /*==============================================================================
  * CLASS XxCentralFrame
@@ -149,7 +150,7 @@ private:
 
    /*----- data members -----*/
 
-   QLabel*        _filenameLabel[3];
+   XxCopyLabel*   _filenameLabel[3];
    QLabel*        _lineNumberLabel[3];
    XxLineNumbers* _lineNumbers[3];
    XxText*        _text[3];

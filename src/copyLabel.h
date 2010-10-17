@@ -76,7 +76,7 @@ public:
    // See base class.
    // <group>
    virtual QSize sizeHint() const;
-   virtual void setText( const QString& );
+   void setText( const QString& );
    virtual void mousePressEvent( QMouseEvent* );
    virtual void resizeEvent( QResizeEvent* );
    // </group>
