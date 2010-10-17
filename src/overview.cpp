@@ -30,11 +30,10 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
-//Added by qt3to4:
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
 #include <QWheelEvent>
 #include <QResizeEvent>
 #include <QFrame>

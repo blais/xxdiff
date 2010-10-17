@@ -29,9 +29,9 @@
 #include <diffs.h>
 #include <app.h>
 
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qcombobox.h>
+#include <QtGui/QLineEdit>
+#include <QtGui/QPushButton>
+#include <QtGui/QComboBox>
 
 XX_NAMESPACE_BEGIN
 

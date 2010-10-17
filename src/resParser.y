@@ -32,10 +32,10 @@
 #include <resParser.h>
 
 // Qt imports
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qrect.h>
-#include <qstylefactory.h>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QRect>
+#include <QtGui/QStyleFactory>
 
 // The parser input is the resources object to fill in.
 #define RESOURCES  ( static_cast<XxResources*>(resources) )

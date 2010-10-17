@@ -44,17 +44,16 @@
 #include <kdeSupport.h>
 
 #include <QKeySequence>
-#include <qapplication.h>
-#include <qfont.h>
-#include <qfile.h>
-#include <qfileinfo.h>
+#include <QtGui/QApplication>
+#include <QtGui/QFont>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QByteArray>
-#include <qstring.h>
+#include <QtCore/QString>
 #if (QT_VERSION >= 0x030000)
-#include <qstylefactory.h>
+#include <QtGui/QStyleFactory>
 #endif
-#include <qdesktopwidget.h>
-//Added by qt3to4:
+#include <QtGui/QDesktopWidget>
 #include <QTextStream>
 
 #include <stdexcept>

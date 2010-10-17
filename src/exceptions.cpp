@@ -28,7 +28,7 @@
 #include <cmdline.h>
 #include <help.h>
 
-#include <qtextstream.h>
+#include <QtCore/QTextStream>
 
 #include <iostream>
 #include <string.h> // strerror

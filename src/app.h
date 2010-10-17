@@ -1,5 +1,3 @@
-//Added by qt3to4:
-#include <QLabel>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -50,12 +48,12 @@
 #endif
 
 #ifndef INCL_QT_QAPPLICATION
-#include <qapplication.h>
+#include <QtGui/QApplication>
 #define INCL_QT_QAPPLICATION
 #endif
 
 #ifndef INCL_QT_QFILEINFO
-#include <qfileinfo.h>
+#include <QtCore/QFileInfo>
 #define INCL_QT_QFILEINFO
 #endif
 
@@ -77,6 +75,7 @@ class QSocketNotifier;
 class QMessageBox;
 class QSplitter;
 class QLabel;
+class QAction;
 
 XX_NAMESPACE_BEGIN
 

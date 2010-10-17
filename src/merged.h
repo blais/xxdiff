@@ -54,7 +54,7 @@
 #endif
 
 #ifndef INCL_QT_QWIDGET
-#include <qwidget.h>
+#include <QtGui/QWidget>
 #define INCL_QT_QWIDGET
 #endif
 

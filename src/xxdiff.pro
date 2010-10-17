@@ -200,7 +200,6 @@ SOURCES = \
 	getopt1.c \
 	proginfo.c
 
-#The following line was changed from FORMS to FORMS3 by qt3to4
 FORMS = \
 	markersWidgetBase.ui \
 	optionsDialogBase.ui \

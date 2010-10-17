@@ -1,6 +1,3 @@
-//Added by qt3to4:
-#include <QResizeEvent>
-#include <QMouseEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -35,7 +32,7 @@
 #endif
 
 #ifndef INCL_QT_QLABEL
-#include <qlabel.h>
+#include <QtGui/QLabel>
 #define INCL_QT_QLABEL
 #endif
 
@@ -44,6 +41,8 @@
  *============================================================================*/
 
 class QScrollBar;
+class QResizeEvent;
+class QMouseEvent;
 
 XX_NAMESPACE_BEGIN
 

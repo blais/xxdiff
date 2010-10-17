@@ -51,17 +51,17 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <qstring.h>
+#include <QtCore/QString>
 #define INCL_QT_QSTRING
 #endif
 
 #ifndef INCL_QT_QSTRINGLIST
-#include <qstringlist.h>
+#include <QtCore/QStringList>
 #define INCL_QT_QSTRINGLIST
 #endif
 
 #ifndef INCL_QT_QFILEINFO
-#include <qfileinfo.h>
+#include <QtCore/QFileInfo>
 #define INCL_QT_QFILEINFO
 #endif
 

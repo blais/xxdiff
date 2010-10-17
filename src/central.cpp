@@ -34,16 +34,15 @@
 #include <lineNumbers.h>
 #include <help.h>
 
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
-#include <qlayout.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
+#include <QtGui/QLayout>
 #include <QShortcut>
 
-#include <qapplication.h>
-#include <qclipboard.h>
-//Added by qt3to4:
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QLabel>

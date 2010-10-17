@@ -1,7 +1,3 @@
-//Added by qt3to4:
-#include <QResizeEvent>
-#include <QWheelEvent>
-#include <QMouseEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -43,6 +39,14 @@
 #include <QFrame>
 #define INCL_QT_QFRAME
 #endif
+
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class QResizeEvent;
+class QWheelEvent;
+class QMouseEvent;
 
 XX_NAMESPACE_BEGIN
 

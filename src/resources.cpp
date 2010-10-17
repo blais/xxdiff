@@ -31,13 +31,12 @@
 #include <exceptions.h>
 #include <util.h>
 
-#include <qcolor.h>
-#include <qobject.h>
-#include <qnamespace.h>
-#include <qapplication.h> // to get desktop
-#include <qregexp.h>
+#include <QtGui/QColor>
+#include <QtCore/QObject>
+#include <QtGui/QApplication> // to get desktop
+#include <QtCore/QRegexp>
 #if (QT_VERSION >= 0x030000)
-#include <qstylefactory.h>
+#include <QtGui/QStyleFactory>
 #endif
 
 #include <iostream>

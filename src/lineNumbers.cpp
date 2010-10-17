@@ -31,14 +31,13 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
 
-#include <qapplication.h>
-#include <qclipboard.h>
-//Added by qt3to4:
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
 #include <QFrame>
 
 #include <math.h>

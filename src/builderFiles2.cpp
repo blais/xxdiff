@@ -31,10 +31,10 @@
 #include <diffutils.h>
 #include <buffer.h>
 
-#include <qstring.h>
+#include <QtCore/QString>
 #include <QByteArray>
-#include <qtextstream.h>
-#include <qfile.h>
+#include <QtCore/QTextStream>
+#include <QtCore/QFile>
 
 #include <stdexcept>
 #include <stdio.h>

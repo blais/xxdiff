@@ -30,8 +30,8 @@
 #include <resources.h>
 
 #include <QByteArray>
-#include <qtextstream.h>
-#include <qregexp.h>
+#include <QtCore/QTextStream>
+#include <QtCore/QRegexp>
 
 #include <stdio.h>
 #include <iostream>

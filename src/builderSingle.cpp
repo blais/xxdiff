@@ -28,7 +28,7 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qtextstream.h>
+#include <QtCore/QTextStream>
 
 #include <stdio.h>
 #include <iostream>

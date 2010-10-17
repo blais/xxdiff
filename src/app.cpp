@@ -51,29 +51,28 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
-#include <qlayout.h>
-#include <qscrollbar.h>
-#include <qlabel.h>
+#include <QtGui/QLayout>
+#include <QtGui/QScrollBar>
+#include <QtGui/QLabel>
 #if (QT_VERSION >= 0x030000)
-#include <qstylefactory.h>
+#include <QtGui/QStyleFactory>
 #endif
-#include <qfont.h>
-#include <qmessagebox.h>
+#include <QtGui/QFont>
+#include <QtGui/QMessageBox>
 #include <QFileDialog>
 #include <QShortcut>
-#include <qlabel.h>
+#include <QtGui/QLabel>
 #include <QWhatsThis>
-#include <qclipboard.h>
-#include <qsocketnotifier.h>
+#include <QtGui/QClipboard>
+#include <QtCore/QSocketNotifier>
 #include <QToolBar>
 #include <QAction>
 #include <QTextStream>
-#include <qfile.h>
-#include <qsplitter.h>
-#include <qregexp.h>
-#include <qcheckbox.h>
-#include <qdatetime.h>
-//Added by qt3to4:
+#include <QtCore/QFile>
+#include <QtGui/QSplitter>
+#include <QtCore/QRegexp>
+#include <QtGui/QCheckBox>
+#include <QtCore/QDateTime>
 #include <QPixmap>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

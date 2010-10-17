@@ -1,5 +1,3 @@
-//Added by qt3to4:
-#include <QWheelEvent>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -38,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QWIDGET
-#include <qwidget.h>
+#include <QtGui/QWidget>
 #define INCL_QT_QWIDGET
 #endif
 
@@ -48,6 +46,7 @@
 
 class QScrollBar;
 class QSize;
+class QWheelEvent;
 
 XX_NAMESPACE_BEGIN
 

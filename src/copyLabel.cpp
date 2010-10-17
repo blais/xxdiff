@@ -28,11 +28,10 @@
 
 #include <kdeSupport.h>
 
-#include <qtooltip.h>
+#include <QtGui/QToolTip>
 
-#include <qapplication.h>
-#include <qclipboard.h>
-//Added by qt3to4:
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
 #include <QResizeEvent>
 #include <QMouseEvent>
 #include <QLabel>

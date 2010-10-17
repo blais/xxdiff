@@ -27,18 +27,17 @@
 #include <markers.h>
 
 #include <QFileDialog>
-#include <qfileinfo.h>
-#include <qstring.h>
-#include <qdir.h>
+#include <QtCore/QFileInfo>
+#include <QtCore/QString>
+#include <QtCore/QDir>
 
-#include <qradiobutton.h>
-#include <qlineedit.h>
-#include <qlabel.h>
-#include <qcheckbox.h>
+#include <QtGui/QRadioButton>
+#include <QtGui/QLineEdit>
+#include <QtGui/QLabel>
+#include <QtGui/QCheckBox>
 
-#include <qlayout.h>
-#include <qpushbutton.h>
-//Added by qt3to4:
+#include <QtGui/QLayout>
+#include <QtGui/QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 

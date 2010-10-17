@@ -33,12 +33,12 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <qstring.h>
+#include <QtCore/QString>
 #define INCL_QT_QSTRING
 #endif
 
 #ifndef INCL_QT_QTEXTSTREAM
-#include <qtextstream.h>
+#include <QtCore/QTextStream>
 #define INCL_QT_QTEXTSTREAM
 #endif
 

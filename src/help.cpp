@@ -32,7 +32,6 @@
 #include <resParser.h>
 
 #include <kdeSupport.h>
-//Added by qt3to4:
 #include <QPixmap>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -45,12 +44,12 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #endif
 }}
 
-#include <qdialog.h>
-#include <qmessagebox.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qpalette.h>
+#include <QtGui/QDialog>
+#include <QtGui/QMessageBox>
+#include <QtGui/QLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QPushButton>
+#include <QtGui/QPalette>
 #include <QTextBrowser>
 #include <QByteArray>
 

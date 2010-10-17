@@ -1,5 +1,3 @@
-//Added by qt3to4:
-#include <QTextStream>
 /* -*- c-file-style: "xxdiff" -*- */
 /******************************************************************************\
  * $RCSfile$
@@ -34,9 +32,15 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <qstring.h>
+#include <QtCore/QString>
 #define INCL_QT_QSTRING
 #endif
+
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class QTextStream;
 
 XX_NAMESPACE_BEGIN
 

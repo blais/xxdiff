@@ -32,22 +32,22 @@
 
 #include <kdeSupport.h>
 
-#include <qtabwidget.h>
+#include <QtGui/QTabWidget>
 #include <QTextEdit>
-#include <qlineedit.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <QtGui/QLineEdit>
+#include <QtGui/QCheckBox>
+#include <QtGui/QRadioButton>
+#include <QtGui/QPushButton>
+#include <QtGui/QSpinBox>
 #include <QListWidgetItem>
 #include <QListWidget>
-#include <qcolor.h>
-#include <qcolordialog.h>
-#include <qfontdialog.h>
-#include <qlabel.h>
-#include <qcombobox.h>
-#include <qstring.h>
-#include <qpainter.h>
+#include <QtGui/QColor>
+#include <QtGui/QColorDialog>
+#include <QtGui/QFontDialog>
+#include <QtGui/QLabel>
+#include <QtGui/QComboBox>
+#include <QtCore/QString>
+#include <QtGui/QPainter>
 #include <QMetaType>
 #include <QItemDelegate>
 

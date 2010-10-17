@@ -36,9 +36,8 @@
 
 #include <kdeSupport.h>
 
-#include <qapplication.h>
+#include <QtGui/QApplication>
 #include <QByteArray>
-//Added by qt3to4:
 #include <QTextStream>
 
 /*#define getopt xxdiff_getopt*/

@@ -28,12 +28,12 @@
 #include <exceptions.h>
 #include <main.h>
 
-#include <qstring.h>
+#include <QtCore/QString>
 #include <QByteArray>
-#include <qtextstream.h>
-#include <qfileinfo.h>
-#include <qregexp.h>
-#include <qdatetime.h>
+#include <QtCore/QTextStream>
+#include <QtCore/QFileInfo>
+#include <QtCore/QRegexp>
+#include <QtCore/QDateTime>
 
 #include <iostream>
 #include <sys/types.h>

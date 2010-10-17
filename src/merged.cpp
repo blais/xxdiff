@@ -31,18 +31,17 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
 #include <QMenu>
 #include <QMenuBar>
-#include <qlayout.h>
+#include <QtGui/QLayout>
 #include <QCloseEvent>
 
-#include <qapplication.h>
-#include <qclipboard.h>
-//Added by qt3to4:
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 

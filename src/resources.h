@@ -32,22 +32,22 @@
 #endif
 
 #ifndef INCL_QT_QOBJECT
-#include <qobject.h>
+#include <QtCore/QObject>
 #define INCL_QT_QOBJECT
 #endif
 
 #ifndef INCL_QT_QCOLOR
-#include <qcolor.h>
+#include <QtGui/QColor>
 #define INCL_QT_QCOLOR
 #endif
 
 #ifndef INCL_QT_QFONT
-#include <qfont.h>
+#include <QtGui/QFont>
 #define INCL_QT_QFONT
 #endif
 
 #ifndef INCL_QT_QRECT
-#include <qrect.h>
+#include <QtCore/QRect>
 #define INCL_QT_QFONT
 #endif
 
