@@ -44,36 +44,6 @@
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
- * LOCAL CLASS XxCopyLabel::Tip
- *============================================================================*/
-
-// <summary> a tooltip that only tips when the string of an associated label is
-// too long.  </summary>
-
-class XxCopyLabel::Tip : public QToolTip {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   Tip( QLabel* parent );
-
-   // See base class.
-   virtual void maybeTip( const QPoint& );
-
-};
-
-//------------------------------------------------------------------------------
-//
-
-//------------------------------------------------------------------------------
-//
-void XxCopyLabel::Tip::maybeTip( const QPoint& )
-{
-}
-
-/*==============================================================================
  * CLASS XxCopyLabel
  *============================================================================*/
 
@@ -83,14 +53,12 @@ XxCopyLabel::XxCopyLabel( QWidget* parent ) :
    QLabel( parent )
 {
    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
-   //_tip = new Tip( this );
 }
 
 //------------------------------------------------------------------------------
 //
 XxCopyLabel::~XxCopyLabel()
 {
-   delete _tip;
 }
 
 //------------------------------------------------------------------------------
@@ -158,5 +126,23 @@ void XxCopyLabel::resizeEvent( QResizeEvent* event )
    QLabel::setText( tex );
    QLabel::resizeEvent( event );
 }
+
+//------------------------------------------------------------------------------
+//
+bool XxCopyLabel::event( QEvent* event )
+{
+   if ( event->type() == QEvent::ToolTip ) {
+      QHelpEvent *helpEvent = static_cast<QHelpEvent *>( event );
+      QRect br = fontMetrics().boundingRect( _fulltext );
+      if (  br.width() + SAFETY_OFFSET > size().width() ) {
+         QToolTip::showText( helpEvent->globalPos(), _fulltext );
+      } else {
+         event->ignore();
+      }
+      return true;
+   }
+   return QWidget::event(event);
+}
+
 
 XX_NAMESPACE_END

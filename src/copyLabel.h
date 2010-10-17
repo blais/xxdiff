@@ -43,6 +43,7 @@
 class QScrollBar;
 class QResizeEvent;
 class QMouseEvent;
+class QEvent;
 
 XX_NAMESPACE_BEGIN
 
@@ -84,15 +85,14 @@ public:
    // Returns the full text of the label.
    const QString& getFullText() const;
 
+protected:
+
+   bool event( QEvent* );
+
 private:
-
-   /*----- classes -----*/
-
-   class Tip;
 
    /*----- data members -----*/
 
-   Tip*    _tip;
    QString _fulltext;
 
 };
