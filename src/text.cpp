@@ -221,7 +221,7 @@ XxText::XxText(
    setLineWidth( 2 );
 #ifdef XX_DEBUG_TEXT
    QPalette palette;
-   palette.setCOlor( backgroundRole(), Qt::red );
+   palette.setColor( backgroundRole(), Qt::red );
    setPalette( palette );
 #endif
 
@@ -719,7 +719,8 @@ void XxText::paintEvent( QPaintEvent *e )
    if ( resources.getShowOpt( SHOW_VERTICAL_LINE ) ) {
 
       uint cpos = resources.getVerticalLinePos();
-      int posx = cpos * fm.maxWidth() - horizontalPos;
+      // Dont use fm.maxWidth(), since, at least on OSX, it returns 0
+      int posx = cpos * fm.width("w") - horizontalPos;
 
       QColor vlineColor = resources.getColor( COLOR_VERTICAL_LINE );
       p.setPen( vlineColor );
