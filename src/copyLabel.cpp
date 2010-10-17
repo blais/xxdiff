@@ -32,9 +32,9 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
-#include <QResizeEvent>
-#include <QMouseEvent>
-#include <QLabel>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QLabel>
 
 
 /*==============================================================================

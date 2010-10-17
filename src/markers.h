@@ -37,7 +37,7 @@
 #endif
 
 #ifndef INCL_STD_QFILEDIALOG
-#include <QFileDialog>
+#include <QtGui/QFileDialog>
 #define INCL_STD_QFILEDIALOG
 #endif
 

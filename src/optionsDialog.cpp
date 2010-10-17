@@ -33,14 +33,14 @@
 #include <kdeSupport.h>
 
 #include <QtGui/QTabWidget>
-#include <QTextEdit>
+#include <QtGui/QTextEdit>
 #include <QtGui/QLineEdit>
 #include <QtGui/QCheckBox>
 #include <QtGui/QRadioButton>
 #include <QtGui/QPushButton>
 #include <QtGui/QSpinBox>
-#include <QListWidgetItem>
-#include <QListWidget>
+#include <QtGui/QListWidgetItem>
+#include <QtGui/QListWidget>
 #include <QtGui/QColor>
 #include <QtGui/QColorDialog>
 #include <QtGui/QFontDialog>
@@ -48,8 +48,8 @@
 #include <QtGui/QComboBox>
 #include <QtCore/QString>
 #include <QtGui/QPainter>
-#include <QMetaType>
-#include <QItemDelegate>
+#include <QtCore/QMetaType>
+#include <QtGui/QItemDelegate>
 
 #include <stdlib.h>
 

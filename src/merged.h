@@ -44,12 +44,12 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <QMainWindow>
+#include <QtGui/QMainWindow>
 #define INCL_QT_QMAINWINDOW
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <QFrame>
+#include <QtGui/QFrame>
 #define INCL_QT_QFRAME
 #endif
 

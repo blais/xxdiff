@@ -43,18 +43,18 @@
 
 #include <kdeSupport.h>
 
-#include <QKeySequence>
+#include <QtGui/QKeySequence>
 #include <QtGui/QApplication>
 #include <QtGui/QFont>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
-#include <QByteArray>
+#include <QtCore/QByteArray>
 #include <QtCore/QString>
 #if (QT_VERSION >= 0x030000)
 #include <QtGui/QStyleFactory>
 #endif
 #include <QtGui/QDesktopWidget>
-#include <QTextStream>
+#include <QtCore/QTextStream>
 
 #include <stdexcept>
 #include <iostream>

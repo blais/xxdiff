@@ -29,7 +29,7 @@
 #include <main.h>
 
 #include <QtCore/QString>
-#include <QByteArray>
+#include <QtCore/QByteArray>
 #include <QtCore/QTextStream>
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegexp>

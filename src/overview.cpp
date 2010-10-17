@@ -34,10 +34,10 @@
 #include <QtGui/QBrush>
 #include <QtGui/QPen>
 #include <QtGui/QColor>
-#include <QWheelEvent>
-#include <QResizeEvent>
-#include <QFrame>
-#include <QMouseEvent>
+#include <QtGui/QWheelEvent>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QFrame>
+#include <QtGui/QMouseEvent>
 
 #include <math.h>
 

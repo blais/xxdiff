@@ -37,8 +37,8 @@
 #include <kdeSupport.h>
 
 #include <QtGui/QApplication>
-#include <QByteArray>
-#include <QTextStream>
+#include <QtCore/QByteArray>
+#include <QtCore/QTextStream>
 
 /*#define getopt xxdiff_getopt*/
 #include <getopt.h>

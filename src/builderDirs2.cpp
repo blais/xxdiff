@@ -31,7 +31,7 @@
 #include <buffer.h>
 
 #include <QtCore/QString>
-#include <QByteArray>
+#include <QtCore/QByteArray>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>

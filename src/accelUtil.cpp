@@ -27,7 +27,7 @@
 #include <accelUtil.h>
 #include <resources.h>
 
-#include <QKeySequence>
+#include <QtGui/QKeySequence>
 
 #include <iostream>
 #include <string.h>

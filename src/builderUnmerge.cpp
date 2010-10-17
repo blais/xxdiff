@@ -29,7 +29,7 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <QByteArray>
+#include <QtCore/QByteArray>
 #include <QtCore/QTextStream>
 #include <QtCore/QRegexp>
 

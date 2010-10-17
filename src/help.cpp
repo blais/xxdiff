@@ -32,9 +32,9 @@
 #include <resParser.h>
 
 #include <kdeSupport.h>
-#include <QPixmap>
-#include <QTextStream>
-#include <QVBoxLayout>
+#include <QtGui/QPixmap>
+#include <QtCore/QTextStream>
+#include <QtGui/QVBoxLayout>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
 #ifndef WINDOWS
@@ -50,8 +50,8 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #include <QtGui/QLabel>
 #include <QtGui/QPushButton>
 #include <QtGui/QPalette>
-#include <QTextBrowser>
-#include <QByteArray>
+#include <QtGui/QTextBrowser>
+#include <QtCore/QByteArray>
 
 #include <iostream>
 #include <stdio.h>

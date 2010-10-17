@@ -48,9 +48,9 @@
 #include <resParser.h>
 #include <central.h>
 
-#include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
+#include <QtGui/QMainWindow>
+#include <QtGui/QMenu>
+#include <QtGui/QMenuBar>
 #include <QtGui/QLayout>
 #include <QtGui/QScrollBar>
 #include <QtGui/QLabel>
@@ -59,23 +59,23 @@
 #endif
 #include <QtGui/QFont>
 #include <QtGui/QMessageBox>
-#include <QFileDialog>
-#include <QShortcut>
+#include <QtGui/QFileDialog>
+#include <QtGui/QShortcut>
 #include <QtGui/QLabel>
-#include <QWhatsThis>
+#include <QtGui/QWhatsThis>
 #include <QtGui/QClipboard>
 #include <QtCore/QSocketNotifier>
-#include <QToolBar>
-#include <QAction>
-#include <QTextStream>
+#include <QtGui/QToolBar>
+#include <QtGui/QAction>
+#include <QtCore/QTextStream>
 #include <QtCore/QFile>
 #include <QtGui/QSplitter>
 #include <QtCore/QRegexp>
 #include <QtGui/QCheckBox>
 #include <QtCore/QDateTime>
-#include <QPixmap>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QtGui/QPixmap>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QVBoxLayout>
 
 
 #ifdef XX_KDE

@@ -38,7 +38,7 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
-#include <QFrame>
+#include <QtGui/QFrame>
 
 #include <math.h>
 #include <stdio.h>

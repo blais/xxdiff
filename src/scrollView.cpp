@@ -31,7 +31,7 @@
 #include <QtCore/QSize>
 #include <QtGui/QFont>
 #include <QtGui/QFontMetrics>
-#include <QWheelEvent>
+#include <QtGui/QWheelEvent>
 
 XX_NAMESPACE_BEGIN
 

@@ -28,7 +28,7 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <QTextStream>
+#include <QtCore/QTextStream>
 
 #include <list>
 #include <algorithm>

@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <QFrame>
+#include <QtGui/QFrame>
 #define INCL_QT_QFRAME
 #endif
 

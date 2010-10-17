@@ -26,7 +26,7 @@
 
 #include <markers.h>
 
-#include <QFileDialog>
+#include <QtGui/QFileDialog>
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
 #include <QtCore/QDir>
@@ -38,8 +38,8 @@
 
 #include <QtGui/QLayout>
 #include <QtGui/QPushButton>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QVBoxLayout>
 
 XX_NAMESPACE_BEGIN
 

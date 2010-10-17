@@ -39,14 +39,14 @@
 #include <QtGui/QPen>
 #include <QtGui/QColor>
 #include <QtGui/QLayout>
-#include <QShortcut>
+#include <QtGui/QShortcut>
 
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
-#include <QHBoxLayout>
-#include <QFrame>
-#include <QLabel>
-#include <QVBoxLayout>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QFrame>
+#include <QtGui/QLabel>
+#include <QtGui/QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>

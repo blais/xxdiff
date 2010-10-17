@@ -37,14 +37,14 @@
 #include <QtGui/QBrush>
 #include <QtGui/QPen>
 #include <QtGui/QColor>
-#include <QMenu>
+#include <QtGui/QMenu>
 
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
-#include <QFrame>
-#include <QResizeEvent>
-#include <QMouseEvent>
-#include <QWheelEvent>
+#include <QtGui/QFrame>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QWheelEvent>
 
 #include <math.h>
 #include <stdio.h>

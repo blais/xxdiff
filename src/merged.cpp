@@ -35,15 +35,15 @@
 #include <QtGui/QBrush>
 #include <QtGui/QPen>
 #include <QtGui/QColor>
-#include <QMenu>
-#include <QMenuBar>
+#include <QtGui/QMenu>
+#include <QtGui/QMenuBar>
 #include <QtGui/QLayout>
-#include <QCloseEvent>
+#include <QtGui/QCloseEvent>
 
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
