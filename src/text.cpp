@@ -782,7 +782,9 @@ void XxText::mousePressEvent( QMouseEvent* event )
          _grabDeltaLineNo = dlineno;
 
          QClipboard* cb = QkApplication::clipboard();
-         cb->clear( QClipboard::Selection );
+         cb->clear( cb->supportsSelection() ? 
+                       QClipboard::Selection :
+                       QClipboard::Clipboard );
 
          _regionSelect[0] = _grabTopLine + dlineno;
          _regionSelect[1] = -1;
@@ -883,7 +885,9 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
 
    QClipboard* cb = QkApplication::clipboard();
-   cb->setText( textCopy, QClipboard::Selection );
+   cb->setText( textCopy, cb->supportsSelection() ? 
+                             QClipboard::Selection :
+                             QClipboard::Clipboard );
 
    if ( event->button() == Qt::LeftButton ||
         event->button() == Qt::MidButton ) {
@@ -997,7 +1001,9 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
 
             _dontClearOnce = true;
             QClipboard* cb = QkApplication::clipboard();
-            cb->setText( textCopy, QClipboard::Selection );
+            cb->setText( textCopy, cb->supportsSelection() ? 
+                                      QClipboard::Selection :
+                                      QClipboard::Clipboard );
          }
       }
    }

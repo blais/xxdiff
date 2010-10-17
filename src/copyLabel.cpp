@@ -81,7 +81,9 @@ const QString& XxCopyLabel::getFullText() const
 void XxCopyLabel::mousePressEvent( QMouseEvent* event )
 {
    QClipboard *cb = QkApplication::clipboard();
-   cb->setText( _fulltext );
+   cb->setText( _fulltext, cb->supportsSelection() ? 
+                       QClipboard::Selection :
+                       QClipboard::Clipboard );
    QLabel::mousePressEvent( event );
 }
 
