@@ -61,7 +61,6 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QShortcut>
-#include <QtGui/QLabel>
 #include <QtGui/QWhatsThis>
 #include <QtGui/QClipboard>
 #include <QtCore/QSocketNotifier>
