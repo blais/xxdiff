@@ -61,10 +61,6 @@ public:
       const QString& text, 
       Icon           icon 
    );
-
-   // See base class.
-   virtual void done( int r );
-
 };
 
 XX_NAMESPACE_END

@@ -47,13 +47,7 @@ XxSuicideMessageBox::XxSuicideMessageBox(
    QMessageBox( icon, caption, text, QMessageBox::Close, parent )
 {
    setModal( false );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxSuicideMessageBox::done( int /*r*/ )
-{
-   delete this;
+   setAttribute( Qt::WA_DeleteOnClose );
 }
 
 XX_NAMESPACE_END

@@ -303,9 +303,6 @@ public:
    // Constructor.
    XxManPageDialog( QWidget* parent, const QString& text );
 
-   // See base class.
-   virtual void accept();
-
 };
 
 
@@ -317,6 +314,7 @@ XxManPageDialog::XxManPageDialog(
 ) :
    QDialog( parent )
 {
+   setAttribute( Qt::WA_DeleteOnClose );
    QVBoxLayout* toplay = new QVBoxLayout( this );
    toplay->setMargin( 0 );
    QkTextBrowser* tv = new QkTextBrowser();
@@ -328,14 +326,6 @@ XxManPageDialog::XxManPageDialog(
    b1->setDefault( true );
    toplay->addWidget( b1 );
    connect( b1, SIGNAL(clicked()), this, SLOT(accept()) );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxManPageDialog::accept()
-{
-   QDialog::accept();
-   delete this;
 }
 
 }
