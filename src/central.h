@@ -87,8 +87,7 @@ public:
    // Constructor.
    XxCentralFrame( 
       XxApp*          app, 
-      QWidget*        parent = 0,
-      const char*     name = 0 
+      QWidget*        parent = 0
    );
 
    // See base class.

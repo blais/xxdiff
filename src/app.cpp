@@ -722,14 +722,14 @@ void XxApp::createUI()
 
    topLayout->addWidget( _splitter );
 
-   _paneMergedView = new XxMergedFrame( this, _splitter, "paneMergedView" );
+   _paneMergedView = new XxMergedFrame( this, _splitter );
    if ( !_resources->getShowOpt( SHOW_PANE_MERGED_VIEW ) ) {
       _paneMergedView->hide();
    }
 
    // Texts widget (texts).
    //
-   _central = new XxCentralFrame( this, _splitter, "centralFrame" );
+   _central = new XxCentralFrame( this, _splitter );
    _central->showFilenames( _resources->getShowOpt( SHOW_FILENAMES ) );
 
    // Hide filename widgets on startup if requested.

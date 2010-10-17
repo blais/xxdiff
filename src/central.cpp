@@ -65,10 +65,9 @@ XX_NAMESPACE_BEGIN
 //
 XxCentralFrame::XxCentralFrame( 
    XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+   QWidget*    parent 
 ) :
-   BaseClass( app, parent, name )
+   BaseClass( app, parent )
 {
    XX_CHECK( app );
    uint nbTextWidgets = _app->getNbFiles();

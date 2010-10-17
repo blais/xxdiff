@@ -47,8 +47,7 @@ XX_NAMESPACE_BEGIN
 //
 XxScrollView::XxScrollView( 
    XxApp*      app, 
-   QWidget*    parent,
-   const char* name
+   QWidget*    parent
 ) :
    BaseClass( parent ),
    _app( app ),

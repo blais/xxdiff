@@ -58,10 +58,9 @@ XX_NAMESPACE_BEGIN
 //
 XxMergedFrame::XxMergedFrame( 
    XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+   QWidget*    parent
 ) :
-   BaseClass( app, parent, name )
+   BaseClass( app, parent )
 {
    QVBoxLayout* vlayout = new QVBoxLayout( this );
    vlayout->setSpacing( 0 );
@@ -159,7 +158,7 @@ XxMergedWindow::XxMergedWindow(
       resources.getAccelerator( ACCEL_MERGED_CLOSE )
    );
 
-   _frame = new XxMergedFrame( app, this, "merged_frame" );
+   _frame = new XxMergedFrame( app, this );
 
    setCentralWidget( _frame );
 }
