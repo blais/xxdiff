@@ -152,8 +152,10 @@ inline void rentxt(
       int nw = fm.width( str, rlen );
 
 #ifndef XX_DRAWTEXT_DRAWS_BACKGROUND
+      // don't draw beyond the viewport, to avoid painting ON the frame decoration (Sunken)
+      int minw = std::min( nw, p.viewport().width()-xpx );
       p.eraseRect(
-         XX_RED_RECT( xpx, y, nw, fm.lineSpacing() )
+         XX_RED_RECT( xpx, y, minw, fm.lineSpacing() )
       );
 #endif
 
