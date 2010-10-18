@@ -223,6 +223,7 @@ XxText::XxText(
    QPalette palette;
    palette.setColor( backgroundRole(), Qt::red );
    setPalette( palette );
+   setAutoFillBackground( true );
 #endif
 
 #if (QT_VERSION >= 0x030000)
