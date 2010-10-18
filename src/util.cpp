@@ -32,7 +32,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QTextStream>
 #include <QtCore/QFileInfo>
-#include <QtCore/QRegexp>
+#include <QtCore/QRegExp>
 #include <QtCore/QDateTime>
 
 #include <iostream>

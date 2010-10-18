@@ -31,7 +31,7 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QTextStream>
-#include <QtCore/QRegexp>
+#include <QtCore/QRegExp>
 
 #include <stdio.h>
 #include <iostream>

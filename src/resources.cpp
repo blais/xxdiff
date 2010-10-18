@@ -34,7 +34,7 @@
 #include <QtGui/QColor>
 #include <QtCore/QObject>
 #include <QtGui/QApplication> // to get desktop
-#include <QtCore/QRegexp>
+#include <QtCore/QRegExp>
 #if (QT_VERSION >= 0x030000)
 #include <QtGui/QStyleFactory>
 #endif

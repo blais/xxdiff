@@ -69,7 +69,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
 #include <QtGui/QSplitter>
-#include <QtCore/QRegexp>
+#include <QtCore/QRegExp>
 #include <QtGui/QCheckBox>
 #include <QtCore/QDateTime>
 #include <QtGui/QPixmap>
