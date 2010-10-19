@@ -702,7 +702,7 @@ void XxText::paintEvent( QPaintEvent *e )
         !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
-      p.drawRect( 0, cursorY1 - 1, w, cursorY2 - cursorY1 + 2 );
+      p.drawRect( 0, cursorY1 - 1, w - 1, cursorY2 - cursorY1 + 1 );
    }
 
    // Draw selected region marker.
