@@ -159,15 +159,11 @@ void XxOverview::paintEvent( QPaintEvent* e )
    p.setPen( pen );
    QBrush brush( Qt::SolidPattern );
 
+   brush.setColor( backgroundColor );
    for ( ii = 0; ii < nbFiles; ++ii ) {
-      // Draw both ends.
-      brush.setColor( backgroundColor );
-      p.fillRect( _fileL[ii], 0, fileWidth, _fileT[ii], brush );
-      p.fillRect( _fileL[ii], _fileB[ii], fileWidth, h - _fileB[ii], brush );
-
       if ( ii != (nbFiles-1) ) {
          // Draw separator background.
-         p.fillRect( _fileR[ii], 0, sepWidth, h, brush );
+         p.fillRect( _fileR[ii], 1, sepWidth, h-2, brush );
       }
    }
 
@@ -177,19 +173,14 @@ void XxOverview::paintEvent( QPaintEvent* e )
 
    // Start drawing at beginning of blocks.
    int prevy[3];
-   prevy[0] = _fileT[0];
-   prevy[1] = _fileT[1];
-   prevy[2] = _fileT[2];
+   prevy[0] = _fileT[0]-1;
+   prevy[1] = _fileT[1]-1;
+   prevy[2] = _fileT[2]-1;
    XxFln fline[3] = { 0,0,0 };
    QColor back, fore;
 
    // Draw very first line connecting regions.
-   for ( ii = 0; ii < nbFiles; ++ii ) {
-      if ( ii > 0 ) {
-         p.drawLine( _fileR[ii-1], prevy[ii-1], 
-                     _fileL[ii], prevy[ii] );
-      }
-   }
+   p.drawLine( 0, 0, rect.width()-1, 0 );
    
    do {
       diffs->findRegionWithSel( end + 1, start, end );
@@ -197,11 +188,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
       for ( ii = 0; ii < nbFiles; ++ii ) {
 
          int fsize = diffs->getNbFileLines( ii, start, end );
-         if ( fsize == 0 ) {
-            p.drawLine( _fileL[ii], prevy[ii], 
-                        _fileR[ii], prevy[ii] );
-         }
-         else {
+         if ( fsize != 0 ) {
             fline[ii] += fsize;
 
             int yend = _fileT[ii] + (_fileDy[ii]*fline[ii])/flines[ii];
@@ -220,7 +207,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
             brush.setColor( back );
             p.fillRect( _fileL[ii]+1, prevy[ii], fileWidth-2, ddy, brush );
 
-            p.drawRect( _fileL[ii], prevy[ii], fileWidth, ddy );
+            p.drawRect( _fileL[ii], prevy[ii], fileWidth-1, ddy-1 );
 
             prevy[ii] = yend;
          }
@@ -258,7 +245,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
       cfline = diffs->getBufferLine( ii, bottomline, aempty ) + 1;
       int bottompos =
          _fileT[ii] + 
-         int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
+         int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) ) - 1;
 
       p.setPen( cursorColor );
       p.drawRect( _regL[ii], toppos,
