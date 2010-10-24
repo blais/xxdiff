@@ -48,7 +48,6 @@
 #  include <io.h>
 #  include <time.h>
 #  include <winsock.h>
-//#  include <process.h> // for spawn()
 
 #define pipe _pipe
 #define popen _popen
@@ -554,232 +553,6 @@ bool XxUtil::isAsciiText( const QString& filename )
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::spawnCommand(
-   const char** argv,
-   FILE** outf,
-   FILE** errf,
-   void (*sigChldHandler)(int),
-   const char* cstdin
-)
-{
-   XX_ASSERT( argv );
-
-#ifndef WINDOWS
-
-   int pipe_fds_in[2];
-   if ( cstdin ) {
-      // Open the pipe.
-      if ( pipe( pipe_fds_in ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-   }
-
-   int pipe_fds_out[2];
-   if ( outf ) {
-      // Open the pipe.
-      if ( pipe( pipe_fds_out ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-   }
-
-   int pipe_fds_err[2];
-   if ( errf ) {
-      if ( pipe( pipe_fds_err ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-   }
-
-   int pid = fork();
-   switch ( pid ) {
-      case 0: { // the child
-
-         /*
-          * pipe standard input into the pipe
-          */
-         if ( cstdin ) {
-            if ( dup2( pipe_fds_in[0], fileno( stdin ) ) == -1 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-            close( pipe_fds_in[1] );
-         }
-
-         /*
-          * redirect standard output and standard error into the pipe
-          */
-         if ( outf ) {
-            /*close( fileno( stdout ) );*/
-            /*if ( dup( pipe_fds_out[1] ) == -1 ) {*/
-            if ( dup2( pipe_fds_out[1], fileno( stdout ) ) == -1 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-            close( pipe_fds_out[0] );
-         }
-
-         if ( errf ) {
-            /*close( fileno( stderr ) );*/
-            /*if ( dup( pipe_fds_err[1] ) == -1 ) {*/
-            if ( dup2( pipe_fds_err[1], fileno( stderr ) ) == -1 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-            close( pipe_fds_err[0] );
-         }
-
-         if ( execvp( argv[0], const_cast<char**>(argv) ) == -1 ) {
-            // Send parent some output telling it we couldn't exec.
-            QString errs;
-            {
-               QTextStream errss( &errs );
-               errss << "Cannot exec process " << argv[0] << endl << flush;
-            }
-            fwrite( errs.toLatin1().constData(), errs.length(), 1, stderr );
-            fwrite( "\n", 1, 1, stderr );
-
-            exit( 1 );
-         }
-
-         // Unreached.
-
-      } break;
-
-      case -1: { // fork error
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-
-      default: { // the parent
-
-         if ( sigChldHandler ) {
-            if ( installSigChldHandler( sigChldHandler ) == false ) {
-               return -2;
-            }
-         }
-
-         /*
-          * we must close this in the parent or else the close of the
-          * writer end of the pipe in the child will not cause an EOF
-          * condition for the reader
-          */
-         if ( cstdin ) {
-            close( pipe_fds_in[0] );
-         }
-         if ( outf ) {
-            close( pipe_fds_out[1] );
-         }
-         if ( errf ) {
-            close( pipe_fds_err[1] );
-         }
-
-         /*
-          * if requested, write into stdin of the subprocess.
-          */
-         if ( cstdin ) {
-            FILE* inf = fdopen( pipe_fds_in[1], "w" );
-
-            unsigned int len = strlen( cstdin );
-            // XX_TRACE( "writing " << len << " bytes" );
-            if ( fwrite( cstdin, sizeof(char), len, inf ) != len ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-
-            if ( fclose( inf ) != 0 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-         }
-
-         /*
-          * return the reader side of the pipe as a stdio stream.
-          */
-         if ( outf ) {
-            *outf = fdopen( pipe_fds_out[0], "r" );
-            if ( !*outf ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-         }
-         if ( errf ) {
-            *errf = fdopen( pipe_fds_err[0], "r" );
-            if ( !*errf ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-         }
-      }
-   }
-
-#else
-
-   int pid = -1;
-
-   QString command;
-   const char** arg;
-   for ( arg = argv; *arg != 0; ++arg ) {
-      command += QString(*arg) + QString(" ");
-   }
-   XX_TRACE( "Command: " << command.toLatin1().constData() );
-
-//    /*
-//     * N**xed up version with Windows calls. Consider yourself lucky if this
-//     * works even just once.
-//     */
-
-//    if ( _spawnvp( _P_NOWAIT | _P_DETACH, argv[0], const_cast<char**>(argv) ) != 0 ) {
-//       // Send parent some output telling it we couldn't exec.
-//       QString errs;
-//       {
-//          QTextStream errss( &errs );
-//          errss << "Error spawning process " << argv[0] << endl << flush;
-//       }
-//       fwrite( errs.toLatin1().constData(), errs.length(), 1, stderr );
-//       fwrite( "\n", 1, 1, stderr );
-
-//       exit( 1 );
-//    }
-
-   FILE* outputf;
-   FILE* errorf;
-
-   /*
-    * Run command so that it writes its output to a pipe. Open this pipe with
-    * read text attribute so that we can read it like a text file.
-    */
-   if( (outputf = popen( command.toLatin1().constData(), "rt" )) == NULL ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-   errorf = stderr;
-
-#if KEPT_FOR_HISTORY
-   /*
-    * Read pipe until end of file. End of file indicates that outputf closed its
-    * standard out (probably meaning it terminated).
-    */
-   while( !feof( chkdsk ) )
-   {
-      if( fgets( psBuffer, 128, chkdsk ) != NULL )
-         printf( psBuffer );
-   }
-#endif
-
-   /* Close pipe and print return value of outputf. */
-   *outf = outputf;
-   *errf = errorf;
-//   printf( "\nProcess returned %d\n", pclose( outputf ) );
-// FIXME todo, check result value as well
-
-#endif
-
-   // Not reached.
-   return pid;
-}
-
-//------------------------------------------------------------------------------
-//
-int XxUtil::spawnCommand(
-   const char** argv,
-   void (*sigChldHandler)(int)
-)
-{
-   return spawnCommand( argv, 0, 0, sigChldHandler );
-}
-
-//------------------------------------------------------------------------------
-//
 int XxUtil::interruptibleSystem( const QString& command )
 {
    // This is code for an interruptible system() call as shown as suggested in
@@ -844,25 +617,27 @@ void XxUtil::printTime( std::ostream& os, long time )
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::splitArgs(
+void XxUtil::splitArgs(
    const QString&     command,
    const QStringList& filenames,
-   const char**&      out_args
+   QString&           executable,
+   QStringList&       out_args
 )
 {
     // Titles aren't needed that often...
     const QString * titles[3] = { NULL, NULL, NULL };
-    return splitArgs(command,titles,filenames,out_args);
+    splitArgs(command, titles, filenames, executable, out_args);
 }
 
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::splitArgs(
+void XxUtil::splitArgs(
    const QString&     command,
    const QString *    titles[3],
    const QStringList& filenames,
-   const char**&      out_args
+   QString&           executable,
+   QStringList&       out_args
 )
 {
    /*
@@ -872,52 +647,27 @@ int XxUtil::splitArgs(
     * spaces will break this.
     */
 
-   QStringList args = command.trimmed().split( QRegExp( "\\s" ) );
-   args += filenames;
-   int argc = 0;
-   // It doesn't hurt to reserve space for 3 slots even though we may
-   // not need them all.
-   const char** argv =
-      (const char**) malloc( sizeof(char*) * (args.count() + 1 + 3) );
-   for ( QStringList::Iterator it = args.begin();
-         it != args.end();
-         ++it ) {
-      argv[argc++] = strdup( (*it).toLatin1().constData() );
-   }
-   for (int i=0; i<3; i++)
+   out_args = command.trimmed().split( QRegExp( "\\s" ) );
+   out_args += filenames;
+   for (int i=0; i<3; i++) {
       if (titles[i]) {
-         argv[argc++] = strdup( titles[i]->toLatin1().constData() );
+         out_args << *titles[i];
       }
-   argv[argc] = 0;
+   }
+   executable = out_args.takeFirst();
 
 //#define ANAL_DEBUGGING
 #ifdef ANAL_DEBUGGING
    std::ofstream ofs( "/tmp/diff_args" );
    ofs << " ARGS ------------------------------" << std::endl;
-   const char** ppargs = argv;
-   while ( *ppargs != 0 ) {
-      ofs << *ppargs << std::endl;
-      ++ppargs;
+   for ( QStringList::Iterator it = out_args.begin();
+         it != out_args.end();
+         ++it ) {
+      ofs << (*it).toLatin1().constData() << std::endl;
    }
    ofs << " -----------------------------------" << std::endl;
    ofs.close();
 #endif
-
-   out_args = argv;
-   return argc;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxUtil::freeArgs( const char**& out_args )
-{
-   if ( out_args ) {
-      for ( const char** dargv = out_args; *dargv; ++dargv ) {
-         free( const_cast<char*>( *dargv ) );
-      }
-      free( out_args );
-      out_args = 0; // reset it, just in case.
-   }
 }
 
 //------------------------------------------------------------------------------

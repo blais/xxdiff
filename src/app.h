@@ -71,7 +71,7 @@
  * FORWARD DECLARATIONS
  *============================================================================*/
 
-class QSocketNotifier;
+class QProcess;
 class QMessageBox;
 class QSplitter;
 class QLabel;
@@ -191,9 +191,6 @@ public slots:
 
    // On a number of line change in diffs.
    void onNbLinesChanged();
-
-   // This gets called in the main thread when the edit is done.
-   void editDone();
 
    // Most menu items.
    // <group>
@@ -376,9 +373,8 @@ private:
       const bool     overwrite = false
    );
 
-   // Edits the said file, and add signal handler to catch children exit, and
-   // notify.
-   void editFile( const QString& filename );
+   // Edits the said file.
+   void editFile( const QString& filename, const int bufIdx );
 
    // Reopen file at no and rebuild diffs and update and all.
    void openFile( const XxFno no );
@@ -437,11 +433,6 @@ private:
    // SIGCHLD handler for editor.
    static void handlerSIGCHLD( int );
 
-   /*----- static data members -----*/
-
-   static int              _sockfd;
-   static QSocketNotifier* _socketNotifier;
-
    /*----- data members -----*/
 
    // UI widgets.
@@ -477,6 +468,7 @@ private:
    std::auto_ptr<XxBuffer> _files[3];
    std::auto_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;
+   QProcess*               _editProc[3];
 
    // True if there is even a single byte of difference between the files.
    bool                    _isThereAnyDifference;

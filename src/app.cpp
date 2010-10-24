@@ -63,7 +63,7 @@
 #include <QtGui/QShortcut>
 #include <QtGui/QWhatsThis>
 #include <QtGui/QClipboard>
-#include <QtCore/QSocketNotifier>
+#include <QtCore/QProcess>
 #include <QtGui/QToolBar>
 #include <QtGui/QAction>
 #include <QtCore/QTextStream>
@@ -86,21 +86,7 @@
 #include <iostream>
 #include <memory>
 
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 #include <stdio.h>
-
-#ifndef WINDOWS
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <unistd.h>
-#else
-#  include <io.h>
-#endif
-
 
 // Pixmaps
 #include "pixmaps/next_difference.xpm"
@@ -230,11 +216,6 @@ XX_NAMESPACE_BEGIN
  * CLASS XxApp
  *============================================================================*/
 
-/*----- static data members -----*/
-
-int XxApp::_sockfd = -1;
-QSocketNotifier* XxApp::_socketNotifier = 0;
-
 //------------------------------------------------------------------------------
 //
 XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
@@ -258,6 +239,8 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
    _cmdline( cmdline ),
    _newlineChar( '\n' )
 {
+   _editProc[0] = _editProc[1] = _editProc[2] = NULL;
+
    if ( _cmdline._macNewlines ) {
       _newlineChar = '\015';
    }
@@ -516,9 +499,6 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
 //
 XxApp::~XxApp()
 {
-   if ( _socketNotifier != 0 ) {
-      ::close( _sockfd );
-   }
    delete _resources;
 }
 
@@ -2688,7 +2668,7 @@ bool XxApp::saveMergedToFile(
 
 //------------------------------------------------------------------------------
 //
-void XxApp::editFile( const QString& filename )
+void XxApp::editFile( const QString& filename, const int bufIdx )
 {
    if ( _diffs.get() == 0 ) {
       return;
@@ -2699,119 +2679,32 @@ void XxApp::editFile( const QString& filename )
       return;
    }
 
-#ifndef WINDOWS
-
-   //
-   // Open socket and create notifier if not yet done.  We're using a socket
-   // notifier for synchronization reasons.
-   //
-   if ( _socketNotifier == 0 ) {
-
-#ifdef FILE_NAMESPACE_SOCKET
-      /* Create the socket.   */
-      _sockfd = ::socket( PF_UNIX, SOCK_DGRAM, 0 );
-      if ( _sockfd < 0 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-
-      /* set socket reuse. */
-      int reuse = 1;
-      ::setsockopt( _sockfd, SOL_SOCKET, SO_REUSEADDR,
-                    (const char*)&reuse, sizeof(int) );
-
-      struct sockaddr_un name;
-      size_t size;
-      /* Bind a name to the socket.   */
-      name.sun_family = AF_FILE;
-      ::strncpy( name.sun_path, "/tmp/xxdiff_socket", sizeof(name.sun_path) );
-
-      /* The size of the address is
-         the offset of the start of the filename,
-         plus its length,
-         plus one for the terminating null byte.  */
-      size = ( offsetof( struct sockaddr_un, sun_path )
-               + strlen( name.sun_path ) + 1 );
-
-      if ( ::bind( _sockfd, (struct sockaddr*)&name, size ) < 0 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-#else
-      /* Create the socket.   */
-      _sockfd = ::socket( PF_INET, SOCK_STREAM, 0 );
-      if ( _sockfd < 0 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-
-      /* set socket reuse. */
-      /* Note: the const char* cast is necessary for SUNWspro. */
-      int reuse = 1;
-      ::setsockopt( _sockfd, SOL_SOCKET, SO_REUSEADDR,
-                    (const char *)&reuse, sizeof(int) );
-
-      /* Give the socket a name.  */
-      struct sockaddr_in name;
-      name.sin_family = AF_INET;
-      name.sin_port = 0; // unique port, otherwise: htons( port );
-      name.sin_addr.s_addr = htonl( INADDR_ANY );
-      if ( ::bind( _sockfd, (struct sockaddr*)&name, sizeof(name) ) < 0 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-#endif
-
-      // connect to host
-      ::connect( _sockfd, (struct sockaddr*)&name, sizeof(name) );
-
-      // set non-blocking
-      ::fcntl( _sockfd, F_SETFL, O_NONBLOCK );
-
-      // Create a new socket notifier.
-      _socketNotifier =
-         new QSocketNotifier( _sockfd, QSocketNotifier::Read, _mainWindow );
-      QObject::connect(
-         _socketNotifier, SIGNAL(activated(int)),
-         this, SLOT(editDone())
-      );
-   }
 
    QStringList filenames;
    filenames.append( filename );
-   const char** args;
-   XxUtil::splitArgs( command, filenames, args );
+   QStringList args;
+   QString executable;
+   XxUtil::splitArgs( command, filenames, executable, args );
 
-   try {
-      XxUtil::spawnCommand( args, handlerSIGCHLD );
+   if ( _editProc[bufIdx] == NULL ) {
+      _editProc[bufIdx] = new QProcess;
+      connect( _editProc[bufIdx], SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(redoDiff()) );
    }
-   catch ( const XxIoError& ioerr ) {
+   _editProc[bufIdx]->start( executable, args );
+   if ( ! _editProc[bufIdx]->waitForStarted() ) {
       QString text;
       {
          QTextStream oss( &text );
-         oss << "There has been an error spawning the editor:"
-             << ioerr.getMsg() << endl;
+         oss << "There has been an error spawning the editor ("
+             << executable << "): "
+             << _editProc[bufIdx]->errorString() << endl;
       }
       QMessageBox* box = new XxSuicideMessageBox(
          _mainWindow, "Error.", text, QMessageBox::Warning
       );
       box->show();
    }
-
-   XxUtil::freeArgs( args );
-#endif /* !WINDOWS */
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::editDone()
-{
-   // Read all the garbage from the socket.
-   char buf[1024];
-   while ( read( _sockfd, buf, sizeof(char) ) > 0 ) {
-   }
-
-   delete _socketNotifier;
-   _socketNotifier = 0;
-   ::close( _sockfd );
-
-   redoDiff();
+   
 }
 
 //------------------------------------------------------------------------------
@@ -3160,30 +3053,15 @@ void XxApp::generatePatchFromLeft()
       ::fclose( fout2 );
 
       // Run diff on the two temporary files.
-      QStringList filenames;
-      filenames.append( temporaryFilename1 );
-      filenames.append( temporaryFilename2 );
-      const char** out_args;
-      XxUtil::splitArgs( "diff -Naur", filenames, out_args );
-
-      FILE* fout;
-      FILE* ferr;
-      int pid = XxUtil::spawnCommand( out_args, &fout, &ferr );
-      if ( fout == 0 || ferr == 0 ) {
+      QProcess diffProc;
+      diffProc.start( "diff", QStringList() << "-Naur" << temporaryFilename1 << temporaryFilename2 );
+      if ( ! diffProc.waitForStarted() ) {
          throw XxIoError( XX_EXC_PARAMS );
       }
 
 // FIXME: TODO read the output and write it to some file.
 
-      ::fclose( fout );
-      ::fclose( ferr );
-
-      XxUtil::freeArgs( out_args );
-
-      if ( pid >= 0 ) {
-         int status;
-         ::waitpid( pid, &status, 0 );
-      }
+      diffProc.waitForFinished();
 
       // Delete the temporary files.
       XxUtil::removeFile( temporaryFilename1 );
@@ -3331,7 +3209,7 @@ void XxApp::editLeft()
 {
    XxBuffer* file = getBuffer( 0 );
    if ( file != 0 ) {
-      editFile( file->getName() );
+      editFile( file->getName(), 0 );
    }
 }
 
@@ -3341,7 +3219,7 @@ void XxApp::editMiddle()
 {
    XxBuffer* file = getBuffer( 1 );
    if ( file != 0 ) {
-      editFile( file->getName() );
+      editFile( file->getName(), 1 );
    }
 }
 
@@ -3349,9 +3227,10 @@ void XxApp::editMiddle()
 //
 void XxApp::editRight()
 {
-   XxBuffer* file = getBuffer( _nbFiles == 2 ? 1 : 2 );
+   int bufIdx = _nbFiles == 2 ? 1 : 2;
+   XxBuffer* file = getBuffer( bufIdx );
    if ( file != 0 ) {
-      editFile( file->getName() );
+      editFile( file->getName(), bufIdx );
    }
 }
 
@@ -3658,18 +3537,17 @@ void XxApp::diffFilesAtCursor()
          }
       }
 
-      const char** args;
-      XxUtil::splitArgs( command, titles, filenames, args );
+      QStringList args;
+      QString executable;
+      XxUtil::splitArgs( command, titles, filenames, executable, args );
 
-      try {
-         XxUtil::spawnCommand( args );
-      }
-      catch ( const XxIoError& ioerr ) {
+      QProcess xxdiffProc;
+      if ( ! xxdiffProc.startDetached( executable, args ) ) {
          QString text;
          {
             QTextStream oss( &text );
-            oss << "There has been an error spawning diff program:"
-                << ioerr.getMsg() << endl;
+            oss << "There has been an error spawning xxdiff: "
+                << xxdiffProc.errorString() << endl;
          }
          QMessageBox* box = new XxSuicideMessageBox(
             _mainWindow, "Error.", text, QMessageBox::Warning
@@ -3678,8 +3556,6 @@ void XxApp::diffFilesAtCursor()
       }
       for ( XxFno ii = 0; ii < 2; ++ii)
          delete titles[ii];
-
-      XxUtil::freeArgs( args );
    }
 
 }
@@ -4646,19 +4522,6 @@ void XxApp::synchronizeUI()
    _menuactions[ ID_ToggleShowFilenames ]->setChecked( 
       _resources->getShowOpt( SHOW_FILENAMES )
    );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxApp::handlerSIGCHLD( int )
-{
-   XX_ASSERT( _socketNotifier != 0 );
-   XX_TRACE( "XxApp::handlerSIGCHLD called" );
-
-   // Wake up the socket notifier.
-   // This should get caught by a select() call from the main event loop.
-   static const char* buf = "garbage";
-   write( _sockfd, &buf, sizeof(char) );
 }
 
 //==============================================================================

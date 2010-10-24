@@ -35,6 +35,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
+#include <QtCore/QProcess>
 
 #include <stdexcept>
 #include <stdio.h>
@@ -305,7 +306,7 @@ void patchUpMissingTypes(
 //------------------------------------------------------------------------------
 //
 void buildSolelyFromOutput(
-   FILE*                     fout,
+   QProcess&                 diffProc,
    QTextStream&              errors,
    XxBuffer&                 buffer1,
    XxBuffer&                 buffer2,
@@ -324,15 +325,13 @@ void buildSolelyFromOutput(
    const int len1 = path1.length();
    const int len2 = path2.length();
 
-   QFile qfout;
-   qfout.open( fout, QIODevice::ReadOnly );
-   QTextStream outputs( &qfout );
-
    while ( true ) {
-      QString line = outputs.readLine();
-      if ( line.isNull() ) {
-         break;
+      if ( ! diffProc.canReadLine() ) {
+         if ( ! diffProc.waitForReadyRead() ) {
+            break;
+         }
       }
+      QString line = diffProc.readLine().trimmed();
 
       DirDiffType type;
       QString filename;
@@ -382,7 +381,6 @@ void buildSolelyFromOutput(
          }
       }
    }
-   qfout.close();
 
    // Build the buffers.
    buffer1.setDirectoryEntries( entries1 );
@@ -392,7 +390,7 @@ void buildSolelyFromOutput(
 //------------------------------------------------------------------------------
 //
 void buildAgainstReadDirectory(
-   FILE*                     fout,
+   QProcess&                 diffProc,
    QTextStream&              errors,
    const XxBuffer&           buffer1,
    const XxBuffer&           buffer2,
@@ -426,15 +424,13 @@ void buildAgainstReadDirectory(
    const int len1 = path1.length();
    const int len2 = path2.length();
 
-   QFile qfout;
-   qfout.open( fout, QIODevice::ReadOnly );
-   QTextStream outputs( &qfout );
-
    while ( true ) {
-      QString line = outputs.readLine();
-      if ( line.isNull() ) {
-         break;
+      if ( ! diffProc.canReadLine() ) {
+         if ( ! diffProc.waitForReadyRead() ) {
+            break;
+         }
       }
+      QString line = diffProc.readLine().trimmed();
 
       DirDiffType type;
       QString filename;
@@ -480,7 +476,6 @@ void buildAgainstReadDirectory(
          }
       }
    }
-   qfout.close();
 
    {
       std::vector<DirDiffType>::const_iterator it1 = 
@@ -554,16 +549,17 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    QStringList filenames;
    filenames.append( path1 );
    filenames.append( path2 );
-   const char** out_args;
-   XxUtil::splitArgs( command, filenames, out_args );
+   QStringList out_args;
+   QString executable;
+   XxUtil::splitArgs( command, filenames, executable, out_args );
 
-   FILE* fout;
-   FILE* ferr;
-   XxUtil::spawnCommand( out_args, &fout, &ferr );
-   if ( fout == 0 || ferr == 0 ) {
+   QProcess diffProc;
+   diffProc.start( executable, out_args );
+   if ( ! diffProc.waitForStarted() ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
-   XxUtil::freeArgs( out_args );
+   diffProc.waitForReadyRead();
+   diffProc.setReadChannel( QProcess::StandardOutput );
 
    std::vector<DirDiffType> types1;
    std::vector<DirDiffType> types2;
@@ -573,15 +569,14 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    // Note: for now we don't support recursive diffs built against a directory.
    if ( _buildSolelyFromOutput || _isDiffRecursive ) {
       buildSolelyFromOutput(
-         fout, errors, buffer1, buffer2, types1, types2
+         diffProc, errors, buffer1, buffer2, types1, types2
       );
    }
    else {
       buildAgainstReadDirectory( 
-         fout, errors, buffer1, buffer2, types1, types2
+         diffProc, errors, buffer1, buffer2, types1, types2
       );
    }
-   ::fclose( fout );
 
 #ifdef LOCAL_TRACE
    XX_TRACE( "------------------------------" );
@@ -685,18 +680,14 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
       }
    }
 
+   diffProc.waitForFinished();
+
    // Collect stderr.
-   QFile qferr;
-   qferr.open( ferr, QIODevice::ReadOnly );
-   {
-      QTextStream errorss( &qferr );
-      QString errstr = errorss.readAll();
-      if ( !errstr.isNull() ) {
-         errors << errstr << endl;
-      }
+   QString errstr = diffProc.readAllStandardError();
+   if ( ! errstr.isEmpty() ) {
+      errors << errstr << endl;
    }
-   qferr.close();
-   ::fclose( ferr );
+   _status = ( diffProc.exitStatus() == QProcess::NormalExit ) ? diffProc.exitCode() : 2;
 
    // Saved error text.
    errors << flush;
@@ -704,27 +695,8 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
-#ifndef WINDOWS
-      int stat_loc;
-      if ( wait( &stat_loc ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-      _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-      throw XxIoError( XX_EXC_PARAMS );
-#else
-      _status = 2;
-#endif
-   }
-
-#ifndef WINDOWS
-   int stat_loc;
-   if ( wait( &stat_loc ) == -1 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
-   _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-#else
-   _status = 2;
-#endif
 
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, true ) );
    return ap;

@@ -105,28 +105,6 @@ public:
    // Quick heuristic to test whether a file's contents are ascii text
    static bool isAsciiText( const QString& filename );
 
-   // Run a program with command line arguments and two pathname arguments via
-   // fork/exec and return file descriptors into which standard output and
-   // standard error have been redirected.  Return the child's pid or -1 if it
-   // already finished.
-   //
-   // If you don't want the pipes, let outf and/or errf be null.
-   //
-   // If cstdin is not null, it is piped into the subprocess standard input.
-   static int spawnCommand( 
-      const char** argv,
-      FILE** outf,
-      FILE** errf,
-      void (*sigChldHandler)(int) = 0,
-      const char* cstdin = 0
-   );
-
-   // Convenience for above method, without output.
-   static int spawnCommand( 
-      const char** argv,
-      void (*sigChldHandler)(int) = 0
-   );
-
    // This is code for an interruptible system() call as shown as suggested in
    // GNU libc/Linux system(3) man page.
    static int interruptibleSystem( const QString& command );
@@ -137,21 +115,19 @@ public:
    // Print time value to stream.
    static void printTime( std::ostream& os, long time );
 
-   // Note: you have to free() out_args when you're done.
-   static int splitArgs( 
+   static void splitArgs( 
       const QString&     command,
       const QStringList& filenames,
-      const char**&      out_args
+      QString&           executable,
+      QStringList&       out_args
    );
-   static int splitArgs( 
+   static void splitArgs( 
       const QString&     command,
       const QString *    titles[3],
       const QStringList& filenames,
-      const char**&      out_args
+      QString&           executable,
+      QStringList&       out_args
    );
-
-   // Free args allocated with splitArgs.
-   static void freeArgs( const char**& out_args );
 
    // Remove ClearCase extension to filename if it is present.
    static QString removeClearCaseExt( const QString& );

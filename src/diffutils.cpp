@@ -212,23 +212,22 @@ XxDiffutils::~XxDiffutils()
 
 //------------------------------------------------------------------------------
 //
-void XxDiffutils::diff( int argc, char** out_args )
+void XxDiffutils::diff( QStringList& out_args )
 {
-   diff_fun( argc, out_args, diffutils_diff_main );
+   diff_fun( out_args, diffutils_diff_main );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxDiffutils::diff3( int argc, char** out_args )
+void XxDiffutils::diff3( QStringList& out_args )
 {
-   diff_fun( argc, out_args, diffutils_diff3_main );
+   diff_fun( out_args, diffutils_diff3_main );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxDiffutils::diff_fun( 
-   int argc,
-   char** out_args, 
+   QStringList& out_args, 
    int(*main_fun)(int, char**) 
 )
 {
@@ -240,11 +239,27 @@ void XxDiffutils::diff_fun(
    streamStdout = & oss_cout;
    streamStderr = & oss_cerr;
 
+   int argc = 0;
+   const char** argv =
+      (const char**) malloc( sizeof(char*) * (out_args.count() + 1) );
+   argv[argc++] = "fakeExeName";
+   for ( QStringList::Iterator it = out_args.begin();
+         it != out_args.end();
+         ++it ) {
+      argv[argc++] = strdup( (*it).toLatin1().constData() );
+   }
+   argv[argc] = 0;
+
    int i = setjmp( exit_env );
    if ( i == 0 ) {
       optind = 0;
-      main_fun( argc, out_args );
+      main_fun( argc, argv );
    }
+
+   for ( const char** dargv = argv; *dargv; ++dargv ) {
+      free( const_cast<char*>( *dargv ) );
+   }
+   free( argv );
 
    oss_cout << flush;
    oss_cerr << flush;

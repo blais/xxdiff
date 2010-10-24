@@ -34,6 +34,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
+#include <QtCore/QProcess>
 
 #include <stdexcept>
 #include <stdio.h>
@@ -434,16 +435,21 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    filenames.append( buffer1.getName() );
    filenames.append( buffer2.getName() );
    filenames.append( buffer3.getName() );
-   const char** out_args;
-   XxUtil::splitArgs( command, filenames, out_args );
+   QStringList out_args;
+   QString executable;
+   XxUtil::splitArgs( command, filenames, executable, out_args );
 
-   FILE* fout;
-   FILE* ferr;
-   XxUtil::spawnCommand( out_args, &fout, &ferr, 0, cstdin );
-   if ( fout == 0 || ferr == 0 ) {
+   QProcess diffProc;
+   diffProc.start( executable, out_args );
+   if ( ! diffProc.waitForStarted() ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
-   XxUtil::freeArgs( out_args );
+   if ( cstdin ) {
+      diffProc.write( cstdin );
+      diffProc.closeWriteChannel();
+   }
+   diffProc.waitForReadyRead();
+   diffProc.setReadChannel( QProcess::StandardOutput );
 
    _curHunk = 0;
    XxFln fline1 = 1;
@@ -455,15 +461,13 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    int sno;
    XxFln f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
 
-   QFile qfout;
-   qfout.open( fout, QIODevice::ReadOnly );
-   QTextStream outputs( &qfout );
-
    while ( true ) {
-      QString line = outputs.readLine();
-      if ( line.isNull() ) {
-         break;
+      if ( ! diffProc.canReadLine() ) {
+         if ( ! diffProc.waitForReadyRead() ) {
+            break;
+         }
       }
+      QString line = diffProc.readLine();
 
       XxLine::Type type;
       if ( parseDiffLine( type, line,
@@ -538,19 +542,15 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
          _curHunk++;
       }
    }
-   qfout.close();
    
+   diffProc.waitForFinished();
+
    // Collect stderr.
-   QFile qferr;
-   qferr.open( ferr, QIODevice::ReadOnly );
-   {
-      QTextStream errorss( &qferr );
-      QString errstr = errorss.readAll();
-      if ( !errstr.isNull() ) {
-         errors << errstr << endl;
-      }
+   QString errstr = diffProc.readAllStandardError();
+   if ( ! errstr.isEmpty() ) {
+      errors << errstr << endl;
    }
-   qferr.close();
+   _status = ( diffProc.exitStatus() == QProcess::NormalExit ) ? diffProc.exitCode() : 2;
 
    // Saved error text.
    errors << flush;
@@ -559,16 +559,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && ( fline3 == 1 ) &&
         hasErrors() ) {
-#ifndef WINDOWS
-      int stat_loc;
-      if ( wait( &stat_loc ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-      _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
       throw XxError( XX_EXC_PARAMS, _errors );
-#else
-      _status = 2;
-#endif
    }
 
    // Add final ignore region if present.
@@ -581,22 +572,10 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       createIgnoreBlock( fline1, fline2, fline3, int(nbRemainingLines) );
    }
 
-#ifndef WINDOWS
-   int stat_loc;
-   if ( wait( &stat_loc ) == -1 ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-   _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-#else
-   _status = 2;
-#endif
    // Fix for deficient non-GNU diff3.
    if ( _status == 0 && foundDifferences == true ) {
       _status = 1;
    }
-
-   ::fclose( fout );
-   ::fclose( ferr );
 
    std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;
