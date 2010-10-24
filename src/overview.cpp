@@ -161,9 +161,11 @@ void XxOverview::paintEvent( QPaintEvent* e )
 
    brush.setColor( backgroundColor );
    for ( ii = 0; ii < nbFiles; ++ii ) {
+      p.fillRect( _fileL[ii], 0, fileWidth, _fileT[ii], brush );
+      p.fillRect( _fileL[ii], _fileB[ii], fileWidth, h - _fileB[ii], brush );
       if ( ii != (nbFiles-1) ) {
          // Draw separator background.
-         p.fillRect( _fileR[ii], 1, sepWidth, h-2, brush );
+         p.fillRect( _fileR[ii], 0, sepWidth, h, brush );
       }
    }
 
@@ -180,7 +182,12 @@ void XxOverview::paintEvent( QPaintEvent* e )
    QColor back, fore;
 
    // Draw very first line connecting regions.
-   p.drawLine( 0, 0, rect.width()-1, 0 );
+   for ( ii = 0; ii < nbFiles; ++ii ) {
+      if ( ii > 0 ) {
+         p.drawLine( _fileR[ii-1], prevy[ii-1], 
+                     _fileL[ii], prevy[ii] );
+      }
+   }
    
    do {
       diffs->findRegionWithSel( end + 1, start, end );
