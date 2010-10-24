@@ -2370,9 +2370,9 @@ XxResources* XxApp::buildResources() const
          resParser.parse( rcfilename, *resources );
       }
       catch ( const XxIoError& ioerr ) {
-         QMessageBox::critical(
-            _mainWindow, "xxdiff", ioerr.getMsg()
-         );
+         (new XxSuicideMessageBox(
+            0, "xxdiff", ioerr.getMsg(), QMessageBox::Critical
+         ))->exec();
       }
    }
 
@@ -2382,9 +2382,9 @@ XxResources* XxApp::buildResources() const
          resParser.parse( cmdlineStream, *resources );
       }
       catch ( const XxIoError& ioerr ) {
-         QMessageBox::critical(
-            _mainWindow, "xxdiff cmdline resources", ioerr.getMsg()
-         );
+         (new XxSuicideMessageBox(
+            0, "xxdiff cmdline resources", ioerr.getMsg(), QMessageBox::Critical
+         ))->exec();
       }
    }
 
@@ -2398,14 +2398,9 @@ void XxApp::outputDiffErrors( const QString& errors )
    // _mainWindow could be 0 here, if this is called from the constructor,
    // that's ok.
 
-   QMessageBox* diffErrorsMsgBox = new XxSuicideMessageBox(
+   (new XxSuicideMessageBox(
       _mainWindow, "Diff errors.", errors, QMessageBox::Warning
-   );
-
-   diffErrorsMsgBox->show();
-
-   // Forget about it, it'll be closed and destroy itself, not a leak.
-   diffErrorsMsgBox->exec();
+   ))->exec();
 }
 
 //------------------------------------------------------------------------------
@@ -2542,10 +2537,11 @@ bool XxApp::askOverwrite( const QString& filename ) const
          oss << ", overwrite?";
       }
 
-      int resp = QMessageBox::warning(
-         _mainWindow, "xxdiff", msg, "Ok", "Cancel", QString(), 0, 1
+      QMessageBox::StandardButton resp = QMessageBox::warning(
+         _mainWindow, "xxdiff", msg,
+         QMessageBox::Ok | QMessageBox::Cancel
       );
-      if ( resp == 1 ) {
+      if ( resp == QMessageBox::Cancel ) {
          // User has canceled.
          return false;
       }
@@ -2657,8 +2653,8 @@ bool XxApp::saveMergedToFile(
       }
    }
    catch ( const XxIoError& ioerr ) {
-      QMessageBox::critical(
-         _mainWindow, "xxdiff", ioerr.getMsg()
+      new XxSuicideMessageBox(
+         _mainWindow, "xxdiff", ioerr.getMsg(), QMessageBox::Critical
       );
    }
 
@@ -2699,10 +2695,9 @@ void XxApp::editFile( const QString& filename, const int bufIdx )
              << executable << "): "
              << _editProc[bufIdx]->errorString() << endl;
       }
-      QMessageBox* box = new XxSuicideMessageBox(
+      new XxSuicideMessageBox(
          _mainWindow, "Error.", text, QMessageBox::Warning
       );
-      box->show();
    }
    
 }
@@ -2737,10 +2732,9 @@ void XxApp::openFile( const XxFno no )
       XxUtil::testFile( f, false, isDirectory );
       if ( isDirectory == true ) {
          QString text( "Cannot open a new directory" );
-         QMessageBox* box = new XxSuicideMessageBox(
+         new XxSuicideMessageBox(
             _mainWindow, "Error.", text, QMessageBox::Warning
          );
-         box->show();
          return;
       }
 
@@ -3249,10 +3243,10 @@ void XxApp::saveOptions()
       XxResParser::genInitFile( *_resources, *defres, outs );
    }
    if ( outstr.isEmpty() ) {
-      QMessageBox::warning(
+      new XxSuicideMessageBox(
          _mainWindow, "xxdiff",
          "There is nothing to write as init file\n(nothing has been changed).",
-         QMessageBox::Ok
+         QMessageBox::Warning
       );
       return;
    }
@@ -3292,8 +3286,8 @@ void XxApp::saveOptions()
       }
    }
    catch ( const XxIoError& ioerr ) {
-      QMessageBox::critical(
-         _mainWindow, "xxdiff", ioerr.getMsg()
+      new XxSuicideMessageBox(
+         _mainWindow, "xxdiff", ioerr.getMsg(), QMessageBox::Critical
       );
    }
 }
@@ -3549,10 +3543,9 @@ void XxApp::diffFilesAtCursor()
             oss << "There has been an error spawning xxdiff: "
                 << xxdiffProc.errorString() << endl;
          }
-         QMessageBox* box = new XxSuicideMessageBox(
+         new XxSuicideMessageBox(
             _mainWindow, "Error.", text, QMessageBox::Warning
          );
-         box->show();
       }
       for ( XxFno ii = 0; ii < 2; ++ii)
          delete titles[ii];
@@ -3610,10 +3603,9 @@ void XxApp::copyFile( XxFno nnno ) const
    // Get filenames.
    XxFln fline = line.getLineNo( nosrc );
    if ( fline == -1 ) {
-      QMessageBox* box = new XxSuicideMessageBox(
+      new XxSuicideMessageBox(
          _mainWindow, "Error.", "File is empty.", QMessageBox::Warning
       );
-      box->show();
       return;
    }
    QString filesrc = _files[nosrc]->getBufferAtLine( fline );
@@ -3638,10 +3630,9 @@ void XxApp::copyFile( XxFno nnno ) const
 
    // Copy file.
    if ( XxUtil::copyFile( filesrc, filedst ) != 0 ) {
-      QMessageBox* box = new XxSuicideMessageBox(
+      new XxSuicideMessageBox(
          _mainWindow, "Error.", "Error copying file.", QMessageBox::Warning
       );
-      box->show();
       return;
    }
 }
@@ -3679,10 +3670,9 @@ void XxApp::removeFile( XxFno nnno ) const
    // Get filenames.
    XxFln fline = line.getLineNo( nosrc );
    if ( fline == -1 ) {
-      QMessageBox* box = new XxSuicideMessageBox(
+      new XxSuicideMessageBox(
          _mainWindow, "Error.", "File is empty.", QMessageBox::Warning
       );
-      box->show();
       return;
    }
    QString filesrc = _files[nosrc]->getBufferAtLine( fline );
@@ -3699,10 +3689,9 @@ void XxApp::removeFile( XxFno nnno ) const
 
    // Remove file.
    if ( XxUtil::removeFile( filesrc ) != 0 ) {
-      QMessageBox* box = new XxSuicideMessageBox(
+      new XxSuicideMessageBox(
          _mainWindow, "Error.", "Error deleting file.", QMessageBox::Warning
       );
-      box->show();
       return;
    }
 }
@@ -4664,13 +4653,13 @@ void XxApp::quitAccept()
    if ( _diffs->hasSelectionsOtherThan(
            _nbFiles == 2 ? XxLine::SEL2 : XxLine::SEL3 ) ) {
 
-      int resp = QMessageBox::warning(
+      QMessageBox::StandardButton resp = QMessageBox::warning(
          _mainWindow,
          "xxdiff",
-         "Some selections are incompatible with your decision, confirm action.",
-         "Discard selections", "Cancel", QString(), 0, 1
+         "Some selections are incompatible with your decision, confirm action (Save to discard selections).",
+         QMessageBox::Save | QMessageBox::Cancel
       );
-      if ( resp == 1 ) {
+      if ( resp == QMessageBox::Cancel ) {
          // User has canceled.
          return;
       }
@@ -4691,13 +4680,13 @@ void XxApp::quitReject()
    // Confirm with the user if some incompatible selections were made.
    if ( _diffs->hasSelectionsOtherThan( XxLine::SEL1 ) ) {
 
-      int resp = QMessageBox::warning(
+      QMessageBox::StandardButton resp  = QMessageBox::warning(
          _mainWindow,
          "xxdiff",
-         "Some selections are incompatible with your decision, confirm action.",
-         "Accept, discard selections", "Cancel", QString(), 0, 1
+         "Some selections are incompatible with your decision, confirm action (Save to accept and discard selections).",
+        QMessageBox::Save | QMessageBox::Cancel
       );
-      if ( resp == 1 ) {
+      if ( resp == QMessageBox::Cancel ) {
          // User has canceled.
          return;
       }

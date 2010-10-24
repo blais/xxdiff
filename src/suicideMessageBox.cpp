@@ -48,6 +48,10 @@ XxSuicideMessageBox::XxSuicideMessageBox(
 {
    setModal( false );
    setAttribute( Qt::WA_DeleteOnClose );
+#ifdef Q_OS_MAC
+   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint );
+#endif
+   show();
 }
 
 XX_NAMESPACE_END
