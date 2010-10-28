@@ -347,11 +347,12 @@ void XxResources::initializeOriginalXdiff()
    
    //---------------------------------------------------------------------------
 
-   _tags[ TAG_CONFLICT_SEPARATOR ] = ">>>>>>>>>>>>>>>>>>>> File %d";
-   _tags[ TAG_CONFLICT_END ] = "<<<<<<<<<<<<<<<<<<<<";
+   _tags[ TAG_CONFLICT_START ] = "<<<<<<< %L";
+   _tags[ TAG_CONFLICT_SEP ] = "=======";
+   _tags[ TAG_CONFLICT_SEP_EXTRA ] = "||||||| %M";
+   _tags[ TAG_CONFLICT_END ] = ">>>>>>> %R";
    _tags[ TAG_CONDITIONAL_IF ] = "#if defined( %s )";
    _tags[ TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
-   _tags[ TAG_CONDITIONAL_ELSE ] = "#else";
    _tags[ TAG_CONDITIONAL_ENDIF ] = "#endif";
 
    // Defaults match CVS format.
