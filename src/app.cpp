@@ -2624,7 +2624,8 @@ bool XxApp::saveMergedToFile(
    }
    XX_ASSERT( !f.isEmpty() );
 
-   if ( !overwrite ) {
+   //  When ask==true, the warning is handled by QFileDialog
+   if ( !overwrite && ! ask ) {
       if ( ! askOverwrite( f ) ) {
          return false;
       }
@@ -3173,11 +3174,6 @@ void XxApp::saveSelectedOnly()
       return;
    }
 
-   // Check for file existence.
-   if ( ! askOverwrite( f ) ) {
-      return;
-   }
-
    QFile outfile( f );
    bool succ = outfile.open( QIODevice::Truncate | QIODevice::WriteOnly );
    if ( !succ ) {
@@ -3261,10 +3257,6 @@ void XxApp::saveOptions()
       return;
    }
    XX_ASSERT( !f.isEmpty() );
-
-   if ( ! askOverwrite( f ) ) {
-      return;
-   }
 
    // Open a file.
    try {
