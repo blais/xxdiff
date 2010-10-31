@@ -43,7 +43,6 @@
 #include <math.h>
 #include <stdio.h>
 
-
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
@@ -67,10 +66,8 @@ XxLineNumbers::XxLineNumbers(
    _central( central ),
    _no( no )
 {
-   // This must be set equal to the one in XxText for proper vertical alignment
-   // of text.
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   setLineWidth( 2 );
+   // Frame borders must be set equal to the one in XxText for proper vertical
+   // alignment of text.
 
    setSizePolicy(
       QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding )
@@ -127,6 +124,8 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
    QString lnFormat;
    lnFormat.sprintf( "%%%dd", _app->getMaxDigits() );
 
+   p.setPen( palette().color( backgroundRole() ).darker( 200 ) );
+
    const int x = 0;
    int y = 0;
    for ( uint ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
@@ -144,7 +143,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
       line.getLineColorType( 
          resources.getIgnoreFile(),
          _no,
-         dtype, dtypeSup
+         dtype, dtypeSup, false
       );
       resources.getRegionColor( dtype, bcolor, fcolor );
       QBrush brush( bcolor );
@@ -159,9 +158,12 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
          const QString& renderedNums =
             file->renderLineNumber( dfline, lnFormat );
 
-         p.drawText( x, y + fm.ascent(), renderedNums );
+         p.drawText( x, y+1 + fm.ascent(), renderedNums );
       }
    }
+   
+   p.setPen( palette().color( backgroundRole() ).darker( 135 ) );
+   p.drawLine( rect.topRight(), rect.bottomRight() );
 }
 
 XX_NAMESPACE_END

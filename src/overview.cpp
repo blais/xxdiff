@@ -62,14 +62,11 @@ XxOverview::XxOverview(
    XxCentralFrame* central,
    QWidget *       parent
 ) :
-   QFrame( parent ),
+   XxBorderLabel( XxBorderLabel::BorderLeft, parent ),
    _app( app ),
    _central( central ),
    _manipNo( -1 )
 {
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   setLineWidth( 2 );
-
    const XxResources& resources = _app->getResources();
    uint nbFiles = _app->getNbFiles();
    if ( nbFiles == 0 ) {
@@ -79,7 +76,7 @@ XxOverview::XxOverview(
    uint width =
       2 * lineWidth() + 
       nbFiles * resources.getOverviewFileWidth() + 
-      (nbFiles-1) * resources.getOverviewSepWidth();
+      (nbFiles-1) * resources.getOverviewSepWidth() - 1;
    setFixedWidth( width );
 }
 
@@ -100,10 +97,11 @@ QSizePolicy XxOverview::sizePolicy() const
 //
 void XxOverview::paintEvent( QPaintEvent* e )
 {
-   QFrame::paintEvent(e);
+   BaseClass::paintEvent(e);
 
    QPainter p( this );
    QRect rect = contentsRect();
+   rect.adjust( 1, 0, 0, 0 );
 
    // We want 1:1 pixel/coord ratio.
    p.setViewport( rect );

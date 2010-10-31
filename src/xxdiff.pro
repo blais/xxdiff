@@ -158,6 +158,7 @@ HEADERS = \
 	lineNumbers.h \
 	util.h \
 	markers.h \
+    borderLabel.h \
 	getopt.h \
 	diffutils.h \
 	diffutils_hack.h \
@@ -196,6 +197,7 @@ SOURCES = \
 	accelUtil.cpp \
 	resParser.cpp \
 	markers.cpp \
+    borderLabel.cpp \
 	getopt.c \
 	getopt1.c \
 	proginfo.c

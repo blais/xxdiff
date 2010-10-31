@@ -20,8 +20,8 @@
  *
  ******************************************************************************/
 
-#ifndef INCL_XXDIFF_COPYLABEL
-#define INCL_XXDIFF_COPYLABEL
+#ifndef INCL_XXDIFF_BORDERLABEL
+#define INCL_XXDIFF_BORDERLABEL
 
 /*==============================================================================
  * EXTERNAL DECLARATIONS
@@ -31,8 +31,8 @@
 #include <defs.h>
 #endif
 
-#ifndef INCL_XXDIFF_BORDERLABEL
-#include <borderLabel.h>
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
 #endif
 
 #ifndef INCL_QT_QLABEL
@@ -40,66 +40,60 @@
 #define INCL_QT_QLABEL
 #endif
 
-/*==============================================================================
- * FORWARD DECLARATIONS
- *============================================================================*/
-
-class QScrollBar;
-class QResizeEvent;
-class QMouseEvent;
-class QEvent;
-
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
- * CLASS XxCopyLabel
+ * CLASS XxBorderLabel
  *============================================================================*/
 
-// <summary> a label that puts its contents into the clipboard when clicked on
-// </summary>
+// <summary> a widget that can display line numbers </summary>
 
-class XxCopyLabel : public XxBorderLabel {
-
-   Q_OBJECT
+class XxBorderLabel : public QLabel {
 
 public:
 
    /*----- types and enumerations -----*/
 
-   enum {
-      SAFETY_OFFSET = 10
+   enum BorderFlag { 
+      BorderNone   = 0,
+      BorderLeft   = (1 << 0),
+      BorderRight  = (1 << 1),
+      BorderTop    = (1 << 2),
+      BorderBottom = (1 << 3)
    };
+   Q_DECLARE_FLAGS(BorderFlags, BorderFlag)
 
    /*----- member functions -----*/
 
-   // Constructor.
-   XxCopyLabel( QWidget* parent = 0 );
+   // Constructors.
+   XxBorderLabel(
+      BorderFlags bf = BorderNone,
+      QWidget* parent = 0,
+      Qt::WindowFlags wf = 0
+   );
+   XxBorderLabel( 
+      const QString& text,
+      BorderFlags bf = BorderNone,
+      QWidget* parent = 0,
+      Qt::WindowFlags wf = 0
+   );
 
    // Destructor.
-   virtual ~XxCopyLabel();
+   virtual ~XxBorderLabel();
 
    // See base class.
-   // <group>
-   virtual QSize sizeHint() const;
-   void setText( const QString& );
-   virtual void mousePressEvent( QMouseEvent* );
-   virtual void resizeEvent( QResizeEvent* );
-   // </group>
-
-   // Returns the full text of the label.
-   const QString& getFullText() const;
-
-protected:
-
-   bool event( QEvent* );
+   virtual void paintEvent( QPaintEvent* );
 
 private:
 
    /*----- data members -----*/
 
-   QString _fulltext;
+    BorderFlags _borders;
 
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(XxBorderLabel::BorderFlags)
+
 
 XX_NAMESPACE_END
 

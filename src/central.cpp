@@ -32,6 +32,7 @@
 #include <buffer.h>
 #include <copyLabel.h>
 #include <lineNumbers.h>
+#include <borderLabel.h>
 #include <help.h>
 
 #include <QtGui/QPainter>
@@ -108,18 +109,15 @@ XxCentralFrame::XxCentralFrame(
 
       _filenameLabel[ii] = new XxCopyLabel();
       _filenameLabel[ii]->setFont( smaller );
-      _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _filenameLabel[ii]->setMinimumWidth( 1 );
-      _filenameLabel[ii]->setLineWidth( 2 );
 
-      _lineNumberLabel[ii] = new QLabel( "9999" );
+      _lineNumberLabel[ii] = new XxBorderLabel("9999",
+              XxBorderLabel::BorderLeft | XxBorderLabel::BorderBottom);
       _lineNumberLabel[ii]->setAlignment( Qt::AlignCenter );
-      _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
-      _lineNumberLabel[ii]->setLineWidth( 2 );
       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
       _lineNumberLabel[ii]->setMaximumSize( _lineNumberLabel[ii]->sizeHint() );
       _lineNumberLabel[ii]->setText( "" );
-
+      
       fnLayout->addWidget( _filenameLabel[ii], 10 );
       fnLayout->addWidget( _lineNumberLabel[ii], 1 );
 

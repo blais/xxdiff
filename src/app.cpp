@@ -47,6 +47,7 @@
 #include <markers.h>
 #include <resParser.h>
 #include <central.h>
+#include <borderLabel.h>
 
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenu>
@@ -732,7 +733,8 @@ void XxApp::createUI()
    overviewLayout->setSpacing( 0 );
 
    //QHBoxLayout* hlayout = new QHBoxLayout;
-   _remUnselView = new QLabel( "remaining unselected" );
+   _remUnselView = new XxBorderLabel( "remaining unselected",
+           XxBorderLabel::BorderBottom | XxBorderLabel::BorderLeft );
    _remUnselView->setAlignment( Qt::AlignCenter );
    _remUnselView->setMaximumHeight( _remUnselView->sizeHint().height() );
    //hlayout->addWidget( _remUnselView, 100 );

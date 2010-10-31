@@ -31,6 +31,10 @@
 #include <defs.h>
 #endif
 
+#ifndef INCL_XXDIFF_BORDERLABEL
+#include <borderLabel.h>
+#endif
+
 #ifndef INCL_QT_QFRAME
 #include <QtGui/QFrame>
 #define INCL_QT_QFRAME
@@ -60,13 +64,13 @@ class XxCentralFrame;
 
 // <summary> overview area </summary>
 
-class XxOverview : public QFrame {
+class XxOverview : public XxBorderLabel {
 
 public:
 
    /*----- types and enumerations -----*/
 
-   typedef QFrame BaseClass;
+   typedef XxBorderLabel BaseClass;
 
    /*----- member functions -----*/
 

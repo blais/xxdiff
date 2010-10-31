@@ -160,7 +160,7 @@ inline void rentxt(
 #endif
 
       p.drawText(
-         XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() ),
+         XX_RED_RECT( xpx, y+1, wwidth - xpx, fm.lineSpacing() ),
          Qt::AlignLeft | Qt::AlignTop,
          str.left( rlen ),
          &brect
@@ -219,8 +219,9 @@ XxText::XxText(
    _regionSelect[0] = -1;
    _regionSelect[1] = -1;
 
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   setLineWidth( 2 );
+   // Frame borders must be set equal to the one in XxLineNumbers for proper
+   // vertical alignment of text.
+
 #ifdef XX_DEBUG_TEXT
    QPalette palette;
    palette.setColor( backgroundRole(), Qt::red );
@@ -702,7 +703,10 @@ void XxText::paintEvent( QPaintEvent *e )
         !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
-      p.drawRect( 0, cursorY1 - 1, w - 1, cursorY2 - cursorY1 + 1 );
+      p.drawLine( 0, cursorY1 , w, cursorY1 );
+      p.drawLine( 0, cursorY2 , w, cursorY2 );
+      cursorColor.setAlpha(64);
+      p.fillRect( 0, cursorY1 + 1 , w, cursorY2 - cursorY1 - 1, cursorColor );
    }
 
    // Draw selected region marker.

@@ -50,7 +50,7 @@ XX_NAMESPACE_BEGIN
 //------------------------------------------------------------------------------
 //
 XxCopyLabel::XxCopyLabel( QWidget* parent ) :
-   QLabel( parent )
+   XxBorderLabel( XxBorderLabel::BorderBottom, parent )
 {
    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
 }
