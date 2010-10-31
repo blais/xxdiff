@@ -1057,28 +1057,29 @@ void XxDiffs::search(
 
    _searchResults.clear();
 
-   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
-      const XxLine& line = getLineNC( ii );
-      SearchResult scurrent; // init as invalid
+   if ( ! searchText.isEmpty() ) {
+      for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+         const XxLine& line = getLineNC( ii );
+         SearchResult scurrent; // init as invalid
 
-      // Look in all files.
-      for ( int ni = 0; ni < nbFiles; ++ni ) {
+         // Look in all files.
+         for ( int ni = 0; ni < nbFiles; ++ni ) {
 
-         int fline = line.getLineNo( ni );
-         if ( fline != -1 ) {
-            if ( files[ni]->searchLine( fline, searchText ) == true ) {
-               // We have a hit.
-               scurrent._lineNo = ii;
-               scurrent._fline[ni] = fline;
+            int fline = line.getLineNo( ni );
+            if ( fline != -1 ) {
+               if ( files[ni]->searchLine( fline, searchText ) == true ) {
+                  // We have a hit.
+                  scurrent._lineNo = ii;
+                  scurrent._fline[ni] = fline;
+               }
             }
          }
-      }
 
-      if ( scurrent.isValid() ) {
-         _searchResults.push_back( scurrent );
+         if ( scurrent.isValid() ) {
+            _searchResults.push_back( scurrent );
+         }
       }
    }
-
    // This is just used to trigger overview area redraw.
    emit changed();
 }

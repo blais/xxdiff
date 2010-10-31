@@ -78,7 +78,7 @@ void XxSearchDialog::onApply()
 {
    XxDiffs* diffs = _app->getDiffs();
    const QString searchText = _lineeditSearchString->text();
-   if ( diffs != 0 && !searchText.isEmpty() ) {
+   if ( diffs != 0 ) {
       diffs->search( searchText, _app->getNbFiles(), _app->getBuffers() );
    }
 }
