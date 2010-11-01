@@ -343,11 +343,6 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
    }
 
    // Find out if it was clicked in the visible region.
-   if ( !( _regL[no] <= x && x <= _regR[no] ) ) {
-      return;
-   }
-
-   // Find out if it was clicked in the visible region.
    if ( !( _fileT[no] <= y && y <= _fileB[no] ) ) {
       return;
    }
@@ -379,7 +374,13 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
       _fileT[no] +
       int( (_fileDy[no] * (cfline-1)) / float( flines[no] ) );
 
-   if ( !( toppos <= y && y <= bottompos ) ) {
+   if ( !( _regL[no] <= x && x <= _regR[no] ) ||
+        !( toppos <= y && y <= bottompos ) ) {
+      // Clicked outside the handle - jump to the line
+      int displayheight = bottomline - topline + 1;
+      XxFln lineclicked = (y - _fileT[no]) * flines[no] / _fileDy[no];
+      XxDln displayline = diffs->getDisplayLine(lineclicked, *files[no], no);
+      _central->setTopLine( displayline - (displayheight / 2));
       return;
    }
 
