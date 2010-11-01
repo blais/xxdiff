@@ -378,9 +378,9 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
         !( toppos <= y && y <= bottompos ) ) {
       // Clicked outside the handle - jump to the line
       int displayheight = bottomline - topline + 1;
-      XxFln lineclicked = (y - _fileT[no]) * flines[no] / _fileDy[no];
-      XxDln displayline = diffs->getDisplayLine(lineclicked, *files[no], no);
-      _central->setTopLine( displayline - (displayheight / 2));
+      XxFln lineclicked = ( y - _fileT[no] ) * flines[no] / _fileDy[no];
+      XxDln displayline = diffs->getDisplayLine( lineclicked, *files[no], no );
+      _central->setTopLine( displayline - ( displayheight / 2 ) );
       return;
    }
 
