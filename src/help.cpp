@@ -52,6 +52,7 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #include <QtGui/QPalette>
 #include <QtGui/QTextBrowser>
 #include <QtCore/QByteArray>
+#include <QtGui/QLineEdit>
 
 #include <iostream>
 #include <stdio.h>
@@ -64,7 +65,7 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
  * LOCAL DECLARATIONS
  *============================================================================*/
 
-namespace {
+namespace XxHelpNS {
 
 /*----- variables -----*/
 
@@ -292,18 +293,6 @@ void XxAboutDialog::done( int )
  * LOCAL CLASS XxManPageDialog
  *============================================================================*/
 
-// <summary> the man pag dialog </summary>
-
-class XxManPageDialog : public QDialog {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxManPageDialog( QWidget* parent, const QString& text );
-
-};
 
 
 //------------------------------------------------------------------------------
@@ -317,20 +306,56 @@ XxManPageDialog::XxManPageDialog(
    setAttribute( Qt::WA_DeleteOnClose );
    QVBoxLayout* toplay = new QVBoxLayout( this );
    toplay->setMargin( 0 );
-   QkTextBrowser* tv = new QkTextBrowser();
-   tv->setText( text );
-   tv->setMinimumSize( 500, 700 );
-   toplay->addWidget( tv );
+   toplay->setSpacing( 0 );
+   _textBrowser = new QkTextBrowser();
+   _textBrowser->setText( text );
+   _textBrowser->setMinimumSize( 500, 700 );
+   toplay->addWidget( _textBrowser );
    
+   QHBoxLayout* sbLayout = new QHBoxLayout;
+   toplay->addLayout( sbLayout );
+   sbLayout->setMargin( 3 );
+   sbLayout->setSpacing( 3 );
+   _lineEdit = new QkLineEdit;
+   sbLayout->addWidget( new QLabel( "Search String:") );
+   sbLayout->addWidget( _lineEdit );
+   connect( _lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(searchFirst(const QString&)) );
+   connect( _lineEdit, SIGNAL(returnPressed()), this, SLOT(searchNext()) );
+   
+   QHBoxLayout* btLayout = new QHBoxLayout;
+   toplay->addLayout( btLayout );
    QkPushButton* b1 = new QkPushButton( "Close", this );
-   b1->setDefault( true );
-   toplay->addWidget( b1 );
+   b1->setAutoDefault( false );
+
+   btLayout->addItem( new QSpacerItem( 1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
+   btLayout->addWidget( b1 );
    connect( b1, SIGNAL(clicked()), this, SLOT(accept()) );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxManPageDialog::searchFirst(const QString& text)
+{
+    QTextCursor c = _textBrowser->textCursor();
+    c.movePosition( QTextCursor::Start);
+    _textBrowser->setTextCursor( c );
+    _textBrowser->find( text );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxManPageDialog::searchNext()
+{
+    if ( ! _textBrowser->find( _lineEdit->text() ) ) {
+        searchFirst( _lineEdit->text() );
+    }
 }
 
 }
 
 XX_NAMESPACE_BEGIN
+
+using namespace XxHelpNS;
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
