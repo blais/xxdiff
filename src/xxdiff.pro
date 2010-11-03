@@ -104,6 +104,7 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 ## macx-g++:QMAKE_CXXFLAGS += -D__GNU_LIBRARY__
 ## macx-g++:QMAKE_CXXFLAGS -= -fno-exceptions
 
+macx: ICON = xxdiff.icns
 
 #----------------------------------------
 # win32-msvc
