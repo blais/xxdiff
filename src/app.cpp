@@ -776,16 +776,25 @@ void XxApp::createUI()
    //
    // Cursor motion.
    //
-   connect ( new QShortcut( Qt::Key_Down, _mainWindow ), SIGNAL(activated()), SLOT(cursorDown()) );
-   connect ( new QShortcut( Qt::Key_Up,   _mainWindow ), SIGNAL(activated()), SLOT(cursorUp()) );
+   if ( _resources->getAccelerator( ACCEL_CURSOR_DOWN ) != Qt::Key_Down ) {
+      connect ( new QShortcut( Qt::Key_Down, _mainWindow ), SIGNAL(activated()), SLOT(cursorDown()) );
+   }
+   if ( _resources->getAccelerator( ACCEL_CURSOR_UP ) != Qt::Key_Up ) {
+      connect ( new QShortcut( Qt::Key_Up,   _mainWindow ), SIGNAL(activated()), SLOT(cursorUp()) );
+   }
 
-   connect ( new QShortcut( Qt::Key_Home, _mainWindow ), SIGNAL(activated()), SLOT(cursorTop()) );
-   connect ( new QShortcut( Qt::Key_End,  _mainWindow ), SIGNAL(activated()), SLOT(cursorBottom()) );
-
+   if ( _resources->getAccelerator( ACCEL_CURSOR_TOP ) != Qt::Key_Home ) {
+      connect ( new QShortcut( Qt::Key_Home, _mainWindow ), SIGNAL(activated()), SLOT(cursorTop()) );
+   }
+   if ( _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ) != Qt::Key_End ) {
+      connect ( new QShortcut( Qt::Key_End,  _mainWindow ), SIGNAL(activated()), SLOT(cursorBottom()) );
+   }
    connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_DOWN ),   _mainWindow ), SIGNAL(activated()), SLOT(cursorDown()) );
    connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_UP ),     _mainWindow ), SIGNAL(activated()), SLOT(cursorUp()) );
-   connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_TOP ),    _mainWindow ), SIGNAL(activated()), SLOT(cursorTop()) );
-   connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ), _mainWindow ), SIGNAL(activated()), SLOT(cursorBottom()) );
+
+   // Already managed by menu items
+   // connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_TOP ),    _mainWindow ), SIGNAL(activated()), SLOT(cursorTop()) );
+   // connect ( new QShortcut( _resources->getAccelerator( ACCEL_CURSOR_BOTTOM ), _mainWindow ), SIGNAL(activated()), SLOT(cursorBottom()) );
 
    //
    // Page motion.
@@ -795,8 +804,12 @@ void XxApp::createUI()
    // a->connectItem( a->insertItem(Key_Space), this, SLOT(pageDown()) );
    // a->connectItem( a->insertItem(Key_Backspace), this, SLOT(pageUp()) );
 
-   connect ( new QShortcut( Qt::Key_PageDown, _mainWindow ), SIGNAL(activated()), SLOT(pageDown()) );
-   connect ( new QShortcut( Qt::Key_PageUp,   _mainWindow ), SIGNAL(activated()), SLOT(pageUp()) );
+   if ( _resources->getAccelerator( ACCEL_PAGE_DOWN ) != Qt::Key_PageDown ) {
+      connect ( new QShortcut( Qt::Key_PageDown, _mainWindow ), SIGNAL(activated()), SLOT(pageDown()) );
+   }
+   if ( _resources->getAccelerator( ACCEL_PAGE_UP ) != Qt::Key_PageUp ) {
+      connect ( new QShortcut( Qt::Key_PageUp,   _mainWindow ), SIGNAL(activated()), SLOT(pageUp()) );
+   }
 
    connect ( new QShortcut( _resources->getAccelerator( ACCEL_PAGE_DOWN ), _mainWindow ), SIGNAL(activated()), SLOT(pageDown()) );
    connect ( new QShortcut( _resources->getAccelerator( ACCEL_PAGE_UP ),   _mainWindow ), SIGNAL(activated()), SLOT(pageUp()) );
