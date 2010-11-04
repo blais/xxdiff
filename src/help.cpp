@@ -314,11 +314,12 @@ XxManPageDialog::XxManPageDialog(
    
    QHBoxLayout* sbLayout = new QHBoxLayout;
    toplay->addLayout( sbLayout );
-   sbLayout->setMargin( 3 );
+   sbLayout->setMargin( 10 );
    sbLayout->setSpacing( 3 );
    _lineEdit = new QkLineEdit;
    sbLayout->addWidget( new QLabel( "Search String:") );
    sbLayout->addWidget( _lineEdit );
+   _lineEdit->setFocus();
    connect( _lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(searchFirst(const QString&)) );
    connect( _lineEdit, SIGNAL(returnPressed()), this, SLOT(searchNext()) );
    
@@ -329,7 +330,9 @@ XxManPageDialog::XxManPageDialog(
 
    btLayout->addItem( new QSpacerItem( 1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
    btLayout->addWidget( b1 );
+   btLayout->addItem( new QSpacerItem( 10, 1, QSizePolicy::Minimum, QSizePolicy::Minimum ) );
    connect( b1, SIGNAL(clicked()), this, SLOT(accept()) );
+   toplay->addItem( new QSpacerItem( 1, 10, QSizePolicy::Minimum, QSizePolicy::Minimum ) );
 }
 
 //------------------------------------------------------------------------------
