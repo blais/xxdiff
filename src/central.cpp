@@ -285,7 +285,7 @@ void XxCentralFrame::adjustLineNumbers( bool show, const QFont& fontText )
             lnw,
             file->computeLineNumbersWidth( fontText ) +
             ( _lineNumbers[ii]->width() -
-              _lineNumbers[ii]->contentsRect().width() + 2 ) );
+              _lineNumbers[ii]->contentsRect().width() + 6 ) );
          
       }
       for ( ii = 0; ii < nbFiles; ++ii ) {

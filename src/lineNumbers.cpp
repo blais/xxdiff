@@ -158,12 +158,29 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
          const QString& renderedNums =
             file->renderLineNumber( dfline, lnFormat );
 
-         p.drawText( x, y+1 + fm.ascent(), renderedNums );
+         p.drawText( x+2, y+1 + fm.ascent(), renderedNums );
       }
    }
    
    p.setPen( palette().color( backgroundRole() ).darker( 135 ) );
    p.drawLine( rect.topRight(), rect.bottomRight() );
+   
+   // Draw line cursor.
+   if ( !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
+      XxDln cursorLine = _app->getCursorLine() - topLine;
+      if (cursorLine>=0 && cursorLine <nbLines) {
+         int cursorY1 = cursorLine * fm.lineSpacing();
+         int cursorY2 = cursorY1 + fm.lineSpacing();
+         QColor cursorColor = resources.getColor( COLOR_CURSOR );
+         int w = rect.width();
+         p.setPen( cursorColor );
+         p.drawLine( 0, cursorY1 , w, cursorY1 );
+         p.drawLine( 0, cursorY2 , w, cursorY2 );
+         cursorColor.setAlpha(64);
+         p.fillRect( 0, cursorY1 + 1 , w, cursorY2 - cursorY1 - 1, cursorColor );
+      }
+  }
+
 }
 
 XX_NAMESPACE_END
