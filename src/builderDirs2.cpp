@@ -152,10 +152,8 @@ bool parseDiffLine(
       }
       
       //int len = colonPtr - bufPtr;
-      QByteArray dir1Ba = dir1.toLatin1();
-      QByteArray dir2Ba = dir2.toLatin1();
-      int cmp1 = ::strncmp( bufPtr, dir1Ba.constData(), len1 );
-      int cmp2 = ::strncmp( bufPtr, dir2Ba.constData(), len2 );
+      int cmp1 = ::strncmp( bufPtr, dir1.toLatin1().constData(), len1 );
+      int cmp2 = ::strncmp( bufPtr, dir2.toLatin1().constData(), len2 );
       // Note: you cannot compare the lengths because these might be directory
       // diffs.
       if ( cmp1 == 0 && cmp2 == 0 ) {
