@@ -28,6 +28,10 @@
 TEMPLATE = app
 CONFIG += debug qt warn_on thread
 
+DESTDIR=../bin
+TARGET = xxdiff
+
+
 # FIXME: Is this needed for Windows compile?
 #REQUIRES=full-config
 #REQUIRES=large-config
@@ -104,7 +108,36 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 ## macx-g++:QMAKE_CXXFLAGS += -D__GNU_LIBRARY__
 ## macx-g++:QMAKE_CXXFLAGS -= -fno-exceptions
 
-macx: ICON = xxdiff.icns
+
+#----------------------------------------
+# Max OS X (macx-g++ for command line build)
+
+macx {
+   # Icon used to the application bundle
+   ICON = xxdiff.icns
+   
+   # Special targets to deploy a standalone mac package in a DMG image:
+   # Call it with "make deploy"
+   
+   BUNDLE = $$DESTDIR/$$TARGET".app"
+
+   # Copy all required frameworks (libs) inthe bundle, and remove i386 part of libs (only keep x86_64)
+   macdeployqt.target = $$BUNDLE/Contents/Resources/qt.conf
+   macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do lipo \$\$l -thin x86_64 -output \$\$l; done
+   macdeployqt.depends = $$BUNDLE
+
+   # Create a dmg package
+   VER = $$system(cat ../VERSION)
+   DMG = $$DESTDIR/$$TARGET"_"$$VER".dmg"
+   dmg.target = $$DMG
+   dmg.commands = @hdiutil create -ov -fs HFS+ -srcfolder $$BUNDLE -volname $$quote("xxdiff\\ $$VER") $$DMG
+   dmg.depends = $$macdeployqt.target $(TARGET)
+
+   # "public" rule
+   deploy.depends = $$dmg.target
+
+   QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy
+}
 
 #----------------------------------------
 # win32-msvc
@@ -208,9 +241,6 @@ FORMS = \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
 
-DESTDIR=../bin
-
-TARGET = xxdiff
 
 
 #===============================================================================
