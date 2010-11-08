@@ -565,7 +565,7 @@ void XxHordiffImp::multipleHordiffs2(
 #endif
 
          if ( 
-            ( htable[ x + y*tlen0 ] == ( htable[ x-1 + (y-1)*tlen0 ] + 1 ) /*||
+            ( htable[ x + y*tlen0 ] == ( htable[ std::max( 0, x-1 + (y-1)*tlen0 ) ] + 1 ) /*||
               htable[ x + y*tlen0 ] == htable[ x-1 + (y-1)*tlen0 ]*/ ) &&
             ctext0[x] == ctext1[y] 
 
@@ -614,7 +614,7 @@ void XxHordiffImp::multipleHordiffs2(
                inword = false;
             }
 
-            if ( htable[ x-1 + y*tlen0 ] > htable[ x + (y-1)*tlen0 ] ) {
+            if ( htable[ std::max( 0, x-1 + y*tlen0 ) ] > htable[ std::max( 0, x + (y-1)*tlen0 ) ] ) {
                --x;
             }
             else { 
