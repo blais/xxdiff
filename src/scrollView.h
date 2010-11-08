@@ -91,8 +91,8 @@ public:
    // Computes the text display width in pixels.
    virtual QSize computeDisplaySize() const = 0;
 
-   // Computes the number of lines in the text to display.
-   virtual uint computeTextLength() const = 0;
+   // Gets the number of lines in the text to display.
+   virtual uint getTextLength() const = 0;
 
    // Returns the number of fully visible display lines that this display can
    // currently see.

@@ -194,7 +194,7 @@ QSize XxCentralFrame::computeDisplaySize() const
 
 //------------------------------------------------------------------------------
 //
-uint XxCentralFrame::computeTextLength() const
+uint XxCentralFrame::getTextLength() const
 {
    const XxDiffs* diffs = _app->getDiffs();
    if ( diffs != 0 ) {

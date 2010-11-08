@@ -2337,7 +2337,7 @@ bool XxApp::processDiff()
    //
    if ( _diffs.get() != 0 ) {
 
-      connect( _diffs.get(), SIGNAL(changed()), this, SLOT(updateWidgets()) );
+      connect( _diffs.get(), SIGNAL(changed()), this, SLOT(updateWidgetsForDiffs()) );
       connect( _diffs.get(), SIGNAL(nbLinesChanged()),
                this, SLOT(onNbLinesChanged()) );
 
@@ -2358,7 +2358,7 @@ bool XxApp::processDiff()
       // Reset update connections and adjust scrollbars.
       if ( _diffs.get() != 0 ) {
          connect( _diffs.get(), SIGNAL(changed()),
-                  this, SLOT(updateWidgets()) );
+                  this, SLOT(updateWidgetsForDiffs()) );
       }
 
       // Note: this should also be done, but more efficiently for each loaded
@@ -2495,6 +2495,19 @@ QkMenu* XxApp::getViewPopup( const int no, const XxLine& /*line*/ ) const
       return _viewPopup[no + 1];
    }
 
+}
+
+//------------------------------------------------------------------------------
+//
+void XxApp::updateWidgetsForDiffs()
+{
+   if ( _popupMergedView != 0 && _popupMergedView->isVisible() ) {
+      _popupMergedView->updateMergedLines();
+   }
+   if ( _paneMergedView != 0 && _paneMergedView->isVisible() ) {
+      _paneMergedView->updateMergedLines();
+   }
+   updateWidgets();
 }
 
 //------------------------------------------------------------------------------
@@ -2780,7 +2793,7 @@ void XxApp::openFile( const XxFno no )
 
          // Reset the cursor line.
          setCursorLine( 1 );
-         updateWidgets();
+         updateWidgetsForDiffs();
       }
       else {
          QString str;
@@ -2929,7 +2942,7 @@ void XxApp::onRedoDiff()
          // Reset the cursor line.
          setCursorLine( cursorLine );
          _central->setCenterLine( centerLine );
-         updateWidgets();
+         updateWidgetsForDiffs();
       }
       catch ( const std::exception& ex ) {
          outputDiffErrors( ex.what() );

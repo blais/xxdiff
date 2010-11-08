@@ -76,11 +76,11 @@ XxMergedFrame::XxMergedFrame(
    hlayout->addWidget( _text );
    
    _vscroll[0] = new QScrollBar;
-  // _vscroll[0]->setFixedWidth( 20 ); to be removed, at least on OSX
+  // _vscroll[0]->setFixedWidth( 20 ); to be removed, at least on OSX and Solaris
    hlayout->addWidget( _vscroll[0] );
 
    _hscroll = new QScrollBar( Qt::Horizontal );
-   //_hscroll->setFixedHeight( 20 ); to be removed, at least on OSX
+   //_hscroll->setFixedHeight( 20 ); to be removed, at least on OSX and Solaris
 
    vlayout->addWidget( _hscroll );
 
@@ -103,6 +103,25 @@ void XxMergedFrame::update()
 
 //------------------------------------------------------------------------------
 //
+void XxMergedFrame::show()
+{
+   BaseClass::show();
+   updateMergedLines();
+   // Too bad that at this time, the pane height is still 0, so the cursor
+   // gets located at the topline
+   recenter();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedFrame::updateMergedLines()
+{
+   _text->computeMergedLines();
+   adjustVerticalScrollbars( computeDisplaySize() );
+}
+
+//------------------------------------------------------------------------------
+//
 QSize XxMergedFrame::computeDisplaySize() const
 {
    uint displayWidth = _text->contentsRect().width();
@@ -112,9 +131,44 @@ QSize XxMergedFrame::computeDisplaySize() const
 
 //------------------------------------------------------------------------------
 //
-uint XxMergedFrame::computeTextLength() const
+uint XxMergedFrame::getTextLength() const
 {
-   return _text->computeMergedLines();
+   return _text->getMergedLines();
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::getTopLine() const
+{
+   return _text->getMergedLineFromLine( BaseClass::getTopLine() );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::getBottomLine() const
+{
+   return _text->getMergedLineFromLine( BaseClass::getBottomLine() );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::setTopLine( const XxDln lineNo )
+{
+    return BaseClass::setTopLine(  _text->getLineFromMergedLine( lineNo ) );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::setBottomLine( const XxDln lineNo )
+{
+    return BaseClass::setBottomLine(  _text->getLineFromMergedLine( lineNo ) );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::setCenterLine( const XxDln lineNo )
+{
+    return BaseClass::setCenterLine(  _text->getLineFromMergedLine( lineNo ) );
 }
 
 //------------------------------------------------------------------------------
@@ -161,6 +215,21 @@ XxMergedWindow::XxMergedWindow(
    _frame = new XxMergedFrame( app, this );
 
    setCentralWidget( _frame );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::show()
+{
+   BaseClass::show();
+   _frame->show();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::updateMergedLines()
+{
+   _frame->updateMergedLines();
 }
 
 //------------------------------------------------------------------------------

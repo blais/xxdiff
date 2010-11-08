@@ -40,6 +40,11 @@
 #define INCL_QT_QFRAME
 #endif
 
+#ifndef INCL_STD_VECTOR
+#include <vector>
+#define INCL_STD_VECTOR
+#endif
+
 /*==============================================================================
  * FORWARD DECLARATIONS
  *============================================================================*/
@@ -96,9 +101,19 @@ public:
    // Returns the width of pixels that can display text.
    uint getDisplayWidth() const;
 
-   // Compute approx. number of lines that would be need to be fit inside a
+   // Computes approx. number of lines that would be needed to be fit inside a
+   // merged view, and keep track of line positions.
+   uint computeMergedLines();
+   
+   // Returns approx. number of lines that would be needed to be fit inside a
    // merged view.
-   uint computeMergedLines() const;
+   uint getMergedLines() const;
+
+   // Returns the line number in the merged view for a given line number.
+   XxDln getMergedLineFromLine( XxDln line ) const;
+
+   // Returns the line number for a given line number in the merged view.
+   XxDln getLineFromMergedLine( XxDln mergedLine ) const;
 
 public slots:
 
@@ -150,9 +165,14 @@ private:
    int           _grabDeltaLineNo;
    int           _regionSelect[2]; // Selected text region for review.
    bool          _dontClearOnce; // one-time flag for our own clipboard calls.
+   uint          _mergedLines;
+   std::vector<XxDln> _idxMergedLines; // Keep track of merged line positions.
+
 };
 
 
 XX_NAMESPACE_END
+
+#include <text.inline.h>
 
 #endif

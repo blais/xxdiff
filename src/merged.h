@@ -100,14 +100,23 @@ public:
 
    // See base class.
    virtual void update();
+   virtual void show();
 
    // See base class XxScrollView.
    // <group>
    virtual QSize computeDisplaySize() const;
-   virtual uint computeTextLength() const;
+   virtual uint getTextLength() const;
    virtual XxDln getNbDisplayLines() const;
+   virtual XxDln getTopLine() const;
+   virtual XxDln getBottomLine() const;
+   virtual XxDln setTopLine( const XxDln lineNo );
+   virtual XxDln setBottomLine( const XxDln lineNo );
+   virtual XxDln setCenterLine( const XxDln lineNo );
    // </group>
-   
+
+   // See XxText.
+   void updateMergedLines();
+
 public slots:
 
    // Reacts to a cursor change.
@@ -145,6 +154,12 @@ public:
       QWidget*        parent = 0
    );
 
+   // See XxText.
+   void updateMergedLines();
+
+   // See base class.
+   virtual void show();
+   
    // See base class.
    // <group>
 public slots:

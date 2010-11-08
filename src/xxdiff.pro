@@ -186,6 +186,7 @@ HEADERS = \
 	accelUtil.h \
 	copyLabel.h \
 	text.h \
+	text.inline.h \
 	scrollView.h \
 	central.h \
 	merged.h \

@@ -112,7 +112,7 @@ XxDln XxScrollView::getBottomLine() const
    }
 
    int botline = std::min( 
-      getTopLine() /* top line */
+      XxScrollView::getTopLine() /* top line */
       + (getNbDisplayLines() - 1) /* to bottom line */
       - 1, /* don't allow cursor on half-displayed line */
       diffs->getNbLines()
@@ -141,10 +141,10 @@ XxDln XxScrollView::setTopLine( const XxDln lineNo )
       );
    _vscroll[0]->setValue( displayableLine - 1 );
    if ( _vscroll[1] != 0 ) {
-      _vscroll[1]->setValue( displayableLine - 1 );
+      _vscroll[1]->setValue( displayableLine -1 );
    }
    // Note: this will trigger the scroll signal indirectly.
-   
+
    return oldLine;
 }
 
@@ -158,7 +158,7 @@ XxDln XxScrollView::setCenterLine( const XxDln lineNo )
    }
 
    XxDln oldLine = getCenterLine();
-   setTopLine( lineNo - getNbDisplayLines() / 2 );
+   XxScrollView::setTopLine( lineNo - getNbDisplayLines() / 2 );
    return oldLine;
 }
 
@@ -172,7 +172,7 @@ XxDln XxScrollView::setBottomLine( const XxDln lineNo )
    }
 
    XxDln oldLine = getBottomLine();
-   setTopLine( lineNo - (getNbDisplayLines() - 2) );
+   XxScrollView::setTopLine( lineNo - (getNbDisplayLines() - 2) );
    return oldLine;
 }
 
@@ -253,7 +253,7 @@ void XxScrollView::adjustVerticalScrollbars( const QSize& displaySize )
 
    uint displayHeight = displaySize.height();
    const XxDiffs* diffs = _app->getDiffs();
-   uint textHeight = computeTextLength();
+   uint textHeight = getTextLength();
 
    if ( _displayHeight != displayHeight || _textHeight != textHeight ) {
 

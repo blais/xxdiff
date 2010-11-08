@@ -188,6 +188,9 @@ public slots:
 
    // Redraws the text widgets.
    void updateWidgets();
+   // Have the merged panes recompute their merged line indexes, and adjust their
+   // scrollbars, then normally update widgets.
+   void updateWidgetsForDiffs();
 
    // On a number of line change in diffs.
    void onNbLinesChanged();

@@ -97,7 +97,7 @@ public:
    // See base class XxScrollView.
    // <group>
    virtual QSize computeDisplaySize() const;
-   virtual uint computeTextLength() const;
+   virtual uint getTextLength() const;
    virtual XxDln getNbDisplayLines() const;
    // </group>
    

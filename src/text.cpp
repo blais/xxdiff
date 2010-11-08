@@ -214,13 +214,19 @@ XxText::XxText(
    _sv( sv ),
    _no( no ),
    _grabMode( NONE ),
-   _dontClearOnce( false )
+   _dontClearOnce( false ),
+   _mergedLines( 0 )
 {
    _regionSelect[0] = -1;
    _regionSelect[1] = -1;
 
    // Frame borders must be set equal to the one in XxLineNumbers for proper
    // vertical alignment of text.
+   
+   // Initialize the vector of merged topLines
+   if ( no == -1 ) {
+       computeMergedLines();
+   }
 
 #ifdef XX_DEBUG_TEXT
    QPalette palette;
@@ -1075,7 +1081,7 @@ uint XxText::getDisplayWidth() const
 
 //------------------------------------------------------------------------------
 //
-uint XxText::computeMergedLines() const
+uint XxText::computeMergedLines()
 {
    // Count equivalent number of lines that would be rendered in the merged
    // view.
@@ -1089,12 +1095,16 @@ uint XxText::computeMergedLines() const
    QFontMetrics fm( font );
    const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
 
+   XxDln nbLines = diffs->getNbLines();
+   _idxMergedLines.reserve( nbLines );
+   _idxMergedLines[0] = 1;
+
    // Count the number of equivalent lines.
-   int y = 0;
+   float y = 0;
    SkipType skip = SK_NOSKIP;
    XxLine::Type prevtype;
    XxLine::Type type = XxLine::SAME;
-   for ( XxDln icurline = 1; icurline <= diffs->getNbLines(); ++icurline ) {
+   for ( XxDln icurline = 1; icurline <= nbLines; ++icurline ) {
 
       // Get line to display.
       prevtype = type;
@@ -1116,6 +1126,7 @@ uint XxText::computeMergedLines() const
                   // Draw undecided marker.
                   //
                   y += HEIGHT_UNSEL_REGION;
+                  _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_UNSEL_REGION " << y );
                }
                continue;
@@ -1128,6 +1139,7 @@ uint XxText::computeMergedLines() const
                   // Draw neither marker.
                   //
                   y += HEIGHT_NEITHER_REGION;
+                  _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_NEITHER_REGION " << y );
                }
                continue;
@@ -1150,6 +1162,7 @@ uint XxText::computeMergedLines() const
       if ( fline != -1 ) {
 
          y += fm.lineSpacing();
+         _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
          XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
       }
       else {
@@ -1158,6 +1171,7 @@ uint XxText::computeMergedLines() const
 
             // The line is empty, just fill in the background.
             y += fm.lineSpacing();
+            _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
             XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
          }
          else {
@@ -1169,20 +1183,52 @@ uint XxText::computeMergedLines() const
                // Draw empty marker.
                //
                y += HEIGHT_EMPTY_REGION;
+               _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
                XX_LOCAL_TRACE( "HEIGHT_EMPTY_REGION " << y );
             }
          }
       }
    }
 
+   _mergedLines = ceilf( y/fm.lineSpacing() );
+
+   for ( XxDln icurline = _mergedLines + 1; icurline <= nbLines; ++icurline ) {
+      _idxMergedLines[icurline] = nbLines+1;
+   }
 
    XX_LOCAL_TRACE( "y = " << y
              << " ls = " << fm.lineSpacing()
-             << " difflines = " << diffs->getNbLines() );
+             << " difflines = " << nbLines );
 
-   int approxNbLines = y / fm.lineSpacing() + 1;
-   XX_LOCAL_TRACE( "approxNbLines = " << approxNbLines );
-   return approxNbLines;
+   XX_LOCAL_TRACE( "_mergedLines = " << _mergedLines );
+   return _mergedLines;
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxText::getMergedLineFromLine( XxDln line ) const
+{
+   if ( _app->getDiffs() == 0 ) {
+      return 0;
+   }
+
+   return _idxMergedLines[line];
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxText::getLineFromMergedLine( XxDln mergedLine ) const
+{
+   if ( _app->getDiffs() == 0 ) {
+      return 0;
+   }
+
+   for ( XxDln icurline = mergedLine; icurline >= 0; --icurline ) {
+       if ( _idxMergedLines[icurline] <= mergedLine ) {
+          return icurline;
+       }
+   }
+   return 0;
 }
 
 //------------------------------------------------------------------------------
