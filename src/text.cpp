@@ -215,7 +215,9 @@ XxText::XxText(
    _no( no ),
    _grabMode( NONE ),
    _dontClearOnce( false ),
-   _mergedLines( 0 )
+   _mergedLines( 0 ),
+   _idxMergedLinesSize( 0 ),
+   _idxMergedLines( NULL )
 {
    _regionSelect[0] = -1;
    _regionSelect[1] = -1;
@@ -1096,8 +1098,14 @@ uint XxText::computeMergedLines()
    const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
 
    XxDln nbLines = diffs->getNbLines();
-   _idxMergedLines.reserve( nbLines + 1 );
-   _idxMergedLines[0] = 1;
+   
+   // (Re)allocate enough space to deal with nbLines
+   if ( (uint)( nbLines + 1 ) > _idxMergedLinesSize ) {
+       _idxMergedLinesSize = nbLines + 1;
+      _idxMergedLines = (XxDln*)realloc( (void*)_idxMergedLines,
+                                         _idxMergedLinesSize * sizeof( XxDln ) );
+      _idxMergedLines[0] = 1;
+   }
 
    // Count the number of equivalent lines.
    float y = 0;
@@ -1126,7 +1134,7 @@ uint XxText::computeMergedLines()
                   // Draw undecided marker.
                   //
                   y += HEIGHT_UNSEL_REGION;
-                  _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
+                  _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_UNSEL_REGION " << y );
                }
                continue;
@@ -1139,7 +1147,7 @@ uint XxText::computeMergedLines()
                   // Draw neither marker.
                   //
                   y += HEIGHT_NEITHER_REGION;
-                  _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
+                  _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_NEITHER_REGION " << y );
                }
                continue;
@@ -1162,7 +1170,7 @@ uint XxText::computeMergedLines()
       if ( fline != -1 ) {
 
          y += fm.lineSpacing();
-         _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
+         _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
          XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
       }
       else {
@@ -1171,7 +1179,7 @@ uint XxText::computeMergedLines()
 
             // The line is empty, just fill in the background.
             y += fm.lineSpacing();
-            _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
+            _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
             XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
          }
          else {
@@ -1183,7 +1191,7 @@ uint XxText::computeMergedLines()
                // Draw empty marker.
                //
                y += HEIGHT_EMPTY_REGION;
-               _idxMergedLines[ceilf( y/fm.lineSpacing() )] = icurline;
+               _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
                XX_LOCAL_TRACE( "HEIGHT_EMPTY_REGION " << y );
             }
          }
@@ -1191,10 +1199,6 @@ uint XxText::computeMergedLines()
    }
 
    _mergedLines = ceilf( y/fm.lineSpacing() );
-
-   for ( XxDln icurline = _mergedLines + 1; icurline <= nbLines; ++icurline ) {
-      _idxMergedLines[icurline] = nbLines+1;
-   }
 
    XX_LOCAL_TRACE( "y = " << y
              << " ls = " << fm.lineSpacing()
@@ -1222,8 +1226,7 @@ XxDln XxText::getLineFromMergedLine( XxDln mergedLine ) const
    if ( _app->getDiffs() == 0 ) {
       return 0;
    }
-
-   for ( XxDln icurline = mergedLine; icurline >= 0; --icurline ) {
+   for ( XxDln icurline = std::min( (uint)mergedLine, _mergedLines ); icurline >= 0; --icurline ) {
        if ( _idxMergedLines[icurline] <= mergedLine ) {
           return icurline;
        }

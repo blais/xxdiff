@@ -165,8 +165,9 @@ private:
    int           _grabDeltaLineNo;
    int           _regionSelect[2]; // Selected text region for review.
    bool          _dontClearOnce; // one-time flag for our own clipboard calls.
-   uint          _mergedLines;
-   std::vector<XxDln> _idxMergedLines; // Keep track of merged line positions.
+   uint          _mergedLines; // approx. number of lines that would be needed to be fit inside a merged view
+   uint          _idxMergedLinesSize; // allocated size of _idxMergedLines
+   XxDln*        _idxMergedLines; // Keep track of merged line positions.
 
 };
 
