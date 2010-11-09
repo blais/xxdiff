@@ -1096,7 +1096,7 @@ uint XxText::computeMergedLines()
    const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
 
    XxDln nbLines = diffs->getNbLines();
-   _idxMergedLines.reserve( nbLines );
+   _idxMergedLines.reserve( nbLines + 1 );
    _idxMergedLines[0] = 1;
 
    // Count the number of equivalent lines.
