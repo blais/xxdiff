@@ -112,12 +112,6 @@ Download
   <http://xxdiff.sourceforge.net/download/2.9/windows>`_.  No support offered
   though.
 
-* A preliminary Qt4 port to Mac has been done by Matt Johnston, you can `find it
-  here <http://xxdiff.sourceforge.net/download/3.2/contrib>`_.  I don't have a
-  Mac, so questions will not be very useful.  The current xxdiff source code
-  does not reflect this build though.  Newer versions can be found at
-  http://matt.ucc.asn.au/xxdiff/.
-
 
 Tools
 -----
@@ -193,19 +187,19 @@ Dependencies
 
 Build dependencies are:
 
-- Qt-3.2 or higher
+- Qt-4.5 or higher
 - a C++ compiler, flex and yacc
 
 Runtime dependencies are:
 
-- Qt-3.2 or higher
+- Qt-4.5 or higher
 
 
 Portability
 -----------
 
 xxdiff is known to build and work on a great majority of UNIX platforms where Qt
-works.  It has also been ported to Mac OS X.
+works, including Mac OS X.
 
 
 External Links
