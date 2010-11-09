@@ -104,19 +104,27 @@ Screenshots
 Download
 ========
 
+* Source code can be found the public Mercurial repository, here:
+
+     http://hg.furius.ca/public/xxdiff/
+
 * `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
 
-* `Alternate Location and Snapshots </downloads/xxdiff>`_
+* A complete Qt4 port (which also works on the Mac) has been done by
+  Alexandre Feblot, I will soon integrate the source code into the
+  official repository [2010-11-09], as a 'qt4' branch. Watch the
+  repository for new.
 
-* A Windows build (with some minor bugs) can be found `here
-  <http://xxdiff.sourceforge.net/download/2.9/windows>`_.  No support offered
-  though.
+* A preliminary Qt4 port to Mac for 3.2 had been made by Matt
+  Johnston, you can `find it here
+  <http://xxdiff.sourceforge.net/download/3.2/contrib>`_. I don't have
+  a Mac, so questions will not be very useful. The current xxdiff
+  source code does not reflect this build though. Newer versions can
+  be found at http://matt.ucc.asn.au/xxdiff/.
 
-* A preliminary Qt4 port to Mac has been done by Matt Johnston, you can `find it
-  here <http://xxdiff.sourceforge.net/download/3.2/contrib>`_.  I don't have a
-  Mac, so questions will not be very useful.  The current xxdiff source code
-  does not reflect this build though.  Newer versions can be found at
-  http://matt.ucc.asn.au/xxdiff/.
+* An old Windows build for 2.9 (with some minor bugs) can be found
+  `here <http://xxdiff.sourceforge.net/download/2.9/windows>`_. No
+  support offered though.
 
 
 Tools
