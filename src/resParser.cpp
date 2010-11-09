@@ -50,9 +50,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
-#if (QT_VERSION >= 0x030000)
 #include <QtGui/QStyleFactory>
-#endif
 #include <QtGui/QDesktopWidget>
 #include <QtCore/QTextStream>
 
@@ -992,11 +990,7 @@ void XxResParser::genInitFile(
    if ( !XxResources::compareFonts( fontApp, res2.getFontApp() ) ) {
       os << searchTokenName( kwdList, kwdList_size, FONT_APP )
          << ": \""
-#if (QT_VERSION >= 0x030000)
          << fontApp.toString()
-#else
-         << fontApp.rawName()
-#endif
          << "\"" << endl;
    }
 
@@ -1004,11 +998,7 @@ void XxResParser::genInitFile(
    if ( !XxResources::compareFonts( fontText, res2.getFontText() ) ) {
       os << searchTokenName( kwdList, kwdList_size, FONT_TEXT )
          << ": \""
-#if (QT_VERSION >= 0x030000)
          << fontText.toString()
-#else
-         << fontText.rawName()
-#endif
          << "\"" << endl;
    }
 
@@ -1188,21 +1178,13 @@ void XxResParser::listResources( QTextStream& os )
    const QFont& fontApp = res.getFontApp();
    os << searchTokenName( kwdList, kwdList_size, FONT_APP )
       << ": \""
-#if (QT_VERSION >= 0x030000)
       << fontApp.toString()
-#else
-      << fontApp.rawName()
-#endif
       << "\"" << endl;
 
    const QFont& fontText = res.getFontText();
    os << searchTokenName( kwdList, kwdList_size, FONT_TEXT )
       << ": \""
-#if (QT_VERSION >= 0x030000)
       << fontText.toString()
-#else
-      << fontText.rawName()
-#endif
       << "\"" << endl;
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
@@ -1383,11 +1365,7 @@ QString XxResParser::getResourceRef()
       os << tok->_name << ": \"";
       if ( qApp != 0 ) {
          os << XxHelp::xmlize(
-#if (QT_VERSION >= 0x030000)
             fontApp.toString()
-#else
-            fontApp.rawName()
-#endif
          );
       }
       else {
@@ -1407,11 +1385,7 @@ QString XxResParser::getResourceRef()
       os << tok->_name << ": \"";
       if ( qApp != 0 ) {
          os << XxHelp::xmlize(
-#if (QT_VERSION >= 0x030000)
             fontText.toString()
-#else
-            fontText.rawName()
-#endif
          );
       }
       else {

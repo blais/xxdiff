@@ -35,9 +35,7 @@
 #include <QtCore/QObject>
 #include <QtGui/QApplication> // to get desktop
 #include <QtCore/QRegExp>
-#if (QT_VERSION >= 0x030000)
 #include <QtGui/QStyleFactory>
-#endif
 
 #include <iostream>
 #include <string.h> // ::strcmp
@@ -406,7 +404,6 @@ void XxResources::setPreferredGeometry( const QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
-#if (QT_VERSION >= 0x030000)
 void XxResources::setStyleKey( const QString& styleKey )
 {
    QStringList styles = QStyleFactory::keys();
@@ -414,11 +411,6 @@ void XxResources::setStyleKey( const QString& styleKey )
    _styleKey = styleKey;
    emit changed();
 }
-#else
-void XxResources::setStyleKey( const QString& /*styleKey*/ )
-{
-}
-#endif
 
 //------------------------------------------------------------------------------
 //
@@ -447,11 +439,7 @@ bool XxResources::setAccelerator( XxAccel accel, const QString& val )
 //
 bool XxResources::setFontApp( const QString& val )
 {
-#if (QT_VERSION >= 0x030000)
    _fontApp.fromString( val );
-#else
-   _fontApp.setRawName( val );
-#endif
    emit changed();
    return true; // never generates error.
 }
@@ -469,11 +457,7 @@ bool XxResources::setFontApp( const QFont& font )
 //
 bool XxResources::setFontText( const QString& val )
 {
-#if (QT_VERSION >= 0x030000)
    _fontText.fromString( val );
-#else
-   _fontText.setRawName( val );
-#endif
    emit changed();
    return true; // never generates error.
 }
@@ -801,11 +785,7 @@ void XxResources::setMergedFilename( const QString& fn )
 bool XxResources::compareFonts( const QFont& f1, const QFont& f2 )
 {
    if ( f1.rawMode() || f2.rawMode() ) {
-#if (QT_VERSION >= 0x030000)
       return f1.toString() == f2.toString();
-#else
-      return f1.rawName() == f2.rawName();
-#endif
    }
    return f1 == f2;
 }

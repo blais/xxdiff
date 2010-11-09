@@ -1129,11 +1129,7 @@ QString XxOptionsDialog::getFontDisplayText(
 ) const
 {
    QString displayText;
-#if (QT_VERSION >= 0x030000)
    displayText = font.toString();
-#else
-   displayText = font.rawName();
-#endif
 
 #if KEPT_FOR_HISTORY
    QFontInfo fontInfo( font );

@@ -166,21 +166,13 @@ XxMarkersDialog::XxMarkersDialog(
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
    _buttonOk = new QPushButton;
-#if (QT_VERSION >= 0x030000)
    _buttonOk->setText( trUtf8( "Ok" ) );
-#else
-   _buttonOk->setText( "Ok" );
-#endif
    _buttonOk->setDefault( TRUE );
    hlayout->addWidget( _buttonOk );
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
    _buttonCancel = new QPushButton;
-#if (QT_VERSION >= 0x030000)
    _buttonCancel->setText( trUtf8( "Cancel" ) );
-#else
-   _buttonCancel->setText( "Cancel" );
-#endif
    hlayout->addWidget( _buttonCancel );
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 

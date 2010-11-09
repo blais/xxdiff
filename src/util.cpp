@@ -177,11 +177,7 @@ void formatPrintFunc(
    bool             newest
 )
 {
-#if (QT_VERSION >= 0x030000)
 #define DATEFORMAT Qt::ISODate
-#else
-#define DATEFORMAT 
-#endif
 
    switch ( m ) {
 
@@ -756,19 +752,9 @@ bool XxUtil::formatFilename(
 
 //------------------------------------------------------------------------------
 //
-unsigned int XxUtil::toTime_t( 
-#if (QT_VERSION >= 0x030100)
-   const QDateTime& t
-#else
-   const QDateTime& /*t*/
-#endif
-)
+unsigned int XxUtil::toTime_t( const QDateTime& t )
 {
-#if (QT_VERSION >= 0x030100)
    return t.toTime_t();
-#else
-   return 0; // Note: we could hack something by hand.
-#endif
 }
 
 //------------------------------------------------------------------------------

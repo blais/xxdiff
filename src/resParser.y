@@ -203,23 +203,17 @@ prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
 style		: STYLE COLON STRING
 		{
                    /*printf( "==> style: %s\n", $3 );*/
-#if (QT_VERSION >= 0x030000)
                    QStringList styles = QStyleFactory::keys();
                    QString styleKey( $3 );
                    if ( styles.indexOf( styleKey ) != -1 ) {
                       RESOURCES->setStyleKey( styleKey );
                    }
                    else {
-#endif
                       QString err = QString( "Requested style key does not exist." );
-#if (QT_VERSION >= 0x030000)
                       err += QString( "\nValid styles are: " );
                       err += styles.join( ", " );
-#endif
                       yyerror( err.toLatin1().constData() );
-#if (QT_VERSION >= 0x030000)
                    }
-#endif
                 }
                 ;
 

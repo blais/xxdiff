@@ -55,9 +55,7 @@
 #include <QtGui/QLayout>
 #include <QtGui/QScrollBar>
 #include <QtGui/QLabel>
-#if (QT_VERSION >= 0x030000)
 #include <QtGui/QStyleFactory>
-#endif
 #include <QtGui/QFont>
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
@@ -250,13 +248,11 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
    _resources = buildResources();
 
 #ifndef XX_KDE
-#if (QT_VERSION >= 0x030000)
    // By default, if not specified, force SGI style.
    if ( _cmdline._forceStyle == false ) {
       _style = QStyleFactory::create( _resources->getStyleKey() );
       setStyle( _style );
    }
-#endif
 #endif
 
 #ifndef XX_KDE
@@ -841,9 +837,7 @@ void XxApp::createUI()
    }
 
    // Connect closing window to quit().
-#if (QT_VERSION >= 0x030000)
    connect( this, SIGNAL(lastWindowClosed()), this, SLOT(quit()) );
-#endif
 
    //
    // Show it!

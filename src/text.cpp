@@ -237,7 +237,6 @@ XxText::XxText(
    setAutoFillBackground( true );
 #endif
 
-#if (QT_VERSION >= 0x030000)
    // Initialize clipboard to use mouse selection.
    //
    // We do this multiple times for nothing, but I'd rather have it here
@@ -246,7 +245,6 @@ XxText::XxText(
 
    // Bind clear to change signal.
    connect( cb, SIGNAL(selectionChanged()), this, SLOT(clearRegionSelect()) );
-#endif
 }
 
 //------------------------------------------------------------------------------
