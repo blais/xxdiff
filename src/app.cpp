@@ -496,8 +496,8 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
 //
 XxApp::~XxApp()
 {
-   delete _resources;
    delete _mainWindow;
+   delete _resources;
 }
 
 //------------------------------------------------------------------------------
