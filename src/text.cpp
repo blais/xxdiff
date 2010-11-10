@@ -409,6 +409,7 @@ void XxText::paintEvent( QPaintEvent *e )
 
                   brush.setColor( fcolor );
                   brush.setStyle( Qt::BDiagPattern );
+                  brush.setTransform( QTransform::fromTranslate( 0.0-horizontalPos, 0 ) );
                   p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
                               brush );
 
@@ -653,6 +654,7 @@ void XxText::paintEvent( QPaintEvent *e )
 
             if ( resources.getBoolOpt( BOOL_DRAW_PATTERN_IN_FILLER_LINES ) ) {
                QBrush patBrush( bcolor.dark( 120 ), Qt::DiagCrossPattern );
+               patBrush.setTransform( QTransform::fromTranslate( 0.0-horizontalPos, 0 ) );
                p.fillRect(
                   XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
                   patBrush
