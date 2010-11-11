@@ -1243,6 +1243,11 @@ void XxApp::createMenus()
    fileMenu->addSeparator();
 
    if ( _cmdline._forceDecision == false ) {
+      // Note: on OSX, this action is reaffected to the Quit item of the application
+      // menu, which always has Ctrl-Q as an accelerator. This can be prevented by
+      //  using setMenuRole( QAction::ApplicationSpecificRole ), or our item can even
+      // be kept out of the application menu with QAction::NoRole, but anyway, there
+      // will be a standard Quit item in the application menu with Ctrl-Q.
       fileMenu->addAction(
          "Exit", this, SLOT(quit()),
          _resources->getAccelerator( ACCEL_EXIT )

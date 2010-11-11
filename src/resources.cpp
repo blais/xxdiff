@@ -96,7 +96,12 @@ void XxResources::initializeOriginalXdiff()
 {
    // Just like xdiff.
    _preferredGeometry = _defaultGeometry;
-   _styleKey = "Cleanlooks"; // Default style.
+   _styleKey =  // Default style.
+#ifdef Q_OS_MAC
+      "Macintosh (aqua)";
+#else
+      "Cleanlooks";
+#endif
    _maximize = false;
 
    //---------------------------------------------------------------------------
