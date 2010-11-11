@@ -96,7 +96,7 @@ void XxResources::initializeOriginalXdiff()
 {
    // Just like xdiff.
    _preferredGeometry = _defaultGeometry;
-   _styleKey = "SGI"; // Default style.
+   _styleKey = "Cleanlooks"; // Default style.
    _maximize = false;
 
    //---------------------------------------------------------------------------
