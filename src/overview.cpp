@@ -157,10 +157,11 @@ void XxOverview::paintEvent( QPaintEvent* e )
    p.setPen( pen );
    QBrush brush( Qt::SolidPattern );
 
-   brush.setColor( backgroundColor );
+      brush.setColor( backgroundColor );
    for ( ii = 0; ii < nbFiles; ++ii ) {
       p.fillRect( _fileL[ii], 0, fileWidth, _fileT[ii], brush );
       p.fillRect( _fileL[ii], _fileB[ii], fileWidth, h - _fileB[ii], brush );
+
       if ( ii != (nbFiles-1) ) {
          // Draw separator background.
          p.fillRect( _fileR[ii], 0, sepWidth, h, brush );
@@ -193,7 +194,11 @@ void XxOverview::paintEvent( QPaintEvent* e )
       for ( ii = 0; ii < nbFiles; ++ii ) {
 
          int fsize = diffs->getNbFileLines( ii, start, end );
-         if ( fsize != 0 ) {
+         if ( fsize == 0 ) {
+            p.drawLine( _fileL[ii], prevy[ii], 
+                        _fileR[ii], prevy[ii] );
+         }
+         else {
             fline[ii] += fsize;
 
             int yend = _fileT[ii] + (_fileDy[ii]*fline[ii])/flines[ii];
