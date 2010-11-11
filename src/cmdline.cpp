@@ -191,13 +191,6 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "functionality is useful for better integration with scripts that "
      "require some form of decision to be made by the user."
    },
-   { "mac", 0, false, 'G',
-     "Split the file lines at single carriage returns instead of newlines."
-     "This should allow xxdiff working on Mac OSX.  Note that this will not "
-     "enable xxdiff to process Mac files under UNIX, unless the underlying "
-     "diff program that is invoked to compute the diffs supports the newlines. "
-     "(This is not the case under Linux with GNU diff, for example."
-   },
    { "indicate-input-processed", 0, false, 'j',
      "Indicate that the input files have been entirely processed and are not "
      "needed anymore by printing out the string INPUT-PROCESSED on stdout as "
@@ -337,6 +330,10 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
    { "sync", 0, false, 'C',
      "Switches to synchronous mode for debugging."
    }, 
+   { "graphicssystem", 0, true, 'G',
+     "Sets the application graphics system. Possible values are raster, "
+     "opengl (experimental), opengl1 (obsolete), x11, native. "
+   }, 
 }; 
 
 //------------------------------------------------------------------------------
@@ -352,7 +349,6 @@ XxCmdline::XxCmdline() :
    _unmerge( false ),
    _unmergeNbFiles( 2 ),
    _forceDecision( false ),
-   _macNewlines( false ),
    _indicateInputProcessed( false ),
    _useTemporaryFiles( false ),
    _promptForFiles( false ),
@@ -587,10 +583,6 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             _forceDecision = true;
          } break;
          
-         case 'G': {
-            _macNewlines = true;
-         } break;
-         
          case 'p': {
             _promptForFiles = true;
          } break;
@@ -651,6 +643,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 
          case 'd':
          case 's':
+         case 'G':
          case 'g':
          case 'F':
          case 'L':

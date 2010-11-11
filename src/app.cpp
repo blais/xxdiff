@@ -240,10 +240,6 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
 {
    _editProc[0] = _editProc[1] = _editProc[2] = NULL;
 
-   if ( _cmdline._macNewlines ) {
-      _newlineChar = '\015';
-   }
-
    // Read in the resources and create resources object.
    _resources = buildResources();
 

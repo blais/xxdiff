@@ -138,7 +138,6 @@ private:
    int           _unmergeNbFiles;
 
    bool          _forceDecision;
-   bool          _macNewlines;
    bool          _indicateInputProcessed;
    bool          _useTemporaryFiles;
    bool          _promptForFiles;
