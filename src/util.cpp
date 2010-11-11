@@ -482,7 +482,17 @@ bool XxUtil::testFile(
    bool&            isDirectory
 )
 {
-   if ( !finfo.exists() || !finfo.isReadable() ) {
+   // It sucks to play with errno here, but it seems QFileInfo always lets
+   // errno = EACCES even when the file doesn't exist. I just reset errno to
+   // it's correct value so that XxIoError displays a correct message.
+   if ( !finfo.exists() ) {
+      errno = ENOENT;
+   } else if ( !finfo.isReadable() ) {
+      errno = EACCES;
+   } else {
+      errno = 0;
+   }
+   if ( errno ) {
       QString s;
       QTextStream oss( & s );
       oss << "Cannot access file: " << filename;
