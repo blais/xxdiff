@@ -23,9 +23,14 @@ Current Development Version
 * Allow to clear search results by searching for an empty string
 * Add instant search bar in the online user's manual
 * Ability to double click the application on OSX to start it
+* The diag and cross patterns in text widgets now horizontally scroll with the text.
 * Remove unused resource 'Conditional.Else' (pattern is if/elseif/end)
+* Remove useless --mac option (OSX uses usual unix newlines)
+  and add the new Qt option --graphicssystem.
 * Add a rule to create a distributable OSX package (.dmg) of an xxdiff bundle
   embedding Qt libraries (64bit only, 32bit part is removed) (make deploy)
+* Some accelerator names may change, as xxdiff now uses standard Qt accelerator strings.
+* Set the 'Macintosh (aqua)' style as a default on OSX.
 
 --- Bugfix ---
 
@@ -39,6 +44,7 @@ Current Development Version
 * Fix (workaround) random crash in horizontal diffs computation
 * When saving a file with unresolved conflicts using the conditional option,
   the last chunk was not managed properly.
+
 
 
 Version 3.2: (major feature enhancements)
