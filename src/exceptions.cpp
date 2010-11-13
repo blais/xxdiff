@@ -28,7 +28,7 @@
 #include <cmdline.h>
 #include <help.h>
 
-#include <qtextstream.h>
+#include <QtCore/QTextStream>
 
 #include <iostream>
 #include <string.h> // strerror
@@ -46,7 +46,7 @@ XX_NAMESPACE_BEGIN
 void issueWarning( const QString& str )
 {
    // Send it to stderr.
-   QTextStream oss_cerr( stderr, IO_WriteOnly );
+   QTextStream oss_cerr( stderr, QIODevice::WriteOnly );
    oss_cerr << "Warning: " << str << endl;
 }
 
@@ -61,7 +61,7 @@ XxError::XxError(
    const QString& msg
 )
 {
-   QTextOStream oss( &_msg );
+   QTextStream oss( &_msg );
    oss << "xxdiff (" << file << ":" << line << "): " << endl;
    if ( !msg.isEmpty() ) {
       oss << msg;
@@ -101,12 +101,12 @@ XxUsageError::XxUsageError(
 
    if ( msg.isEmpty() ) {
       // Overwrite base class msg.
-      QTextStream oss( &_msg, IO_WriteOnly | IO_Truncate );
+      QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Truncate );
       oss << XxHelp::getUsage( helpMask, true );
    }
    else {
       // Don't base class msg.
-      QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+      QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
       oss << endl;
 
       // Don't output usage in case of an explicit error.
@@ -128,7 +128,7 @@ XxIoError::XxIoError(
    XxError( file, line, msg ),
    std::runtime_error( strerror( errno ) )
 {
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << endl;
    oss << "IO error: " << strerror( errno );
 }
@@ -145,7 +145,7 @@ XxInternalError::XxInternalError(
    XxError( file, line ),
    std::runtime_error( "Internal error." )
 {
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << endl;
    oss << "Internal error." << endl << endl;
    oss << "There has been an internal error within xxdiff." << endl
@@ -161,7 +161,7 @@ XxInternalError::XxInternalError(
 // I'll know what's going on at least when developing in debug mode.
 #ifdef XX_DEBUG
    std::cerr << "Throwing exception:" << std::endl;
-   std::cerr << _msg.latin1() << std::endl;
+   std::cerr << _msg.toLatin1().constData() << std::endl;
 #endif
 }
 

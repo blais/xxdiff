@@ -31,14 +31,25 @@
 #include <defs.h>
 #endif
 
+#ifndef INCL_XXDIFF_BORDERLABEL
+#include <borderLabel.h>
+#endif
+
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <QtGui/QFrame>
 #define INCL_QT_QFRAME
 #endif
 
 
-XX_NAMESPACE_BEGIN
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
 
+class QResizeEvent;
+class QMouseEvent;
+class QWheelEvent;
+
+XX_NAMESPACE_BEGIN
 
 /*==============================================================================
  * FORWARD DECLARATIONS
@@ -53,13 +64,13 @@ class XxCentralFrame;
 
 // <summary> overview area </summary>
 
-class XxOverview : public QFrame {
+class XxOverview : public XxBorderLabel {
 
 public:
 
    /*----- types and enumerations -----*/
 
-   typedef QFrame BaseClass;
+   typedef XxBorderLabel BaseClass;
 
    /*----- member functions -----*/
 
@@ -67,15 +78,14 @@ public:
    XxOverview(
       XxApp*          app,
       XxCentralFrame* central,
-      QWidget *       parent = 0,
-      const char*     name = 0
+      QWidget *       parent = 0
    );
 
    // Destructor.
    virtual ~XxOverview();
 
    // See base class.
-   virtual void drawContents( QPainter* );
+   virtual void paintEvent( QPaintEvent* );
 
    // Override to expand.
    virtual QSizePolicy sizePolicy() const;

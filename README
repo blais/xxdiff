@@ -201,19 +201,19 @@ Dependencies
 
 Build dependencies are:
 
-- Qt-3.2 or higher
+- Qt-4.5 or higher
 - a C++ compiler, flex and yacc
 
 Runtime dependencies are:
 
-- Qt-3.2 or higher
+- Qt-4.5 or higher
 
 
 Portability
 -----------
 
 xxdiff is known to build and work on a great majority of UNIX platforms where Qt
-works.  It has also been ported to Mac OS X.
+works, including Mac OS X.
 
 
 External Links

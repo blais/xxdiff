@@ -28,11 +28,12 @@
 #include <exceptions.h>
 #include <main.h>
 
-#include <qstring.h>
-#include <qtextstream.h>
-#include <qfileinfo.h>
-#include <qregexp.h>
-#include <qdatetime.h>
+#include <QtCore/QString>
+#include <QtCore/QByteArray>
+#include <QtCore/QTextStream>
+#include <QtCore/QFileInfo>
+#include <QtCore/QRegExp>
+#include <QtCore/QDateTime>
 
 #include <iostream>
 #include <sys/types.h>
@@ -47,7 +48,6 @@
 #  include <io.h>
 #  include <time.h>
 #  include <winsock.h>
-//#  include <process.h> // for spawn()
 
 #define pipe _pipe
 #define popen _popen
@@ -123,15 +123,15 @@ char* qfiToHPerm( char* buf, const QFileInfo& qfi )
     char* p = buf;
     // we only support dir option
     *p++ = qfi.isDir() ? 'd' : '-';
-    *p++ = qfi.permission( QFileInfo::ReadUser )   ? 'r' : '-';
-    *p++ = qfi.permission( QFileInfo::WriteUser )  ? 'w' : '-';
-    *p++ = qfi.permission( QFileInfo::ExeUser )    ? 'x' : '-';
-    *p++ = qfi.permission( QFileInfo::ReadGroup )  ? 'r' : '-';
-    *p++ = qfi.permission( QFileInfo::WriteGroup ) ? 'w' : '-';
-    *p++ = qfi.permission( QFileInfo::ExeGroup )   ? 'x' : '-';
-    *p++ = qfi.permission( QFileInfo::ReadOther )  ? 'r' : '-';
-    *p++ = qfi.permission( QFileInfo::WriteOther ) ? 'w' : '-';
-    *p++ = qfi.permission( QFileInfo::ExeOther )   ? 'x' : '-';
+    *p++ = qfi.permission( QFile::ReadUser )   ? 'r' : '-';
+    *p++ = qfi.permission( QFile::WriteUser )  ? 'w' : '-';
+    *p++ = qfi.permission( QFile::ExeUser )    ? 'x' : '-';
+    *p++ = qfi.permission( QFile::ReadGroup )  ? 'r' : '-';
+    *p++ = qfi.permission( QFile::WriteGroup ) ? 'w' : '-';
+    *p++ = qfi.permission( QFile::ExeGroup )   ? 'x' : '-';
+    *p++ = qfi.permission( QFile::ReadOther )  ? 'r' : '-';
+    *p++ = qfi.permission( QFile::WriteOther ) ? 'w' : '-';
+    *p++ = qfi.permission( QFile::ExeOther )   ? 'x' : '-';
     *p = 0;
     return buf;
 }
@@ -145,23 +145,23 @@ int qfiToPerm( const QFileInfo& qfi )
     // This is not nice, but there's no direct way in qfi...
     // also, stat only reports 3 decimals wether it's a file or whatever
     int rv = 0;
-    if ( qfi.permission( QFileInfo::ReadUser ) )
+    if ( qfi.permission( QFile::ReadUser ) )
         rv += 400;
-    if ( qfi.permission( QFileInfo::WriteUser ) )
+    if ( qfi.permission( QFile::WriteUser ) )
         rv += 200;
-    if ( qfi.permission( QFileInfo::ExeUser ) )
+    if ( qfi.permission( QFile::ExeUser ) )
         rv += 100;
-    if ( qfi.permission( QFileInfo::ReadGroup ) )
+    if ( qfi.permission( QFile::ReadGroup ) )
         rv += 40;
-    if ( qfi.permission( QFileInfo::WriteGroup ) )
+    if ( qfi.permission( QFile::WriteGroup ) )
         rv += 20;
-    if ( qfi.permission( QFileInfo::ExeGroup ) )
+    if ( qfi.permission( QFile::ExeGroup ) )
         rv += 10;
-    if ( qfi.permission( QFileInfo::ReadOther ) )
+    if ( qfi.permission( QFile::ReadOther ) )
         rv += 4;
-    if ( qfi.permission( QFileInfo::WriteOther ) )
+    if ( qfi.permission( QFile::WriteOther ) )
         rv += 2;
-    if ( qfi.permission( QFileInfo::ExeOther ) )
+    if ( qfi.permission( QFile::ExeOther ) )
         rv += 1;
     return rv;
 }
@@ -177,11 +177,7 @@ void formatPrintFunc(
    bool             newest
 )
 {
-#if (QT_VERSION >= 0x030000)
 #define DATEFORMAT Qt::ISODate
-#else
-#define DATEFORMAT 
-#endif
 
    switch ( m ) {
 
@@ -194,14 +190,14 @@ void formatPrintFunc(
       case 'n': { // - File name
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat, filename.latin1() );
+         tmp.sprintf( pformat, filename.toLatin1().constData() );
          target.append( tmp );
       } break;
 
       case 'N': { // - Quoted File name with dereference if symbolic link
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat, filename.latin1() );
+         tmp.sprintf( pformat, filename.toLatin1().constData() );
          if ( qfi.isSymLink() ) {
             tmp.append( "' -> `" );
             tmp.append( qfi.readLink() );
@@ -239,7 +235,7 @@ void formatPrintFunc(
       case 'U': { // - User name of owner
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.owner().ascii() );
+         tmp.sprintf( pformat,qfi.owner().toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -253,7 +249,7 @@ void formatPrintFunc(
       case 'G': { // - Group name of owner
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.group().ascii() );
+         tmp.sprintf( pformat,qfi.group().toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -284,7 +280,7 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastRead().toString( DATEFORMAT ).ascii() );
+                      qfi.lastRead().toString( DATEFORMAT ).toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -301,7 +297,7 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastModified().toString( DATEFORMAT ).ascii() );
+                      qfi.lastModified().toString( DATEFORMAT ).toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -387,7 +383,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).ascii()
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toAscii().constData()
          );
          target.append( tmp );
       } break;
@@ -407,7 +403,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).ascii() );
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toAscii().constData() );
          target.append( tmp );
       } break;
 
@@ -452,7 +448,7 @@ int XxUtil::copyFile( const QString& src, const QString& dest )
 {
    QString cmd = QString("cp '") + src + QString("' '") + dest + QString("'");
 
-   FILE* f = popen( cmd.latin1(), "r" );
+   FILE* f = popen( cmd.toLatin1().constData(), "r" );
    int r = pclose( f );
    return r;
 }
@@ -462,7 +458,7 @@ int XxUtil::copyFile( const QString& src, const QString& dest )
 int XxUtil::removeFile( const QString& src )
 {
    XX_ASSERT( !src.isEmpty() );
-   return unlink( src.latin1() );
+   return unlink( src.toLatin1().constData() );
 }
 
 //------------------------------------------------------------------------------
@@ -486,9 +482,19 @@ bool XxUtil::testFile(
    bool&            isDirectory
 )
 {
-   if ( !finfo.exists() || !finfo.isReadable() ) {
+   // It sucks to play with errno here, but it seems QFileInfo always lets
+   // errno = EACCES even when the file doesn't exist. I just reset errno to
+   // it's correct value so that XxIoError displays a correct message.
+   if ( !finfo.exists() ) {
+      errno = ENOENT;
+   } else if ( !finfo.isReadable() ) {
+      errno = EACCES;
+   } else {
+      errno = 0;
+   }
+   if ( errno ) {
       QString s;
-      QTextOStream oss( & s );
+      QTextStream oss( & s );
       oss << "Cannot access file: " << filename;
       throw XxIoError( XX_EXC_PARAMS, s );
    }
@@ -500,7 +506,7 @@ bool XxUtil::testFile(
    // // Check if file is a regular file or a directory.
    // if ( !( finfo.isFile() || finfo.isDir() ) ) {
    //    QString os;
-   //    QTextOStream oss( &os );
+   //    QTextStream oss( &os );
    //    oss << "Error: not an ordinary file or a directory";
    //    throw XxIoError( XX_EXC_PARAMS, os );
    // }
@@ -518,7 +524,7 @@ bool XxUtil::testFile(
    if ( testAscii ) {
       if ( !isAsciiText( filename ) ) {
          QString os;
-         QTextOStream oss( &os );
+         QTextStream oss( &os );
          oss << "Error: file is not a text file";
          throw XxIoError( XX_EXC_PARAMS, os );
       }
@@ -534,7 +540,7 @@ bool XxUtil::isAsciiText( const QString& filename )
    int fd, bytes, i;
    char buffer[1024];
 
-   fd = open( filename.latin1(), O_RDONLY );
+   fd = open( filename.toLatin1().constData(), O_RDONLY );
    bytes = read( fd, (void *)buffer, 1024 );
    close( fd );
 
@@ -549,232 +555,6 @@ bool XxUtil::isAsciiText( const QString& filename )
       }
    }
    return true;
-}
-
-//------------------------------------------------------------------------------
-//
-int XxUtil::spawnCommand(
-   const char** argv,
-   FILE** outf,
-   FILE** errf,
-   void (*sigChldHandler)(int),
-   const char* cstdin
-)
-{
-   XX_ASSERT( argv );
-
-#ifndef WINDOWS
-
-   int pipe_fds_in[2];
-   if ( cstdin ) {
-      // Open the pipe.
-      if ( pipe( pipe_fds_in ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-   }
-
-   int pipe_fds_out[2];
-   if ( outf ) {
-      // Open the pipe.
-      if ( pipe( pipe_fds_out ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-   }
-
-   int pipe_fds_err[2];
-   if ( errf ) {
-      if ( pipe( pipe_fds_err ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-   }
-
-   int pid = fork();
-   switch ( pid ) {
-      case 0: { // the child
-
-         /*
-          * pipe standard input into the pipe
-          */
-         if ( cstdin ) {
-            if ( dup2( pipe_fds_in[0], fileno( stdin ) ) == -1 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-            close( pipe_fds_in[1] );
-         }
-
-         /*
-          * redirect standard output and standard error into the pipe
-          */
-         if ( outf ) {
-            /*close( fileno( stdout ) );*/
-            /*if ( dup( pipe_fds_out[1] ) == -1 ) {*/
-            if ( dup2( pipe_fds_out[1], fileno( stdout ) ) == -1 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-            close( pipe_fds_out[0] );
-         }
-
-         if ( errf ) {
-            /*close( fileno( stderr ) );*/
-            /*if ( dup( pipe_fds_err[1] ) == -1 ) {*/
-            if ( dup2( pipe_fds_err[1], fileno( stderr ) ) == -1 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-            close( pipe_fds_err[0] );
-         }
-
-         if ( execvp( argv[0], const_cast<char**>(argv) ) == -1 ) {
-            // Send parent some output telling it we couldn't exec.
-            QString errs;
-            {
-               QTextOStream errss( &errs );
-               errss << "Cannot exec process " << argv[0] << endl << flush;
-            }
-            fwrite( errs.latin1(), errs.length(), 1, stderr );
-            fwrite( "\n", 1, 1, stderr );
-
-            exit( 1 );
-         }
-
-         // Unreached.
-
-      } break;
-
-      case -1: { // fork error
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-
-      default: { // the parent
-
-         if ( sigChldHandler ) {
-            if ( installSigChldHandler( sigChldHandler ) == false ) {
-               return -2;
-            }
-         }
-
-         /*
-          * we must close this in the parent or else the close of the
-          * writer end of the pipe in the child will not cause an EOF
-          * condition for the reader
-          */
-         if ( cstdin ) {
-            close( pipe_fds_in[0] );
-         }
-         if ( outf ) {
-            close( pipe_fds_out[1] );
-         }
-         if ( errf ) {
-            close( pipe_fds_err[1] );
-         }
-
-         /*
-          * if requested, write into stdin of the subprocess.
-          */
-         if ( cstdin ) {
-            FILE* inf = fdopen( pipe_fds_in[1], "w" );
-
-            unsigned int len = strlen( cstdin );
-            // XX_TRACE( "writing " << len << " bytes" );
-            if ( fwrite( cstdin, sizeof(char), len, inf ) != len ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-
-            if ( fclose( inf ) != 0 ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-         }
-
-         /*
-          * return the reader side of the pipe as a stdio stream.
-          */
-         if ( outf ) {
-            *outf = fdopen( pipe_fds_out[0], "r" );
-            if ( !*outf ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-         }
-         if ( errf ) {
-            *errf = fdopen( pipe_fds_err[0], "r" );
-            if ( !*errf ) {
-               throw XxIoError( XX_EXC_PARAMS );
-            }
-         }
-      }
-   }
-
-#else
-
-   int pid = -1;
-
-   QString command;
-   const char** arg;
-   for ( arg = argv; *arg != 0; ++arg ) {
-      command += QString(*arg) + QString(" ");
-   }
-   XX_TRACE( "Command: " << command.latin1() );
-
-//    /*
-//     * N**xed up version with Windows calls. Consider yourself lucky if this
-//     * works even just once.
-//     */
-
-//    if ( _spawnvp( _P_NOWAIT | _P_DETACH, argv[0], const_cast<char**>(argv) ) != 0 ) {
-//       // Send parent some output telling it we couldn't exec.
-//       QString errs;
-//       {
-//          QTextOStream errss( &errs );
-//          errss << "Error spawning process " << argv[0] << endl << flush;
-//       }
-//       fwrite( errs.latin1(), errs.length(), 1, stderr );
-//       fwrite( "\n", 1, 1, stderr );
-
-//       exit( 1 );
-//    }
-
-   FILE* outputf;
-   FILE* errorf;
-
-   /*
-    * Run command so that it writes its output to a pipe. Open this pipe with
-    * read text attribute so that we can read it like a text file.
-    */
-   if( (outputf = popen( command.latin1(), "rt" )) == NULL ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-   errorf = stderr;
-
-#if KEPT_FOR_HISTORY
-   /*
-    * Read pipe until end of file. End of file indicates that outputf closed its
-    * standard out (probably meaning it terminated).
-    */
-   while( !feof( chkdsk ) )
-   {
-      if( fgets( psBuffer, 128, chkdsk ) != NULL )
-         printf( psBuffer );
-   }
-#endif
-
-   /* Close pipe and print return value of outputf. */
-   *outf = outputf;
-   *errf = errorf;
-//   printf( "\nProcess returned %d\n", pclose( outputf ) );
-// FIXME todo, check result value as well
-
-#endif
-
-   // Not reached.
-   return pid;
-}
-
-//------------------------------------------------------------------------------
-//
-int XxUtil::spawnCommand(
-   const char** argv,
-   void (*sigChldHandler)(int)
-)
-{
-   return spawnCommand( argv, 0, 0, sigChldHandler );
 }
 
 //------------------------------------------------------------------------------
@@ -794,10 +574,11 @@ int XxUtil::interruptibleSystem( const QString& command )
       return -1;
    }
    if ( pid == 0 ) {
+      QByteArray commandBa = command.toLatin1();
       char* argv[4];
       argv[0] = const_cast<char*>( "sh" );
       argv[1] = const_cast<char*>( "-c" );
-      argv[2] = const_cast<char*>( command.latin1() );
+      argv[2] = const_cast<char*>( commandBa.constData() );
       argv[3] = 0;
       execve( "/bin/sh", argv, environ );
       exit( 127 );
@@ -842,25 +623,27 @@ void XxUtil::printTime( std::ostream& os, long time )
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::splitArgs(
+void XxUtil::splitArgs(
    const QString&     command,
    const QStringList& filenames,
-   const char**&      out_args
+   QString&           executable,
+   QStringList&       out_args
 )
 {
     // Titles aren't needed that often...
     const QString * titles[3] = { NULL, NULL, NULL };
-    return splitArgs(command,titles,filenames,out_args);
+    splitArgs(command, titles, filenames, executable, out_args);
 }
 
 
 //------------------------------------------------------------------------------
 //
-int XxUtil::splitArgs(
+void XxUtil::splitArgs(
    const QString&     command,
    const QString *    titles[3],
    const QStringList& filenames,
-   const char**&      out_args
+   QString&           executable,
+   QStringList&       out_args
 )
 {
    /*
@@ -870,53 +653,27 @@ int XxUtil::splitArgs(
     * spaces will break this.
     */
 
-   QStringList args = QStringList::split( QRegExp( "\\s" ), command );
-   args += filenames;
-   int argc = 0;
-   // It doesn't hurt to reserve space for 3 slots even though we may
-   // not need them all.
-   const char** argv =
-      (const char**) malloc( sizeof(char*) * (args.count() + 1 + 3) );
-   for ( QStringList::Iterator it = args.begin();
-         it != args.end();
-         ++it ) {
-
-      argv[argc++] = strdup( (*it).latin1() );
-   }
-   for (int i=0; i<3; i++)
+   out_args = command.trimmed().split( QRegExp( "\\s" ) );
+   out_args += filenames;
+   for (int i=0; i<3; i++) {
       if (titles[i]) {
-         argv[argc++] = strdup( titles[i]->latin1() );
+         out_args << *titles[i];
       }
-   argv[argc] = 0;
+   }
+   executable = out_args.takeFirst();
 
 //#define ANAL_DEBUGGING
 #ifdef ANAL_DEBUGGING
    std::ofstream ofs( "/tmp/diff_args" );
    ofs << " ARGS ------------------------------" << std::endl;
-   const char** ppargs = argv;
-   while ( *ppargs != 0 ) {
-      ofs << *ppargs << std::endl;
-      ++ppargs;
+   for ( QStringList::Iterator it = out_args.begin();
+         it != out_args.end();
+         ++it ) {
+      ofs << (*it).toLatin1().constData() << std::endl;
    }
    ofs << " -----------------------------------" << std::endl;
    ofs.close();
 #endif
-
-   out_args = argv;
-   return argc;
-}
-
-//------------------------------------------------------------------------------
-//
-void XxUtil::freeArgs( const char**& out_args )
-{
-   if ( out_args ) {
-      for ( const char** dargv = out_args; *dargv; ++dargv ) {
-         free( const_cast<char*>( *dargv ) );
-      }
-      free( out_args );
-      out_args = 0; // reset it, just in case.
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -924,7 +681,7 @@ void XxUtil::freeArgs( const char**& out_args )
 QString XxUtil::removeClearCaseExt( const QString& filename )
 {
    // Remove ClearCase extended syntax if it is there.
-   int bpos = filename.find( "@@" );
+   int bpos = filename.indexOf( "@@" );
    QString cleanname;
    if ( bpos != -1 ) {
       cleanname = filename.mid( 0, bpos );
@@ -952,7 +709,7 @@ bool XxUtil::formatFilename(
    //
    // Including anyway for now, because I absolutely don't have time right now.
 
-   char* format = strdup( masterformat.latin1() );
+   char* format = strdup( masterformat.toLatin1().constData() );
    char* dest = (char*) malloc( strlen( format ) + 1 );
    char* b = format;
    target = "";
@@ -1005,19 +762,9 @@ bool XxUtil::formatFilename(
 
 //------------------------------------------------------------------------------
 //
-unsigned int XxUtil::toTime_t( 
-#if (QT_VERSION >= 0x030100)
-   const QDateTime& t
-#else
-   const QDateTime& /*t*/
-#endif
-)
+unsigned int XxUtil::toTime_t( const QDateTime& t )
 {
-#if (QT_VERSION >= 0x030100)
    return t.toTime_t();
-#else
-   return 0; // Note: we could hack something by hand.
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1038,15 +785,15 @@ QString XxUtil::escapeChars( const QString& format )
 QString XxUtil::unescapeChars( const QString& format )
 {
    QString newFormat = format;
-   uint ix = 0;
+   int ix = 0;
 
    while ( ix < newFormat.length() ) {
-       int found = newFormat.find( QChar( '\\' ), ix );
+       int found = newFormat.indexOf( QChar( '\\' ), ix );
        if ( found < 0 )
 	   break;
        // use at() in case found+1 is past the end of the string
        QChar escapedChar = newFormat.at( found+1 );
-       switch( escapedChar ) {
+       switch( escapedChar.toAscii() ) {
        case 'n':
 	   newFormat = newFormat.replace( found, 2, QChar( '\n' ) );
 	   break;

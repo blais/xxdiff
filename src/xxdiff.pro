@@ -29,6 +29,10 @@
 TEMPLATE = app
 CONFIG += debug qt warn_on thread
 
+DESTDIR=../bin
+TARGET = xxdiff
+
+
 # FIXME: Is this needed for Windows compile?
 #REQUIRES=full-config
 #REQUIRES=large-config
@@ -52,8 +56,8 @@ QMAKE_LEX = flex
 QMAKE_YACC = bison
 
 QMAKE_YACCFLAGS = -d -o y.tab.c
-QMAKE_YACC_HEADER =
-QMAKE_YACC_SOURCE =
+QMAKE_YACC_HEADER = y.tab.h
+QMAKE_YACC_SOURCE = y.tab.c
 
 LEXSOURCES = resParser.l
 
@@ -107,6 +111,36 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 
 
 #----------------------------------------
+# Max OS X (macx-g++ for command line build)
+
+macx {
+   # Icon used to the application bundle
+   ICON = xxdiff.icns
+   
+   # Special targets to deploy a standalone mac package in a DMG image:
+   # Call it with "make deploy"
+   
+   BUNDLE = $$DESTDIR/$$TARGET".app"
+
+   # Copy all required frameworks (libs) inthe bundle, and remove i386 part of libs (only keep x86_64)
+   macdeployqt.target = $$BUNDLE/Contents/Resources/qt.conf
+   macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do lipo \$\$l -thin x86_64 -output \$\$l; done
+   macdeployqt.depends = $$BUNDLE
+
+   # Create a dmg package
+   VER = $$system(cat ../VERSION)
+   DMG = $$DESTDIR/$$TARGET"_"$$VER".dmg"
+   dmg.target = $$DMG
+   dmg.commands = @hdiutil create -ov -fs HFS+ -srcfolder $$BUNDLE -volname $$quote("xxdiff\\ $$VER") $$DMG
+   dmg.depends = $$macdeployqt.target $(TARGET)
+
+   # "public" rule
+   deploy.depends = $$dmg.target
+
+   QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy
+}
+
+#----------------------------------------
 # win32-msvc
 
 win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
@@ -153,12 +187,14 @@ HEADERS = \
 	accelUtil.h \
 	copyLabel.h \
 	text.h \
+	text.inline.h \
 	scrollView.h \
 	central.h \
 	merged.h \
 	lineNumbers.h \
 	util.h \
 	markers.h \
+	borderLabel.h \
 	getopt.h \
 	diffutils.h \
 	diffutils_hack.h \
@@ -197,6 +233,7 @@ SOURCES = \
 	accelUtil.cpp \
 	resParser.cpp \
 	markers.cpp \
+	borderLabel.cpp \
 	getopt.c \
 	getopt1.c \
 	proginfo.c
@@ -206,9 +243,6 @@ FORMS = \
 	optionsDialogBase.ui \
 	searchDialogBase.ui
 
-DESTDIR=../bin
-
-TARGET = xxdiff
 
 
 #===============================================================================
@@ -236,6 +270,3 @@ TARGET = xxdiff
 # 	$$DIFFUTILS_DIR/diff3.o
 
 # SOURCES += diffutils.cpp 
-
-
-

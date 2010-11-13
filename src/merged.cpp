@@ -31,17 +31,19 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qscrollview.h>
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
-#include <qpopupmenu.h>
-#include <qmenubar.h>
-#include <qlayout.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
+#include <QtGui/QMenu>
+#include <QtGui/QMenuBar>
+#include <QtGui/QLayout>
+#include <QtGui/QCloseEvent>
 
-#include <qapplication.h>
-#include <qclipboard.h>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
@@ -56,24 +58,29 @@ XX_NAMESPACE_BEGIN
 //
 XxMergedFrame::XxMergedFrame( 
    XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+   QWidget*    parent
 ) :
-   BaseClass( app, parent, name )
+   BaseClass( app, parent )
 {
    QVBoxLayout* vlayout = new QVBoxLayout( this );
-   QHBoxLayout* hlayout = new QHBoxLayout( vlayout );
+   vlayout->setSpacing( 0 );
+   vlayout->setMargin( 0 );
+
+   QHBoxLayout* hlayout = new QHBoxLayout;
+   vlayout->addLayout( hlayout );
+   hlayout->setSpacing( 0 );
+   hlayout->setMargin( 0 );
    
-   _text = new XxText( _app, this, -1, this, "text in merged frame" );
+   _text = new XxText( _app, this, -1 );
 
    hlayout->addWidget( _text );
    
-   _vscroll[0] = new QScrollBar( this );
-   _vscroll[0]->setFixedWidth( 20 );
+   _vscroll[0] = new QScrollBar;
+  // _vscroll[0]->setFixedWidth( 20 ); to be removed, at least on OSX and Solaris
    hlayout->addWidget( _vscroll[0] );
 
-   _hscroll = new QScrollBar( Qt::Horizontal, this );
-   _hscroll->setFixedHeight( 20 );
+   _hscroll = new QScrollBar( Qt::Horizontal );
+   //_hscroll->setFixedHeight( 20 ); to be removed, at least on OSX and Solaris
 
    vlayout->addWidget( _hscroll );
 
@@ -96,6 +103,25 @@ void XxMergedFrame::update()
 
 //------------------------------------------------------------------------------
 //
+void XxMergedFrame::show()
+{
+   BaseClass::show();
+   updateMergedLines();
+   // Too bad that at this time, the pane height is still 0, so the cursor
+   // gets located at the topline
+   recenter();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedFrame::updateMergedLines()
+{
+   _text->computeMergedLines();
+   adjustVerticalScrollbars( computeDisplaySize() );
+}
+
+//------------------------------------------------------------------------------
+//
 QSize XxMergedFrame::computeDisplaySize() const
 {
    uint displayWidth = _text->contentsRect().width();
@@ -105,9 +131,44 @@ QSize XxMergedFrame::computeDisplaySize() const
 
 //------------------------------------------------------------------------------
 //
-uint XxMergedFrame::computeTextLength() const
+uint XxMergedFrame::getTextLength() const
 {
-   return _text->computeMergedLines();
+   return _text->getMergedLines();
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::getTopLine() const
+{
+   return _text->getMergedLineFromLine( BaseClass::getTopLine() );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::getBottomLine() const
+{
+   return _text->getMergedLineFromLine( BaseClass::getBottomLine() );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::setTopLine( const XxDln lineNo )
+{
+    return BaseClass::setTopLine(  _text->getLineFromMergedLine( lineNo ) );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::setBottomLine( const XxDln lineNo )
+{
+    return BaseClass::setBottomLine(  _text->getLineFromMergedLine( lineNo ) );
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxMergedFrame::setCenterLine( const XxDln lineNo )
+{
+    return BaseClass::setCenterLine(  _text->getLineFromMergedLine( lineNo ) );
 }
 
 //------------------------------------------------------------------------------
@@ -138,34 +199,22 @@ void XxMergedFrame::onCursorChanged( int cursorLine )
 //
 XxMergedWindow::XxMergedWindow( 
    XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+   QWidget*    parent
 ) :
-   BaseClass( parent, name ),
+   BaseClass( parent ),
    _app( app )
 {
    const XxResources& resources = app->getResources();
 
-   QkPopupMenu* menu = new QkPopupMenu;
-   menu->insertItem( 
+   QkMenu* menu = menuBar()->addMenu( "W&indow" );
+   menu->addAction( 
       "Close", this, SLOT(hide()),
       resources.getAccelerator( ACCEL_MERGED_CLOSE )
    );
 
-   QkMenuBar* m = menuBar();
-   m->insertItem( "W&indow", menu );
-
-   _frame = new XxMergedFrame( app, this, "merged_frame" );
+   _frame = new XxMergedFrame( app, this );
 
    setCentralWidget( _frame );
-}
-
-//------------------------------------------------------------------------------
-//
-void XxMergedWindow::update()
-{
-   BaseClass::update();
-   _frame->update(); // FIXME do we really need this?
 }
 
 //------------------------------------------------------------------------------
@@ -173,7 +222,14 @@ void XxMergedWindow::update()
 void XxMergedWindow::show()
 {
    BaseClass::show();
-   // Nop for now.
+   _frame->show();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::updateMergedLines()
+{
+   _frame->updateMergedLines();
 }
 
 //------------------------------------------------------------------------------
@@ -182,6 +238,14 @@ void XxMergedWindow::hide()
 {
    BaseClass::hide();
    _app->synchronizeUI();
+}
+
+//------------------------------------------------------------------------------
+//
+void XxMergedWindow::closeEvent( QCloseEvent *e)
+{
+   e->ignore();
+   hide();
 }
 
 XX_NAMESPACE_END

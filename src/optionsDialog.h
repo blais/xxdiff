@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_OPTIONSDIALOGBASE
-#include <optionsDialogBase.h>
+#include <ui_optionsDialogBase.h>
 #define INCL_OPTIONSDIALOGBASE
 #endif
 
@@ -54,13 +54,13 @@ class XxApp;
 
 // <summary> dialog for diff options </summary>
 
-class XxOptionsDialog : public XxOptionsDialogBase {
+class XxOptionsDialog : public QDialog, public Ui::XxOptionsDialogBase {
 
    Q_OBJECT
 
    /*----- types and enumerations -----*/
 
-   typedef XxOptionsDialogBase BaseClass;
+   typedef QDialog BaseClass;
 
 public:
 
@@ -136,9 +136,9 @@ public slots:
    void checkboxIgnoreWhitespace( int );
    void checkboxIgnoreCase( int );
    void checkboxIgnoreBlankLines( int );
-   void radiobuttonQualityNormal( int );
-   void radiobuttonQualityFastest( int );
-   void radiobuttonQualityHighest( int );
+   void radiobuttonQualityNormal( bool );
+   void radiobuttonQualityFastest( bool );
+   void radiobuttonQualityHighest( bool );
 
    //---------------------------------------------------------------------------
    // Files 3
@@ -166,7 +166,7 @@ public slots:
    //---------------------------------------------------------------------------
    // Colors
 
-   void listboxColors( const QString& );
+   void listboxColors( QListWidgetItem*, QListWidgetItem* );
    void editColorFore();
    void editColorBack();
 

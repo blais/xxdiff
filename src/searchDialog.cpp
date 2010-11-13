@@ -29,9 +29,9 @@
 #include <diffs.h>
 #include <app.h>
 
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qcombobox.h>
+#include <QtGui/QLineEdit>
+#include <QtGui/QPushButton>
+#include <QtGui/QComboBox>
 
 XX_NAMESPACE_BEGIN
 
@@ -52,6 +52,8 @@ XxSearchDialog::XxSearchDialog(
    BaseClass( parent ),
    _app( app )
 {
+    setupUi( this );
+
    // Make connections.
    connect( _buttonApply, SIGNAL( clicked() ),
             this, SLOT( onApply() ) );
@@ -76,7 +78,7 @@ void XxSearchDialog::onApply()
 {
    XxDiffs* diffs = _app->getDiffs();
    const QString searchText = _lineeditSearchString->text();
-   if ( diffs != 0 && !searchText.isEmpty() ) {
+   if ( diffs != 0 ) {
       diffs->search( searchText, _app->getNbFiles(), _app->getBuffers() );
    }
 }
@@ -89,8 +91,8 @@ void XxSearchDialog::onGotoLine()
    int gline = _lineeditGotoLine->text().toInt( &ok );
    
    static int ind[3] = { 0, 2, 1 };
-   XX_ASSERT( _comboGotoWhichFile->currentItem() < 3 );
-   XxFno fno = ind[ _comboGotoWhichFile->currentItem() ];
+   XX_ASSERT( _comboGotoWhichFile->currentIndex() < 3 );
+   XxFno fno = ind[ _comboGotoWhichFile->currentIndex() ];
    if ( fno == 2 && _app->getNbFiles() == 2 ) {
       fno = 1;
    }

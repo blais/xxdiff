@@ -28,7 +28,7 @@ Requirements
 
 - bison
 
-- Qt-3.x
+- Qt >=4.5
 
 Compiling
 ---------
@@ -46,7 +46,7 @@ Notes
 * Note: xxdiff used to require the obsolete tmake tool, but has been ported to
   use qmake in may 2006.
 
-* you may have to set your QTDIR manually (e.g. to /usr/lib/qt3)
+* you may have to set your QTDIR manually (e.g. to /usr/lib/qt4)
 
 * you may have to edit CONFIG to include the option 'thread' or not, depending
   on if you have only the multi-threaded version of qt installed or not

@@ -31,17 +31,17 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
 
-#include <qapplication.h>
-#include <qclipboard.h>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QFrame>
 
 #include <math.h>
 #include <stdio.h>
-
 
 XX_NAMESPACE_BEGIN
 
@@ -59,18 +59,15 @@ XxLineNumbers::XxLineNumbers(
    XxApp*          app, 
    XxCentralFrame* central, 
    const XxFno     no, 
-   QWidget*        parent, 
-   const char*     name 
+   QWidget*        parent
 ) :
-   QFrame( parent, name, WResizeNoErase ),
+   QFrame( parent ),
    _app( app ),
    _central( central ),
    _no( no )
 {
-   // This must be set equal to the one in XxText for proper vertical alignment
-   // of text.
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   setLineWidth( 2 );
+   // Frame borders must be set equal to the one in XxText for proper vertical
+   // alignment of text.
 
    setSizePolicy(
       QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding )
@@ -85,18 +82,18 @@ XxLineNumbers::~XxLineNumbers()
 
 //------------------------------------------------------------------------------
 //
-void XxLineNumbers::drawContents( QPainter* pp )
+void XxLineNumbers::paintEvent( QPaintEvent *e )
 {
    //XX_TRACE( "painting!" );
 
-   // QPainter p;
-   // p.begin( this );
-   QPainter& p = *pp;
+   QFrame::paintEvent(e);
+
+   QPainter p( this );
    QRect rect = contentsRect();
 
    // We want 1:1 pixel/coord ratio.
    p.setViewport( rect );
-   rect.moveBy( -rect.x(), -rect.y() );
+   rect.translate( -rect.x(), -rect.y() );
    p.setWindow( rect );
 //#define BACK_COLORING
 #ifdef BACK_COLORING
@@ -127,6 +124,8 @@ void XxLineNumbers::drawContents( QPainter* pp )
    QString lnFormat;
    lnFormat.sprintf( "%%%dd", _app->getMaxDigits() );
 
+   p.setPen( palette().color( backgroundRole() ).darker( 200 ) );
+
    const int x = 0;
    int y = 0;
    for ( uint ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
@@ -144,7 +143,7 @@ void XxLineNumbers::drawContents( QPainter* pp )
       line.getLineColorType( 
          resources.getIgnoreFile(),
          _no,
-         dtype, dtypeSup
+         dtype, dtypeSup, false
       );
       resources.getRegionColor( dtype, bcolor, fcolor );
       QBrush brush( bcolor );
@@ -159,11 +158,29 @@ void XxLineNumbers::drawContents( QPainter* pp )
          const QString& renderedNums =
             file->renderLineNumber( dfline, lnFormat );
 
-         p.drawText( x, y + fm.ascent(), renderedNums );
+         p.drawText( x+2, y+1 + fm.ascent(), renderedNums );
       }
    }
+   
+   p.setPen( palette().color( backgroundRole() ).darker( 135 ) );
+   p.drawLine( rect.topRight(), rect.bottomRight() );
+   
+   // Draw line cursor.
+   if ( !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
+      XxDln cursorLine = _app->getCursorLine() - topLine;
+      if (cursorLine>=0 && cursorLine <nbLines) {
+         int cursorY1 = cursorLine * fm.lineSpacing();
+         int cursorY2 = cursorY1 + fm.lineSpacing();
+         QColor cursorColor = resources.getColor( COLOR_CURSOR );
+         int w = rect.width();
+         p.setPen( cursorColor );
+         p.drawLine( 0, cursorY1 , w, cursorY1 );
+         p.drawLine( 0, cursorY2 , w, cursorY2 );
+         cursorColor.setAlpha(64);
+         p.fillRect( 0, cursorY1 + 1 , w, cursorY2 - cursorY1 - 1, cursorColor );
+      }
+  }
 
-   // p.end();
 }
 
 XX_NAMESPACE_END

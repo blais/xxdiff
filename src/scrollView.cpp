@@ -27,10 +27,11 @@
 #include <scrollView.h>
 #include <app.h>
 
-#include <qscrollbar.h>
-#include <qsize.h>
-#include <qfont.h>
-#include <qfontmetrics.h>
+#include <QtGui/QScrollBar>
+#include <QtCore/QSize>
+#include <QtGui/QFont>
+#include <QtGui/QFontMetrics>
+#include <QtGui/QWheelEvent>
 
 XX_NAMESPACE_BEGIN
 
@@ -46,15 +47,15 @@ XX_NAMESPACE_BEGIN
 //
 XxScrollView::XxScrollView( 
    XxApp*      app, 
-   QWidget*    parent,
-   const char* name
+   QWidget*    parent
 ) :
-   BaseClass( parent, name ),
+   BaseClass( parent ),
    _app( app ),
    _displayWidth( 0 ),
    _displayHeight( 0 ),
    _textWidth( 0 ),
-   _textHeight( 0 )
+   _textHeight( 0 ),
+   _managingWheelEvent( false )
 {
    // Initialize to null.  The derived classes create them.
    _hscroll = 0;
@@ -111,7 +112,7 @@ XxDln XxScrollView::getBottomLine() const
    }
 
    int botline = std::min( 
-      getTopLine() /* top line */
+      XxScrollView::getTopLine() /* top line */
       + (getNbDisplayLines() - 1) /* to bottom line */
       - 1, /* don't allow cursor on half-displayed line */
       diffs->getNbLines()
@@ -140,10 +141,10 @@ XxDln XxScrollView::setTopLine( const XxDln lineNo )
       );
    _vscroll[0]->setValue( displayableLine - 1 );
    if ( _vscroll[1] != 0 ) {
-      _vscroll[1]->setValue( displayableLine - 1 );
+      _vscroll[1]->setValue( displayableLine -1 );
    }
    // Note: this will trigger the scroll signal indirectly.
-   
+
    return oldLine;
 }
 
@@ -157,7 +158,7 @@ XxDln XxScrollView::setCenterLine( const XxDln lineNo )
    }
 
    XxDln oldLine = getCenterLine();
-   setTopLine( lineNo - getNbDisplayLines() / 2 );
+   XxScrollView::setTopLine( lineNo - getNbDisplayLines() / 2 );
    return oldLine;
 }
 
@@ -171,7 +172,7 @@ XxDln XxScrollView::setBottomLine( const XxDln lineNo )
    }
 
    XxDln oldLine = getBottomLine();
-   setTopLine( lineNo - (getNbDisplayLines() - 2) );
+   XxScrollView::setTopLine( lineNo - (getNbDisplayLines() - 2) );
    return oldLine;
 }
 
@@ -229,7 +230,8 @@ void XxScrollView::adjustHorizontalScrollbars( const QSize& displaySize )
          // This will generate a resize event for the text widgets.
       }
       else {
-         _hscroll->setSteps( 1, _displayWidth );
+         _hscroll->setSingleStep( 1 );
+         _hscroll->setPageStep( _displayWidth );
          _hscroll->setRange( 0, textWidth - _displayWidth );
          _hscroll->show();
       }
@@ -251,7 +253,7 @@ void XxScrollView::adjustVerticalScrollbars( const QSize& displaySize )
 
    uint displayHeight = displaySize.height();
    const XxDiffs* diffs = _app->getDiffs();
-   uint textHeight = computeTextLength();
+   uint textHeight = getTextLength();
 
    if ( _displayHeight != displayHeight || _textHeight != textHeight ) {
 
@@ -260,9 +262,11 @@ void XxScrollView::adjustVerticalScrollbars( const QSize& displaySize )
 
       uint displayLines = getNbDisplayLines();
 
-      _vscroll[0]->setSteps( 1, displayLines );
+      _vscroll[0]->setSingleStep( 1 );
+      _vscroll[0]->setPageStep( displayLines );
       if ( _vscroll[1] != 0 ) {
-         _vscroll[1]->setSteps( 1, displayLines );
+         _vscroll[1]->setSingleStep( 1 );
+         _vscroll[1]->setPageStep( displayLines );
       }
       
       if ( diffs == 0 ) {
@@ -311,7 +315,7 @@ void XxScrollView::verticalScroll2( int value )
 //
 void XxScrollView::wheelEvent( QWheelEvent* e )
 {
-   if ( e->state() & Qt::ControlButton ) {
+   if ( e->modifiers() & Qt::ControlModifier ) {
       // Interactive font resize feature with mouse wheel.
       if ( e->delta() > 0 ) {
          _app->fontSizeDecrease();
@@ -321,7 +325,11 @@ void XxScrollView::wheelEvent( QWheelEvent* e )
       }
    }
    else {
-      QApplication::sendEvent( _vscroll[0], e );
+      if ( ! _managingWheelEvent ) {
+          _managingWheelEvent = true;
+          QApplication::sendEvent( _vscroll[0], e );
+          _managingWheelEvent = false;
+      }
    }
 }
 

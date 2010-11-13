@@ -24,7 +24,18 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <suicideMessageBox.h>
+#include <borderLabel.h>
+#include <app.h>
+
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
+
+#include <QtGui/QApplication>
+#include <QtGui/QLabel>
+
+#include <stdio.h>
 
 XX_NAMESPACE_BEGIN
 
@@ -33,25 +44,63 @@ XX_NAMESPACE_BEGIN
  *============================================================================*/
 
 /*==============================================================================
- * CLASS XxSuicideMessageBox
+ * CLASS XxBorderLabel
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxSuicideMessageBox::XxSuicideMessageBox( 
-   QWidget*       parent,
-   const QString& caption, 
-   const QString& text, 
-   Icon           icon 
+XxBorderLabel::XxBorderLabel( 
+   BorderFlags     bf,
+   QWidget*        parent,
+   Qt::WindowFlags wf
 ) :
-   QMessageBox( icon, caption, text, QMessageBox::Close, parent )
+   QLabel( parent, wf ),
+   _borders( bf )
 {
-   setModal( false );
-   setAttribute( Qt::WA_DeleteOnClose );
-#ifdef Q_OS_MAC
-   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint );
-#endif
-   show();
+}
+
+//------------------------------------------------------------------------------
+//
+XxBorderLabel::XxBorderLabel( 
+   const QString& text,
+   BorderFlags     bf,
+   QWidget*        parent,
+   Qt::WindowFlags wf
+) :
+   QLabel( text, parent, wf ),
+   _borders( bf )
+{
+}
+
+//------------------------------------------------------------------------------
+//
+XxBorderLabel::~XxBorderLabel()
+{
+}
+
+//------------------------------------------------------------------------------
+//
+void XxBorderLabel::paintEvent( QPaintEvent *e )
+{
+   QLabel::paintEvent(e);
+
+   QPainter p( this );
+   QRect rect = contentsRect();
+
+   p.setPen( palette().color( backgroundRole() ).darker( 135 ) );
+
+   if ( _borders & BorderLeft ) {
+      p.drawLine( rect.topLeft(), rect.bottomLeft() );
+   }
+   if ( _borders & BorderRight ) {
+      p.drawLine( rect.topRight(), rect.bottomRight() );
+   }
+   if ( _borders & BorderBottom ) {
+      p.drawLine( rect.bottomLeft(), rect.bottomRight() );
+   }
+   if ( _borders & BorderTop ) {
+      p.drawLine( rect.topLeft(), rect.topRight() );
+   }
 }
 
 XX_NAMESPACE_END

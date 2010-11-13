@@ -32,7 +32,7 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <qstring.h>
+#include <QtCore/QString>
 #define INCL_QT_QSTRING
 #endif
 

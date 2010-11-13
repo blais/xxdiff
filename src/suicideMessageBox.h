@@ -32,7 +32,7 @@
 #endif
 
 #ifndef INCL_QT_QMESSAGEBOX
-#include <qmessagebox.h>
+#include <QtGui/QMessageBox>
 #define INCL_QT_QMESSAGEBOX
 #endif
 
@@ -61,10 +61,6 @@ public:
       const QString& text, 
       Icon           icon 
    );
-
-   // See base class.
-   virtual void done( int r );
-
 };
 
 XX_NAMESPACE_END

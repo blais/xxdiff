@@ -40,12 +40,12 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <qmainwindow.h>
+#include <QtGui/QMainWindow>
 #define INCL_QT_QMAINWINDOW
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <QtGui/QFrame>
 #define INCL_QT_QFRAME
 #endif
 
@@ -65,6 +65,7 @@ XX_NAMESPACE_BEGIN
 class XxApp;
 class XxLineNumbers;
 class XxText;
+class XxCopyLabel;
 
 /*==============================================================================
  * CLASS XxCentralFrame
@@ -87,8 +88,7 @@ public:
    // Constructor.
    XxCentralFrame( 
       XxApp*          app, 
-      QWidget*        parent = 0,
-      const char*     name = 0 
+      QWidget*        parent = 0
    );
 
    // See base class.
@@ -97,7 +97,7 @@ public:
    // See base class XxScrollView.
    // <group>
    virtual QSize computeDisplaySize() const;
-   virtual uint computeTextLength() const;
+   virtual uint getTextLength() const;
    virtual XxDln getNbDisplayLines() const;
    // </group>
    
@@ -150,7 +150,7 @@ private:
 
    /*----- data members -----*/
 
-   QLabel*        _filenameLabel[3];
+   XxCopyLabel*   _filenameLabel[3];
    QLabel*        _lineNumberLabel[3];
    XxLineNumbers* _lineNumbers[3];
    XxText*        _text[3];

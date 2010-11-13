@@ -44,17 +44,17 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <qmainwindow.h>
+#include <QtGui/QMainWindow>
 #define INCL_QT_QMAINWINDOW
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <qframe.h>
+#include <QtGui/QFrame>
 #define INCL_QT_QFRAME
 #endif
 
 #ifndef INCL_QT_QWIDGET
-#include <qwidget.h>
+#include <QtGui/QWidget>
 #define INCL_QT_QWIDGET
 #endif
 
@@ -63,6 +63,7 @@
  *============================================================================*/
 
 class QScrollBar;
+class QCloseEvent;
 
 XX_NAMESPACE_BEGIN
 
@@ -94,20 +95,28 @@ public:
    // Constructor.
    XxMergedFrame( 
       XxApp*          app, 
-      QWidget*        parent = 0,
-      const char*     name = 0 
+      QWidget*        parent = 0
    );
 
    // See base class.
    virtual void update();
+   virtual void show();
 
    // See base class XxScrollView.
    // <group>
    virtual QSize computeDisplaySize() const;
-   virtual uint computeTextLength() const;
+   virtual uint getTextLength() const;
    virtual XxDln getNbDisplayLines() const;
+   virtual XxDln getTopLine() const;
+   virtual XxDln getBottomLine() const;
+   virtual XxDln setTopLine( const XxDln lineNo );
+   virtual XxDln setBottomLine( const XxDln lineNo );
+   virtual XxDln setCenterLine( const XxDln lineNo );
    // </group>
-   
+
+   // See XxText.
+   void updateMergedLines();
+
 public slots:
 
    // Reacts to a cursor change.
@@ -142,17 +151,23 @@ public:
    // Constructor.
    XxMergedWindow( 
       XxApp*          app, 
-      QWidget*        parent = 0,
-      const char*     name = 0 
+      QWidget*        parent = 0
    );
 
+   // See XxText.
+   void updateMergedLines();
+
+   // See base class.
+   virtual void show();
+   
    // See base class.
    // <group>
-   virtual void update();
-   virtual void show();
-   virtual void hide();
+public slots:
+   void hide();
    // </group>
 
+protected:
+   virtual void closeEvent( QCloseEvent* );
 
 private:
 

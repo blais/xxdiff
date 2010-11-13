@@ -40,7 +40,7 @@
 #endif
 
 #ifndef INCL_QT_QOBJECT
-#include <qobject.h>
+#include <QtCore/QObject>
 #define INCL_QT_QOBJECT
 #endif
 
@@ -58,6 +58,12 @@
 #include <iosfwd>
 #define INCL_STD_IOSFWD
 #endif
+
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class QTextStream;
 
 XX_NAMESPACE_BEGIN
 
@@ -338,6 +344,8 @@ signals:
 
 private:
 
+   enum SaveState { IF = 0, ELSIF = 1, END = 3 };
+
    /*----- member functions -----*/
 
    // This is simply a non-const version of getLine().  It barfs with MIPSpro
@@ -358,6 +366,18 @@ private:
    // Make really sure the line numbers are sequential.  This is zealous and
    // that's how I like it. Self-defensive programming.
    void validateLineNumbers() const;
+
+   // Save a chunk. Function created to factorize code used twice by save()
+   void saveChunk(
+      QTextStream&                   os,
+      const std::auto_ptr<XxBuffer>* files,
+      const bool                     useConditionals,
+      const bool                     removeEmptyConditionals,
+      const QString                  conditionals[3],
+      const QString                  tags[4],
+      const uint                     unselBegin,
+      const uint                     unselEnd
+   ) const;
 
    /*----- data members -----*/
 

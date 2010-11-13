@@ -31,8 +31,12 @@
 #include <defs.h>
 #endif
 
+#ifndef INCL_XXDIFF_KDESUPPORT
+#include <kdeSupport.h>
+#endif
+
 #ifndef INCL_QT_QDIALOG
-#include <qdialog.h>
+#include <QtGui/QDialog>
 #define INCL_QT_QDIALOG
 #endif
 
@@ -46,6 +50,46 @@
  *============================================================================*/
 
 class QWidget;
+
+namespace XxHelpNS {
+
+/*==============================================================================
+ * LOCAL CLASS XxSearchDialog
+ *============================================================================*/
+
+// <summary> the man pag dialog </summary>
+
+class XxManPageDialog : public QDialog {
+
+   Q_OBJECT
+
+   public:
+
+      /*----- member functions -----*/
+
+      // Constructor.
+      XxManPageDialog( QWidget* parent, const QString& text );
+
+      // Destructor.
+     virtual ~XxManPageDialog() {}
+
+   public slots:
+
+      /*----- member functions -----*/
+
+      void searchFirst(const QString&);
+      void searchNext();
+
+   private:
+
+   /*----- data members -----*/
+
+      QkTextBrowser* _textBrowser;
+      QkLineEdit* _lineEdit;
+
+};
+
+}
 
 
 XX_NAMESPACE_BEGIN

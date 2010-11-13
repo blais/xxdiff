@@ -30,11 +30,14 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
-#include <qpopupmenu.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
+#include <QtGui/QWheelEvent>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QFrame>
+#include <QtGui/QMouseEvent>
 
 #include <math.h>
 
@@ -57,18 +60,13 @@ XX_NAMESPACE_BEGIN
 XxOverview::XxOverview(
    XxApp*          app,
    XxCentralFrame* central,
-   QWidget *       parent,
-   const char*     name
+   QWidget *       parent
 ) :
-   QFrame( parent, name, WResizeNoErase ),
+   XxBorderLabel( XxBorderLabel::BorderLeft, parent ),
    _app( app ),
    _central( central ),
    _manipNo( -1 )
 {
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   setLineWidth( 2 );
-   setBackgroundMode( NoBackground );
-
    const XxResources& resources = _app->getResources();
    uint nbFiles = _app->getNbFiles();
    if ( nbFiles == 0 ) {
@@ -78,7 +76,7 @@ XxOverview::XxOverview(
    uint width =
       2 * lineWidth() + 
       nbFiles * resources.getOverviewFileWidth() + 
-      (nbFiles-1) * resources.getOverviewSepWidth();
+      (nbFiles-1) * resources.getOverviewSepWidth() - 1;
    setFixedWidth( width );
 }
 
@@ -97,16 +95,17 @@ QSizePolicy XxOverview::sizePolicy() const
 
 //------------------------------------------------------------------------------
 //
-void XxOverview::drawContents( QPainter* pp )
+void XxOverview::paintEvent( QPaintEvent* e )
 {
-   // QPainter p;
-   // p.begin( this );
-   QPainter& p = *pp;
+   BaseClass::paintEvent(e);
+
+   QPainter p( this );
    QRect rect = contentsRect();
+   rect.adjust( 1, 0, 0, 0 );
 
    // We want 1:1 pixel/coord ratio.
    p.setViewport( rect );
-   rect.moveBy( -rect.x(), -rect.y() );
+   rect.translate( -rect.x(), -rect.y() );
    p.setWindow( rect );
    // int w = rect.width();
    int h = rect.height();
@@ -121,7 +120,6 @@ void XxOverview::drawContents( QPainter* pp )
    if ( nbFiles == 0 || diffs == 0 ) {
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
-      //p.end();
       return;
    }
 
@@ -141,7 +139,6 @@ void XxOverview::drawContents( QPainter* pp )
    if ( maxlines == 0 ) {
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
-      //p.end();
       return;
    }
 
@@ -158,11 +155,10 @@ void XxOverview::drawContents( QPainter* pp )
    QPen pen;
    pen.setColor( Qt::black );
    p.setPen( pen );
-   QBrush brush( QBrush::SolidPattern );
+   QBrush brush( Qt::SolidPattern );
 
-   for ( ii = 0; ii < nbFiles; ++ii ) {
-      // Draw both ends.
       brush.setColor( backgroundColor );
+   for ( ii = 0; ii < nbFiles; ++ii ) {
       p.fillRect( _fileL[ii], 0, fileWidth, _fileT[ii], brush );
       p.fillRect( _fileL[ii], _fileB[ii], fileWidth, h - _fileB[ii], brush );
 
@@ -178,9 +174,9 @@ void XxOverview::drawContents( QPainter* pp )
 
    // Start drawing at beginning of blocks.
    int prevy[3];
-   prevy[0] = _fileT[0];
-   prevy[1] = _fileT[1];
-   prevy[2] = _fileT[2];
+   prevy[0] = _fileT[0]-1;
+   prevy[1] = _fileT[1]-1;
+   prevy[2] = _fileT[2]-1;
    XxFln fline[3] = { 0,0,0 };
    QColor back, fore;
 
@@ -221,7 +217,7 @@ void XxOverview::drawContents( QPainter* pp )
             brush.setColor( back );
             p.fillRect( _fileL[ii]+1, prevy[ii], fileWidth-2, ddy, brush );
 
-            p.drawRect( _fileL[ii], prevy[ii], fileWidth, ddy );
+            p.drawRect( _fileL[ii], prevy[ii], fileWidth-1, ddy-1 );
 
             prevy[ii] = yend;
          }
@@ -259,7 +255,7 @@ void XxOverview::drawContents( QPainter* pp )
       cfline = diffs->getBufferLine( ii, bottomline, aempty ) + 1;
       int bottompos =
          _fileT[ii] + 
-         int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
+         int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) ) - 1;
 
       p.setPen( cursorColor );
       p.drawRect( _regL[ii], toppos,
@@ -282,17 +278,19 @@ void XxOverview::drawContents( QPainter* pp )
       if ( ii > 0 ) {
 
          // Draw left arrow.
-         int pts1[6] = { _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
+         QPolygon pa1;
+         pa1.putPoints(0, 3, 
+                         _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
                          _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
-                         _fileL[ii] - sepWidth, curppos[ii-1] };                
-         QPointArray pa1( 3, pts1 );
+                         _fileL[ii] - sepWidth, curppos[ii-1] );                
          p.drawPolygon( pa1 );
 
          // Draw right arrow.
-         int pts2[6] = { _fileL[ii] + dx, curppos[ii] - dyo2,
+         QPolygon pa2;
+         pa2.putPoints(0, 3, 
+                         _fileL[ii] + dx, curppos[ii] - dyo2,
                          _fileL[ii] + dx, curppos[ii] + dyo2,
-                         _fileL[ii], curppos[ii] };                
-         QPointArray pa2( 3, pts2 );
+                         _fileL[ii], curppos[ii] );                
          p.drawPolygon( pa2 );
       }
    }
@@ -314,18 +312,18 @@ void XxOverview::drawContents( QPainter* pp )
             int ypos =
                _fileT[ii] +
                int( (_fileDy[ii] * (ffline-1)) / float( flines[ii] ) );
-            int pts1[8] = { _fileL[ii] + fw2 - sdx, ypos,
+            QPolygon pa1;
+            pa1.putPoints(0, 4, 
+                            _fileL[ii] + fw2 - sdx, ypos,
                             _fileL[ii] + fw2, ypos + sdx,
                             _fileL[ii] + fw2 + sdx, ypos,
-                            _fileL[ii] + fw2, ypos - sdx };
-            QPointArray pa1( 4, pts1 );
+                            _fileL[ii] + fw2, ypos - sdx );
             p.drawPolygon( pa1 );
          }
       }
    }
 
-   p.resetXForm();
-   // p.end();
+   p.resetTransform();
 }
 
 //------------------------------------------------------------------------------
@@ -346,11 +344,6 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
       }
    }
    if ( no == nbFiles ) {
-      return;
-   }
-
-   // Find out if it was clicked in the visible region.
-   if ( !( _regL[no] <= x && x <= _regR[no] ) ) {
       return;
    }
 
@@ -386,7 +379,13 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
       _fileT[no] +
       int( (_fileDy[no] * (cfline-1)) / float( flines[no] ) );
 
-   if ( !( toppos <= y && y <= bottompos ) ) {
+   if ( !( _regL[no] <= x && x <= _regR[no] ) ||
+        !( toppos <= y && y <= bottompos ) ) {
+      // Clicked outside the handle - jump to the line
+      int displayheight = bottomline - topline + 1;
+      XxFln lineclicked = ( y - _fileT[no] ) * flines[no] / _fileDy[no];
+      XxDln displayline = diffs->getDisplayLine( lineclicked, *files[no], no );
+      _central->setTopLine( displayline - ( displayheight / 2 ) );
       return;
    }
 

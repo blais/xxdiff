@@ -27,7 +27,7 @@
 #include <hordiffImp.h>
 #include <resources.h>
 
-#include <qcstring.h>
+#include <QtCore/QByteArray>
 
 #ifndef COMPILER_MIPSPRO
 #include <cctype> // isspace()
@@ -439,8 +439,8 @@ void XxHordiffImp::multipleHordiffs2(
 
 #ifdef XX_LOCAL_HDIFF_DEBUG
    {
-      QCString s1( text0 + 1, len0+1 );
-      QCString s2( text1 + 1, len1+1 );
+      QByteArray s1( text0 + 1, len0+1 );
+      QByteArray s2( text1 + 1, len1+1 );
       cerr << "Comparing " << s1 << " to " << s2 << endl;
    }
 #endif
@@ -474,11 +474,11 @@ void XxHordiffImp::multipleHordiffs2(
 
 #ifdef XX_LOCAL_HDIFF_DEBUG
       cerr << "==============================" << endl;
-      QCString stext0( text0+1, len0+1 );
+      QByteArray stext0( text0+1, len0+1 );
       cerr << stext0 << endl;
       cerr << ctext0+1 << endl;
       cerr << "------------------------------" << endl;
-      QCString stext1( text1+1, len1+1 );
+      QByteArray stext1( text1+1, len1+1 );
       cerr << stext1 << endl;
       cerr << ctext1+1 << endl;
       cerr << "------------------------------" << endl;
@@ -565,7 +565,7 @@ void XxHordiffImp::multipleHordiffs2(
 #endif
 
          if ( 
-            ( htable[ x + y*tlen0 ] == ( htable[ x-1 + (y-1)*tlen0 ] + 1 ) /*||
+            ( htable[ x + y*tlen0 ] == ( htable[ std::max( 0, x-1 + (y-1)*tlen0 ) ] + 1 ) /*||
               htable[ x + y*tlen0 ] == htable[ x-1 + (y-1)*tlen0 ]*/ ) &&
             ctext0[x] == ctext1[y] 
 
@@ -614,7 +614,7 @@ void XxHordiffImp::multipleHordiffs2(
                inword = false;
             }
 
-            if ( htable[ x-1 + y*tlen0 ] > htable[ x + (y-1)*tlen0 ] ) {
+            if ( htable[ std::max( 0, x-1 + y*tlen0 ) ] > htable[ std::max( 0, x + (y-1)*tlen0 ) ] ) {
                --x;
             }
             else { 

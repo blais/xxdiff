@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QWIDGET
-#include <qwidget.h>
+#include <QtGui/QWidget>
 #define INCL_QT_QWIDGET
 #endif
 
@@ -46,6 +46,7 @@
 
 class QScrollBar;
 class QSize;
+class QWheelEvent;
 
 XX_NAMESPACE_BEGIN
 
@@ -81,8 +82,7 @@ public:
    // Constructor.
    XxScrollView( 
       XxApp*      app, 
-      QWidget*    parent = 0,
-      const char* name = 0 
+      QWidget*    parent = 0
    );
 
    // Destructor.
@@ -91,8 +91,8 @@ public:
    // Computes the text display width in pixels.
    virtual QSize computeDisplaySize() const = 0;
 
-   // Computes the number of lines in the text to display.
-   virtual uint computeTextLength() const = 0;
+   // Gets the number of lines in the text to display.
+   virtual uint getTextLength() const = 0;
 
    // Returns the number of fully visible display lines that this display can
    // currently see.
@@ -171,6 +171,10 @@ private:
    uint        _textWidth; // in chars
    uint        _textHeight; // in lines
    // </group>
+   
+   // This is to fix what seems (?) to be a Qt4 bug which enters a recursive
+   //loop when the wheel event doesn't lead to a value change of the scrollbar
+   bool _managingWheelEvent;
 
 };
 

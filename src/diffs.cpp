@@ -28,7 +28,7 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <qcstring.h>
+#include <QtCore/QTextStream>
 
 #include <list>
 #include <algorithm>
@@ -57,7 +57,7 @@ int outputLine(
       const char* text = files[no]->getTextLine( fline, len );
       XX_ASSERT( text != 0 ); // make this one throw
 
-      os.writeRawBytes( text, len );
+      os << QString::fromLocal8Bit(text, len);
       os << endl;
       return 1;
    }
@@ -866,42 +866,39 @@ bool XxDiffs::save(
 
    QString tags[4];
    if ( useConditionals == false ) {
-      for ( int ii = 0; ii < 3; ++ii ) {
-         tags[ii] = resources.getTag( TAG_CONFLICT_SEPARATOR );
+      tags[0]         = resources.getTag( TAG_CONFLICT_START );
+      tags[1]         = resources.getTag( TAG_CONFLICT_SEP_EXTRA );
+      tags[nbFiles-1] = resources.getTag( TAG_CONFLICT_SEP );
+      tags[END]       = resources.getTag( TAG_CONFLICT_END );
+      // Allow to specify exactly which filename must appear in which tag
+      QString left, middle, right;
+      left = files[0]->getDisplayName();
+      if ( nbFiles == 2 ) {
+         right = files[1]->getDisplayName();
+      } else {
+         middle = files[1]->getDisplayName();
+         right  = files[2]->getDisplayName();
+         }
+      for ( int ii = 0; ii < 4; ++ii ) {
+         tags[ii].replace( QRegExp("%L"), left );
+         tags[ii].replace( QRegExp("%M"), middle );
+         tags[ii].replace( QRegExp("%R"), right );
       }
-      tags[3] = resources.getTag( TAG_CONFLICT_END );
    }
    else {
-      tags[0] = resources.getTag( TAG_CONDITIONAL_IF );
-      tags[1] = resources.getTag( TAG_CONDITIONAL_ELSEIF );
-      tags[2] = resources.getTag( TAG_CONDITIONAL_ELSE );
-      tags[3] = resources.getTag( TAG_CONDITIONAL_ENDIF );
+      tags[IF]    = resources.getTag( TAG_CONDITIONAL_IF );
+      tags[ELSIF] = resources.getTag( TAG_CONDITIONAL_ELSEIF );
+      tags[END]   = resources.getTag( TAG_CONDITIONAL_ENDIF );
    }
 
-   for ( int ii = 0; ii < nbFiles; ++ii ) {
-      int pos = tags[ii].find( "%d" );
-      if ( pos != -1 ) {
-         tags[ii].replace( pos, 2, QString::number( ii+1 ) );
-      }
-
-      if ( ! useConditionals ) {
-         pos = tags[ii].find( "%s" );
-         if ( pos != -1 ) {
-            tags[ii].replace( pos, 2, files[ii]->getDisplayName() );
-         }
-      }
-   }
-
-   // for ( int ii = 0; ii < nbFiles+1; ++ii ) {
-   //    XX_TRACE( tags[ii].latin1() );
+   // for ( int ii = 0; ii < 4; ++ii ) {
+   //    XX_TRACE( tags[ii].toLatin1().constData() );
    // }
 
    bool foundUnsel = false;
    bool insideUnsel = false;
    uint unselBegin = 0;
-   uint unselEnd;
    XxDln uii;
-   enum State { IF = 0, ELSIF = 1, ELSE = 2 };
    for ( uii = 1; uii <= getNbLines(); ++uii ) {
       const XxLine& line = getLine( uii );
 
@@ -912,49 +909,8 @@ bool XxDiffs::save(
 
          if ( insideUnsel == true ) {
             // Output the unselected portion.
-            unselEnd = uii;
-            XX_ASSERT( unselEnd - unselBegin > 0 );
-            int state = IF;
-            for ( uint f = 0; f < 3; ++f ) {
-               if ( files[f].get() != 0 ) {
-
-                  // Note: I know this is lame, but SGI STL doesn't support
-                  // formatted output from ostream.
-                  QString cond;
-                  cond.sprintf( tags[state].latin1(),
-                                conditionals[f].latin1() );
-
-                  QByteArray line;
-                  QTextOStream oss( line );
-                  oss << cond << endl;
-
-                  int nbOutlines = 0;
-                  for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
-                     const XxLine& cline = getLine( iii );
-                     nbOutlines += outputLine( oss, files, cline, f );
-                  }
-
-                  if ( removeEmptyConditionals && nbOutlines == 0 ) {
-                     continue;
-                  }
-
-                  if ( useConditionals ) {
-                     switch ( state ) {
-                        case IF: state = ELSIF; break;
-                        case ELSIF: /* stay as ELSIF */ break;
-                        case ELSE: break;
-                     }
-                  }
-                  else {
-                     ++state;
-                  }
-                  oss << '\0' << flush; // end string and flush
-                  os << static_cast<const char*>( line );
-               }
-            }
-
-            os << tags[3] << endl;
-
+            saveChunk( os, files, useConditionals, removeEmptyConditionals,
+                       conditionals, tags, unselBegin, uii );
             insideUnsel = false;
          }
 
@@ -981,26 +937,62 @@ bool XxDiffs::save(
    // If file ends with a hunk, make sure a pending unselected hunk is output.
    if ( insideUnsel == true ) {
       // Output the unselected portion.
-      unselEnd = uii;
-      XX_ASSERT( unselEnd - unselBegin > 0 );
-      for ( uint f = 0; f < 3; ++f ) {
-         if ( files[f].get() != 0 ) {
-
-            os << tags[f] << endl;
-
-            for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
-               const XxLine& cline = getLine( iii );
-               outputLine( os, files, cline, f );
-            }
-         }
-      }
-
-      os << tags[nbFiles] << endl;
+      saveChunk( os, files, useConditionals, removeEmptyConditionals,
+                 conditionals, tags, unselBegin, uii );
 
       insideUnsel = false;
    }
 
    return !foundUnsel;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxDiffs::saveChunk(
+   QTextStream&                   os,
+   const std::auto_ptr<XxBuffer>* files,
+   const bool                     useConditionals,
+   const bool                     removeEmptyConditionals,
+   const QString                  conditionals[3],
+   const QString                  tags[4],
+   const uint                     unselBegin,
+   const uint                     unselEnd
+) const
+{
+   // Output the unselected portion.
+   XX_ASSERT( unselEnd - unselBegin > 0 );
+   int state = IF;
+   for ( uint f = 0; f < 3; ++f ) {
+      if ( files[f].get() != 0 ) {
+
+         QString cond( tags[state] );
+         cond.replace( "%s", conditionals[f] );
+         QByteArray line;
+         QTextStream oss( &line );
+         oss << cond << endl;
+
+         int nbOutlines = 0;
+         for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
+            const XxLine& cline = getLine( iii );
+            nbOutlines += outputLine( oss, files, cline, f );
+         }
+         if ( removeEmptyConditionals && nbOutlines == 0 ) {
+            continue;
+         }
+         if ( useConditionals ) {
+            switch ( state ) {
+               case IF: state = ELSIF; break;
+               case ELSIF: /* stay as ELSIF */ break;
+            }
+         } else {
+            ++state;
+         }
+         oss << '\0' << flush; // end string and flush
+         os << static_cast<const char*>( line );
+      }
+   }
+
+   os << tags[END] << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -1032,7 +1024,7 @@ bool XxDiffs::saveSelectedOnly(
             XX_ASSERT( text != 0 ); // make this one throw
 
             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
-            os.writeRawBytes( text, len );
+            os << QString::fromLocal8Bit(text, len);
             os << endl;
 
             some = true;
@@ -1065,28 +1057,29 @@ void XxDiffs::search(
 
    _searchResults.clear();
 
-   for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
-      const XxLine& line = getLineNC( ii );
-      SearchResult scurrent; // init as invalid
+   if ( ! searchText.isEmpty() ) {
+      for ( XxDln ii = 1; ii <= getNbLines(); ++ii ) {
+         const XxLine& line = getLineNC( ii );
+         SearchResult scurrent; // init as invalid
 
-      // Look in all files.
-      for ( int ni = 0; ni < nbFiles; ++ni ) {
+         // Look in all files.
+         for ( int ni = 0; ni < nbFiles; ++ni ) {
 
-         int fline = line.getLineNo( ni );
-         if ( fline != -1 ) {
-            if ( files[ni]->searchLine( fline, searchText ) == true ) {
-               // We have a hit.
-               scurrent._lineNo = ii;
-               scurrent._fline[ni] = fline;
+            int fline = line.getLineNo( ni );
+            if ( fline != -1 ) {
+               if ( files[ni]->searchLine( fline, searchText ) == true ) {
+                  // We have a hit.
+                  scurrent._lineNo = ii;
+                  scurrent._fline[ni] = fline;
+               }
             }
          }
-      }
 
-      if ( scurrent.isValid() ) {
-         _searchResults.push_back( scurrent );
+         if ( scurrent.isValid() ) {
+            _searchResults.push_back( scurrent );
+         }
       }
    }
-
    // This is just used to trigger overview area redraw.
    emit changed();
 }

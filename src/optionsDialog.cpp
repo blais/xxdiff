@@ -32,22 +32,24 @@
 
 #include <kdeSupport.h>
 
-#include <qtabwidget.h>
-#include <qtextview.h>
-#include <qlineedit.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
-#include <qpushbutton.h>
-#include <qgroupbox.h>
-#include <qspinbox.h>
-#include <qlistbox.h>
-#include <qcolor.h>
-#include <qcolordialog.h>
-#include <qfontdialog.h>
-#include <qlabel.h>
-#include <qcombobox.h>
-#include <qstring.h>
-#include <qpainter.h>
+#include <QtGui/QTabWidget>
+#include <QtGui/QTextEdit>
+#include <QtGui/QLineEdit>
+#include <QtGui/QCheckBox>
+#include <QtGui/QRadioButton>
+#include <QtGui/QPushButton>
+#include <QtGui/QSpinBox>
+#include <QtGui/QListWidgetItem>
+#include <QtGui/QListWidget>
+#include <QtGui/QColor>
+#include <QtGui/QColorDialog>
+#include <QtGui/QFontDialog>
+#include <QtGui/QLabel>
+#include <QtGui/QComboBox>
+#include <QtCore/QString>
+#include <QtGui/QPainter>
+#include <QtCore/QMetaType>
+#include <QtGui/QItemDelegate>
 
 #include <stdlib.h>
 
@@ -55,7 +57,7 @@
  * LOCAL DECLARATIONS
  *============================================================================*/
 
-namespace {
+namespace XxOptDlg {
 
 /*----- variables -----*/
 
@@ -77,10 +79,38 @@ const char* pangrams[] = {
 /*----- classes -----*/
 
 /*==============================================================================
+ * CLASS XxColoredItemData
+ *============================================================================*/
+
+class XxColoredItemData {
+
+public:
+
+   XxColoredItemData() {};
+   XxColoredItemData(const XxColor color, const QString colorName);
+
+   /*----- data members -----*/
+   XxColor            _color;
+   QString            _colorName;
+   bool               _modified;
+   QColor             _foreColor;
+   QColor             _backColor;
+};
+
+//------------------------------------------------------------------------------
+//
+XxColoredItemData::XxColoredItemData(const XxColor color, const QString colorName) :
+   _color( color ),
+   _colorName(colorName ),
+   _modified( false )
+{
+}
+
+/*==============================================================================
  * CLASS XxColoredItem
  *============================================================================*/
 
-class XxColoredItem : public QListBoxText {
+class XxColoredItem : public QListWidgetItem {
 
 public:
 
@@ -88,51 +118,33 @@ public:
 
    // Ctor/dtor.
    // <group>
-   XxColoredItem( const XxResources* resources, XxColor color );
+   XxColoredItem( XxColor color );
    virtual ~XxColoredItem();
    // </group>
 
-   XxColor getColor() const;
-
-protected:
-
    /*----- member functions -----*/
-   
-   // Overriden height to use our own text font.
-   virtual int height( const QListBox* lb ) const;
 
-   // Overriden paint to setup the colors right.
-   virtual void paint( QPainter* painter );
+   XxColor color() const;
+   QColor foreColor() const;
+   QColor backColor() const;
+   bool modified() const;
+   void setForeColor( const QColor& color);
+   void setBackColor( const QColor& color);
+   void setModified( const bool modified );
 
 private:
 
    /*----- data members -----*/
 
    const XxResources* _resources;
-
-public: // let the dialog access all of this
-
-   /*----- data members -----*/
-
-   // Current state.
-   const XxColor      _color;
-   bool               _modified;
-   QColor             _foreColor;
-   QColor             _backColor;
-
 };
 
 //------------------------------------------------------------------------------
 //
-XxColoredItem::XxColoredItem( const XxResources* resources, XxColor color ) :
-   QListBoxText( XxResParser::getColorName( color ) ),
-   _resources( resources ),
-   _color( color ),
-   _modified( false ),
-   _foreColor(),
-   _backColor()
+XxColoredItem::XxColoredItem( XxColor color )
 {
-   XX_ASSERT( _resources );
+   XxColoredItemData data( color, XxResParser::getColorName( color ) );
+   setData( Qt::DisplayRole, qVariantFromValue( data ) );
 }
 
 //------------------------------------------------------------------------------
@@ -143,44 +155,143 @@ XxColoredItem::~XxColoredItem()
 
 //------------------------------------------------------------------------------
 //
-inline XxColor XxColoredItem::getColor() const
+inline XxColor XxColoredItem::color() const
 {
-   return _color;
+   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._color;
 }
 
 //------------------------------------------------------------------------------
 //
-int XxColoredItem::height( const QListBox* /*lb*/ ) const
+inline QColor XxColoredItem::foreColor() const
 {
+   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._foreColor;
+}
+
+//------------------------------------------------------------------------------
+//
+inline QColor XxColoredItem::backColor() const
+{
+   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._backColor;
+}
+
+//------------------------------------------------------------------------------
+//
+inline bool XxColoredItem::modified() const
+{
+   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._modified;
+}
+
+//------------------------------------------------------------------------------
+//
+void XxColoredItem::setForeColor( const QColor& color)
+{
+   XxColoredItemData data = qVariantValue<XxColoredItemData>( this->data( Qt::DisplayRole ) );
+   data._foreColor = color;
+   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxColoredItem::setBackColor( const QColor& color)
+{
+   XxColoredItemData data = qVariantValue<XxColoredItemData>( this->data( Qt::DisplayRole ) );
+   data._backColor = color;
+   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxColoredItem::setModified( const bool modified )
+{
+   XxColoredItemData data = qVariantValue<XxColoredItemData>( this->data( Qt::DisplayRole ) );
+   data._modified = modified;
+   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+}
+
+/*==============================================================================
+ * CLASS XxColoredItemDelegate
+ *============================================================================*/
+
+class XxColoredItemDelegate : public QItemDelegate
+{
+
+typedef QItemDelegate BaseClass;
+
+public:
+
+   XxColoredItemDelegate( const XxResources* resources, QObject* parent = 0 );
+
+   /*----- member functions -----*/
+
+   // Overriden sizeHint to use our own text font.
+   virtual QSize sizeHint( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+   // Overriden paint to setup the colors right.
+   virtual void paint( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+
+private:
+
+   /*----- data members -----*/
+   const XxResources* _resources;
+};
+
+//------------------------------------------------------------------------------
+//
+XxColoredItemDelegate::XxColoredItemDelegate( const XxResources* resources, QObject* parent ) :
+   QItemDelegate( parent ),
+   _resources ( resources )
+{
+   XX_ASSERT( _resources );
+};
+
+//------------------------------------------------------------------------------
+//
+QSize XxColoredItemDelegate::sizeHint( const QStyleOptionViewItem & option, const QModelIndex & index ) const
+{
+   QSize hint = BaseClass::sizeHint(option, index);
    const QFont& font = _resources->getFontText();
    QFontMetrics fm( font );
-   return fm.height() + 2; // allow space for the listbox cursor.
+   hint.setHeight( fm.height() + 2 ); // allow space for the listbox cursor.
+   return hint;
 }
 
 //------------------------------------------------------------------------------
 //
-void XxColoredItem::paint( QPainter* ppainter )
+void XxColoredItemDelegate::paint( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
-   QPainter& pp = *ppainter;
-   const int w = pp.window().width();
+   painter->save();
+
+   XxColoredItemData data = qVariantValue<XxColoredItemData>(index.data());
 
    // Font.
-   pp.setFont( _resources->getFontText() );
-   QFontMetrics fm = pp.fontMetrics();
+   painter->setFont( _resources->getFontText() );
+   QFontMetrics fm = painter->fontMetrics();
 
    // Don't draw background of chars since we'll draw first.
-   pp.setBackgroundMode( Qt::TransparentMode );
+   painter->setBackgroundMode( Qt::TransparentMode );
 
-   QBrush brush( _backColor );
-   pp.setPen( _foreColor );
+   painter->setPen( data._foreColor );
 
-   pp.fillRect( 0, 0, w, fm.height() + 2, brush );
-   pp.drawText( 10, 1 + fm.ascent(), text() );
+   painter->fillRect( option.rect, data._backColor );
+   painter->drawText( option.rect.left()+10, option.rect.top()+1 + fm.ascent(), data._colorName );
+
+   if (option.state & QStyle::State_Selected) {
+      QRect r = option.rect;
+      r.adjust( 0, 0, -1, -1 ); 
+      painter->setPen( QPen( option.palette.highlight(), 1 ) );
+      painter->drawRect( r );
+   }
+
+   painter->restore();
 }
 
-}
+
+} // namespace XxOptDlg
+
+Q_DECLARE_METATYPE(XxOptDlg::XxColoredItemData)
 
 XX_NAMESPACE_BEGIN
+
+using namespace XxOptDlg;
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -200,6 +311,7 @@ XxOptionsDialog::XxOptionsDialog(
    _app( app )
 {
    XX_CHECK( _app != 0 );
+   setupUi( this );
    
    // This disables the irrelevant tabs.
    // Don't, let the user edit all fields.
@@ -247,12 +359,12 @@ XxOptionsDialog::XxOptionsDialog(
    connect( _checkboxIgnoreBlankLines, SIGNAL( stateChanged(int) ), 
             this, SLOT( checkboxIgnoreBlankLines(int) ) );
 
-   connect( _radiobuttonQualityNormal, SIGNAL( stateChanged(int) ), 
-            this, SLOT( radiobuttonQualityNormal(int) ) );
-   connect( _radiobuttonQualityFastest, SIGNAL( stateChanged(int) ), 
-            this, SLOT( radiobuttonQualityFastest(int) ) );
-   connect( _radiobuttonQualityHighest, SIGNAL( stateChanged(int) ), 
-            this, SLOT( radiobuttonQualityHighest(int) ) );
+   connect( _radiobuttonQualityNormal, SIGNAL( clicked(bool) ), 
+            this, SLOT( radiobuttonQualityNormal(bool) ) );
+   connect( _radiobuttonQualityFastest, SIGNAL( clicked(bool) ), 
+            this, SLOT( radiobuttonQualityFastest(bool) ) );
+   connect( _radiobuttonQualityHighest, SIGNAL( clicked(bool) ), 
+            this, SLOT( radiobuttonQualityHighest(bool) ) );
 
    //---------------------------------------------------------------------------
    // Files 3
@@ -271,16 +383,22 @@ XxOptionsDialog::XxOptionsDialog(
    //---------------------------------------------------------------------------
    // Colors
 
-   // Fill up listbox with color names.
    const XxResources* resourcesPtr = &(_app->getResources());
+   _listboxColors->setItemDelegate( new XxColoredItemDelegate( resourcesPtr ) );
+   
+   // Fill up listbox with color names.
    for ( int ii = 0; ii < int(COLOR_LAST); ++ii ) {
-      QListBoxItem* lbi = 
-         new XxColoredItem( resourcesPtr, XxColor(ii) );
-      _listboxColors->insertItem( lbi );
+      QListWidgetItem* lwi = 
+         new XxColoredItem( XxColor(ii) );
+      _listboxColors->addItem( lwi );
    }
 
-   connect( _listboxColors, SIGNAL( highlighted(const QString&) ), 
-            this, SLOT( listboxColors(const QString&) ) );
+   // So that their background color can be changed
+   _labelEditFore->setAutoFillBackground( true );
+   _labelEditBack->setAutoFillBackground( true );
+
+   connect( _listboxColors, SIGNAL( currentItemChanged(QListWidgetItem*,QListWidgetItem*) ), 
+            this, SLOT( listboxColors(QListWidgetItem*,QListWidgetItem*) ) );
 
    connect( _buttonEditFore, SIGNAL( clicked() ),
             this, SLOT( editColorFore() ) );
@@ -403,7 +521,7 @@ void XxOptionsDialog::synchronize()
    //---------------------------------------------------------------------------
    // Display
 
-   _comboHordiffType->setCurrentItem( int( resources.getHordiffType() ) );
+   _comboHordiffType->setCurrentIndex( int( resources.getHordiffType() ) );
    _spinboxHordiffContext->setValue( resources.getHordiffContext() );
 
    _checkboxIgnoreHorizontalWhitespace->setChecked(
@@ -419,7 +537,7 @@ void XxOptionsDialog::synchronize()
       resources.getShowOpt( SHOW_VERTICAL_LINE )
    );
 
-   _comboIgnoreFile->setCurrentItem( int( resources.getIgnoreFile() ) );
+   _comboIgnoreFile->setCurrentIndex( int( resources.getIgnoreFile() ) );
 
 
    _checkboxIgnoreFileChanges->setChecked(
@@ -449,22 +567,21 @@ void XxOptionsDialog::synchronize()
       XxColoredItem* coli =
          static_cast<XxColoredItem*>( _listboxColors->item( ii ) );
       XX_ASSERT( coli );
-      coli->_foreColor = resources.getColor( XxColor(ii), true );
-      coli->_backColor = resources.getColor( XxColor(ii), false );
-      coli->_modified = false;
+      coli->setForeColor( resources.getColor( XxColor(ii), true ) );
+      coli->setBackColor( resources.getColor( XxColor(ii), false ) );
+      coli->setModified( false );
    }        
 
-   {
-      int idx = _listboxColors->currentItem();
-      if ( idx != -1 ) {
-         XxColoredItem* coli = 
-            static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
-         XX_ASSERT( coli );
-         _labelEditFore->setBackgroundColor( coli->_foreColor );
-         _labelEditBack->setBackgroundColor( coli->_backColor );
-         _labelEditFore->update();
-         _labelEditBack->update();
-      }
+   XxColoredItem* coli = 
+      static_cast<XxColoredItem*>( _listboxColors->currentItem() );
+   if ( coli ) {
+      QPalette palette;
+      palette.setColor( _labelEditFore->backgroundRole(), coli->foreColor() );
+      _labelEditFore->setPalette( palette );
+      palette.setColor( _labelEditBack->backgroundRole(), coli->backColor() );
+      _labelEditBack->setPalette( palette );
+      _labelEditFore->update();
+      _labelEditBack->update();
    }
 }
 
@@ -472,14 +589,14 @@ void XxOptionsDialog::synchronize()
 //
 void XxOptionsDialog::selectDiffOptions()
 {
-   _tabWidget->setCurrentPage( getDiffPageIndex() );
+   _tabWidget->setCurrentIndex( getDiffPageIndex() );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxOptionsDialog::selectDisplayOptions()
 {
-   _tabWidget->setCurrentPage( 2 );
+   _tabWidget->setCurrentIndex( 2 );
 }
 
 //------------------------------------------------------------------------------
@@ -535,7 +652,7 @@ void XxOptionsDialog::onApply()
    // Display
 
    bool reinitHorizontalDiffs = false;
-   XxHordiff newhdtype = XxHordiff( _comboHordiffType->currentItem() );
+   XxHordiff newhdtype = XxHordiff( _comboHordiffType->currentIndex() );
    if ( resources.getHordiffType() != newhdtype ) {
       resources.setHordiffType( newhdtype );
       reinitHorizontalDiffs = true;
@@ -565,7 +682,7 @@ void XxOptionsDialog::onApply()
    resources.setVerticalLinePos( _spinboxVlinePos->value() );
 
    resources.setIgnoreFile(
-      XxIgnoreFile(_comboIgnoreFile->currentItem())
+      XxIgnoreFile(_comboIgnoreFile->currentIndex())
    );
 
    if ( resources.getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES ) !=
@@ -587,7 +704,7 @@ void XxOptionsDialog::onApply()
    if ( !XxResources::compareFonts( _fontApp,
                                     resources.getFontApp() ) ) {
       resources.setFontApp( _fontApp );
-      _app->setFont( _fontApp, true );
+      _app->setFont( _fontApp );
    }
    if ( !XxResources::compareFonts( _fontText,
                                     resources.getFontText() ) ) {
@@ -602,10 +719,10 @@ void XxOptionsDialog::onApply()
       XxColoredItem* coli =
          static_cast<XxColoredItem*>( _listboxColors->item( ii ) );
       XX_ASSERT( coli );
-      if ( coli->_modified ) {
-         resources.setColor( XxColor(ii), true, coli->_foreColor );
-         resources.setColor( XxColor(ii), false, coli->_backColor );
-         coli->_modified = false;
+      if ( coli->modified() ) {
+         resources.setColor( XxColor(ii), true, coli->foreColor() );
+         resources.setColor( XxColor(ii), false, coli->backColor() );
+         coli->setModified( false );
       }
    }        
 
@@ -694,29 +811,23 @@ void XxOptionsDialog::setFileDiffOptions(
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::radiobuttonQualityNormal( int state )
+void XxOptionsDialog::radiobuttonQualityNormal( bool )
 {
-   if ( state != 0 ) {
-      setFileDiffQuality( QUALITY_NORMAL );
-   }
+   setFileDiffQuality( QUALITY_NORMAL );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::radiobuttonQualityFastest( int state )
+void XxOptionsDialog::radiobuttonQualityFastest( bool )
 {
-   if ( state != 0 ) {
-      setFileDiffQuality( QUALITY_FASTEST );
-   }
+   setFileDiffQuality( QUALITY_FASTEST );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::radiobuttonQualityHighest( int state )
+void XxOptionsDialog::radiobuttonQualityHighest( bool )
 {
-   if ( state != 0 ) {
-      setFileDiffQuality( QUALITY_HIGHEST );
-   }
+   setFileDiffQuality( QUALITY_HIGHEST );
 }
 
 //------------------------------------------------------------------------------
@@ -743,29 +854,30 @@ void XxOptionsDialog::setFileDiffQuality(
 
 //------------------------------------------------------------------------------
 //
-void XxOptionsDialog::listboxColors( const QString& )
+void XxOptionsDialog::listboxColors( QListWidgetItem* current, QListWidgetItem* )
 {
-   int idx = _listboxColors->currentItem();
-   if ( idx == -1 ) {
-      return;
-   }
    XxColoredItem* coli = 
-      static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
+      static_cast<XxColoredItem*>( current );
    XX_ASSERT( coli );
    
    // Set the buttons backgrounds to the given color.
-   _labelEditFore->setBackgroundColor( coli->_foreColor );
-   _labelEditBack->setBackgroundColor( coli->_backColor );
+   QPalette palette;
+   palette.setColor( _labelEditFore->backgroundRole(), coli->foreColor() );
+   _labelEditFore->setPalette( palette );
+   palette.setBrush( _labelEditBack->backgroundRole(), coli->backColor() );
+   _labelEditBack->setPalette( palette );
    _labelEditFore->update();
    _labelEditBack->update();
 
+   XxColor color = coli->color();
+
    _buttonEditFore->setEnabled(
-      !( coli->_color == COLOR_BACKGROUND || 
-         coli->_color == COLOR_CURSOR ||
-         coli->_color == COLOR_VERTICAL_LINE )
+      !( color == COLOR_BACKGROUND || 
+         color == COLOR_CURSOR ||
+         color == COLOR_VERTICAL_LINE )
    );
 
-   QString desc = XxResParser::getColorDescription( XxColor(idx) );
+   QString desc = XxResParser::getColorDescription( color );
    _labelDescription->setText( desc );
 }
 
@@ -829,28 +941,28 @@ void XxOptionsDialog::editFontText()
 //
 void XxOptionsDialog::editColorFore()
 {
-   int idx = _listboxColors->currentItem();
-   if ( idx == -1 ) {
+   XxColoredItem* coli = 
+      static_cast<XxColoredItem*>( _listboxColors->currentItem() );
+   if ( coli == NULL ) {
       return;
    }
-   XxColoredItem* coli = 
-      static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
-   XX_ASSERT( coli );
 
 #ifdef XX_KDE
    QColor newColor = coli->_foreColor;
    if ( KColorDialog::getColor( newColor, this ) == QDialog::Rejected ) {
-      newColor = coli->_foreColor;
+      newColor = coli->foreColor();
    }
 #else
-   QColor newColor = QColorDialog::getColor( coli->_foreColor, this );
+   QColor newColor = QColorDialog::getColor( coli->foreColor(), this );
 #endif
       
-   if ( newColor.isValid() && newColor != coli->_foreColor ) {
-      coli->_foreColor = newColor;
-      coli->_modified = true;
+   if ( newColor.isValid() && newColor != coli->foreColor() ) {
+      coli->setForeColor( newColor );
+      coli->setModified( true );
       _listboxColors->update();
-      _labelEditFore->setBackgroundColor( coli->_foreColor );
+      QPalette palette;
+      palette.setColor( _labelEditFore->backgroundRole(), coli->foreColor() );
+      _labelEditFore->setPalette( palette );
       _labelEditFore->update();
    }
 }
@@ -859,28 +971,28 @@ void XxOptionsDialog::editColorFore()
 //
 void XxOptionsDialog::editColorBack()
 {
-   int idx = _listboxColors->currentItem();
-   if ( idx == -1 ) {
+   XxColoredItem* coli = 
+      static_cast<XxColoredItem*>( _listboxColors->currentItem() );
+   if ( coli == NULL ) {
       return;
    }
-   XxColoredItem* coli = 
-      static_cast<XxColoredItem*>( _listboxColors->item( idx ) );
-   XX_ASSERT( coli );
 
 #ifdef XX_KDE
    QColor newColor = coli->_backColor;
    if ( KColorDialog::getColor( newColor, this ) == QDialog::Rejected ) {
-      newColor = coli->_backColor;
+      newColor = coli->backColor();
    }
 #else
-   QColor newColor = QColorDialog::getColor( coli->_backColor, this );
+   QColor newColor = QColorDialog::getColor( coli->backColor(), this );
 #endif
    
-   if ( newColor.isValid() && newColor != coli->_backColor ) {
-      coli->_backColor = newColor;
-      coli->_modified = true;
+   if ( newColor.isValid() && newColor != coli->backColor() ) {
+      coli->setBackColor( newColor );
+      coli->setModified( true );
       _listboxColors->update();
-      _labelEditBack->setBackgroundColor( coli->_backColor );
+      QPalette palette;
+      palette.setColor( _labelEditBack->backgroundRole(), coli->backColor() );
+      _labelEditBack->setPalette( palette );
       _labelEditBack->update();
    }
 }
@@ -892,7 +1004,7 @@ bool XxOptionsDialog::isInCommand(
    const QString& option
 )
 {
-   return command.find( option ) != -1;
+   return command.indexOf( option ) != -1;
 }
 
 //------------------------------------------------------------------------------
@@ -903,12 +1015,12 @@ void XxOptionsDialog::addToCommand(
 )
 {
    // Look for option in command, if not found, add it to command.
-   int pos = command.find( option );
+   int pos = command.indexOf( option );
    if ( pos == -1 ) {
       command.append( " " );
       command.append( option );
    }
-   command = command.simplifyWhiteSpace();
+   command = command.simplified();
 }
 
 //------------------------------------------------------------------------------
@@ -919,11 +1031,11 @@ void XxOptionsDialog::removeFromCommand(
 )
 {
    // Look for option in command, if found, remove it from command.
-   int pos = command.find( option );
+   int pos = command.indexOf( option );
    if ( pos != -1 ) {
       command.remove( pos, option.length() );
    }
-   command = command.simplifyWhiteSpace();
+   command = command.simplified();
 }
 
 //------------------------------------------------------------------------------
@@ -1017,11 +1129,7 @@ QString XxOptionsDialog::getFontDisplayText(
 ) const
 {
    QString displayText;
-#if (QT_VERSION >= 0x030000)
    displayText = font.toString();
-#else
-   displayText = font.rawName();
-#endif
 
 #if KEPT_FOR_HISTORY
    QFontInfo fontInfo( font );

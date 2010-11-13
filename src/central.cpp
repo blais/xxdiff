@@ -32,21 +32,22 @@
 #include <buffer.h>
 #include <copyLabel.h>
 #include <lineNumbers.h>
+#include <borderLabel.h>
 #include <help.h>
 
-#include <qscrollview.h>
-#include <qpainter.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
-#include <qpopupmenu.h>
-#include <qmenubar.h>
-#include <qlayout.h>
-#include <qwhatsthis.h>
-#include <qaccel.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
+#include <QtGui/QLayout>
+#include <QtGui/QShortcut>
 
-#include <qapplication.h>
-#include <qclipboard.h>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QFrame>
+#include <QtGui/QLabel>
+#include <QtGui/QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>
@@ -65,10 +66,9 @@ XX_NAMESPACE_BEGIN
 //
 XxCentralFrame::XxCentralFrame( 
    XxApp*      app, 
-   QWidget*    parent, 
-   const char* name 
+   QWidget*    parent 
 ) :
-   BaseClass( app, parent, name )
+   BaseClass( app, parent )
 {
    XX_CHECK( app );
    uint nbTextWidgets = _app->getNbFiles();
@@ -76,61 +76,62 @@ XxCentralFrame::XxCentralFrame(
    // Texts widget (texts).
    //
 
-   QVBoxLayout* textAndSbLayout =
-      new QVBoxLayout( this, 0, -1, "textAndSbLayout" );
-   QHBoxLayout* textLayout =
-      new QHBoxLayout( textAndSbLayout, -1, "textLayout" );
+   QVBoxLayout* textAndSbLayout = new QVBoxLayout( this );
+   textAndSbLayout->setMargin( 0 );
+   textAndSbLayout->setSpacing( 0 );
+   QHBoxLayout* textLayout = new QHBoxLayout;
+   textAndSbLayout->addLayout( textLayout );
 
    QFont smaller = font();
    smaller.setPointSize( smaller.pointSize() - 2 );
 
    for ( uint ii = 0; ii < nbTextWidgets; ++ii ) {
       if ( ii == 1 ) {
-         _vscroll[0] = new QScrollBar( this, "vscroll[0]" );
+         _vscroll[0] = new QScrollBar;
          textLayout->addWidget( _vscroll[0] );
          connect( _vscroll[0], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll(int)) );
       }
       if ( ii == 2 ) {
-         _vscroll[1] = new QScrollBar( this, "vscroll[1]" );
+         _vscroll[1] = new QScrollBar;
          textLayout->addWidget( _vscroll[1] );
          connect( _vscroll[1], SIGNAL(valueChanged(int)),
                   this, SLOT(verticalScroll2(int)) );
       }
 
-      QVBoxLayout* layout = new QVBoxLayout( textLayout, -1, "layout" );
+      QVBoxLayout* layout = new QVBoxLayout;
+      textLayout->addLayout( layout );
       //textLayout->setStretchFactor( layout, 1 ); useless to make equal
 
       // Create filename and line number labels.
-      QHBoxLayout* fnLayout = new QHBoxLayout( layout, -1, "fnLayout" );
-      _filenameLabel[ii] = new XxCopyLabel( this );
+      QHBoxLayout* fnLayout = new QHBoxLayout;
+      layout->addLayout( fnLayout );
+
+      _filenameLabel[ii] = new XxCopyLabel();
       _filenameLabel[ii]->setFont( smaller );
-      _filenameLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
       _filenameLabel[ii]->setMinimumWidth( 1 );
-      _filenameLabel[ii]->setLineWidth( 2 );
 
-      _lineNumberLabel[ii] =
-         new QLabel( "9999", this, "lineNumberLabel" );
+      _lineNumberLabel[ii] = new XxBorderLabel("9999",
+              XxBorderLabel::BorderLeft | XxBorderLabel::BorderBottom);
       _lineNumberLabel[ii]->setAlignment( Qt::AlignCenter );
-      _lineNumberLabel[ii]->setFrameStyle( QFrame::Panel | QFrame::Raised );
-      _lineNumberLabel[ii]->setLineWidth( 2 );
       _lineNumberLabel[ii]->setMinimumSize( _lineNumberLabel[ii]->sizeHint() );
+      _lineNumberLabel[ii]->setMaximumSize( _lineNumberLabel[ii]->sizeHint() );
       _lineNumberLabel[ii]->setText( "" );
-
+      
       fnLayout->addWidget( _filenameLabel[ii], 10 );
       fnLayout->addWidget( _lineNumberLabel[ii], 1 );
 
       // Create linenumbers widget and text widget.
-      QHBoxLayout* fnLayout2 = new QHBoxLayout( layout, -1, "fnLayout2" );
-      _text[ii] = new XxText( _app, this, ii, this, "text" );
-      _lineNumbers[ii] =
-         new XxLineNumbers( _app, this, ii, this, "lineNumbers" );
+      QHBoxLayout* fnLayout2 = new QHBoxLayout;
+      layout->addLayout( fnLayout2 );
+      _text[ii] = new XxText( _app, this, ii );
+      _lineNumbers[ii] = new XxLineNumbers( _app, this, ii );
 
-      fnLayout2->addWidget( _lineNumbers[ii] );
-      fnLayout2->addWidget( _text[ii] );
+      fnLayout2->addWidget( _lineNumbers[ii], 1 );
+      fnLayout2->addWidget( _text[ii], 10 );
    }
 
-   _hscroll = new QScrollBar( Qt::Horizontal, this, "hscroll" );
+   _hscroll = new QScrollBar( Qt::Horizontal );
    connect( _hscroll, SIGNAL(valueChanged(int)),
             this, SLOT(horizontalScroll(int)) );
 
@@ -139,10 +140,8 @@ XxCentralFrame::XxCentralFrame(
    createOnContextHelp();
 
    // Add some extra accelerators.
-   QAccel* a = new QAccel( this );
-
-   a->connectItem( a->insertItem(Key_Right), this, SLOT(scrollRight()) );
-   a->connectItem( a->insertItem(Key_Left), this, SLOT(scrollLeft()) );
+   new QShortcut( Qt::Key_Right, this, SLOT(scrollRight()) );
+   new QShortcut( Qt::Key_Left,  this, SLOT(scrollLeft())  );
 
    // Watch cursor changes.
    connect( app, SIGNAL(cursorChanged(int)), this, SLOT(onCursorChanged(int)) );
@@ -152,23 +151,16 @@ XxCentralFrame::XxCentralFrame(
 //
 void XxCentralFrame::createOnContextHelp()
 {
-   QWhatsThis::add( _vscroll[0], XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+    _vscroll[0]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
    if ( _vscroll[1] != 0 ) {
-      QWhatsThis::add( _vscroll[1],
-                       XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
+      _vscroll[1]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::VSCROLL ) );
    }
-   QWhatsThis::add( _hscroll, XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
+    _hscroll->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::HSCROLL ) );
 
    for ( uint ii = 0; ii < _app->getNbFiles(); ++ii ) {
-      QWhatsThis::add(
-         _filenameLabel[ii], XxHelp::getWhatsThisText( XxHelp::FILENAME )
-      );
-      QWhatsThis::add(
-         _lineNumberLabel[ii], XxHelp::getWhatsThisText( XxHelp::LINENO )
-      );
-      QWhatsThis::add(
-         _text[ii], XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW )
-      );
+      _filenameLabel[ii]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::FILENAME ) );
+      _lineNumberLabel[ii]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::LINENO ) );
+      _text[ii]->setWhatsThis( XxHelp::getWhatsThisText( XxHelp::TEXT_VIEW ) );
    }
 }
 
@@ -202,7 +194,7 @@ QSize XxCentralFrame::computeDisplaySize() const
 
 //------------------------------------------------------------------------------
 //
-uint XxCentralFrame::computeTextLength() const
+uint XxCentralFrame::getTextLength() const
 {
    const XxDiffs* diffs = _app->getDiffs();
    if ( diffs != 0 ) {
@@ -293,7 +285,7 @@ void XxCentralFrame::adjustLineNumbers( bool show, const QFont& fontText )
             lnw,
             file->computeLineNumbersWidth( fontText ) +
             ( _lineNumbers[ii]->width() -
-              _lineNumbers[ii]->contentsRect().width() + 2 ) );
+              _lineNumbers[ii]->contentsRect().width() + 6 ) );
          
       }
       for ( ii = 0; ii < nbFiles; ++ii ) {
@@ -335,14 +327,14 @@ void XxCentralFrame::verticalScroll( int value )
 //
 void XxCentralFrame::scrollRight()
 {
-   _hscroll->setValue( _hscroll->value() + _hscroll->lineStep() * 10 );
+   _hscroll->setValue( _hscroll->value() + _hscroll->singleStep() * 10 );
 }
 
 //------------------------------------------------------------------------------
 //
 void XxCentralFrame::scrollLeft()
 {
-   _hscroll->setValue( _hscroll->value() - _hscroll->lineStep() * 10 );
+   _hscroll->setValue( _hscroll->value() - _hscroll->singleStep() * 10 );
 }
 
 XX_NAMESPACE_END

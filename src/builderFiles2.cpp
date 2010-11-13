@@ -31,9 +31,11 @@
 #include <diffutils.h>
 #include <buffer.h>
 
-#include <qstring.h>
-#include <qtextstream.h>
-#include <qfile.h>
+#include <QtCore/QString>
+#include <QtCore/QByteArray>
+#include <QtCore/QTextStream>
+#include <QtCore/QFile>
+#include <QtCore/QProcess>
 
 #include <stdexcept>
 #include <stdio.h>
@@ -84,7 +86,8 @@ bool parseDiffLine(
     * this code taken from "ediff.c" by David MacKenzie, a published,
     * uncopyrighted program to translate diff output into plain English 
     */ 
-   const char* buf = line.latin1();
+   QByteArray lineBa = line.toLatin1();
+   const char* buf = lineBa.constData();
 
    bool error = true;
    if ( ( buf[0] == '<' ) || ( buf[0] == '>' ) || ( buf[0] == '-' ) ) {
@@ -193,7 +196,7 @@ XxParseDiffError::XxParseDiffError(
    XxError( file, line ),
    std::runtime_error( "Parse diff output error." )
 {
-   QTextStream oss( &_msg, IO_WriteOnly | IO_Append );
+   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing diff output: file1:" 
        << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: " 
        << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
@@ -250,45 +253,42 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    QStringList filenames;
    filenames.append( buffer1.getName() );
    filenames.append( buffer2.getName() );
-   const char** out_args;
-#ifdef XX_INTERNAL_DIFFS
-   int argc = 
-#endif
-   XxUtil::splitArgs( command, filenames, out_args );
+   QStringList out_args;
+   QString executable;
+   XxUtil::splitArgs( command, filenames, executable, out_args );
 
 #ifndef XX_INTERNAL_DIFFS
-   FILE* fout;
-   FILE* ferr;
-   XxUtil::spawnCommand( out_args, &fout, &ferr, 0, cstdin );
-   if ( fout == 0 || ferr == 0 ) {
+   QProcess diffProc;
+   diffProc.start( executable, out_args );
+   if ( ! diffProc.waitForStarted() ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
+   if ( cstdin ) {
+      diffProc.write( cstdin );
+      diffProc.closeWriteChannel();
+   }
+   diffProc.waitForReadyRead();
+   diffProc.setReadChannel( QProcess::StandardOutput );
 #else
    std::auto_ptr<XxDiffutils> diffutils( new XxDiffutils );
-   diffutils->diff( argc, const_cast<char**>(out_args) );
+   diffutils->diff( out_args );
 #endif
-   XxUtil::freeArgs( out_args );
 
    _curHunk = 0;
    XxFln fline1 = 1;
    XxFln fline2 = 1;
 
-   QFile qfout;
-   qfout.open( IO_ReadOnly, fout );
-   QTextStream outputs( &qfout );
-
-   QTextOStream errors( &_errors );
+   QTextStream errors( &_errors );
    XxFln f1n1, f1n2, f2n1, f2n2;
 
    while ( true ) {
 #ifndef XX_INTERNAL_DIFFS
-      // FIXME here we should change the code so that reading a line includes
-      // the carriage return characters within the line.  This results in
-      // harmless but nonetheless annoying empty diff error messages.
-      QString line = outputs.readLine();
-      if ( line.isNull() ) {
-         break;
+      if ( ! diffProc.canReadLine() ) {
+         if ( ! diffProc.waitForReadyRead() ) {
+            break;
+         }
       }
+      QString line = diffProc.readLine();
 #else
       QString line = diffutils->readLine();
       if ( line.isNull() ) {
@@ -306,7 +306,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
       switch ( type ) {
          case XxLine::INSERT_1: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -327,7 +327,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::INSERT_2: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -348,7 +348,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::DIFF_ALL: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
             XX_LOCAL_TRACE( "Output: f1n1=" << f1n1 << "  f1n2=" << f1n2 <<
                             "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
 
@@ -381,7 +381,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          } break;
 
          case XxLine::SAME: {
-            XX_LOCAL_TRACE( XxLine::mapToString( type ).latin1() );
+            XX_LOCAL_TRACE( XxLine::mapToString( type ).toLatin1().constData() );
          } break;
 
          /* Used to ignore a line */
@@ -405,19 +405,19 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
          }
       }
    }
-   qfout.close();
+
+#if !defined(XX_INTERNAL_DIFFS)
+   diffProc.waitForFinished();
 
    // Collect stderr.
-   QFile qferr;
-   qferr.open( IO_ReadOnly, ferr );
-   {
-      QTextStream errorss( &qferr );
-      QString errstr = errorss.read();
-      if ( !errstr.isNull() ) {
-         errors << errstr << endl;
-      }
+   QString errstr = diffProc.readAllStandardError();
+   if ( ! errstr.isEmpty() ) {
+      errors << errstr << endl;
    }
-   qferr.close();
+   _status = ( diffProc.exitStatus() == QProcess::NormalExit ) ? diffProc.exitCode() : 2;
+#else
+   _status = 2;
+#endif
 
    // Saved error text.
    errors << flush;
@@ -425,15 +425,6 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 
    // If we've read no lines and there are diff errors then blow off
    if ( ( fline1 == 1 ) && ( fline2 == 1 ) && hasErrors() ) {
-#if !defined(XX_INTERNAL_DIFFS) && !defined(WINDOWS)
-      int stat_loc;
-      if ( wait( &stat_loc ) == -1 ) {
-         throw XxIoError( XX_EXC_PARAMS );
-      }
-      _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-#else
-      _status = 2;
-#endif
       throw XxError( XX_EXC_PARAMS, _errors );
    }
 
@@ -446,20 +437,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
                          buffer1, buffer2 );
    }
 
-#if !defined(XX_INTERNAL_DIFFS) && !defined(WINDOWS)
-   int stat_loc;
-   if ( wait( &stat_loc ) == -1 ) {
-      throw XxIoError( XX_EXC_PARAMS );
-   }
-   _status = (WIFEXITED(stat_loc)) ? (WEXITSTATUS(stat_loc)) : 2;
-#else
-   _status = 2;
-#endif
-
-#ifndef XX_INTERNAL_DIFFS
-   ::fclose( fout );
-   ::fclose( ferr );
-#else
+#ifdef XX_INTERNAL_DIFFS
    std::auto_ptr<XxDiffutils> null( 0 );
    diffutils = null;
 #endif

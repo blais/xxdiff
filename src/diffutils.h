@@ -32,9 +32,16 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <qstring.h>
+#include <QtCore/QString>
 #define INCL_QT_QSTRING
 #endif
+
+/*==============================================================================
+ * FORWARD DECLARATIONS
+ *============================================================================*/
+
+class QTextStream;
+class QStringList;
 
 XX_NAMESPACE_BEGIN
 
@@ -54,10 +61,10 @@ public:
    virtual ~XxDiffutils();
 
    // Run diff.
-   void diff( int argc, char** out_args );
+   void diff( QStringList& out_args );
 
    // Run diff3.
-   void diff3( int argc, char** out_args );
+   void diff3( QStringList& out_args );
 
    // Reads a line.  A null string will be returned on EOF.
    QString readLine();
@@ -68,8 +75,7 @@ private:
    /*----- member functions -----*/
 
    void diff_fun( 
-      int argc,
-      char** out_args, 
+      QStringList& out_args, 
       int(*main)(int, char**) 
    );
 

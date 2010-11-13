@@ -32,10 +32,10 @@
 #include <resParser.h>
 
 // Qt imports
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qrect.h>
-#include <qstylefactory.h>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QRect>
+#include <QtGui/QStyleFactory>
 
 // The parser input is the resources object to fill in.
 #define RESOURCES  ( static_cast<XxResources*>(resources) )
@@ -203,23 +203,17 @@ prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
 style		: STYLE COLON STRING
 		{
                    /*printf( "==> style: %s\n", $3 );*/
-#if (QT_VERSION >= 0x030000)
                    QStringList styles = QStyleFactory::keys();
                    QString styleKey( $3 );
-                   if ( styles.find( styleKey ) != styles.end() ) {
+                   if ( styles.indexOf( styleKey ) != -1 ) {
                       RESOURCES->setStyleKey( styleKey );
                    }
                    else {
-#endif
                       QString err = QString( "Requested style key does not exist." );
-#if (QT_VERSION >= 0x030000)
                       err += QString( "\nValid styles are: " );
                       err += styles.join( ", " );
-#endif
-                      yyerror( err.latin1() );
-#if (QT_VERSION >= 0x030000)
+                      yyerror( err.toLatin1().constData() );
                    }
-#endif
                 }
                 ;
 

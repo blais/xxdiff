@@ -28,10 +28,13 @@
 
 #include <kdeSupport.h>
 
-#include <qtooltip.h>
+#include <QtGui/QToolTip>
 
-#include <qapplication.h>
-#include <qclipboard.h>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QLabel>
 
 
 /*==============================================================================
@@ -41,65 +44,21 @@
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
- * LOCAL CLASS XxCopyLabel::Tip
- *============================================================================*/
-
-// <summary> a tooltip that only tips when the string of an associated label is
-// too long.  </summary>
-
-class XxCopyLabel::Tip : public QToolTip {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   Tip( QLabel* parent );
-
-   // See base class.
-   virtual void maybeTip( const QPoint& );
-
-};
-
-//------------------------------------------------------------------------------
-//
-XxCopyLabel::Tip::Tip( QLabel* parent ) :
-   QToolTip( parent )
-{
-}
-
-//------------------------------------------------------------------------------
-//
-void XxCopyLabel::Tip::maybeTip( const QPoint& )
-{
-   XxCopyLabel* clabel = static_cast<XxCopyLabel*>( parentWidget() );
-   XX_CHECK( clabel != 0 );
-   QString tex = clabel->getFullText();
-   QFontMetrics fm = clabel->fontMetrics();
-   QRect br = fm.boundingRect( tex );
-   if ( br.width() + XxCopyLabel::SAFETY_OFFSET > clabel->size().width() ) {
-      tip( clabel->rect(), tex );
-   }
-}
-
-/*==============================================================================
  * CLASS XxCopyLabel
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
 XxCopyLabel::XxCopyLabel( QWidget* parent ) :
-   QLabel( parent )
+   XxBorderLabel( XxBorderLabel::BorderBottom, parent )
 {
    setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
-   _tip = new Tip( this );
 }
 
 //------------------------------------------------------------------------------
 //
 XxCopyLabel::~XxCopyLabel()
 {
-   delete _tip;
 }
 
 //------------------------------------------------------------------------------
@@ -122,7 +81,9 @@ const QString& XxCopyLabel::getFullText() const
 void XxCopyLabel::mousePressEvent( QMouseEvent* event )
 {
    QClipboard *cb = QkApplication::clipboard();
-   cb->setText( _fulltext );
+   cb->setText( _fulltext, cb->supportsSelection() ? 
+                       QClipboard::Selection :
+                       QClipboard::Clipboard );
    QLabel::mousePressEvent( event );
 }
 
@@ -149,11 +110,11 @@ void XxCopyLabel::resizeEvent( QResizeEvent* event )
       //
       // Note: also check for '\' in case we ever port to Windoze.
       int pos = -1;
-      if ( tex.find( "[...]/", 0 ) == 0 ) {
-         pos = tex.find( '/', 6 );
+      if ( tex.indexOf( "[...]/", 0 ) == 0 ) {
+         pos = tex.indexOf( '/', 6 );
       }
       else {
-         pos = tex.find( '/', 0 );
+         pos = tex.indexOf( '/', 0 );
       }
 
       if ( pos == -1 ) {
@@ -167,5 +128,23 @@ void XxCopyLabel::resizeEvent( QResizeEvent* event )
    QLabel::setText( tex );
    QLabel::resizeEvent( event );
 }
+
+//------------------------------------------------------------------------------
+//
+bool XxCopyLabel::event( QEvent* event )
+{
+   if ( event->type() == QEvent::ToolTip ) {
+      QHelpEvent *helpEvent = static_cast<QHelpEvent *>( event );
+      QRect br = fontMetrics().boundingRect( _fulltext );
+      if (  br.width() + SAFETY_OFFSET > size().width() ) {
+         QToolTip::showText( helpEvent->globalPos(), _fulltext );
+      } else {
+         event->ignore();
+      }
+      return true;
+   }
+   return QWidget::event(event);
+}
+
 
 XX_NAMESPACE_END

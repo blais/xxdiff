@@ -31,8 +31,12 @@
 #include <defs.h>
 #endif
 
+#ifndef INCL_XXDIFF_BORDERLABEL
+#include <borderLabel.h>
+#endif
+
 #ifndef INCL_QT_QLABEL
-#include <qlabel.h>
+#include <QtGui/QLabel>
 #define INCL_QT_QLABEL
 #endif
 
@@ -41,6 +45,9 @@
  *============================================================================*/
 
 class QScrollBar;
+class QResizeEvent;
+class QMouseEvent;
+class QEvent;
 
 XX_NAMESPACE_BEGIN
 
@@ -51,7 +58,7 @@ XX_NAMESPACE_BEGIN
 // <summary> a label that puts its contents into the clipboard when clicked on
 // </summary>
 
-class XxCopyLabel : public QLabel {
+class XxCopyLabel : public XxBorderLabel {
 
    Q_OBJECT
 
@@ -66,7 +73,7 @@ public:
    /*----- member functions -----*/
 
    // Constructor.
-   XxCopyLabel( QWidget* parent );
+   XxCopyLabel( QWidget* parent = 0 );
 
    // Destructor.
    virtual ~XxCopyLabel();
@@ -74,7 +81,7 @@ public:
    // See base class.
    // <group>
    virtual QSize sizeHint() const;
-   virtual void setText( const QString& );
+   void setText( const QString& );
    virtual void mousePressEvent( QMouseEvent* );
    virtual void resizeEvent( QResizeEvent* );
    // </group>
@@ -82,15 +89,14 @@ public:
    // Returns the full text of the label.
    const QString& getFullText() const;
 
+protected:
+
+   bool event( QEvent* );
+
 private:
-
-   /*----- classes -----*/
-
-   class Tip;
 
    /*----- data members -----*/
 
-   Tip*    _tip;
    QString _fulltext;
 
 };

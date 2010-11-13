@@ -36,8 +36,9 @@
 
 #include <kdeSupport.h>
 
-#include <qapplication.h>
-#include <qcstring.h>
+#include <QtGui/QApplication>
+#include <QtCore/QByteArray>
+#include <QtCore/QTextStream>
 
 /*#define getopt xxdiff_getopt*/
 #include <getopt.h>
@@ -190,13 +191,6 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "functionality is useful for better integration with scripts that "
      "require some form of decision to be made by the user."
    },
-   { "mac", 0, false, 'G',
-     "Split the file lines at single carriage returns instead of newlines."
-     "This should allow xxdiff working on Mac OSX.  Note that this will not "
-     "enable xxdiff to process Mac files under UNIX, unless the underlying "
-     "diff program that is invoked to compute the diffs supports the newlines. "
-     "(This is not the case under Linux with GNU diff, for example."
-   },
    { "indicate-input-processed", 0, false, 'j',
      "Indicate that the input files have been entirely processed and are not "
      "needed anymore by printing out the string INPUT-PROCESSED on stdout as "
@@ -208,7 +202,8 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "Copies the input streams/files into temporary files to perform diffing. "
      "This is useful if you want to diff FIFOs."
    },
-   { "prompt-for-files", 0, false, 'p',
+// Hack for os x - programs are run with an argument line -psn_0_36306945
+   { "prompt-for-files", 'p', true, 'p',
      "If no files are specified on the command line, show a file dialog so that "
      "the user can select them. This option is ignored if any files are specified."
    },
@@ -335,6 +330,10 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
    { "sync", 0, false, 'C',
      "Switches to synchronous mode for debugging."
    }, 
+   { "graphicssystem", 0, true, 'G',
+     "Sets the application graphics system. Possible values are raster, "
+     "opengl (experimental), opengl1 (obsolete), x11, native. "
+   }, 
 }; 
 
 //------------------------------------------------------------------------------
@@ -350,7 +349,6 @@ XxCmdline::XxCmdline() :
    _unmerge( false ),
    _unmergeNbFiles( 2 ),
    _forceDecision( false ),
-   _macNewlines( false ),
    _indicateInputProcessed( false ),
    _useTemporaryFiles( false ),
    _promptForFiles( false ),
@@ -436,7 +434,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    while ( true ) {
       int c = getopt_long( argc,
                            argv,
-                           shortOptions.latin1(),
+                           shortOptions.toLatin1().constData(),
                            longOptions,
                            &optionIndex );
       if ( c == -1 ) {
@@ -448,15 +446,15 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          // Generic options.
          //
          case 'h':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, OPT_DEFAULT );
+            throw XxUsageError( XX_EXC_PARAMS, QString(), OPT_DEFAULT );
 
          case 'Z':
             throw XxUsageError( XX_EXC_PARAMS,
-                                QString::null, 
+                                QString(), 
                                 1 << OPT_GENERIC | 1 << OPT_QT );
 
          case 'Y':
-            throw XxUsageError( XX_EXC_PARAMS, QString::null, OPT_ALL );
+            throw XxUsageError( XX_EXC_PARAMS, QString(), OPT_ALL );
 
          case 'H': {
             printHtmlHelp();
@@ -481,25 +479,25 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          } break;
 
          case 'D': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_ON_SAME )
                 << ": true" << endl;
          } break;
 
          case 'E': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_IF_NO_CONFLICTS )
                 << ": true" << endl;
          } break;
 
          case 'X': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
                 << ": true" << endl;
          } break;
 
          case 'm': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_SELECT_MERGE )
                 << ": true" << endl;
          } break;
@@ -551,7 +549,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             break;
 
          case 'R': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << optarg << endl << flush;
          } break;
 
@@ -568,7 +566,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          } break;
 
          case 'c': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getShowOptName( SHOW_PANE_MERGED_VIEW ) 
                 << ": true" << endl;
          } break;
@@ -583,10 +581,6 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          
          case 'O': {
             _forceDecision = true;
-         } break;
-         
-         case 'G': {
-            _macNewlines = true;
          } break;
          
          case 'p': {
@@ -610,19 +604,19 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             break;
 
          case 'r': {
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
                 << ": true" << endl;
          } break;
 
          case 'e': {
             _extraDiffArgs.append( " --exclude=" );
-            _extraDiffArgs.append( QCString( optarg ) );
+            _extraDiffArgs.append( QByteArray( optarg ) );
          } break;
 
          case 'f': {
             _extraDiffArgs.append( " --exclude-from=" );
-            _extraDiffArgs.append( QCString( optarg ) );
+            _extraDiffArgs.append( QByteArray( optarg ) );
          } break;
 
          //
@@ -630,25 +624,26 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          //
          case 'Q': {
             // Split string to spaces and add as individual options.
-            QCString qtopts( optarg );
-            qtopts.simplifyWhiteSpace();
+            QByteArray qtopts( optarg );
+            qtopts = qtopts.simplified();
             int previdx = 0;
             int idx = -1;
-            while ( ( idx = qtopts.find( ' ', idx+1 ) ) != -1 ) {
-               QCString qtopt = qtopts.mid( previdx, idx - previdx );
+            while ( ( idx = qtopts.indexOf( ' ', idx+1 ) ) != -1 ) {
+               QByteArray qtopt = qtopts.mid( previdx, idx - previdx );
                _qtOptions[ _nbQtOptions++ ] = 
-                  qstrdup( static_cast<const char*>( qtopt ) );
+                  qstrdup( qtopt.constData() );
                XX_ASSERT( _nbQtOptions < 64 ); // just check
                previdx = idx+1;
             }
-            QCString qtopt = qtopts.mid( previdx );
+            QByteArray qtopt = qtopts.mid( previdx );
             _qtOptions[ _nbQtOptions++ ] = 
-               qstrdup( static_cast<const char*>( qtopt ) );
+               qstrdup( qtopt.constData() );
             XX_ASSERT( _nbQtOptions < (64-1) ); // just check
          } break;
 
          case 'd':
          case 's':
+         case 'G':
          case 'g':
          case 'F':
          case 'L':
@@ -663,14 +658,14 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             );
             XX_ASSERT( oidx != -1 );
 
-            QCString qtopt( "-" );
+            QByteArray qtopt( "-" );
             qtopt += _optionsQt[ oidx ]._longname;
 
             // Add argument too.
 
             if ( _optionsQt[ oidx ]._has_arg == true ) {
                _qtOptions[ _nbQtOptions++ ] =
-                  qstrdup( static_cast<const char*>( qtopt ) );
+                  qstrdup( qtopt.constData() );
                XX_ASSERT( _nbQtOptions < (64-1) ); // just check
                
                _qtOptions[ _nbQtOptions++ ] = qstrdup( optarg );
@@ -678,7 +673,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
             }
             else {
                _qtOptions[ _nbQtOptions++ ] =
-                  qstrdup( static_cast<const char*>( qtopt ) );
+                  qstrdup( qtopt.constData() );
                XX_ASSERT( _nbQtOptions < (64-1) ); // just check
             }
 
@@ -690,7 +685,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
                                    "Missing argument for text font." );
             }
 
-            QTextStream oss( _cmdlineResources, IO_WriteOnly | IO_Append );
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getKwdName( FONT_TEXT )
                 << ": \"" << optarg << "\"" << endl;
          } break;
@@ -728,7 +723,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( _unmerge && _single ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "You cannot ask for both unmerge and single.";
       }
       throw XxUsageError( XX_EXC_PARAMS, msg );
@@ -742,7 +737,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( !_promptForFiles && _nbFilenames < minfn ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "You must specify at least " << minfn << " filenames.";
       }
       throw XxUsageError( XX_EXC_PARAMS, msg );
@@ -751,7 +746,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( _nbFilenames > maxfn ) {
       QString msg;
       {
-         QTextOStream oss( &msg );
+         QTextStream oss( &msg );
          oss << "You can specify at most " << maxfn << " filenames." << endl;
          oss << "Extra arguments: \"";
          for ( int ii = maxfn; ii < _nbFilenames; ++ii ) {
@@ -767,8 +762,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( !_promptForFiles )
    {
       for ( ii = 0; ii < _nbFilenames; ++ii ) {
-         _filenames[ ii ].setLatin1( argv[ optind + ii ] );
-         _filenames[ ii ] = _filenames[ ii ].stripWhiteSpace();
+         _filenames[ ii ] = QString::fromLatin1( argv[ optind + ii ] ).trimmed();
       }
    }
    
@@ -812,7 +806,7 @@ void XxCmdline::listResources()
 
    // This lists the default resources, not the ones parsed from the
    // rcfile or command-line.
-   QTextStream oss_cout( stdout, IO_WriteOnly );
+   QTextStream oss_cout( stdout, QIODevice::WriteOnly );
    XxResParser::listResources( oss_cout );
    oss_cout << flush;
 }
@@ -824,7 +818,7 @@ void XxCmdline::printHtmlHelp()
    // Note: we do not require a display connection here.
 
    {
-      QTextStream os( stdout, IO_WriteOnly );
+      QTextStream os( stdout, QIODevice::WriteOnly );
       os << XxHelp::getManual();
    }
 }
@@ -833,7 +827,7 @@ void XxCmdline::printHtmlHelp()
 //
 void XxCmdline::printVersion()
 {
-   QTextStream oss_cout( stdout, IO_WriteOnly );
+   QTextStream oss_cout( stdout, QIODevice::WriteOnly );
    oss_cout << "xxdiff " << XxHelp::getVersion()
 #ifdef XX_DEBUG
             << " [debug]"

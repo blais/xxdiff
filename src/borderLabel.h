@@ -20,38 +20,81 @@
  *
  ******************************************************************************/
 
+#ifndef INCL_XXDIFF_BORDERLABEL
+#define INCL_XXDIFF_BORDERLABEL
+
 /*==============================================================================
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <suicideMessageBox.h>
+#ifndef INCL_XXDIFF_DEFS
+#include <defs.h>
+#endif
+
+#ifndef INCL_XXDIFF_TYPES
+#include <types.h>
+#endif
+
+#ifndef INCL_QT_QLABEL
+#include <QtGui/QLabel>
+#define INCL_QT_QLABEL
+#endif
 
 XX_NAMESPACE_BEGIN
 
 /*==============================================================================
- * PUBLIC FUNCTIONS
+ * CLASS XxBorderLabel
  *============================================================================*/
 
-/*==============================================================================
- * CLASS XxSuicideMessageBox
- *============================================================================*/
+// <summary> a widget that can display line numbers </summary>
 
-//------------------------------------------------------------------------------
-//
-XxSuicideMessageBox::XxSuicideMessageBox( 
-   QWidget*       parent,
-   const QString& caption, 
-   const QString& text, 
-   Icon           icon 
-) :
-   QMessageBox( icon, caption, text, QMessageBox::Close, parent )
-{
-   setModal( false );
-   setAttribute( Qt::WA_DeleteOnClose );
-#ifdef Q_OS_MAC
-   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint );
-#endif
-   show();
-}
+class XxBorderLabel : public QLabel {
+
+public:
+
+   /*----- types and enumerations -----*/
+
+   enum BorderFlag { 
+      BorderNone   = 0,
+      BorderLeft   = (1 << 0),
+      BorderRight  = (1 << 1),
+      BorderTop    = (1 << 2),
+      BorderBottom = (1 << 3)
+   };
+   Q_DECLARE_FLAGS(BorderFlags, BorderFlag)
+
+   /*----- member functions -----*/
+
+   // Constructors.
+   XxBorderLabel(
+      BorderFlags bf = BorderNone,
+      QWidget* parent = 0,
+      Qt::WindowFlags wf = 0
+   );
+   XxBorderLabel( 
+      const QString& text,
+      BorderFlags bf = BorderNone,
+      QWidget* parent = 0,
+      Qt::WindowFlags wf = 0
+   );
+
+   // Destructor.
+   virtual ~XxBorderLabel();
+
+   // See base class.
+   virtual void paintEvent( QPaintEvent* );
+
+private:
+
+   /*----- data members -----*/
+
+    BorderFlags _borders;
+
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(XxBorderLabel::BorderFlags)
+
 
 XX_NAMESPACE_END
+
+#endif

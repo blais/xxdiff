@@ -31,15 +31,11 @@
 #include <exceptions.h>
 #include <util.h>
 
-#include <qcolor.h>
-#include <qaccel.h>
-#include <qobject.h>
-#include <qnamespace.h>
-#include <qapplication.h> // to get desktop
-#include <qregexp.h>
-#if (QT_VERSION >= 0x030000)
-#include <qstylefactory.h>
-#endif
+#include <QtGui/QColor>
+#include <QtCore/QObject>
+#include <QtGui/QApplication> // to get desktop
+#include <QtCore/QRegExp>
+#include <QtGui/QStyleFactory>
 
 #include <iostream>
 #include <string.h> // ::strcmp
@@ -100,7 +96,12 @@ void XxResources::initializeOriginalXdiff()
 {
    // Just like xdiff.
    _preferredGeometry = _defaultGeometry;
-   _styleKey = "SGI"; // Default style.
+   _styleKey =  // Default style.
+#ifdef Q_OS_MAC
+      "Macintosh (aqua)";
+#else
+      "Cleanlooks";
+#endif
    _maximize = false;
 
    //---------------------------------------------------------------------------
@@ -207,66 +208,63 @@ void XxResources::initializeOriginalXdiff()
    //---------------------------------------------------------------------------
 
    if ( qApp != 0 ) { // protect setNamedColor() in case we have no display.
-      setFbColors( COLOR_SAME                   , "grey", "black" );
-      setFbColors( COLOR_SAME_BLANK             , "grey70", "black" );
-      setFbColors( COLOR_DIFF_ONE               , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_SUP           , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_ONE_ONLY          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ONE_NONLY         , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_TWO               , "lightblue2", "black" );
-      setFbColors( COLOR_DIFF_TWO_SUP           , "lightblue3", "black" );
-      setFbColors( COLOR_DIFF_TWO_ONLY          , "lightblue2",  "black" );
-      setFbColors( COLOR_DIFF_TWO_NONLY         , "lightblue3", "black" );
+      setFbColors( COLOR_SAME                   , "#bebebe", "#000000" );
+      setFbColors( COLOR_SAME_BLANK             , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_DIFF_ONE               , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ONE_SUP           , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFF_ONE_ONLY          , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ONE_NONLY         , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFF_TWO               , "#b2dfee", "#000000" );
+      setFbColors( COLOR_DIFF_TWO_SUP           , "#9ac0cd", "#000000" );
+      setFbColors( COLOR_DIFF_TWO_ONLY          , "#b2dfee",  "#000000" );
+      setFbColors( COLOR_DIFF_TWO_NONLY         , "#9ac0cd", "#000000" );
                                                 
-      setFbColors( COLOR_DELETE                 , "lightblue2", "black" );
-      setFbColors( COLOR_DELETE_BLANK           , "grey64", "black" );
+      setFbColors( COLOR_DELETE                 , "#b2dfee", "#000000" );
+      setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "#000000" );
                                                 
-      setFbColors( COLOR_INSERT                 , "darkseagreen2", "black" );
-      setFbColors( COLOR_INSERT_BLANK           , "grey64", "black" );
+      setFbColors( COLOR_INSERT                 , "#b4eeb4", "#000000" );
+      setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "#000000" );
                                                 
-      setFbColors( COLOR_DIFF_ALL               , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_SUP           , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFF_ALL_ONLY          , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFF_ALL_NONLY         , "lemonchiffon3", "black" );
+      setFbColors( COLOR_DIFF_ALL               , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ALL_SUP           , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFF_ALL_ONLY          , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFF_ALL_NONLY         , "#cdc9a5", "#000000" );
                                                 
-      setFbColors( COLOR_DIFFDEL                , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_SUP            , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFFDEL_ONLY           , "palegoldenrod", "black" );
-      setFbColors( COLOR_DIFFDEL_NONLY          , "lemonchiffon3", "black" );
-      setFbColors( COLOR_DIFFDEL_BLANK          , "grey64", "black" );
+      setFbColors( COLOR_DIFFDEL                , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFFDEL_SUP            , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFFDEL_ONLY           , "#eee8aa", "#000000" );
+      setFbColors( COLOR_DIFFDEL_NONLY          , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "#000000" );
                                                 
-      setFbColors( COLOR_SELECTED               , "plum", "black" );
-      setFbColors( COLOR_SELECTED_SUP           , "thistle", "black" );
+      setFbColors( COLOR_SELECTED               , "#dda0dd", "#000000" );
+      setFbColors( COLOR_SELECTED_SUP           , "#d8bfd8", "#000000" );
                                                 
-      setFbColors( COLOR_IGNORE_DISPLAY         , "grey85", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "grey80", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "grey80", "black" );
-      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "grey80", "black" );
+      setFbColors( COLOR_IGNORE_DISPLAY         , "#d9d9d9", "#000000" );
+      setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "#000000" );
+      setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "#000000" );
+      setFbColors( COLOR_IGNORE_DISPLAY_NONLY   , "#cccccc", "#000000" );
 
-      setFbColors( COLOR_DELETED                , "lightslategrey", "black" );
-      setFbColors( COLOR_DELETED_SUP            , "slategrey", "black" );
+      setFbColors( COLOR_DELETED                , "#778899", "#000000" );
+      setFbColors( COLOR_DELETED_SUP            , "#708090", "#000000" );
                                                 
-      setFbColors( COLOR_IGNORED                , "grey70", "grey30" );
+      setFbColors( COLOR_IGNORED                , "#b3b3b3", "#4d4d4d" );
                                                 
-      setFbColors( COLOR_DIRECTORIES            , "mediumturquoise", "black" );
+      setFbColors( COLOR_DIRECTORIES            , "#48d1cc", "#000000" );
                                                            
-      setFbColors( COLOR_MERGED_UNDECIDED       , "lemonchiffon3", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1       , "grey60", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2       , "grey60", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3       , "grey60", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "grey70", "black" );
-      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "grey70", "black" );
+      setFbColors( COLOR_MERGED_UNDECIDED       , "#cdc9a5", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_2       , "#999999", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_2_SUP   , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b3b3b3", "#000000" );
+      setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b3b3b3", "#000000" );
    }   
              
-   _backColors[ COLOR_BACKGROUND ] = QColor( 0x40, 0x61, 0x6a, QColor::Rgb );
-   _backColors[ COLOR_CURSOR ] =
-      QColor( 0xff, 0xff, 0xff, QColor::Rgb ); // white
-   _backColors[ COLOR_VERTICAL_LINE ] = 
-      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
-   _backColors[ COLOR_TEXT_SELECTION ] = 
-      QColor( 0xff, 0x00, 0x00, QColor::Rgb ); // red
+   _backColors[ COLOR_BACKGROUND ] =      QColor( 0x40, 0x61, 0x6a );
+   _backColors[ COLOR_CURSOR ] =          QColor( 0xff, 0xff, 0xff ); // white
+   _backColors[ COLOR_VERTICAL_LINE ] =   QColor( 0xff, 0x00, 0x00 ); // red
+   _backColors[ COLOR_TEXT_SELECTION ] =  QColor( 0xff, 0x00, 0x00 ); // red
    // Note: we don't use the fore colors for these guys.
 
    //---------------------------------------------------------------------------
@@ -318,7 +316,7 @@ void XxResources::initializeOriginalXdiff()
    // "cmp -s" barfs on directories.
    const char* editor = getenv( "EDITOR" );
    if ( editor != 0 ) {
-      _commands[ CMD_EDIT ].setLatin1( editor );
+      _commands[ CMD_EDIT ] = QString::fromLatin1( editor );
    }
    else {
       _commands[ CMD_EDIT ] = "xterm -e vi";
@@ -352,11 +350,12 @@ void XxResources::initializeOriginalXdiff()
    
    //---------------------------------------------------------------------------
 
-   _tags[ TAG_CONFLICT_SEPARATOR ] = ">>>>>>>>>>>>>>>>>>>> File %d";
-   _tags[ TAG_CONFLICT_END ] = "<<<<<<<<<<<<<<<<<<<<";
+   _tags[ TAG_CONFLICT_START ] = "<<<<<<< %L";
+   _tags[ TAG_CONFLICT_SEP ] = "=======";
+   _tags[ TAG_CONFLICT_SEP_EXTRA ] = "||||||| %M";
+   _tags[ TAG_CONFLICT_END ] = ">>>>>>> %R";
    _tags[ TAG_CONDITIONAL_IF ] = "#if defined( %s )";
    _tags[ TAG_CONDITIONAL_ELSEIF ] = "#elif defined( %s )";
-   _tags[ TAG_CONDITIONAL_ELSE ] = "#else";
    _tags[ TAG_CONDITIONAL_ENDIF ] = "#endif";
 
    // Defaults match CVS format.
@@ -410,19 +409,13 @@ void XxResources::setPreferredGeometry( const QRect& geometry )
 
 //------------------------------------------------------------------------------
 //
-#if (QT_VERSION >= 0x030000)
 void XxResources::setStyleKey( const QString& styleKey )
 {
    QStringList styles = QStyleFactory::keys();
-   XX_ASSERT( styles.find( styleKey ) != styles.end() );
+   XX_ASSERT( styles.indexOf( styleKey ) != -1 );
    _styleKey = styleKey;
    emit changed();
 }
-#else
-void XxResources::setStyleKey( const QString& /*styleKey*/ )
-{
-}
-#endif
 
 //------------------------------------------------------------------------------
 //
@@ -451,11 +444,7 @@ bool XxResources::setAccelerator( XxAccel accel, const QString& val )
 //
 bool XxResources::setFontApp( const QString& val )
 {
-#if (QT_VERSION >= 0x030000)
    _fontApp.fromString( val );
-#else
-   _fontApp.setRawName( val );
-#endif
    emit changed();
    return true; // never generates error.
 }
@@ -473,11 +462,7 @@ bool XxResources::setFontApp( const QFont& font )
 //
 bool XxResources::setFontText( const QString& val )
 {
-#if (QT_VERSION >= 0x030000)
    _fontText.fromString( val );
-#else
-   _fontText.setRawName( val );
-#endif
    emit changed();
    return true; // never generates error.
 }
@@ -805,11 +790,7 @@ void XxResources::setMergedFilename( const QString& fn )
 bool XxResources::compareFonts( const QFont& f1, const QFont& f2 )
 {
    if ( f1.rawMode() || f2.rawMode() ) {
-#if (QT_VERSION >= 0x030000)
       return f1.toString() == f2.toString();
-#else
-      return f1.rawName() == f2.rawName();
-#endif
    }
    return f1 == f2;
 }

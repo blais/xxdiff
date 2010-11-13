@@ -79,8 +79,11 @@ typedef unsigned int 	uint;
 #elif defined COMPILER_DECCXX
 #define XX_THROW_NOTHING  _RWSTD_THROW_SPEC_NULL
 
+#elif defined COMPILER_SUNWSPRO
+#define XX_THROW_NOTHING throw()
+
 #else
-#define XX_THROW_NOTHING
+#define XX_THROW_NOTHING  
 
 #endif
 

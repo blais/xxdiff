@@ -33,15 +33,18 @@
 
 #include <kdeSupport.h>
 
-#include <qpainter.h>
-#include <qnamespace.h>
-#include <qbrush.h>
-#include <qpen.h>
-#include <qcolor.h>
-#include <qpopupmenu.h>
+#include <QtGui/QPainter>
+#include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtGui/QColor>
+#include <QtGui/QMenu>
 
-#include <qapplication.h>
-#include <qclipboard.h>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QFrame>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QWheelEvent>
 
 #include <math.h>
 #include <stdio.h>
@@ -133,7 +136,7 @@ inline void rentxt(
    if ( renNulHorizMarkers && xch == xend ) {
       p.fillRect(
          XX_RED_RECT( xpx - 1, y, 1, fm.lineSpacing() ),
-         p.backgroundColor()
+         p.background().color()
       );
       return;
    }
@@ -144,21 +147,22 @@ inline void rentxt(
          rlen = xend - xch;
       }
 
-      QString str;
       XX_CHECK( rlen > 0 ); // always true, because xch < xend
-      str.setLatin1( renderedText + xch, rlen );
+      QString str( QString::fromLatin1( renderedText + xch, rlen ) );
       int nw = fm.width( str, rlen );
 
 #ifndef XX_DRAWTEXT_DRAWS_BACKGROUND
+      // don't draw beyond the viewport, to avoid painting ON the frame decoration (Sunken)
+      int minw = std::min( nw, p.viewport().width()-xpx );
       p.eraseRect(
-         XX_RED_RECT( xpx, y, nw, fm.lineSpacing() )
+         XX_RED_RECT( xpx, y, minw, fm.lineSpacing() )
       );
 #endif
 
       p.drawText(
-         XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() ),
+         XX_RED_RECT( xpx, y+1, wwidth - xpx, fm.lineSpacing() ),
          Qt::AlignLeft | Qt::AlignTop,
-         str, rlen,
+         str.left( rlen ),
          &brect
       );
 
@@ -203,28 +207,36 @@ XxText::XxText(
    XxApp*        app,
    XxScrollView* sv,
    const XxFno   no,
-   QWidget*      parent,
-   const char*   name
+   QWidget*      parent
 ) :
-   QFrame( parent, name, WResizeNoErase ),
+   QFrame( parent ),
    _app( app ),
    _sv( sv ),
    _no( no ),
    _grabMode( NONE ),
-   _dontClearOnce( false )
+   _dontClearOnce( false ),
+   _mergedLines( 0 ),
+   _idxMergedLinesSize( 0 ),
+   _idxMergedLines( NULL )
 {
    _regionSelect[0] = -1;
    _regionSelect[1] = -1;
 
-   setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   setLineWidth( 2 );
+   // Frame borders must be set equal to the one in XxLineNumbers for proper
+   // vertical alignment of text.
+   
+   // Initialize the vector of merged topLines
+   if ( no == -1 ) {
+       computeMergedLines();
+   }
+
 #ifdef XX_DEBUG_TEXT
-   setBackgroundColor( Qt::red );
-#else
-   setBackgroundMode( NoBackground );
+   QPalette palette;
+   palette.setColor( backgroundRole(), Qt::red );
+   setPalette( palette );
+   setAutoFillBackground( true );
 #endif
 
-#if (QT_VERSION >= 0x030000)
    // Initialize clipboard to use mouse selection.
    //
    // We do this multiple times for nothing, but I'd rather have it here
@@ -233,7 +245,6 @@ XxText::XxText(
 
    // Bind clear to change signal.
    connect( cb, SIGNAL(selectionChanged()), this, SLOT(clearRegionSelect()) );
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -258,7 +269,7 @@ QSizePolicy XxText::sizePolicy() const
 
 //------------------------------------------------------------------------------
 //
-void XxText::drawContents( QPainter* pp )
+void XxText::paintEvent( QPaintEvent *e )
 {
    // Note: if only QPainter had a way to draw text which is not a QString, or
    // if there was a way to allocate a QString with shallow copy of non-unicode
@@ -266,15 +277,15 @@ void XxText::drawContents( QPainter* pp )
 
    //XX_LOCAL_TRACE( "painting!" );
 
-   // QPainter p;
-   // p.begin( this );
-   QPainter& p = *pp;
+   QFrame::paintEvent(e);
+
+   QPainter p( this );
    QRect rect = contentsRect();
 
    // We want 1:1 pixel/coord ratio.
    QPoint offset = rect.topLeft();
    p.setViewport( rect );
-   rect.moveBy( -offset.x(), -offset.y() );
+   rect.translate( -offset.x(), -offset.y() );
    p.setWindow( rect );
    const int w = rect.width();
    const int h = rect.height();
@@ -293,7 +304,6 @@ void XxText::drawContents( QPainter* pp )
       QBrush brush( backgroundColor );
       p.fillRect( rect, brush );
 
-      p.end();
       return;
    }
 
@@ -391,14 +401,15 @@ void XxText::drawContents( QPainter* pp )
                   resources.getRegionColor( COLOR_MERGED_UNDECIDED,
                                             bcolor, fcolor );
 
-                  p.setBackgroundColor( bcolor );
+                  p.setBackground( bcolor );
                   QBrush brush( bcolor );
 
                   p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
                               brush );
 
                   brush.setColor( fcolor );
-                  brush.setStyle( QBrush::BDiagPattern );
+                  brush.setStyle( Qt::BDiagPattern );
+                  brush.setTransform( QTransform::fromTranslate( 0.0-horizontalPos, 0 ) );
                   p.fillRect( XX_RED_RECT( 0, y, w, HEIGHT_UNSEL_REGION ),
                               brush );
 
@@ -533,13 +544,13 @@ void XxText::drawContents( QPainter* pp )
             }
 
             XX_CHECK( rlen > 0 ); // always true, because xch < xend
-            chunk.setLatin1( renderedText + xch, rlen );
+            chunk = QString::fromLatin1( renderedText + xch, rlen );
             // FIXME check somehow that this actually corresponds to the
             // rendered measure.
             QRect brect = fm.boundingRect(
-               -128, -128, 8192, 2048,
-               Qt::AlignLeft | Qt::AlignTop | Qt::SingleLine,
-               chunk, rlen, 0, 0
+               QRect( -128, -128, 8192, 2048 ),
+               Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
+               chunk.left( rlen ), 0, 0
             );
 
             if ( (xpx + brect.width()) > 0 ) {
@@ -576,11 +587,11 @@ void XxText::drawContents( QPainter* pp )
 
                if ( (c % 2) == 0 ) {
                   p.setPen( fcolorSup );
-                  p.setBackgroundColor( bcolorSup );
+                  p.setBackground( bcolorSup );
                }
                else {
                   p.setPen( fcolor );
-                  p.setBackgroundColor( bcolor );
+                  p.setBackground( bcolor );
                }
 
                rentxt(
@@ -608,7 +619,7 @@ void XxText::drawContents( QPainter* pp )
             //
 
             p.setPen( fcolor );
-            p.setBackgroundColor( bcolor );
+            p.setBackground( bcolor );
             rentxt(
                p, renderedText,
                xch, ehd,
@@ -643,6 +654,7 @@ void XxText::drawContents( QPainter* pp )
 
             if ( resources.getBoolOpt( BOOL_DRAW_PATTERN_IN_FILLER_LINES ) ) {
                QBrush patBrush( bcolor.dark( 120 ), Qt::DiagCrossPattern );
+               patBrush.setTransform( QTransform::fromTranslate( 0.0-horizontalPos, 0 ) );
                p.fillRect(
                   XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
                   patBrush
@@ -684,7 +696,7 @@ void XxText::drawContents( QPainter* pp )
 
       ++irenline;
    }
-   p.setBackgroundMode( TransparentMode );
+   p.setBackgroundMode( Qt::TransparentMode );
 
    // Fill in at the bottom if necessary (at end of text).
    if ( y < h ) {
@@ -699,7 +711,10 @@ void XxText::drawContents( QPainter* pp )
         !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       QColor cursorColor = resources.getColor( COLOR_CURSOR );
       p.setPen( cursorColor );
-      p.drawRect( 0, cursorY1 - 1, w, cursorY2 - cursorY1 + 2 );
+      p.drawLine( 0, cursorY1 , w, cursorY1 );
+      p.drawLine( 0, cursorY2 , w, cursorY2 );
+      cursorColor.setAlpha(64);
+      p.fillRect( 0, cursorY1 + 1 , w, cursorY2 - cursorY1 - 1, cursorColor );
    }
 
    // Draw selected region marker.
@@ -719,14 +734,13 @@ void XxText::drawContents( QPainter* pp )
    if ( resources.getShowOpt( SHOW_VERTICAL_LINE ) ) {
 
       uint cpos = resources.getVerticalLinePos();
-      int posx = cpos * fm.maxWidth() - horizontalPos;
+      // Dont use fm.maxWidth(), since, at least on OSX, it returns 0
+      int posx = cpos * fm.width("w") - horizontalPos;
 
       QColor vlineColor = resources.getColor( COLOR_VERTICAL_LINE );
       p.setPen( vlineColor );
       p.drawLine( posx, 0, posx, h );
    }
-
-   // p.end();
 }
 
 //------------------------------------------------------------------------------
@@ -758,32 +772,34 @@ void XxText::mousePressEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->button() == RightButton && event->state() == 0 ) {
+   if ( event->button() == Qt::RightButton && event->modifiers() == Qt::NoModifier ) {
       // Activate popup in third button.
 
       // Popup.
       const XxLine& line = diffs->getLine( lineno );
-      QkPopupMenu* popup = _app->getViewPopup( _no, line );
+      QkMenu* popup = _app->getViewPopup( _no, line );
       popup->popup( event->globalPos() );
       return;
    }
 
-   if ( event->state() & ControlButton ) {
-      if ( event->button() == RightButton ) {
+   if ( event->modifiers() & Qt::ControlModifier ) {
+      if ( event->button() == Qt::RightButton ) {
 
          _grabMode = MOUSE_DRAG;
          _grabTopLine = _sv->getTopLine();
          _grabDeltaLineNo = dlineno;
          return;
       }
-      else if ( event->button() == LeftButton ) {
+      else if ( event->button() == Qt::LeftButton ) {
 
          _grabMode = REGION_SELECT;
          _grabTopLine = _sv->getTopLine();
          _grabDeltaLineNo = dlineno;
 
          QClipboard* cb = QkApplication::clipboard();
-         cb->clear( QClipboard::Selection );
+         cb->clear( cb->supportsSelection() ? 
+                       QClipboard::Selection :
+                       QClipboard::Clipboard );
 
          _regionSelect[0] = _grabTopLine + dlineno;
          _regionSelect[1] = -1;
@@ -794,8 +810,8 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    // Interactive toggling of debug drawing structures.
 #ifdef XX_DEBUG_TEXT
-   if ( event->button() == MidButton ) {
-      if ( event->state() & ControlButton ) {
+   if ( event->button() == Qt::MidButton ) {
+      if ( event->modifiers() & Qt::ControlModifier ) {
          flag = !flag;
       }
    }
@@ -816,13 +832,13 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    // Perform the selection and create cut text.
    QString textCopy;
-   if ( event->button() == MidButton ) {
+   if ( event->button() == Qt::MidButton ) {
       // Line event.
-      if ( event->state() & ShiftButton ) {
+      if ( event->modifiers() & Qt::ShiftModifier ) {
          // Unselect line.
          diffs->selectLine( lineno, XxLine::UNSELECTED );
       }
-      else if ( event->state() & ControlButton ) {
+      else if ( event->modifiers() & Qt::ControlModifier ) {
          // Delete line.
          diffs->selectLine( lineno, XxLine::NEITHER );
       }
@@ -843,7 +859,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
             if ( text != 0 ) {
                QString adt;
                if ( len > 0 ) {
-                  adt.setLatin1( text, len );
+                  adt = QString::fromLatin1( text, len );
                }
                if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                     == true ) {
@@ -862,12 +878,12 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
    else {
       // Region event.
-      if ( event->state() & ShiftButton ) {
-         if ( event->button() == LeftButton ) {
+      if ( event->modifiers() & Qt::ShiftModifier ) {
+         if ( event->button() == Qt::LeftButton ) {
             // Unselect region.
             diffs->selectRegion( lineno, XxLine::UNSELECTED );
          }
-         else if ( event->button() == RightButton ) {
+         else if ( event->button() == Qt::RightButton ) {
             // Unselect region.
             diffs->selectRegion( lineno, XxLine::NEITHER );
          }
@@ -884,10 +900,12 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
 
    QClipboard* cb = QkApplication::clipboard();
-   cb->setText( textCopy, QClipboard::Selection );
+   cb->setText( textCopy, cb->supportsSelection() ? 
+                             QClipboard::Selection :
+                             QClipboard::Clipboard );
 
-   if ( event->button() == LeftButton ||
-        event->button() == MidButton ) {
+   if ( event->button() == Qt::LeftButton ||
+        event->button() == Qt::MidButton ) {
       _app->setCursorLine( lineno );
    }
 }
@@ -929,7 +947,7 @@ QString XxText::getRegionText( XxDln start, XxDln end ) const
          if ( text != 0 ) {
             QString adt;
             if ( len > 0 ) {
-               adt.setLatin1( text, len );
+               adt = QString::fromLatin1( text, len );
             }
             if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                  == true ) {
@@ -998,7 +1016,9 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
 
             _dontClearOnce = true;
             QClipboard* cb = QkApplication::clipboard();
-            cb->setText( textCopy, QClipboard::Selection );
+            cb->setText( textCopy, cb->supportsSelection() ? 
+                                      QClipboard::Selection :
+                                      QClipboard::Clipboard );
          }
       }
    }
@@ -1032,7 +1052,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
       return;
    }
 
-   if ( event->button() == LeftButton ) {
+   if ( event->button() == Qt::LeftButton ) {
       if ( diffs->isDirectoryDiff() ) {
          // The cursor is moved by the previous normal clicks.
          _app->diffFilesAtCursor();
@@ -1063,7 +1083,7 @@ uint XxText::getDisplayWidth() const
 
 //------------------------------------------------------------------------------
 //
-uint XxText::computeMergedLines() const
+uint XxText::computeMergedLines()
 {
    // Count equivalent number of lines that would be rendered in the merged
    // view.
@@ -1077,12 +1097,22 @@ uint XxText::computeMergedLines() const
    QFontMetrics fm( font );
    const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
 
+   XxDln nbLines = diffs->getNbLines();
+   
+   // (Re)allocate enough space to deal with nbLines
+   if ( (uint)( nbLines + 1 ) > _idxMergedLinesSize ) {
+       _idxMergedLinesSize = nbLines + 1;
+      _idxMergedLines = (XxDln*)realloc( (void*)_idxMergedLines,
+                                         _idxMergedLinesSize * sizeof( XxDln ) );
+      _idxMergedLines[0] = 1;
+   }
+
    // Count the number of equivalent lines.
-   int y = 0;
+   float y = 0;
    SkipType skip = SK_NOSKIP;
    XxLine::Type prevtype;
    XxLine::Type type = XxLine::SAME;
-   for ( XxDln icurline = 1; icurline <= diffs->getNbLines(); ++icurline ) {
+   for ( XxDln icurline = 1; icurline <= nbLines; ++icurline ) {
 
       // Get line to display.
       prevtype = type;
@@ -1104,6 +1134,7 @@ uint XxText::computeMergedLines() const
                   // Draw undecided marker.
                   //
                   y += HEIGHT_UNSEL_REGION;
+                  _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_UNSEL_REGION " << y );
                }
                continue;
@@ -1116,6 +1147,7 @@ uint XxText::computeMergedLines() const
                   // Draw neither marker.
                   //
                   y += HEIGHT_NEITHER_REGION;
+                  _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_NEITHER_REGION " << y );
                }
                continue;
@@ -1138,6 +1170,7 @@ uint XxText::computeMergedLines() const
       if ( fline != -1 ) {
 
          y += fm.lineSpacing();
+         _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
          XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
       }
       else {
@@ -1146,6 +1179,7 @@ uint XxText::computeMergedLines() const
 
             // The line is empty, just fill in the background.
             y += fm.lineSpacing();
+            _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
             XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
          }
          else {
@@ -1157,20 +1191,47 @@ uint XxText::computeMergedLines() const
                // Draw empty marker.
                //
                y += HEIGHT_EMPTY_REGION;
+               _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
                XX_LOCAL_TRACE( "HEIGHT_EMPTY_REGION " << y );
             }
          }
       }
    }
 
+   _mergedLines = ceilf( y/fm.lineSpacing() );
 
    XX_LOCAL_TRACE( "y = " << y
              << " ls = " << fm.lineSpacing()
-             << " difflines = " << diffs->getNbLines() );
+             << " difflines = " << nbLines );
 
-   int approxNbLines = y / fm.lineSpacing() + 1;
-   XX_LOCAL_TRACE( "approxNbLines = " << approxNbLines );
-   return approxNbLines;
+   XX_LOCAL_TRACE( "_mergedLines = " << _mergedLines );
+   return _mergedLines;
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxText::getMergedLineFromLine( XxDln line ) const
+{
+   if ( _app->getDiffs() == 0 ) {
+      return 0;
+   }
+
+   return _idxMergedLines[line];
+}
+
+//------------------------------------------------------------------------------
+//
+XxDln XxText::getLineFromMergedLine( XxDln mergedLine ) const
+{
+   if ( _app->getDiffs() == 0 ) {
+      return 0;
+   }
+   for ( XxDln icurline = std::min( (uint)mergedLine, _mergedLines ); icurline >= 0; --icurline ) {
+       if ( _idxMergedLines[icurline] <= mergedLine ) {
+          return icurline;
+       }
+   }
+   return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -1192,7 +1253,7 @@ QString XxText::formatClipboard(
 
    // Fileno.
    while ( 1 ) {
-      PosType spos = forline.find( "%N", pos );
+      PosType spos = forline.indexOf( "%N", pos );
       if ( spos == notfound ) {
          break;
       }
@@ -1205,7 +1266,7 @@ QString XxText::formatClipboard(
    // Lineno.
    pos = 0;
    while ( 1 ) {
-      PosType spos = forline.find( "%L", pos );
+      PosType spos = forline.indexOf( "%L", pos );
       if ( spos == notfound ) {
          break;
       }
@@ -1218,7 +1279,7 @@ QString XxText::formatClipboard(
    // Filename.
    pos = 0;
    while ( 1 ) {
-      PosType spos = forline.find( "%F", pos );
+      PosType spos = forline.indexOf( "%F", pos );
       if ( spos == notfound ) {
          break;
       }
@@ -1229,7 +1290,7 @@ QString XxText::formatClipboard(
    // Line contents.
    pos = 0;
    while ( 1 ) {
-      PosType spos = forline.find( "%s", pos );
+      PosType spos = forline.indexOf( "%s", pos );
       if ( spos == notfound ) {
          break;
       }

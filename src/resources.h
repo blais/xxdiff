@@ -32,22 +32,22 @@
 #endif
 
 #ifndef INCL_QT_QOBJECT
-#include <qobject.h>
+#include <QtCore/QObject>
 #define INCL_QT_QOBJECT
 #endif
 
 #ifndef INCL_QT_QCOLOR
-#include <qcolor.h>
+#include <QtGui/QColor>
 #define INCL_QT_QCOLOR
 #endif
 
 #ifndef INCL_QT_QFONT
-#include <qfont.h>
+#include <QtGui/QFont>
 #define INCL_QT_QFONT
 #endif
 
 #ifndef INCL_QT_QRECT
-#include <qrect.h>
+#include <QtCore/QRect>
 #define INCL_QT_QFONT
 #endif
 
@@ -308,11 +308,12 @@ enum XxCommandSwitch {
 
 // Blips of text to tag regions in output files.
 enum XxTag {
-   TAG_CONFLICT_SEPARATOR,
+   TAG_CONFLICT_START,
+   TAG_CONFLICT_SEP,
+   TAG_CONFLICT_SEP_EXTRA,
    TAG_CONFLICT_END,
    TAG_CONDITIONAL_IF,
    TAG_CONDITIONAL_ELSEIF,
-   TAG_CONDITIONAL_ELSE,
    TAG_CONDITIONAL_ENDIF,
    TAG_UNMERGE_START,
    TAG_UNMERGE_SEP,

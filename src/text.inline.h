@@ -24,34 +24,18 @@
  * EXTERNAL DECLARATIONS
  *============================================================================*/
 
-#include <suicideMessageBox.h>
-
 XX_NAMESPACE_BEGIN
 
-/*==============================================================================
- * PUBLIC FUNCTIONS
- *============================================================================*/
 
 /*==============================================================================
- * CLASS XxSuicideMessageBox
+ * CLASS XxText
  *============================================================================*/
 
 //------------------------------------------------------------------------------
 //
-XxSuicideMessageBox::XxSuicideMessageBox( 
-   QWidget*       parent,
-   const QString& caption, 
-   const QString& text, 
-   Icon           icon 
-) :
-   QMessageBox( icon, caption, text, QMessageBox::Close, parent )
+inline uint XxText::getMergedLines() const
 {
-   setModal( false );
-   setAttribute( Qt::WA_DeleteOnClose );
-#ifdef Q_OS_MAC
-   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint );
-#endif
-   show();
+   return _mergedLines;
 }
 
 XX_NAMESPACE_END

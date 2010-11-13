@@ -32,6 +32,9 @@
 #include <resParser.h>
 
 #include <kdeSupport.h>
+#include <QtGui/QPixmap>
+#include <QtCore/QTextStream>
+#include <QtGui/QVBoxLayout>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
 #ifndef WINDOWS
@@ -41,14 +44,15 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
 #endif
 }}
 
-#include <qdialog.h>
-#include <qmessagebox.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qpalette.h>
-#include <qtextbrowser.h>
-#include <qscrollview.h>
+#include <QtGui/QDialog>
+#include <QtGui/QMessageBox>
+#include <QtGui/QLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QPushButton>
+#include <QtGui/QPalette>
+#include <QtGui/QTextBrowser>
+#include <QtCore/QByteArray>
+#include <QtGui/QLineEdit>
 
 #include <iostream>
 #include <stdio.h>
@@ -61,7 +65,7 @@ char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
  * LOCAL DECLARATIONS
  *============================================================================*/
 
-namespace {
+namespace XxHelpNS {
 
 /*----- variables -----*/
 
@@ -110,7 +114,7 @@ QString formatOptionsPlain(
 )
 {
    QString outs;
-   QTextOStream oss( &outs );
+   QTextStream oss( &outs );
 
    // Compute maximum width of long-option.
    unsigned int maxw = 0;
@@ -152,7 +156,7 @@ QString formatOptionsPlain(
       // Output formatted help.
       {
          QString helpstr( options[ii]._help );
-         QTextIStream iss( &helpstr );
+         QTextStream iss( &helpstr );
          QString word;
          int cch = startw;
          while ( !iss.atEnd() ) {
@@ -189,7 +193,7 @@ QString formatOptionsQml(
 )
 {
    QString outs;
-   QTextOStream oss( &outs );
+   QTextStream oss( &outs );
 
    oss << "<table cellpadding=5 width=\"100%\">" << endl << endl;
    for ( int ii = 0; ii < nbOptions; ++ii ) {
@@ -243,8 +247,10 @@ public:
    XxAboutDialog( QWidget* parent, QString& text );
 #endif
 
+#ifdef XX_KDE
    // See base class.
    virtual void done( int r );
+#endif
 
 };
 
@@ -262,42 +268,31 @@ XxAboutDialog::XxAboutDialog( QWidget* parent, const KAboutData* aboutData ) :
 
 XxAboutDialog::XxAboutDialog( QWidget* parent, QString& text ) :
    QMessageBox( 
-      "About xxdiff.", text, QMessageBox::Information, 
-      1, 0, 0, parent, 0, false 
+      QMessageBox::Information, "About xxdiff.", text,
+      QMessageBox::Close, parent
    )
 {
    QPixmap pm_xxdiff_logo( const_cast<const char**>( xxdiff_xpm ) );
    setIconPixmap( pm_xxdiff_logo );
+   setModal( 0 );
+   setAttribute( Qt::WA_DeleteOnClose );
 }
 
 #endif
 
 //------------------------------------------------------------------------------
 //
+#ifdef XX_KDE
 void XxAboutDialog::done( int )
 {
-   delete this;
+   delete this; // Will probably crash too in KDE, as it does in Qt4
 }
+#endif
 
 /*==============================================================================
  * LOCAL CLASS XxManPageDialog
  *============================================================================*/
 
-// <summary> the man pag dialog </summary>
-
-class XxManPageDialog : public QDialog {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor.
-   XxManPageDialog( QWidget* parent, const QString& text );
-
-   // See base class.
-   virtual void accept();
-
-};
 
 
 //------------------------------------------------------------------------------
@@ -308,29 +303,62 @@ XxManPageDialog::XxManPageDialog(
 ) :
    QDialog( parent )
 {
+   setAttribute( Qt::WA_DeleteOnClose );
    QVBoxLayout* toplay = new QVBoxLayout( this );
-   QkTextBrowser* tv = new QkTextBrowser( this, "name" );
-   tv->setText( text, QString::null );
-   tv->setMinimumSize( 500, 700 );
-   toplay->addWidget( tv );
+   toplay->setMargin( 0 );
+   toplay->setSpacing( 0 );
+   _textBrowser = new QkTextBrowser();
+   _textBrowser->setText( text );
+   _textBrowser->setMinimumSize( 500, 700 );
+   toplay->addWidget( _textBrowser );
    
+   QHBoxLayout* sbLayout = new QHBoxLayout;
+   toplay->addLayout( sbLayout );
+   sbLayout->setMargin( 10 );
+   sbLayout->setSpacing( 3 );
+   _lineEdit = new QkLineEdit;
+   sbLayout->addWidget( new QLabel( "Search String:") );
+   sbLayout->addWidget( _lineEdit );
+   _lineEdit->setFocus();
+   connect( _lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(searchFirst(const QString&)) );
+   connect( _lineEdit, SIGNAL(returnPressed()), this, SLOT(searchNext()) );
+   
+   QHBoxLayout* btLayout = new QHBoxLayout;
+   toplay->addLayout( btLayout );
    QkPushButton* b1 = new QkPushButton( "Close", this );
-   b1->setDefault( true );
-   toplay->addWidget( b1 );
+   b1->setAutoDefault( false );
+
+   btLayout->addItem( new QSpacerItem( 1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
+   btLayout->addWidget( b1 );
+   btLayout->addItem( new QSpacerItem( 10, 1, QSizePolicy::Minimum, QSizePolicy::Minimum ) );
    connect( b1, SIGNAL(clicked()), this, SLOT(accept()) );
+   toplay->addItem( new QSpacerItem( 1, 10, QSizePolicy::Minimum, QSizePolicy::Minimum ) );
 }
 
 //------------------------------------------------------------------------------
 //
-void XxManPageDialog::accept()
+void XxManPageDialog::searchFirst(const QString& text)
 {
-   QDialog::accept();
-   delete this;
+    QTextCursor c = _textBrowser->textCursor();
+    c.movePosition( QTextCursor::Start);
+    _textBrowser->setTextCursor( c );
+    _textBrowser->find( text );
+}
+
+//------------------------------------------------------------------------------
+//
+void XxManPageDialog::searchNext()
+{
+    if ( ! _textBrowser->find( _lineEdit->text() ) ) {
+        searchFirst( _lineEdit->text() );
+    }
 }
 
 }
 
 XX_NAMESPACE_BEGIN
+
+using namespace XxHelpNS;
 
 /*==============================================================================
  * PUBLIC FUNCTIONS
@@ -363,7 +391,7 @@ QString XxHelp::getUsage( int helpMask, bool plain )
 
    QString usage;
    if ( plain ) {
-      QTextStream oss( &usage, IO_WriteOnly | IO_Append );
+      QTextStream oss( &usage, QIODevice::WriteOnly | QIODevice::Append );
       oss << "Usage: "
           << "xxdiff [OPTIONS] file1 file2 [file3]" << endl
           << endl
@@ -411,7 +439,7 @@ QString XxHelp::getUsage( int helpMask, bool plain )
           << endl;
    }
    else {
-      QTextStream oss( &usage, IO_WriteOnly | IO_Append );
+      QTextStream oss( &usage, QIODevice::WriteOnly | QIODevice::Append );
       if ( helpMask & (1 << XxCmdline::OPT_GENERIC) ) {
          oss << "<h4>Generic options</h4>" << endl;
          options =
@@ -462,7 +490,7 @@ QString XxHelp::getManual()
 
    // Fill in the invocation section.
    QString vertag( "<version/>" );
-   int idxver = srcManual.find( vertag, idx );
+   int idxver = srcManual.indexOf( vertag, idx );
    if ( idxver != -1 ) {
       manual += srcManual.mid( idx, idxver );
       manual += getVersion();
@@ -475,7 +503,7 @@ QString XxHelp::getManual()
 
    // Fill in the invocation section.
    QString invtag( "<invocation/>" );
-   int idxinv = srcManual.find( invtag, idx );
+   int idxinv = srcManual.indexOf( invtag, idx );
    if ( idxinv != -1 ) {
       manual += srcManual.mid( idx, idxinv - idx );
       manual += getUsage( XxCmdline::OPT_ALL, false );
@@ -488,7 +516,7 @@ QString XxHelp::getManual()
 
    // Fill in the resource reference section.
    QString restag( "<resourceref/>" );
-   int idxres = srcManual.find( restag, idx );
+   int idxres = srcManual.indexOf( restag, idx );
    if ( idxres != -1 ) {
       manual += srcManual.mid( idx, idxres - idx );
       manual += XxResParser::getResourceRef();
@@ -536,7 +564,7 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
 #else
    
    QString text;
-   QTextOStream oss( &text );
+   QTextStream oss( &text );
    oss << xx_name << endl 
        << endl
        << xx_description << endl
@@ -558,7 +586,7 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
 {
    QString docstr;
    {
-      QTextOStream oss( &docstr );
+      QTextStream oss( &docstr );
       oss << "<qt title=\"xxdiff documentation\">" << endl
           << getManual() << endl
           << "</qt" << endl;
@@ -571,7 +599,8 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
 //
 QString XxHelp::xmlize( const QString& in )
 {
-   const char* inc = in.latin1();
+   QByteArray inBa =  in.toLatin1();
+   const char* inc = inBa.constData();
    QString out;
    for ( unsigned int ii = 0; ii < in.length(); ++ii ) {
       if ( inc[ii] == '<' ) {
