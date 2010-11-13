@@ -5,6 +5,17 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+Version 4.0b1: Port to Qt4 by Alexandre Feblot
+----------------------------------------------
+
+* Alexandre Feblot submitted a port to Qt4 which also work on the
+  Mac--did lots of work!--I made that the official default version. He
+  can be reached at <alexandre dot feblot at gmail dot com>.
+
+
+Version 3.2.2: Minor features, closing Qt3 Version
+--------------------------------------------------
+
 * Fixed nasty old split-swap-join bug.
 * In dirdiffs, if an insert, don't invoke a subdiff on directory + empty.
 * Added Hanna Mousa Makefile for Sun AMD64

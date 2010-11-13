@@ -136,20 +136,34 @@ these lack some of the most interesting features of xxdiff).</p>
 </li>
 <li><p class="first"><a class="reference external" href="http://sourceforge.net/project/showfiles.php?group_id=2198">Releases Download</a></p>
 </li>
-<li><p class="first">A complete Qt4 port (which also works on the Mac) has been done by
-Alexandre Feblot, I will soon integrate the source code into the
-official repository [2010-11-09], as a 'qt4' branch. Watch the
-repository for new.</p>
+<li><p class="first">A complete Qt4 port (which works on the Mac) has been done by
+Alexandre Feblot (evolved from a preliminary port by Matt Johnston).
+This forms the basis for versions 4.x of xxdiff as of November 2010.
+Some notes about the Mac OS X build:</p>
+<blockquote>
+<p>On OSX, a Qt bug
+(<a class="reference external" href="http://bugreports.qt.nokia.com/browse/QTBUG-9271">http://bugreports.qt.nokia.com/browse/QTBUG-9271</a>) affects
+rendering performance. As a workaround you can use the much faster
+&quot;raster&quot; graphics engine by one of these 2 ways:</p>
+<ul>
+<li><p class="first">use <tt class="docutils literal"><span class="pre">--graphicssystem</span></tt> raster option</p>
 </li>
-<li><p class="first">A preliminary Qt4 port to Mac for 3.2 had been made by Matt
-Johnston, you can <a class="reference external" href="http://xxdiff.sourceforge.net/download/3.2/contrib">find it here</a>. I don't have
-a Mac, so questions will not be very useful. The current xxdiff
-source code does not reflect this build though. Newer versions can
-be found at <a class="reference external" href="http://matt.ucc.asn.au/xxdiff/">http://matt.ucc.asn.au/xxdiff/</a>.</p>
+<li><p class="first">define this environment variable in your terminal:</p>
+<pre class="literal-block">
+QT_GRAPHICSSYSTEM=raster
+</pre>
 </li>
-<li><p class="first">An old Windows build for 2.9 (with some minor bugs) can be found
-<a class="reference external" href="http://xxdiff.sourceforge.net/download/2.9/windows">here</a>. No
-support offered though.</p>
+</ul>
+<p>This engine has a couple of drawbacks (it will not refresh the
+display during window resizing, and will dump warning lines when
+opening native OSX dialogs like colors chooser or file selection
+dialogs), but it's worth coping with them anyway.</p>
+</blockquote>
+</li>
+<li><p class="first">An old Windows build for 2.9 (with some minor bugs) and based on the
+qt3 version can be found <a class="reference external" href="http://xxdiff.sourceforge.net/download/2.9/windows">here</a>. No support
+offered though. Someone should probably port the newer qt4 code to
+Windows though, that would be worthwhile.</p>
 </li>
 </ul>
 <div class="section" id="tools">
@@ -213,18 +227,18 @@ you don't even need a SourceForge account. Thank you.</p>
 <h2><a class="toc-backref" href="#id14">Dependencies</a></h2>
 <p>Build dependencies are:</p>
 <ul class="simple">
-<li>Qt-3.2 or higher</li>
+<li>Qt-4.5 or higher</li>
 <li>a C++ compiler, flex and yacc</li>
 </ul>
 <p>Runtime dependencies are:</p>
 <ul class="simple">
-<li>Qt-3.2 or higher</li>
+<li>Qt-4.5 or higher</li>
 </ul>
 </div>
 <div class="section" id="portability">
 <h2><a class="toc-backref" href="#id15">Portability</a></h2>
 <p>xxdiff is known to build and work on a great majority of UNIX platforms where Qt
-works.  It has also been ported to Mac OS X.</p>
+works, including Mac OS X.</p>
 </div>
 </div>
 <div class="section" id="external-links">
