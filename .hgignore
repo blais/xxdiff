@@ -3,6 +3,7 @@ syntax: glob
 *.pyc
 moc_*.cpp
 bin/xxdiff
+bin/xxdiff.app
 src/Makefile
 src/Makefile.qmake
 src/doc.h

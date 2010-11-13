@@ -9,6 +9,12 @@ QMAKE ?= /usr/bin/qmake-qt4
 
 all: Makefile
 
+OS := $(shell uname -s)
+ifeq ($(OS),Darwin)
+    # Default is an Xcode project, so force a makefile build
+    export QMAKESPEC=macx-g++
+endif
+
 Makefile.qmake: xxdiff.pro
 	$(QMAKE) -o Makefile.qmake $<
 
