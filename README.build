@@ -33,11 +33,11 @@ Requirements
 Compiling
 ---------
 
-Compile xxdiff with qmake (http://www.trolltech.com) ::
+Compiling xxdiff::
 
    cd xxdiff/src
-   make -f Makefile.bootstrap makefile     # Generate the qmake Makefile
-   make                                    # Build xxdiff
+   make -f Makefile.bootstrap # Generate the 'Makefile' file.
+   make                       # Build xxdiff
 
 
 Notes

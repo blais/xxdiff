@@ -158,7 +158,7 @@ QString formatOptionsPlain(
          QString helpstr( options[ii]._help );
          QTextStream iss( &helpstr );
          QString word;
-         int cch = startw;
+         unsigned int cch = startw;
          while ( !iss.atEnd() ) {
             iss >> word;
 
@@ -602,7 +602,7 @@ QString XxHelp::xmlize( const QString& in )
    QByteArray inBa =  in.toLatin1();
    const char* inc = inBa.constData();
    QString out;
-   for ( unsigned int ii = 0; ii < in.length(); ++ii ) {
+   for ( int ii = 0; ii < in.length(); ++ii ) {
       if ( inc[ii] == '<' ) {
          out.append( "&lt;" );
       }

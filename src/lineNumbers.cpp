@@ -119,7 +119,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
    QPen pen;
 
    uint displayLines = _central->getNbDisplayLines();
-   uint nbLines = std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
+   int nbLines = std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
 
    QString lnFormat;
    lnFormat.sprintf( "%%%dd", _app->getMaxDigits() );
@@ -128,7 +128,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
 
    const int x = 0;
    int y = 0;
-   for ( uint ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
+   for ( int ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
 
       // Get line to display.
       const XxLine& line = diffs->getLine( topLine + ii );
@@ -168,7 +168,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
    // Draw line cursor.
    if ( !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       XxDln cursorLine = _app->getCursorLine() - topLine;
-      if (cursorLine>=0 && cursorLine <nbLines) {
+      if ( cursorLine >= 0 && cursorLine < nbLines ) {
          int cursorY1 = cursorLine * fm.lineSpacing();
          int cursorY2 = cursorY1 + fm.lineSpacing();
          QColor cursorColor = resources.getColor( COLOR_CURSOR );
