@@ -21,6 +21,7 @@
 #****************************************************************************/
 #
 # Generate with xxdiff.t template, as `qmake -t xxdiff.t xxdiff.pro > Makefile'
+#
 
 # Note: the version number is now in the VERSION file at the root and there is a
 # special make rule defined to generate an include file for it.
@@ -116,12 +117,12 @@ macx {
    # Icon used to the application bundle
    ICON = xxdiff.icns
    
-   # Special targets to deploy a standalone mac package in a DMG image:
-   # Call it with "make deploy"
-   
+   # Special targets to quickly deploy a standalone mac package (just
+   # containing the application) in a DMG image. Call it with "make deploy"
+
    BUNDLE = $$DESTDIR/$$TARGET".app"
 
-   # Copy all required frameworks (libs) inthe bundle, and remove i386 part of libs (only keep x86_64)
+   # Copy all required frameworks (libs) in the bundle, and remove i386 part of libs (only keep x86_64)
    macdeployqt.target = $$BUNDLE/Contents/Resources/qt.conf
    macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do lipo \$\$l -thin x86_64 -output \$\$l; done
    macdeployqt.depends = $$BUNDLE
@@ -193,7 +194,7 @@ HEADERS = \
 	lineNumbers.h \
 	util.h \
 	markers.h \
-    borderLabel.h \
+	borderLabel.h \
 	getopt.h \
 	diffutils.h \
 	diffutils_hack.h \
@@ -232,7 +233,7 @@ SOURCES = \
 	accelUtil.cpp \
 	resParser.cpp \
 	markers.cpp \
-    borderLabel.cpp \
+	borderLabel.cpp \
 	getopt.c \
 	getopt1.c \
 	proginfo.c

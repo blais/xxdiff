@@ -6,12 +6,13 @@ xxdiff is a graphical file and directories comparison and merge tool.
 
 Official home page:
     http://xxdiff.sourceforge.net
-Author:
+Original author:
     Martin Blais <blais@furius.ca>
 
 Full documentation is available from the Help menu or web site.
 Various integration tools are available under the tools subdirectory
 (CVS, ClearCase, etc.)
+
 
 Building from source
 ====================
@@ -22,7 +23,7 @@ Requirements
 - GNU make.  You will need GNU make.  Don't waste your time with other makes,
   many are known not to work (Sun's, as well as OSF1).
 
-- A C++ compiler with a decent STL (g++-2.96 or more will do).
+- A C++ compiler with a decent STL
 
 - flex >=2.5.31
 
@@ -33,22 +34,26 @@ Requirements
 Compiling
 ---------
 
-Compile xxdiff with qmake (http://www.trolltech.com) ::
+Compiling xxdiff::
 
    cd xxdiff/src
-   make -f Makefile.bootstrap makefile     # Generate the qmake Makefile
-   make                                    # Build xxdiff
+   make -f Makefile.bootstrap # Generate the 'Makefile' file.
+   make                       # Build xxdiff
 
 
 Notes
 ~~~~~
 
+* For a long time, xxdiff was based on qt3, but was finally ported to
+  qt4 in november 2010 by Alexandre Feblot.
+
 * Note: xxdiff used to require the obsolete tmake tool, but has been ported to
   use qmake in may 2006.
 
-* you may have to set your QTDIR manually (e.g. to /usr/lib/qt4)
+* Depending on your platform, you may have to set your QTDIR manually
+  (e.g. to /usr/lib/qt4)
 
-* you may have to edit CONFIG to include the option 'thread' or not, depending
+* You may have to edit CONFIG to include the option 'thread' or not, depending
   on if you have only the multi-threaded version of qt installed or not
   (libqt-mt).  xxdiff does not specifically need it and can build and run
   without the multi-threaded version of Qt.  Re-run take after making the

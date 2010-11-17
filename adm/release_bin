@@ -12,6 +12,8 @@ fi
 VERSION=`adm/get_version`
 echo "Making binary release version $VERSION"
 
+XXDIFF=xxdiff
+
 PLAT=`adm/config.guess`
 case $PLAT in
         *sparc*)
@@ -22,22 +24,44 @@ case $PLAT in
 
         *linux*)
         PEXT=i386 ;;
+
+        *apple-darwin*)
+        PEXT=osx 
+        BUNDLE=xxdiff.app
+        XXDIFF=$BUNDLE/Contents/MacOS/xxdiff
+        ;;
 esac
     
 PDIR=xxdiff-$VERSION.$PEXT
 ROOT=..
 
 mkdir $ROOT/$PDIR
-cp bin/* $ROOT/$PDIR
+cp -rf bin/* $ROOT/$PDIR
 
-strip $ROOT/$PDIR/xxdiff
+if [ $PEXT = osx ]; then
+    if [ ! -e $ROOT/$PDIR/$BUNDLE/Contents/Resources/qt.conf ]; then
+        # Copy all required Qt libs in the bundle
+        macdeployqt $ROOT/$PDIR/$BUNDLE
+        # Strip 32bit part of the libraries, to just keep the x86_64 part
+        for lib in `find $ROOT/$PDIR/$BUNDLE -type f -name '*.dylib'; find $ROOT/$PDIR/$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do
+            lipo $lib -thin x86_64 -output $lib
+        done
+    fi
+fi
+
+strip $ROOT/$PDIR/$XXDIFF
 
 cp src/xxdiff.1 $ROOT/$PDIR
 cp README $ROOT/$PDIR
 cp CHANGES $ROOT/$PDIR
 
-$ROOT/$PDIR/xxdiff --help-html > $ROOT/$PDIR/xxdiff-doc.html
+$ROOT/$PDIR/$XXDIFF --help-html > $ROOT/$PDIR/xxdiff-doc.html
 
 cd ..
-tar cvf - $PDIR | gzip > $PDIR.tar.gz
+if [ $PEXT != osx ]; then
+    tar cvf - $PDIR | gzip > $PDIR.tar.gz
+else
+    hdiutil create -ov -fs HFS+ -srcfolder $PDIR -volname "xxdiff $VERSION" $PDIR.dmg
+fi
+
 rm -rf $PDIR

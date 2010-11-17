@@ -1,0 +1,25 @@
+syntax: glob
+*.o
+*.pyc
+moc_*.cpp
+bin/xxdiff
+bin/xxdiff.app
+src/Makefile
+src/Makefile.qmake
+src/doc.h
+src/markersWidgetBase.cpp
+src/markersWidgetBase.h
+src/optionsDialogBase.cpp
+src/optionsDialogBase.h
+src/resParser_lex.cpp
+src/resParser_lex.h
+src/resParser_yacc.cpp
+src/resParser_yacc.h
+src/searchDialogBase.cpp
+src/searchDialogBase.h
+src/version.h
+
+src/core
+src/ui_markersWidgetBase.h
+src/ui_optionsDialogBase.h
+src/ui_searchDialogBase.h

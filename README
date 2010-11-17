@@ -104,13 +104,46 @@ Screenshots
 Download
 ========
 
+* Source code can be found the public Mercurial repository, here:
+
+     http://hg.furius.ca/public/xxdiff/
+
 * `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
 
-* `Alternate Location and Snapshots </downloads/xxdiff>`_
+* A complete Qt4 port (which works on the Mac) has been done by
+  Alexandre Feblot (alexandre dot feblot at gmail dot com), evolved
+  from a preliminary port by Matt Johnston. This forms the basis for
+  versions 4.x of xxdiff as of November 2010. Some notes about the Mac
+  OS X build:
 
-* A Windows build (with some minor bugs) can be found `here
-  <http://xxdiff.sourceforge.net/download/2.9/windows>`_.  No support offered
-  though.
+    On OSX, a Qt bug
+    (http://bugreports.qt.nokia.com/browse/QTBUG-9271) affects
+    rendering performance. As a workaround you can use the much faster
+    "raster" graphics engine by either
+
+    - using the ``--graphicssystem`` raster option
+    - defining this environment variable in your terminal::
+
+         QT_GRAPHICSSYSTEM=raster
+
+    This engine has a couple of drawbacks (it will not refresh the
+    display during window resizing, and will dump warning lines when
+    opening native OSX dialogs like colors chooser or file selection
+    dialogs), but it's worth coping with them anyway.
+
+
+* A recent Mac OS X binary build is available for download here:
+
+    http://furius.ca/downloads/xxdiff/releases/macosx/
+
+
+* An old Windows build for 2.9 (with some minor bugs) and based on the
+  qt3 version can be found here:
+
+    http://furius.ca/downloads/xxdiff/releases/windows/
+
+  No support is offered though. Someone should probably port the newer
+  qt4 code to Windows though, that would be worthwhile.
 
 
 Tools
