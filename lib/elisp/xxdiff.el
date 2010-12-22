@@ -109,13 +109,19 @@ kill-ring.  With prefix arg, compare the last three."
 				 fn))
 		 selections))
 
-      (apply 'call-process-region
-	     (append (list (point-min) (point-max)
-			   xxdiff-exec nil nil nil)
-		     files))
-      (dolist (fn files)
-	(when (file-exists-p fn) (delete-file fn)))
-      ))
+    (let ((args (append (list xxdiff-exec nil nil nil) files)))
+      ;(prin1 args) ;; FIXME remove
+      (apply 'call-process args)
+      ;(prin1 "DONE") ;; FIXME remove
+      )
+    (dolist (fn files)
+      (when (file-exists-p fn) (delete-file fn)))
+    ))
+
+;; (call-process "/home/blais/p/xxdiff/bin/xxdiff" nil nil nil
+;; 	      "/tmp/xxdiff-emacs.2563rAR"
+;; 	      "/tmp/xxdiff-emacs.25634KX")
+
 
 
 (defun xxdiff-compare-selections (beg end)
