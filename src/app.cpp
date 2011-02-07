@@ -243,13 +243,14 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
    // Read in the resources and create resources object.
    _resources = buildResources();
 
-#ifndef XX_KDE
-   // By default, if not specified, force SGI style.
-   if ( _cmdline._forceStyle == false ) {
-      _style = QStyleFactory::create( _resources->getStyleKey() );
-      setStyle( _style );
-   }
-#endif
+// We do not force the style anymore.
+// #ifndef XX_KDE
+//    // By default, if not specified, force SGI style.
+//    if ( !_cmdline._forceStyle ) {
+//       _style = QStyleFactory::create( _resources->getStyleKey() );
+//       setStyle( _style );
+//    }
+// #endif
 
 #ifndef XX_KDE
    if ( _cmdline._forceFont == false ) {
