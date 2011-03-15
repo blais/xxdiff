@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Autor: Jimmy Björklund
+# Mail:   xx-ct-diff@dreamz.se
+#
+# Tool for diffing files in clearcase using xxdiff.
+#
+# xxdiff can be found at http://furius.ca/xxdiff/
+#
+
+if [ $# -ne 1 ]; then
+        b="xx-ct-diff";
+        echo ""
+        echo "Usage: Compare the current file with the latest on this branch or"
+        echo "       all the files from a given directory root."
+        echo ""
+        echo " $b <file>|<dir>"
+        echo ""
+        exit 1;
+fi
+
+if [ -d $1 ]; then
+    echo $0 - Directory $1:
+
+    for d in `cleartool lsprivate -co $1 | sed 's/ .*//g'` ; do
+        $0 $d;
+    done
+    exit 1;
+fi
+
+version=`cleartool describe -predecessor $1 | grep "predecessor version:" | sed -e 's/predecessor version://g' -e 's/ //g'`
+
+#
+# You can substitute xxdiff with meld if you find it more
+# to your liking.
+#
+xxdiff $1 "$1@@$version"
