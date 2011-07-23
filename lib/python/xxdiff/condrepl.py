@@ -8,7 +8,7 @@ __author__ = "Martin Blais <blais@furius.ca>"
 
 
 # stdlib imports.
-import sys, os, optparse
+import sys, os, optparse, logging
 from os.path import *
 from subprocess import Popen, PIPE
 import shutil
@@ -193,7 +193,10 @@ def do_replace_file(ofn, nfn, opts, logs):
         xxdiff.checkout.insure_checkout(ofn, opts, logs)
 
     # Copy the new file over the original.
-    shutil.copyfile(nfn, ofn)
+    if not os.access(ofn, os.W_OK):
+        logging.warn("Could not overwrite file '%s'." % ofn)
+    else:
+        shutil.copyfile(nfn, ofn)
 
 
 
