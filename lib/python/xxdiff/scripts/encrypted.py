@@ -27,6 +27,28 @@ Using gpg-agent
 Usage of this program with password caching using gpg-agent makes it much easier
 to call on multiple files.  The user's password given key is asked only once by
 gpg-agent, kept in memory, and then decryption occurs without user intervention.
+
+Merging Encrypted Files with Mercurial
+--------------------------------------
+
+Mercurial can be easily configured so that this tool gets invoked automatically
+when encrypted files need to be merged. This way you can independently
+edit encrypted files using Emacs (I use a custom mailcrypt setup to seamlessly
+decode on open and encode on save) and when tracked in a Mercurial repository,
+if the encrypted files have been edited in two separate revisions, xx-encrypted
+is invoked automatically and brings up a 3-way xxdiff to merge them interactively.
+Here's the configuration I use in my .hgrc::
+
+  [merge-tools]
+  xx-encrypted = 
+  xx-encrypted.priority = 100
+  xx-encrypted.premerge = False
+  xx-encrypted.args = $local $base $other -o $output
+  
+  [merge-patterns]
+  **.asc = xx-encrypted
+  **.gpg = xx-encrypted
+
 """
 
 __moredoc__ = """
@@ -54,9 +76,10 @@ __depends__ = ['xxdiff', 'Python-2.4', 'GnuPG']
 
 
 # stdlib imports.
-import sys, os
+import sys, os, re
 from os.path import *
 from tempfile import NamedTemporaryFile
+from subprocess import Popen, PIPE
 
 # xxdiff imports.
 import xxdiff.scripts
@@ -70,12 +93,24 @@ encodecmd_noarmor = '%(gpg)s --encrypt --use-agent '
 encodecmd = encodecmd_noarmor + '--armor '
 
 
+def get_recipient(text, gpg):
+    """ Extract the recipient/key name from the given encrypted text, without
+    saving any temporary file. """
+    p = Popen(('gpg', '--list-only'), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    out, err = p.communicate(text)
+    mo = re.compile('.*public key is ([0-9A-F]+)', re.M).search(err)
+    if mo:
+        return mo.group(1)
+
+
 def diff_encrypted(textlist, opts, outmerged=None):
     """
     Run a comparison of the encrypted texts specified in textlists and if an
     'outmerged' filename is specified, encrypt the merged file into it. Note
     that the texts are not filenames, but actual contents of files.
     """
+    m = {'gpg': opts.gpg}
+
     # Create temporary files.
     tempfiles = []
     for t in xrange(len(textlist)):
@@ -83,9 +118,12 @@ def diff_encrypted(textlist, opts, outmerged=None):
         print '== TEMPFILE', f.name
         tempfiles.append(f)
 
+    # Figure out the key/recipient for the first file.
+    if opts.recipient is None:
+        opts.recipient = get_recipient(textlist[0], opts.gpg)
+
     # Always create a temporary file for the merged file, we will delete it for
     # sure, since it would contain decrypted content if saved.
-    m = {'gpg': opts.gpg}
 
     # Decode the files.
     for i in xrange(len(textlist)):
