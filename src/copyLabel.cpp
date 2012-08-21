@@ -52,7 +52,8 @@ XX_NAMESPACE_BEGIN
 XxCopyLabel::XxCopyLabel( QWidget* parent ) :
    XxBorderLabel( XxBorderLabel::BorderBottom, parent )
 {
-   setAlignment( (alignment() & !Qt::AlignLeft) | Qt::AlignCenter );
+   // RJVB 20120821: bitwise AND below, so ~Qt::AlignLeft instead of !Qt::AlignLeft !
+   setAlignment( (alignment() & ~(Qt::AlignLeft)) | Qt::AlignCenter );
 }
 
 //------------------------------------------------------------------------------

@@ -27,6 +27,7 @@
 // This is REALLY lame, we should use std::min and std::max, but we have to
 // start portnig to Windoom at some point.
 //
+#ifndef WINDOWS
 namespace std {
 
 #ifdef min
@@ -45,10 +46,11 @@ T max( const T& a, const T& b ) {
 }
 
 }
+#endif //!WINDOWS
 
 
 #define snprintf _snprintf
 
-#define getenv(x) 0
+//#define getenv(x) 0
 
 #endif

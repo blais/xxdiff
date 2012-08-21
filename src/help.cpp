@@ -37,7 +37,7 @@
 #include <QtGui/QVBoxLayout>
 
 namespace XX_NAMESPACE_PREFIX { namespace Manual {
-#ifndef WINDOWS
+#if !defined(WINDOWS) && !defined(__APPLE__) && !defined(__CYGWIN__)
 #include <doc.h>
 #else
 char text[]="<h1>xxdiff documentation</h1><p>Not available under Windows.</p>";
