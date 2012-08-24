@@ -37,7 +37,7 @@ class Transformer(object):
           We're expecting to find opts.dry_run on it.
         """
         self.opts = opts
-        
+
     def transform(self, fn, outf):
         """
         Process the file 'fn' and write the transformed contents to the
@@ -81,7 +81,7 @@ def transform_replace_loop(opts, selector, xformer, logs):
     of the filenames to the decision code that was used on each of them.
     """
     decision_map = {}
-    
+
     for fn in selector:
         # Create temporary file to receive the transformed file.
         tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
