@@ -25,7 +25,7 @@
  *============================================================================*/
 
 #include <proginfo.h>
-//#include <version.h>
+#include <version.h>
 
 
 /*==============================================================================
@@ -33,8 +33,7 @@
  *============================================================================*/
 
 char const xx_name[] = "xxdiff";
-//char const xx_version[] = XX_VERSION;
-char const xx_version[] = "rev 395";
+char const xx_version[] = XX_VERSION;
 char const xx_description[] = "A graphical file comparator and merge tool.";
 char const xx_copyright[] = "Copyright (C) 1999-2004  Martin Blais";
 char const xx_homepage[] = "http://xxdiff.sourceforge.net";

@@ -17,7 +17,6 @@ src/resParser_yacc.cpp
 src/resParser_yacc.h
 src/searchDialogBase.cpp
 src/searchDialogBase.h
-src/version.h
 
 src/core
 src/ui_markersWidgetBase.h
