@@ -35,6 +35,12 @@
  * PUBLIC DECLARATIONS
  *============================================================================*/
 
+#ifndef WINDOWS
+extern "C" {
+
 extern char** environ;
+
+}
+#endif
 
 #endif

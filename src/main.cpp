@@ -49,15 +49,18 @@ const char* exceptionPreface = "xxdiff: exception caught: ";
 
 XX_NAMESPACE_USING
 
+#ifndef WINDOWS
 extern char** environ;
+#endif
 static char s_env_string_LC_ALL[] = "LC_ALL=C";
 
 //------------------------------------------------------------------------------
 //
 int main( int argc, char** argv, char** envp )
 {
-   environ = envp;
-
+#ifndef WINDOWS
+    environ = envp;
+#endif
    // Override user locale or xxdiff could not parse localized diff output...
    putenv(s_env_string_LC_ALL);
 

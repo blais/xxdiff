@@ -3274,9 +3274,22 @@ void XxApp::saveOptions()
    // Ok, there is something to write, get filename and save to file.
 
    QString f;
+#ifdef WINDOWS
+   {
+//       new XxSuicideMessageBox(
+//          _mainWindow, "xxdiff",
+//          QString( getenv("USERPROFILE") ) + QString( "\\.xxdiffrc" ),
+//          QMessageBox::Warning
+//       );
+       f = QkFileDialog::getSaveFileName(
+                   _mainWindow, QString(), QString( getenv("USERPROFILE") ) + QString( "\\.xxdiffrc" )
+                   );
+   }
+#else
    f = QkFileDialog::getSaveFileName(
       _mainWindow, QString(), QString( getenv("HOME") ) + QString( "/.xxdiffrc" ) 
    );
+#endif
    if ( f.isEmpty() ) {
       // The user cancelled the dialog.
       return;

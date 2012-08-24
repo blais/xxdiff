@@ -840,6 +840,13 @@ QString XxResParser::getRcFilename()
       filename = XXDIFFRC;
    }
    else {
+#ifdef WINDOWS
+	const char* HOME = getenv( "USERPROFILE" );
+	if ( HOME ) {
+		filename = HOME;
+	}
+	filename.append( "\\.xxdiffrc" );
+#else
       const char* HOME = getenv( "HOME" );
       if ( HOME ) {
          filename = HOME;
@@ -848,6 +855,7 @@ QString XxResParser::getRcFilename()
          filename = "~";
       }
       filename.append( "/.xxdiffrc" );
+#endif
    }
    return filename;
 }

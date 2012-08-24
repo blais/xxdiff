@@ -27,7 +27,8 @@
 # special make rule defined to generate an include file for it.
 
 TEMPLATE = app
-CONFIG += debug qt warn_on thread
+CONFIG -= debug
+CONFIG += qt warn_on thread
 
 DESTDIR=../bin
 TARGET = xxdiff
@@ -138,17 +139,20 @@ macx {
    deploy.depends = $$dmg.target
 
    QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy
+   QMAKE_CXXFLAGS -= -O2
+   QMAKE_CXXFLAGS += -mdynamic-no-pic -O3 -ftracer -msse2 -msse3 -mssse3 -ftree-vectorize
 }
 
 #----------------------------------------
 # win32-msvc
 
-win32-msvc:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
+win32-msvc*:DEFINES += QT_DLL QT_THREAD_SUPPORT WINDOWS HAVE_STRING_H
 #win32-msvc:QMAKE_CFLAGS += -GX
-win32-msvc:QMAKE_CXXFLAGS += -GX
-win32-msvc:INCLUDEPATH += winfixes
+win32-msvc*:QMAKE_CXXFLAGS += -EHsc
+win32-msvc*:INCLUDEPATH += winfixes
 
 #win32-msvc:QMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
+win32-msvc*:LIBS += winmm.lib
 
 
 #===============================================================================
