@@ -138,6 +138,10 @@ Download
     http://furius.ca/downloads/xxdiff/releases/macosx/
 
 
+* An recent Windows 7 port of version 4.0 has been done by Rene J.V. Bertin
+  (it's ifdef'ed).
+
+
 * An old Windows build for 2.9 (with some minor bugs) and based on the
   qt3 version can be found here:
 
