@@ -459,7 +459,12 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    bool foundDifferences = false;
    QTextStream errors( &_errors );
    int sno;
-   XxFln f1n1, f1n2, f2n1, f2n2, f3n1, f3n2;
+   XxFln f1n1 = 0;
+   XxFln f1n2 = 0;
+   XxFln f2n1 = 0;
+   XxFln f2n2 = 0;
+   XxFln f3n1 = 0;
+   XxFln f3n2 = 0;
 
    while ( true ) {
       if ( ! diffProc.canReadLine() ) {

@@ -115,13 +115,15 @@ public:
    // Print time value to stream.
    static void printTime( std::ostream& os, long time );
 
-   static void splitArgs( 
+    // Take the command, filenames, buffer titles, and executable as input and
+    // build a list of arguments that can be passed to exec() in 'out_args'.
+   static void splitArgs(
       const QString&     command,
       const QStringList& filenames,
       QString&           executable,
       QStringList&       out_args
    );
-   static void splitArgs( 
+   static void splitArgs(
       const QString&     command,
       const QString *    titles[3],
       const QStringList& filenames,

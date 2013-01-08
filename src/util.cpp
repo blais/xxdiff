@@ -371,7 +371,7 @@ void formatPrintFunc(
       case 'X': { // - Time of last access as seconds since Epoch
          strcat( pformat, "d" );
          QString tmp;
-         tmp.sprintf( pformat, 
+         tmp.sprintf( pformat,
                       XxUtil::toTime_t( QDateTime::currentDateTime() ) );
          target.append( tmp );
       } break;
@@ -391,7 +391,7 @@ void formatPrintFunc(
       case 'Y': { // - Time of last modification as seconds since Epoch
          strcat( pformat, "d" );
          QString tmp;
-         tmp.sprintf( pformat, 
+         tmp.sprintf( pformat,
                       XxUtil::toTime_t( QDateTime::currentDateTime() ) );
          target.append( tmp );
       } break;
@@ -653,7 +653,7 @@ void XxUtil::splitArgs(
     * spaces will break this.
     */
 
-   out_args = command.trimmed().split( QRegExp( "\\s" ) );
+   out_args = command.trimmed().split( QRegExp("\\s(?=[^\"\']*([\"\'][^\"\']*[\"\'][^\"\']*)*$)") );
    out_args += filenames;
    for (int i=0; i<3; i++) {
       if (titles[i]) {
@@ -662,16 +662,16 @@ void XxUtil::splitArgs(
    }
    executable = out_args.takeFirst();
 
-//#define ANAL_DEBUGGING
-#ifdef ANAL_DEBUGGING
+//#define DO_DEBUGGING
+#ifdef DO_DEBUGGING
    std::ofstream ofs( "/tmp/diff_args" );
-   ofs << " ARGS ------------------------------" << std::endl;
+   ofs << " ---- ARGS ------------------------------" << std::endl;
    for ( QStringList::Iterator it = out_args.begin();
          it != out_args.end();
          ++it ) {
       ofs << (*it).toLatin1().constData() << std::endl;
    }
-   ofs << " -----------------------------------" << std::endl;
+   ofs << " ----------------------------------------" << std::endl;
    ofs.close();
 #endif
 }
@@ -717,7 +717,7 @@ bool XxUtil::formatFilename(
    // Below code is an adapted extract from GNU Coreutils stat
    // along with the bug fix discovered while doing that.
    // Idea is that the %-sequences get changed in formatPrintFunc
-   // for sprintf. Also the format string gets null terminators 
+   // for sprintf. Also the format string gets null terminators
    // here and there, that's why we need two copies of the masterformat.
    while ( b ) {
 
@@ -806,7 +806,7 @@ QString XxUtil::unescapeChars( const QString& format )
        }
        ix = found + 1;
    }
-   
+
    return newFormat;
 }
 
@@ -823,7 +823,7 @@ FILE* XxUtil::tempfile( char* tmplate )
    mktemp( tmplate );
    if ( ( ftmp = ::fopen( tmplate, "w" ) ) == NULL ) {
 #endif
-      throw XxIoError( XX_EXC_PARAMS, 
+      throw XxIoError( XX_EXC_PARAMS,
                        "Error opening temporary file." );
    }
    return ftmp;

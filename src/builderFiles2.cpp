@@ -73,19 +73,19 @@ XX_NAMESPACE_USING
 
 //------------------------------------------------------------------------------
 //
-bool parseDiffLine( 
+bool parseDiffLine(
    XxLine::Type&  type,
    const QString& line,
-   XxFln&         f1n1, 
-   XxFln&         f1n2, 
-   XxFln&         f2n1, 
-   XxFln&         f2n2 
+   XxFln&         f1n1,
+   XxFln&         f1n2,
+   XxFln&         f2n1,
+   XxFln&         f2n2
 )
 {
-   /* 
+   /*
     * this code taken from "ediff.c" by David MacKenzie, a published,
-    * uncopyrighted program to translate diff output into plain English 
-    */ 
+    * uncopyrighted program to translate diff output into plain English
+    */
    QByteArray lineBa = line.toLatin1();
    const char* buf = lineBa.constData();
 
@@ -172,12 +172,12 @@ public:
    // Constructor with state.
    XxParseDiffError(
       XX_EXC_PARAMS_DECL(file,line),
-      const XxFln fline1, 
-      const XxFln fline2, 
-      const XxFln f1n1, 
-      const XxFln f1n2, 
-      const XxFln f2n1, 
-      const XxFln f2n2 
+      const XxFln fline1,
+      const XxFln fline2,
+      const XxFln f1n1,
+      const XxFln f1n2,
+      const XxFln f2n1,
+      const XxFln f2n2
    );
 
 };
@@ -186,19 +186,19 @@ public:
 //
 XxParseDiffError::XxParseDiffError(
    XX_EXC_PARAMS_DECL(file,line),
-   const XxFln fline1, 
-   const XxFln fline2, 
-   const XxFln f1n1, 
-   const XxFln f1n2, 
-   const XxFln f2n1, 
-   const XxFln f2n2 
+   const XxFln fline1,
+   const XxFln fline2,
+   const XxFln f1n1,
+   const XxFln f1n2,
+   const XxFln f2n1,
+   const XxFln f2n2
 ) :
    XxError( file, line ),
    std::runtime_error( "Parse diff output error." )
 {
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
-   oss << "Error parsing diff output: file1:" 
-       << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: " 
+   oss << "Error parsing diff output: file1:"
+       << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: "
        << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
 }
 #endif
@@ -230,7 +230,7 @@ XxBuilderFiles2::~XxBuilderFiles2()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles2::process( 
+std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    const QString&  command,
    const XxBuffer& buffer1,
    const XxBuffer& buffer2
@@ -313,8 +313,8 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 	    if ( f1n1 != fline1 ) {
                XxFln fsize1 = f1n1 - fline1;
                XxFln fsize2 = f2n1 - fline2 + 1;
-               createIgnoreBlock( 
-                  fline1, fsize1, fline2, fsize2, buffer1, buffer2 
+               createIgnoreBlock(
+                  fline1, fsize1, fline2, fsize2, buffer1, buffer2
                );
                fline1 += fsize1;
                fline2 += fsize2;
@@ -334,8 +334,8 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 	    if ( f2n1 != fline2 ) {
                XxFln fsize1 = f1n1 - fline1 + 1;
                XxFln fsize2 = f2n1 - fline2;
-               createIgnoreBlock( 
-                  fline1, fsize1, fline2, fsize2, buffer1, buffer2 
+               createIgnoreBlock(
+                  fline1, fsize1, fline2, fsize2, buffer1, buffer2
                );
                fline1 += fsize1;
                fline2 += fsize2;
@@ -357,16 +357,16 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
             // line changes (-B)!  Disabled.
             //
 	    // if ( (f1n1 - fline1) != (f2n1 - fline2) ) {
-            //    throw XxParseDiffError( 
-            //       fline1, fline2, f1n1, f1n2, f2n1, f2n2 
+            //    throw XxParseDiffError(
+            //       fline1, fline2, f1n1, f1n2, f2n1, f2n2
             //    );
             // }
 
 	    if ( f1n1 != fline1 ) {
                XxFln fsize1 = f1n1 - fline1;
                XxFln fsize2 = f2n1 - fline2;
-               createIgnoreBlock( 
-                  fline1, fsize1, fline2, fsize2, buffer1, buffer2 
+               createIgnoreBlock(
+                  fline1, fsize1, fline2, fsize2, buffer1, buffer2
                );
                fline1 += fsize1;
                fline2 += fsize2;
@@ -431,7 +431,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    // Add final ignore region if present.
    uint nbRemainingLines1 = buffer1.getNbLines() + 1 - fline1;
    uint nbRemainingLines2 = buffer2.getNbLines() + 1 - fline2;
-   if ( nbRemainingLines1 > 0 || nbRemainingLines2 > 0 ) { 
+   if ( nbRemainingLines1 > 0 || nbRemainingLines2 > 0 ) {
       createIgnoreBlock( fline1, buffer1.getNbLines() + 1 - fline1,
                          fline2, buffer2.getNbLines() + 1 - fline2,
                          buffer1, buffer2 );
@@ -526,7 +526,7 @@ void XxBuilderFiles2::createIgnoreBlock(
       const char* text2 = buffer2.getTextLine( ii2, len2 );
       bool filled1 = !isAllSpace( text1, len1 );
       bool filled2 = !isAllSpace( text2, len2 );
-      /*XX_TRACE( ii1 << "-" << filled1 << "=" << len1 << " " 
+      /*XX_TRACE( ii1 << "-" << filled1 << "=" << len1 << " "
                 << ii2 << "-" << filled2 << "=" << len2 );*/
 
       if ( filled1 == filled2 && ii1 < end1 && ii2 < end2 ) {
@@ -571,7 +571,7 @@ void XxBuilderFiles2::createIgnoreBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createChangeBlock( 
+void XxBuilderFiles2::createChangeBlock(
    XxFln fline1,
    XxFln fline2,
    uint  fsize1,
@@ -579,7 +579,7 @@ void XxBuilderFiles2::createChangeBlock(
 )
 {
    // Add common lines.
-   uint commonLines = std::min( fsize1, fsize2 ); 
+   uint commonLines = std::min( fsize1, fsize2 );
    for ( uint ii = 0; ii < commonLines; ++ii ) {
       XxLine line( XxLine::DIFF_ALL, fline1 + ii, fline2 + ii );
       line.setHunkId( _curHunk );
@@ -587,7 +587,7 @@ void XxBuilderFiles2::createChangeBlock(
    }
 
    // Add remaining lines.
-   if ( fsize1 > fsize2 ) { 
+   if ( fsize1 > fsize2 ) {
       uint diffLines = fsize1 - commonLines;
       for ( uint ii = 0; ii < diffLines; ++ii ) {
          XxLine line( XxLine::DIFF_ALL, fline1 + commonLines + ii, -1 );
@@ -608,7 +608,7 @@ void XxBuilderFiles2::createChangeBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createInsertLeftBlock( 
+void XxBuilderFiles2::createInsertLeftBlock(
    XxFln fline1,
    uint  fsize
 )
@@ -623,7 +623,7 @@ void XxBuilderFiles2::createInsertLeftBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles2::createInsertRightBlock( 
+void XxBuilderFiles2::createInsertRightBlock(
    XxFln fline2,
    uint  fsize
 )
