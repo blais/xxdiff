@@ -63,7 +63,7 @@ XX_NAMESPACE_USING
  * CLASS XxParseDiffError
  *============================================================================*/
 
-class XxParseDiffError : public XxError, 
+class XxParseDiffError : public XxError,
                          public std::runtime_error {
 
 public:
@@ -73,12 +73,12 @@ public:
    // Constructor with state.
    XxParseDiffError(
       XX_EXC_PARAMS_DECL(file,line),
-      const XxFln f1n1, 
-      const XxFln f1n2, 
-      const XxFln f2n1, 
+      const XxFln f1n1,
+      const XxFln f1n2,
+      const XxFln f2n1,
       const XxFln f2n2,
-      const XxFln f3n1, 
-      const XxFln f3n2 
+      const XxFln f3n1,
+      const XxFln f3n2
    );
 
 };
@@ -87,11 +87,11 @@ public:
 //
 XxParseDiffError::XxParseDiffError(
    XX_EXC_PARAMS_DECL(file,line),
-   XxFln f1n1, 
-   XxFln f1n2, 
-   XxFln f2n1, 
+   XxFln f1n1,
+   XxFln f1n2,
+   XxFln f2n1,
    XxFln f2n2,
-   XxFln f3n1, 
+   XxFln f3n1,
    XxFln f3n2
 ) :
    XxError( file, line ),
@@ -99,8 +99,8 @@ XxParseDiffError::XxParseDiffError(
 {
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing diff3 output:"
-       << " (" << f1n1 << "," << f1n2 << ")  file2: " 
-       << " (" << f2n1 << "," << f2n2 << ")  file3: " 
+       << " (" << f1n1 << "," << f1n2 << ")  file2: "
+       << " (" << f2n1 << "," << f2n2 << ")  file3: "
        << " (" << f3n1 << "," << f3n2 << ")" << endl;
 }
 
@@ -110,16 +110,16 @@ XxParseDiffError::XxParseDiffError(
 
 //------------------------------------------------------------------------------
 //
-bool parseDiffLine( 
+bool parseDiffLine(
    XxLine::Type&  type,
-   const QString& line, 
-   int&           sno, 
-   XxFln&         f1n1, 
-   XxFln&         f1n2, 
-   XxFln&         f2n1, 
-   XxFln&         f2n2, 
-   XxFln&         f3n1, 
-   XxFln&         f3n2 
+   const QString& line,
+   int&           sno,
+   XxFln&         f1n1,
+   XxFln&         f1n2,
+   XxFln&         f2n1,
+   XxFln&         f2n2,
+   XxFln&         f3n1,
+   XxFln&         f3n2
 )
 {
    //
@@ -201,7 +201,7 @@ bool parseDiffLine(
    //                                     |         |
    // XaZ,W or XaZ                        |  (-A )  |  INSERT_2
    //
- 
+
 #define PARSE_CHECK(xxxx) \
   if ( !(xxxx) ) { \
       throw XxParseDiffError( XX_EXC_PARAMS, \
@@ -309,7 +309,7 @@ bool parseDiffLine(
          int fsize2 = f2n2 - f2n1;
          int fsize3 = f3n2 - f3n1;
          if ( sno == 1 ) {
-            if ( fsize1 >= 0 ) { 
+            if ( fsize1 >= 0 ) {
                if ( fsize2 >= 0 ) {
                   PARSE_CHECK( fsize3 >= 0 )
                   type = XxLine::DIFF_1;
@@ -325,7 +325,7 @@ bool parseDiffLine(
             }
          }
          else if ( sno == 2 ) {
-            if ( fsize1 >= 0 ) { 
+            if ( fsize1 >= 0 ) {
                if ( fsize2 >= 0 ) {
                   PARSE_CHECK( fsize3 >= 0 )
                   type = XxLine::DIFF_2;
@@ -341,7 +341,7 @@ bool parseDiffLine(
             }
          }
          else if ( sno == 3 ) {
-            if ( fsize1 >= 0 ) { 
+            if ( fsize1 >= 0 ) {
                if ( fsize3 >= 0 ) {
                   PARSE_CHECK( fsize2 >= 0 )
                   type = XxLine::DIFF_3;
@@ -357,15 +357,15 @@ bool parseDiffLine(
             }
          }
          else if ( sno == -1 ) {
-            if ( fsize1 < 0 ) { 
+            if ( fsize1 < 0 ) {
                PARSE_CHECK( fsize2 >= 0 && fsize3 >= 0 )
                type = XxLine::DIFFDEL_1;
             }
-            else if ( fsize2 < 0 ) { 
+            else if ( fsize2 < 0 ) {
                PARSE_CHECK( fsize1 >= 0 && fsize3 >= 0 )
                type = XxLine::DIFFDEL_2;
             }
-            else if ( fsize3 < 0 ) { 
+            else if ( fsize3 < 0 ) {
                PARSE_CHECK( fsize1 >= 0 && fsize2 >= 0 )
                type = XxLine::DIFFDEL_3;
             }
@@ -409,7 +409,7 @@ XxBuilderFiles3::~XxBuilderFiles3()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles3::process( 
+std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    const QString&  command,
    const XxBuffer& buffer1,
    const XxBuffer& buffer2,
@@ -491,7 +491,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       XX_LOCAL_TRACE( "  f2n1=" << f2n1 << "  f2n2=" << f2n2 );
       XX_LOCAL_TRACE( "  f3n1=" << f3n1 << "  f3n2=" << f3n2 );
 #endif
-      
+
       if ( type != XxLine::SAME ) {
          foundDifferences = true;
          int fsize1 = f1n1 - fline1;
@@ -547,7 +547,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
          _curHunk++;
       }
    }
-   
+
    diffProc.waitForFinished();
 
    // Collect stderr.
@@ -573,7 +573,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
         nbRemainingLines != buffer3.getNbLines() + 1 - fline3 ) {
       throw XxError( XX_EXC_PARAMS, _errors );
    }
-   if ( nbRemainingLines > 0 ) { 
+   if ( nbRemainingLines > 0 ) {
       createIgnoreBlock( fline1, fline2, fline3, int(nbRemainingLines) );
    }
 
@@ -588,7 +588,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderFiles3::createIgnoreBlock( 
+void XxBuilderFiles3::createIgnoreBlock(
    XxFln fline1,
    XxFln fline2,
    XxFln fline3,
