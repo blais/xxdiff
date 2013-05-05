@@ -76,7 +76,7 @@ class Matcher(object):
 def line_pair((line1, line2)):
   line1 = int(line1)
   if line2 is None:
-    line2 = line1
+    line2 = line1 + 1
   else:
     line2 = int(line2) + 1
   return (line1, line2)
@@ -193,64 +193,92 @@ DIFF3_MAP = {
 
 class FileWithNo(object):
   "A file object wrapper that tracks its line number, 1-based."
+
   def __init__(self, f):
     self.lineno = 1
     self.f = f
+
+  def __str__(self):
+    return 'FileWithNo({}, lineno={})'.format(self.f.name, self.lineno)
+  __repr__ = __str__
 
   def readline(self):
     self.lineno += 1
     return self.f.readline()
 
 
-EMPTY_LINE = 'X' * 80
 SEPARATOR = '|'
 
 
-def render_line(f, line, color, width):
+class TruncLineWriter(object):
+  "Writes to a file up to the given number of characters."
+
+  def __init__(self, f, width):
+    self.f = f
+    self.width = width
+    self.c = 0
+
+  def write_text(self, text):
+    remaining = self.width - self.c
+    if remaining <= 0:
+      return
+    if len(text) < remaining:
+      self.f.write(text)
+      self.c += len(text)
+    else:
+      self.f.write(text[:remaining])
+      self.c = self.width
+
+  def complete(self):
+    "Pad the end of the line with blanks, up to width, if necessary."
+    remaining = self.width - self.c
+    if remaining > 0:
+      self.f.write(' ' * remaining)
+
+
+def render_line(f, line, color, width, hd=None):
   """Render a single file's line in the given terminal color, fitting exactly in
   the specifed width."""
-  f.write(curses.tparm(curses.tigetstr('setaf'), 0))
+  if line is None:
+    line = EMPTY_LINE
+    color = COLOR_BLANK
+
+  line = line.rstrip('\n\r')
+  wr = TruncLineWriter(f, width)
   f.write(color)
-  f.write('{:{w}.{w}}'.format(line.rstrip('\n\r'), w=width))
+  if hd is None:
+    wr.write_text(line)
+  else:
+    ipre, isfx = hd
+    wr.write_text(line[:ipre])
+    f.write(COLOR_HIGHLIGHT[color])
+    wr.write_text(line[ipre:isfx])
+    f.write(color)
+    wr.write_text(line[isfx:])
+  wr.complete()
+
   f.write(COLOR_BASE)
-  f.write(curses.tparm(curses.tigetstr('setaf'), 7))
+
 
 COLORS = [
-    ('COLOR_BASE',                  0),
-    ('COLOR_SAME',                  250),
-    ('COLOR_SAME_OTHER',              153),
-    #('COLOR_SAME_TWO_HIGHLIGHT',          110),
-    ('COLOR_INSERT',                157),
-    ('COLOR_DELETE',                153),
-    ('COLOR_CHANGE',              223),
-    #('COLOR_CHANGE_HIGHLIGHT',          187),
-    ('COLOR_BLANK',              247),
-
-    # ('COLOR_SAME_BLANK',            249),
-    # ('COLOR_DELETE_BLANK',          247),
-    # ('COLOR_INSERT_BLANK',          247),
-    # ('COLOR_SELECTED',              182),
-    # ('COLOR_SELECTED_HIGHLIGHT',          182),
-    # ('COLOR_IGNORE_DISPLAY',        253),
-    # ('COLOR_IGNORE_DISPLAY_HIGHLIGHT',    252),
-    # ('COLOR_IGNORE_DISPLAY_ONLY',   252),
-    # ('COLOR_IGNORE_DISPLAY_NONLY',  252),
-    # ('COLOR_DELETED',               102),
-    # ('COLOR_DELETED_HIGHLIGHT',           66),
-    # ('COLOR_IGNORED',               249),
-    # ('COLOR_DIRECTORIES',           80),
-    # ('COLOR_MERGED_UNDECIDED',      187),
-    # ('COLOR_MERGED_DECIDED_1',      246),
-    # ('COLOR_MERGED_DECIDED_1_HIGHLIGHT',  249),
-    # ('COLOR_MERGED_DECIDED_2',      246),
-    # ('COLOR_MERGED_DECIDED_2_HIGHLIGHT',  249),
-    # ('COLOR_MERGED_DECIDED_3',      246),
-    # ('COLOR_MERGED_DECIDED_3_HIGHLIGHT',  249),
-    # ('COLOR_MERGED_DECIDED_NEITHER', 249),
+    ('COLOR_BASE'                 ,   0, 7),
+    ('COLOR_SAME'                 , 250, 0),
+    ('COLOR_SAME_OTHER'           , 153, 0),
+    ('COLOR_SAME_OTHER_HIGHLIGHT' , 110, 0),
+    ('COLOR_INSERT'               , 157, 0),
+    ('COLOR_DELETE'               , 157, 0),
+    ('COLOR_CHANGE'               , 223, 0),
+    ('COLOR_CHANGE_HIGHLIGHT'     , 229, 0),
+    ('COLOR_BLANK'                , 246, 0),
+    ('COLOR_TITLE'                , 19 , 15),
     ]
+
+
 def init_colors():
-  for color_name, color_id in COLORS:
-    globals()[color_name] = curses.tparm(curses.tigetstr('setab'), color_id)
+  for color_name, color_id_bg, color_id_fg in COLORS:
+    globals()[color_name] = (curses.tparm(curses.tigetstr('setab'), color_id_bg) +
+                             curses.tparm(curses.tigetstr('setaf'), color_id_fg))
+
 
   global HUNK_COLORS_2
   HUNK_COLORS_2 = {
@@ -268,7 +296,7 @@ def init_colors():
     LINE_DIFF_3      : (COLOR_SAME_OTHER , COLOR_SAME_OTHER , COLOR_CHANGE)     ,
     LINE_DELETE_1    : (COLOR_BLANK      , COLOR_SAME_OTHER , COLOR_SAME_OTHER) ,
     LINE_DELETE_2    : (COLOR_SAME_OTHER , COLOR_BLANK      , COLOR_SAME_OTHER) ,
-    LINE_DELETE_3    : (COLOR_SAME_OTHER , COLOR_SAME_OTHER , COLOR_BLANK)     ,
+    LINE_DELETE_3    : (COLOR_SAME_OTHER , COLOR_SAME_OTHER , COLOR_BLANK)      ,
     LINE_INSERT_1    : (COLOR_INSERT     , COLOR_BLANK      , COLOR_BLANK)      ,
     LINE_INSERT_2    : (COLOR_BLANK      , COLOR_INSERT     , COLOR_BLANK)      ,
     LINE_INSERT_3    : (COLOR_BLANK      , COLOR_BLANK      , COLOR_INSERT)     ,
@@ -277,6 +305,62 @@ def init_colors():
     LINE_DIFFDEL_2   : (COLOR_CHANGE     , COLOR_BLANK      , COLOR_CHANGE)     ,
     LINE_DIFFDEL_3   : (COLOR_CHANGE     , COLOR_CHANGE     , COLOR_BLANK)      ,
     }
+
+  global COLOR_HIGHLIGHT
+  COLOR_HIGHLIGHT = {
+      COLOR_SAME_OTHER: COLOR_SAME_OTHER_HIGHLIGHT,
+      COLOR_CHANGE:  COLOR_CHANGE_HIGHLIGHT,
+      }
+
+
+def render_same_region(files):
+  """Given a mapping of files, render a same-region, that is, a region between
+  hunks whose text should match."""
+
+
+def compute_horizontal_prefix(lines):
+  """Return the first character that differs between the given lines."""
+  for i in xrange(min(map(len, lines))):
+    c = lines[0][i]
+    for oline in lines[1:]:
+      if oline[i] != c:
+        return i
+
+def compute_horizontal_suffix(lines):
+  """Return the last character from the back that differs between the given
+  lines."""
+  for i in xrange(min(map(len, lines))):
+    c = lines[0][-i]
+    for oline in lines[1:]:
+      if oline[-i] != c:
+        return i
+  return 0
+
+def compute_horizontal_diffs(lines):
+  """Compute the horizontal diffs of the lines that have content.
+  'lines' is a dict of side (L, R, M) to lines. Lines without
+  content have indexes returned as None."""
+
+  # Linearize order or items.
+  items = lines.items()
+
+  # The result, initialized.
+  indices = dict((side, None) for side in lines.iterkeys())
+
+  # Operate on the valid lines only.
+  valid_lines = [line for (side, line) in items if line]
+  if len(valid_lines) < 2:
+    return indices
+
+  # Compute prefix and suffix (this is a simpler algorithm than xxdiff).
+  ipre = compute_horizontal_prefix(valid_lines)
+  isfx = compute_horizontal_suffix(valid_lines)
+
+  # Fill in the computed results.
+  for (side, line) in items:
+    if line:
+      indices[side] = (ipre, max(ipre, len(line)-isfx))
+  return indices
 
 
 def main():
@@ -291,6 +375,9 @@ def main():
                       help="Executable to call for two-day diffs.")
   parser.add_argument('--prog-diff3', action='store', default='diff3',
                       help="Executable to call for three-day diffs.")
+
+  parser.add_argument('--blank-char', action='store', default=' ',
+                      help="Blank character to use for filler.")
 
   opts = parser.parse_args()
 
@@ -307,10 +394,37 @@ def main():
   else:
     parser.error("Invalid number of files: should be 2 or 3")
 
-  # FIXME: Auto-compute using curses
-  width = 60
+  # Get the terminal's width.
+  width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
 
-  outf = sys.stdout
+  global EMPTY_LINE
+  EMPTY_LINE = opts.blank_char * 200
+
+  render_diffs(filenames, hunks, sys.stdout, width)
+
+
+def format_filename(filename, width):
+  """Format a filename for printability."""
+  if len(filename) > width:
+    return '...{}'.format(filename[-(width-3):])
+  else:
+    return filename
+
+
+def render_diffs(filenames, hunks, outf, width):
+  """Render the diffs from the given filenames and hunks, to file object 'outf',
+  and constrained by 'width' characters."""
+
+  nfiles = len(filenames)
+
+  # Render the filenames as a title at the top.
+  render_line(outf, format_filename(filenames[L], width), COLOR_TITLE, width)
+  outf.write(SEPARATOR)
+  if nfiles == 3:
+    render_line(outf, format_filename(filenames[M], width), COLOR_TITLE, width)
+    outf.write(SEPARATOR)
+  render_line(outf, format_filename(filenames[R], width), COLOR_TITLE, width)
+  outf.write('\n')
 
   files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
   for hunk in hunks:
@@ -319,15 +433,17 @@ def main():
     # Check sizes
     sizeL = hunk.linesL[0] - files[L].lineno
     sizeR = hunk.linesR[0] - files[R].lineno
-    assert sizeL == sizeR, (sizeL, sizeR)
+    assert sizeL == sizeR, (str(hunk), files)
     if nfiles == 3:
       sizeM = hunk.linesM[0] - files[M].lineno
-      assert sizeM == sizeL, (sizeM, sizeL)
+      assert sizeM == sizeL, (hunk, files)
 
     # Render same lines.
     while files[L].lineno < hunk.linesL[0]:
       lineL = files[L].readline()
       lineR = files[R].readline()
+      if nfiles != 2:
+        lineM = files[M].readline()
 
       if nfiles == 2:
         colL, colR = HUNK_COLORS_2[LINE_SAME]
@@ -335,7 +451,6 @@ def main():
         outf.write(SEPARATOR)
         render_line(outf, lineR, colR, width)
       else:
-        lineM = files[M].readline()
         colL, colM, colR = HUNK_COLORS_3[LINE_SAME]
         render_line(outf, lineL, colL, width)
         outf.write(SEPARATOR)
@@ -343,12 +458,12 @@ def main():
         outf.write(SEPARATOR)
         render_line(outf, lineR, colR, width)
 
-      sys.stdout.write('\n')
+      outf.write('\n')
 
     # Render diff hunk.
     while 1:
       didread = False
-      lineL = lineR = lineM = EMPTY_LINE
+      lineL = lineR = lineM = None
       if files[L].lineno < hunk.linesL[1]:
         lineL = files[L].readline()
         didread = True
@@ -365,40 +480,50 @@ def main():
         break
 
       if nfiles == 2:
+        hd = compute_horizontal_diffs({L: lineL, R: lineR})
         colL, colR = HUNK_COLORS_2[hunk.hunk_type]
-        render_line(outf, lineL, colL, width)
+        render_line(outf, lineL, colL, width, hd[L])
         outf.write(SEPARATOR)
-        render_line(outf, lineR, colR, width)
+        render_line(outf, lineR, colR, width, hd[R])
       else:
+        hd = compute_horizontal_diffs({L: lineL, R: lineR, M: lineM})
         colL, colM, colR = HUNK_COLORS_3[hunk.hunk_type]
-        render_line(outf, lineL, colL, width)
+        render_line(outf, lineL, colL, width, hd[L])
         outf.write(SEPARATOR)
-        render_line(outf, lineM, colM, width)
+        render_line(outf, lineM, colM, width, hd[M])
         outf.write(SEPARATOR)
-        render_line(outf, lineR, colR, width)
+        render_line(outf, lineR, colR, width, hd[R])
 
-      sys.stdout.write('\n')
+      outf.write('\n')
 
-  # FIXME: render the final same lines as well
+  # Render the same region at the end of the file.
+  while 1:
+    lineL = files[L].readline()
+    lineR = files[R].readline()
+    if nfiles != 2:
+      lineM = files[M].readline()
+    if not lineL and not lineR and (nfiles == 2 or not lineM):
+      break
+
+    if nfiles == 2:
+      colL, colR = HUNK_COLORS_2[LINE_SAME]
+      render_line(outf, lineL, colL, width)
+      outf.write(SEPARATOR)
+      render_line(outf, lineR, colR, width)
+    else:
+      colL, colM, colR = HUNK_COLORS_3[LINE_SAME]
+      render_line(outf, lineL, colL, width)
+      outf.write(SEPARATOR)
+      render_line(outf, lineM, colM, width)
+      outf.write(SEPARATOR)
+      render_line(outf, lineR, colR, width)
+
+    outf.write('\n')
 
 
 
-  # FIMXE: Find an example version of more or less in curses, integrate this.
 
-  # FIXME: Find in vimdiff:
-  # - Can I overrride the colors?
-  # - Is there a way to skip between hunks?
-  # - Can I copy hunks from side to side?
-  # - How do I open a fold? (see foldmethod)
-
-  # FIXME: Dump an Emacs with just ediff in site.el, is it fast to start?
-
-
-
-
-
-
-
+#-------------------------------------------------------------------------------
 
 def find_colors():
   "One-off funciton used to compute the terminal colors corresponding to xxdiff's."
@@ -447,10 +572,9 @@ def find_colors():
     print color_name, color_id
 
 
-
 if __name__ == '__main__':
   curses.setupterm()
-  print curses.getmaxyx()
+  ##print curses.getmaxyx()
   init_colors()
   #find_colors()
   main()
