@@ -561,4 +561,9 @@ def main():
 if __name__ == '__main__':
   curses.setupterm()
   init_colors()
-  main()
+  try:
+    main()
+  finally:
+    # Make sure to reset the terminal properly when we're done.
+    sys.stdout.write(curses.tparm(curses.tigetstr('setab'), 16))
+    sys.stdout.write(curses.tparm(curses.tigetstr('setaf'), 15))
