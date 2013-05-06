@@ -18,6 +18,8 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 __copyright__ = 'GNU GPL v3'
 
 import curses
+import difflib
+from os import path
 import re
 import shutil
 import subprocess
@@ -510,40 +512,50 @@ def main():
   # display.
   width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
 
-  # If any of the files is from stdin, we need to place a copy under a temp
-  # file, unforunately, because we use an external tool to compute the actual
-  # diffs, so the tool needs to read it, and then we do too.
-  tempfiles = []
-  for i, filename in enumerate(opts.filenames):
-    if filename == '-':
-      tf = tempfile.NamedTemporaryFile(prefix='termdiff')
-      shutil.copyfileobj(sys.stdin, tf)
-      tf.flush()
-      opts.filenames[i] = tf.name
-      tempfiles.append(tf)
+  # Determine whether this will be a directory diff or a file diff.
+  # The invocation is a file diff if at least one of the files is a non-directory.
+  # In this case, the file's basename is appended to all of the other directories
+  # (This is just like for xxdiff.)
+  isdirdiff = all(path.isdir(x) for x in opts.filenames)
+  if isdirdiff:
+    # FIXME: TODO, continue here
+    pass ##print difflib ...
 
-  # Run an external diff and gather its output.
-  # By default this works well with GNU diff and diff3, but other diffs should
-  # work too (e.g. cleardiff) and you could write your own custom diff wrapper
-  # as well.
-  if nfiles == 2:
-    hunks = parse_diff2(opts.prog_diff2, *opts.filenames)
-    filenames = {L: opts.filenames[0],
-                 R: opts.filenames[1]}
-  elif nfiles == 3:
-    hunks = parse_diff3(opts.prog_diff3, *opts.filenames)
-    filenames = {L: opts.filenames[0],
-                 M: opts.filenames[1],
-                 R: opts.filenames[2]}
   else:
-    parser.error("Invalid number of files: should be 2 or 3")
+    # If any of the files is from stdin, we need to place a copy under a temp
+    # file, unforunately, because we use an external tool to compute the actual
+    # diffs, so the tool needs to read it, and then we do too.
+    tempfiles = []
+    for i, filename in enumerate(opts.filenames):
+      if filename == '-':
+        tf = tempfile.NamedTemporaryFile(prefix='termdiff')
+        shutil.copyfileobj(sys.stdin, tf)
+        tf.flush()
+        opts.filenames[i] = tf.name
+        tempfiles.append(tf)
 
-  # Create file wrappers for each of the files. They will be processed by
-  # reading the exactly once.
-  files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
+    # Run an external diff and gather its output.
+    # By default this works well with GNU diff and diff3, but other diffs should
+    # work too (e.g. cleardiff) and you could write your own custom diff wrapper
+    # as well.
+    if nfiles == 2:
+      hunks = parse_diff2(opts.prog_diff2, *opts.filenames)
+      filenames = {L: opts.filenames[0],
+                   R: opts.filenames[1]}
+    elif nfiles == 3:
+      hunks = parse_diff3(opts.prog_diff3, *opts.filenames)
+      filenames = {L: opts.filenames[0],
+                   M: opts.filenames[1],
+                   R: opts.filenames[2]}
+    else:
+      parser.error("Invalid number of files: should be 2 or 3")
 
-  # Render the diff hunks.
-  render_diffs(files, hunks, sys.stdout, width)
+    # Create file wrappers for each of the files. They will be processed by
+    # reading the exactly once.
+    files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
+
+    # Render the diff hunks.
+    render_diffs(files, hunks, sys.stdout, width)
 
 
 if __name__ == '__main__':
