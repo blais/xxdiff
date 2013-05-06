@@ -17,9 +17,12 @@ decided to rewrite xxdiff in curses.
 __author__ = 'Martin Blais <blais@furius.ca>'
 __copyright__ = 'GNU GPL v3'
 
-import sys, os, re
 import curses
-from subprocess import Popen, PIPE
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
 
 
 # Kinds of changes                     [2-way] [3-way]
@@ -123,7 +126,8 @@ def parse_diff2_line(line):
 
 def parse_diff2(program, filename1, filename2):
   """Parse a two-way diff."""
-  p = Popen((program, filename1, filename2), stdout=PIPE, stderr=PIPE)
+  p = subprocess.Popen((program, filename1, filename2),
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out, err = p.communicate()
   hunks = []
   for line in out.splitlines():
@@ -135,7 +139,8 @@ def parse_diff2(program, filename1, filename2):
 
 def parse_diff3(program, filename1, filename2, filename3):
   """Parse a single line of diff3's output. 'f' is a file object."""
-  p = Popen((program, filename1, filename2, filename3), stdout=PIPE, stderr=PIPE)
+  p = subprocess.Popen((program, filename1, filename2, filename3),
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out, err = p.communicate()
 
   matcher = Matcher()
@@ -197,6 +202,7 @@ class FileWithNo(object):
   def __init__(self, f):
     self.lineno = 1
     self.f = f
+    self.name = self.f.name
 
   def __str__(self):
     return 'FileWithNo({}, lineno={})'.format(self.f.name, self.lineno)
@@ -205,9 +211,6 @@ class FileWithNo(object):
   def readline(self):
     self.lineno += 1
     return self.f.readline()
-
-
-SEPARATOR = '|'
 
 
 class TruncLineWriter(object):
@@ -229,33 +232,33 @@ class TruncLineWriter(object):
       self.f.write(text[:remaining])
       self.c = self.width
 
-  def complete(self):
+  def complete(self, char):
     "Pad the end of the line with blanks, up to width, if necessary."
     remaining = self.width - self.c
     if remaining > 0:
-      self.f.write(' ' * remaining)
+      self.f.write(char * remaining)
 
 
 def render_line(f, line, color, width, hd=None):
   """Render a single file's line in the given terminal color, fitting exactly in
   the specifed width."""
-  if line is None:
-    line = EMPTY_LINE
-    color = COLOR_BLANK
-
-  line = line.rstrip('\n\r')
   wr = TruncLineWriter(f, width)
   f.write(color)
-  if hd is None:
-    wr.write_text(line)
+  if line:
+    line = line.rstrip('\n\r')
+    if hd is None:
+      wr.write_text(line)
+    else:
+      ipre, isfx = hd
+      wr.write_text(line[:ipre])
+      f.write(COLOR_HIGHLIGHT[color])
+      wr.write_text(line[ipre:isfx])
+      f.write(color)
+      wr.write_text(line[isfx:])
+    wr.complete(' ')
   else:
-    ipre, isfx = hd
-    wr.write_text(line[:ipre])
-    f.write(COLOR_HIGHLIGHT[color])
-    wr.write_text(line[ipre:isfx])
-    f.write(color)
-    wr.write_text(line[isfx:])
-  wr.complete()
+    f.write(COLOR_BLANK)
+    wr.complete(opts.blank_char)
 
   f.write(COLOR_BASE)
 
@@ -267,9 +270,9 @@ COLORS = [
     ('COLOR_SAME_OTHER_HIGHLIGHT' , 110, 0),
     ('COLOR_INSERT'               , 157, 0),
     ('COLOR_DELETE'               , 157, 0),
-    ('COLOR_CHANGE'               , 223, 0),
-    ('COLOR_CHANGE_HIGHLIGHT'     , 229, 0),
-    ('COLOR_BLANK'                , 246, 0),
+    ('COLOR_CHANGE'               , 229, 0),
+    ('COLOR_CHANGE_HIGHLIGHT'     , 227, 0),
+    ('COLOR_BLANK'                , 245, 0),
     ('COLOR_TITLE'                , 19 , 15),
     ]
 
@@ -363,46 +366,6 @@ def compute_horizontal_diffs(lines):
   return indices
 
 
-def main():
-  import argparse, logging
-  logging.basicConfig(level=logging.INFO, format='%(levelname)-8s: %(message)s')
-  parser = argparse.ArgumentParser(__doc__.strip())
-
-  parser.add_argument('filenames', nargs='+',
-                      help='Filenames')
-
-  parser.add_argument('--prog-diff2', '--prog-diff', action='store', default='diff',
-                      help="Executable to call for two-day diffs.")
-  parser.add_argument('--prog-diff3', action='store', default='diff3',
-                      help="Executable to call for three-day diffs.")
-
-  parser.add_argument('--blank-char', action='store', default=' ',
-                      help="Blank character to use for filler.")
-
-  opts = parser.parse_args()
-
-  nfiles = len(opts.filenames)
-  if nfiles == 2:
-    hunks = parse_diff2(opts.prog_diff2, *opts.filenames)
-    filenames = {L: opts.filenames[0],
-                 R: opts.filenames[1]}
-  elif nfiles == 3:
-    hunks = parse_diff3(opts.prog_diff3, *opts.filenames)
-    filenames = {L: opts.filenames[0],
-                 M: opts.filenames[1],
-                 R: opts.filenames[2]}
-  else:
-    parser.error("Invalid number of files: should be 2 or 3")
-
-  # Get the terminal's width.
-  width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
-
-  global EMPTY_LINE
-  EMPTY_LINE = opts.blank_char * 200
-
-  render_diffs(filenames, hunks, sys.stdout, width)
-
-
 def format_filename(filename, width):
   """Format a filename for printability."""
   if len(filename) > width:
@@ -411,22 +374,24 @@ def format_filename(filename, width):
     return filename
 
 
-def render_diffs(filenames, hunks, outf, width):
+SEPARATOR = '|'
+
+
+def render_diffs(files, hunks, outf, width):
   """Render the diffs from the given filenames and hunks, to file object 'outf',
   and constrained by 'width' characters."""
 
-  nfiles = len(filenames)
+  nfiles = len(files)
 
   # Render the filenames as a title at the top.
-  render_line(outf, format_filename(filenames[L], width), COLOR_TITLE, width)
+  render_line(outf, format_filename(files[L].name, width), COLOR_TITLE, width)
   outf.write(SEPARATOR)
   if nfiles == 3:
-    render_line(outf, format_filename(filenames[M], width), COLOR_TITLE, width)
+    render_line(outf, format_filename(files[M].name, width), COLOR_TITLE, width)
     outf.write(SEPARATOR)
-  render_line(outf, format_filename(filenames[R], width), COLOR_TITLE, width)
+  render_line(outf, format_filename(files[R].name, width), COLOR_TITLE, width)
   outf.write('\n')
 
-  files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
   for hunk in hunks:
     ##print '********************', hunk
 
@@ -521,60 +486,67 @@ def render_diffs(filenames, hunks, outf, width):
     outf.write('\n')
 
 
+def main():
+  import argparse, logging
+  logging.basicConfig(level=logging.INFO, format='%(levelname)-8s: %(message)s')
+  parser = argparse.ArgumentParser(__doc__.strip())
 
+  parser.add_argument('filenames', nargs='+',
+                      help='Filenames')
 
-#-------------------------------------------------------------------------------
+  parser.add_argument('--prog-diff2', '--prog-diff', action='store', default='diff',
+                      help="Executable to call for two-day diffs.")
+  parser.add_argument('--prog-diff3', action='store', default='diff3',
+                      help="Executable to call for three-day diffs.")
 
-def find_colors():
-  "One-off funciton used to compute the terminal colors corresponding to xxdiff's."
-  colors = [
-      ( 'COLOR_SAME                 ' , "#bebebe", "#000000" ),
-      ( 'COLOR_SAME_BLANK           ' , "#b3b3b3", "#000000" ),
-      ( 'COLOR_DIFF_ONE             ' , "#eee8aa", "#000000" ),
-      ( 'COLOR_DIFF_ONE_SUP         ' , "#cdc9a5", "#000000" ),
-      ( 'COLOR_DIFF_TWO             ' , "#b2dfee", "#000000" ),
-      ( 'COLOR_DIFF_TWO_SUP         ' , "#9ac0cd", "#000000" ),
-      ( 'COLOR_DELETE               ' , "#b2dfee", "#000000" ),
-      ( 'COLOR_DELETE_BLANK         ' , "#a3a3a3", "#000000" ),
-      ( 'COLOR_INSERT               ' , "#b4eeb4", "#000000" ),
-      ( 'COLOR_INSERT_BLANK         ' , "#a3a3a3", "#000000" ),
-      ( 'COLOR_SELECTED             ' , "#dda0dd", "#000000" ),
-      ( 'COLOR_SELECTED_SUP         ' , "#d8bfd8", "#000000" ),
-      ( 'COLOR_IGNORE_DISPLAY       ' , "#d9d9d9", "#000000" ),
-      ( 'COLOR_IGNORE_DISPLAY_SUP   ' , "#cccccc", "#000000" ),
-      ( 'COLOR_IGNORE_DISPLAY_ONLY  ' , "#cccccc", "#000000" ),
-      ( 'COLOR_IGNORE_DISPLAY_NONLY ' , "#cccccc", "#000000" ),
-      ( 'COLOR_DELETED              ' , "#778899", "#000000" ),
-      ( 'COLOR_DELETED_SUP          ' , "#708090", "#000000" ),
-      ( 'COLOR_IGNORED              ' , "#b3b3b3", "#4d4d4d" ),
-      ( 'COLOR_DIRECTORIES          ' , "#48d1cc", "#000000" ),
-      ( 'COLOR_MERGED_UNDECIDED     ' , "#cdc9a5", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_1     ' , "#999999", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_1_SUP ' , "#b3b3b3", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_2     ' , "#999999", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_2_SUP ' , "#b3b3b3", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_3     ' , "#999999", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_3_SUP ' , "#b3b3b3", "#000000" ),
-      ( 'COLOR_MERGED_DECIDED_NEITHER' , "#b3b3b3", "#000000" ),
-      ]
-  import mapcolors
-  for color_name, color_bg, color_fg in colors:
-    (rgb, color_id, distance) = mapcolors.find_closest_color(mapcolors.getrgb(color_bg))
-    print curses.tparm(curses.tigetstr('setab'), color_id),
-    (rgb, color_id, distance) = mapcolors.find_closest_color(mapcolors.getrgb(color_fg))
-    print curses.tparm(curses.tigetstr('setaf'), color_id),
-    print color_name
-  print curses.tparm(curses.tigetstr('setab'), 0)
-  print curses.tparm(curses.tigetstr('setaf'), 7)
+  parser.add_argument('--blank-char', action='store', default=' ',
+                      help="Blank character to use for filler.")
 
-  for color_name, color_bg, color_fg in colors:
-    (rgb, color_id, distance) = mapcolors.find_closest_color(mapcolors.getrgb(color_bg))
-    print color_name, color_id
+  global opts; opts = parser.parse_args()
+
+  nfiles = len(opts.filenames)
+
+  # Get the terminal's width and compute how many characters we'll be able to
+  # display.
+  width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
+
+  # If any of the files is from stdin, we need to place a copy under a temp
+  # file, unforunately, because we use an external tool to compute the actual
+  # diffs, so the tool needs to read it, and then we do too.
+  tempfiles = []
+  for i, filename in enumerate(opts.filenames):
+    if filename == '-':
+      tf = tempfile.NamedTemporaryFile(prefix='termdiff')
+      shutil.copyfileobj(sys.stdin, tf)
+      tf.flush()
+      opts.filenames[i] = tf.name
+      tempfiles.append(tf)
+
+  # Run an external diff and gather its output.
+  # By default this works well with GNU diff and diff3, but other diffs should
+  # work too (e.g. cleardiff) and you could write your own custom diff wrapper
+  # as well.
+  if nfiles == 2:
+    hunks = parse_diff2(opts.prog_diff2, *opts.filenames)
+    filenames = {L: opts.filenames[0],
+                 R: opts.filenames[1]}
+  elif nfiles == 3:
+    hunks = parse_diff3(opts.prog_diff3, *opts.filenames)
+    filenames = {L: opts.filenames[0],
+                 M: opts.filenames[1],
+                 R: opts.filenames[2]}
+  else:
+    parser.error("Invalid number of files: should be 2 or 3")
+
+  # Create file wrappers for each of the files. They will be processed by
+  # reading the exactly once.
+  files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
+
+  # Render the diff hunks.
+  render_diffs(files, hunks, sys.stdout, width)
 
 
 if __name__ == '__main__':
   curses.setupterm()
-  ##print curses.getmaxyx()
   init_colors()
-  #find_colors()
   main()
