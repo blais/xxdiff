@@ -275,7 +275,7 @@ COLORS = [
     ('COLOR_INSERT'               , 157, 0),
     ('COLOR_DELETE'               , 157, 0),
     ('COLOR_CHANGE'               , 229, 0),
-    ('COLOR_CHANGE_HIGHLIGHT'     , 227, 0),
+    ('COLOR_CHANGE_HIGHLIGHT'     , 226, 0),
     ('COLOR_BLANK'                , 245, 0),
     ('COLOR_TITLE'                , 19 , 15),
     ]
@@ -364,9 +364,17 @@ def compute_horizontal_diffs(lines):
   isfx = compute_horizontal_suffix(valid_lines)
 
   # Fill in the computed results.
+  trim = 0
   for (side, line) in items:
     if line:
-      indices[side] = (ipre, max(ipre, len(line)-isfx))
+      if len(line)-isfx < ipre:
+        trim = max(trim, ipre - (len(line)-isfx))
+  isfx -= trim
+
+  for (side, line) in items:
+    if line:
+      assert len(line)-isfx >= ipre
+      indices[side] = (ipre, len(line)-isfx)
   return indices
 
 
