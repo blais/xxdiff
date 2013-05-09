@@ -19,12 +19,14 @@ __copyright__ = 'GNU GPL v3'
 
 import curses
 import difflib
+import os
 from os import path
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import StringIO
 
 
 # Kinds of changes                     [2-way] [3-way]
@@ -496,6 +498,9 @@ def main():
   parser.add_argument('filenames', nargs='+',
                       help='Filenames')
 
+  parser.add_argument('--pager', '--less', action='store_true',
+                      help="Pipe the output into $PAGER.")
+
   parser.add_argument('--prog-diff2', '--prog-diff', action='store', default='diff',
                       help="Executable to call for two-day diffs.")
   parser.add_argument('--prog-diff3', action='store', default='diff3',
@@ -554,8 +559,20 @@ def main():
     # reading the exactly once.
     files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
 
+    # Render the diffs into a temporary string, or stdout directly.
+    outf = StringIO.StringIO() if opts.pager else sys.stdout
+
     # Render the diff hunks.
-    render_diffs(files, hunks, sys.stdout, width)
+    render_diffs(files, hunks, outf, width)
+
+    # Pipe into 'less' if requested.
+    if opts.pager:
+      pager = '/usr/bin/less -r'
+      p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE)
+      p.communicate(outf.getvalue())
+
+
+# FIXME: Add number number rendering.
 
 
 if __name__ == '__main__':
