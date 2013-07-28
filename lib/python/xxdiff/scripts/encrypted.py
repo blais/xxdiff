@@ -40,11 +40,11 @@ is invoked automatically and brings up a 3-way xxdiff to merge them interactivel
 Here's the configuration I use in my .hgrc::
 
   [merge-tools]
-  xx-encrypted = 
+  xx-encrypted =
   xx-encrypted.priority = 100
   xx-encrypted.premerge = False
   xx-encrypted.args = $local $base $other -o $output
-  
+
   [merge-patterns]
   **.asc = xx-encrypted
   **.gpg = xx-encrypted
@@ -172,7 +172,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
         fin.close()
         encoded_output = fout.read()
         fout.close()
-
+        
         # Write out the encoded output file.
         try:
             f = open(outmerged, 'w')
@@ -224,9 +224,6 @@ def parse_options():
     return opts, args
 
 def encrypted_main():
-    """
-    Main program for cond-replace script.
-    """
     opts, args = parse_options()
 
     if isabs(opts.gpg) and not exists(opts.gpg):
@@ -255,6 +252,7 @@ def encrypted_main():
         for fn in args:
             text = open(fn, 'r').read()
             textlist.append(text)
+
         diff_encrypted(textlist, opts, opts.output)
 
 
@@ -262,4 +260,3 @@ main = encrypted_main
 
 if __name__ == '__main__':
     main()
-
