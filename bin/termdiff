@@ -283,6 +283,10 @@ COLORS = [
 
 def init_colors():
   for color_name, color_id_bg, color_id_fg in COLORS:
+    if (curses.tigetstr('setab') is None or
+        curses.tigetstr('setaf') is None):
+      raise SystemExit("Terminal does not support colors.")
+
     globals()[color_name] = (curses.tparm(curses.tigetstr('setab'), color_id_bg) +
                              curses.tparm(curses.tigetstr('setaf'), color_id_fg))
 
