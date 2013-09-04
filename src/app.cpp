@@ -2667,7 +2667,8 @@ bool XxApp::saveMergedToFile(
       // Save to the file.
       {
          QTextStream osstream( &outfile );
-         //osstream.setEncoding( QTextStream::Locale ); not necessary
+         // Assume latin-1; it won't hurt. Maybe make this an option later.
+         osstream.setCodec( "ISO-8859-1" );
          _diffs->save( getResources(), osstream, getBuffers(),
                        useConditionals, removeEmptyConditionals,
                        conditionals );

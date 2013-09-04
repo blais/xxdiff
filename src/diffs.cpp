@@ -57,7 +57,8 @@ int outputLine(
       const char* text = files[no]->getTextLine( fline, len );
       XX_ASSERT( text != 0 ); // make this one throw
 
-      os << QString::fromLocal8Bit(text, len);
+      //os << QString::fromLocal8Bit(text, len);
+      os << QByteArray(text, len);
       os << endl;
       return 1;
    }
@@ -969,6 +970,8 @@ void XxDiffs::saveChunk(
          cond.replace( "%s", conditionals[f] );
          QByteArray line;
          QTextStream oss( &line );
+         // Assume latin-1; it won't hurt. Maybe make this an option later.
+         oss.setCodec( "ISO-8859-1" );
          oss << cond << endl;
 
          int nbOutlines = 0;
