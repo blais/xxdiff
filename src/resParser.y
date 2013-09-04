@@ -25,7 +25,7 @@
     int   num;
     char* str;
 }
-%{
+%code top {
 
 // xxdiff imports
 #include <resources.h>
@@ -144,7 +144,9 @@ using namespace XxResParserNS; // Make sure we can use the above.
 %type <num> boolkwd
 
 %start xxdiffrc
-%pure_parser
+/* %pure_parser */
+/* %define api.pure full */
+%parse-param { XxResources* resources }
 
 %%
 xxdiffrc	: stmts
