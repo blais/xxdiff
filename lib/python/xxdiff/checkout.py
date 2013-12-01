@@ -14,7 +14,7 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 import optparse
 
 
-checkout_choices = ('clearcase',)
+checkout_choices = ('clearcase', 'subversion', 'cvs', 'perforce')
 
 def options_graft(parser):
     """
@@ -69,4 +69,3 @@ def insure_checkout(fn, opts, logs=None):
 
     scm_module.checkout(fn)
     return True
-

@@ -128,9 +128,9 @@ def parse_diff2_line(line):
   return hunk
 
 
-def parse_diff2(program, filename1, filename2):
+def parse_diff2(command, filename1, filename2):
   """Parse a two-way diff."""
-  p = subprocess.Popen((program, filename1, filename2),
+  p = subprocess.Popen(command + [filename1, filename2],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out, err = p.communicate()
   hunks = []
@@ -141,9 +141,9 @@ def parse_diff2(program, filename1, filename2):
   return hunks
 
 
-def parse_diff3(program, filename1, filename2, filename3):
+def parse_diff3(command, filename1, filename2, filename3):
   """Parse a single line of diff3's output. 'f' is a file object."""
-  p = subprocess.Popen((program, filename1, filename2, filename3),
+  p = subprocess.Popen(command + [filename1, filename2, filename3],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out, err = p.communicate()
 
@@ -283,6 +283,10 @@ COLORS = [
 
 def init_colors():
   for color_name, color_id_bg, color_id_fg in COLORS:
+    if (curses.tigetstr('setab') is None or
+        curses.tigetstr('setaf') is None):
+      raise SystemExit("Terminal does not support colors.")
+
     globals()[color_name] = (curses.tparm(curses.tigetstr('setab'), color_id_bg) +
                              curses.tparm(curses.tigetstr('setaf'), color_id_fg))
 
@@ -517,6 +521,17 @@ def main():
   parser.add_argument('--blank-char', action='store', default=' ',
                       help="Blank character to use for filler.")
 
+  group = parser.add_argument_group("Options forwarded to GNU diff")
+  forwarded_options = [
+      ('-i', '--ignore-case'),
+      ('-E', '--ignore-tab-expansion'),
+      ('-w', '--ignore-all-space'),
+      ('-b', '--ignore-space-change'),
+      ('-B', '--ignore-blank-lines'),
+      ]
+  for short, long in forwarded_options:
+      group.add_argument(short, long, action='store_true')
+
   global opts; opts = parser.parse_args()
 
   nfiles = len(opts.filenames)
@@ -552,14 +567,22 @@ def main():
     # work too (e.g. cleardiff) and you could write your own custom diff wrapper
     # as well.
     if nfiles == 2:
-      hunks = parse_diff2(opts.prog_diff2, *opts.filenames)
+      command = [opts.prog_diff2]
+      for short, long in forwarded_options:
+        if getattr(opts, long[2:].replace('-', '_')):
+          command.append(long)
+
+      hunks = parse_diff2(command, *opts.filenames)
       filenames = {L: opts.filenames[0],
                    R: opts.filenames[1]}
+
     elif nfiles == 3:
-      hunks = parse_diff3(opts.prog_diff3, *opts.filenames)
+      command = [opts.prog_diff3]
+      hunks = parse_diff3(command, *opts.filenames)
       filenames = {L: opts.filenames[0],
                    M: opts.filenames[1],
                    R: opts.filenames[2]}
+
     else:
       parser.error("Invalid number of files: should be 2 or 3")
 
