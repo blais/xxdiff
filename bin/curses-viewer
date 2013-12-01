@@ -17,6 +17,7 @@ FTEST = open('/tmp/input.log', 'w')
 def debug_input_filter(keys, raw):
     FTEST.write('{} ({})\n'.format(keys, raw))
     FTEST.flush()
+    return keys
 
 
 class LineWalker(urwid.ListWalker):
@@ -39,6 +40,8 @@ class LineWalker(urwid.ListWalker):
 
     def get_prev(self, start_from):
         return self._get_at_pos(start_from - 1)
+
+
 
     def __read_next_line(self):
         """Read another line from the file."""
