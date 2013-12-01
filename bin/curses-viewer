@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""
+Example program that can view a body of text and scroll.
+This is meant to be a test for writing termdiff using curses.
+"""
+import sys
+import urwid
+import urwid.command_map
+import urwid.curses_display
+
+urwid.command_map['ctrl v'] = urwid.CURSOR_PAGE_DOWN
+urwid.command_map['meta v'] = urwid.CURSOR_PAGE_UP
+
+
+FTEST = open('/tmp/input.log', 'w')
+
+def debug_input_filter(keys, raw):
+    FTEST.write('{} ({})\n'.format(keys, raw))
+    FTEST.flush()
+
+
+class LineWalker(urwid.ListWalker):
+    """ListWalker-compatible class for lazily reading file contents."""
+
+    def __init__(self, name):
+        self.file = open(name)
+        self.lines = []
+        self.focus = 0
+
+    def get_focus(self):
+        return self._get_at_pos(self.focus)
+
+    def set_focus(self, focus):
+        self.focus = focus
+        self._modified()
+
+    def get_next(self, start_from):
+        return self._get_at_pos(start_from + 1)
+
+    def get_prev(self, start_from):
+        return self._get_at_pos(start_from - 1)
+
+    def __read_next_line(self):
+        """Read another line from the file."""
+
+        next_line = self.file.readline()
+
+        if not next_line or next_line[-1:] != '\n':
+            # no newline on last line of file
+            self.file = None
+        else:
+            # trim newline characters
+            next_line = next_line[:-1]
+
+        expanded = next_line.expandtabs()
+
+        edit = urwid.Edit("", expanded, allow_tab=True)
+        edit.set_edit_pos(0)
+        edit.original_text = next_line
+        self.lines.append(edit)
+
+        return next_line
+
+
+    def _get_at_pos(self, pos):
+        """Return a widget for the line number passed."""
+
+        if pos < 0:
+            # line 0 is the start of the file, no more above
+            return None, None
+
+        if len(self.lines) > pos:
+            # we have that line so return it
+            return self.lines[pos], pos
+
+        if self.file is None:
+            # file is closed, so there are no more lines
+            return None, None
+
+        assert pos == len(self.lines), "out of order request?"
+        self.__read_next_line()
+
+        return self.lines[-1], pos
+
+
+
+
+class EditDisplay:
+
+    palette = [
+        ('body','default', 'default'),
+        ('foot','dark cyan', 'dark blue', 'bold'),
+        ('key','light cyan', 'dark blue', 'underline'),
+        ]
+
+    footer_text = ('foot', [
+        "Text Viewer    ",
+        ('key', "meta q"), " quit",
+        ])
+
+    def __init__(self, name):
+        self.save_name = name
+        self.walker = LineWalker(name)
+        self.listbox = urwid.ListBox(self.walker)
+
+        self.footer = urwid.AttrWrap(urwid.Text(self.footer_text),
+            "foot")
+        self.view = urwid.Frame(urwid.AttrWrap(self.listbox, 'body'),
+            footer=self.footer)
+
+    def main(self):
+        self.loop = urwid.MainLoop(self.view, self.palette,
+                                   unhandled_input=self.unhandled_keypress,
+                                   input_filter=debug_input_filter)
+                                   ##screen=urwid.curses_display.Screen())
+        self.loop.run()
+
+    def unhandled_keypress(self, k):
+        """Last resort for keypresses."""
+
+        if k == "meta q":
+            raise urwid.ExitMainLoop()
+
+        elif k == "right":
+            w, pos = self.walker.get_focus()
+            w, pos = self.walker.get_next(pos)
+            if w:
+                self.listbox.set_focus(pos, 'above')
+                self.loop.process_input(["home"])
+
+        elif k == "left":
+            w, pos = self.walker.get_focus()
+            w, pos = self.walker.get_prev(pos)
+            if w:
+                self.listbox.set_focus(pos, 'below')
+                self.loop.process_input(["end"])
+        else:
+            return
+        return True
+
+
+def main():
+    try:
+        name = sys.argv[1]
+        assert open(name, "a")
+    except Exception:
+        sys.stderr.write(__doc__)
+        return
+    EditDisplay(name).main()
+
+
+if __name__=="__main__":
+    main()

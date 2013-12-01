@@ -506,7 +506,7 @@ def main():
   parser.add_argument('filenames', nargs='+',
                       help='Filenames')
 
-  parser.add_argument('--pager', '--less', action='store_true',
+  parser.add_argument('-p', '--pager', '--less', action='store_true',
                       help="Pipe the output into $PAGER.")
 
   parser.add_argument('--prog-diff2', '--prog-diff', action='store', default='diff',
