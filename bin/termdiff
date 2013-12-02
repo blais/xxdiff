@@ -510,10 +510,15 @@ def main():
   parser.add_argument('filenames', nargs='+',
                       help='Filenames')
 
-  parser.add_argument('-p', '--pager', '--less', action='store_true',
-                      help="Pipe the output into $PAGER.")
+  parser.add_argument('-c', '--cat', action='store_true',
+                      help="Cat the output without a pager nor using curses.")
 
-  parser.add_argument('--prog-diff2', '--prog-diff', action='store', default='diff',
+  parser.add_argument('-p', '--pager', action='store',
+                      help=("Cat the output into $PAGER. "
+                            "Use --cat to just cat it out."))
+
+  parser.add_argument('--prog-diff2', '--prog-diff', action='store',
+                      default='diff',
                       help="Executable to call for two-day diffs.")
   parser.add_argument('--prog-diff3', action='store', default='diff3',
                       help="Executable to call for three-day diffs.")
@@ -534,11 +539,11 @@ def main():
 
   global opts; opts = parser.parse_args()
 
-  nfiles = len(opts.filenames)
+  if opts.cat:
+    opts.pager = '-'
+    del opts.cat
 
-  # Get the terminal's width and compute how many characters we'll be able to
-  # display.
-  width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
+  nfiles = len(opts.filenames)
 
   # Determine whether this will be a directory diff or a file diff.
   # The invocation is a file diff if at least one of the files is a non-directory.
@@ -590,20 +595,60 @@ def main():
     # reading the exactly once.
     files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
 
-    # Render the diffs into a temporary string, or stdout directly.
-    outf = StringIO.StringIO() if opts.pager else sys.stdout
-
-    # Render the diff hunks.
-    render_diffs(files, hunks, outf, width)
-
-    # Pipe into 'less' if requested.
     if opts.pager:
-      pager = '/usr/bin/less -r'
-      p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE)
-      p.communicate(outf.getvalue())
+      render_with_cat(files, hunks, opts.pager)
+    else:
+      for hunk in hunks:
+        print hunk
+
+      #curses.wrapper(render_with_curses, files, hunks)
 
 
-# FIXME: Add number number rendering.
+def render_with_cat(files, hunks, pager):
+  """Render all the file to be piped into a pager."""
+
+  # Get the terminal's width and compute how many characters we'll be able to
+  # display.
+  nfiles = len(files)
+  width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
+
+  if pager != '-':
+    # Pipe into 'less'.
+    p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE)
+
+    sio = StringIO.StringIO()
+    render_diffs(files, hunks, p.stdin, width)
+    p.communicate(sio.getvalue())
+  else:
+    # Write straight to the terminal.
+    render_diffs(files, hunks, sys.stdout, width)
+
+
+def render_with_curses(window, files, hunks):
+  """Render the output as a curses app."""
+
+  top_line = 120
+  height, width = window.getmaxyx()
+
+  outf = StringIO.StringIO()
+  render_diffs(files, hunks, outf, width)
+  lines = outf.getvalue().splitlines()
+
+  while True:
+    for line in xrange(0, height-2):
+      window.addstr(line, 0, lines[top_line + line])
+    # window.refresh()
+
+    input = window.getch()
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
