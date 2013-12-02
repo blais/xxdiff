@@ -393,7 +393,7 @@ def format_filename(filename, width):
 SEPARATOR = '|'
 
 
-def render_diffs(files, hunks, outf, width):
+def render_diffs__OLD(files, hunks, outf, width):
   """Render the diffs from the given filenames and hunks, to file object 'outf',
   and constrained by 'width' characters."""
 
@@ -500,6 +500,103 @@ def render_diffs(files, hunks, outf, width):
       render_line(outf, lineR, colR, width)
 
     outf.write('\n')
+
+
+def render_diffs__NEW(files, hunks, outf, width):
+  lines = linearize_diffs(files, hunks)
+  nfiles = len(files)
+
+  # FIXME: Continue, render the lines here.
+
+
+
+
+
+
+render_diffs = render_diffs__OLD
+
+
+def linearize_same_lines(files, maxline, lines):
+  nfiles = len(files)
+  nnewlines = 0
+  while maxline is None or files[L].lineno < maxline:
+    lineL = files[L].readline()
+    lineR = files[R].readline()
+    if nfiles != 2:
+      lineM = files[M].readline()
+
+    if not lineL and not lineR and (nfiles == 2 or not lineM):
+      break
+
+    if nfiles == 2:
+      colL, colR = HUNK_COLORS_2[LINE_SAME]
+      lines[L].append((lineL, LINE_SAME, colL, None))
+      lines[R].append((lineR, LINE_SAME, colR, None))
+    else:
+      colL, colM, colR = HUNK_COLORS_3[LINE_SAME]
+      lines[L].append((lineL, LINE_SAME, colL, None))
+      lines[M].append((lineM, LINE_SAME, colM, None))
+      lines[R].append((lineR, LINE_SAME, colR, None))
+    nnewlines += 1
+
+  return nnewlines
+
+
+def linearize_diffs(files, hunks):
+  """ Convert the file contents and hunks into lists of categorized lines."""
+
+  nfiles = len(files)
+  lines = tuple([] for _ in xrange(nfiles))
+
+  for hunk in hunks:
+    ##print '********************', hunk
+
+    # Check sizes
+    sizeL = hunk.linesL[0] - files[L].lineno
+    sizeR = hunk.linesR[0] - files[R].lineno
+    assert sizeL == sizeR, (str(hunk), files)
+    if nfiles == 3:
+      sizeM = hunk.linesM[0] - files[M].lineno
+      assert sizeM == sizeL, (hunk, files)
+
+    # Render same lines.
+    linearize_same_lines(files, hunk.linesL[0], lines)
+
+    # Render diff hunk.
+    while 1:
+      didread = False
+      lineL = lineR = lineM = None
+      if files[L].lineno < hunk.linesL[1]:
+        lineL = files[L].readline()
+        didread = True
+
+      if files[R].lineno < hunk.linesR[1]:
+        lineR = files[R].readline()
+        didread = True
+
+      if nfiles == 3 and files[M].lineno < hunk.linesM[1]:
+        lineM = files[M].readline()
+        didread = True
+
+      if not didread:
+        break
+
+      if nfiles == 2:
+        hd = compute_horizontal_diffs({L: lineL, R: lineR})
+        colL, colR = HUNK_COLORS_2[hunk.hunk_type]
+        lines[L].append((lineL, hunk.hunk_type, colL, hd[L]))
+        lines[R].append((lineR, hunk.hunk_type, colR, hd[R]))
+      else:
+        hd = compute_horizontal_diffs({L: lineL, R: lineR, M: lineM})
+        colL, colM, colR = HUNK_COLORS_3[hunk.hunk_type]
+        lines[L].append((lineL, hunk.hunk_type, colL, hd[L]))
+        lines[M].append((lineM, hunk.hunk_type, colM, hd[M]))
+        lines[R].append((lineR, hunk.hunk_type, colR, hd[R]))
+
+  # Render the same region at the end of the file.
+  linearize_same_lines(files, None, lines)
+
+  return lines
 
 
 def main():
