@@ -18,6 +18,8 @@ __author__ = 'Martin Blais <blais@furius.ca>'
 __copyright__ = 'GNU GPL v3'
 
 import curses
+import collections
+import itertools
 import difflib
 import os
 from os import path
@@ -213,8 +215,9 @@ class FileWithNo(object):
   __repr__ = __str__
 
   def readline(self):
+    lineno = self.lineno
     self.lineno += 1
-    return self.f.readline()
+    return (lineno, self.f.readline())
 
 
 class TruncLineWriter(object):
@@ -382,35 +385,28 @@ def compute_horizontal_diffs(lines):
   return indices
 
 
-def format_filename(filename, width):
-  """Format a filename for printability."""
-  if len(filename) > width:
-    return '...{}'.format(filename[-(width-3):])
-  else:
-    return filename
 
 
-SEPARATOR = '|'
 
 
-def render_diffs__OLD(files, hunks, outf, width):
-  """Render the diffs from the given filenames and hunks, to file object 'outf',
-  and constrained by 'width' characters."""
+Line = collections.namedtuple('Line', 'no text color hordiff hunk')
 
-  nfiles = len(files)
+def prerender_lines(filenames, hunks):
+  """Pre-render the lines to be rendered.
+  This routine reads all the file lines, processes the hunks and
+  returns a dict of L,R or L,M,R -> list of line tuples for each
+  file.
+  """
 
-  # Render the filenames as a title at the top.
-  render_line(outf, format_filename(files[L].name, width), COLOR_TITLE, width)
-  outf.write(SEPARATOR)
-  if nfiles == 3:
-    render_line(outf, format_filename(files[M].name, width), COLOR_TITLE, width)
-    outf.write(SEPARATOR)
-  render_line(outf, format_filename(files[R].name, width), COLOR_TITLE, width)
-  outf.write('\n')
+  # Create a dict of line-lists to return.
+  lines = dict((k, []) for k in filenames.iterkeys())
+
+  # Create file wrappers for each of the files. They will be processed by
+  # reading the exactly once.
+  files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
+  nfiles = len(filenames)
 
   for hunk in hunks:
-    ##print '********************', hunk
-
     # Check sizes
     sizeL = hunk.linesL[0] - files[L].lineno
     sizeR = hunk.linesR[0] - files[R].lineno
@@ -421,40 +417,35 @@ def render_diffs__OLD(files, hunks, outf, width):
 
     # Render same lines.
     while files[L].lineno < hunk.linesL[0]:
-      lineL = files[L].readline()
-      lineR = files[R].readline()
+      noL, lineL = files[L].readline()
+      noR, lineR = files[R].readline()
       if nfiles != 2:
-        lineM = files[M].readline()
+        noM, lineM = files[M].readline()
 
       if nfiles == 2:
         colL, colR = HUNK_COLORS_2[LINE_SAME]
-        render_line(outf, lineL, colL, width)
-        outf.write(SEPARATOR)
-        render_line(outf, lineR, colR, width)
+        lines[L].append(Line(noL, lineL, colL, None, None))
+        lines[R].append(Line(noR, lineR, colR, None, None))
       else:
         colL, colM, colR = HUNK_COLORS_3[LINE_SAME]
-        render_line(outf, lineL, colL, width)
-        outf.write(SEPARATOR)
-        render_line(outf, lineM, colM, width)
-        outf.write(SEPARATOR)
-        render_line(outf, lineR, colR, width)
-
-      outf.write('\n')
+        lines[L].append(Line(noL, lineL, colL, None, None))
+        lines[M].append(Line(noM, lineM, colM, None, None))
+        lines[R].append(Line(noR, lineR, colR, None, None))
 
     # Render diff hunk.
     while 1:
       didread = False
       lineL = lineR = lineM = None
       if files[L].lineno < hunk.linesL[1]:
-        lineL = files[L].readline()
+        noL, lineL = files[L].readline()
         didread = True
 
       if files[R].lineno < hunk.linesR[1]:
-        lineR = files[R].readline()
+        noR, lineR = files[R].readline()
         didread = True
 
       if nfiles == 3 and files[M].lineno < hunk.linesM[1]:
-        lineM = files[M].readline()
+        noM, lineM = files[M].readline()
         didread = True
 
       if not didread:
@@ -463,138 +454,35 @@ def render_diffs__OLD(files, hunks, outf, width):
       if nfiles == 2:
         hd = compute_horizontal_diffs({L: lineL, R: lineR})
         colL, colR = HUNK_COLORS_2[hunk.hunk_type]
-        render_line(outf, lineL, colL, width, hd[L])
-        outf.write(SEPARATOR)
-        render_line(outf, lineR, colR, width, hd[R])
+
+        lines[L].append(Line(noL, lineL, colL, hunk, hd[L]))
+        lines[R].append(Line(noR, lineR, colR, hunk, hd[R]))
       else:
         hd = compute_horizontal_diffs({L: lineL, R: lineR, M: lineM})
         colL, colM, colR = HUNK_COLORS_3[hunk.hunk_type]
-        render_line(outf, lineL, colL, width, hd[L])
-        outf.write(SEPARATOR)
-        render_line(outf, lineM, colM, width, hd[M])
-        outf.write(SEPARATOR)
-        render_line(outf, lineR, colR, width, hd[R])
-
-      outf.write('\n')
+        lines[L].append(Line(noL, lineL, colL, hunk, hd[L]))
+        lines[M].append(Line(noM, lineM, colM, hunk, hd[M]))
+        lines[R].append(Line(noR, lineR, colR, hunk, hd[R]))
 
   # Render the same region at the end of the file.
   while 1:
-    lineL = files[L].readline()
-    lineR = files[R].readline()
+    noL, lineL = files[L].readline()
+    noR, lineR = files[R].readline()
     if nfiles != 2:
-      lineM = files[M].readline()
-    if not lineL and not lineR and (nfiles == 2 or not lineM):
-      break
-
-    if nfiles == 2:
-      colL, colR = HUNK_COLORS_2[LINE_SAME]
-      render_line(outf, lineL, colL, width)
-      outf.write(SEPARATOR)
-      render_line(outf, lineR, colR, width)
-    else:
-      colL, colM, colR = HUNK_COLORS_3[LINE_SAME]
-      render_line(outf, lineL, colL, width)
-      outf.write(SEPARATOR)
-      render_line(outf, lineM, colM, width)
-      outf.write(SEPARATOR)
-      render_line(outf, lineR, colR, width)
-
-    outf.write('\n')
-
-
-def render_diffs__NEW(files, hunks, outf, width):
-  lines = linearize_diffs(files, hunks)
-  nfiles = len(files)
-
-  # FIXME: Continue, render the lines here.
-
-
-
-
-
-
-render_diffs = render_diffs__OLD
-
-
-def linearize_same_lines(files, maxline, lines):
-  nfiles = len(files)
-  nnewlines = 0
-  while maxline is None or files[L].lineno < maxline:
-    lineL = files[L].readline()
-    lineR = files[R].readline()
-    if nfiles != 2:
-      lineM = files[M].readline()
+      noM, lineM = files[M].readline()
 
     if not lineL and not lineR and (nfiles == 2 or not lineM):
       break
 
     if nfiles == 2:
       colL, colR = HUNK_COLORS_2[LINE_SAME]
-      lines[L].append((lineL, LINE_SAME, colL, None))
-      lines[R].append((lineR, LINE_SAME, colR, None))
+      lines[L].append(Line(noL, lineL, colL, None, None))
+      lines[R].append(Line(noR, lineR, colR, None, None))
     else:
       colL, colM, colR = HUNK_COLORS_3[LINE_SAME]
-      lines[L].append((lineL, LINE_SAME, colL, None))
-      lines[M].append((lineM, LINE_SAME, colM, None))
-      lines[R].append((lineR, LINE_SAME, colR, None))
-    nnewlines += 1
-
-  return nnewlines
-
-
-def linearize_diffs(files, hunks):
-  """ Convert the file contents and hunks into lists of categorized lines."""
-
-  nfiles = len(files)
-  lines = tuple([] for _ in xrange(nfiles))
-
-  for hunk in hunks:
-    ##print '********************', hunk
-
-    # Check sizes
-    sizeL = hunk.linesL[0] - files[L].lineno
-    sizeR = hunk.linesR[0] - files[R].lineno
-    assert sizeL == sizeR, (str(hunk), files)
-    if nfiles == 3:
-      sizeM = hunk.linesM[0] - files[M].lineno
-      assert sizeM == sizeL, (hunk, files)
-
-    # Render same lines.
-    linearize_same_lines(files, hunk.linesL[0], lines)
-
-    # Render diff hunk.
-    while 1:
-      didread = False
-      lineL = lineR = lineM = None
-      if files[L].lineno < hunk.linesL[1]:
-        lineL = files[L].readline()
-        didread = True
-
-      if files[R].lineno < hunk.linesR[1]:
-        lineR = files[R].readline()
-        didread = True
-
-      if nfiles == 3 and files[M].lineno < hunk.linesM[1]:
-        lineM = files[M].readline()
-        didread = True
-
-      if not didread:
-        break
-
-      if nfiles == 2:
-        hd = compute_horizontal_diffs({L: lineL, R: lineR})
-        colL, colR = HUNK_COLORS_2[hunk.hunk_type]
-        lines[L].append((lineL, hunk.hunk_type, colL, hd[L]))
-        lines[R].append((lineR, hunk.hunk_type, colR, hd[R]))
-      else:
-        hd = compute_horizontal_diffs({L: lineL, R: lineR, M: lineM})
-        colL, colM, colR = HUNK_COLORS_3[hunk.hunk_type]
-        lines[L].append((lineL, hunk.hunk_type, colL, hd[L]))
-        lines[M].append((lineM, hunk.hunk_type, colM, hd[M]))
-        lines[R].append((lineR, hunk.hunk_type, colR, hd[R]))
-
-  # Render the same region at the end of the file.
-  linearize_same_lines(files, None, lines)
+      lines[L].append(Line(noL, lineL, colL, None, None))
+      lines[M].append(Line(noM, lineM, colM, None, None))
+      lines[R].append(Line(noR, lineR, colR, None, None))
 
   return lines
 
@@ -607,10 +495,13 @@ def main():
   parser.add_argument('filenames', nargs='+',
                       help='Filenames')
 
-  parser.add_argument('-c', '--cat', action='store_true',
+  parser.add_argument('--cat', action='store_true',
                       help="Cat the output without a pager nor using curses.")
 
-  parser.add_argument('-p', '--pager', action='store',
+  parser.add_argument('--less', action='store_true',
+                      help=("Equivalent to --pager='less -r'."))
+
+  parser.add_argument('-P', '--pager', action='store',
                       help=("Cat the output into $PAGER. "
                             "Use --cat to just cat it out."))
 
@@ -639,6 +530,9 @@ def main():
   if opts.cat:
     opts.pager = '-'
     del opts.cat
+  elif opts.less:
+    opts.pager = 'less -r'
+    del opts.less
 
   nfiles = len(opts.filenames)
 
@@ -688,25 +582,24 @@ def main():
     else:
       parser.error("Invalid number of files: should be 2 or 3")
 
-    # Create file wrappers for each of the files. They will be processed by
-    # reading the exactly once.
-    files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
+    # Pre-process the lines to be aligned and ready for on-screen rendering.
+    lines = prerender_lines(filenames, hunks)
 
     if opts.pager:
-      render_with_cat(files, hunks, opts.pager)
+      render_with_cat(filenames, lines, opts.pager)
     else:
-      for hunk in hunks:
-        print hunk
-
+      render_with_cat(filenames, lines, opts.pager)
       #curses.wrapper(render_with_curses, files, hunks)
 
 
-def render_with_cat(files, hunks, pager):
-  """Render all the file to be piped into a pager."""
+#--------------------------------------------------------------------------------
+
+def render_with_cat(filenames, lines, pager):
+  """Render all the file as piped into a pager, no curses, simple."""
 
   # Get the terminal's width and compute how many characters we'll be able to
   # display.
-  nfiles = len(files)
+  nfiles = len(filenames)
   width = (curses.tigetnum('cols') - ((nfiles-1) * len(SEPARATOR))) / nfiles
 
   if pager != '-':
@@ -714,14 +607,60 @@ def render_with_cat(files, hunks, pager):
     p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE)
 
     sio = StringIO.StringIO()
-    render_diffs(files, hunks, p.stdin, width)
+    render_diffs(filenames, lines, p.stdin, width)
     p.communicate(sio.getvalue())
   else:
     # Write straight to the terminal.
-    render_diffs(files, hunks, sys.stdout, width)
+    render_diffs(filenames, lines, sys.stdout, width)
 
 
-def render_with_curses(window, files, hunks):
+SEPARATOR = '|'
+
+
+def render_diffs(filenames, lines, outf, width):
+  """Render the diffs from the given filenames and hunks, to file object 'outf',
+  and constrained by 'width' characters."""
+
+  nfiles = len(lines)
+
+  # Render the filenames as a title at the top.
+  render_line(outf, format_filename(filenames[L], width), COLOR_TITLE, width)
+  outf.write(SEPARATOR)
+  if nfiles == 3:
+    render_line(outf, format_filename(filenames[M], width), COLOR_TITLE, width)
+    outf.write(SEPARATOR)
+  render_line(outf, format_filename(filenames[R], width), COLOR_TITLE, width)
+  outf.write('\n')
+
+  if nfiles == 2:
+    for lineL, lineR in itertools.izip(lines[L], lines[R]):
+      render_line(outf, lineL.text, lineL.color, width)
+      outf.write(SEPARATOR)
+      render_line(outf, lineR.text, lineR.color, width)
+      outf.write('\n')
+  elif nfiles == 3:
+    for lineL, lineM, lineR in itertools.izip(lines[L], lines[M], lines[R]):
+      render_line(outf, lineL.text, lineL.color, width)
+      outf.write(SEPARATOR)
+      render_line(outf, lineM.text, lineM.color, width)
+      outf.write(SEPARATOR)
+      render_line(outf, lineR.text, lineR.color, width)
+      outf.write('\n')
+  else:
+    raise NotImplementedError("Invalid number of files.")
+
+
+def format_filename(filename, width):
+  """Format a filename for printability."""
+  if len(filename) > width:
+    return '...{}'.format(filename[-(width-3):])
+  else:
+    return filename
+
+
+#--------------------------------------------------------------------------------
+
+def render_with_curses(window, files, hunks, lines):
   """Render the output as a curses app."""
 
   top_line = 120
