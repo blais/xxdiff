@@ -217,7 +217,7 @@ class FileWithNo(object):
   def readline(self):
     lineno = self.lineno
     self.lineno += 1
-    return (lineno, self.f.readline())
+    return (lineno, self.f.readline()[:-1])
 
 
 class TruncLineWriter(object):
@@ -588,8 +588,7 @@ def main():
     if opts.pager:
       render_with_cat(filenames, lines, opts.pager)
     else:
-      render_with_cat(filenames, lines, opts.pager)
-      #curses.wrapper(render_with_curses, files, hunks)
+      curses.wrapper(render_with_curses, filenames, lines)
 
 
 #--------------------------------------------------------------------------------
@@ -660,22 +659,56 @@ def format_filename(filename, width):
 
 #--------------------------------------------------------------------------------
 
-def render_with_curses(window, files, hunks, lines):
+def render_with_curses(window, filenames, lines):
   """Render the output as a curses app."""
 
-  top_line = 120
-  height, width = window.getmaxyx()
+  ### window.stripspaces = False rem
 
-  outf = StringIO.StringIO()
-  render_diffs(files, hunks, outf, width)
-  lines = outf.getvalue().splitlines()
+  nfiles = len(filenames)
+  top_line = 0 ## FIXME: whatever
+  height, width = window.getmaxyx()
+  width2 = width / 2 - 1
+
+  # outf = StringIO.StringIO()
+  # render_diffs(files, hunks, outf, width)
+  # lines = outf.getvalue().splitlines()
+
+  curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_WHITE)
 
   while True:
-    for line in xrange(0, height-2):
-      window.addstr(line, 0, lines[top_line + line])
-    # window.refresh()
+    for screen_line in xrange(0, height-2):
+      line = top_line + screen_line
 
+      if nfiles == 2:
+        lineL = lines[L][line]
+        lineR = lines[R][line]
+        out = '{: <{:d}}{}{: <{:d}}'.format(
+          lineL.text if lineL.text else '',
+          width2, SEPARATOR,
+          lineR.text if lineR.text else '',
+          width2)
+        #render_line(outf, lineL.text, lineL.color, width)
+        ## outf.write('{:{:d}}'.format(lineR.text, width/2))
+        #render_line(outf, lineR.text, lineR.color, width)
+      else:
+        assert False
+        # lineL = lines[L][line]
+        # lineM = lines[M][line]
+        # lineR = lines[R][line]
+        # render_line(outf, lineL.text, lineL.color, width)
+        # outf.write(SEPARATOR)
+        # render_line(outf, lineM.text, lineM.color, width)
+        # outf.write(SEPARATOR)
+        # render_line(outf, lineR.text, lineR.color, width)
+
+      #window.addstr(screen_line, 0, out, curses.color_pair(1))
+      for x in xrange(0, len(out)):
+        window.addch(screen_line, x, out[x], curses.color_pair(1))
+
+
+    ##window.refresh()
     input = window.getch()
+    top_line += 1
 
 
 
