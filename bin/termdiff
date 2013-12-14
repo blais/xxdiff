@@ -662,7 +662,11 @@ def format_filename(filename, width):
 def render_with_curses(window, filenames, lines):
   """Render the output as a curses app."""
 
+
   ### window.stripspaces = False rem
+  ##  if curses.tigetflag('bce'):
+
+
 
   nfiles = len(filenames)
   top_line = 0 ## FIXME: whatever
@@ -701,9 +705,9 @@ def render_with_curses(window, filenames, lines):
         # outf.write(SEPARATOR)
         # render_line(outf, lineR.text, lineR.color, width)
 
-      #window.addstr(screen_line, 0, out, curses.color_pair(1))
-      for x in xrange(0, len(out)):
-        window.addch(screen_line, x, out[x], curses.color_pair(1))
+      window.addstr(screen_line, 0, out, curses.color_pair(1))
+      # for x in xrange(0, len(out)):
+      #   window.addch(screen_line, x, out[x], curses.color_pair(1))
 
 
     ##window.refresh()
@@ -716,7 +720,8 @@ def render_with_curses(window, filenames, lines):
 
 
 
-
+# See bce problem here: http://invisible-island.net/ncurses/ncurses.faq.html
+# nsterm works, xterm-color works
 
 
 
@@ -729,3 +734,5 @@ if __name__ == '__main__':
     # Make sure to reset the terminal properly when we're done.
     sys.stdout.write(curses.tparm(curses.tigetstr('setab'), 16))
     sys.stdout.write(curses.tparm(curses.tigetstr('setaf'), 15))
+
+
