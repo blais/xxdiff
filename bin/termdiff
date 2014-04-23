@@ -689,7 +689,7 @@ def main():
       parser.error("Invalid number of files: should be 2 or 3")
 
     # Create file wrappers for each of the files. They will be processed by
-    # reading the exactly once.
+    # reading them exactly once.
     files = dict((k, FileWithNo(open(v))) for (k, v) in filenames.iteritems())
 
     if opts.pager:
