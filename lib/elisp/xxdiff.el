@@ -110,9 +110,7 @@ kill-ring.  With prefix arg, compare the last three."
 		 selections))
 
     (let ((args (append (list xxdiff-exec nil nil nil) files)))
-      ;(prin1 args) ;; FIXME remove
       (apply 'call-process args)
-      ;(prin1 "DONE") ;; FIXME remove
       )
     (dolist (fn files)
       (when (file-exists-p fn) (delete-file fn)))
