@@ -63,7 +63,6 @@
 #endif
 
 //#define XX_DEBUG_TEXT  1
-
 #ifndef XX_DEBUG_TEXT
 #define XX_RED_RECT(x,y,w,h) x, y, w, h
 #define XX_RED_WIDTH(w) w
@@ -71,6 +70,7 @@
 #define XX_RED_RECT(x,y,w,h) x+1, y+1, w-2, h-2
 #define XX_RED_WIDTH(w) w+2
 #endif
+
 
 /*==============================================================================
  * LOCAL DECLARATIONS
@@ -135,7 +135,7 @@ inline void rentxt(
 
    if ( renNulHorizMarkers && xch == xend ) {
       p.fillRect(
-         XX_RED_RECT( xpx - 1, y, 1, fm.lineSpacing() ),
+         XX_RED_RECT( xpx - 1, y, 1, XxText::lineHeight(fm) ),
          p.background().color()
       );
       return;
@@ -155,12 +155,12 @@ inline void rentxt(
       // don't draw beyond the viewport, to avoid painting ON the frame decoration (Sunken)
       int minw = std::min( nw, p.viewport().width()-xpx );
       p.eraseRect(
-         XX_RED_RECT( xpx, y, minw, fm.lineSpacing() )
+         XX_RED_RECT( xpx, y, minw, XxText::lineHeight(fm) )
       );
 #endif
 
       p.drawText(
-         XX_RED_RECT( xpx, y+1, wwidth - xpx, fm.lineSpacing() ),
+         XX_RED_RECT( xpx, y, wwidth - xpx, XxText::lineHeight(fm) ),
          Qt::AlignLeft | Qt::AlignTop,
          str.left( rlen ),
          &brect
@@ -174,7 +174,7 @@ inline void rentxt(
          stipplePen.setStyle( Qt::DashLine );
          p.setPen( stipplePen );
          p.drawRect(
-            XX_RED_RECT( xpx, y, wwidth - xpx, fm.lineSpacing() )
+            XX_RED_RECT( xpx, y, wwidth - xpx, XxText::lineHeight(fm) )
          );
          p.setPen( pushPen );
       }
@@ -224,7 +224,7 @@ XxText::XxText(
 
    // Frame borders must be set equal to the one in XxLineNumbers for proper
    // vertical alignment of text.
-   
+
    // Initialize the vector of merged topLines
    if ( no == -1 ) {
        computeMergedLines();
@@ -328,7 +328,7 @@ void XxText::paintEvent( QPaintEvent *e )
    traceFontMetrics( fm );
 #endif
 
-   const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
+   const int HEIGHT_UNSEL_REGION = XxText::lineHeight(fm) / 2;
 
 
    // Make this OpaqueMode if the text drawing is to take care of the
@@ -633,12 +633,12 @@ void XxText::paintEvent( QPaintEvent *e )
          int fillerwidth = w - xpx;
          if ( fillerwidth > 0 ) {
             p.fillRect(
-               XX_RED_RECT( xpx, y, fillerwidth, fm.lineSpacing() ),
+               XX_RED_RECT( xpx, y, fillerwidth, XxText::lineHeight(fm) ),
                fillerBrush
             );
          }
 
-         y += fm.lineSpacing();
+         y += XxText::lineHeight(fm);
       }
       else {
 
@@ -648,7 +648,7 @@ void XxText::paintEvent( QPaintEvent *e )
             // The line is empty, just fill in the background.
             QBrush backBrush( bcolor );
             p.fillRect(
-               XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
+               XX_RED_RECT( 0, y, w, XxText::lineHeight(fm) ),
                backBrush
             );
 
@@ -656,12 +656,12 @@ void XxText::paintEvent( QPaintEvent *e )
                QBrush patBrush( bcolor.dark( 120 ), Qt::DiagCrossPattern );
                patBrush.setTransform( QTransform::fromTranslate( 0.0-horizontalPos, 0 ) );
                p.fillRect(
-                  XX_RED_RECT( 0, y, w, fm.lineSpacing() ),
+                  XX_RED_RECT( 0, y, w, XxText::lineHeight(fm) ),
                   patBrush
                );
             }
 
-            y += fm.lineSpacing();
+            y += XxText::lineHeight(fm);
          }
          else {
             // For merged view, render the first empty line as thin.
@@ -749,7 +749,7 @@ uint XxText::computeDisplayLines() const
 {
    const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
-   return contentsRect().height() / fm.lineSpacing() + 1;
+   return contentsRect().height() / XxText::lineHeight(fm) + 1;
 }
 
 //------------------------------------------------------------------------------
@@ -765,7 +765,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    const XxResources& resources = _app->getResources();
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
-   XxDln dlineno = event->y() / fm.lineSpacing();
+   XxDln dlineno = event->y() / XxText::lineHeight(fm);
    XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
@@ -797,7 +797,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
          _grabDeltaLineNo = dlineno;
 
          QClipboard* cb = QkApplication::clipboard();
-         cb->clear( cb->supportsSelection() ? 
+         cb->clear( cb->supportsSelection() ?
                        QClipboard::Selection :
                        QClipboard::Clipboard );
 
@@ -900,7 +900,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    }
 
    QClipboard* cb = QkApplication::clipboard();
-   cb->setText( textCopy, cb->supportsSelection() ? 
+   cb->setText( textCopy, cb->supportsSelection() ?
                              QClipboard::Selection :
                              QClipboard::Clipboard );
 
@@ -973,7 +973,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
    if ( _grabMode != NONE ) {
       const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
-      XxDln dlineno = event->y() / fm.lineSpacing();
+      XxDln dlineno = event->y() / XxText::lineHeight(fm);
 
       if ( _grabMode == MOUSE_DRAG ) {
          _sv->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
@@ -1016,7 +1016,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
 
             _dontClearOnce = true;
             QClipboard* cb = QkApplication::clipboard();
-            cb->setText( textCopy, cb->supportsSelection() ? 
+            cb->setText( textCopy, cb->supportsSelection() ?
                                       QClipboard::Selection :
                                       QClipboard::Clipboard );
          }
@@ -1045,7 +1045,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
 
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
-   XxDln dlineno = event->y() / fm.lineSpacing();
+   XxDln dlineno = event->y() / XxText::lineHeight(fm);
    XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
@@ -1095,10 +1095,10 @@ uint XxText::computeMergedLines()
 
    const QFont& font = _app->getResources().getFontText();
    QFontMetrics fm( font );
-   const int HEIGHT_UNSEL_REGION = fm.lineSpacing() / 2;
+   const int HEIGHT_UNSEL_REGION = XxText::lineHeight(fm) / 2;
 
    XxDln nbLines = diffs->getNbLines();
-   
+
    // (Re)allocate enough space to deal with nbLines
    if ( (uint)( nbLines + 1 ) > _idxMergedLinesSize ) {
        _idxMergedLinesSize = nbLines + 1;
@@ -1134,7 +1134,7 @@ uint XxText::computeMergedLines()
                   // Draw undecided marker.
                   //
                   y += HEIGHT_UNSEL_REGION;
-                  _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
+                  _idxMergedLines[(int)( ceilf( y/XxText::lineHeight(fm) ) )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_UNSEL_REGION " << y );
                }
                continue;
@@ -1147,7 +1147,7 @@ uint XxText::computeMergedLines()
                   // Draw neither marker.
                   //
                   y += HEIGHT_NEITHER_REGION;
-                  _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
+                  _idxMergedLines[(int)( ceilf( y/XxText::lineHeight(fm) ) )] = icurline;
                   XX_LOCAL_TRACE( "HEIGHT_NEITHER_REGION " << y );
                }
                continue;
@@ -1169,18 +1169,18 @@ uint XxText::computeMergedLines()
       XxFln fline = line.getLineNo( renNo );
       if ( fline != -1 ) {
 
-         y += fm.lineSpacing();
-         _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
-         XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
+         y += XxText::lineHeight(fm);
+         _idxMergedLines[(int)( ceilf( y/XxText::lineHeight(fm) ) )] = icurline;
+         XX_LOCAL_TRACE( "XxText::lineHeight(fm) " << y );
       }
       else {
 
          if ( !isMerged() ) {
 
             // The line is empty, just fill in the background.
-            y += fm.lineSpacing();
-            _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
-            XX_LOCAL_TRACE( "fm.lineSpacing() " << y );
+            y += XxText::lineHeight(fm);
+            _idxMergedLines[(int)( ceilf( y/XxText::lineHeight(fm) ) )] = icurline;
+            XX_LOCAL_TRACE( "XxText::lineHeight(fm) " << y );
          }
          else {
             // For merged view, render the first empty line as thin.
@@ -1191,17 +1191,17 @@ uint XxText::computeMergedLines()
                // Draw empty marker.
                //
                y += HEIGHT_EMPTY_REGION;
-               _idxMergedLines[(int)( ceilf( y/fm.lineSpacing() ) )] = icurline;
+               _idxMergedLines[(int)( ceilf( y/XxText::lineHeight(fm) ) )] = icurline;
                XX_LOCAL_TRACE( "HEIGHT_EMPTY_REGION " << y );
             }
          }
       }
    }
 
-   _mergedLines = ceilf( y/fm.lineSpacing() );
+   _mergedLines = ceilf( y/XxText::lineHeight(fm) );
 
    XX_LOCAL_TRACE( "y = " << y
-             << " ls = " << fm.lineSpacing()
+             << " ls = " << XxText::lineHeight(fm)
              << " difflines = " << nbLines );
 
    XX_LOCAL_TRACE( "_mergedLines = " << _mergedLines );
@@ -1313,4 +1313,3 @@ void XxText::clearRegionSelect()
 }
 
 XX_NAMESPACE_END
-

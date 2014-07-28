@@ -30,6 +30,7 @@
 #include <resources.h>
 #include <diffs.h>
 #include <buffer.h>
+#include <text.h>
 
 #include <QtGui/QPainter>
 #include <QtGui/QBrush>
@@ -55,10 +56,10 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-XxLineNumbers::XxLineNumbers( 
-   XxApp*          app, 
-   XxCentralFrame* central, 
-   const XxFno     no, 
+XxLineNumbers::XxLineNumbers(
+   XxApp*          app,
+   XxCentralFrame* central,
+   const XxFno     no,
    QWidget*        parent
 ) :
    QFrame( parent ),
@@ -128,7 +129,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
 
    const int x = 0;
    int y = 0;
-   for ( int ii = 0; ii < nbLines; ++ii, y += fm.lineSpacing() ) {
+   for ( int ii = 0; ii < nbLines; ++ii, y += XxText::lineHeight(fm) ) {
 
       // Get line to display.
       const XxLine& line = diffs->getLine( topLine + ii );
@@ -140,14 +141,14 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
       QColor bcolor;
       QColor fcolor;
       XxColor dtype, dtypeSup;
-      line.getLineColorType( 
+      line.getLineColorType(
          resources.getIgnoreFile(),
          _no,
          dtype, dtypeSup, false
       );
       resources.getRegionColor( dtype, bcolor, fcolor );
       QBrush brush( bcolor );
-      p.fillRect( x, y, w, fm.lineSpacing(), brush );
+      p.fillRect( x, y, w, XxText::lineHeight(fm), brush );
 #endif
 
       // Render text.
@@ -158,19 +159,19 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
          const QString& renderedNums =
             file->renderLineNumber( dfline, lnFormat );
 
-         p.drawText( x+2, y+1 + fm.ascent(), renderedNums );
+         p.drawText( x+2, y + fm.ascent(), renderedNums );
       }
    }
-   
+
    p.setPen( palette().color( backgroundRole() ).darker( 135 ) );
    p.drawLine( rect.topRight(), rect.bottomRight() );
-   
+
    // Draw line cursor.
    if ( !resources.getBoolOpt( BOOL_DISABLE_CURSOR_DISPLAY ) ) {
       XxDln cursorLine = _app->getCursorLine() - topLine;
       if ( cursorLine >= 0 && cursorLine < nbLines ) {
-         int cursorY1 = cursorLine * fm.lineSpacing();
-         int cursorY2 = cursorY1 + fm.lineSpacing();
+         int cursorY1 = cursorLine * XxText::lineHeight(fm);
+         int cursorY2 = cursorY1 + XxText::lineHeight(fm);
          QColor cursorColor = resources.getColor( COLOR_CURSOR );
          int w = rect.width();
          p.setPen( cursorColor );

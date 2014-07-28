@@ -40,6 +40,11 @@
 #define INCL_QT_QFRAME
 #endif
 
+#ifndef INCL_QT_QFONTMETRICS
+#include <QtGui/QFontMetrics>
+#define INCL_QT_QFONTMETRICS
+#endif
+
 #ifndef INCL_STD_VECTOR
 #include <vector>
 #define INCL_STD_VECTOR
@@ -52,6 +57,7 @@
 class QResizeEvent;
 class QWheelEvent;
 class QMouseEvent;
+class QFontMetrics;
 
 XX_NAMESPACE_BEGIN
 
@@ -69,7 +75,7 @@ class XxScrollView;
 // <summary> a text widget that can display diffs </summary>
 
 class XxText : public QFrame {
-   
+
    Q_OBJECT
 
 public:
@@ -78,7 +84,7 @@ public:
 
    // Constructor.  no is which file this text is supposed to display.  If you
    // use -1, this text will display the merged results.
-   XxText( 
+   XxText(
       XxApp*        app,
       XxScrollView* sv,
       const XxFno   no = -1,
@@ -104,7 +110,7 @@ public:
    // Computes approx. number of lines that would be needed to be fit inside a
    // merged view, and keep track of line positions.
    uint computeMergedLines();
-   
+
    // Returns approx. number of lines that would be needed to be fit inside a
    // merged view.
    uint getMergedLines() const;
@@ -115,10 +121,18 @@ public:
    // Returns the line number for a given line number in the merged view.
    XxDln getLineFromMergedLine( XxDln mergedLine ) const;
 
+   /*----- static member functions -----*/
+
+   // Global helper to return the chosen line spacing.
+   static inline int lineHeight(const QFontMetrics& fm)
+   {
+      return fm.height();
+   }
+
 public slots:
 
    virtual void clearRegionSelect();
-   
+
 protected:
 
    /*----- member functions -----*/

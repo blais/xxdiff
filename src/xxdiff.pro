@@ -117,7 +117,7 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 macx {
    # Icon used to the application bundle
    ICON = xxdiff.icns
-   
+
    # Special targets to quickly deploy a standalone mac package (just
    # containing the application) in a DMG image. Call it with "make deploy"
 
@@ -273,4 +273,4 @@ FORMS = \
 # 	$$DIFFUTILS_DIR/diff.o \
 # 	$$DIFFUTILS_DIR/diff3.o
 
-# SOURCES += diffutils.cpp 
+# SOURCES += diffutils.cpp

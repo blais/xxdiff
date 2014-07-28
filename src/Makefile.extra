@@ -4,12 +4,12 @@
 #
 
 # Extra targets.
-EXTRA_FILES = version.h doc.h 
+EXTRA_FILES = version.h doc.h
 
 .SUFFIXES: .html .txt .h
 
 
-# 
+#
 # resParser.o
 #
 
@@ -37,7 +37,7 @@ proginfo.obj: version.h
 
 # Convert the html/qml documentation to an C include file.
 # This needs to be automated.
-.html.h: 
+.html.h:
 	sed -e 's/\"/\\\"/g;s/$$/\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
 
 # Dependencies for the generated documentation file.
@@ -69,5 +69,4 @@ QMAKE = $(QTDIR)/bin/qmake
 all: Makefile
 
 Makefile: xxdiff.pro
-	$(MAKE) -f Makefile.bootstrap makefile
-
+	$(MAKE) -f Makefile.bootstrap Makefile
