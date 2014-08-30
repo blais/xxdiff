@@ -73,7 +73,7 @@ extern int resParserparse( void* );
 
 //------------------------------------------------------------------------------
 //
-void resParsererror( XxResources *, const char* msg )
+void resParsererror( const char* msg )
 {
    // Send errors to stdout so we can filter out the debug info shmeglu while
    // debugging parser.
@@ -794,7 +794,7 @@ int parseFromKeywordList(
       QString os;
       QTextStream oss( &os );
       oss << "Unknown " << errmsg << ": " << name << flush;
-      resParsererror( NULL, os.toLatin1().constData() );
+      resParsererror( os.toLatin1().constData() );
    }
    num = ERROR_TOKEN;
    return ERROR_TOKEN;

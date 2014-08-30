@@ -76,7 +76,7 @@ if ( input_stream_ptr->atEnd() ) {                                     \
    result = YY_NULL;                                                   \
 }                                                                      \
 else {                                                                 \
-   unsigned ii = 0;                                                         \
+   int ii = 0;                                                         \
    for ( ; (ii < max_size) && (!input_stream_ptr->atEnd()); ++ii ) {   \
 	(*input_stream_ptr) >> buf[ii]; \
    }                                                                   \
