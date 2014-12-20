@@ -8,6 +8,9 @@ Current Development Version
 Version 4.0b1: Port to Qt4 by Alexandre Feblot
 ----------------------------------------------
 
+* Merged patch by John Schmerge (<john dot schmerge at gmail dot com>) to make
+  build work with bison 2 and 3.
+
 * Merged in Rene J.V. Bertin's port to Windows 7 (<rjvbertin at gmail dot com>).
 
 * Alexandre Feblot submitted a port to Qt4 which also work on the
