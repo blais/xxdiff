@@ -20,11 +20,7 @@
  *
  ******************************************************************************/
 
-%union
-{
-    int   num;
-    char* str;
-}
+
 %{
 
 // xxdiff imports
@@ -39,12 +35,23 @@
 
 // The parser input is the resources object to fill in.
 #define RESOURCES  ( static_cast<XxResources*>(resources) )
-#define YYPARSE_PARAM resources
+%}
 
+%define api.pure
+
+%parse-param {XxResources * resources}
+
+%union
+{
+    int   num;
+    char* str;
+}
+
+%{
 // Declare lexer from other compilation unit.
 int resParserlex( YYSTYPE* yylval );
 
-void resParsererror( const char* msg );
+void resParsererror( void *, const char* msg );
 
 // Declare some parser functions and data defined in resParser.cpp
 namespace XxResParserNS {
@@ -54,9 +61,8 @@ bool readGeometry( const QString& val, QRect& geometry );
 }
 using namespace XxResParserNS; // Make sure we can use the above.
 
-
-
 %}
+
 
 /* generate header file */
 %defines
@@ -144,7 +150,6 @@ using namespace XxResParserNS; // Make sure we can use the above.
 %type <num> boolkwd
 
 %start xxdiffrc
-%pure_parser
 
 %%
 xxdiffrc	: stmts
@@ -188,7 +193,7 @@ prefgeometry	: PREFGEOMETRY COLON GEOMSPEC
                       RESOURCES->setPreferredGeometry( geometry );
                    }
                    else {
-                      yyerror( "Bad geometry specification." );
+                      yyerror( NULL, "Bad geometry specification." );
                       // Should never happen, the lexer regexp should be tough
                       // enough.
                    }
@@ -212,7 +217,7 @@ style		: STYLE COLON STRING
                       QString err = QString( "Requested style key does not exist." );
                       err += QString( "\nValid styles are: " );
                       err += styles.join( ", " );
-                      yyerror( err.toLatin1().constData() );
+                      yyerror( NULL, err.toLatin1().constData() );
                    }
                 }
                 ;
@@ -224,7 +229,7 @@ accel		: ACCEL DOT ACCELNAME COLON STRING
                       char buf[2048];
                       ::snprintf( buf, 2048,
                                   "Unrecognized accelerator: %s\n", $5 );
-                      yyerror( buf );
+                      yyerror( NULL, buf );
                    }
                 }
 		;

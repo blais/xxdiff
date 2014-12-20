@@ -69,11 +69,11 @@
  *============================================================================*/
 
 // Parser routine defined in the yacc parser.
-extern int resParserparse( void* );
+extern int resParserparse( XxResources* );
 
 //------------------------------------------------------------------------------
 //
-void resParsererror( const char* msg )
+void resParsererror( void *, const char* msg )
 {
    // Send errors to stdout so we can filter out the debug info shmeglu while
    // debugging parser.
@@ -794,7 +794,7 @@ int parseFromKeywordList(
       QString os;
       QTextStream oss( &os );
       oss << "Unknown " << errmsg << ": " << name << flush;
-      resParsererror( os.toLatin1().constData() );
+      resParsererror( NULL, os.toLatin1().constData() );
    }
    num = ERROR_TOKEN;
    return ERROR_TOKEN;
