@@ -719,6 +719,8 @@ def render_with_curses(window, filenames, lines):
 
 
 
+# FIXME: See hgview-curses source code for a great example!
+
 
 # See bce problem here: http://invisible-island.net/ncurses/ncurses.faq.html
 # nsterm works, xterm-color works
@@ -734,5 +736,3 @@ if __name__ == '__main__':
     # Make sure to reset the terminal properly when we're done.
     sys.stdout.write(curses.tparm(curses.tigetstr('setab'), 16))
     sys.stdout.write(curses.tparm(curses.tigetstr('setaf'), 15))
-
-
