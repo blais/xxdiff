@@ -58,7 +58,6 @@ def main():
         '--title2=Ancestor',
         '--title3=Merging',
         file_yours.name, file_original.name, file_theirs.name)
-    merged_name = mergedf.name
 
 
 if __name__ == '__main__':
