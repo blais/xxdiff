@@ -125,7 +125,7 @@ macx {
 
    # Copy all required frameworks (libs) in the bundle, and remove i386 part of libs (only keep x86_64)
    macdeployqt.target = $$BUNDLE/Contents/Resources/qt.conf
-   macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do lipo \$\$l -thin x86_64 -output \$\$l; done
+   macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do if [ \$\$(lipo \$\$l -info | grep -c 'Non-fat') != 1 ]; then lipo \$\$l -thin x86_64 -output \$\$l; fi; done
    macdeployqt.depends = $$BUNDLE
 
    # Create a dmg package

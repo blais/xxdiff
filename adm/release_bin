@@ -39,12 +39,15 @@ mkdir $ROOT/$PDIR
 cp -rf bin/* $ROOT/$PDIR
 
 if [ $PEXT = osx ]; then
+    rm -f $ROOT/$PDIR/*.dmg # the one created by make deploy
     if [ ! -e $ROOT/$PDIR/$BUNDLE/Contents/Resources/qt.conf ]; then
         # Copy all required Qt libs in the bundle
         macdeployqt $ROOT/$PDIR/$BUNDLE
         # Strip 32bit part of the libraries, to just keep the x86_64 part
         for lib in `find $ROOT/$PDIR/$BUNDLE -type f -name '*.dylib'; find $ROOT/$PDIR/$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do
-            lipo $lib -thin x86_64 -output $lib
+            if [ `lipo $lib -info | grep -c 'Non-fat'` != "1" ]; then
+                lipo $lib -thin x86_64 -output $lib
+            fi
         done
     fi
 fi
