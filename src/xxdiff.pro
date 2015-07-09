@@ -135,10 +135,20 @@ macx {
    dmg.commands = @hdiutil create -ov -fs HFS+ -srcfolder $$BUNDLE -volname $$quote("xxdiff\\ $$VER") $$DMG
    dmg.depends = $$macdeployqt.target $(TARGET)
 
+   # Crappy crap to generate and use a specific bison source file that is compatible with bison 2.3 (the default on OSX)
+   bison23lnk.target = resParser_yacc.h
+   bison23lnk.commands = rm -f resParser_yacc.h resParser_yacc.cpp; ln -s resParser_bison23_yacc.cpp resParser_yacc.cpp; ln -s resParser_bison23_yacc.h resParser_yacc.h
+   bison23lnk.depends = bison23src resParser_bison23_yacc.h resParser_bison23.y
+   bison23src.target = resParser_bison23.y
+   bison23src.commands = perl -pe \'s/define api.pure/pure-parser/\' resParser.y > resParser_bison23.y
+   bison23src.depends = 
+   YACCSOURCES = resParser_bison23.y
+   QMAKE_YACCFLAGS_MANGLE = -p resParser -b resParser
+
    # "public" rule
    deploy.depends = $$dmg.target
 
-   QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy
+   QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy bison23src bison23lnk
    QMAKE_CXXFLAGS -= -O2
    QMAKE_CXXFLAGS += -mdynamic-no-pic -O3 -ftracer -msse2 -msse3 -mssse3 -ftree-vectorize
 }
