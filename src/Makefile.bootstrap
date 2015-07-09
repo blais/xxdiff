@@ -5,7 +5,7 @@
 #
 
 # Rule to generate the qmake Makefile for building xxdiff.
-QMAKE ?= /usr/bin/qmake-qt4
+QMAKE ?= /usr/bin/qmake
 
 all: Makefile
 
