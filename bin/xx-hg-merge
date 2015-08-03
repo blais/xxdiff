@@ -42,7 +42,7 @@ def main():
 
     # Invoke xxdiff.
     mergedf = None
-    if not re.match('.*\\.asc$', fl):
+    if not re.match('.*\\.(asc|gpg)$', fl):
         decision, mergedf, __retcode = invoke.xxdiff_decision(
             opts,
             '--title1=Current',
