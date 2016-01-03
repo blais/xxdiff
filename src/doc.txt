@@ -979,7 +979,7 @@ Reporting bugs
 ==============
       
 
-All bug reports and feature requests should be submitted throught the
+All bug reports and feature requests should be submitted through the
 SourceForge bug tracking system at the following URL
 http://sourceforge.net/bugs/?group_id=2198.  Please avoid sending the author
 email about xxdiff bugs.  Please use this bug tracking system, it is extremely
