@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.8.1: http://docutils.sourceforge.net/" />
 <title>xxdiff documentation</title>
 <meta name="author" content="Martin Blais" />
 <meta name="date" content="2003-12-25" />
@@ -20,7 +20,7 @@
 <tr><th class="docinfo-name">Author:</th>
 <td>Martin Blais</td></tr>
 <tr><th class="docinfo-name">Contact:</th>
-<td><a class="first last reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a></td></tr>
+<td><a class="first last reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a></td></tr>
 <tr><th class="docinfo-name">Date:</th>
 <td>2003-12-25</td></tr>
 <tr><th class="docinfo-name">Copyright:</th>
@@ -30,92 +30,92 @@
 <div class="abstract topic">
 <p class="topic-title first">Abstract</p>
 <p>User's manual for xxdiff.  The official location of xxdiff on the internet is
-<a class="reference" href="http://xxdiff.sourceforge.net">http://xxdiff.sourceforge.net</a>.  If you're reading this page from the web, note
+<a class="reference external" href="http://xxdiff.sourceforge.net">http://xxdiff.sourceforge.net</a>.  If you're reading this page from the web, note
 that you can also access this document from the Help menu of xxdiff.</p>
 </div>
 <div class="contents topic" id="table-of-contents">
 <p class="topic-title first">Table of Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference" href="#introduction" id="id5">1&nbsp;&nbsp;&nbsp;Introduction</a></li>
-<li><a class="reference" href="#version" id="id6">2&nbsp;&nbsp;&nbsp;Version</a></li>
-<li><a class="reference" href="#invocation" id="id7">3&nbsp;&nbsp;&nbsp;Invocation</a><ul class="auto-toc">
-<li><a class="reference" href="#return-value" id="id8">3.1&nbsp;&nbsp;&nbsp;Return Value</a></li>
-<li><a class="reference" href="#command-line-options" id="id9">3.2&nbsp;&nbsp;&nbsp;Command-line Options</a></li>
-<li><a class="reference" href="#using-xxdiff-as-a-short-lived-application" id="id10">3.3&nbsp;&nbsp;&nbsp;Using xxdiff as a short-lived application</a></li>
+<li><a class="reference internal" href="#introduction" id="id5">1&nbsp;&nbsp;&nbsp;Introduction</a></li>
+<li><a class="reference internal" href="#version" id="id6">2&nbsp;&nbsp;&nbsp;Version</a></li>
+<li><a class="reference internal" href="#invocation" id="id7">3&nbsp;&nbsp;&nbsp;Invocation</a><ul class="auto-toc">
+<li><a class="reference internal" href="#return-value" id="id8">3.1&nbsp;&nbsp;&nbsp;Return Value</a></li>
+<li><a class="reference internal" href="#command-line-options" id="id9">3.2&nbsp;&nbsp;&nbsp;Command-line Options</a></li>
+<li><a class="reference internal" href="#using-xxdiff-as-a-short-lived-application" id="id10">3.3&nbsp;&nbsp;&nbsp;Using xxdiff as a short-lived application</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#general-operation" id="id11">4&nbsp;&nbsp;&nbsp;General operation</a><ul class="auto-toc">
-<li><a class="reference" href="#the-text-area" id="id12">4.1&nbsp;&nbsp;&nbsp;The text area</a><ul class="auto-toc">
-<li><a class="reference" href="#horizontal-diffs" id="id13">4.1.1&nbsp;&nbsp;&nbsp;Horizontal diffs</a></li>
-<li><a class="reference" href="#per-hunk-ignore-whitespace" id="id14">4.1.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></li>
-<li><a class="reference" href="#navigation" id="id15">4.1.3&nbsp;&nbsp;&nbsp;Navigation</a></li>
-<li><a class="reference" href="#pop-up-menu" id="id16">4.1.4&nbsp;&nbsp;&nbsp;Pop-up menu</a></li>
-<li><a class="reference" href="#searching" id="id17">4.1.5&nbsp;&nbsp;&nbsp;Searching</a></li>
-<li><a class="reference" href="#other-options" id="id18">4.1.6&nbsp;&nbsp;&nbsp;Other options</a></li>
-<li><a class="reference" href="#display-options" id="id19">4.1.7&nbsp;&nbsp;&nbsp;Display options</a></li>
+<li><a class="reference internal" href="#general-operation" id="id11">4&nbsp;&nbsp;&nbsp;General operation</a><ul class="auto-toc">
+<li><a class="reference internal" href="#the-text-area" id="id12">4.1&nbsp;&nbsp;&nbsp;The text area</a><ul class="auto-toc">
+<li><a class="reference internal" href="#horizontal-diffs" id="id13">4.1.1&nbsp;&nbsp;&nbsp;Horizontal diffs</a></li>
+<li><a class="reference internal" href="#per-hunk-ignore-whitespace" id="id14">4.1.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></li>
+<li><a class="reference internal" href="#navigation" id="id15">4.1.3&nbsp;&nbsp;&nbsp;Navigation</a></li>
+<li><a class="reference internal" href="#pop-up-menu" id="id16">4.1.4&nbsp;&nbsp;&nbsp;Pop-up menu</a></li>
+<li><a class="reference internal" href="#searching" id="id17">4.1.5&nbsp;&nbsp;&nbsp;Searching</a></li>
+<li><a class="reference internal" href="#other-options" id="id18">4.1.6&nbsp;&nbsp;&nbsp;Other options</a></li>
+<li><a class="reference internal" href="#display-options" id="id19">4.1.7&nbsp;&nbsp;&nbsp;Display options</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#redoing-the-diffs" id="id20">4.2&nbsp;&nbsp;&nbsp;Redoing the diffs</a></li>
-<li><a class="reference" href="#other-ui-elements" id="id21">4.3&nbsp;&nbsp;&nbsp;Other UI elements</a></li>
+<li><a class="reference internal" href="#redoing-the-diffs" id="id20">4.2&nbsp;&nbsp;&nbsp;Redoing the diffs</a></li>
+<li><a class="reference internal" href="#other-ui-elements" id="id21">4.3&nbsp;&nbsp;&nbsp;Other UI elements</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#comparing-two-files" id="id22">5&nbsp;&nbsp;&nbsp;Comparing two files</a><ul class="auto-toc">
-<li><a class="reference" href="#types-of-hunks" id="id23">5.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
-<li><a class="reference" href="#options" id="id24">5.2&nbsp;&nbsp;&nbsp;Options</a></li>
+<li><a class="reference internal" href="#comparing-two-files" id="id22">5&nbsp;&nbsp;&nbsp;Comparing two files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#types-of-hunks" id="id23">5.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
+<li><a class="reference internal" href="#options" id="id24">5.2&nbsp;&nbsp;&nbsp;Options</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#comparing-three-files" id="id25">6&nbsp;&nbsp;&nbsp;Comparing three files</a><ul class="auto-toc">
-<li><a class="reference" href="#id1" id="id26">6.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
-<li><a class="reference" href="#ignoring-one-file" id="id27">6.2&nbsp;&nbsp;&nbsp;Ignoring one file</a></li>
+<li><a class="reference internal" href="#comparing-three-files" id="id25">6&nbsp;&nbsp;&nbsp;Comparing three files</a><ul class="auto-toc">
+<li><a class="reference internal" href="#id1" id="id26">6.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
+<li><a class="reference internal" href="#ignoring-one-file" id="id27">6.2&nbsp;&nbsp;&nbsp;Ignoring one file</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#comparing-two-directories" id="id28">7&nbsp;&nbsp;&nbsp;Comparing two directories</a><ul class="auto-toc">
-<li><a class="reference" href="#id2" id="id29">7.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
-<li><a class="reference" href="#id3" id="id30">7.2&nbsp;&nbsp;&nbsp;Options</a></li>
-<li><a class="reference" href="#file-operations" id="id31">7.3&nbsp;&nbsp;&nbsp;File operations</a></li>
+<li><a class="reference internal" href="#comparing-two-directories" id="id28">7&nbsp;&nbsp;&nbsp;Comparing two directories</a><ul class="auto-toc">
+<li><a class="reference internal" href="#id2" id="id29">7.1&nbsp;&nbsp;&nbsp;Types of hunks</a></li>
+<li><a class="reference internal" href="#id3" id="id30">7.2&nbsp;&nbsp;&nbsp;Options</a></li>
+<li><a class="reference internal" href="#file-operations" id="id31">7.3&nbsp;&nbsp;&nbsp;File operations</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#merging-files-and-resolving-conflicts" id="id32">8&nbsp;&nbsp;&nbsp;Merging files and resolving conflicts</a><ul class="auto-toc">
-<li><a class="reference" href="#selecting-regions" id="id33">8.1&nbsp;&nbsp;&nbsp;Selecting regions</a></li>
-<li><a class="reference" href="#saving-the-resulting-file" id="id34">8.2&nbsp;&nbsp;&nbsp;Saving the resulting file</a><ul class="auto-toc">
-<li><a class="reference" href="#forcing-output-of-a-merged-file-and-better-script-integration" id="id35">8.2.1&nbsp;&nbsp;&nbsp;Forcing Output of a Merged File and Better Script Integration</a></li>
+<li><a class="reference internal" href="#merging-files-and-resolving-conflicts" id="id32">8&nbsp;&nbsp;&nbsp;Merging files and resolving conflicts</a><ul class="auto-toc">
+<li><a class="reference internal" href="#selecting-regions" id="id33">8.1&nbsp;&nbsp;&nbsp;Selecting regions</a></li>
+<li><a class="reference internal" href="#saving-the-resulting-file" id="id34">8.2&nbsp;&nbsp;&nbsp;Saving the resulting file</a><ul class="auto-toc">
+<li><a class="reference internal" href="#forcing-output-of-a-merged-file-and-better-script-integration" id="id35">8.2.1&nbsp;&nbsp;&nbsp;Forcing Output of a Merged File and Better Script Integration</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#rapid-sequential-merge-conflict-resolution" id="id36">8.3&nbsp;&nbsp;&nbsp;Rapid, sequential merge conflict resolution</a></li>
-<li><a class="reference" href="#automatic-merge" id="id37">8.4&nbsp;&nbsp;&nbsp;Automatic merge</a><ul class="auto-toc">
-<li><a class="reference" href="#requiring-an-output-file" id="id38">8.4.1&nbsp;&nbsp;&nbsp;Requiring an output file</a></li>
+<li><a class="reference internal" href="#rapid-sequential-merge-conflict-resolution" id="id36">8.3&nbsp;&nbsp;&nbsp;Rapid, sequential merge conflict resolution</a></li>
+<li><a class="reference internal" href="#automatic-merge" id="id37">8.4&nbsp;&nbsp;&nbsp;Automatic merge</a><ul class="auto-toc">
+<li><a class="reference internal" href="#requiring-an-output-file" id="id38">8.4.1&nbsp;&nbsp;&nbsp;Requiring an output file</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#merging-directories" id="id39">8.5&nbsp;&nbsp;&nbsp;Merging directories</a></li>
-<li><a class="reference" href="#merged-view" id="id40">8.6&nbsp;&nbsp;&nbsp;Merged view</a></li>
+<li><a class="reference internal" href="#merging-directories" id="id39">8.5&nbsp;&nbsp;&nbsp;Merging directories</a></li>
+<li><a class="reference internal" href="#merged-view" id="id40">8.6&nbsp;&nbsp;&nbsp;Merged view</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#merge-review-features" id="id41">9&nbsp;&nbsp;&nbsp;Merge review features</a><ul class="auto-toc">
-<li><a class="reference" href="#variable-text-selection" id="id42">9.1&nbsp;&nbsp;&nbsp;Variable text selection</a></li>
-<li><a class="reference" href="#id4" id="id43">9.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></li>
+<li><a class="reference internal" href="#merge-review-features" id="id41">9&nbsp;&nbsp;&nbsp;Merge review features</a><ul class="auto-toc">
+<li><a class="reference internal" href="#variable-text-selection" id="id42">9.1&nbsp;&nbsp;&nbsp;Variable text selection</a></li>
+<li><a class="reference internal" href="#id4" id="id43">9.2&nbsp;&nbsp;&nbsp;Per-hunk ignore whitespace</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#unmerging-merge-conflicts" id="id44">10&nbsp;&nbsp;&nbsp;Unmerging merge conflicts</a><ul class="auto-toc">
-<li><a class="reference" href="#unmerging-merge-conflicts-with-three-files" id="id45">10.1&nbsp;&nbsp;&nbsp;Unmerging merge conflicts with three files</a></li>
+<li><a class="reference internal" href="#unmerging-merge-conflicts" id="id44">10&nbsp;&nbsp;&nbsp;Unmerging merge conflicts</a><ul class="auto-toc">
+<li><a class="reference internal" href="#unmerging-merge-conflicts-with-three-files" id="id45">10.1&nbsp;&nbsp;&nbsp;Unmerging merge conflicts with three files</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#editing-files" id="id46">11&nbsp;&nbsp;&nbsp;Editing files</a></li>
-<li><a class="reference" href="#customization-using-resource-file" id="id47">12&nbsp;&nbsp;&nbsp;Customization using resource file</a><ul class="auto-toc">
-<li><a class="reference" href="#automatic-generation-of-the-resource-file" id="id48">12.1&nbsp;&nbsp;&nbsp;Automatic generation of the resource file</a></li>
+<li><a class="reference internal" href="#editing-files" id="id46">11&nbsp;&nbsp;&nbsp;Editing files</a></li>
+<li><a class="reference internal" href="#customization-using-resource-file" id="id47">12&nbsp;&nbsp;&nbsp;Customization using resource file</a><ul class="auto-toc">
+<li><a class="reference internal" href="#automatic-generation-of-the-resource-file" id="id48">12.1&nbsp;&nbsp;&nbsp;Automatic generation of the resource file</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#resource-reference" id="id49">13&nbsp;&nbsp;&nbsp;Resource reference</a></li>
-<li><a class="reference" href="#frequently-asked-questions-faq" id="id50">14&nbsp;&nbsp;&nbsp;Frequently Asked Questions (FAQ)</a><ul class="auto-toc">
-<li><a class="reference" href="#can-i-diff-files-with-crlf-dos-characters-in-them" id="id51">14.1&nbsp;&nbsp;&nbsp;Can I diff files with CRLF DOS characters in them?</a></li>
-<li><a class="reference" href="#how-do-i-make-xxdiff-display-the-revision-number-of-a-file" id="id52">14.2&nbsp;&nbsp;&nbsp;How do I make xxdiff display the revision number of a file?</a></li>
+<li><a class="reference internal" href="#resource-reference" id="id49">13&nbsp;&nbsp;&nbsp;Resource reference</a></li>
+<li><a class="reference internal" href="#frequently-asked-questions-faq" id="id50">14&nbsp;&nbsp;&nbsp;Frequently Asked Questions (FAQ)</a><ul class="auto-toc">
+<li><a class="reference internal" href="#can-i-diff-files-with-crlf-dos-characters-in-them" id="id51">14.1&nbsp;&nbsp;&nbsp;Can I diff files with CRLF DOS characters in them?</a></li>
+<li><a class="reference internal" href="#how-do-i-make-xxdiff-display-the-revision-number-of-a-file" id="id52">14.2&nbsp;&nbsp;&nbsp;How do I make xxdiff display the revision number of a file?</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#author" id="id53">15&nbsp;&nbsp;&nbsp;Author</a></li>
-<li><a class="reference" href="#reporting-bugs" id="id54">16&nbsp;&nbsp;&nbsp;Reporting bugs</a></li>
-<li><a class="reference" href="#project-history" id="id55">17&nbsp;&nbsp;&nbsp;Project history</a><ul class="auto-toc">
-<li><a class="reference" href="#licensing" id="id56">17.1&nbsp;&nbsp;&nbsp;Licensing</a></li>
-<li><a class="reference" href="#dependencies" id="id57">17.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
-<li><a class="reference" href="#acknowledgements" id="id58">17.3&nbsp;&nbsp;&nbsp;Acknowledgements</a></li>
+<li><a class="reference internal" href="#author" id="id53">15&nbsp;&nbsp;&nbsp;Author</a></li>
+<li><a class="reference internal" href="#reporting-bugs" id="id54">16&nbsp;&nbsp;&nbsp;Reporting bugs</a></li>
+<li><a class="reference internal" href="#project-history" id="id55">17&nbsp;&nbsp;&nbsp;Project history</a><ul class="auto-toc">
+<li><a class="reference internal" href="#licensing" id="id56">17.1&nbsp;&nbsp;&nbsp;Licensing</a></li>
+<li><a class="reference internal" href="#dependencies" id="id57">17.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
+<li><a class="reference internal" href="#acknowledgements" id="id58">17.3&nbsp;&nbsp;&nbsp;Acknowledgements</a></li>
 </ul>
 </li>
 </ul>
@@ -200,7 +200,7 @@ so there's no need to rewrite them.</p>
 <h1><a class="toc-backref" href="#id6">2&nbsp;&nbsp;&nbsp;Version</a></h1>
 <p>This documentation was generated for version:</p>
 <div id="version">
-  3.2
+  4.0
 </div></div>
 <div class="section" id="invocation">
 <h1><a class="toc-backref" href="#id7">3&nbsp;&nbsp;&nbsp;Invocation</a></h1>
@@ -217,9 +217,9 @@ For example, if you specify:</p>
 <pre class="literal-block">
 xxdiff dir1/bn1 dir2/bn2 dir3
 </pre>
-<p>xxdiff will be run on <tt class="docutils literal"><span class="pre">dir1/bn1</span></tt>, <tt class="docutils literal"><span class="pre">dir2/bn2</span></tt>, and <tt class="docutils literal"><span class="pre">dir3/bn1</span></tt>.</p>
+<p>xxdiff will be run on <tt class="docutils literal">dir1/bn1</tt>, <tt class="docutils literal">dir2/bn2</tt>, and <tt class="docutils literal">dir3/bn1</tt>.</p>
 <p>xxdiff can accept one of its inputs from stdin. You must replace the relevant
-filename by '<tt class="docutils literal"><span class="pre">-</span></tt>' (a dash) to instruct xxdiff to use stdin for that file,
+filename by '<tt class="docutils literal">-</tt>' (a dash) to instruct xxdiff to use stdin for that file,
 e.g.:</p>
 <pre class="literal-block">
 cat file2 | sort | xxdiff file1 - file3
@@ -367,6 +367,13 @@ Running under a debugger can cause an implicit -nograb, use -dograb to override.
 <td width="30%"><tt>--sync</tt></td>
 <td align=left>
 Switches to synchronous mode for debugging.
+</td>
+</tr>
+
+<tr>
+<td width="30%"><tt>--graphicssystem &lt;arg&gt;</tt></td>
+<td align=left>
+Sets the application graphics system. Possible values are raster, opengl (experimental), opengl1 (obsolete), x11, native. 
 </td>
 </tr>
 
@@ -529,13 +536,6 @@ Forces the user to take a decision upon exit. The user can choose between ACCEPT
 </tr>
 
 <tr>
-<td width="30%"><tt>--mac</tt></td>
-<td align=left>
-Split the file lines at single carriage returns instead of newlines.This should allow xxdiff working on Mac OSX.  Note that this will not enable xxdiff to process Mac files under UNIX, unless the underlying diff program that is invoked to compute the diffs supports the newlines. (This is not the case under Linux with GNU diff, for example.
-</td>
-</tr>
-
-<tr>
 <td width="30%"><tt>--indicate-input-processed</tt></td>
 <td align=left>
 Indicate that the input files have been entirely processed and are not needed anymore by printing out the string INPUT-PROCESSED on stdout as soon as possible. This can be used by scripts which create temporary files to delete those as soon as xxdiff has finished reading them. This only works from startup.
@@ -550,7 +550,7 @@ Copies the input streams/files into temporary files to perform diffing. This is 
 </tr>
 
 <tr>
-<td width="30%"><tt>--prompt-for-files</tt></td>
+<td width="30%"><tt>--prompt-for-files, -p &lt;arg&gt;</tt></td>
 <td align=left>
 If no files are specified on the command line, show a file dialog so that the user can select them. This option is ignored if any files are specified.
 </td>
@@ -763,7 +763,7 @@ specified column.  This can be used for alignment purposes or for verifying
 that a line doesn't extend beyond a specified number of characters (many
 people like to limit their source code to fit in e.g. 80 characters).</li>
 <li><strong>Merged view</strong>. A view of the file resulting from the currently selected
-regions (see section on <a class="reference" href="#merged-view">Merged view</a> below).</li>
+regions (see section on <a class="reference internal" href="#merged-view">Merged view</a> below).</li>
 </ul>
 </div>
 </div>
@@ -878,7 +878,7 @@ directories, and then to examine the pairs of files that have changed, all from
 that directory diff.  That functionality is available from the popup menu in the
 text area (right-click).</p>
 <p>You can also copy and remove files from that menu, see
-<a class="reference" href="#merging-files-and-resolving-conflicts">Merging files and resolving conflicts</a> section for details.</p>
+<a class="reference internal" href="#merging-files-and-resolving-conflicts">Merging files and resolving conflicts</a> section for details.</p>
 </div>
 </div>
 <div class="section" id="merging-files-and-resolving-conflicts">
@@ -1034,13 +1034,13 @@ clipboard text&quot; option.  The clipboard line format is a string that contain
 format specifiers similar to printf for each line to be formatted prior to being
 put on the clipboard.  The following specifiers are allowed:</p>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">%N</span></tt></dt>
+<dt><tt class="docutils literal">%N</tt></dt>
 <dd>file line (0 is leftmost file)</dd>
-<dt><tt class="docutils literal"><span class="pre">%L</span></tt></dt>
+<dt><tt class="docutils literal">%L</tt></dt>
 <dd>line number</dd>
-<dt><tt class="docutils literal"><span class="pre">%F</span></tt></dt>
+<dt><tt class="docutils literal">%F</tt></dt>
 <dd>filename</dd>
-<dt><tt class="docutils literal"><span class="pre">%s</span></tt></dt>
+<dt><tt class="docutils literal">%s</tt></dt>
 <dd>line contents</dd>
 </dl>
 <p>There is also a &quot;clipboard header format&quot; resource for adding the filename at
@@ -1136,7 +1136,7 @@ changed.</p>
 <h1><a class="toc-backref" href="#id47">12&nbsp;&nbsp;&nbsp;Customization using resource file</a></h1>
 <p>Much of the state of xxdiff can be customized through a resource file (actually,
 some of the features can only be changed through resource customization).
-By default, xxdiff looks for the file <tt class="docutils literal"><span class="pre">.xxdiffrc</span></tt> located in the user's
+By default, xxdiff looks for the file <tt class="docutils literal">.xxdiffrc</tt> located in the user's
 home directory (this file location can be overriden by setting the environment
 variable XXDIFFRC), and reads that file for resource definition.</p>
 <p>The format of the resource file is a fairly simple list of colon-separated
@@ -1175,7 +1175,7 @@ Geometry: 1200x600
 Preferred geometry upon initialization.  Format is the same a X geometry specification, plus you can also use `Maximize' to maximize on startup
 </BLOCKQUOTE>
 <PRE>
-Style: "SGI"
+Style: "Cleanlooks"
 </PRE>
 <BLOCKQUOTE>
 Preferred Qt style, see Qt documentation for more details. The style can otherwise be specified through command-line arguments.
@@ -1803,7 +1803,7 @@ Command.DiffDirectoriesRec: "diff -q -s -r"
 Command to use for comparing two directories, recursively.
 </BLOCKQUOTE>
 <PRE>
-Command.Edit: "emacsclient"
+Command.Edit: "/home/blais/p/conf/bin/e"
 </PRE>
 <BLOCKQUOTE>
 Command to use to spawn an editor on a file.
@@ -1857,16 +1857,28 @@ Tag.[NAME]: [True|False]
 <BLOCKQUOTE>
 Tags used for conditionals used for unselected regions, when that option is used to save files.
 <PRE>
-Tag.Conflict.Separator: "&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; File %d"
+Tag.Conflict.Start: "&lt;&lt;&lt;&lt;&lt;&lt;&lt; %L"
 </PRE>
 <BLOCKQUOTE>
-String used to separate chunks when saving with conflicts.
+String used to indicate the start of a merged merge conflict when saving with conflicts. Default is the CVS start tag.
 </BLOCKQUOTE>
 <PRE>
-Tag.Conflict.End: "&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;"
+Tag.Conflict.Sep: "======="
 </PRE>
 <BLOCKQUOTE>
-String used to end chunks when saving with conflicts.
+String used to separate sides of a merged merge conflict when saving with conflicts. Default is the CVS separator tag.
+</BLOCKQUOTE>
+<PRE>
+Tag.Conflict.SepExtra: "||||||| %M"
+</PRE>
+<BLOCKQUOTE>
+String used to separate sides of a merged 3-way merge conflict when saving with conflicts. Default is the tag generated by GNU diff3.
+</BLOCKQUOTE>
+<PRE>
+Tag.Conflict.End: "&gt;&gt;&gt;&gt;&gt;&gt;&gt; %R"
+</PRE>
+<BLOCKQUOTE>
+String used to end a merged merge conflict when saving with conflicts. Default is the CVS end tag.
 </BLOCKQUOTE>
 <PRE>
 Tag.Conditional.Ifdef: "#if defined( %s )"
@@ -1879,12 +1891,6 @@ Tag.Conditional.Elseif: "#elif defined( %s )"
 </PRE>
 <BLOCKQUOTE>
 Elseif string used when saving with conditionals.
-</BLOCKQUOTE>
-<PRE>
-Tag.Conditional.Else: "#else"
-</PRE>
-<BLOCKQUOTE>
-Else string used when saving with conditionals.
 </BLOCKQUOTE>
 <PRE>
 Tag.Conditional.Endif: "#endif"
@@ -1902,7 +1908,7 @@ Tag that appears at the beginning of a line in a merged file to indicate the sta
 Tag.Unmerge.Sep: "^=======\s*$"
 </PRE>
 <BLOCKQUOTE>
-Tag that appears at the beginning of a line in a merged file to separate sides of a merged merge conflict. Default is the CVS start tag.
+Tag that appears at the beginning of a line in a merged file to separate sides of a merged merge conflict. Default is the CVS separator tag.
 </BLOCKQUOTE>
 <PRE>
 Tag.Unmerge.SepExtra: "^\|\|\|\|\|\|\| (.*)$"
@@ -1914,7 +1920,7 @@ Tag that appears at the beginning of a line in a merged file to separate sides o
 Tag.Unmerge.End: "^&gt;&gt;&gt;&gt;&gt;&gt;&gt; (.*)$"
 </PRE>
 <BLOCKQUOTE>
-Tag that appears at the beginning of a line in a merged file to indicate the end of a merged merge conflict. Default is the CVS start tag.
+Tag that appears at the beginning of a line in a merged file to indicate the end of a merged merge conflict. Default is the CVS end tag.
 </BLOCKQUOTE>
 </BLOCKQUOTE>
 <PRE>
@@ -1982,13 +1988,13 @@ current revision number.</p>
 <div class="section" id="author">
 <h1><a class="toc-backref" href="#id53">15&nbsp;&nbsp;&nbsp;Author</a></h1>
 <p>This program has been written from scratch and is being actively maintained by
-<strong>Martin Blais</strong> (<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>).</p>
+<strong>Martin Blais</strong> (<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>).</p>
 </div>
 <div class="section" id="reporting-bugs">
 <h1><a class="toc-backref" href="#id54">16&nbsp;&nbsp;&nbsp;Reporting bugs</a></h1>
 <p>All bug reports and feature requests should be submitted throught the
 SourceForge bug tracking system at the following URL
-<a class="reference" href="http://sourceforge.net/bugs/?group_id=2198">http://sourceforge.net/bugs/?group_id=2198</a>.  Please avoid sending the author
+<a class="reference external" href="http://sourceforge.net/bugs/?group_id=2198">http://sourceforge.net/bugs/?group_id=2198</a>.  Please avoid sending the author
 email about xxdiff bugs.  Please use this bug tracking system, it is extremely
 fast and simple to use.</p>
 </div>
@@ -2005,12 +2011,12 @@ It has reached a stable state.</p>
 <div class="section" id="licensing">
 <h2><a class="toc-backref" href="#id56">17.1&nbsp;&nbsp;&nbsp;Licensing</a></h2>
 <p>This program is distributed under the GNU General Public License. See the
-<a class="reference" href="http://www.gnu.org">GNU project website</a> for full details.</p>
+<a class="reference external" href="http://www.gnu.org">GNU project website</a> for full details.</p>
 </div>
 <div class="section" id="dependencies">
 <h2><a class="toc-backref" href="#id57">17.2&nbsp;&nbsp;&nbsp;Dependencies</a></h2>
 <p>This program depends on the availability of a textual diff program (such as GNU
-diff) and the Qt UI toolkit (available at <a class="reference" href="http://trolltech.com">http://trolltech.com</a>).</p>
+diff) and the Qt UI toolkit (available at <a class="reference external" href="http://trolltech.com">http://trolltech.com</a>).</p>
 </div>
 <div class="section" id="acknowledgements">
 <h2><a class="toc-backref" href="#id58">17.3&nbsp;&nbsp;&nbsp;Acknowledgements</a></h2>
