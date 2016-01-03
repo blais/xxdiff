@@ -726,7 +726,7 @@ showing the merge output, that updates interactively as you make selections.
 This view will scroll to match the main display.  Unselected regions are shown
 in this view with oblique lines ("in construction" style), and merge decisions
 are slightly highlighted as well.  This output allows you to review the merge
-decisions before commiting the file to output.
+decisions before committing the file to output.
 
 
 
@@ -892,7 +892,7 @@ Customization using resource file
 Much of the state of xxdiff can be customized through a resource file (actually,
 some of the features can only be changed through resource customization).
 By default, xxdiff looks for the file ``.xxdiffrc`` located in the user's
-home directory (this file location can be overriden by setting the environment
+home directory (this file location can be overridden by setting the environment
 variable XXDIFFRC), and reads that file for resource definition.
 
 
@@ -912,7 +912,7 @@ specification, but not all (see below).
 
 
 You can also specify additional resources on the command-line, which take
-precendence over the resources specified in the resource file.  To get a
+precedence over the resources specified in the resource file.  To get a
 complete list of the available resources, use the ``--list-resources``
 command-line option (see Options section).
 
@@ -979,7 +979,7 @@ Reporting bugs
 ==============
       
 
-All bug reports and feature requests should be submitted throught the
+All bug reports and feature requests should be submitted through the
 SourceForge bug tracking system at the following URL
 http://sourceforge.net/bugs/?group_id=2198.  Please avoid sending the author
 email about xxdiff bugs.  Please use this bug tracking system, it is extremely

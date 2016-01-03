@@ -49,6 +49,11 @@ TARGET = xxdiff
 debug:QMAKE_CFLAGS += -DXX_DEBUG
 debug:QMAKE_CXXFLAGS += -DXX_DEBUG
 
+# Support Debian hardening flags
+QMAKE_CXXFLAGS += $$(CPPFLAGS) $$(CXXFLAGS)
+QMAKE_CFLAGS += $$(CPPFLAGS) $$(CFLAGS)
+QMAKE_LFLAGS += $$(LDFLAGS)
+
 
 #
 # Parser/grammar generation.

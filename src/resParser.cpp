@@ -213,7 +213,7 @@ view on startup." },
 
    { "MergedFilename", MERGED_FILENAME,
      "Default merged filename. %L, %M, %R can be used as placeholders for \
-left, middle and right filenames repectively. Note that ClearCase suffixes \
+left, middle and right filenames respectively. Note that ClearCase suffixes \
 are stripped automatically." },
 
 };

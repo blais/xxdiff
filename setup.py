@@ -69,6 +69,7 @@ http://furius.ca/xxdiff/doc/xxdiff-scripts.html
       package_dir = {'': 'lib/python'},
       packages = ['xxdiff',
                   join('xxdiff', 'scripts'),
-                  join('xxdiff', 'scm')],
+                  join('xxdiff', 'scm'),
+                  join('xxdiff', 'db')],
       scripts = allscripts
      )

@@ -1,14 +1,10 @@
-#!/bin/sh
-#
-# $Id: bashrc 760 2004-02-09 18:51:12Z blais $
-# $Source$
 #
 # Bash configuration for this project.
 #
 
 # Make bash invoke optcomplete completion for the scripts.
 #
-# This is not necessary for other users, the scripts will work without 
+# This is not necessary for other users, the scripts will work without
 # auto-generated programmable completion.
 complete -F _optcomplete svn-foreign
 complete -F _optcomplete xx-cond-replace

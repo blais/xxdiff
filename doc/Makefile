@@ -14,7 +14,7 @@ TXTDOC=						\
 
 TXTDOC_HTML = $(TXTDOC:.txt=.html)
 
-TXTHTML_CONVERT=projects-rst2html --project-header  --project-home=".."
+TXTHTML_CONVERT=projects-rst2html --project-header  --project-home="http://furius.ca/xxdiff"
 
 BIN=../bin
 
@@ -61,4 +61,3 @@ debug:
 	@echo $(SCRIPTS)
 	@echo TOOLS_HTML
 	@echo $(TOOLS_HTML)
-

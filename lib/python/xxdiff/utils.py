@@ -52,6 +52,7 @@ def idify(s, strip=True, preserve_chars=[]):
 # options were taken from Ian F. Darwin's file implementation.
 guesscmd = ['file', '-b', '-L']
 text_re = re.compile('\\btext\\b')
+xml_re = re.compile('\\bXML\\b')
 empty_re = re.compile('^empty$')
 
 def istextfile(fn):
@@ -68,7 +69,7 @@ def istextfile(fn):
     if p.returncode != 0 or stderr or stdout.startswith('cannot open'):
         raise RuntimeError("Error: running 'file' on '%s'." % fn)
 
-    return bool(text_re.search(stdout) or empty_re.match(stdout))
+    return bool(text_re.search(stdout) or xml_re.search(stdout) or empty_re.match(stdout))
 
 
 def makedirs(dirn, error_on_exist=True):
