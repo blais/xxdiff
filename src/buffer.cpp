@@ -457,7 +457,7 @@ void XxBuffer::reindex( const std::vector<XxFln>& reindexTbl )
    std::swap( _index, oldIndex );
 
 #ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
-   std::vector<size_t> oldLengths;
+   std::vector<short> oldLengths;
    std::swap( _lengths, oldLengths );
 #endif
 
