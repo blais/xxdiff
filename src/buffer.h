@@ -277,7 +277,7 @@ private:
    // unmerge feature was introduced, we're sharing the very text buffer that
    // the multiple buffers use we cannot anymore rely on buffer lines appearing
    // next to each other in the data array.
-   std::vector<short> _lengths;
+   std::vector<size_t> _lengths;
 #endif
 
    // Indirection index for reindexed files. This array contains the line

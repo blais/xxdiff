@@ -61,7 +61,7 @@ clean_extra:
 
 
 # Override the qmake we use because the one in the path might be different.
-QMAKE = $(QTDIR)/bin/qmake
+QMAKE = qmake
 
 
 # Note: we would need to add this to be correct.  Danger!  If the Makefile gets

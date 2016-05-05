@@ -49,6 +49,12 @@ Here's the configuration I use in my .hgrc::
   **.asc = xx-encrypted
   **.gpg = xx-encrypted
 
+Alternatively, you may just use xx-hg-merge which deals with all file types,
+encrypted or not:
+
+  [merge-patterns]
+  ** = xx-hg-merge
+
 """
 
 __moredoc__ = """
@@ -172,7 +178,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
         fin.close()
         encoded_output = fout.read()
         fout.close()
-        
+
         # Write out the encoded output file.
         try:
             f = open(outmerged, 'w')

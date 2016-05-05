@@ -4,23 +4,10 @@ A wrapper script that implements an interface compatible with hgmerge.
 Basically, it needs to exit with 0 on success, and to place the results of the
 merge in the 'left' file.
 
-Note [2013-08-04]: this script is probably not necessary anymore.
-You can use the following Mercurial configuration instead:
-
-  [merge-tools]
-  xx-encrypted =
-  xx-encrypted.priority = 100
-  xx-encrypted.premerge = False
-  xx-encrypted.args = $local $base $other -o $output
-  xxdiff =
-  xxdiff.priority = 100
-  xxdiff.premerge = False
-  xxdiff.args = --decision $local $base $other -M $output
+Use it like this:
 
   [merge-patterns]
-  **.asc = xx-encrypted
-  **.gpg = xx-encrypted
-  ** = xxdiff
+  ** = xx-hg-merge
 
 """
 
@@ -55,7 +42,7 @@ def main():
 
     # Invoke xxdiff.
     mergedf = None
-    if not re.match('.*\\.asc$', fl):
+    if not re.match('.*\\.(asc|gpg)$', fl):
         decision, mergedf, __retcode = invoke.xxdiff_decision(
             opts,
             '--title1=Current',
