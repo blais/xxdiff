@@ -5,6 +5,12 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+Version 4.0.1: Port to Qt4 by Alexandre Feblot
+----------------------------------------------
+
+Just an update of the tarball with various bug fixes over 3 years.
+
+
 Version 4.0b1: Port to Qt4 by Alexandre Feblot
 ----------------------------------------------
 
