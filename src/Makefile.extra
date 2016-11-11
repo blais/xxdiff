@@ -4,7 +4,7 @@
 #
 
 # Extra targets.
-EXTRA_FILES = version.h doc.h
+EXTRA_FILES = version.h $(MAKEDIR)/doc.h
 
 .SUFFIXES: .html .txt .h
 
@@ -23,8 +23,8 @@ resParser.cpp: resParser_lex.h
 #
 
 # Automatically generate a simple include file with version number in it.
-version.h: ../VERSION
-	echo "#define XX_VERSION \"`cat ../VERSION`\"" > $@
+version.h: $(MAKEDIR)/../VERSION
+	echo "#define XX_VERSION \"`cat $(MAKEDIR)/../VERSION`\"" > $@
 
 # Dependencies for the generated version file.
 proginfo.o: version.h
@@ -41,8 +41,8 @@ proginfo.obj: version.h
 	sed -e 's/\"/\\\"/g;s/$$/\\n\\/;1s/^/char text[]=\"/;$$s/\\$$/\"\;/' $< > $@
 
 # Dependencies for the generated documentation file.
-help.o: doc.h
-help.obj: doc.h
+help.o: $(MAKEDIR)/doc.h
+help.obj: $(MAKEDIR)/doc.h
 
 # Convert the reStructuredText documentation to html.  (this is only used by the
 # author, directly, manually, not that important for xxdiff packagers.)
@@ -60,13 +60,9 @@ clean_extra:
 	rm -f $(EXTRA_FILES)
 
 
-# Override the qmake we use because the one in the path might be different.
-QMAKE = qmake
-
-
 # Note: we would need to add this to be correct.  Danger!  If the Makefile gets
 # remade, this file does not get appended again to the new makefile!
 all: Makefile
 
-Makefile: xxdiff.pro
-	$(MAKE) -f Makefile.bootstrap Makefile
+Makefile: $(MAKEDIR)/xxdiff.pro
+	$(MAKE) -f $(MAKEDIR)/Makefile.bootstrap Makefile

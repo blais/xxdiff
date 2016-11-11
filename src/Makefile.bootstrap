@@ -6,6 +6,8 @@
 
 # Rule to generate the qmake Makefile for building xxdiff.
 QMAKE ?= /usr/bin/qmake
+MAKEDIR ?= .
+QMAKEOPTS =
 
 all: Makefile
 
@@ -15,9 +17,10 @@ ifeq ($(OS),Darwin)
     export QMAKESPEC=macx-g++
 endif
 
-Makefile.qmake: xxdiff.pro
-	$(QMAKE) -o Makefile.qmake $<
+Makefile.qmake: $(MAKEDIR)/xxdiff.pro
+	$(QMAKE) $(QMAKEOPTS) -o Makefile.qmake $<
 
-Makefile: Makefile.qmake Makefile.extra
-	cat $^ > Makefile
+Makefile: Makefile.qmake $(MAKEDIR)/Makefile.extra
+	echo "MAKEDIR = $(MAKEDIR)" > Makefile
+	cat $^ >> Makefile
 
