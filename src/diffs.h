@@ -40,7 +40,7 @@
 #endif
 
 #ifndef INCL_QT_QOBJECT
-#include <QtCore/QObject>
+#include <QObject>
 #define INCL_QT_QOBJECT
 #endif
 

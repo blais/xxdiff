@@ -32,14 +32,14 @@
 #include <buffer.h>
 #include <text.h>
 
-#include <QtGui/QPainter>
-#include <QtGui/QBrush>
-#include <QtGui/QPen>
-#include <QtGui/QColor>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QColor>
 
-#include <QtGui/QApplication>
-#include <QtGui/QClipboard>
-#include <QtGui/QFrame>
+#include <QApplication>
+#include <QClipboard>
+#include <QFrame>
 
 #include <math.h>
 #include <stdio.h>

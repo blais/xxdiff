@@ -43,16 +43,16 @@
 
 #include <kdeSupport.h>
 
-#include <QtGui/QKeySequence>
-#include <QtGui/QApplication>
-#include <QtGui/QFont>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QByteArray>
-#include <QtCore/QString>
-#include <QtGui/QStyleFactory>
-#include <QtGui/QDesktopWidget>
-#include <QtCore/QTextStream>
+#include <QKeySequence>
+#include <QApplication>
+#include <QFont>
+#include <QFile>
+#include <QFileInfo>
+#include <QByteArray>
+#include <QString>
+#include <QStyleFactory>
+#include <QDesktopWidget>
+#include <QTextStream>
 
 #include <stdexcept>
 #include <iostream>

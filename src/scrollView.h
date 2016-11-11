@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QWIDGET
-#include <QtGui/QWidget>
+#include <QWidget>
 #define INCL_QT_QWIDGET
 #endif
 

@@ -28,13 +28,13 @@
 
 #include <kdeSupport.h>
 
-#include <QtGui/QToolTip>
+#include <QToolTip>
 
-#include <QtGui/QApplication>
-#include <QtGui/QClipboard>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QLabel>
+#include <QApplication>
+#include <QClipboard>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QLabel>
 
 
 /*==============================================================================

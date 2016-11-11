@@ -35,19 +35,19 @@
 #include <borderLabel.h>
 #include <help.h>
 
-#include <QtGui/QPainter>
-#include <QtGui/QBrush>
-#include <QtGui/QPen>
-#include <QtGui/QColor>
-#include <QtGui/QLayout>
-#include <QtGui/QShortcut>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QColor>
+#include <QLayout>
+#include <QShortcut>
 
-#include <QtGui/QApplication>
-#include <QtGui/QClipboard>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QFrame>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
+#include <QApplication>
+#include <QClipboard>
+#include <QHBoxLayout>
+#include <QFrame>
+#include <QLabel>
+#include <QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>

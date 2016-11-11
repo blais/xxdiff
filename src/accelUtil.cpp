@@ -27,7 +27,7 @@
 #include <accelUtil.h>
 #include <resources.h>
 
-#include <QtGui/QKeySequence>
+#include <QKeySequence>
 
 #include <iostream>
 #include <string.h>
@@ -49,7 +49,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
    QString cval = val.trimmed().toLower();
 
    QKeySequence keyseq = QKeySequence::fromString( cval );
-   accel = (int)keyseq;
+   accel = keyseq[0];
    
    // Check that converting back gets the original value
    return ( cval == keyseq.toString().toLower() );
@@ -59,7 +59,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 //
 void XxAccelUtil::write( std::ostream& os, int accel )
 {
-   os << QKeySequence( accel ).toString().toAscii().constData();
+   os << QKeySequence( accel ).toString().toLatin1().constData();
 }
 
 XX_NAMESPACE_END

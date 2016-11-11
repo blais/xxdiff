@@ -29,9 +29,9 @@
 #include <buffer.h>
 #include <resources.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QTextStream>
-#include <QtCore/QRegExp>
+#include <QByteArray>
+#include <QTextStream>
+#include <QRegExp>
 
 #include <stdio.h>
 #include <iostream>

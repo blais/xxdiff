@@ -28,12 +28,12 @@
 #include <exceptions.h>
 #include <main.h>
 
-#include <QtCore/QString>
-#include <QtCore/QByteArray>
-#include <QtCore/QTextStream>
-#include <QtCore/QFileInfo>
-#include <QtCore/QRegExp>
-#include <QtCore/QDateTime>
+#include <QString>
+#include <QByteArray>
+#include <QTextStream>
+#include <QFileInfo>
+#include <QRegExp>
+#include <QDateTime>
 
 #include <iostream>
 #include <sys/types.h>
@@ -235,7 +235,7 @@ void formatPrintFunc(
       case 'U': { // - User name of owner
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.owner().toAscii().constData() );
+         tmp.sprintf( pformat,qfi.owner().toLatin1().constData() );
          target.append( tmp );
       } break;
 
@@ -249,7 +249,7 @@ void formatPrintFunc(
       case 'G': { // - Group name of owner
          strcat( pformat, "s" );
          QString tmp;
-         tmp.sprintf( pformat,qfi.group().toAscii().constData() );
+         tmp.sprintf( pformat,qfi.group().toLatin1().constData() );
          target.append( tmp );
       } break;
 
@@ -280,7 +280,7 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastRead().toString( DATEFORMAT ).toAscii().constData() );
+                      qfi.lastRead().toString( DATEFORMAT ).toLatin1().constData() );
          target.append( tmp );
       } break;
 
@@ -297,7 +297,7 @@ void formatPrintFunc(
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
          tmp.sprintf( pformat,
-                      qfi.lastModified().toString( DATEFORMAT ).toAscii().constData() );
+                      qfi.lastModified().toString( DATEFORMAT ).toLatin1().constData() );
          target.append( tmp );
       } break;
 
@@ -383,7 +383,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toAscii().constData()
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toLatin1().constData()
          );
          target.append( tmp );
       } break;
@@ -403,7 +403,7 @@ void formatPrintFunc(
          // and stat uses some weird syntax of it's own.
          tmp.sprintf(
             pformat,
-            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toAscii().constData() );
+            ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toLatin1().constData() );
          target.append( tmp );
       } break;
 
@@ -793,7 +793,7 @@ QString XxUtil::unescapeChars( const QString& format )
 	   break;
        // use at() in case found+1 is past the end of the string
        QChar escapedChar = newFormat.at( found+1 );
-       switch( escapedChar.toAscii() ) {
+       switch( escapedChar.toLatin1() ) {
        case 'n':
 	   newFormat = newFormat.replace( found, 2, QChar( '\n' ) );
 	   break;

@@ -36,12 +36,12 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <QtCore/QString>
+#include <QString>
 #define INCL_QT_QSTRING
 #endif
 
 #ifndef INCL_QT_QTEXTSTREAM
-#include <QtCore/QTextStream>
+#include <QTextStream>
 #define INCL_QT_QTEXTSTREAM
 #endif
 

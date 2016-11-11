@@ -36,9 +36,9 @@
 
 #include <kdeSupport.h>
 
-#include <QtGui/QApplication>
-#include <QtCore/QByteArray>
-#include <QtCore/QTextStream>
+#include <QApplication>
+#include <QByteArray>
+#include <QTextStream>
 
 /*#define getopt xxdiff_getopt*/
 #include <getopt.h>
@@ -289,9 +289,13 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
      "Sets the X display (default is $DISPLAY)."
    }, 
    { "style", 0, true, 's',
-     "Sets the application GUI style. Possible values are motif, windows, "
-     "and platinum. "
-   }, 
+     "Sets the application GUI style. Possible values are fusion, windows, "
+     "or QtCurve when that style has been installed. "
+   },
+   { "platform", 0, true, 'x',
+      "Sets the platform plugin to be used. For instance, on OS X one can use "
+      "cocoa or xcb as platform plugins."
+   },
    { "geometry", 0, true, 'g',
      "Sets the client geometry of the main widget."
    }, 
@@ -339,6 +343,7 @@ XxCmdline::Option XxCmdline::_optionsQt[] = {
 //------------------------------------------------------------------------------
 //
 XxCmdline::XxCmdline() :
+   _forcePlatform( false ),
    _forceStyle( false ),
    _forceGeometry( false ),
    _forceFont( false ),
@@ -642,7 +647,8 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          } break;
 
          case 'd':
-         case 's':
+         case 's':  // --style
+         case 'x':  // --platform
          case 'G':
          case 'g':
          case 'F':
@@ -770,6 +776,9 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    for ( ii = 0; ii < _nbQtOptions; ++ii ) {
       if ( strncmp( _qtOptions[ ii ], "-style", 6 ) == 0 ) {
          _forceStyle = true;
+      }
+      else if ( strncmp( _qtOptions[ ii ], "-platform", 9 ) == 0 ) {
+         _forcePlatform = true;
       }
       else if ( strncmp( _qtOptions[ ii ], "-geometry", 9 ) == 0 ) {
          _forceGeometry = true;

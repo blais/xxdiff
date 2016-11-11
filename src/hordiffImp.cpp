@@ -27,7 +27,7 @@
 #include <hordiffImp.h>
 #include <resources.h>
 
-#include <QtCore/QByteArray>
+#include <QByteArray>
 
 #ifndef COMPILER_MIPSPRO
 #include <cctype> // isspace()

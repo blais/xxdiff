@@ -32,24 +32,24 @@
 
 #include <kdeSupport.h>
 
-#include <QtGui/QTabWidget>
-#include <QtGui/QTextEdit>
-#include <QtGui/QLineEdit>
-#include <QtGui/QCheckBox>
-#include <QtGui/QRadioButton>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpinBox>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QListWidget>
-#include <QtGui/QColor>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFontDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QComboBox>
-#include <QtCore/QString>
-#include <QtGui/QPainter>
-#include <QtCore/QMetaType>
-#include <QtGui/QItemDelegate>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QListWidgetItem>
+#include <QListWidget>
+#include <QColor>
+#include <QColorDialog>
+#include <QFontDialog>
+#include <QLabel>
+#include <QComboBox>
+#include <QString>
+#include <QPainter>
+#include <QMetaType>
+#include <QItemDelegate>
 
 #include <stdlib.h>
 
@@ -153,39 +153,45 @@ XxColoredItem::~XxColoredItem()
 {
 }
 
+// copied from Qt 4.8's qvariant.h:
+// template<typename T> inline T qvariant_cast(const QVariant &variant)
+// {
+//    return qvariant_cast<T>(variant);
+// }
+
 //------------------------------------------------------------------------------
 //
 inline XxColor XxColoredItem::color() const
 {
-   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._color;
+   return qvariant_cast<XxColoredItemData>( data( Qt::DisplayRole ) )._color;
 }
 
 //------------------------------------------------------------------------------
 //
 inline QColor XxColoredItem::foreColor() const
 {
-   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._foreColor;
+   return qvariant_cast<XxColoredItemData>( data( Qt::DisplayRole ) )._foreColor;
 }
 
 //------------------------------------------------------------------------------
 //
 inline QColor XxColoredItem::backColor() const
 {
-   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._backColor;
+   return qvariant_cast<XxColoredItemData>( data( Qt::DisplayRole ) )._backColor;
 }
 
 //------------------------------------------------------------------------------
 //
 inline bool XxColoredItem::modified() const
 {
-   return qVariantValue<XxColoredItemData>( data( Qt::DisplayRole ) )._modified;
+   return qvariant_cast<XxColoredItemData>( data( Qt::DisplayRole ) )._modified;
 }
 
 //------------------------------------------------------------------------------
 //
 void XxColoredItem::setForeColor( const QColor& color)
 {
-   XxColoredItemData data = qVariantValue<XxColoredItemData>( this->data( Qt::DisplayRole ) );
+   XxColoredItemData data = qvariant_cast<XxColoredItemData>( this->data( Qt::DisplayRole ) );
    data._foreColor = color;
    setData( Qt::DisplayRole, qVariantFromValue( data ) );
 }
@@ -194,7 +200,7 @@ void XxColoredItem::setForeColor( const QColor& color)
 //
 void XxColoredItem::setBackColor( const QColor& color)
 {
-   XxColoredItemData data = qVariantValue<XxColoredItemData>( this->data( Qt::DisplayRole ) );
+   XxColoredItemData data = qvariant_cast<XxColoredItemData>( this->data( Qt::DisplayRole ) );
    data._backColor = color;
    setData( Qt::DisplayRole, qVariantFromValue( data ) );
 }
@@ -203,7 +209,7 @@ void XxColoredItem::setBackColor( const QColor& color)
 //
 void XxColoredItem::setModified( const bool modified )
 {
-   XxColoredItemData data = qVariantValue<XxColoredItemData>( this->data( Qt::DisplayRole ) );
+   XxColoredItemData data = qvariant_cast<XxColoredItemData>( this->data( Qt::DisplayRole ) );
    data._modified = modified;
    setData( Qt::DisplayRole, qVariantFromValue( data ) );
 }
@@ -260,7 +266,7 @@ void XxColoredItemDelegate::paint( QPainter * painter, const QStyleOptionViewIte
 {
    painter->save();
 
-   XxColoredItemData data = qVariantValue<XxColoredItemData>(index.data());
+   XxColoredItemData data = qvariant_cast<XxColoredItemData>(index.data());
 
    // Font.
    painter->setFont( _resources->getFontText() );

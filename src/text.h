@@ -36,12 +36,12 @@
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <QtGui/QFrame>
+#include <QFrame>
 #define INCL_QT_QFRAME
 #endif
 
 #ifndef INCL_QT_QFONTMETRICS
-#include <QtGui/QFontMetrics>
+#include <QFontMetrics>
 #define INCL_QT_QFONTMETRICS
 #endif
 

@@ -27,13 +27,13 @@
 #include <borderLabel.h>
 #include <app.h>
 
-#include <QtGui/QPainter>
-#include <QtGui/QBrush>
-#include <QtGui/QPen>
-#include <QtGui/QColor>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QColor>
 
-#include <QtGui/QApplication>
-#include <QtGui/QLabel>
+#include <QApplication>
+#include <QLabel>
 
 #include <stdio.h>
 

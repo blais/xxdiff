@@ -5,7 +5,7 @@
 #
 
 # Rule to generate the qmake Makefile for building xxdiff.
-QMAKE ?= /usr/bin/qmake
+QMAKE ?= qmake
 MAKEDIR ?= .
 QMAKEOPTS =
 
@@ -14,7 +14,7 @@ all: Makefile
 OS := $(shell uname -s)
 ifeq ($(OS),Darwin)
     # Default is an Xcode project, so force a makefile build
-    export QMAKESPEC=macx-g++
+    export QMAKESPEC=macx-clang
 endif
 
 Makefile.qmake: $(MAKEDIR)/xxdiff.pro

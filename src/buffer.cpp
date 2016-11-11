@@ -28,10 +28,10 @@
 #include <exceptions.h>
 #include <util.h>
 
-#include <QtGui/QFontMetrics>
-#include <QtGui/QFont>
-#include <QtCore/QRect>
-#include <QtCore/QDir>
+#include <QFontMetrics>
+#include <QFont>
+#include <QRect>
+#include <QDir>
 
 #include <iostream>
 #include <string.h>

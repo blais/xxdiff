@@ -31,19 +31,19 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <QtGui/QPainter>
-#include <QtGui/QBrush>
-#include <QtGui/QPen>
-#include <QtGui/QColor>
-#include <QtGui/QMenu>
-#include <QtGui/QMenuBar>
-#include <QtGui/QLayout>
-#include <QtGui/QCloseEvent>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QColor>
+#include <QMenu>
+#include <QMenuBar>
+#include <QLayout>
+#include <QCloseEvent>
 
-#include <QtGui/QApplication>
-#include <QtGui/QClipboard>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
+#include <QApplication>
+#include <QClipboard>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include <math.h>
 #include <stdio.h>

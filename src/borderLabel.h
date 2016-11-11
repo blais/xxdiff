@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QLABEL
-#include <QtGui/QLabel>
+#include <QLabel>
 #define INCL_QT_QLABEL
 #endif
 

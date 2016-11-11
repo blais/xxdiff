@@ -30,14 +30,14 @@
 #include <diffs.h>
 #include <buffer.h>
 
-#include <QtGui/QPainter>
-#include <QtGui/QBrush>
-#include <QtGui/QPen>
-#include <QtGui/QColor>
-#include <QtGui/QWheelEvent>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QFrame>
-#include <QtGui/QMouseEvent>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QColor>
+#include <QWheelEvent>
+#include <QResizeEvent>
+#include <QFrame>
+#include <QMouseEvent>
 
 #include <math.h>
 

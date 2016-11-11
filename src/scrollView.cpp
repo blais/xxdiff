@@ -27,11 +27,11 @@
 #include <scrollView.h>
 #include <app.h>
 
-#include <QtGui/QScrollBar>
-#include <QtCore/QSize>
-#include <QtGui/QFont>
-#include <QtGui/QFontMetrics>
-#include <QtGui/QWheelEvent>
+#include <QScrollBar>
+#include <QSize>
+#include <QFont>
+#include <QFontMetrics>
+#include <QWheelEvent>
 
 XX_NAMESPACE_BEGIN
 

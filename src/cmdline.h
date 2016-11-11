@@ -117,6 +117,7 @@ private:
    /*----- data members -----*/
 
    // Cmdline-related variables.
+   bool          _forcePlatform;
    bool          _forceStyle;
    bool          _forceGeometry;
    bool          _forceFont;

@@ -33,18 +33,18 @@
 
 #include <kdeSupport.h>
 
-#include <QtGui/QPainter>
-#include <QtGui/QBrush>
-#include <QtGui/QPen>
-#include <QtGui/QColor>
-#include <QtGui/QMenu>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
+#include <QColor>
+#include <QMenu>
 
-#include <QtGui/QApplication>
-#include <QtGui/QClipboard>
-#include <QtGui/QFrame>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QWheelEvent>
+#include <QApplication>
+#include <QClipboard>
+#include <QFrame>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 #include <math.h>
 #include <stdio.h>

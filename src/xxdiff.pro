@@ -29,6 +29,7 @@
 TEMPLATE = app
 CONFIG -= debug
 CONFIG += qt warn_on thread
+QT += widgets help
 
 DESTDIR=../bin
 TARGET = xxdiff
@@ -115,12 +116,11 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 ## macx-g++:QMAKE_CXXFLAGS += -D__GNU_LIBRARY__
 ## macx-g++:QMAKE_CXXFLAGS -= -fno-exceptions
 
-
 #----------------------------------------
 # Max OS X (macx-g++ for command line build)
 
 macx {
-   # Icon used to the application bundle
+   # Icon used for the application bundle
    ICON = xxdiff.icns
 
    # Special targets to quickly deploy a standalone mac package (just
@@ -155,7 +155,7 @@ macx {
 
    QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy bison23src bison23lnk
    QMAKE_CXXFLAGS -= -O2
-   QMAKE_CXXFLAGS += -mdynamic-no-pic -O3 -ftracer -msse2 -msse3 -mssse3 -ftree-vectorize
+   QMAKE_CXXFLAGS += -mdynamic-no-pic -O3 -msse2 -msse3 -mssse3 -ftree-vectorize
 }
 
 #----------------------------------------
@@ -201,6 +201,7 @@ HEADERS = \
 	main.h \
 	overview.h \
 	resParser.h \
+	resParser_lex.h \
 	resources.h \
 	resources.inline.h \
 	accelUtil.h \

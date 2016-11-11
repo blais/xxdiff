@@ -32,17 +32,17 @@
 #endif
 
 #ifndef INCL_QT_QSTRING
-#include <QtCore/QString>
+#include <QString>
 #define INCL_QT_QSTRING
 #endif
 
 #ifndef INCL_QT_QFILEINFO
-#include <QtCore/QFileInfo>
+#include <QFileInfo>
 #define INCL_QT_QFILEINFO
 #endif
 
 #ifndef INCL_QT_QSTRINGLIST
-#include <QtCore/QStringList>
+#include <QStringList>
 #define INCL_QT_QSTRINGLIST
 #endif
 

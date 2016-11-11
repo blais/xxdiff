@@ -30,11 +30,11 @@
 #include <util.h>
 #include <buffer.h>
 
-#include <QtCore/QString>
-#include <QtCore/QByteArray>
-#include <QtCore/QTextStream>
-#include <QtCore/QFile>
-#include <QtCore/QProcess>
+#include <QString>
+#include <QByteArray>
+#include <QTextStream>
+#include <QFile>
+#include <QProcess>
 
 #include <stdexcept>
 #include <stdio.h>

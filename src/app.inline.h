@@ -37,7 +37,7 @@
 #endif
 
 #ifndef INCL_QT_QSCROLLBAR
-#include <QtGui/QScrollBar>
+#include <QScrollBar>
 #define INCL_QT_QSCROLLBAR
 #endif
 

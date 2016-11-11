@@ -48,12 +48,12 @@
 #endif
 
 #ifndef INCL_QT_QAPPLICATION
-#include <QtGui/QApplication>
+#include <QApplication>
 #define INCL_QT_QAPPLICATION
 #endif
 
 #ifndef INCL_QT_QFILEINFO
-#include <QtCore/QFileInfo>
+#include <QFileInfo>
 #define INCL_QT_QFILEINFO
 #endif
 

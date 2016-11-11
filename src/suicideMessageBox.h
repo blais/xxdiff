@@ -32,7 +32,7 @@
 #endif
 
 #ifndef INCL_QT_QMESSAGEBOX
-#include <QtGui/QMessageBox>
+#include <QMessageBox>
 #define INCL_QT_QMESSAGEBOX
 #endif
 

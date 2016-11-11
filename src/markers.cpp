@@ -26,20 +26,20 @@
 
 #include <markers.h>
 
-#include <QtGui/QFileDialog>
-#include <QtCore/QFileInfo>
-#include <QtCore/QString>
-#include <QtCore/QDir>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QString>
+#include <QDir>
 
-#include <QtGui/QRadioButton>
-#include <QtGui/QLineEdit>
-#include <QtGui/QLabel>
-#include <QtGui/QCheckBox>
+#include <QRadioButton>
+#include <QLineEdit>
+#include <QLabel>
+#include <QCheckBox>
 
-#include <QtGui/QLayout>
-#include <QtGui/QPushButton>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
+#include <QLayout>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 XX_NAMESPACE_BEGIN
 
@@ -167,7 +167,7 @@ XxMarkersDialog::XxMarkersDialog(
 
    _buttonOk = new QPushButton;
    _buttonOk->setText( trUtf8( "Ok" ) );
-   _buttonOk->setDefault( TRUE );
+   _buttonOk->setDefault( true );
    hlayout->addWidget( _buttonOk );
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
@@ -253,7 +253,7 @@ XxMarkersFileDialog::XxMarkersFileDialog(
    
    // Hack to embed XxMarkersWidget into the QFileDialog, since the
    // convenient Qt3 addWidgets doesn't exist anymore
-   QVBoxLayout *l = qFindChild<QVBoxLayout*>(this);
+   QVBoxLayout *l = this->findChild<QVBoxLayout*>(); //qFindChild<QVBoxLayout*>(this);
    Q_ASSERT(l);
    _markersWidget = new XxMarkersWidget( threeWay );
    l->addWidget(_markersWidget);
@@ -272,7 +272,7 @@ QString XxMarkersFileDialog::getSaveFileName(
 )
 {
    XxMarkersFileDialog* dlg = new XxMarkersFileDialog(
-      startWith, filter, TRUE, threeWay, parent
+      startWith, filter, true, threeWay, parent
    );
 
    QString result;

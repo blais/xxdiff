@@ -31,11 +31,11 @@
 #include <exceptions.h>
 #include <util.h>
 
-#include <QtGui/QColor>
-#include <QtCore/QObject>
-#include <QtGui/QApplication> // to get desktop
-#include <QtCore/QRegExp>
-#include <QtGui/QStyleFactory>
+#include <QColor>
+#include <QObject>
+#include <QApplication> // to get desktop
+#include <QRegExp>
+#include <QStyleFactory>
 
 #include <iostream>
 #include <string.h> // ::strcmp
@@ -98,9 +98,11 @@ void XxResources::initializeOriginalXdiff()
    _preferredGeometry = _defaultGeometry;
    _styleKey =  // Default style.
 #ifdef Q_OS_MAC
-      "Macintosh (aqua)";
+      "Macintosh";
+#elif defined(Q_OS_WIN)
+      "Windows";
 #else
-      "Cleanlooks";
+      "";
 #endif
    _maximize = false;
 

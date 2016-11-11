@@ -40,12 +40,12 @@
 #endif
 
 #ifndef INCL_QT_QMAINWINDOW
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #define INCL_QT_QMAINWINDOW
 #endif
 
 #ifndef INCL_QT_QFRAME
-#include <QtGui/QFrame>
+#include <QFrame>
 #define INCL_QT_QFRAME
 #endif
 

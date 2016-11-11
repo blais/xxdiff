@@ -91,7 +91,7 @@ int main( int argc, char** argv, char** envp )
       }
    }
    catch ( const XxError& ex ) {
-      std::cerr << ex.getMsg().toAscii().constData() << std::endl;
+      std::cerr << ex.getMsg().toLatin1().constData() << std::endl;
       // Note: we're casting for Windows MSVC streams which are broken.
    }
    catch ( const std::exception& ex ) {

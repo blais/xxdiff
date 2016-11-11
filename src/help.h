@@ -36,7 +36,7 @@
 #endif
 
 #ifndef INCL_QT_QDIALOG
-#include <QtGui/QDialog>
+#include <QDialog>
 #define INCL_QT_QDIALOG
 #endif
 
