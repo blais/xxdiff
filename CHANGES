@@ -5,6 +5,8 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+* Add keyboard shortcuts for "Save as left" and "Save as right"
+
 Version 4.0.1: Port to Qt4 by Alexandre Feblot
 ----------------------------------------------
 

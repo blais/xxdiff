@@ -117,6 +117,8 @@ void XxResources::initializeOriginalXdiff()
    _accelerators[ ACCEL_EXIT_MERGED ] = Qt::Key_M;
    _accelerators[ ACCEL_EXIT_REJECT ] = Qt::Key_R;
                   
+   _accelerators[ ACCEL_SAVE_AS_LEFT ] = Qt::CTRL | Qt::SHIFT | Qt::Key_L;
+   _accelerators[ ACCEL_SAVE_AS_RIGHT ] = Qt::CTRL | Qt::SHIFT | Qt::Key_R;
    _accelerators[ ACCEL_SAVE_AS_MERGED ] = Qt::CTRL | Qt::Key_M;
 
    _accelerators[ ACCEL_SEARCH ] = Qt::CTRL | Qt::Key_S;
