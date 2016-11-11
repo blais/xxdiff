@@ -47,6 +47,7 @@
 class QScrollBar;
 class QSize;
 class QWheelEvent;
+class QElapsedTimer;
 
 XX_NAMESPACE_BEGIN
 
@@ -175,6 +176,13 @@ private:
    // This is to fix what seems (?) to be a Qt4 bug which enters a recursive
    //loop when the wheel event doesn't lead to a value change of the scrollbar
    bool _managingWheelEvent;
+
+   // state variables that help to prevent accidental text zooming
+   // due to using the Ctrl key during inertial scrolling.
+   // Qt/Mac does this behind the scenes.
+   QElapsedTimer *lastWheelEvent;
+   bool accidentalModifier;
+   bool lastWheelEventUnmodified;
 
 };
 

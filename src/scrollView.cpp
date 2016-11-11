@@ -1,4 +1,5 @@
 /* -*- c-file-style: "xxdiff" -*- */
+/* kate: backspace-indents true; indent-pasted-text true; indent-width 3; keep-extra-spaces true; remove-trailing-spaces modified; replace-tabs true; replace-tabs-save true; syntax Tcl/Tk; tab-indents true; tab-width 3; */
 /******************************************************************************\
  * $RCSfile$
  *
@@ -32,6 +33,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include <QWheelEvent>
+#include <QElapsedTimer>
 
 XX_NAMESPACE_BEGIN
 
@@ -55,7 +57,9 @@ XxScrollView::XxScrollView(
    _displayHeight( 0 ),
    _textWidth( 0 ),
    _textHeight( 0 ),
-   _managingWheelEvent( false )
+   _managingWheelEvent( false ),
+   accidentalModifier(false),
+   lastWheelEventUnmodified(false)
 {
    // Initialize to null.  The derived classes create them.
    _hscroll = 0;
@@ -67,12 +71,21 @@ XxScrollView::XxScrollView(
       _app, SIGNAL(textSizeChanged()),
       this, SLOT(adjustScrollbars())
    );
+#ifndef Q_OS_OSX
+   lastWheelEvent = new QElapsedTimer;
+   lastWheelEvent->start();
+#else
+   lastWheelEvent = NULL;
+#endif
 }
 
 //------------------------------------------------------------------------------
 //
 XxScrollView::~XxScrollView()
 {
+   if (lastWheelEvent) {
+      delete lastWheelEvent;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -315,13 +328,32 @@ void XxScrollView::verticalScroll2( int value )
 //
 void XxScrollView::wheelEvent( QWheelEvent* e )
 {
+#ifndef Q_OS_OSX
+   qint64 deltaT = lastWheelEvent->elapsed();
+#endif
    if ( e->modifiers() & Qt::ControlModifier ) {
-      // Interactive font resize feature with mouse wheel.
-      if ( e->delta() > 0 ) {
-         _app->fontSizeDecrease();
+#ifndef Q_OS_OSX
+      // Pressing the Control/Command key within 200ms of the previous "unmodified" wheelevent
+      // is not allowed to cause text zooming; this prevents zooming due to inertial scrolling.
+      if (lastWheelEventUnmodified && deltaT < 200) {
+            accidentalModifier = true;
       }
       else {
-         _app->fontSizeIncrease();
+         // hold the Control/Command key for 1s without scrolling to re-allow text zooming
+         if (deltaT > 1000) {
+            accidentalModifier = false;
+         }
+      }
+      lastWheelEventUnmodified = false;
+#endif
+      // Interactive font resize feature with mouse wheel.
+      if ( !accidentalModifier ) {
+         if ( e->delta() > 0 ) {
+            _app->fontSizeDecrease();
+         }
+         else {
+            _app->fontSizeIncrease();
+         }
       }
    }
    else {
@@ -330,7 +362,12 @@ void XxScrollView::wheelEvent( QWheelEvent* e )
           QApplication::sendEvent( _vscroll[0], e );
           _managingWheelEvent = false;
       }
+      lastWheelEventUnmodified = true;
+      accidentalModifier = false;
    }
+#ifndef Q_OS_OSX
+   lastWheelEvent->start();
+#endif
 }
 
 XX_NAMESPACE_END
