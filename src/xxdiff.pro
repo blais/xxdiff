@@ -66,6 +66,9 @@ QMAKE_YACCFLAGS = -d -o y.tab.c
 QMAKE_YACC_HEADER = y.tab.h
 QMAKE_YACC_SOURCE = y.tab.c
 
+# Don't generate unused functions (warning suppression)
+QMAKE_LEXFLAGS = --noyy_push_state --noyy_pop_state --noyy_top_state
+
 LEXSOURCES = resParser.l
 
 YACCSOURCES = resParser.y
@@ -150,10 +153,15 @@ macx {
    YACCSOURCES = resParser_bison23.y
    QMAKE_YACCFLAGS_MANGLE = -p resParser -b resParser
 
+   # "register" deprecated in C++11 but the MacOS flex still uses it in files it generates
+   QMAKE_LEXFLAGS += -Dregister=
+
    # "public" rule
    deploy.depends = $$dmg.target
 
    QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy bison23src bison23lnk
+   QMAKE_CFLAGS -= -O2
+   QMAKE_CFLAGS += -mdynamic-no-pic -O3 -msse2 -msse3 -mssse3 -ftree-vectorize
    QMAKE_CXXFLAGS -= -O2
    QMAKE_CXXFLAGS += -mdynamic-no-pic -O3 -msse2 -msse3 -mssse3 -ftree-vectorize
 }

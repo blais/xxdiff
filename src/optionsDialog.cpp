@@ -143,6 +143,7 @@ private:
 //
 XxColoredItem::XxColoredItem( XxColor color )
 {
+   (void)_resources; // suppress "unused" warning
    XxColoredItemData data( color, XxResParser::getColorName( color ) );
    setData( Qt::DisplayRole, qVariantFromValue( data ) );
 }

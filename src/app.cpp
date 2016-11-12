@@ -201,7 +201,9 @@ XxMainWindow::XxMainWindow(
 ) :
    QkMainWindow( parent, f ),
    _app( app )
-{}
+{
+   (void)_app; // suppress "unused" warning
+}
 
 }
 

@@ -52,17 +52,17 @@ namespace {
 
 //------------------------------------------------------------------------------
 //
-const char* strnchr( const char* s, int c, const char* end ) 
-{
-   const char* pc = s;
-   while ( pc < end ) {
-      if ( *pc == c ) {
-         return pc;
-      }
-      pc++;
-   }
-   return 0;
-}
+// const char* strnchr( const char* s, int c, const char* end ) 
+// {
+//    const char* pc = s;
+//    while ( pc < end ) {
+//       if ( *pc == c ) {
+//          return pc;
+//       }
+//       pc++;
+//    }
+//    return 0;
+// }
 
 //------------------------------------------------------------------------------
 //

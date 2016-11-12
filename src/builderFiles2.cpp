@@ -221,7 +221,9 @@ XX_NAMESPACE_BEGIN
 XxBuilderFiles2::XxBuilderFiles2( bool useInternalDiff ) :
    XxBuilder(),
    _useInternalDiff( useInternalDiff )
-{}
+{
+   (void)_useInternalDiff; // suppress "unused" warning
+}
 
 //------------------------------------------------------------------------------
 //

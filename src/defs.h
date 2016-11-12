@@ -87,6 +87,17 @@ typedef unsigned int 	uint;
 
 #endif
 
+// auto_ptr deprecated in C++11, removed in C++17
+#ifndef INCL_STD_MEMORY
+#include <memory>
+#define INCL_STD_MEMORY
+#endif
+#if __cplusplus >= 201103L
+template <typename T>
+using auto_ptr = std::unique_ptr<T>;
+#else
+using std::auto_ptr;
+#endif
 
 //
 // Debugging stuff.
