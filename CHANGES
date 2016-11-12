@@ -5,7 +5,12 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+Version 5.0b1: Port to Qt5 by Rene J.V. Bertin
+----------------------------------------------
+
+* Switch to Qt5 (tested with 5.6, probably ok with older versions too)
 * Add keyboard shortcuts for "Save as left" and "Save as right"
+* Prevent accidental wheel-zoom when pressing the Ctrl key while inertial scroll events are coming in.
 
 Version 4.0.1: Port to Qt4 by Alexandre Feblot
 ----------------------------------------------

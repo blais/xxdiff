@@ -1,1 +1,1 @@
-#define XX_VERSION "4.0.1"
+#define XX_VERSION "5.0b1"
