@@ -110,6 +110,8 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 #linux-g++:QMAKE_CXXFLAGS += -fcheck-memory-usage
 #linux-g++:QMAKE_LIBS += -lmpatrol -lbfd -liberty
 
+# auto_ptr deprecated in C++11, removed in C++17
+linux: QMAKE_CXXFLAGS += -std=c++03
 
 #----------------------------------------
 # Max OS X with XFree86 port, macx-g++
@@ -152,6 +154,8 @@ macx {
    bison23src.depends = 
    YACCSOURCES = resParser_bison23.y
    QMAKE_YACCFLAGS_MANGLE = -p resParser -b resParser
+   resParser_lex_obj.target = resParser_lex.o
+   resParser_lex_obj.depends = bison23lnk
 
    # "register" deprecated in C++11 but the MacOS flex still uses it in files it generates
    QMAKE_LEXFLAGS += -Dregister=
@@ -159,10 +163,10 @@ macx {
    # "public" rule
    deploy.depends = $$dmg.target
 
-   QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy bison23src bison23lnk
-   QMAKE_CFLAGS -= -O2
-   QMAKE_CFLAGS += -mdynamic-no-pic -O3 -msse2 -msse3 -mssse3 -ftree-vectorize
-   QMAKE_CXXFLAGS -= -O2
+   QMAKE_EXTRA_TARGETS += macdeployqt dmg deploy bison23src bison23lnk resParser_lex_obj
+   QMAKE_CFLAGS_RELEASE   -= -O2
+   QMAKE_CXXFLAGS_RELEASE -= -O2
+   QMAKE_CFLAGS   += -mdynamic-no-pic -O3 -msse2 -msse3 -mssse3 -ftree-vectorize
    QMAKE_CXXFLAGS += -mdynamic-no-pic -O3 -msse2 -msse3 -mssse3 -ftree-vectorize
 }
 
