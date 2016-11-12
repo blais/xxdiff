@@ -29,7 +29,7 @@
 TEMPLATE = app
 CONFIG -= debug
 CONFIG += qt warn_on thread
-QT += widgets help
+QT = widgets gui core
 
 DESTDIR=../bin
 TARGET = xxdiff
