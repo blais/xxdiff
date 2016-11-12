@@ -68,50 +68,6 @@
 
 namespace {
 
-// bool installSigChldHandler(
-//    void (*sigChldHandler)(int)
-// )
-// {
-// // Disabled crud that doesn't work (it works only the first time, the second
-// // time around the handler is called immediately upon setting up the handler).
-//    (void)sigChldHandler;
-// #ifdef DISABLED_ENABLED /* always false */
-//    XX_ASSERT( sigChldHandler != 0 );
-// 
-//    XX_TRACE( "Installing SIGCHLD handler." );
-// 
-//    // sigset_t spm_o;
-//    // sigprocmask( SIG_NOP, 0, &spm_o );
-//    // XX_TRACE( "is SIGCHLD member=" <<
-//    //           sigismember( &spm_o, SIGCHLD ) );
-//    // sigemptyset( &spm_o );
-//    // sigaddset( &spm_o, SIGCHLD );
-//    // sigprocmask( SIG_BLOCK, &spm_o, 0 );
-// 
-//    //
-//    // Register a SIGCHLD handler.
-//    //
-//    // Note: under IRIX (untested with others), SA_NOCLDWAIT will not
-//    // allow a redo diff to work. I don't know why.
-// 
-//    struct sigaction sa;
-//    sa.sa_flags = /*SA_SIGINFO | */SA_RESTART |
-//       SA_RESETHAND | SA_NOCLDWAIT | SA_NOCLDSTOP;
-//    sa.sa_handler = sigChldHandler;
-//    sigset_t ss;
-//    sigemptyset( &ss );
-//    sa.sa_mask = ss;
-//    //sa.sa_sigaction = 0; don't clear sa_sigaction for nothing...
-//    // sa_handler and sa_sigaction may be sharing an union.
-//    if ( ::sigaction( SIGCHLD, &sa, 0 ) != 0 ) {
-//       // Ignore error.
-//       XX_TRACE( "Error calling sigaction." );
-//       return false;
-//    }
-// #endif
-//    return true;
-// }
-
 //------------------------------------------------------------------------------
 //
 // Returns permissions from QFileInfo in human readable format

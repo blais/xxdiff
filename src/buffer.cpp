@@ -52,21 +52,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 //
-// const char* strnchr( const char* s, int c, const char* end ) 
-// {
-//    const char* pc = s;
-//    while ( pc < end ) {
-//       if ( *pc == c ) {
-//          return pc;
-//       }
-//       pc++;
-//    }
-//    return 0;
-// }
-
-//------------------------------------------------------------------------------
-//
-const char* strnstr( const char* haystack, const uint n, const char* needle ) 
+const char* strnstr( const char* haystack, const uint n, const char* needle )
 {
    const char* p = haystack;
    const char* pe = p + n - ::strlen( needle );
@@ -101,7 +87,7 @@ XX_NAMESPACE_BEGIN
 
 //------------------------------------------------------------------------------
 //
-XxBuffer::XxBuffer( 
+XxBuffer::XxBuffer(
    const bool     /*passiveDummy*/, // ignored
    const QString& filename,
    const QString& displayFilename,
@@ -123,7 +109,7 @@ XxBuffer::XxBuffer(
 
 //------------------------------------------------------------------------------
 //
-XxBuffer::XxBuffer( 
+XxBuffer::XxBuffer(
    const QString&   filename,
    const QString&   displayFilename,
    const QFileInfo& fileInfo,
@@ -334,16 +320,16 @@ void XxBuffer::loadDirectory()
 {
    QDir dir( _name );
    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::System );
-// Dirs - List directories only 
-// Files - List files only 
-// Drives - List disk drives (does nothing under unix) 
-// NoSymLinks - Do not list symbolic links (where they exist) 
-// Readable - List files for which the application has read access. 
-// Writable - List files for which the application has write access. 
-// Executable - List files for which the application has execute access 
-// Modified - Only list files that have been modified (does nothing under unix) 
-// Hidden - List hidden files (on unix, files starting with a .) 
-// System - List system files (does nothing under unix) 
+// Dirs - List directories only
+// Files - List files only
+// Drives - List disk drives (does nothing under unix)
+// NoSymLinks - Do not list symbolic links (where they exist)
+// Readable - List files for which the application has read access.
+// Writable - List files for which the application has write access.
+// Executable - List files for which the application has execute access
+// Modified - Only list files that have been modified (does nothing under unix)
+// Hidden - List hidden files (on unix, files starting with a .)
+// System - List system files (does nothing under unix)
 
    dir.setSorting( QDir::Unsorted );
    XX_CHECK( dir.exists() );
@@ -355,14 +341,14 @@ void XxBuffer::loadDirectory()
 
 //------------------------------------------------------------------------------
 //
-void XxBuffer::setDirectoryEntries( 
-   const QStringList& directoryEntries 
+void XxBuffer::setDirectoryEntries(
+   const QStringList& directoryEntries
 )
 {
    _directoryEntries = directoryEntries;
 
    _bufferSize = 0;
-   for ( QStringList::Iterator itr = _directoryEntries.begin(); 
+   for ( QStringList::Iterator itr = _directoryEntries.begin();
          itr != _directoryEntries.end();
          ++itr ) {
       _bufferSize += (*itr).length() + 1;
@@ -371,9 +357,9 @@ void XxBuffer::setDirectoryEntries(
    // Allocate buffer.
    // add one for potential added newline.
    _buffer = static_cast<char*>( malloc( (_bufferSize + 1) * sizeof(char) ) );
-   
+
    char* bufferPtr = _buffer;
-   for ( QStringList::Iterator it = _directoryEntries.begin(); 
+   for ( QStringList::Iterator it = _directoryEntries.begin();
          it != _directoryEntries.end();
          ++it ) {
       int len = (*it).length();
@@ -466,7 +452,7 @@ void XxBuffer::reindex( const std::vector<XxFln>& reindexTbl )
 #ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
    _lengths.push_back( -1 );
 #endif
-   
+
    for ( ii = 1; ii < reindexTbl.size(); ++ii ) {
       int reidx = reindexTbl[ii];
       _index.push_back( oldIndex[reidx] );
@@ -519,7 +505,7 @@ uint XxBuffer::computeTextWidth(
       const char* lineText = getTextLine( ii, length );
 
       int rlength;
-      const char* renderedText = 
+      const char* renderedText =
          renderTextWithTabs( lineText, length, tabWidth, hideCR, rlength, 0 );
       QString str( renderedText );
 
@@ -555,7 +541,7 @@ uint XxBuffer::computeLineNumbersWidth( const QFont& font ) const
 
 //------------------------------------------------------------------------------
 //
-const char* XxBuffer::renderTextWithTabs( 
+const char* XxBuffer::renderTextWithTabs(
    const char* lineText,
    const uint  length,
    const uint  tabWidth,
@@ -591,7 +577,7 @@ const char* XxBuffer::renderTextWithTabs(
       // that will accomodate all possible cases below.
       const int requiredSize = curcol + maxIncrement;
       if ( _renderBufferSize <= requiredSize ) {
-         _renderBufferSize = 
+         _renderBufferSize =
             ( (requiredSize / renderBufferIncrement) + 1 ) *
             renderBufferIncrement;
          _renderBuffer = (char*)realloc( _renderBuffer,
@@ -606,9 +592,9 @@ const char* XxBuffer::renderTextWithTabs(
          // We detected a tab character.
          //
          if ( tabWidth != 0 ) {
-            
+
             // Compute amount of chars to insert.
-            int bcol = pd - _renderBuffer; 
+            int bcol = pd - _renderBuffer;
             uint nspaces = tabWidth - (bcol % tabWidth);
 
             // Output equivalent spaces for tab in the destination.
@@ -636,7 +622,7 @@ const char* XxBuffer::renderTextWithTabs(
             continue;
          }
       }
-      else { 
+      else {
          XX_LOCAL_TRACE( "  output:" << *ps );
          *pd++ = *ps;
          XX_CHECK( pd - _renderBuffer < _renderBufferSize );
@@ -678,7 +664,7 @@ const char* XxBuffer::renderTextWithTabs(
    // Expand render buffer if necessary.
    const int requiredSize = curcol + 1;
    if ( _renderBufferSize <= requiredSize ) {
-      _renderBufferSize = 
+      _renderBufferSize =
          ( (requiredSize / renderBufferIncrement) + 1 ) *
          renderBufferIncrement;
       _renderBuffer = (char*)realloc( _renderBuffer, _renderBufferSize );
@@ -705,7 +691,7 @@ uint XxBuffer::getNbDigits() const
 
 //------------------------------------------------------------------------------
 //
-const QString& XxBuffer::renderLineNumber( 
+const QString& XxBuffer::renderLineNumber(
    const XxFln    lineNumber,
    const QString& format
 )
@@ -749,7 +735,7 @@ QString XxBuffer::getBufferAtLine( const XxFln lineno ) const
    if ( filename.at( filename.length()-1 ) != '/' ) {
       filename.append( "/" );
    }
-   
+
    XX_CHECK( lineno - 1 < XxFln(_directoryEntries.count()) );
 
    // Note: QStringList O(n) lookup.
@@ -768,22 +754,22 @@ void XxBuffer::makeTemporary()
    // Open the temporary file.
    char temporaryFilename[32] = "/var/tmp/xxdiff-tmp.XXXXXX";
    FILE* fout = XxUtil::tempfile( temporaryFilename );
-   
+
    // Write contents.
    uint size;
    const char* buffer = getBuffer( size );
-   
+
    if ( ::fwrite( buffer, 1, size, fout ) != size ) {
-      throw XxIoError( XX_EXC_PARAMS, 
+      throw XxIoError( XX_EXC_PARAMS,
                        "Error writing to temporary file." );
    }
 
    // Close the temporary file.
    if ( ::fclose( fout ) != 0 ) {
-      throw XxIoError( XX_EXC_PARAMS, 
+      throw XxIoError( XX_EXC_PARAMS,
                        "Error closing temporary file." );
    }
-   
+
    // Make this buffer a temporary to be deleted.
    _name = QString(temporaryFilename);
    _deleteFile = true;
