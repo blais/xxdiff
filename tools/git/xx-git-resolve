@@ -1,0 +1,11 @@
+#!/bin/bash
+# Resolve merge conflicts with xxdiff.
+FILENAME=$1
+OUT=$(xxdiff --merged="${FILENAME}" --unmerge --decision "${FILENAME}")
+
+if [ "x$OUT" = "xNODECISION" -o "x$OUT" = "x" ]; then
+    exit 1
+fi
+
+git add "${FILENAME}"
+echo "Marked as resolved."
