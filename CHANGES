@@ -5,6 +5,8 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+* Fixed coredump on long lines by allowing line length up to 2^32.
+
 Version 5.0b1: Port to Qt5 by Rene J.V. Bertin
 ----------------------------------------------
 

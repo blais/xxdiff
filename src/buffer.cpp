@@ -419,7 +419,7 @@ void XxBuffer::indexFile()
          _index.push_back( ii + 1 );
 #ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
          _lengths.push_back( ii - prev );
-         prev = static_cast<short>( ii + 1 );
+         prev = static_cast<unsigned int>( ii + 1 );
 #endif
       }
    }
@@ -443,7 +443,7 @@ void XxBuffer::reindex( const std::vector<XxFln>& reindexTbl )
    std::swap( _index, oldIndex );
 
 #ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
-   std::vector<short> oldLengths;
+   std::vector<unsigned int> oldLengths;
    std::swap( _lengths, oldLengths );
 #endif
 
