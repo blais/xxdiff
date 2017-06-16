@@ -6,6 +6,7 @@ Current Development Version
 ---------------------------
 
 * Fixed coredump on long lines by allowing line length up to 2^32.
+  (Thanks to Jim Diamond for finding the issue.)
 
 Version 5.0b1: Port to Qt5 by Rene J.V. Bertin
 ----------------------------------------------
