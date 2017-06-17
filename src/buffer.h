@@ -268,11 +268,6 @@ private:
 
 #define XX_ENABLED_BUFFER_LINE_LENGTHS
 #ifdef XX_ENABLED_BUFFER_LINE_LENGTHS
-   // Important note: due to the use of the short datatype to record line
-   // lengths, xxdiff is limited to lines of length up to 64k characters. We
-   // consider this reasonable for all purposes. However, this could be easily
-   // changed to int below if necessary.
-   //
    // We had to introduce an explicit vector of lengths because since the
    // unmerge feature was introduced, we're sharing the very text buffer that
    // the multiple buffers use we cannot anymore rely on buffer lines appearing
