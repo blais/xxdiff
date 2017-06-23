@@ -246,7 +246,7 @@ void XxDiffutils::diff_fun(
    for ( QStringList::Iterator it = out_args.begin();
          it != out_args.end();
          ++it ) {
-      argv[argc++] = strdup( (*it).toLatin1().constData() );
+      argv[argc++] = strdup( (*it).toLocal8Bit().constData() );
    }
    argv[argc] = 0;
 

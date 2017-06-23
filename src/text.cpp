@@ -148,7 +148,7 @@ inline void rentxt(
       }
 
       XX_CHECK( rlen > 0 ); // always true, because xch < xend
-      QString str( QString::fromLatin1( renderedText + xch, rlen ) );
+      QString str( QString::fromLocal8Bit( renderedText + xch, rlen ) );
       int nw = fm.width( str, rlen );
 
 #ifndef XX_DRAWTEXT_DRAWS_BACKGROUND
@@ -544,7 +544,7 @@ void XxText::paintEvent( QPaintEvent *e )
             }
 
             XX_CHECK( rlen > 0 ); // always true, because xch < xend
-            chunk = QString::fromLatin1( renderedText + xch, rlen );
+            chunk = QString::fromLocal8Bit( renderedText + xch, rlen );
             // FIXME check somehow that this actually corresponds to the
             // rendered measure.
             QRect brect = fm.boundingRect(
@@ -859,7 +859,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
             if ( text != 0 ) {
                QString adt;
                if ( len > 0 ) {
-                  adt = QString::fromLatin1( text, len );
+                  adt = QString::fromLocal8Bit( text, len );
                }
                if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                     == true ) {
@@ -947,7 +947,7 @@ QString XxText::getRegionText( XxDln start, XxDln end ) const
          if ( text != 0 ) {
             QString adt;
             if ( len > 0 ) {
-               adt = QString::fromLatin1( text, len );
+               adt = QString::fromLocal8Bit( text, len );
             }
             if ( resources.getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
                  == true ) {

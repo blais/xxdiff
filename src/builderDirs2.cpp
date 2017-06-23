@@ -130,16 +130,19 @@ XxParseDiffError::XxParseDiffError(
 bool parseDiffLine( 
    const QString& line,
    const QString& dir1,
-   int            len1,
    const QString& dir2,
-   int            len2,
    DirDiffType&   type,
    QString&       filename,
    int&           onlyDir
 )
 {
-   QByteArray lineBa = line.toLatin1();
+   QByteArray lineBa = line.toLocal8Bit();
    const char* buf = lineBa.constData();
+
+   QByteArray bytes1 = dir1.toLocal8Bit();
+   QByteArray bytes2 = dir2.toLocal8Bit();
+   const int len1 = bytes1.size();
+   const int len2 = bytes2.size();
 
    bool error;
    const char* bufPtr = buf;
@@ -152,8 +155,8 @@ bool parseDiffLine(
       }
       
       //int len = colonPtr - bufPtr;
-      int cmp1 = ::strncmp( bufPtr, dir1.toLatin1().constData(), len1 );
-      int cmp2 = ::strncmp( bufPtr, dir2.toLatin1().constData(), len2 );
+      int cmp1 = ::strncmp( bufPtr, bytes1.constData(), len1 );
+      int cmp2 = ::strncmp( bufPtr, bytes2.constData(), len2 );
       // Note: you cannot compare the lengths because these might be directory
       // diffs.
       if ( cmp1 == 0 && cmp2 == 0 ) {
@@ -179,7 +182,7 @@ bool parseDiffLine(
          ++dnamePtr;
       }
       if ( colonPtr - dnamePtr > 0 ) {
-         QString aname( QString::fromLatin1( dnamePtr, colonPtr - dnamePtr ) );
+         QString aname( QString::fromLocal8Bit( dnamePtr, colonPtr - dnamePtr ) );
          filename += aname;
          if ( filename.at( filename.length() - 1 ) != '/' ) {
             filename.append( '/' );
@@ -187,7 +190,7 @@ bool parseDiffLine(
       }
 
       // Note: need to remove \n
-       QString bname( QString::fromLatin1( colonPtr + 2 ) );
+       QString bname( QString::fromLocal8Bit( colonPtr + 2 ) );
 
       filename += bname;
       type = ONLY_IN;
@@ -205,7 +208,7 @@ bool parseDiffLine(
       }
       int mlen = andPtr - filenamePtr;
       if ( mlen > 0 ) {
-         filename = QString::fromLatin1( filenamePtr, mlen );
+         filename = QString::fromLocal8Bit( filenamePtr, mlen );
       }
       else {
          filename = QString();
@@ -236,7 +239,7 @@ bool parseDiffLine(
       }
       int mlen = andPtr - filenamePtr;
       if ( mlen > 0 ) {
-         filename = QString::fromLatin1( filenamePtr, mlen );
+         filename = QString::fromLocal8Bit( filenamePtr, mlen );
       }
       else {
          filename = QString();
@@ -267,7 +270,7 @@ void setType(
       for ( unsigned int ii = 0; ii < entries.count(); ++ii ) {
          XX_TRACE( entries[ii] );
       }
-      XX_TRACE( "filename \"" << filename.toLatin1().constData() << "\"" );
+      XX_TRACE( "filename \"" << filename.toLocal8Bit().constData() << "\"" );
 #endif
       throw XxInternalError( XX_EXC_PARAMS );
    }
@@ -320,8 +323,6 @@ void buildSolelyFromOutput(
 
    QString path1 = buffer1.getName();
    QString path2 = buffer2.getName();
-   const int len1 = path1.length();
-   const int len2 = path2.length();
 
    while ( true ) {
       if ( ! diffProc.canReadLine() ) {
@@ -335,7 +336,7 @@ void buildSolelyFromOutput(
       QString filename;
       int onlyDir = -1;
       if ( parseDiffLine(
-         line, path1, len1, path2, len2, type, filename, onlyDir
+         line, path1, path2, type, filename, onlyDir
       ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
          errors << "Diff error:" << endl;
@@ -346,7 +347,7 @@ void buildSolelyFromOutput(
 #ifdef LOCAL_TRACE
       XX_TRACE( line 
                 << typeString[ type ] << "   " 
-                << filename.toLatin1().constData() << "   "
+                << filename.toLocal8Bit().constData() << "   "
                 << onlyDir );
       if ( type == UNKNOWN ) {
          throw XxInternalError( XX_EXC_PARAMS );
@@ -402,11 +403,11 @@ void buildAgainstReadDirectory(
    {
       for ( QStringList::ConstIterator iter = entries1.begin();
             iter != entries1.end(); ++iter ) {
-         XX_TRACE( (*iter).toLatin1().constData() );
+         XX_TRACE( (*iter).toLocal8Bit().constData() );
       }
       for ( QStringList::ConstIterator iter = entries2.begin();
             iter != entries2.end(); ++iter ) {
-         XX_TRACE( (*iter).toLatin1().constData() );
+         XX_TRACE( (*iter).toLocal8Bit().constData() );
       }
    }
 #endif
@@ -418,9 +419,6 @@ void buildAgainstReadDirectory(
 
    QString path1 = buffer1.getName();
    QString path2 = buffer2.getName();
-
-   const int len1 = path1.length();
-   const int len2 = path2.length();
 
    while ( true ) {
       if ( ! diffProc.canReadLine() ) {
@@ -434,7 +432,7 @@ void buildAgainstReadDirectory(
       QString filename;
       int onlyDir = -1;
       if ( parseDiffLine(
-         line, path1, len1, path2, len2, type, filename, onlyDir
+         line, path1, path2, type, filename, onlyDir
       ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
          errors << "Diff error:" << endl;
@@ -445,7 +443,7 @@ void buildAgainstReadDirectory(
 #ifdef LOCAL_TRACE
       XX_TRACE( line
                 << typeString[ type ] << "   " 
-                << filename.toLatin1().constData() << "   "
+                << filename.toLocal8Bit().constData() << "   "
                 << onlyDir );
       if ( type == UNKNOWN ) {
          throw XxInternalError( XX_EXC_PARAMS );

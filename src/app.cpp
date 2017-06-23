@@ -2285,12 +2285,12 @@ bool XxApp::processDiff()
          if ( _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE ) ) {
             dirdiff_command = _resources->getCommand(
                CMD_DIFF_DIRECTORIES_REC
-            ).toLatin1();
+            ).toLocal8Bit();
          }
          else {
             dirdiff_command = _resources->getCommand(
                CMD_DIFF_DIRECTORIES
-            ).toLatin1();
+            ).toLocal8Bit();
          }
          std::auto_ptr<XxDiffs> tmp(
             dirsBuilder->process( dirdiff_command.constData(), *_files[0], *_files[1] )
@@ -3524,7 +3524,7 @@ void XxApp::diffFilesAtCursor()
              QString * tmpTitle = new QString();
              tmpTitle->sprintf( "--title%d=%s",
                                 ii+1,
-                                _cmdline._userFilenames[ii].toLatin1().constData() );
+                                _cmdline._userFilenames[ii].toLocal8Bit().constData() );
              titles[ii] = tmpTitle;
          }
       }

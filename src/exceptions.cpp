@@ -161,7 +161,7 @@ XxInternalError::XxInternalError(
 // I'll know what's going on at least when developing in debug mode.
 #ifdef XX_DEBUG
    std::cerr << "Throwing exception:" << std::endl;
-   std::cerr << _msg.toLatin1().constData() << std::endl;
+   std::cerr << _msg.toLocal8Bit().constData() << std::endl;
 #endif
 }
 

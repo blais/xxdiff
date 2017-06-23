@@ -701,7 +701,7 @@ bool readGeometry( const QString& val, QRect& geometry )
    int t = -1;
    int w = -1;
    int h = -1;
-   QByteArray valBa = val.toLatin1();
+   QByteArray valBa = val.toLocal8Bit();
    const char* vchar = valBa.constData();
    if ( sscanf( vchar, "%dx%d+%d+%d", &w, &h, &l, &t ) == 4 ) {
       geometry = QRect( l, t, w, h );
@@ -794,7 +794,7 @@ int parseFromKeywordList(
       QString os;
       QTextStream oss( &os );
       oss << "Unknown " << errmsg << ": " << name << flush;
-      resParsererror( NULL, os.toLatin1().constData() );
+      resParsererror( NULL, os.toLocal8Bit().constData() );
    }
    num = ERROR_TOKEN;
    return ERROR_TOKEN;
@@ -1180,7 +1180,7 @@ void XxResParser::listResources( QTextStream& os )
          astr = QKeySequence( aval ).toString();
       }
       os << accelStr << "." << accelList[ii]._name << ": \""
-         << astr.toLatin1().constData() << "\"" << endl;
+         << astr.toLocal8Bit().constData() << "\"" << endl;
    }
 
    const QFont& fontApp = res.getFontApp();
@@ -1232,7 +1232,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommand bo = XxCommand(commandList[ii]._token);
       const QString& b1 = res.getCommand( bo );
       os << commandStr << "." << commandList[ii]._name << ": \""
-         << b1.toLatin1().constData() << "\"" << endl;
+         << b1.toLocal8Bit().constData() << "\"" << endl;
    }
 
    int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
@@ -1242,7 +1242,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       const QString& b1 = res.getCommandSwitch( bo );
       os << commandSwitchStr << "." << commandSwitchList[ii]._name << ": \""
-         << b1.toLatin1().constData() << "\"" << endl;
+         << b1.toLocal8Bit().constData() << "\"" << endl;
    }
 
    const char* initSwitchStr = searchTokenName( kwdList, kwdList_size, INITSW );
@@ -1270,7 +1270,7 @@ void XxResParser::listResources( QTextStream& os )
       XxTag bo = XxTag(tagList[ii]._token);
       const QString& b1 = res.getTag( bo );
       os << tagStr << "." << tagList[ii]._name << ": \""
-         << b1.toLatin1().constData() << "\"" << endl;
+         << b1.toLocal8Bit().constData() << "\"" << endl;
    }
 
    os << searchTokenName( kwdList, kwdList_size, CLIPBOARD_HEAD_FORMAT ) << ": \""

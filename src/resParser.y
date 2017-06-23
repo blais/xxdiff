@@ -217,7 +217,7 @@ style		: STYLE COLON STRING
                       QString err = QString( "Requested style key does not exist." );
                       err += QString( "\nValid styles are: " );
                       err += styles.join( ", " );
-                      yyerror( NULL, err.toLatin1().constData() );
+                      yyerror( NULL, err.toLocal8Bit().constData() );
                    }
                 }
                 ;

@@ -199,7 +199,7 @@ XxBuffer::~XxBuffer()
    }
 
    if ( _deleteFile == true ) {
-      XxUtil::removeFile( _name.toLatin1().constData() );
+      XxUtil::removeFile( _name.toLocal8Bit().constData() );
    }
 }
 
@@ -268,7 +268,7 @@ void XxBuffer::loadStream( FILE* fin )
 void XxBuffer::loadFile( const QFileInfo& finfo )
 {
    // Read file into buffer.
-   FILE* fp = fopen( _name.toLatin1().constData(), "r" );
+   FILE* fp = fopen( _name.toLocal8Bit().constData(), "r" );
    if ( fp == 0 ) {
       throw XxIoError( XX_EXC_PARAMS );
    }
@@ -363,7 +363,7 @@ void XxBuffer::setDirectoryEntries(
          it != _directoryEntries.end();
          ++it ) {
       int len = (*it).length();
-      ::strncpy( bufferPtr, (*it).toLatin1().constData(), len );
+      ::strncpy( bufferPtr, (*it).toLocal8Bit().constData(), len );
       bufferPtr[len] = _newlineChar;
       bufferPtr += len + 1;
    }
@@ -696,7 +696,7 @@ const QString& XxBuffer::renderLineNumber(
    const QString& format
 )
 {
-   _lnBuffer.sprintf( format.toLatin1().constData(), lineNumber );
+   _lnBuffer.sprintf( format.toLocal8Bit().constData(), lineNumber );
    return _lnBuffer;
 }
 
@@ -707,7 +707,7 @@ bool XxBuffer::searchLine( const XxFln lineno, const QString& searchText ) const
    bool found = false;
    uint len;
    const char* text = getTextLine( lineno, len );
-   if ( strnstr( text, len, searchText.toLatin1().constData() ) != 0 ) {
+   if ( strnstr( text, len, searchText.toLocal8Bit().constData() ) != 0 ) {
       found = true;
    }
    return found;

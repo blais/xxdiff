@@ -320,7 +320,7 @@ void XxResources::initializeOriginalXdiff()
    // "cmp -s" barfs on directories.
    const char* editor = getenv( "EDITOR" );
    if ( editor != 0 ) {
-      _commands[ CMD_EDIT ] = QString::fromLatin1( editor );
+      _commands[ CMD_EDIT ] = QString::fromLocal8Bit( editor );
    }
    else {
       _commands[ CMD_EDIT ] = "xterm -e vi";

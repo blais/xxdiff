@@ -893,7 +893,7 @@ bool XxDiffs::save(
    }
 
    // for ( int ii = 0; ii < 4; ++ii ) {
-   //    XX_TRACE( tags[ii].toLatin1().constData() );
+   //    XX_TRACE( tags[ii].toLocal8Bit().constData() );
    // }
 
    bool foundUnsel = false;

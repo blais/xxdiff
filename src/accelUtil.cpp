@@ -59,7 +59,7 @@ bool XxAccelUtil::read( const QString& val, int& accel )
 //
 void XxAccelUtil::write( std::ostream& os, int accel )
 {
-   os << QKeySequence( accel ).toString().toLatin1().constData();
+   os << QKeySequence( accel ).toString().toLocal8Bit().constData();
 }
 
 XX_NAMESPACE_END

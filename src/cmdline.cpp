@@ -439,7 +439,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    while ( true ) {
       int c = getopt_long( argc,
                            argv,
-                           shortOptions.toLatin1().constData(),
+                           shortOptions.toLocal8Bit().constData(),
                            longOptions,
                            &optionIndex );
       if ( c == -1 ) {
@@ -768,7 +768,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
    if ( !_promptForFiles )
    {
       for ( ii = 0; ii < _nbFilenames; ++ii ) {
-         _filenames[ ii ] = QString::fromLatin1( argv[ optind + ii ] ).trimmed();
+         _filenames[ ii ] = QString::fromLocal8Bit( argv[ optind + ii ] ).trimmed();
       }
    }
    

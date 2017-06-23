@@ -5,6 +5,9 @@ CHANGES: xxdiff
 Current Development Version
 ---------------------------
 
+* Applied patch from Vadim Zhukov <persgray at gmail dot com> for more general
+  local encoding conversion.
+
 * Fixed coredump on long lines by allowing line length up to 2^32.
   (Thanks to Jim Diamond for finding the issue.)
 

@@ -599,7 +599,7 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
 //
 QString XxHelp::xmlize( const QString& in )
 {
-   QByteArray inBa =  in.toLatin1();
+   QByteArray inBa =  in.toLocal8Bit();
    const char* inc = inBa.constData();
    QString out;
    for ( int ii = 0; ii < in.length(); ++ii ) {
