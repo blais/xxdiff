@@ -106,7 +106,7 @@ Download
 
 * Source code can be found the public Mercurial repository, here:
 
-     http://bitbucket.org/blais/xxdiff
+     http://github.com/blais/xxdiff
 
 
 * `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_

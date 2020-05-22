@@ -65,7 +65,7 @@ http://furius.ca/xxdiff/doc/xxdiff-scripts.html
       author="Martin Blais",
       author_email="blais@furius.ca",
       url="http://furius.ca/xxdiff",
-      download_url="http://bitbucket.org/blais/xxdiff",
+      download_url="http://github.com/blais/xxdiff",
       package_dir = {'': 'lib/python'},
       packages = ['xxdiff',
                   join('xxdiff', 'scripts'),
