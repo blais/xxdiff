@@ -111,7 +111,7 @@ irix-n32:QMAKE_CFLAGS_RELEASE += -OPT:Olimit=4000
 #linux-g++:QMAKE_LIBS += -lmpatrol -lbfd -liberty
 
 # auto_ptr deprecated in C++11, removed in C++17
-linux: QMAKE_CXXFLAGS += -std=c++03
+linux: QMAKE_CXXFLAGS += -std=c++11
 
 #----------------------------------------
 # Max OS X with XFree86 port, macx-g++
