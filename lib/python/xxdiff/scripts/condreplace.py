@@ -101,7 +101,7 @@ def parse_options():
         raise parser.error("no need to use --delete on file from stdin.")
     if tofn == '-':
         raise parser.error("cannot copy to stdin, this does not make sense.")
-        
+
     return opts, fromfn, tofn
 
 
@@ -117,7 +117,7 @@ def condreplace_main():
             intmpf.write(sys.stdin.read())
             sys.stdin.close()
             intmpf.flush()
-        except IOError, e:
+        except IOError as e:
             raise SystemExit(
                 "Error: saving stdin to temporary file (%s)" % str(e))
         fromfn = intmpf.name
@@ -130,7 +130,7 @@ def condreplace_main():
     if opts.delete and not opts.dry_run:
         try:
             os.unlink(fromfn)
-        except OSError, e:
+        except OSError as e:
             raise SystemExit("Error: deleting modified file (%s)" % str(e))
 
     # repeat message at the end for convenience.
@@ -140,7 +140,7 @@ def condreplace_main():
     # Compute return value.
     rval = 0
     if decision in ('REJECT', 'NODECISION'):
-        rval = 1 
+        rval = 1
 
     return rval
 
@@ -150,4 +150,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

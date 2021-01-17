@@ -128,7 +128,7 @@ def runDiff(cargs):
 #
 #        child_stdin.close()
 #        child_stdout.close()
-#    except os.error, e:
+#    except os.error as e:
 #        sys.stderr.write( "Error spawning program:" + e.strerror + "\n" )
 #
 
@@ -150,7 +150,7 @@ def run(program, args, stdinn = None):
 
         child_stdin.close()
         child_stdout.close()
-    except os.error, e:
+    except os.error as e:
         sys.stderr.write( "Error spawning program:" + e.strerror + "\n" )
 
 #-------------------------------------------------------------------------------
@@ -161,8 +161,8 @@ def checkEqualFiles(files):
     pass
 
 
-        
-    
+
+
 #===============================================================================
 # CLASS ExtCmdBase
 #===============================================================================
@@ -173,7 +173,7 @@ class ExtCmdBase(quickopts.CmdBase):
     def __init__(self):
         quickopts.CmdBase.__init__( self )
         self.child_stdin = None
-        
+
     def getFiles(self, names):
         # get files
         for f in names:
@@ -227,11 +227,11 @@ class CmdDiff(ExtCmdBase):
             else:
                 fal.append( f[0] )
                 i=i+1
-        
+
         runDiff( string.split( gopts.xxdiffargs ) + fal, \
                  self.child_stdin )
 
-    
+
 #===============================================================================
 # CLASS CmdPrevious
 #===============================================================================
@@ -239,13 +239,13 @@ class CmdDiff(ExtCmdBase):
 class CmdPrevious(ExtCmdBase):
 
     """(no description yet FIXME.)"""
-    
+
     _name = 'previous'
     _description = "diffs each file with its previous revision."
 
     def __init__(self):
         ExtCmdBase.__init__( self )
-        
+
     def usage(self):
         print self.__doc__
 
@@ -288,7 +288,7 @@ class CmdPrevious(ExtCmdBase):
 class CmdBranch(ExtCmdBase):
 
     """FIXME no description yet"""
-    
+
     _name = 'branch'
     _description = "diffs each file with the previous tagged revision."
 
@@ -319,7 +319,7 @@ it is different. Diff hunks that can be resolved are automatically selected."""
 
     def __init__(self):
         ExtCmdBase.__init__( self )
-        
+
     def execute(self, args):
         # FIXME todo
         # Note: I've got this code already done in xxct for ccase
@@ -349,7 +349,7 @@ ancestor file to include in the graphical diff.  """
  "Specify an ancestor revision to show in the graphical diff." ]
         self.optmap[ 'ancfile' ] = [ 'a', 0, \
  "Specify an ancestor file to show in the graphical diff." ]
-        
+
     def execute(self, args):
         # FIXME todo
         # Note: I've got this code already done in xxct for ccase
@@ -366,13 +366,13 @@ invoke graphical diff/merge tool to resolve conflicts if any are present.  """
 
     _name = 'update'
     _description = "updates, with graphical merge where needed."
-    
+
     def usage(self):
         print self.__doc__
-        
+
     def __init__(self):
         ExtCmdBase.__init__( self )
-        
+
     def execute(self, args):
         # FIXME todo
         # first parse output of status or some benine update call to figure out
@@ -391,7 +391,7 @@ format: filename-rXXX, where XXX is the revision number.  """
 
     _name = 'coall'
     _description = "checks out all revisions of a file."
-    
+
     def usage(self):
         print self.__doc__
 
@@ -414,7 +414,7 @@ format: filename-rXXX, where XXX is the revision number.  """
 
             revisions = file.getAllRevisions()
             for rev in revisions:
-                print "Checking out revision:", rev 
+                print "Checking out revision:", rev
                 cvs.run( "update -p -r" + rev + " " + file.fullname + \
                          " > " + pdir + '/' + file.fullname + "-r" + rev )
 
@@ -489,4 +489,3 @@ subargs = subargs[1:]
 for sc in subcmds:
     if sc._name == subcmd:
         quickopts.CmdBase.execute( sc, subargs )
-

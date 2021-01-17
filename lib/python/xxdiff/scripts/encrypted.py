@@ -77,9 +77,10 @@ the diffs (e.g. modifying an unsuspecting user's resources in ~/.xxdiffrc), they
 could feed the decrypted files to an arbitrary program.)
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'GnuPG']
-
 
 # stdlib imports.
 import sys, os, re
@@ -121,7 +122,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
     tempfiles = []
     for t in xrange(len(textlist)):
         f = NamedTemporaryFile(prefix=tmpprefix)
-        print '== TEMPFILE', f.name
+        print('== TEMPFILE', f.name)
         tempfiles.append(f)
 
     # Figure out the key/recipient for the first file.
@@ -153,7 +154,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
     for f in tempfiles:
         f.close()
 
-    print 'Waiting...'
+    print('Waiting...')
     decision, mergedf, retcode = waiter()
 
     if decision != 'NODECISION' and outmerged:
@@ -184,9 +185,8 @@ def diff_encrypted(textlist, opts, outmerged=None):
             f = open(outmerged, 'w')
             f.write(encoded_output)
             f.close()
-        except IOError, e:
-            print >> sys.stderr, \
-                  'Error: cannot write to encoded merged file.'
+        except IOError as e:
+            print('Error: cannot write to encoded merged file.', file=sys.stderr)
             raise e
 
     return decision
@@ -238,11 +238,11 @@ def encrypted_main():
 
     if not (opts.unmerge or opts.output):
         if opts.dont_armor:
-            print >> sys.stderr, "Warning: there will be no output file, " + \
-                  "--dont-armor will means nothing special."
+            print("Warning: there will be no output file, " +
+                  "--dont-armor will means nothing special.", file=sys.stderr)
         if opts.recipient:
-            print >> sys.stderr, "Warning: there will be no output file, " + \
-                  "--recipient will means nothing special."
+            print(I"Warning: there will be no output file, " +
+                  "--recipient will means nothing special.", file=sys.stderr)
 
     if opts.unmerge:
         for fn in args: # do all files specified on cmdline, why not.

@@ -44,7 +44,7 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
         # Compile the from strings as regexps.
         self.renames = []
         for sfrom, sto in renames:
-        
+
             # Escape the string for regexp compilation if necessary.
             if self.opts.regexp:
                 regexp = sfrom
@@ -55,7 +55,7 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
             # Compile the regular expression.
             try:
                 refrom = re.compile(regexp, re.MULTILINE)
-            except re.error, e:
+            except re.error as e:
                 raise SystemExit(
                     "Error: Could not compile given regexp '%s':\n%s" %
                     (regexp, e))
@@ -65,9 +65,9 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
     def transform(self, fn, outf):
         # Open and read input file in memory.
         try:
-            inf = file(fn, 'r')
+            inf = open(fn, 'r')
             text = inf.read()
-        except IOError, e:
+        except IOError as e:
             raise SystemExit("Error: Could not read file '%s':\n  %s" % (fn, e))
 
         # Replace the string or regexp.
@@ -79,7 +79,7 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
         # If there were no replacements, skip the file.
         if nbrepl == 0:
             return False
-        
+
         outf.write(text)
         return True
 
@@ -106,7 +106,7 @@ def parse_options():
     renames = []
     it = iter(args)
     for sfrom in it:
-        renames.append( (sfrom, it.next()) )
+        renames.append( (sfrom, next(it)) )
 
     # Force to always perform a diff on output.
     opts.verbose = 2
@@ -143,4 +143,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

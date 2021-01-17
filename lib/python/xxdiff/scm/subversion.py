@@ -9,6 +9,8 @@ inasmuch as we do not do much with Subversion.  Should we get do more involved
 stuff with it, we should switch this code to use the Subversion Python bindings.
 """
 
+from __future__ import print_function
+
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 
@@ -48,7 +50,7 @@ def commit(filenames, comments=None):
         filenames = [filenames]
     else:
         assert isinstance(filenames, (tuple, list))
-        
+
     # Note: if the comments are ever so huge, we consider using a file with the
     # -f option to 'svn commit'.  Wondering if there may be any important issues
     # with passing large objects through the environment.  This is certainly not
@@ -61,7 +63,7 @@ def commit(filenames, comments=None):
         tmpf.flush()
         call(['svn', 'commit', '--file', tmpf.name] + filenames)
 
-        
+
 def resolve(filename):
     """
     Commit the given filename into CVS.
@@ -164,7 +166,7 @@ def status(rootdirs):
         status.mconflict = lc.next()
         if status.mconflict == '>':
             continue
-        
+
         # There is a space and the rest is a filename:
         status.filename = line[7:].strip()
         assert isabs(status.filename)
@@ -188,7 +190,7 @@ def status(rootdirs):
 
 
 
-        
+
 
 def getinfo(filename):
     """
@@ -224,7 +226,7 @@ def cat_revision_temp(filename, revision):
 
 
 
-    
+
 def test():
     """
     Simple interactive test.
@@ -234,9 +236,8 @@ def test():
     opts, args = parser.parse_args()
 
     for s in status(args[0]):
-        print s.filename, ':', s.status
+        print(s.filename, ':', s.status)
 
 
 if __name__ == '__main__':
     test()
-

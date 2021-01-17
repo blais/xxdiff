@@ -13,9 +13,10 @@ xxdiff.db.* module rather than writing a dedicated script.  (I'm very flexible
 about adding new features to this script.)
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'PostgreSQL']
-
 
 # stdlib imports.
 from os.path import *
@@ -47,10 +48,10 @@ def parse_options():
     xxdiff.mapcompare.options_validate(opts, parser)
     postgresql.options_validate(opts, parser)
     xxdiff.invoke.options_validate(opts, parser)
-    
+
     if len(args) != 2:
         parser.error("You need to specify two databases/schemas to compare.")
-    
+
     dbspec1, dbspec2 = args
 
     return (opts,
@@ -62,7 +63,7 @@ def sqlcompare_main():
     Main program for schema comparison script.
     """
     opts, db1, db2 = parse_options()
-    
+
     # Dump the database schemas.
     for db in db1, db2:
         dump = postgresql.dump_schema(db.user, db.dbname, db.schema, opts)
@@ -74,7 +75,7 @@ def sqlcompare_main():
 
     # List all objects that were found.
     for key in sorted(set(db1.objmap.keys() + db2.objmap.keys())):
-        print key
+        print(key)
 
     # Render comparable files.
     files = xxdiff.mapcompare.render_diffable_maps(opts, db1.objmap, db2.objmap)
@@ -99,4 +100,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

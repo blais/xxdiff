@@ -7,9 +7,10 @@ checkout whose conflicts need to be resolved.  Depending on the exit status,
 xxdiff also calls 'svn resolve' on the files.
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
-
 
 # stdlib imports.
 import sys, os, re
@@ -82,8 +83,8 @@ def svnresolve_main():
 
     # First print out the list/status of the conflicting files to the user.
     for s in select_conflicts(statii):
-        print s.parsed_line
-    print
+        print(s.parsed_line)
+    print()
 
     logs = sys.stdout
 
@@ -122,7 +123,7 @@ def svnresolve_main():
         # Resolve the conflict with Subversion, if requested.
         if not opts.no_resolve:
             subversion.resolve(s.filename)
-            print '(Resolved.)'
+            print('(Resolved.)')
 
     xxdiff.backup.print_reminder(opts)
 
@@ -132,5 +133,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

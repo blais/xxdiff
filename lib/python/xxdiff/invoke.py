@@ -4,8 +4,9 @@
 Functions to invoke xxdiff in various ways.
 """
 
-__author__ = 'Martin Blais <blais@furius.ca>'
+from __future__ import print_function
 
+__author__ = 'Martin Blais <blais@furius.ca>'
 
 # stdlib imports.
 import os, optparse, tempfile, logging
@@ -57,7 +58,7 @@ def _run_xxdiff(cmd, opts, stdin):
     Note: this is an internal function, not meant to be called from the outside.
     """
     if getattr(opts, 'xxdiff_verbose', None):
-        print '===', ' '.join(cmd)
+        print('===', ' '.join(cmd))
 
     if stdin is not None:
         assert '-' in cmd
@@ -70,13 +71,13 @@ def _run_xxdiff(cmd, opts, stdin):
         intype = stdin
     else:
         intype = None
-        
+
     try:
         p = Popen(cmd,
                   stdout=PIPE,
                   stderr=PIPE,
                   stdin=intype)
-    except OSError, e:
+    except OSError as e:
         extramsg = ''
         if e.errno == 2:
             extramsg = '\nHint: Check if xxdiff is accessible in your path.'
@@ -85,7 +86,7 @@ def _run_xxdiff(cmd, opts, stdin):
     # Write the given text to stdin if necessary.
     if intype is PIPE:
         p.stdin.write(intext)
-    
+
     return p
 
 decisions = ('ACCEPT', 'REJECT', 'MERGED', 'NODECISION')
@@ -133,7 +134,7 @@ def xxdiff_decision(opts, *arguments, **kwds):
     # Get the appropriate xxdiff executable and options.
     xexec = getattr(opts, 'xxdiff_exec', 'xxdiff')
     options = getattr(opts, 'xxdiff_options', [])
-        
+
     # Make sure that xxdiff is invoked with the decision switch.
     if '--decision' not in options:
         options.insert(0, '--decision')
@@ -192,7 +193,7 @@ def xxdiff_decision(opts, *arguments, **kwds):
             stdout, stderr = p.communicate()
             logging.error("Error: running xxdiff as '%s'.\n" %
                           ' '.join(cmd) + stderr)
-            
+
         return waiter
 
     # Wait for the results and return them.
@@ -261,7 +262,7 @@ def xxdiff_display(opts, *arguments, **kwds):
             stdout, stderr = p.communicate()
             logging.error("Error: running xxdiff as '%s'.\n" %
                           ' '.join(cmd) + stderr)
-            
+
         return waiter
 
     # Wait for the results and return them.
@@ -291,40 +292,39 @@ def test():
 
     class Opts:
         xxdiff = 'xxdiff'
-        
+
     f1, f2, f3 = map(lambda x: join('/home/blais/p/xxdiff/test', x),
                      ('mine', 'older', 'yours'))
 
     for t in args:
         if t == 'simple':
-            print xxdiff_decision(Opts, f1, f2)
+            print(xxdiff_decision(Opts, f1, f2))
 
         elif t == 'async':
             w = xxdiff_decision(Opts, f1, f2, nowait=1)
-            print 'Deleting temp input files...'
-            print w()
+            print('Deleting temp input files...')
+            print(w())
 
         elif t == 'error':
-            print xxdiff_decision(Opts, '--bullshit', f1, f2)
+            print(xxdiff_decision(Opts, '--bullshit', f1, f2))
 
         elif t == 'error-nowait':
-            print xxdiff_decision(Opts, '--bullshit', f1, f2, nowait=1)
+            print(xxdiff_decision(Opts, '--bullshit', f1, f2, nowait=1))
 
         if t == 'display':
-            print xxdiff_display(Opts, f1, f2)
+            print(xxdiff_display(Opts, f1, f2))
 
         if t == 'display-nowait':
             w = xxdiff_display(Opts, f1, f2, nowait=1)
-            print 'Deleting temp input files...'
-            print w()
+            print('Deleting temp input files...')
+            print(w())
 
         if t == 'pipe-text':
-            print xxdiff_display(Opts, f2, '-', stdin='Some text\n')
+            print(xxdiff_display(Opts, f2, '-', stdin='Some text\n'))
 
         if t == 'pipe-cmd':
             p = Popen('cat $HOME/.xxdiffrc', shell=True, stdout=PIPE)
-            print xxdiff_display(Opts, '-', f2, stdin=p.stdout)
+            print(xxdiff_display(Opts, '-', f2, stdin=p.stdout))
 
 if __name__ == '__main__':
     test()
-

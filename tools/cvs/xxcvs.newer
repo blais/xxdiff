@@ -86,7 +86,7 @@ class PrintCheckoutInfo:
         module = cvs.getModule(os.getcwd())
         print "Module:          ", module
         tag = cvs.getTag(os.getcwd())
-        if not tag: tag = '(none)'            
+        if not tag: tag = '(none)'
         print "Branch:          ", tag
 
 
@@ -424,7 +424,7 @@ class RemoveBranch:
                     if self.gopts.verbose: print "==> Saving safe copy into %s" % savefn
                     shutil.copyfile(file, savefn)
                     print "Saved copy in '%s'" % savefn
-                except OSError, e:
+                except OSError as e:
                     raise Error("Cannot copy file %s into %s: %s",
                                  (file, savefn, repr(e)))
             else:
@@ -501,7 +501,7 @@ class Revert:
                     if self.gopts.verbose: print "==> Saving safe copy into %s" % savefn
                     os.rename(file, savefn)
                     print "Saved copy in '%s'" % savefn
-                except OSError, e:
+                except OSError as e:
                     raise Error("Cannot rename file %s into %s: %s",
                                  (file, savefn, repr(e)))
             else:
@@ -542,7 +542,7 @@ class Fetch:
     names = ['get', 'fetch', 'cat']
 
     stdout_sep1 = 79 * '='
-    
+
     def addopts(self, parser):
         parser.add_option('-p', '--stdout', action='store_true',
                           help="Output to stdout (don't write output file).")
@@ -551,7 +551,7 @@ class Fetch:
                           "for workarea).")
         parser.add_option('-r', '--revision', action='store',
                           help="Specify which revision for filename.")
-    
+
 
     def execute(self, subargs):
 
@@ -603,7 +603,7 @@ class Fetch:
                     outf = open(filename + '@@' + rev, 'w')
                     outf.write(contents)
                     outf.close()
-                except IOError, e:
+                except IOError as e:
                     print >> sys.stderr, "Error: writing fetched file %s", outfn
                     print e
 
@@ -747,7 +747,7 @@ class Mani:
             tempf = open(tempname, 'w')
             tempf.write(contents)
             tempf.close()
-        except IOError, e:
+        except IOError as e:
             raise Error("Writing to temp file %s" % tempname)
         return tempname
 
@@ -1012,7 +1012,7 @@ class DiffModified(Mani):
                           help="Don't be so verbose about progress and all.")
         parser.add_option('-r', '--reverse', action='store_true',
                           help="Reverse order of files (order is by default reversed).")
-        
+
     def execute(self, subargs):
 
         self.options = self.computeOptionsString()
@@ -1225,11 +1225,11 @@ try:
     # delete all references to the subcmd here for the cmdqueue.
     subcmds = subcmd = sc = None
 
-except Error, e:
+except Error as e:
     print error_str, e
     sys.exit(1)
 
-except cvs.Error, e:
+except cvs.Error as e:
     print 'CVS Error:', e
     if gopts.debug:
         raise
@@ -1241,4 +1241,3 @@ except KeyboardInterrupt:
     if gopts.debug:
         raise
     sys.exit(1)
-

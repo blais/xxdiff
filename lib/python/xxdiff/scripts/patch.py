@@ -57,6 +57,8 @@ Examples
 
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'diffutils']
 
@@ -119,7 +121,7 @@ def patch_main():
     Main program for patch script.
     """
     opts, args = parse_options()
-    
+
     #
     # read the input file.
     #
@@ -135,7 +137,7 @@ def patch_main():
                 iif = open(fn, 'r')
             text = iif.read()
             iif.close()
-        except IOError, e:
+        except IOError as e:
             raise SystemExit(
                 "Error: reading patchfile %s: %s" % (fn, str(e)))
 
@@ -145,17 +147,13 @@ def patch_main():
     # For each subpatch, apply it individually
     #
     for filename, patch in chunks:
-        ## print '*' * 80
-        ## print fn
-        ## print text
-
         # print patch contents for this file.
-        print
-        print
-        print "FILE:", filename
-        print '*' * 40
-        print patch
-        print '*' * 40
+        print()
+        print()
+        print("FILE:", filename)
+        print('*' * 40)
+        print(patch)
+        print('*' * 40)
 
         # feed diffs to patch, patch will do its deed and save the output to
         # a temporary file.
@@ -172,9 +170,9 @@ def patch_main():
         cin.close()
 
         # read output from patch.
-        print cout.read()
+        print9cout.read())
         if cout.close() != None:
-            print >> sys.stderr, "Error: running patch."
+            print("Error: running patch.", file=sys.stderr)
 
         #
         # spawn xxdiff
@@ -202,7 +200,7 @@ def patch_main():
 
         # print output of xxdiff command.
         if decision:
-            print decision
+            print(decision)
 
         # perform the requested action
         if decision and not opts.dry_run:
@@ -238,4 +236,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

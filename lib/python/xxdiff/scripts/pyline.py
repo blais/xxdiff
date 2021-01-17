@@ -52,7 +52,7 @@ class PylineTransformer(xxdiff.xformloop.Transformer):
         # Open and read input file in memory.
         try:
             inf = file(fn, 'r')
-        except IOError, e:
+        except IOError as e:
             raise SystemExit("Error: Could not read file '%s':\n  %s" % (fn, e))
 
         # Run the code on each line.
@@ -66,7 +66,7 @@ class PylineTransformer(xxdiff.xformloop.Transformer):
             except Exception:
                 raise SystemExit("Error: running expression on line %d:\n%s\n%s"
                                  % (numz, line, traceback.format_exc(limit=0)))
-                
+
             if result is None or result is False:
                 modified = True
                 continue
@@ -107,9 +107,9 @@ def parse_options():
     for libname in opts.import_lib:
         try:
             globals()[libname] = __import__(libname.strip())
-        except ImportError, e:
+        except ImportError as e:
             parser.error("Importing module '%s': %s" % (libname, e))
-        
+
     return expr, opts, selector
 
 
@@ -134,4 +134,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

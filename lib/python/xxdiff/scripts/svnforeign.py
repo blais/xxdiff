@@ -66,6 +66,7 @@ to resolve it and delete the temporary files.
 # -------
 # * To Sean Reifschneider (Jafo) for providing example code for raw tty input
 
+from __future__ import print_function
 
 __version__ = '$Revision$'
 __author__ = 'Martin Blais <blais@furius.ca>'
@@ -82,7 +83,7 @@ try:
 except ImportError:
     backup = None
 
-    
+
 debug = False
 
 def read_one():
@@ -176,7 +177,7 @@ def parse_options():
                       action='store_const', const=2, dest='verbose',
                       default=1,
                       help=optparse.SUPPRESS_HELP)
-    parser.add_option('-q', '--quiet', '--silent', 
+    parser.add_option('-q', '--quiet', '--silent',
                       action='store_const', const=0, dest='verbose',
                       help="Suppress certain harmless warnings.")
 
@@ -185,7 +186,7 @@ def parse_options():
         backup.options_graft(parser,
                              "These options affect automatic backup of "
                              "deleted files.")
-    
+
     opts, args = parser.parse_args()
 
     if backup is not None:
@@ -266,7 +267,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     for line in out.splitlines():
         if not line or re.match('^Performing', line):
             continue
-        
+
         if line[0] == 'C':
             fn = line[8:]
             cre = re.compile('%s\\.(mine|r\\d+)' % re.escape(fn)).match
@@ -314,7 +315,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
             # Get the file size.
             try:
                 size = os.lstat(fn).st_size
-            except OSError, e:
+            except OSError as e:
                 if e.errno == 2:
                     continue # File not found, was probably a temp file.
                 else:
@@ -380,7 +381,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
                         pat = bn
 
                     if pat == '!':
-                        print '(cancelled.)'
+                        print('(cancelled.)')
 
                     elif pat == '*':
                         call(['svn', 'propedit', 'svn:ignore', dn])
@@ -455,7 +456,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     write('(Done.)\n')
     return True
 
-    
+
 def main():
     """
     Main program.
@@ -474,7 +475,7 @@ def main():
 
         # Read command
         c = read_one().lower()
-        print c
+        print(c)
 
         if c == 'y': # Commit.
             comments = opts.comments or ''
@@ -487,5 +488,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print
         sys.exit(1)
-
-

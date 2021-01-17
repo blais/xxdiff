@@ -35,9 +35,10 @@ Here is the original submission email description:
 
 """
 
+from __future__ import print_function
+
 __author__ = ('Michalis Giannakidis <mgiannakidis@gmail.com>',
               'Martin Blais <blais@furius.ca>')
-
 
 # stdlib imports.
 import sys, os, re, tempfile
@@ -98,12 +99,12 @@ def collect_unupdated_files(diff_directories, resolve_conflicts):
         files = find_in_trunk(diff_directories, fn)
         if files:
             if len(files) > 1:
-                print '%s more than once' % fn
+                print('%s more than once' % fn)
                 # FIXME: if we find a file more than once,
                 # keep the unupdated.
             collected_files.extend(files)
         else:
-            print '%s: No such file' % fn
+            print('%s: No such file' % fn)
 
     return collected_files
 
@@ -156,7 +157,7 @@ def get_revisions_between(r1, r2):
     try:
         beg = int(l_r1[-1])
         end = int(l_r2[-1])
-    except ValueError:  
+    except ValueError:
         return rev
 
     if end <= beg:
@@ -208,7 +209,7 @@ def cvsxxdiff_bi_bj(diff_files, prevcounts):
     Compare two relative revision numbers.
     """
     for fn in diff_files:
-        print mkheader(fn)
+        print(mkheader(fn))
 
         # Get revision numbers.
         v1, v2 = [get_previous_revision(fn, prevcounts[x]) for x in 0, 1]
@@ -223,7 +224,7 @@ def cvsxxdiff_bi_bj(diff_files, prevcounts):
         # Print the revisions.
         revs = get_revisions_between(v1, v2)
         for r in revs:
-            print '\n'.join(get_revision_log(fn, r))
+            print('\n'.join(get_revision_log(fn, r)))
 
         # Launch xxdiff.
         xxdiff.invoke.xxdiff_display(
@@ -237,7 +238,7 @@ def cvsxxdiff_bi(diff_files, prevcount):
     Compare to one relative revision number.
     """
     for fn in diff_files:
-        print mkheader(fn)
+        print(mkheader(fn))
 
         # Get revision numbers.
         v = get_previous_revision(fn, prevcount)
@@ -246,7 +247,7 @@ def cvsxxdiff_bi(diff_files, prevcount):
         # Print the revisions.
         revs = get_revisions_between(v, vl)
         for r in revs:
-            print '\n'.join(get_revision_log(fn, r))
+            print('\n'.join(get_revision_log(fn, r)))
 
         # Get the other file from the server.
         p = Popen(['cvs', 'update', '-r', v, '-p', fn], stdout=PIPE)
@@ -265,11 +266,11 @@ def cvsxxdiff_ri(diff_files, action):
     Compare to one absolute revision number.
     """
     for fn in diff_files:
-        print mkheader(fn)
+        print(mkheader(fn))
 
         # Print the revisions.
         if action[0] == 'r':
-            print '\n'.join(get_revision_log(fn, action[1]))
+            print('\n'.join(get_revision_log(fn, action[1])))
 
         # Launch xxdiff.
         p = Popen(['cvs', 'update', '-%s' % action[0], action[1], '-p', fn],
@@ -288,7 +289,7 @@ def cvsxxdiff_ri_rj(diff_files, actions):
     """
     revisions = [x[1] for x in actions]
     for fn in diff_files:
-        print mkheader(fn)
+        print(mkheader(fn))
 
         # Fetch the temporary files.
         tmpfiles = []
@@ -301,7 +302,7 @@ def cvsxxdiff_ri_rj(diff_files, actions):
         if actions[0][0] == 'r' and actions[1][0] == 'r':
             revs = get_revisions_between(revisions[0], revisions[1])
             for r in revs:
-                print '\n'.join(get_revision_log(fn, r))
+                print('\n'.join(get_revision_log(fn, r)))
 
         # Launch xxdiff.
         xxdiff.invoke.xxdiff_display(
@@ -315,7 +316,7 @@ def cvsxxdiff_rep(diff_files):
     Compare checkout to repository.
     """
     for fn in diff_files:
-        print mkheader(fn)
+        print(mkheader(fn))
 
         # Get the revisions.
         vr = get_repository_revision(fn)
@@ -324,7 +325,7 @@ def cvsxxdiff_rep(diff_files):
         # Print the revisions.
         revs = get_revisions_between(vr, vl)
         for r in revs:
-            print '\n'.join(get_revision_log(fn, r))
+            print('\n'.join(get_revision_log(fn, r)))
 
         # Launch xxdiff.
         p = Popen(['cvs', 'update', '-p', fn], stdout=PIPE)
@@ -340,11 +341,11 @@ def cvsxxdiff_c(diff_files):
     Resolve conflicts.
     """
     for fn in diff_files:
-        print mkheader(fn)
+        print(mkheader(fn))
 
         # Get revision numbers.
         vl = get_local_trunk_version(fn)
-        print '\n'.join(get_revision_log(fn, vl))
+        print('\n'.join(get_revision_log(fn, vl)))
 
 
         # Launch xxdiff.
@@ -424,7 +425,7 @@ def revcomp_main():
 
     # Collect files.
     #
-    # If no files were given on the command line or command was invoked on 
+    # If no files were given on the command line or command was invoked on
     # specific directories, search for unupdated files recursively in
     # o) in the specified directories or
     # o) the current dir
@@ -437,10 +438,10 @@ def revcomp_main():
         # Print a message to the user about the list of files to diff.
         # Print it in a single line. This allows to copy paste the output to
         # ex. a 'cvs commit' command.
-        print '%d files to diff:' % len(diff_files)
-        print '=' * 80
-        print ' '.join(diff_files)
-        print '=' * 80
+        print('%d files to diff:' % len(diff_files))
+        print('=' * 80)
+        print(' '.join(diff_files))
+        print('=' * 80)
 
     # Dispatch to the appropriate method.
     if opts.resolve_conflicts:
@@ -490,4 +491,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

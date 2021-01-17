@@ -63,7 +63,7 @@ def backup_file(fn, opts, logs=None):
     """
     if hasattr(logs, 'write'):
         logs = logs.write
-        
+
     # Compute destination backup filename
     if opts.backup_type == 'along':
         # Search for a non-existing backup filename alongside the original
@@ -102,7 +102,7 @@ def backup_file(fn, opts, logs=None):
         if opts.verbose >= 0 and exists(backupfn) and logs:
             logs("(Warning: Overwriting existing file in backup '%s')\n" %
                  backupfn)
-        
+
     else: # opts.backup_type == 'none'
         backupfn = None
 
@@ -134,9 +134,9 @@ def print_reminder(opts):
     """
     # Print reminder of location of backup files at the end (for convenience).
     if opts.backup_dir:
-        print
-        print "Backup files in: '%s'" % opts.backup_dir
-        print
+        print()
+        print("Backup files in: '%s'" % opts.backup_dir)
+        print()
 
 
 def test():
@@ -149,13 +149,12 @@ def test():
 
     options_validate(opts, parser, logs=sys.stdout)
 
-    print 'Dir:', opts.backup_dir
-    print 'Type:', opts.backup_type
+    print('Dir:', opts.backup_dir)
+    print('Type:', opts.backup_type)
 
     backup_file('/home/blais/.emacs', opts, sys.stdout)
 
 
-        
+
 if __name__ == '__main__':
     test()
-

@@ -81,7 +81,7 @@ class CmdQueue:
             self.waitAll()
         except KeyboardInterrupt:
             pass
-        
+
     def queue(self, cmdl, cmdobj=None):
         """Queues a command to be run.
         If cmdobj is specified, methods preRun() and postRun() are called before and after
@@ -113,7 +113,7 @@ class CmdQueue:
             os.wait()
             self.poll()
         self.waitingForAll = 0
-            
+
     def run(self, cmd):
         cmd.pid = os.fork()
         if cmd.pid == 0:
@@ -125,7 +125,7 @@ class CmdQueue:
             if id:
                 return os.WIFSTOPPED(status) or os.WIFSIGNALED(status) or \
                        os.WIFEXITED(status)
-        except OSError, e:
+        except OSError as e:
             import errno
             if e.errno == errno.ECHILD:
                 return 1
@@ -169,10 +169,9 @@ def selftest():
     queue.queue('xxdiff /users/blais/xxdiff/src/mine /users/blais/xxdiff/src/yours')
     queue.queue('xxdiff /users/blais/xxdiff/src/mine /users/blais/xxdiff/src/older')
     queue.queue('xxdiff /users/blais/xxdiff/src/mine /users/blais/xxdiff/src/yours')
-    
+
 
 
 # Run main if loaded as a script
 if __name__ == "__main__":
     selftest()
-

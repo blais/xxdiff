@@ -4,6 +4,8 @@
 Functions to select files within directories.
 """
 
+from __future__ import print_function
+
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 
@@ -26,7 +28,7 @@ def options_graft(parser):
         try:
             regexp = re.compile(value)
             getattr(parser.values, option.dest).append(regexp)
-        except re.error, e:
+        except re.error as e:
             raise optparse.OptionValueError(
                 "compiling regular expression '%s': %s" % (value, e))
 
@@ -36,7 +38,7 @@ def options_graft(parser):
         ('-I', '--ignore',
          "Adds a regular expression for filenames to ignore."),
         ):
-        group.add_option(oshort, olong, 
+        group.add_option(oshort, olong,
                          action='callback', type='str', callback=regexp_cb,
                          metavar="REGEXP", default=[],
                          help=ohelp)
@@ -93,7 +95,7 @@ def options_graft(parser):
                      help="Do not setup default ignores (i.e. by default, "
                      "appropriate ignore patterns are set for Subversion "
                      "and CVS directories, etc.)")
-    
+
     parser.add_option_group(group)
 
     return group
@@ -128,7 +130,7 @@ def options_validate(opts, parser, logs=None):
 
         # By default ignore some common directories.
         if not opts.select_no_defaults:
-            opts.ignore = map(re.compile, ignore_defaults) + opts.ignore
+            opts.ignore = list(map(re.compile, ignore_defaults)) + opts.ignore
 
         # Process all files if no filter specified
         if not opts.select:
@@ -140,7 +142,7 @@ def options_validate(opts, parser, logs=None):
         if regstr:
             try:
                 setattr(opts, regname, re.compile(regstr))
-            except re.error, e:
+            except re.error as e:
                 parser.error("Error compiling regexp '%s':\n%s" % (regstr, e))
 
     # Create an appropriate generator for the "select" method
@@ -153,7 +155,7 @@ def options_validate(opts, parser, logs=None):
     # the filenames and exit.
     if opts.select_debug:
         for fn in selector:
-            print fn
+            print(fn)
         sys.exit(0)
 
     return selector
@@ -197,12 +199,12 @@ def select_patterns(rootdirs, opts):
                     if sre.match(fn):
                         add = True
                         break
-                
+
                 # Further restrict by grepping the file for a pattern.
                 if add and opts.select_grep:
                     try:
                         text = open(join(dn, fn), 'r').read()
-                    except IOError, e:
+                    except IOError as e:
                         raise SystemExit(
                             "Error: could not read file '%s' for grep." % fn)
                     if not opts.select_grep.search(text):
@@ -218,7 +220,7 @@ def select_patterns(rootdirs, opts):
                 if add and opts.ignore_grep:
                     try:
                         text = open(join(dn, fn), 'r').read()
-                    except IOError, e:
+                    except IOError as e:
                         raise SystemExit(
                             "Error: could not read file for ignore '%s'." % fn)
                     if opts.ignore_grep.search(text):
@@ -239,7 +241,7 @@ def select_from_file(fn):
     try:
         for fn in open(fn, 'r').xreadlines():
             yield fn.strip()
-    except IOError, e:
+    except IOError as e:
         raise SystemExit("Error: cannot open/read file (%s)" % e)
 
 
@@ -253,16 +255,15 @@ def test():
 
     selector = options_validate(opts, parser)
 
-    print 'from-file:', opts.select_from_file
-    print 'select:', map(lambda x: x.pattern, opts.select)
-    print 'ignore:', map(lambda x: x.pattern, opts.ignore)
-    print 'roots:', args
-    print
+    print('from-file:', opts.select_from_file)
+    print('select:', map(lambda x: x.pattern, opts.select))
+    print('ignore:', map(lambda x: x.pattern, opts.ignore))
+    print('roots:', args)
+    print()
 
     for fn in selector:
-        print fn
+        print(fn)
 
-        
+
 if __name__ == '__main__':
     test()
-

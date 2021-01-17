@@ -21,6 +21,8 @@ For more generic behaviour about merging patches graphically, see also
 xx-patch.  The current script is really about committing "some" cvs changes.
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'cvs', 'diffutils']
 
@@ -77,14 +79,10 @@ def cvsdiff_main():
     # For each subpatch, apply it individually
     #
     for filename, patch in chunks:
-        ## print '*' * 80
-        ## print fn
-        ## print text
-
         # print patch contents for this file.
-        print '*' * 40
-        print patch
-        print '*' * 40
+        print('*' * 40)
+        print(patch)
+        print('*' * 40)
 
         # Feed diffs to patch, patch will do its deed and save the output to a
         # temporary file.
@@ -99,7 +97,7 @@ def cvsdiff_main():
         cin.close()
 
         # read output from patch.
-        print cout.read()
+        print(cout.read())
 
         if not opts.commit:
             # simply invoke xxdiff on the files.
@@ -109,7 +107,7 @@ def cvsdiff_main():
                 opts, '--title2', 'NEW FILE', tmpf.name, filename)
 
             # print output of xxdiff command.
-            print decision
+            print(decision)
 
             # ACCEPT: keep the changes and and commit the file
             if decision == 'ACCEPT':
@@ -126,7 +124,7 @@ def cvsdiff_main():
             elif decision == 'REJECT':
                 xxdiff.backup.backup_file(filename, opts, logs)
                 shutil.copyfile(tmpf.name, filename)
-            
+
             # NODECISION: do nothing to the local file
             elif decision == 'NODECISION':
                 pass
@@ -136,4 +134,3 @@ main = cvsdiff_main
 
 if __name__ == '__main__':
     main()
-

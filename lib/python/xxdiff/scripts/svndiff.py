@@ -6,9 +6,10 @@ Script that invokes xxdiff for all modified files in the given Subversion
 checkout area. Optionally replace the output file by decision mode.
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
-
 
 # stdlib imports.
 import sys, os, tempfile, datetime
@@ -85,9 +86,9 @@ def review_file(sobj, opts):
         # We don't know what to do with the rest yet.
         else:
             msg = ('unknown', 'ignored')
-            print >> sys.stderr, (
-                "Error: Action for status '%s' on file '%s' "
-                "is not implemented yet") % (sobj.status, sobj.filename)
+            print(("Error: Action for status '%s' on file '%s' "
+                   "is not implemented yet") % (sobj.status, sobj.filename),
+                  file=sys.stderr)
             return msg, None
     finally:
         pass
@@ -158,7 +159,7 @@ def parse_options():
         mod.options_validate(opts, parser)
 
     if opts.comments_file and not opts.commit:
-        print >> sys.stderr, "(Option '%s' ignored.) " % o.dest
+        print("(Option '%s' ignored.) " % o.dest, file=sys.stderr)
 
     # Add a verbose option for svnforeign to use.
     opts.verbose = True
@@ -194,8 +195,8 @@ def svndiff_main():
             args, opts, sys.stdout, ignore=ignofiles) is not True:
             # The user has quit, don't continue.
             sys.exit(0)
-        print
-        print
+        print()
+        print()
 
     # Get the status of the working copy.
     statii = subversion.status(args)
@@ -204,7 +205,7 @@ def svndiff_main():
     statii = [s for s in statii if abspath(s.filename) not in ignofiles]
 
     if not statii:
-        print '(Nothing to do, exiting.)'
+        print('(Nothing to do, exiting.)')
         hist.delete()
         return
 
@@ -230,15 +231,15 @@ def svndiff_main():
         edit_waiter = xxdiff.editor.spawn_editor(comments, filename=comfn)
 
     # First print out the status to the user.
-    print 'Status Of Files To Be Diffed'
-    print '----------------------------'
-    print renstatus
+    print('Status Of Files To Be Diffed')
+    print('----------------------------')
+    print(renstatus)
 
     # Then we start printing each file and the associated decision.
     msgfmt = '  %-10s | %-10s | %s'
-    print
-    print msgfmt % ('Type', 'Action', 'Status')
-    print msgfmt % ('-'*10, '-'*10, '-'*40)
+    print()
+    print(msgfmt % ('Type', 'Action', 'Status'))
+    print(msgfmt % ('-'*10, '-'*10, '-'*40))
 
     # Main loop for graphical diffs, over each of the files reported by status.
     for s in statii:
@@ -271,7 +272,7 @@ def svndiff_main():
             # Review the file.
             (kind, action), waiter = review_file(s, opts)
         finally:
-            print msgfmt % (kind, action, s.parsed_line)
+            print(msgfmt % (kind, action, s.parsed_line))
 
         if waiter is not None:
             waiter()
@@ -281,19 +282,19 @@ def svndiff_main():
 
     # Commit the files if requested.
     if opts.commit:
-        print "\nWaiting for editor '%s' to complete..." % edit_waiter.command,
+        print("\nWaiting for editor '%s' to complete..." % edit_waiter.command, end='')
         sys.stdout.flush()
         comments = edit_waiter()
-        print 'Done.\n'
-        print 'Recorded Merge Comments: ',
+        print('Done.\n')
+        print('Recorded Merge Comments: ', end='')
         if comments == '':
-            print '(None)'
+            print('(None)')
             comments = None
         else:
-            print
-            print '-' * 70
-            print comments
-            print '-' * 70
+            print()
+            print('-' * 70)
+            print(comments)
+            print('-' * 70)
 
         subversion.commit(args, comments=comments)
 
@@ -304,8 +305,8 @@ def svndiff_main():
     # The entire list of files has been reviewed (and possibly committed), clear
     # the history file.
     if opts.history:
-        print
-        print '(Review complete, history cleared)'
+        print()
+        print('(Review complete, history cleared)')
         hist.delete()
 
 
@@ -314,4 +315,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

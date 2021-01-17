@@ -48,7 +48,7 @@ def get_module(modname):
     try:
         mod = __import__("xxdiff.scm.%s" % modname)
         mod = getattr(mod.scm, modname)
-    except ImportError, e:
+    except ImportError as e:
         raise SystemExit("Internal Error: SCM module not found.")
     return mod
 
@@ -58,7 +58,7 @@ def insure_checkout(fn, opts, logs=None):
     Returns 'True' if the file was checked out.
     """
     scm_module = get_module(opts.checkout)
-    
+
     # Verify if the file is already checked out.
     if scm_module.is_checked_out(fn):
         return False

@@ -17,9 +17,10 @@ more generic equivalent::
 
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'diffutils', 'sed']
-
 
 # stdlib imports.
 import sys, os, re
@@ -44,9 +45,9 @@ class GrepSedTransformer(xxdiff.xformloop.Transformer):
         # Grep the input file.
         try:
             text = open(fn, 'r').read()
-        except IOError, e:
+        except IOError as e:
             # Don't bail out if we cannot read a file.
-            print >> sys.stderr, "Warning: cannot read file '%s'." % fn
+            print("Warning: cannot read file '%s'." % fn, file=sys.stderr)
             return False
 
         # Grep the file.
@@ -63,7 +64,7 @@ class GrepSedTransformer(xxdiff.xformloop.Transformer):
                   stdin=PIPE, stdout=outf, stderr=PIPE)
         try:
             stdout, stderr = p.communicate(text)
-        except OSError, e:
+        except OSError as e:
             raise SystemExit("Error: running sed command '%s':\n%s" %
                              (self.sedprog, p.stderr.read()))
 
@@ -123,4 +124,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

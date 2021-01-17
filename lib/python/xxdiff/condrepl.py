@@ -4,6 +4,8 @@
 Functions for conditional replacement.
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 
 
@@ -66,7 +68,7 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False, replfn=None):
     - 'newfn': the new filename to compare -> string
 
     - 'replfn': if specified, the target filename to replace.
-    
+
     - 'opts': program options object -> Options instance
 
       The options that are used are:
@@ -91,8 +93,8 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False, replfn=None):
 
     # Print header
     if opts.verbose >= 2:
-        print >> logs,  '=' * 80
-        print >> logs,  'File: ', origfn
+        print('=' * 80, file=logs)
+        print('File: ', origfn, file=logs)
 
     if opts.verbose >= 2 or exitonsame:
 
@@ -103,7 +105,7 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False, replfn=None):
         # Print differences.
         if p.returncode == 0:
             if opts.verbose >= 2:
-                print >> logs, "(Warning: no differences.)"
+                print("(Warning: no differences.)", file=logs)
 
             if exitonsame:
                 print_decision('NODIFF', origfn, opts, logs)
@@ -163,18 +165,18 @@ def print_decision(decision, origfn, opts, logs):
     Print the decision string.
     """
     if opts.verbose >= 2:
-        print >> logs, decision
+        print(decision, file=logs)
     elif opts.verbose >= 1:
-        print >> logs, '%-10s %s' % (decision, origfn)
+        print('%-10s %s' % (decision, origfn), file=logs)
 
 def print_diffs(diff_output, logs):
     """
-    Format nicely and print the output of side-by-side diff.
+    ppFormat nicely and print the output of side-by-side diff.
     """
-    print >> logs
+    print(file=logs)
     for line in map(str.expandtabs, diff_output.splitlines()):
-        print >> logs, ' |', line
-    print >> logs
+        print(' |', line, file=logs)
+    print(file=logs)
 
 def do_replace_file(ofn, nfn, opts, logs):
     """
@@ -234,7 +236,7 @@ def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
       * opts.dry_run: Whether to actually apply the changes or not.
 
     - 'extra': are extra parameters to pass on to xxdiff.
-    
+
     Returns the decision code for the file.
     """
     mine, ancestor, yours, output = map(abspath,
@@ -243,18 +245,18 @@ def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
 
     # Print header
     if opts.verbose >= 2:
-        print >> logs,  '=' * 80
-        print >> logs,  'File: ', output
+        print('=' * 80, file=logs)
+        print('File: ', output, file=logs)
 
     if opts.verbose >= 2:
         # Run diff between the three files.
         p = Popen(diff3_cmd + files3, stdout=PIPE, stderr=PIPE)
         diff_output, stderr = p.communicate()
 
-        # Print differences.  
+        # Print differences.
         if not diff_output: # Note: we cannot rely on the return code.
             if opts.verbose >= 2:
-                print >> logs, "(Warning: no differences.)"
+                print("(Warning: no differences.)", file=logs)
 
             print_decision('NODIFF', mine, opts, logs)
             return 'NODECISION'
@@ -328,11 +330,10 @@ def test():
         dry_run = False
         no_confirm = False
 
-    print cond_replace(fm['file1'], fm['file2'], Opts, sys.stdout)
+    print(cond_replace(fm['file1'], fm['file2'], Opts, sys.stdout))
     pprint(fm)
 
 
 
 if __name__ == '__main__':
     test()
-

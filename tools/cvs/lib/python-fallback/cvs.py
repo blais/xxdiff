@@ -51,7 +51,7 @@ attic_pfx = 'Attic' + os.sep
 trace_level = 0 # 1 is cmd, 2 is output
 
 statii_sep = 67 * '=' + os.linesep
-logs_sep = 77 * '=' + os.linesep 
+logs_sep = 77 * '=' + os.linesep
 
 
 #===============================================================================
@@ -105,19 +105,19 @@ def run(command, chin_text=None, indir=None):
 
     if trace_level >= 1:
         print "== (cvs):", command
-    
+
     (chin, chout, cherr) = os.popen3(command, 'r')
 
     if chin_text:
         chin.write(chin_text)
         chin.close()
-        
+
     output = chout.read()
     error_output = cherr.read()
     cherr.close()
     sts = chout.close()
     if sts is None: sts = 0
-    
+
     if trace_level >= 2:
         print "cvs (stdout) ------------------------------"
         for l in output.split('\n'):
@@ -155,7 +155,7 @@ def fetch(filename, revision=None, indir=None, module=None):
     Note that if you specify the module name, the filename must be that from the
     root of the module.
     """
-    
+
     revstr = ''
     if revision:
         revstr = '-r "%s"' % revision
@@ -167,7 +167,7 @@ def fetch(filename, revision=None, indir=None, module=None):
     else:
         command = '%s checkout -p %s %s' % \
                   (program, revstr, os.path.join(module, filename))
-        
+
     (sts, out, err) = run(command)
 
     # remove out as an error msg
@@ -189,7 +189,7 @@ def fetch(filename, revision=None, indir=None, module=None):
 def isRevisionNb(rev):
     """Returns true if the string is in the revision number format."""
     return revre_re.match(rev)
-    
+
 #-------------------------------------------------------------------------------
 #
 def isBranchRev(rev):
@@ -245,11 +245,11 @@ def sortRevisionList(list):
     The advantage of using this method is that one does not need to convert
     to/from ints for every comparison (O(n log(n))).
     """
-    
+
     nl = map(lambda x: map(int, x.split('.')), list)
     nl.sort()
     return map(lambda x: string.join(map(repr, x), '.'), nl)
-    
+
 #-------------------------------------------------------------------------------
 #
 def getModule(dir):
@@ -274,7 +274,7 @@ def getTag(dir):
     fn = os.path.join(dir, 'CVS', 'Tag')
     if not os.path.exists(fn):
         return None
-    
+
     # go cat the CVS/Tag file.
     try:
         f = open(fn, 'r')
@@ -320,7 +320,7 @@ def previousOrParent(rev):
         return rev_prev
     else:
         return parentBranchRev(rev)
-    
+
 #-------------------------------------------------------------------------------
 #
 def isChildRev(rchld, rpar):
@@ -387,7 +387,7 @@ class MultipleOutputs:
     unkre = re.compile('(^\? (.*)|^$\s*)%')
 
     def __init__(self, command, separator, indir):
-        
+
         if indir:
             command = '{ cd "' + indir + '" && ' + command + '; }'
 
@@ -398,7 +398,7 @@ class MultipleOutputs:
         chin.close()
         self.choutfd = self.chout.fileno()
         self.cherrfd = self.cherr.fileno()
-        
+
         # initialize
         self.outeof = 0
         self.erreof = 0
@@ -466,11 +466,11 @@ class MultipleOutputs:
             self.sts = self.chout.close()
             if self.sts is None: sts = 0
             self.cherr.close()
-            
+
         if nblines > 1:
             # check for nb of lines because log ends with separator
             return self.processOne(self.separator + output)
-     
+
     # FIXME this could be removed
     def makeNonBlocking(self, fd):
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
@@ -487,7 +487,7 @@ class MultipleStatii(MultipleOutputs):
     """Get multiple statii."""
 
     def __init__(self, files, with_tags=0, recursive=0, indir=None):
-    
+
         self.files = files
         self.with_tags = with_tags
         sw = ''
@@ -497,7 +497,7 @@ class MultipleStatii(MultipleOutputs):
             sw += ' -R'
         else:
             sw += ' -l'
-    
+
         command = '%s status %s %s' % (program, sw, string.join(files))
         MultipleOutputs.__init__(self, command, statii_sep, indir)
 
@@ -513,7 +513,7 @@ class MultipleStatii(MultipleOutputs):
             status = Status(None, self.with_tags, output)
             self.outputs[status.filename] = output
             self.statii[status.filename] = status
-        except Error, e:
+        except Error as e:
             e.msg += "\nErrors from command:\n"
             e.msg += self.error_output
             raise e
@@ -562,7 +562,7 @@ class Status:
                        'Entry Invalid' ]
 
     longuest_status_str = 29
-    
+
     sre = re.compile('^File:\s(.+)\sStatus:\s(.+)$')
     wrre = re.compile('^\s*Working revision:\s+[-]?('+revre+')\s*(.*)')
     wrre2 = re.compile('^\s*Working revision:\s+New file!\s*$')
@@ -573,12 +573,12 @@ class Status:
     stre2 = re.compile('^\s*Sticky Tag:\s+([^\s]+)\s+\((revision:.*|branch:.*)\)\s*$')
     existags = re.compile('^\s*Existing Tags:')
     tagre = re.compile('^\s+([^\s]+)\s+\((revision:(.*)|branch:(.*))\)\s*$')
-                      
+
     repofile_fmt = '^%%s%s[^%s]+%s(.*),v$' % tuple([os.sep]*3)
-    
+
     # ===================================================================
     # File: exp2              Status: Up-to-date
-    # 
+    #
     #    Working revision:    1.1.1.1 Tue May 14 06:15:29 2002
     #    Repository revision: 1.1.1.1 /mnt/fatboy/home/blais/cvsroot/expscripts/exp2,v
     #    Sticky Tag:          (none)
@@ -615,7 +615,7 @@ class Status:
         self.status_filename = mo.group(1).strip()
         try:
             self.status_id = Status.status_strings.index(mo.group(2).strip())
-        except ValueError, e:
+        except ValueError as e:
             raise error
 
         self.work_rev = ''
@@ -639,7 +639,7 @@ class Status:
             mo1 = Status.wrre2.match(lines[3])
             mo2 = Status.wrre3.match(lines[3])
             if not (mo1 or mo2): raise error
-            
+
         mo = Status.rrre.match(lines[4])
         if mo:
             self.repo_rev = mo.group(1).strip()
@@ -657,7 +657,7 @@ class Status:
             if not self.filename:
                 self.attic = isInAttic(self.status_filename)
                 self.filename = removeAttic(self.status_filename)
-            
+
         mo = Status.stre.match(lines[5])
         if mo: # there could be no sticky spec
             self.sticky_tag = mo.group(1).strip()
@@ -688,7 +688,7 @@ class Status:
                     else:
                         self.symbolic_tags[tag] = mo.group(3).strip()
                     idx += 1
-            
+
     def status(self):
         """Returns the status of the file."""
         return self.status_id
@@ -780,7 +780,7 @@ class Status:
             print rev_or_tag, self.branch_tags[rev_or_tag]
             return previousRev(self.branch_tags[rev_or_tag])
         return None
-    
+
     def parentBranchRev(self, rev_or_tag):
         """Returns the parent revision of a branched revision or None if there isn't
         any. This method accepts a tag."""
@@ -791,7 +791,7 @@ class Status:
         elif rev_or_tag in self.branch_tags:
             return parentBranchRev(self.branch_tags[rev_or_tag])
         return None
-   
+
     def previousOrParent(self, rev_or_tag):
         """Returns the previous revision or parent branch if there is one.
         This method accepts a tag."""
@@ -806,7 +806,7 @@ class Status:
         tag."""
         return isBranchRev(self.sticky_tag)
 
-    
+
 #===============================================================================
 # CLASS MultipleLogs
 #===============================================================================
@@ -815,14 +815,14 @@ class MultipleLogs(MultipleOutputs):
     """Get multiple logs."""
 
     def __init__(self, files, indir=None, remote=0, with_revisions=0):
-    
+
         self.files = files
 
         if remote:
             cmd = 'rlog'
         else:
             cmd = 'log'
-    
+
         command = '%s %s %s' % (program, cmd, string.join(files))
         MultipleOutputs.__init__(self, command, logs_sep, indir)
 
@@ -831,7 +831,7 @@ class MultipleLogs(MultipleOutputs):
         self.logs = {}
         self.with_revisions = with_revisions
         self.remote = remote
-        
+
     def processOne(self, output):
         """Processes a status. Return None when done."""
         log = Log(None, self.remote, output,
@@ -844,7 +844,7 @@ class MultipleLogs(MultipleOutputs):
 
         try:
             pass
-        except Error, e:
+        except Error as e:
             e.msg += "\nErrors from command:\n"
             e.msg += self.error_output
             raise e
@@ -875,7 +875,7 @@ class RevInfo:
         """Prints out textural representation."""
         s = '(revision = %s, fields = %s)' % (self.rev, self.fields)
         return s
-        
+
 
 #===============================================================================
 # CLASS Log
@@ -907,7 +907,7 @@ class Log:
 
     def __init__(self, filename, remote=0, log_output=None, with_revisions=0):
         """Initializes a log object with full pathname."""
-        
+
         self.filename = None
         self.attic = None
         if not log_output and filename:
@@ -1007,7 +1007,7 @@ class Log:
         revisions = {}
 
         # first separator is skipped in (a)
-        #if RevInfo.sepre.match(lines[idx]): idx += 1 
+        #if RevInfo.sepre.match(lines[idx]): idx += 1
 
         strip_logs_sep = string.strip(logs_sep)
         done = 0
@@ -1035,7 +1035,7 @@ class Log:
                 if not mo: raise error
                 revinfo.rev = mo.group(1)
                 revinfo.fields = map(string.strip, rlines[1].split(';'))
-                
+
                 revisions[ revinfo.rev ] = revinfo
 
         return revisions
@@ -1044,7 +1044,7 @@ class Log:
     def rcsFile(self):
         """Returns the path of the RCS file."""
         return self.rcsfile
-    
+
     def headRev(self):
         """Returns the head revision of the file."""
         return self.head_rev
@@ -1103,7 +1103,7 @@ class Log:
         """Returns a list of all the revisions.
         This only returns valids results if it was parsed."""
         return self.revisions
-    
+
     def getMainRevisions(self):
         """Returns a list of the main revisions.
         This only returns valids results if it was parsed."""
@@ -1139,7 +1139,7 @@ def selftest():
     assert(parentBranchRev('1.2.3.4') == '1.2')
     assert(parentBranchRev('1.2.3.4.5') == '1.2.3.4')
     assert(parentBranchRev('1.2.3.4.5.6') == '1.2.3.4')
-    
+
     assert(cmpRevisions('1', '2') == -1)
     assert(cmpRevisions('1', '1') == 0)
     assert(cmpRevisions('2', '1') == 1)
@@ -1163,4 +1163,3 @@ def selftest():
 # Run main if loaded as a script
 if __name__ == "__main__":
     selftest()
-

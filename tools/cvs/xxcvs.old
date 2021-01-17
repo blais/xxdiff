@@ -119,7 +119,7 @@ class CmdRootPath:
 #===============================================================================
 
 try:
-    
+
     import optparse
     parser = optparse.OptionParser(__doc__.strip(), version=__version__)
 
@@ -127,26 +127,26 @@ try:
                       help="Verbose mode (useful for debugging).")
     parser.add_option('--debug', action='store_true',
                       help="Full-on debug mode, including CVS commands.")
-        
+
     # Declare subcommands
-    subcmds = [ 
+    subcmds = [
         CmdStatus(),
         CmdLog(),
         CmdRootPath()
         ]
-    
+
     gopts, sc, opts, args = parse_subcommands(parser, subcmds)
-    
+
     if gopts.debug:
         gopts.verbose = 1
         cvs.trace = 1
 
     sc.execute(args)
 
-except Error, e:
+except Error as e:
     print 'Error:', e
 
-except cvs.Error, e:
+except cvs.Error as e:
     print 'CVS Error:', e
     if gopts.debug:
         raise

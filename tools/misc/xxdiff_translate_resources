@@ -250,7 +250,7 @@ try:
     f = open(opts.file, 'r')
     lines = f.readlines()
     f.close()
-except IOError, e:
+except IOError as e:
     print >> sys.stderr, "Error reading rcfile", e
     sys.exit(1)
 
@@ -262,7 +262,7 @@ for l in lines:
         # leave comment in
         print l
         continue
-    
+
     mo = resre.match( l )
     if mo:
         (name, value) = map( string.strip, mo.groups() )

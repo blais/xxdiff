@@ -77,14 +77,14 @@ def run(program, args, stdinn = None):
 
         child_stdin.close()
         child_stdout.close()
-    except os.error, e:
+    except os.error as e:
         sys.stderr.write( "Error spawning program:" + e.strerror + "\n" )
 
 #-------------------------------------------------------------------------------
 #
 def runCt(cmd):
     if gopts.debug or gopts.fake:
-        print "running: cleartool", cmd 
+        print "running: cleartool", cmd
     if gopts.fake:
         return
 
@@ -98,7 +98,7 @@ def checkEqualFiles(files):
     # FIXME todo
     pass
 
-        
+
 #===============================================================================
 # CLASS CmFile
 #===============================================================================
@@ -127,7 +127,7 @@ revision, etc.
         print "previous", self.getPreviousRevision()
         print "ancestor", self.getAncestorRevision()
         print "mainlatest", self.getMainLatestRevision()
-        print 
+        print
         print "fullname", self.fullname
         print "rev", self.rev
         print "rev_cur", self.rev_cur
@@ -135,8 +135,8 @@ revision, etc.
         print "rev_anc", self.rev_anc
         print "rev_latest", self.rev_latest
         print "checkedout", self.checkedout
-        print 
-    
+        print
+
     def parseName(self, fname):
         """Parses extended names and returns a list of ( filename, revision )
 pairs."""
@@ -210,7 +210,7 @@ pairs."""
                 self.rev_latest = mo.group( 2 )
         return self.rev_latest
 
-        
+
 #===============================================================================
 # CLASS ExtCmdBase
 #===============================================================================
@@ -220,14 +220,14 @@ class ExtCmdBase:
     """Base class for command classes.
 
     FIXME do doc."""
-    
+
     def __init__(self):
         self.child_stdin = None
 
     def getFiles(self, names):
         files = map( lambda x: CmFile(x), names )
         return files
-        
+
 
 #===============================================================================
 # CLASS CmdDiff
@@ -249,7 +249,7 @@ class CmdDiff(ExtCmdBase):
         args = self.getFiles( args )
         runDiff( map( lambda x: x.fullname, args ) )
 
-    
+
 #===============================================================================
 # CLASS CmdPrevious
 #===============================================================================
@@ -257,7 +257,7 @@ class CmdDiff(ExtCmdBase):
 class CmdPrevious(ExtCmdBase):
 
     """Diffs each file with its previous revision
-    
+
     FIXME do doc.
     """
 
@@ -265,7 +265,7 @@ class CmdPrevious(ExtCmdBase):
 
     def __init__(self):
         ExtCmdBase.__init__( self )
-        
+
     def execute(self, args):
         args = self.getFiles( args )
         for f in args:
@@ -289,7 +289,7 @@ class CmdPrevious(ExtCmdBase):
 class CmdBranch(ExtCmdBase):
 
     """Diffs each file with the previous tagged revision
-    
+
     FIXME do doc."""
 
     name = 'branch'
@@ -321,7 +321,7 @@ class CmdBranch(ExtCmdBase):
 class CmdMerge(ExtCmdBase):
 
     """Diff with each ancestor
-    
+
 Diffs each file with its ancestor and the latest in the main
 branch, if it is different.
 
@@ -369,7 +369,7 @@ Use the one that suits you best.
         args = self.getFiles( args )
 
         s = 0
-        if self.opts.remerge: s += 1        
+        if self.opts.remerge: s += 1
         if self.opts.leave_merged: s += 1
         if self.opts.latest: s += 1
         if s > 1:
@@ -406,7 +406,7 @@ Use the one that suits you best.
                         print "ancestor:", ancestor
                         print "latest:  ", latest
                         print "------------------------------"
-                    
+
                 elif self.opts.latest:
                     current = f.getCurrent()
                     previous = f.getPrevious()
@@ -417,7 +417,7 @@ Use the one that suits you best.
                         print "previous:", previous
                         print "latest:  ", latest
                         print "------------------------------"
-                    
+
                 else:
                     current = f.getCurrent()
                     ancestor = f.getAncestor()
@@ -457,10 +457,10 @@ class CmdUpdate(ExtCmdBase):
 
     name = 'update'
     optmap = []
-    
+
     def __init__(self):
         ExtCmdBase.__init__( self )
-        
+
     def execute(self, args):
         args = self.getFiles( args )
         pass
@@ -500,7 +500,7 @@ def parse_options_subcmds(optmap, subcmds=[]):
     parser = fgetopt.FancyGetopt( optmap )
     try:
         args = parser.getopt( args=sys.argv[1:], object=opts )
-    except DistutilsArgError, e:
+    except DistutilsArgError as e:
         print >> sys.stderr, "Argument error:", e
         sys.exit(1)
 
@@ -551,7 +551,7 @@ def parse_options_subcmds(optmap, subcmds=[]):
     subparser = fgetopt.FancyGetopt( suboptmap )
     try:
         subargs = subparser.getopt( args[1:], object=sc.opts )
-    except DistutilsArgError, e:
+    except DistutilsArgError as e:
         print >> sys.stderr, "Argument error:", e
         sys.exit(1)
 
@@ -578,7 +578,7 @@ def main():
     #
     # options parsing
     #
-    
+
     optmap = [
         ( 'verbose', 'v', "Verbose mode. Prints lots of stuff on stdout." ),
         ( 'debug', 'd', "Self debugging utility (do not use)." ),
@@ -588,7 +588,7 @@ def main():
         ( 'xxdiff=', 'g', "Specify xxdiff program location." ),
         ( 'xxdiffargs=', 'A', "Arguments to pass directly to diff program." ),
         ]
-    
+
     # declare subcommands.
     subcmds = [ CmdDiff(), \
                 CmdPrevious(), \

@@ -7,6 +7,8 @@ In particular, functions to dump and parse a PostgreSQL database schema.  We use
 this to perform schema comparison in one of the scripts.
 """
 
+from __future__ import print_function
+
 __author__ = "Martin Blais <blais@furius.ca>"
 
 
@@ -53,7 +55,7 @@ def options_validate(opts, parser, logs=None):
         args.extend( ['-h', opts.host] )
     if opts.port:
         args.extend( ['-p', opts.port] )
-    
+
     opts.pgsqlargs = args
 
 
@@ -75,7 +77,7 @@ def parse_dbspec(dbspec, parser, opts):
     # Set defaults from the options.
     if user is None:
         user = opts.username
-        
+
     return Schema(dbspec, user, db, schema)
 
 
@@ -87,7 +89,7 @@ class Schema(object):
         self.dbspec = dbspec
         self.user, self.dbname, self.schema = user, dbname, schema
         self.dump = None
-        
+
 def dump_schema(user, dbname, schema, opts):
     """
     Dump the schema for the given database.  Returns the dump text on output.
@@ -162,7 +164,6 @@ def dump_chunks(chunks):
     Debug printout of chunks.
     """
     for chunk in chunks:
-        print '========', chunk.name, chunk.typ
-        print chunk.descline
-        print chunk.contents
-
+        print('========', chunk.name, chunk.typ)
+        print(chunk.descline)
+        print(chunk.contents)
