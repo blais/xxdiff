@@ -104,7 +104,7 @@ Screenshots
 Download
 ========
 
-* Source code can be found the public Mercurial repository, here:
+* Source code can be found in the public GitHub repository, here:
 
      http://github.com/blais/xxdiff
 
