@@ -170,7 +170,7 @@ def patch_main():
         cin.close()
 
         # read output from patch.
-        print9cout.read())
+        print(cout.read())
         if cout.close() != None:
             print("Error: running patch.", file=sys.stderr)
 

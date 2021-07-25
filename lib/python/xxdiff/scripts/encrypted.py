@@ -241,7 +241,7 @@ def encrypted_main():
             print("Warning: there will be no output file, " +
                   "--dont-armor will means nothing special.", file=sys.stderr)
         if opts.recipient:
-            print(I"Warning: there will be no output file, " +
+            print("Warning: there will be no output file, " +
                   "--recipient will means nothing special.", file=sys.stderr)
 
     if opts.unmerge:
