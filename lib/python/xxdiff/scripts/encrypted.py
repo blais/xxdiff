@@ -57,6 +57,8 @@ encrypted or not:
 
 """
 
+from __future__ import print_function
+
 __moredoc__ = """
 Safety Notes
 ------------
@@ -76,8 +78,6 @@ calculate the diffs internally.
 the diffs (e.g. modifying an unsuspecting user's resources in ~/.xxdiffrc), they
 could feed the decrypted files to an arbitrary program.)
 """
-
-from __future__ import print_function
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'GnuPG']
