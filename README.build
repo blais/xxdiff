@@ -5,7 +5,7 @@ xxdiff: Build Notes and Instructions
 xxdiff is a graphical file and directories comparison and merge tool.
 
 Official home page:
-    http://xxdiff.sourceforge.net
+    http://github.com/blais/xxdiff
 Original author:
     Martin Blais <blais@furius.ca>
 
@@ -97,36 +97,3 @@ Packaging
 
     inst -f xxdiff-<version>.mips.tardist
     > go
-
-
-The author's own release process
---------------------------------
-
-0) check
-   1a) the doc files have been generated.
-   1b) the version number is correct
-
-1) apply release tag to cvs files
-
-2) build (see instructions above)
-   2a) run tests in xxdiff/test
-
-3) build packages (see instructions above)
-
-4) distribute
-   - add release to sourceforge project
-   - upload to sourceforge htdocs (secondary download location)
-   - upload to sourceforge web page
-   - upload to rhcontrib.bero.org
-
-5) announce
-   - sourceforge project release announcement
-   - update web site
-   - freshmeat
-   - rh-contrib (bero)
-   - qt-interest
-   - cervisia list
-   - wincvs list
-   - sgi freeware
-   - discreet
-

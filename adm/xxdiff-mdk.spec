@@ -4,8 +4,8 @@ Version: 3.1
 Release: 1
 Copyright: GNU GPL
 Group: Development/Tools
-Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.gz
-URL: http://xxdiff.sourceforge.net
+Source: https://github.com/blais/xxdiff/archive/refs/heads/master.tar.gz
+URL: http://github.com/blais/xxdiff/
 Packager: Philippe Corbes <philippe.corbes@laposte.net>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: libqt3 >= 3.0
@@ -22,7 +22,7 @@ highlighted for easy identification.
 %setup -q
 
 %build
-if [ -z "$QTDIR" ]; then 
+if [ -z "$QTDIR" ]; then
 	. /etc/profile.d/qt.sh
 fi
 
@@ -30,7 +30,7 @@ cd src
 tmake xxdiff.pro > Makefile
 
 # Copy files for qt2 if necessary.
-if ! grep -q 'define.*QT_VERSION.*0x03' ${QTDIR}/include/qglobal.h ; then 
+if ! grep -q 'define.*QT_VERSION.*0x03' ${QTDIR}/include/qglobal.h ; then
     cp qt2/*.{h,cpp} .
 fi
 
@@ -62,7 +62,7 @@ install -c -m 644 src/xxdiff.1 ${RPM_BUILD_ROOT}/usr/X11R6/man/man1/xxdiff.1
 
 %changelog
 * Thu Sept 2006 Philippe Corbes <philippe.corbes@laposte.net>
-- released 3.2-1 Added contextuals menus on right click 
+- released 3.2-1 Added contextuals menus on right click
 
 * Thu Feb 14 2006 Philippe Corbes <philippe.corbes@laposte.net>
 - released 3.1-1 Compiled for a Mandrake 9.1 with QT3

@@ -70,11 +70,6 @@ significant part of their development process, many of the features
 are a direct result of suggestions from these people while the author
 was working there.
 
-New releases and updates are announced on freshmeat. You can register
-for notification at either freshmeat or sourceforge.  xxdiff is
-implemented in C++ and its runtime dependencies is only the **Qt UI
-toolkit** from TrollTech.
-
 Unicode and Inline Editing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -104,12 +99,12 @@ Screenshots
 Download
 ========
 
-* Source code can be found the public Mercurial repository, here:
+* Source code can be found the public Git repository, here:
 
      http://github.com/blais/xxdiff
 
+  There are no releases. Pick up the source for from Github.
 
-* `Releases Download <http://sourceforge.net/project/showfiles.php?group_id=2198>`_
 
 * A complete Qt4 port (which works on the Mac) has been done by
   Alexandre Feblot (alexandre dot feblot at gmail dot com). This forms
@@ -206,14 +201,8 @@ the relevant pages.  The author does not publish binaries anymore.
 Reporting Bugs
 ==============
 
-* `Reporting Bugs <https://sourceforge.net/p/xxdiff/bugs/>`_
+* `Reporting Bugs <https://github.com/blais/xxdiff/issues>`_
   *(bugs and feature requests)*
-
-**PLEASE!** report bugs using the bug tracker instead of email. It is extremely
-simple, quick and easy to use, you don't even have to have a SourceForge
-account, and it allows me to track issues and desired features, as well as keep
-a history and dates.  Please do not send the author email about bugs.  Log them,
-you don't even need a SourceForge account. Thank you.
 
 
 Installation
@@ -242,13 +231,6 @@ works, including Mac OS X.
 External Links
 ==============
 
-- `SourceForge Project Page <http://sourceforge.net/projects/xxdiff>`_
-
-- `Freshmeat Application Index <http://freshmeat.net/projects/xxdiff>`_
-
-- `Open Source Directory (OSDir) application index
-  <http://www.osdir.com/Downloads-req-viewdownloaddetails-lid-402-ttitle-xxdiff.html>`_
-
 - Other file comparison programs at `Google directory
   <http://directory.google.com/Top/Computers/Software/File_Management/File_Comparison/>`_,
   `DMOZ <http://dmoz.org/Computers/Software/File_Management/File_Comparison/>`_
@@ -268,10 +250,3 @@ Author
 ======
 
 Martin Blais <blais@furius.ca>
-
-.. official sourceforge logo code snippet
-
-.. image:: http://sourceforge.net/sflogo.php?group_id=2198&type=1
-   :width: 88
-   :height: 31
-   :alt: SourceForge Logo

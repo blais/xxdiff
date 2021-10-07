@@ -150,7 +150,7 @@ XxInternalError::XxInternalError(
    oss << "Internal error." << endl << endl;
    oss << "There has been an internal error within xxdiff." << endl
        << "To report bugs, please use the sourceforge bug tracker" << endl
-       << "at https://sourceforge.net/p/xxdiff/bugs/" << endl
+       << "at https://github.com/blais/xxdiff/" << endl
        << "and log the above information above and if possible," << endl
        << "the files that caused the error, and as much detail as" << endl
        << "you can to reproduce the error.";

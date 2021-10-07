@@ -2196,15 +2196,3 @@ KNOWN BUGS
 ==========
 
 * Using diff option "-B" with xxdiff doesn't work for now.
-
-RELEASE PROCEDURE
------------------
-
-* RH-Contrib (bero)
-* Sourceforge project release announcement
-* Update web site
-* Freshmeat
-* Qt-interest
-* Cervisia ml
-* SGI freeware
-* discreet

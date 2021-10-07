@@ -9,7 +9,7 @@
 :Abstract:
 
   User's manual for xxdiff.  The official location of xxdiff on the internet is
-  http://xxdiff.sourceforge.net.  If you're reading this page from the web, note
+  http://github.com/blais/xxdiff.  If you're reading this page from the web, note
   that you can also access this document from the Help menu of xxdiff.
 
 :Copyright: Copyright (C) 1999-2004, Martin Blais.  All Rights Reserved.
@@ -90,7 +90,7 @@ used to
 xxdiff doesn't itself compute the differences between files, it just displays
 them graphically (the rationale behind this is that you can use different tools
 to compute the actual diffs (for example using Rational ClearCase's cleardiff,
-which gives more sensible results than GNU diff in certain cases), 
+which gives more sensible results than GNU diff in certain cases),
 there is a relatively standard format for difference output (POSIX diff),
 so it is easy and efficient to parse diff output from different programs,
 under the UNIX dataflow paradigm, it is common for graphical tools to be
@@ -167,7 +167,7 @@ conventions for command-line options.
 
 Using xxdiff as a short-lived application
 -----------------------------------------
-    
+
 xxdiff has not been designed with the intent of being used over multiple sets of
 files over the course of one execution---that is, it has been built around the
 idea that you would execute it once over a single set of inputs, use it, then
@@ -330,7 +330,7 @@ also customize the colors and fonts.
 
 Redoing the diffs
 -----------------
-      
+
 
 If a file has changed while xxdiff is up, and there is need to recompute the
 diffs, invoke the "redo diff" command from the edit menu.  The arguments used
@@ -877,7 +877,7 @@ a difficult conflict.  However, that is a task best left to your own favorite
 editing program.  Saving with merge conflicts will allow you to resolve those
 few remaining conflicts by hand.
 
-    
+
 
 However, a few commands have been provided under the File menu to spawn an
 editor on the input files.  You can then redo the diff after your input file has
@@ -977,13 +977,12 @@ This program has been written from scratch and is being actively maintained by
 
 Reporting bugs
 ==============
-      
 
-All bug reports and feature requests should be submitted through the
-SourceForge bug tracking system at the following URL
-http://sourceforge.net/bugs/?group_id=2198.  Please avoid sending the author
-email about xxdiff bugs.  Please use this bug tracking system, it is extremely
-fast and simple to use.
+
+All bug reports and feature requests should be submitted through the Github bug
+tracking system at the following URL http://github.com/blais/xxdiff/issues.
+Please avoid sending the author email about xxdiff bugs. Please use this bug
+tracking system, it is extremely fast and simple to use.
 
 
 Project history
@@ -1025,8 +1024,8 @@ bothering me with the occasional bug fix that I did on the job.  Many more
 thanks to all the many engineers who tested it there and reported problems with
 it, as well as providing invaluable suggestions.
 
-SourceForge is hosting my web site and I'm using many of its features.  Tomas
-Pospisek (tpo at sourcepole.ch) has provided a Debian package.  Dan Weeks has
-packaged it for one of the BSD variants (danimal at danimal.org).  Not sure, but
-I think that Christian Savard (savardc at pobox.com) provided the original
-Gentoo port (xxdiff is now supported in Gentoo).
+SourceForge used to host my web site. Tomas Pospisek (tpo at sourcepole.ch) has
+provided a Debian package. Dan Weeks has packaged it for one of the BSD variants
+(danimal at danimal.org). Not sure, but I think that Christian Savard (savardc
+at pobox.com) provided the original Gentoo port (xxdiff is now supported in
+Gentoo).
