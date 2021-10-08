@@ -6,7 +6,7 @@ Script that invokes xxdiff for all modified files in the given Subversion
 checkout area. Optionally replace the output file by decision mode.
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
@@ -63,7 +63,7 @@ def review_file(sobj, opts):
                 # Get the source filename from the history.
                 info = subversion.getinfo(sobj.filename)
                 from_url, from_rev = [info.get('Copied From %s' % x, None)
-                                      for x in 'URL', 'Rev']
+                                      for x in ('URL', 'Rev')]
 
                 tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
                 dopts.extend(title_opts('%s (%s)' % (from_url, from_rev)))

@@ -57,7 +57,7 @@ encrypted or not:
 
 """
 
-from __future__ import print_function
+
 
 __moredoc__ = """
 Safety Notes
@@ -120,7 +120,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
 
     # Create temporary files.
     tempfiles = []
-    for t in xrange(len(textlist)):
+    for t in range(len(textlist)):
         f = NamedTemporaryFile(prefix=tmpprefix)
         print('== TEMPFILE', f.name)
         tempfiles.append(f)
@@ -133,7 +133,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
     # sure, since it would contain decrypted content if saved.
 
     # Decode the files.
-    for i in xrange(len(textlist)):
+    for i in range(len(textlist)):
         t, f = textlist[i], tempfiles[i]
 
         # Decode one file to an existing temporary file.
@@ -148,7 +148,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
 
     # Spawn xxdiff on the temporary/decoded files.
     waiter = xxdiff.invoke.xxdiff_decision(
-        opts, nowait=1, *map(lambda x: x.name, tempfiles))
+        opts, nowait=1, *[x.name for x in tempfiles])
 
     # Close and automatically delete the temporary/decoded files.
     for f in tempfiles:

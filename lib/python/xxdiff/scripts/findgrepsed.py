@@ -17,7 +17,7 @@ more generic equivalent::
 
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'diffutils', 'sed']

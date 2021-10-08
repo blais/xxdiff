@@ -35,7 +35,7 @@ Here is the original submission email description:
 
 """
 
-from __future__ import print_function
+
 
 __author__ = ('Michalis Giannakidis <mgiannakidis@gmail.com>',
               'Martin Blais <blais@furius.ca>')
@@ -161,9 +161,9 @@ def get_revisions_between(r1, r2):
         return rev
 
     if end <= beg:
-        rg = xrange(beg, end-1, -1)
+        rg = range(beg, end-1, -1)
     else:
-        rg = xrange(beg, end+1)
+        rg = range(beg, end+1)
     for r in rg:
         l_r1[-1] = str(r)
         rev.append('.'.join(l_r1))
@@ -212,7 +212,7 @@ def cvsxxdiff_bi_bj(diff_files, prevcounts):
         print(mkheader(fn))
 
         # Get revision numbers.
-        v1, v2 = [get_previous_revision(fn, prevcounts[x]) for x in 0, 1]
+        v1, v2 = [get_previous_revision(fn, prevcounts[x]) for x in (0, 1)]
 
         # Get the files from the server.
         tmpfiles = []

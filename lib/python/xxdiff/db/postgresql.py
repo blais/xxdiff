@@ -7,7 +7,7 @@ In particular, functions to dump and parse a PostgreSQL database schema.  We use
 this to perform schema comparison in one of the scripts.
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 
@@ -132,7 +132,7 @@ def parse_dump(dbdump, sort_columns=False):
             self.name, self.typ = mo.group(1, 2)
 
     # Parse chunks.
-    chunks = map(lambda mo: Chunk(mo), sec_re.finditer(dbdump))
+    chunks = [Chunk(mo) for mo in sec_re.finditer(dbdump)]
     for c1, c2 in consepairs(chunks):
         c1.contents = dbdump[c1.mo.end():c2.mo.start()]
     chunks[-1].contents = dbdump[chunks[-1].mo.end():]
@@ -149,8 +149,7 @@ def parse_dump(dbdump, sort_columns=False):
             if mo:
                 pre, post = c.contents[:mo.end(1)], c.contents[mo.start(2):]
                 columns = c.contents[mo.end(1):mo.start(2)].strip()
-                line_cols = map(lambda x: x.endswith(',') and x or '%s,' % x,
-                                map(str.strip, columns.splitlines()))
+                line_cols = [x.endswith(',') and x or '%s,' % x for x in list(map(str.strip, columns.splitlines()))]
                 line_cols.sort()
                 c.contents = (pre + '\n' +
                               ''.join('   %s\n' % x for x in line_cols) +

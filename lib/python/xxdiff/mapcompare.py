@@ -61,19 +61,19 @@ def render_diffable_maps(opts, *maps):
                 for x in maps]
     
     mapkeys = set()
-    for x in maps: mapkeys.update(x.keys())
+    for x in maps: mapkeys.update(list(x.keys()))
     mapkeys = sorted(mapkeys)
     for key in mapkeys:
         # Check if some of the keys are missing.  If so, skip this entry.
         if opts.show_common_only:
-            if False in [x.has_key(key) for x in maps]:
+            if False in [key in x for x in maps]:
                 continue
 
         # Generate random garbage that will match up the entries when diffed.
         ranlines = (['=== %s\n' % str(key)] + 
                     ['===[%s] \n' % ''.join(random.choice(string.letters)
-                                            for x in xrange(70))
-                     for x in xrange(opts.garbage_lines)])
+                                            for x in range(70))
+                     for x in range(opts.garbage_lines)])
 
         # Write the output to the files.
         for dmap, tmpf in zip(maps, tmpfiles):

@@ -19,7 +19,7 @@ def consepairs(seq):
     Iterate over consecutive pairs.
     """
     it = iter(seq)
-    prev = it.next()
+    prev = next(it)
     for el in it:
         yield prev, el
         prev = el

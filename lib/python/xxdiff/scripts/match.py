@@ -63,7 +63,7 @@ def match_main():
         bnmap.setdefault(bn, []).append(fn)
 
     # Invoke xxdiff's on alphabetical order of the basenames
-    bnkeys = bnmap.keys()
+    bnkeys = list(bnmap.keys())
     bnkeys.sort()
     for bn in bnkeys:
         filenames = bnmap[bn]

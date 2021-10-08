@@ -4,7 +4,7 @@
 Functions to invoke xxdiff in various ways.
 """
 
-from __future__ import print_function
+
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
@@ -62,7 +62,7 @@ def _run_xxdiff(cmd, opts, stdin):
 
     if stdin is not None:
         assert '-' in cmd
-    if isinstance(stdin, (str, unicode)):
+    if isinstance(stdin, str):
         # stdin is text.
         intype = PIPE
         intext = stdin
@@ -293,8 +293,7 @@ def test():
     class Opts:
         xxdiff = 'xxdiff'
 
-    f1, f2, f3 = map(lambda x: join('/home/blais/p/xxdiff/test', x),
-                     ('mine', 'older', 'yours'))
+    f1, f2, f3 = [join('/home/blais/p/xxdiff/test', x) for x in ('mine', 'older', 'yours')]
 
     for t in args:
         if t == 'simple':

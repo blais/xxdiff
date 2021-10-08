@@ -4,7 +4,7 @@
 Functions for conditional replacement.
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 
@@ -99,7 +99,7 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False, replfn=None):
     if opts.verbose >= 2 or exitonsame:
 
         # Run diff between the original and the new/modified file
-        p = Popen(sbs_diff_cmd + [origfn, newfn], stdout=PIPE, stderr=PIPE)
+        p = Popen(sbs_diff_cmd + [origfn, newfn], stdout=PIPE, stderr=PIPE, encoding='utf-8')
         diff_output, stderr = p.communicate()
 
         # Print differences.
@@ -150,7 +150,7 @@ def cond_replace(origfn, newfn, opts, logs, exitonsame=False, replfn=None):
             if opts.verbose >= 2:
                 # Run diff again to show the real changes that will be applied.
                 p = Popen(sbs_diff_cmd + [origfn, mergedf.name],
-                          stdout=PIPE, stderr=PIPE)
+                          stdout=PIPE, stderr=PIPE, encoding='utf-8')
                 diff_output, stderr = p.communicate()
 
                 if diff_output: print_diffs(diff_output, logs)
@@ -239,8 +239,8 @@ def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
 
     Returns the decision code for the file.
     """
-    mine, ancestor, yours, output = map(abspath,
-                                        (mine, ancestor, yours, output))
+    mine, ancestor, yours, output = list(map(abspath,
+                                        (mine, ancestor, yours, output)))
     files3 = [mine, ancestor, yours]
 
     # Print header
@@ -250,7 +250,7 @@ def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
 
     if opts.verbose >= 2:
         # Run diff between the three files.
-        p = Popen(diff3_cmd + files3, stdout=PIPE, stderr=PIPE)
+        p = Popen(diff3_cmd + files3, stdout=PIPE, stderr=PIPE, encoding='utf-8')
         diff_output, stderr = p.communicate()
 
         # Print differences.
@@ -301,7 +301,7 @@ def cond_resolve(mine, ancestor, yours, output, opts, logs=None, extra=None):
     if opts.verbose >= 2 and decision in proper_decisions:
         # Run diff again to show the real changes that will be applied to
         # 'mine' into the output file.
-        p = Popen(sbs_diff_cmd + [mine, output], stdout=PIPE, stderr=PIPE)
+        p = Popen(sbs_diff_cmd + [mine, output], stdout=PIPE, stderr=PIPE, encoding='utf-8')
         diff_output, stderr = p.communicate()
 
         if diff_output:
@@ -318,8 +318,7 @@ def test():
     from pprint import pprint
 
     newdir = tempfile.mkdtemp()
-    fm = dict(map(lambda x: ('file%d' % x, join(newdir, 'file%d' % x)),
-                  xrange(1, 5)))
+    fm = dict([('file%d' % x, join(newdir, 'file%d' % x)) for x in range(1, 5)])
     pprint(fm)
     os.system('cp /home/blais/.emacs %(file1)s' % fm) # TEST
     os.system('cat %(file1)s | sed -e "s/contr/FREAK/" > %(file2)s' % fm) # TEST
