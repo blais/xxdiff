@@ -212,7 +212,7 @@ def cvsxxdiff_bi_bj(diff_files, prevcounts):
         print(mkheader(fn))
 
         # Get revision numbers.
-        v1, v2 = [get_previous_revision(fn, prevcounts[x]) for x in (0, 1)]
+        v1, v2 = [get_previous_revision(fn, prevcounts[x]) for x in [0, 1]]
 
         # Get the files from the server.
         tmpfiles = []

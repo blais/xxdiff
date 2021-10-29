@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="iso-8859-1" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <title>xxdiff documentation</title>
 <meta name="author" content="Martin Blais" />
 <meta name="date" content="2003-12-25" />
@@ -28,13 +28,13 @@
 </tbody>
 </table>
 <div class="abstract topic">
-<p class="topic-title first">Abstract</p>
+<p class="topic-title">Abstract</p>
 <p>User's manual for xxdiff.  The official location of xxdiff on the internet is
-<a class="reference external" href="http://xxdiff.sourceforge.net">http://xxdiff.sourceforge.net</a>.  If you're reading this page from the web, note
+<a class="reference external" href="http://github.com/blais/xxdiff">http://github.com/blais/xxdiff</a>.  If you're reading this page from the web, note
 that you can also access this document from the Help menu of xxdiff.</p>
 </div>
 <div class="contents topic" id="table-of-contents">
-<p class="topic-title first">Table of Contents</p>
+<p class="topic-title">Table of Contents</p>
 <ul class="auto-toc simple">
 <li><a class="reference internal" href="#introduction" id="id5">1&nbsp;&nbsp;&nbsp;Introduction</a></li>
 <li><a class="reference internal" href="#version" id="id6">2&nbsp;&nbsp;&nbsp;Version</a></li>
@@ -200,7 +200,7 @@ so there's no need to rewrite them.</p>
 <h1><a class="toc-backref" href="#id6">2&nbsp;&nbsp;&nbsp;Version</a></h1>
 <p>This documentation was generated for version:</p>
 <div id="version">
-  4.0
+  5.0b1
 </div></div>
 <div class="section" id="invocation">
 <h1><a class="toc-backref" href="#id7">3&nbsp;&nbsp;&nbsp;Invocation</a></h1>
@@ -296,7 +296,14 @@ Sets the X display (default is $DISPLAY).
 <tr>
 <td width="30%"><tt>--style &lt;arg&gt;</tt></td>
 <td align=left>
-Sets the application GUI style. Possible values are motif, windows, and platinum.
+Sets the application GUI style. Possible values are fusion, windows, or QtCurve when that style has been installed. 
+</td>
+</tr>
+
+<tr>
+<td width="30%"><tt>--platform &lt;arg&gt;</tt></td>
+<td align=left>
+Sets the platform plugin to be used. For instance, on OS X one can use cocoa or xcb as platform plugins.
 </td>
 </tr>
 
@@ -373,7 +380,7 @@ Switches to synchronous mode for debugging.
 <tr>
 <td width="30%"><tt>--graphicssystem &lt;arg&gt;</tt></td>
 <td align=left>
-Sets the application graphics system. Possible values are raster, opengl (experimental), opengl1 (obsolete), x11, native.
+Sets the application graphics system. Possible values are raster, opengl (experimental), opengl1 (obsolete), x11, native. 
 </td>
 </tr>
 
@@ -842,7 +849,7 @@ xxdiff olddir newdir
 </pre>
 <p>The default colors used here are symmetrical, so invoking the files in a
 different order will result in regions being assigned the same colors.</p>
-<div class="note">
+<div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you want to compare the files within directories all at once, use
 the <tt class="docutils literal"><span class="pre">--recursive</span></tt> option and you will get a single xxdiff with
@@ -1175,7 +1182,7 @@ Geometry: 1200x600
 Preferred geometry upon initialization.  Format is the same a X geometry specification, plus you can also use `Maximize' to maximize on startup
 </BLOCKQUOTE>
 <PRE>
-Style: "Cleanlooks"
+Style: ""
 </PRE>
 <BLOCKQUOTE>
 Preferred Qt style, see Qt documentation for more details. The style can otherwise be specified through command-line arguments.
@@ -1312,77 +1319,77 @@ Color.Same.Fore: "&lt;color&gt;"
 Color.Same.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Identical text
+ Identical text 
 </BLOCKQUOTE>
 <PRE>
 Color.SameBlank.Fore: "&lt;color&gt;"
 Color.SameBlank.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Identical text (blank side, for filler lines when ignore-blank-lines is enabled)
+ Identical text (blank side, for filler lines when ignore-blank-lines is enabled) 
 </BLOCKQUOTE>
 <PRE>
 Color.Insert.Fore: "&lt;color&gt;"
 Color.Insert.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Insert text (side with text)
+ Insert text (side with text) 
 </BLOCKQUOTE>
 <PRE>
 Color.InsertBlank.Fore: "&lt;color&gt;"
 Color.InsertBlank.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Insert text (blank side)
+ Insert text (blank side) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffAll.Fore: "&lt;color&gt;"
 Color.DiffAll.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Different in all files
+ Different in all files 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffAllSup.Fore: "&lt;color&gt;"
 Color.DiffAllSup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Different in all files (shadowed)
+ Different in all files (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffAllOnly.Fore: "&lt;color&gt;"
 Color.DiffAllOnly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Different in all files (only text on lines)
+ Different in all files (only text on lines) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffAllNonly.Fore: "&lt;color&gt;"
 Color.DiffAllNonly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Different in all files (blank side)
+ Different in all files (blank side) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffOne.Fore: "&lt;color&gt;"
 Color.DiffOne.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different in one file
+ (diff3 only) Different in one file 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffOneSup.Fore: "&lt;color&gt;"
 Color.DiffOneSup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different in one file (shadowed)
+ (diff3 only) Different in one file (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffOneOnly.Fore: "&lt;color&gt;"
 Color.DiffOneOnly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different in one file (only text on lines)
+ (diff3 only) Different in one file (only text on lines) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffOneNonly.Fore: "&lt;color&gt;"
@@ -1396,231 +1403,231 @@ Color.DiffTwo.Fore: "&lt;color&gt;"
 Color.DiffTwo.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Common text in two files only
+ (diff3 only) Common text in two files only 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffTwoSup.Fore: "&lt;color&gt;"
 Color.DiffTwoSup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Common text in two files only (shadowed)
+ (diff3 only) Common text in two files only (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffTwoOnly.Fore: "&lt;color&gt;"
 Color.DiffTwoOnly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Common text in two files only (only text on lines)
+ (diff3 only) Common text in two files only (only text on lines) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffTwoNonly.Fore: "&lt;color&gt;"
 Color.DiffTwoNonly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Common text in two files only (blank side)
+ (diff3 only) Common text in two files only (blank side) 
 </BLOCKQUOTE>
 <PRE>
 Color.Delete.Fore: "&lt;color&gt;"
 Color.Delete.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Delete text (side with text)
+ (diff3 only) Delete text (side with text) 
 </BLOCKQUOTE>
 <PRE>
 Color.DeleteBlank.Fore: "&lt;color&gt;"
 Color.DeleteBlank.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Delete text (blank side)
+ (diff3 only) Delete text (blank side) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffDel.Fore: "&lt;color&gt;"
 Color.DiffDel.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different and delete text
+ (diff3 only) Different and delete text 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffDelSup.Fore: "&lt;color&gt;"
 Color.DiffDelSup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different and delete text (shadowed)
+ (diff3 only) Different and delete text (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffDelOnly.Fore: "&lt;color&gt;"
 Color.DiffDelOnly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different and delete text (only text on lines)
+ (diff3 only) Different and delete text (only text on lines) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffDelNonly.Fore: "&lt;color&gt;"
 Color.DiffDelNonly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different and delete text (blank side)
+ (diff3 only) Different and delete text (blank side) 
 </BLOCKQUOTE>
 <PRE>
 Color.DiffDelBlank.Fore: "&lt;color&gt;"
 Color.DiffDelBlank.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (diff3 only) Different and delete text (empty side)
+ (diff3 only) Different and delete text (empty side) 
 </BLOCKQUOTE>
 <PRE>
 Color.Selected.Fore: "&lt;color&gt;"
 Color.Selected.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Selected text
+ Selected text 
 </BLOCKQUOTE>
 <PRE>
 Color.SelectedSup.Fore: "&lt;color&gt;"
 Color.SelectedSup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Selected text (shadowed)
+ Selected text (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.IgnoreDisplay.Fore: "&lt;color&gt;"
 Color.IgnoreDisplay.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Ignored for display purposes
+ Ignored for display purposes 
 </BLOCKQUOTE>
 <PRE>
 Color.IgnoreDisplaySup.Fore: "&lt;color&gt;"
 Color.IgnoreDisplaySup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Ignored for display purposes (shadowed)
+ Ignored for display purposes (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.IgnoreDisplayOnly.Fore: "&lt;color&gt;"
 Color.IgnoreDisplayOnly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Ignored for display purposes (only text on lines)
+ Ignored for display purposes (only text on lines) 
 </BLOCKQUOTE>
 <PRE>
 Color.IgnoreDisplayNonly.Fore: "&lt;color&gt;"
 Color.IgnoreDisplayNonly.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Ignored for display purposes (blank side)
+ Ignored for display purposes (blank side) 
 </BLOCKQUOTE>
 <PRE>
 Color.Deleted.Fore: "&lt;color&gt;"
 Color.Deleted.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Deleted text
+ Deleted text 
 </BLOCKQUOTE>
 <PRE>
 Color.DeletedSup.Fore: "&lt;color&gt;"
 Color.DeletedSup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Deleted text (shadowed)
+ Deleted text (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.Ignored.Fore: "&lt;color&gt;"
 Color.Ignored.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Ignore text
+ Ignore text 
 </BLOCKQUOTE>
 <PRE>
 Color.Directories.Fore: "&lt;color&gt;"
 Color.Directories.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- (dir.diffs only) Directories in directory diffs
+ (dir.diffs only) Directories in directory diffs 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedUndecided.Fore: "&lt;color&gt;"
 Color.MergedUndecided.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view undecided text
+ Merged view undecided text 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecided1.Fore: "&lt;color&gt;"
 Color.MergedDecided1.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, file 1
+ Merged view decided text, file 1 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecided1Sup.Fore: "&lt;color&gt;"
 Color.MergedDecided1Sup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, file 1 (shadowed)
+ Merged view decided text, file 1 (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecided2.Fore: "&lt;color&gt;"
 Color.MergedDecided2.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, file 2
+ Merged view decided text, file 2 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecided2Sup.Fore: "&lt;color&gt;"
 Color.MergedDecided2Sup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, file 2 (shadowed)
+ Merged view decided text, file 2 (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecided3.Fore: "&lt;color&gt;"
 Color.MergedDecided3.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, file 3
+ Merged view decided text, file 3 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecided3Sup.Fore: "&lt;color&gt;"
 Color.MergedDecided3Sup.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, file 3 (shadowed)
+ Merged view decided text, file 3 (shadowed) 
 </BLOCKQUOTE>
 <PRE>
 Color.MergedDecidedNeither.Fore: "&lt;color&gt;"
 Color.MergedDecidedNeither.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Merged view decided text, neither files
+ Merged view decided text, neither files 
 </BLOCKQUOTE>
 <PRE>
 Color.Background.Fore: "&lt;color&gt;"
 Color.Background.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Global background color
+ Global background color 
 </BLOCKQUOTE>
 <PRE>
 Color.Cursor.Fore: "&lt;color&gt;"
 Color.Cursor.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Line cursor color
+ Line cursor color 
 </BLOCKQUOTE>
 <PRE>
 Color.VerticalLine.Fore: "&lt;color&gt;"
 Color.VerticalLine.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Vertical line color
+ Vertical line color 
 </BLOCKQUOTE>
 <PRE>
 Color.TextSelection.Fore: "&lt;color&gt;"
 Color.TextSelection.Back: "&lt;color&gt;"
 </PRE>
 <BLOCKQUOTE>
- Color of text region selection
+ Color of text region selection 
 </BLOCKQUOTE>
 </BLOCKQUOTE>
 <PRE>
@@ -1992,11 +1999,10 @@ current revision number.</p>
 </div>
 <div class="section" id="reporting-bugs">
 <h1><a class="toc-backref" href="#id54">16&nbsp;&nbsp;&nbsp;Reporting bugs</a></h1>
-<p>All bug reports and feature requests should be submitted through the
-SourceForge bug tracking system at the following URL
-<a class="reference external" href="http://github.com/blais/xxdiff">http://sourceforge.net/bugs/?group_id=2198</a>.  Please avoid sending the author
-email about xxdiff bugs.  Please use this bug tracking system, it is extremely
-fast and simple to use.</p>
+<p>All bug reports and feature requests should be submitted through the Github bug
+tracking system at the following URL <a class="reference external" href="http://github.com/blais/xxdiff">http://github.com/blais/xxdiff</a>. Please
+avoid sending the author email about xxdiff bugs. Please use this bug tracking
+system, it is extremely fast and simple to use.</p>
 </div>
 <div class="section" id="project-history">
 <h1><a class="toc-backref" href="#id55">17&nbsp;&nbsp;&nbsp;Project history</a></h1>
@@ -2024,11 +2030,11 @@ diff) and the Qt UI toolkit (available at <a class="reference external" href="ht
 bothering me with the occasional bug fix that I did on the job.  Many more
 thanks to all the many engineers who tested it there and reported problems with
 it, as well as providing invaluable suggestions.</p>
-<p>SourceForge is hosting my web site and I'm using many of its features.  Tomas
-Pospisek (tpo at sourcepole.ch) has provided a Debian package.  Dan Weeks has
-packaged it for one of the BSD variants (danimal at danimal.org).  Not sure, but
-I think that Christian Savard (savardc at pobox.com) provided the original
-Gentoo port (xxdiff is now supported in Gentoo).</p>
+<p>SourceForge used to host my web site. Tomas Pospisek (tpo at sourcepole.ch) has
+provided a Debian package. Dan Weeks has packaged it for one of the BSD variants
+(danimal at danimal.org). Not sure, but I think that Christian Savard (savardc
+at pobox.com) provided the original Gentoo port (xxdiff is now supported in
+Gentoo).</p>
 </div>
 </div>
 </div>
