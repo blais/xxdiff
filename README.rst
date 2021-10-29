@@ -82,7 +82,9 @@ these lack some of the most interesting features of xxdiff).
 Documentation
 =============
 
-- `User's Manual <doc/xxdiff-doc.html>`_ *(user's manual, all features, FAQ)*
+- `User's Manual
+  <https://htmlpreview.github.io/?https://github.com/blais/xxdiff/blob/master/doc/xxdiff-doc.html>`_
+  *(user's manual, all features, FAQ)*
 - `The almost secret nifty features of xxdiff <doc/xxdiff-secrets.html>`_
 - `Integrating xxdiff with scripts <doc/xxdiff-integration.html>`_
 - `Helper Scripts for xxdiff <doc/xxdiff-scripts.html>`_
