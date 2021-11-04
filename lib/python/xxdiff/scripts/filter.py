@@ -38,7 +38,7 @@ class FilterTransformer(xxdiff.xformloop.Transformer):
 
     def transform(self, fn, outf):
         # Open input file.
-        inf = file(fn, 'r')
+        inf = open(fn, 'r')
 
         # Run the user's command.
         p = Popen(self.filtcmd, shell=True, stdin=inf, stdout=outf, stderr=PIPE, text=True)
