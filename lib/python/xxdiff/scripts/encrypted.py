@@ -103,7 +103,7 @@ encodecmd = encodecmd_noarmor + '--armor '
 def get_recipient(text, gpg):
     """ Extract the recipient/key name from the given encrypted text, without
     saving any temporary file. """
-    p = Popen(('gpg', '--list-only'), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p = Popen(('gpg', '--list-only'), stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     out, err = p.communicate(text)
     mo = re.compile('.*public key is ([0-9A-F]+)', re.M).search(err)
     if mo:

@@ -18,7 +18,7 @@ def is_checked_out(filename):
     """
     Check if the file is already checked out.
     """
-    p = Popen(['cleartool', 'desc', '-s', filename], stdout=PIPE, stderr=PIPE)
+    p = Popen(['cleartool', 'desc', '-s', filename], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit( stderr )

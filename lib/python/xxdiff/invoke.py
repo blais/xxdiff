@@ -76,7 +76,8 @@ def _run_xxdiff(cmd, opts, stdin):
         p = Popen(cmd,
                   stdout=PIPE,
                   stderr=PIPE,
-                  stdin=intype)
+                  stdin=intype,
+                  text=True)
     except OSError as e:
         extramsg = ''
         if e.errno == 2:
@@ -322,7 +323,7 @@ def test():
             print(xxdiff_display(Opts, f2, '-', stdin='Some text\n'))
 
         if t == 'pipe-cmd':
-            p = Popen('cat $HOME/.xxdiffrc', shell=True, stdout=PIPE)
+            p = Popen('cat $HOME/.xxdiffrc', shell=True, stdout=PIPE, text=True)
             print(xxdiff_display(Opts, '-', f2, stdin=p.stdout))
 
 if __name__ == '__main__':

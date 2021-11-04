@@ -103,7 +103,7 @@ def dump_schema(user, dbname, schema, opts):
         cmd.extend(['--schema', schema])
     cmd.append(dbname)
 
-    p = Popen(cmd, stdout=PIPE)
+    p = Popen(cmd, stdout=PIPE, text=True)
     dump, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Dumping database '%s':\n%s\n" %

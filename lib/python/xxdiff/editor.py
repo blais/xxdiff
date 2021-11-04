@@ -80,7 +80,7 @@ def spawn_editor(initcontents=None, filename=None):
         cmd = def_editor
         cmd[-1] %= filename
 
-    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE, text=True)
     
     def waiter():
         "Waiter closure."

@@ -77,7 +77,7 @@ def collect_unupdated_files(diff_directories, resolve_conflicts):
     """
     assert diff_directories
 
-    p = Popen(['cvs', 'status'] + diff_directories, stdout=PIPE)
+    p = Popen(['cvs', 'status'] + diff_directories, stdout=PIPE, text=True)
     stdout, stderr = p.communicate()
     lines = stdout.splitlines()
 
@@ -128,7 +128,7 @@ def get_repository_revision(filename):
     """
     Get the Repository revision of a file.
     """
-    p = Popen(['cvs', 'status', filename], stdout=PIPE)
+    p = Popen(['cvs', 'status', filename], stdout=PIPE, text=True)
     stdout, stderr = p.communicate()
     for l in stdout.splitlines():
             m = match_repository_rev.search(l)
@@ -181,7 +181,7 @@ def get_revision_log(filename, rev):
     # Note: watch out for the 'cvs log' command, the value of the -r option must
     # not contain spaces before the value, it must be lumped together with the
     # option.  This is a CVS options parsing bug.
-    p = Popen(['cvs', 'log', '-r%s' % rev, filename], stdout=PIPE, stderr=PIPE)
+    p = Popen(['cvs', 'log', '-r%s' % rev, filename], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     # Note: we're simply throwing away stderr here.
 
@@ -250,7 +250,7 @@ def cvsxxdiff_bi(diff_files, prevcount):
             print('\n'.join(get_revision_log(fn, r)))
 
         # Get the other file from the server.
-        p = Popen(['cvs', 'update', '-r', v, '-p', fn], stdout=PIPE)
+        p = Popen(['cvs', 'update', '-r', v, '-p', fn], stdout=PIPE, text=True)
 
         # Launch xxdiff.
         xxdiff.invoke.xxdiff_display(
@@ -274,7 +274,7 @@ def cvsxxdiff_ri(diff_files, action):
 
         # Launch xxdiff.
         p = Popen(['cvs', 'update', '-%s' % action[0], action[1], '-p', fn],
-                  stdout=PIPE)
+                  stdout=PIPE, text=True)
 
         xxdiff.invoke.xxdiff_display(
             opts,
@@ -328,7 +328,7 @@ def cvsxxdiff_rep(diff_files):
             print('\n'.join(get_revision_log(fn, r)))
 
         # Launch xxdiff.
-        p = Popen(['cvs', 'update', '-p', fn], stdout=PIPE)
+        p = Popen(['cvs', 'update', '-p', fn], stdout=PIPE, text=True)
 
         xxdiff.invoke.xxdiff_display(
             opts,

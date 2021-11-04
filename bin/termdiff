@@ -133,7 +133,7 @@ def parse_diff2_line(line):
 def parse_diff2(command, filename1, filename2):
   """Parse a two-way diff."""
   p = subprocess.Popen(command + [filename1, filename2],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
   out, err = p.communicate()
   hunks = []
   for line in out.splitlines():
@@ -146,7 +146,7 @@ def parse_diff2(command, filename1, filename2):
 def parse_diff3(command, filename1, filename2, filename3):
   """Parse a single line of diff3's output. 'f' is a file object."""
   p = subprocess.Popen(command + [filename1, filename2, filename3],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
   out, err = p.communicate()
 
   matcher = Matcher()
@@ -603,7 +603,7 @@ def render_with_cat(filenames, lines, pager):
 
   if pager != '-':
     # Pipe into 'less'.
-    p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE)
+    p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE, text=True)
 
     sio = StringIO.StringIO()
     render_diffs(filenames, lines, p.stdin, width)

@@ -15,7 +15,7 @@ from urlparse import urljoin
 
 def get_repository_root():
     "Get the root URL of the repository."
-    p = Popen(('svn', 'info', '--xml'), shell=0, stdout=PIPE)
+    p = Popen(('svn', 'info', '--xml'), shell=0, stdout=PIPE, text=True)
     out, _ = p.communicate()
     doc = ElementTree.XML(out)
     return doc.find('.//root').text
@@ -26,7 +26,7 @@ def get_changeset_files(r1, r2):
     if r1 > r2:
         r1, r2 = r2, r1
     logcmd = ('svn', 'log', '-r%d:%d' % (r1+1, r2), '-v', '--xml')
-    p = Popen(logcmd, shell=0, stdout=PIPE)
+    p = Popen(logcmd, shell=0, stdout=PIPE, text=True)
     out, _ = p.communicate()
     doc = ElementTree.XML(out)
     return set(node.text for node in doc.findall('.//path'))
@@ -58,7 +58,7 @@ def main():
     if not opts.url:
         if not isdir(join(os.getcwd(), '.svn')):
             parser.error("You must invoke this command from a working directory.")
-        p = Popen(('svn', 'info'), shell=0, stdout=PIPE)
+        p = Popen(('svn', 'info'), shell=0, stdout=PIPE, text=True)
         out, _ = p.communicate()
         mo = re.search('^URL: (.*)', out, re.MULTILINE)
         url = mo.group(1)
