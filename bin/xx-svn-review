@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Usage: REV1 REV2
 Export two SVN revisions and review them.

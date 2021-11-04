@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """File comparison and merge tool.
 
 This is a single file, curses-based version of xxdiff in Python. I, the author

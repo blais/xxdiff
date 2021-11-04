@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 # If this file is found independently as svn-foreign, here are the licensing
