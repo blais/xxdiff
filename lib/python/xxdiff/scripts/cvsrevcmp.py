@@ -217,7 +217,7 @@ def cvsxxdiff_bi_bj(diff_files, prevcounts):
         # Get the files from the server.
         tmpfiles = []
         for v in v1, v2:
-            f = tempfile.NamedTemporaryFile('w+', prefix=tmpprefix)
+            f = tempfile.NamedTemporaryFile(mode='w+', prefix=tmpprefix)
             tmpfiles.append(f)
             call(['cvs', 'update', '-r', v, '-p', fn], stdout=f)
 
@@ -294,7 +294,7 @@ def cvsxxdiff_ri_rj(diff_files, actions):
         # Fetch the temporary files.
         tmpfiles = []
         for code, rev in actions:
-            f = tempfile.NamedTemporaryFile('w+', prefix=tmpprefix)
+            f = tempfile.NamedTemporaryFile(mode='w+', prefix=tmpprefix)
             tmpfiles.append(f)
             call(['cvs', 'update', '-%s' % code, rev, '-p', fn], stdout=f)
 

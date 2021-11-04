@@ -139,7 +139,7 @@ def ignore_prop(dn, ignores):
     """
     Set svn:ignore on directory 'dn'.
     """
-    f = tempfile.NamedTemporaryFile('w')
+    f = tempfile.NamedTemporaryFile(mode='w')
     f.write(ignores)
     f.flush()
     call(['svn', 'propset', 'svn:ignore', '-F', f.name, dn])

@@ -9,7 +9,7 @@ Functions to invoke xxdiff in various ways.
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 # stdlib imports.
-import os, optparse, tempfile, logging
+import os, optparse, tempfile, logging, io
 from os.path import *
 from subprocess import Popen, PIPE
 
@@ -66,7 +66,7 @@ def _run_xxdiff(cmd, opts, stdin):
         # stdin is text.
         intype = PIPE
         intext = stdin
-    elif isinstance(stdin, file) or hasattr(stdin, 'read'):
+    elif isinstance(stdin, io.IOBase) or hasattr(stdin, 'read'):
         # stdin is an open pipe/file.
         intype = stdin
     else:
@@ -129,7 +129,7 @@ def xxdiff_decision(opts, *arguments, **kwds):
 
     """
     # Create a temporary file to contain the output or merged results.
-    mergedf = tempfile.NamedTemporaryFile('rw', prefix=tmpprefix)
+    mergedf = tempfile.NamedTemporaryFile(mode='w+', prefix=tmpprefix)
 
     # Get the appropriate xxdiff executable and options.
     xexec = getattr(opts, 'xxdiff_exec', 'xxdiff')
