@@ -38,10 +38,10 @@ class FilterTransformer(xxdiff.xformloop.Transformer):
 
     def transform(self, fn, outf):
         # Open input file.
-        inf = file(fn, 'r')
+        inf = open(fn, 'r')
 
         # Run the user's command.
-        p = Popen(self.filtcmd, shell=True, stdin=inf, stdout=outf, stderr=PIPE)
+        p = Popen(self.filtcmd, shell=True, stdin=inf, stdout=outf, stderr=PIPE, text=True)
 
         # Note: we do not check the return code, because we do not know the
         # client's convention for the program he invokes.

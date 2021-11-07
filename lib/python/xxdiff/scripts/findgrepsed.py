@@ -61,7 +61,7 @@ class GrepSedTransformer(xxdiff.xformloop.Transformer):
 
         # Perform sed replacement to a temporary file
         p = Popen(['sed', '-e', self.sedprog],
-                  stdin=PIPE, stdout=outf, stderr=PIPE)
+                  stdin=PIPE, stdout=outf, stderr=PIPE, text=True)
         try:
             stdout, stderr = p.communicate(text)
         except OSError as e:

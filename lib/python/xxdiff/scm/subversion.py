@@ -58,7 +58,7 @@ def commit(filenames, comments=None):
     if len(comments) < 512:
         call(['svn', 'commit', '--message', comments] + filenames)
     else:
-        tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
         tmpf.write(comments)
         tmpf.flush()
         call(['svn', 'commit', '--file', tmpf.name] + filenames)
@@ -68,7 +68,7 @@ def resolve(filename):
     """
     Commit the given filename into CVS.
     """
-    p = Popen(['svn', 'resolved', filename], stdout=PIPE, stderr=PIPE)
+    p = Popen(['svn', 'resolved', filename], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Resolving file '%s':\n%s\n" %
@@ -92,7 +92,7 @@ def status(rootdirs):
         rootdirs.append(os.getcwd())
 
     # Note: since we specify abspaths we should get abspaths on the output
-    p = Popen(['svn', 'status'] + list(map(abspath, rootdirs)), stdout=PIPE)
+    p = Popen(['svn', 'status'] + list(map(abspath, rootdirs)), stdout=PIPE, text=True)
     stdout, stderr = p.communicate()
 
     statii = []
@@ -196,7 +196,7 @@ def getinfo(filename):
     """
     Return the fields of 'svn info', in a dictionary.
     """
-    p = Popen(['svn', 'info', filename], stdout=PIPE, stderr=PIPE)
+    p = Popen(['svn', 'info', filename], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Cannot get history for: %s" % stderr)
@@ -213,10 +213,10 @@ def cat_revision_temp(filename, revision):
     which is returned.
     """
     # Fetch the local ancestor to a temporary file.
-    tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+    tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
     p = Popen(['svn', 'cat', '--revision', revision, filename],
-              stdout=tmpf)
+              stdout=tmpf, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Cannot fetch BASE revision: %s" % stderr)

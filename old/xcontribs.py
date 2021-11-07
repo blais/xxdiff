@@ -24,7 +24,7 @@ def main():
 
     files = set()
     for rev in revs:
-        p = Popen('hg diff -r %s' % rev, stdout=PIPE, shell=1)
+        p = Popen('hg diff -r %s' % rev, stdout=PIPE, shell=1, text=True)
         out, _ = p.communicate()
         print()
         print()

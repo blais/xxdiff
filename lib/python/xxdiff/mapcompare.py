@@ -57,7 +57,7 @@ def render_diffable_maps(opts, *maps):
     Note: random markers may be inserted to improve the quality of the diff.
     """
     # Produce two files that will diff nicely.
-    tmpfiles = [tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+    tmpfiles = [tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
                 for x in maps]
     
     mapkeys = set()

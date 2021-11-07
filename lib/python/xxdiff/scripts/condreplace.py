@@ -112,7 +112,7 @@ def condreplace_main():
     opts, fromfn, tofn = parse_options()
 
     if fromfn == '-':
-        intmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        intmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
         try:
             intmpf.write(sys.stdin.read())
             sys.stdin.close()

@@ -51,7 +51,7 @@ class PylineTransformer(xxdiff.xformloop.Transformer):
     def transform(self, fn, outf):
         # Open and read input file in memory.
         try:
-            inf = file(fn, 'r')
+            inf = open(fn, 'r')
         except IOError as e:
             raise SystemExit("Error: Could not read file '%s':\n  %s" % (fn, e))
 

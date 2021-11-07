@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 # If this file is found independently as svn-foreign, here are the licensing
@@ -139,7 +139,7 @@ def ignore_prop(dn, ignores):
     """
     Set svn:ignore on directory 'dn'.
     """
-    f = tempfile.NamedTemporaryFile('w')
+    f = tempfile.NamedTemporaryFile(mode='w')
     f.write(ignores)
     f.flush()
     call(['svn', 'propset', 'svn:ignore', '-F', f.name, dn])
@@ -246,7 +246,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     cmd = ['svn', 'status'] + filenames
     if debug:
         write(' '.join(cmd))
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, text=True)
     out, err = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: %s" % err)
@@ -361,7 +361,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                     # Get the properties first
                     p = Popen(['svn', 'propget', 'svn:ignore', dn],
-                              stdout=PIPE, stderr=PIPE)
+                              stdout=PIPE, stderr=PIPE, text=True)
                     svnign, err = p.communicate()
                     if p.returncode != 0:
                         raise SystemExit(err)

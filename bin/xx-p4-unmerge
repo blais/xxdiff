@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 A wrapper script that will split up a p4 file with merge conflicts to three
 files and invoke xxdiff on it.

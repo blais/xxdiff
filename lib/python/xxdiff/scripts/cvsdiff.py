@@ -66,7 +66,7 @@ def cvsdiff_main():
     # run cvs diff and read its output.
 
     cmd = 'cvs diff -u ' + ' '.join(['"%s"' % x for x in args])
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0 and not stdout:
         raise SystemExit("Error: running cvs command (%s): %s" %

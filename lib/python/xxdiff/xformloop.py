@@ -84,7 +84,7 @@ def transform_replace_loop(opts, selector, xformer, logs):
 
     for fn in selector:
         # Create temporary file to receive the transformed file.
-        tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
         # Transform the file.
         if xformer.transform(fn, tmpf) is False:

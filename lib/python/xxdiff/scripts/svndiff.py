@@ -68,7 +68,7 @@ def review_file(sobj, opts):
                 tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
                 dopts.extend(title_opts('%s (%s)' % (from_url, from_rev)))
             else:
-                tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+                tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
                 dopts.extend(title_opts('(NON-EXISTING)'))
 
             left, right = tmpf.name, sobj.filename
@@ -76,7 +76,7 @@ def review_file(sobj, opts):
         # Diff deleted files
         elif sobj.status == 'D':
             tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
-            tmpf_empty = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+            tmpf_empty = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
             dopts.extend(title_opts('%s (BASE)' % sobj.filename,
                                     '(DELETED)'))

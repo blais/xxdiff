@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """File comparison and merge tool.
 
 This is a single file, curses-based version of xxdiff in Python. I, the author
@@ -133,7 +133,7 @@ def parse_diff2_line(line):
 def parse_diff2(command, filename1, filename2):
   """Parse a two-way diff."""
   p = subprocess.Popen(command + [filename1, filename2],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
   out, err = p.communicate()
   hunks = []
   for line in out.splitlines():
@@ -146,7 +146,7 @@ def parse_diff2(command, filename1, filename2):
 def parse_diff3(command, filename1, filename2, filename3):
   """Parse a single line of diff3's output. 'f' is a file object."""
   p = subprocess.Popen(command + [filename1, filename2, filename3],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
   out, err = p.communicate()
 
   matcher = Matcher()
@@ -334,7 +334,7 @@ def render_same_region(files):
 
 def compute_horizontal_prefix(lines):
   """Return the first character that differs between the given lines."""
-  for i in xrange(min(map(len, lines))):
+  for i in range(min(map(len, lines))):
     c = lines[0][i]
     for oline in lines[1:]:
       if oline[i] != c:
@@ -343,7 +343,7 @@ def compute_horizontal_prefix(lines):
 def compute_horizontal_suffix(lines):
   """Return the last character from the back that differs between the given
   lines."""
-  for i in xrange(min(map(len, lines))):
+  for i in range(min(map(len, lines))):
     c = lines[0][-i]
     for oline in lines[1:]:
       if oline[-i] != c:
@@ -603,7 +603,7 @@ def render_with_cat(filenames, lines, pager):
 
   if pager != '-':
     # Pipe into 'less'.
-    p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE)
+    p = subprocess.Popen((pager,), shell=True, stdin=subprocess.PIPE, text=True)
 
     sio = StringIO.StringIO()
     render_diffs(filenames, lines, p.stdin, width)
@@ -680,7 +680,7 @@ def render_with_curses(window, filenames, lines):
   curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_WHITE)
 
   while True:
-    for screen_line in xrange(0, height-2):
+    for screen_line in range(0, height-2):
       line = top_line + screen_line
 
       if nfiles == 2:
@@ -706,7 +706,7 @@ def render_with_curses(window, filenames, lines):
         # render_line(outf, lineR.text, lineR.color, width)
 
       window.addstr(screen_line, 0, out, curses.color_pair(1))
-      # for x in xrange(0, len(out)):
+      # for x in range(0, len(out)):
       #   window.addch(screen_line, x, out[x], curses.color_pair(1))
 
 
