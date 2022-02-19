@@ -129,24 +129,6 @@ Download
     dialogs), but it's worth coping with them anyway.
 
 
-* A recent Mac OS X binary build is available for download here:
-
-    http://furius.ca/downloads/xxdiff/releases/macosx/
-
-
-* An recent Windows 7 port of version 4.0 has been done by Rene J.V. Bertin
-  (it's ifdef'ed).
-
-
-* An old Windows build for 2.9 (with some minor bugs) and based on the
-  qt3 version can be found here:
-
-    http://furius.ca/downloads/xxdiff/releases/windows/
-
-  No support is offered though. Someone should probably port the newer
-  qt4 code to Windows though, that would be worthwhile.
-
-
 Tools
 -----
 
