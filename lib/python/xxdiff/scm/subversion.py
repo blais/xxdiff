@@ -169,7 +169,8 @@ def status(rootdirs):
 
         # There is a space and the rest is a filename:
         status.filename = line[7:].strip()
-        assert isabs(status.filename)
+        assert isabs(status.filename), (
+            f"Filename {status.filename} is not a path. Check output of svn-foreign.")
 
         statii.append(status)
 
