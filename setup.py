@@ -36,6 +36,7 @@ sdist.add_defaults = add_all_files(sdist.add_defaults)
 allscripts = [join('bin', x) for x in os.listdir('bin')
               if x.startswith('xx-')]
 allscripts.append(join('bin', 'svn-foreign'))
+allscripts.append(join('bin', 'termdiff'))
 
 setup(name="xxdiff-scripts",
       version=read_version(),
