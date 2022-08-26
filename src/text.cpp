@@ -149,7 +149,7 @@ inline void rentxt(
 
       XX_CHECK( rlen > 0 ); // always true, because xch < xend
       QString str( QString::fromLocal8Bit( renderedText + xch, rlen ) );
-      int nw = fm.width( str, rlen );
+      int nw = fm.horizontalAdvance( str, rlen );
 
 #ifndef XX_DRAWTEXT_DRAWS_BACKGROUND
       // don't draw beyond the viewport, to avoid painting ON the frame decoration (Sunken)
@@ -653,7 +653,7 @@ void XxText::paintEvent( QPaintEvent *e )
             );
 
             if ( resources.getBoolOpt( BOOL_DRAW_PATTERN_IN_FILLER_LINES ) ) {
-               QBrush patBrush( bcolor.dark( 120 ), Qt::DiagCrossPattern );
+               QBrush patBrush( bcolor.darker( 120 ), Qt::DiagCrossPattern );
                patBrush.setTransform( QTransform::fromTranslate( 0.0-horizontalPos, 0 ) );
                p.fillRect(
                   XX_RED_RECT( 0, y, w, XxText::lineHeight(fm) ),
@@ -735,7 +735,7 @@ void XxText::paintEvent( QPaintEvent *e )
 
       uint cpos = resources.getVerticalLinePos();
       // Dont use fm.maxWidth(), since, at least on OSX, it returns 0
-      int posx = cpos * fm.width("w") - horizontalPos;
+      int posx = cpos * fm.horizontalAdvance("w") - horizontalPos;
 
       QColor vlineColor = resources.getColor( COLOR_VERTICAL_LINE );
       p.setPen( vlineColor );
@@ -765,7 +765,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    const XxResources& resources = _app->getResources();
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
-   XxDln dlineno = event->y() / XxText::lineHeight(fm);
+   XxDln dlineno = event->position().y() / XxText::lineHeight(fm);
    XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
@@ -778,7 +778,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       // Popup.
       const XxLine& line = diffs->getLine( lineno );
       QkMenu* popup = _app->getViewPopup( _no, line );
-      popup->popup( event->globalPos() );
+      popup->popup( event->globalPosition().toPoint() );
       return;
    }
 
@@ -810,7 +810,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    // Interactive toggling of debug drawing structures.
 #ifdef XX_DEBUG_TEXT
-   if ( event->button() == Qt::MidButton ) {
+   if ( event->button() == Qt::MiddleButton ) {
       if ( event->modifiers() & Qt::ControlModifier ) {
          flag = !flag;
       }
@@ -832,7 +832,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
 
    // Perform the selection and create cut text.
    QString textCopy;
-   if ( event->button() == Qt::MidButton ) {
+   if ( event->button() == Qt::MiddleButton ) {
       // Line event.
       if ( event->modifiers() & Qt::ShiftModifier ) {
          // Unselect line.
@@ -905,7 +905,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
                              QClipboard::Clipboard );
 
    if ( event->button() == Qt::LeftButton ||
-        event->button() == Qt::MidButton ) {
+        event->button() == Qt::MiddleButton ) {
       _app->setCursorLine( lineno );
    }
 }
@@ -973,7 +973,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
    if ( _grabMode != NONE ) {
       const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
-      XxDln dlineno = event->y() / XxText::lineHeight(fm);
+      XxDln dlineno = event->position().y() / XxText::lineHeight(fm);
 
       if ( _grabMode == MOUSE_DRAG ) {
          _sv->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
@@ -1045,7 +1045,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
 
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
-   XxDln dlineno = event->y() / XxText::lineHeight(fm);
+   XxDln dlineno = event->position().y() / XxText::lineHeight(fm);
    XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
@@ -1258,7 +1258,7 @@ QString XxText::formatClipboard(
          break;
       }
       QString buf;
-      buf.sprintf( "%d", fileno );
+      buf.asprintf( "%d", fileno );
       forline.replace( spos, 2, buf );
       pos = spos + buf.length();
    }
@@ -1271,7 +1271,7 @@ QString XxText::formatClipboard(
          break;
       }
       QString buf;
-      buf.sprintf( "%d", lineno );
+      buf.asprintf( "%d", lineno );
       forline.replace( spos, 2, buf );
       pos = spos + buf.length();
    }

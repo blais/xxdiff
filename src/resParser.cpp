@@ -51,7 +51,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QStyleFactory>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QTextStream>
 
 #include <stdexcept>
@@ -662,37 +662,38 @@ QString formatGeometry( const QRect& geom )
 //
 void drbegin( QTextStream& os )
 {
-   os << "<PRE>" << endl;
+   os << "<PRE>" << Qt::endl;
 }
 
 //------------------------------------------------------------------------------
 //
 void drend( QTextStream& os )
 {
-   os << "</PRE>" << endl;
+   os << "</PRE>" << Qt::endl;
 }
 
 //------------------------------------------------------------------------------
 //
 void ddbegin( QTextStream& os )
 {
-   os << "<BLOCKQUOTE>" << endl;
+   os << "<BLOCKQUOTE>" << Qt::endl;
 }
 
 //------------------------------------------------------------------------------
 //
 void ddend( QTextStream& os )
 {
-   os << "</BLOCKQUOTE>" << endl;
+   os << "</BLOCKQUOTE>" << Qt::endl;
 }
 
 //------------------------------------------------------------------------------
 //
 bool readGeometry( const QString& val, QRect& geometry )
 {
-   QWidget* desktop = QkApplication::desktop();
-   XX_ASSERT( desktop != 0 );
-   QSize dsize = desktop->size();
+//   QWidget* desktop = QkApplication::desktop();
+//   XX_ASSERT( desktop != 0 );
+//   QSize dsize = desktop->size();
+   QSize dsize = QApplication::primaryScreen()->size();
 
    // Reads in a value.  Returns true if successful, false if the resource was
    // not the specified type and left untouched.
@@ -793,7 +794,7 @@ int parseFromKeywordList(
    if ( !noerror ) {
       QString os;
       QTextStream oss( &os );
-      oss << "Unknown " << errmsg << ": " << name << flush;
+      oss << "Unknown " << errmsg << ": " << name << Qt::flush;
       resParsererror( NULL, os.toLocal8Bit().constData() );
    }
    num = ERROR_TOKEN;
@@ -968,7 +969,7 @@ void XxResParser::genInitFile(
    const QRect& geom = res1.getPreferredGeometry();
    if ( geom != res2.getPreferredGeometry() ) {
       os << searchTokenName( kwdList, kwdList_size, PREFGEOMETRY ) << ": "
-         << formatGeometry( geom ) << endl;
+         << formatGeometry( geom ) << Qt::endl;
    }
    // Perhaps we should change the default init geometry here to use the actual
    // application geometry.
@@ -976,7 +977,7 @@ void XxResParser::genInitFile(
    QString styleKey = res1.getStyleKey();
    if ( styleKey != res2.getStyleKey() ) {
       os << searchTokenName( kwdList, kwdList_size, STYLE )
-         << ": \"" << styleKey << "\"" << endl;
+         << ": \"" << styleKey << "\"" << Qt::endl;
    }
 
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
@@ -990,7 +991,7 @@ void XxResParser::genInitFile(
             astr = QKeySequence( aval ).toString();
          }
          os << accelStr << "." << accelList[ii]._name << ": \""
-            << astr << "\"" << endl;
+            << astr << "\"" << Qt::endl;
       }
    }
 
@@ -999,7 +1000,7 @@ void XxResParser::genInitFile(
       os << searchTokenName( kwdList, kwdList_size, FONT_APP )
          << ": \""
          << fontApp.toString()
-         << "\"" << endl;
+         << "\"" << Qt::endl;
    }
 
    const QFont& fontText = res1.getFontText();
@@ -1007,7 +1008,7 @@ void XxResParser::genInitFile(
       os << searchTokenName( kwdList, kwdList_size, FONT_TEXT )
          << ": \""
          << fontText.toString()
-         << "\"" << endl;
+         << "\"" << Qt::endl;
    }
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
@@ -1018,13 +1019,13 @@ void XxResParser::genInitFile(
       if ( res1.getColor( color, true ) !=
            res2.getColor( color, true ) ) {
          os << colorStr << "." << colorList[ii]._name << ".Fore" << ": \""
-            << res1.getColor( color, true ).name() << "\"" << endl;
+            << res1.getColor( color, true ).name() << "\"" << Qt::endl;
       }
 
       if ( res1.getColor( color, false ) !=
            res2.getColor( color, false ) ) {
          os << colorStr << "." << colorList[ii]._name << ".Back" << ": \""
-            << res1.getColor( color, false ).name() << "\"" << endl;
+            << res1.getColor( color, false ).name() << "\"" << Qt::endl;
       }
    }
 
@@ -1034,7 +1035,7 @@ void XxResParser::genInitFile(
       bool b1 = res1.getBoolOpt( bo );
       if ( b1 != res2.getBoolOpt( bo ) ) {
          os << boolkwdList[ii]._name << ": "
-            << ( b1 ? "True" : "False" ) << endl;
+            << ( b1 ? "True" : "False" ) << Qt::endl;
       }
    }
 
@@ -1045,13 +1046,13 @@ void XxResParser::genInitFile(
       bool b1 = res1.getShowOpt( bo );
       if ( b1 != res2.getShowOpt( bo ) ) {
          os << showStr << "." << showList[ii]._name << ": "
-            << ( b1 ? "True" : "False" ) << endl;
+            << ( b1 ? "True" : "False" ) << Qt::endl;
       }
    }
 
    if ( res1.getTabWidth() != res2.getTabWidth() ) {
       os << searchTokenName( kwdList, kwdList_size, TAB_WIDTH ) << ": "
-         << res1.getTabWidth() << endl;
+         << res1.getTabWidth() << Qt::endl;
    }
 
    int nbcommand = sizeof(commandList)/sizeof(StringToken);
@@ -1061,7 +1062,7 @@ void XxResParser::genInitFile(
       const QString& b1 = res1.getCommand( bo );
       if ( b1 != res2.getCommand( bo ) ) {
          os << commandStr << "." << commandList[ii]._name << ": \""
-            << b1 << "\"" << endl;
+            << b1 << "\"" << Qt::endl;
       }
    }
 
@@ -1073,7 +1074,7 @@ void XxResParser::genInitFile(
       const QString& b1 = res1.getCommandSwitch( bo );
       if ( b1 != res2.getCommandSwitch( bo ) ) {
          os << commandSwitchStr << "." << commandSwitchList[ii]._name << ": \""
-            << b1 << "\"" << endl;
+            << b1 << "\"" << Qt::endl;
       }
    }
 
@@ -1085,23 +1086,23 @@ void XxResParser::genInitFile(
       const char* bmap[3] = { "Nop", "False", "True" };
       if ( b1 != res2.getInitSwitch( bo ) ) {
          os << initSwitchStr << "." << commandSwitchList[ii]._name << ": "
-            << bmap[b1+1] << endl;
+            << bmap[b1+1] << Qt::endl;
       }
    }
 
    if ( res1.getOverviewFileWidth() != res2.getOverviewFileWidth() ) {
       os << searchTokenName( kwdList, kwdList_size, OVERVIEW_FILE_WIDTH ) << ": "
-         << res1.getOverviewFileWidth() << endl;
+         << res1.getOverviewFileWidth() << Qt::endl;
    }
 
    if ( res1.getOverviewSepWidth() != res2.getOverviewSepWidth() ) {
       os << searchTokenName( kwdList, kwdList_size, OVERVIEW_SEP_WIDTH ) << ": "
-         << res1.getOverviewSepWidth() << endl;
+         << res1.getOverviewSepWidth() << Qt::endl;
    }
 
    if ( res1.getVerticalLinePos() != res2.getVerticalLinePos() ) {
       os << searchTokenName( kwdList, kwdList_size, VERTICAL_LINE_POS ) << ": "
-         << res1.getVerticalLinePos() << endl;
+         << res1.getVerticalLinePos() << Qt::endl;
    }
 
    int nbtag = sizeof(tagList)/sizeof(StringToken);
@@ -1111,46 +1112,46 @@ void XxResParser::genInitFile(
       const QString& b1 = res1.getTag( bo );
       if ( b1 != res2.getTag( bo ) ) {
          os << tagStr << "." << tagList[ii]._name << ": \""
-            << b1 << "\"" << endl;
+            << b1 << "\"" << Qt::endl;
       }
    }
 
    if ( res1.getClipboardHeadFormat() !=
         res2.getClipboardHeadFormat() ) {
       os << searchTokenName( kwdList, kwdList_size, CLIPBOARD_HEAD_FORMAT ) << ": \""
-         << XxUtil::escapeChars( res1.getClipboardHeadFormat() ) << "\"" << endl;
+         << XxUtil::escapeChars( res1.getClipboardHeadFormat() ) << "\"" << Qt::endl;
    }
    if ( res1.getClipboardLineFormat() !=
         res2.getClipboardLineFormat() ) {
       os << searchTokenName( kwdList, kwdList_size, CLIPBOARD_LINE_FORMAT ) << ": \""
-         << XxUtil::escapeChars( res1.getClipboardLineFormat() ) << "\"" << endl;
+         << XxUtil::escapeChars( res1.getClipboardLineFormat() ) << "\"" << Qt::endl;
    }
 
    if ( res1.getHordiffType() != res2.getHordiffType() ) {
       const char* hdtstr[3] = { "None", "Single", "Multiple" };
       os << searchTokenName( kwdList, kwdList_size, HORDIFF_TYPE ) << ": "
-         << hdtstr[ int(res1.getHordiffType()) ] << endl;
+         << hdtstr[ int(res1.getHordiffType()) ] << Qt::endl;
    }
 
    if ( res1.getHordiffMax() != res2.getHordiffMax() ) {
       os << searchTokenName( kwdList, kwdList_size, HORDIFF_MAX ) << ": "
-         << res1.getHordiffMax() << endl;
+         << res1.getHordiffMax() << Qt::endl;
    }
 
    if ( res1.getHordiffContext() != res2.getHordiffContext() ) {
       os << searchTokenName( kwdList, kwdList_size, HORDIFF_CONTEXT ) << ": "
-         << res1.getHordiffContext() << endl;
+         << res1.getHordiffContext() << Qt::endl;
    }
 
    if ( res1.getShowPaneMergedViewPercent() !=
         res2.getShowPaneMergedViewPercent() ) {
       os << searchTokenName( kwdList, kwdList_size, SHOW_PANE_MERGED_VIEW_PERCENT )
-         << ": " << res1.getShowPaneMergedViewPercent() << endl;
+         << ": " << res1.getShowPaneMergedViewPercent() << Qt::endl;
    }
 
    if ( res1.getMergedFilename() != res2.getMergedFilename() ) {
       os << searchTokenName( kwdList, kwdList_size, MERGED_FILENAME ) << ": \""
-         << res1.getMergedFilename() << "\"" << endl;
+         << res1.getMergedFilename() << "\"" << Qt::endl;
    }
    // Ignore file not saved (cannot be read).
 }
@@ -1165,10 +1166,10 @@ void XxResParser::listResources( QTextStream& os )
    int ii;
 
    os << searchTokenName( kwdList, kwdList_size, PREFGEOMETRY ) << ": "
-      << formatGeometry( res.getPreferredGeometry() ) << endl;
+      << formatGeometry( res.getPreferredGeometry() ) << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, STYLE )
-      << ": \"" << res.getStyleKey() << "\"" << endl;
+      << ": \"" << res.getStyleKey() << "\"" << Qt::endl;
 
    int nbaccel = sizeof(accelList)/sizeof(StringToken);
    const char* accelStr = searchTokenName( kwdList, kwdList_size, ACCEL );
@@ -1180,20 +1181,20 @@ void XxResParser::listResources( QTextStream& os )
          astr = QKeySequence( aval ).toString();
       }
       os << accelStr << "." << accelList[ii]._name << ": \""
-         << astr.toLocal8Bit().constData() << "\"" << endl;
+         << astr.toLocal8Bit().constData() << "\"" << Qt::endl;
    }
 
    const QFont& fontApp = res.getFontApp();
    os << searchTokenName( kwdList, kwdList_size, FONT_APP )
       << ": \""
       << fontApp.toString()
-      << "\"" << endl;
+      << "\"" << Qt::endl;
 
    const QFont& fontText = res.getFontText();
    os << searchTokenName( kwdList, kwdList_size, FONT_TEXT )
       << ": \""
       << fontText.toString()
-      << "\"" << endl;
+      << "\"" << Qt::endl;
 
    int nbcolors = sizeof(colorList)/sizeof(StringToken);
    const char* colorStr = searchTokenName( kwdList, kwdList_size, COLOR );
@@ -1201,17 +1202,17 @@ void XxResParser::listResources( QTextStream& os )
       XxColor color = XxColor( colorList[ii]._token );
 
       os << colorStr << "." << colorList[ii]._name << ".Fore" << ": \""
-         << res.getColor( color, true ).name() << "\"" << endl;
+         << res.getColor( color, true ).name() << "\"" << Qt::endl;
 
       os << colorStr << "." << colorList[ii]._name << ".Back" << ": \""
-         << res.getColor( color, false ).name() << "\"" << endl;
+         << res.getColor( color, false ).name() << "\"" << Qt::endl;
    }
 
    int nbbool = sizeof(boolkwdList)/sizeof(StringToken);
    for ( ii = 0; ii < nbbool; ++ii ) {
       XxBoolOpt bo = static_cast<XxBoolOpt>( boolkwdList[ii]._token - BOOLKWD_BASE );
       bool b1 = res.getBoolOpt( bo );
-      os << boolkwdList[ii]._name << ": " << ( b1 ? "True" : "False" ) << endl;
+      os << boolkwdList[ii]._name << ": " << ( b1 ? "True" : "False" ) << Qt::endl;
    }
 
    int nbshow = sizeof(showList)/sizeof(StringToken);
@@ -1220,11 +1221,11 @@ void XxResParser::listResources( QTextStream& os )
       XxShowOpt bo = XxShowOpt(showList[ii]._token);
       bool b1 = res.getShowOpt( bo );
       os << showStr << "." << showList[ii]._name << ": "
-         << ( b1 ? "True" : "False" ) << endl;
+         << ( b1 ? "True" : "False" ) << Qt::endl;
    }
 
    os << searchTokenName( kwdList, kwdList_size, TAB_WIDTH ) << ": "
-      << res.getTabWidth() << endl;
+      << res.getTabWidth() << Qt::endl;
 
    int nbcommand = sizeof(commandList)/sizeof(StringToken);
    const char* commandStr = searchTokenName( kwdList, kwdList_size, COMMAND );
@@ -1232,7 +1233,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommand bo = XxCommand(commandList[ii]._token);
       const QString& b1 = res.getCommand( bo );
       os << commandStr << "." << commandList[ii]._name << ": \""
-         << b1.toLocal8Bit().constData() << "\"" << endl;
+         << b1.toLocal8Bit().constData() << "\"" << Qt::endl;
    }
 
    int nbcommandSwitch = sizeof(commandSwitchList)/sizeof(StringToken);
@@ -1242,7 +1243,7 @@ void XxResParser::listResources( QTextStream& os )
       XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
       const QString& b1 = res.getCommandSwitch( bo );
       os << commandSwitchStr << "." << commandSwitchList[ii]._name << ": \""
-         << b1.toLocal8Bit().constData() << "\"" << endl;
+         << b1.toLocal8Bit().constData() << "\"" << Qt::endl;
    }
 
    const char* initSwitchStr = searchTokenName( kwdList, kwdList_size, INITSW );
@@ -1252,17 +1253,17 @@ void XxResParser::listResources( QTextStream& os )
       XX_CHECK( -1 <= b1 && b1 <= 1 );
       const char* bmap[3] = { "Nop", "False", "True" };
       os << initSwitchStr << "." << commandSwitchList[ii]._name << ": "
-         << bmap[b1+1] << endl;
+         << bmap[b1+1] << Qt::endl;
    }
 
    os << searchTokenName( kwdList, kwdList_size, OVERVIEW_FILE_WIDTH ) << ": "
-      << res.getOverviewFileWidth() << endl;
+      << res.getOverviewFileWidth() << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, OVERVIEW_SEP_WIDTH ) << ": "
-      << res.getOverviewSepWidth() << endl;
+      << res.getOverviewSepWidth() << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, VERTICAL_LINE_POS ) << ": "
-      << res.getVerticalLinePos() << endl;
+      << res.getVerticalLinePos() << Qt::endl;
 
    int nbtag = sizeof(tagList)/sizeof(StringToken);
    const char* tagStr = searchTokenName( kwdList, kwdList_size, TAG );
@@ -1270,29 +1271,29 @@ void XxResParser::listResources( QTextStream& os )
       XxTag bo = XxTag(tagList[ii]._token);
       const QString& b1 = res.getTag( bo );
       os << tagStr << "." << tagList[ii]._name << ": \""
-         << b1.toLocal8Bit().constData() << "\"" << endl;
+         << b1.toLocal8Bit().constData() << "\"" << Qt::endl;
    }
 
    os << searchTokenName( kwdList, kwdList_size, CLIPBOARD_HEAD_FORMAT ) << ": \""
-      << XxUtil::escapeChars( res.getClipboardHeadFormat() ) << "\"" << endl;
+      << XxUtil::escapeChars( res.getClipboardHeadFormat() ) << "\"" << Qt::endl;
    os << searchTokenName( kwdList, kwdList_size, CLIPBOARD_LINE_FORMAT ) << ": \""
-      << XxUtil::escapeChars( res.getClipboardLineFormat() ) << "\"" << endl;
+      << XxUtil::escapeChars( res.getClipboardLineFormat() ) << "\"" << Qt::endl;
 
    const char* hdtstr[3] = { "None", "Single", "Multiple" };
    os << searchTokenName( kwdList, kwdList_size, HORDIFF_TYPE ) << ": "
-      << hdtstr[ int(res.getHordiffType()) ] << endl;
+      << hdtstr[ int(res.getHordiffType()) ] << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, HORDIFF_MAX ) << ": "
-      << res.getHordiffMax() << endl;
+      << res.getHordiffMax() << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, HORDIFF_CONTEXT ) << ": "
-      << res.getHordiffContext() << endl;
+      << res.getHordiffContext() << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, SHOW_PANE_MERGED_VIEW_PERCENT )
-      << ": " << res.getShowPaneMergedViewPercent() << endl;
+      << ": " << res.getShowPaneMergedViewPercent() << Qt::endl;
 
    os << searchTokenName( kwdList, kwdList_size, MERGED_FILENAME ) << ": \""
-      << res.getMergedFilename() << "\"" << endl;
+      << res.getMergedFilename() << "\"" << Qt::endl;
 
    // Ignore file not saved (cannot be read).
 }
@@ -1320,20 +1321,20 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size, PREFGEOMETRY );
       os << tok->_name << ": "
-         << formatGeometry( res.getPreferredGeometry() ) << endl;
+         << formatGeometry( res.getPreferredGeometry() ) << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
    {
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size, STYLE );
-      os << tok->_name << ": \"" << res.getStyleKey() << "\"" << endl;
+      os << tok->_name << ": \"" << res.getStyleKey() << "\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1341,10 +1342,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       int nbaccel = sizeof(accelList)/sizeof(StringToken);
       const StringToken* tok = searchToken( kwdList, kwdList_size, ACCEL );
-      os << tok->_name << "." << "[NAME]." << ": \"[ACCELERATOR]\"" << endl;
+      os << tok->_name << "." << "[NAME]." << ": \"[ACCELERATOR]\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
 
       drbegin( os );
       for ( ii = 0; ii < nbaccel; ++ii ) {
@@ -1360,7 +1361,7 @@ QString XxResParser::getResourceRef()
                astr = "&lt;key&gt;";
             }
          os << tok->_name << "." << accelList[ii]._name << ": \""
-            << XxHelp::xmlize( astr ) << "\"" << endl;
+            << XxHelp::xmlize( astr ) << "\"" << Qt::endl;
       }
       drend( os );
       ddend( os );
@@ -1379,10 +1380,10 @@ QString XxResParser::getResourceRef()
       else {
          os << "&lt;xfld-font-spec&gt;";
       }
-      os << "\"" << endl;
+      os << "\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1399,11 +1400,11 @@ QString XxResParser::getResourceRef()
       else {
          os << "&lt;xfld-font-spec&gt;";
       }
-      os << "\"" << endl;
+      os << "\"" << Qt::endl;
 
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1412,10 +1413,10 @@ QString XxResParser::getResourceRef()
       int nbcolors = sizeof(colorList)/sizeof(StringToken);
       const StringToken* tok = searchToken( kwdList, kwdList_size, COLOR );
       os << tok->_name << "." << "[NAME].[Fore|Back]"
-         << ": \"[COLOR]\"" << endl;
+         << ": \"[COLOR]\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
 
       for ( ii = 0; ii < nbcolors; ++ii ) {
          const StringToken* tokc = &( colorList[ii] );
@@ -1430,7 +1431,7 @@ QString XxResParser::getResourceRef()
          else {
             os << "&lt;color&gt;";
          }
-         os << "\"" << endl;
+         os << "\"" << Qt::endl;
 
          os << tok->_name << "." << tokc->_name << ".Back" << ": \"";
          if ( qApp != 0 ) {
@@ -1439,11 +1440,11 @@ QString XxResParser::getResourceRef()
          else {
             os << "&lt;color&gt;";
          }
-         os << "\"" << endl;
+         os << "\"" << Qt::endl;
 
          drend( os );
          ddbegin( os );
-         os << tokc->_desc << endl;
+         os << tokc->_desc << Qt::endl;
          ddend( os );
       }
       ddend( os );
@@ -1457,10 +1458,10 @@ QString XxResParser::getResourceRef()
          const StringToken* tok = &( boolkwdList[ii] );
 
          drbegin( os );
-         os << tok->_name << ": " << ( b1 ? "True" : "False" ) << endl;
+         os << tok->_name << ": " << ( b1 ? "True" : "False" ) << Qt::endl;
          drend( os );
          ddbegin( os );
-         os << tok->_desc << endl;
+         os << tok->_desc << Qt::endl;
          ddend( os );
       }
    }
@@ -1469,10 +1470,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       int nbshow = sizeof(showList)/sizeof(StringToken);
       const StringToken* tok = searchToken( kwdList, kwdList_size, SHOW );
-      os << tok->_name << "." << "[NAME]" << ": [True|False]" << endl;
+      os << tok->_name << "." << "[NAME]" << ": [True|False]" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
 
       for ( ii = 0; ii < nbshow; ++ii ) {
          const StringToken* tokc = &( showList[ii] );
@@ -1481,10 +1482,10 @@ QString XxResParser::getResourceRef()
 
          drbegin( os );
          os << tok->_name << "."
-            << tokc->_name << ": " << ( b1 ? "True" : "False" ) << endl;
+            << tokc->_name << ": " << ( b1 ? "True" : "False" ) << Qt::endl;
          drend( os );
          ddbegin( os );
-         os << tokc->_desc << endl;
+         os << tokc->_desc << Qt::endl;
          ddend( os );
       }
       ddend( os );
@@ -1493,10 +1494,10 @@ QString XxResParser::getResourceRef()
    {
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size, TAB_WIDTH );
-      os << tok->_name << ": " << res.getTabWidth() << endl;
+      os << tok->_name << ": " << res.getTabWidth() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1505,10 +1506,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       int nbcommand = sizeof(commandList)/sizeof(StringToken);
       const StringToken* tok = searchToken( kwdList, kwdList_size, COMMAND );
-      os << tok->_name << "." << "[NAME]" << ": \"[COMMAND]\"" << endl;
+      os << tok->_name << "." << "[NAME]" << ": \"[COMMAND]\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
 
       for ( ii = 0; ii < nbcommand; ++ii ) {
          const StringToken* tokc = &( commandList[ii] );
@@ -1517,10 +1518,10 @@ QString XxResParser::getResourceRef()
 
          drbegin( os );
          os << tok->_name << "." << tokc->_name << ": \""
-            << b1 << "\"" << endl;
+            << b1 << "\"" << Qt::endl;
          drend( os );
          ddbegin( os );
-         os << tokc->_desc << endl;
+         os << tokc->_desc << Qt::endl;
          ddend( os );
       }
       ddend( os );
@@ -1534,11 +1535,11 @@ QString XxResParser::getResourceRef()
          XxCommandSwitch bo = XxCommandSwitch(commandSwitchList[ii]._token);
          QString b1 = XxHelp::xmlize( res.getCommandSwitch( bo ) );
          os << tok->_name << "." << commandSwitchList[ii]._name << ": \""
-            << b1 << "\"" << endl;
+            << b1 << "\"" << Qt::endl;
       }
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1552,11 +1553,11 @@ QString XxResParser::getResourceRef()
          XX_CHECK( -1 <= b1 && b1 <= 1 );
          const char* bmap[3] = { "Nop", "False", "True" };
          os << tok->_name << "." << commandSwitchList[ii]._name << ": "
-            << bmap[b1+1] << "" << endl;
+            << bmap[b1+1] << "" << Qt::endl;
       }
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1564,10 +1565,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok =
          searchToken( kwdList, kwdList_size, OVERVIEW_FILE_WIDTH );
-      os << tok->_name << ": " << res.getOverviewFileWidth() << endl;
+      os << tok->_name << ": " << res.getOverviewFileWidth() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1575,10 +1576,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok =
          searchToken( kwdList, kwdList_size, OVERVIEW_SEP_WIDTH );
-      os << tok->_name << ": " << res.getOverviewSepWidth() << endl;
+      os << tok->_name << ": " << res.getOverviewSepWidth() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1586,10 +1587,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok =
          searchToken( kwdList, kwdList_size, VERTICAL_LINE_POS );
-      os << tok->_name << ": " << res.getVerticalLinePos() << endl;
+      os << tok->_name << ": " << res.getVerticalLinePos() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1597,10 +1598,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       int nbtag = sizeof(tagList)/sizeof(StringToken);
       const StringToken* tok = searchToken( kwdList, kwdList_size, TAG );
-      os << tok->_name << "." << "[NAME]" << ": [True|False]" << endl;
+      os << tok->_name << "." << "[NAME]" << ": [True|False]" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
 
       for ( ii = 0; ii < nbtag; ++ii ) {
          const StringToken* tokc = &( tagList[ii] );
@@ -1609,10 +1610,10 @@ QString XxResParser::getResourceRef()
 
          drbegin( os );
          os << tok->_name << "."
-            << tokc->_name << ": \"" << b1 << "\"" << endl;
+            << tokc->_name << ": \"" << b1 << "\"" << Qt::endl;
          drend( os );
          ddbegin( os );
-         os << tokc->_desc << endl;
+         os << tokc->_desc << Qt::endl;
          ddend( os );
       }
       ddend( os );
@@ -1623,10 +1624,10 @@ QString XxResParser::getResourceRef()
       const StringToken* tok =
          searchToken( kwdList, kwdList_size, CLIPBOARD_HEAD_FORMAT );
       QString cf = XxHelp::xmlize( res.getClipboardHeadFormat() );
-      os << tok->_name << ": \"" << cf << "\"" << endl;
+      os << tok->_name << ": \"" << cf << "\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
    {
@@ -1634,10 +1635,10 @@ QString XxResParser::getResourceRef()
       const StringToken* tok =
          searchToken( kwdList, kwdList_size, CLIPBOARD_LINE_FORMAT );
       QString cf = XxHelp::xmlize( res.getClipboardLineFormat() );
-      os << tok->_name << ": \"" << cf << "\"" << endl;
+      os << tok->_name << ": \"" << cf << "\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1645,20 +1646,20 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size, HORDIFF_TYPE );
       const char* hdtstr[3] = { "None", "Single", "Multiple" };
-      os << tok->_name << ": " << hdtstr[ int(res.getHordiffType()) ] << endl;
+      os << tok->_name << ": " << hdtstr[ int(res.getHordiffType()) ] << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
    {
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size, HORDIFF_MAX );
-      os << tok->_name << ": " << res.getHordiffMax() << endl;
+      os << tok->_name << ": " << res.getHordiffMax() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1666,10 +1667,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size,
                                             HORDIFF_CONTEXT );
-      os << tok->_name << ": " << res.getHordiffContext() << endl;
+      os << tok->_name << ": " << res.getHordiffContext() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1677,10 +1678,10 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok =
          searchToken( kwdList, kwdList_size, SHOW_PANE_MERGED_VIEW_PERCENT );
-      os << tok->_name << ": " << res.getShowPaneMergedViewPercent() << endl;
+      os << tok->_name << ": " << res.getShowPaneMergedViewPercent() << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
@@ -1688,16 +1689,16 @@ QString XxResParser::getResourceRef()
       drbegin( os );
       const StringToken* tok = searchToken( kwdList, kwdList_size, MERGED_FILENAME );
       QString cf = XxHelp::xmlize( res.getMergedFilename() );
-      os << tok->_name << ": \"" << cf << "\"" << endl;
+      os << tok->_name << ": \"" << cf << "\"" << Qt::endl;
       drend( os );
       ddbegin( os );
-      os << tok->_desc << endl;
+      os << tok->_desc << Qt::endl;
       ddend( os );
    }
 
    // Ignore file not saved (cannot be read).
 
-   os << flush;
+   os << Qt::flush;
    return resref;
 }
 

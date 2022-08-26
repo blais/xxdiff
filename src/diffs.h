@@ -262,7 +262,7 @@ public:
    bool save( 
       const XxResources&             resources,
       QTextStream&                   os, 
-      const std::auto_ptr<XxBuffer>* files,
+      const std::unique_ptr<XxBuffer>* files,
       const bool                     useConditionals,
       const bool                     removeEmptyConditionals,
       const QString                  conditionals[3]
@@ -272,7 +272,7 @@ public:
    // were some regions saved (false thus means an empty file).
    bool saveSelectedOnly( 
       QTextStream&                   os, 
-      const std::auto_ptr<XxBuffer>* files
+      const std::unique_ptr<XxBuffer>* files
    ) const;
 
    // Searches for the occurence of the search text in the files and sets the
@@ -281,7 +281,7 @@ public:
    void search( 
       const QString&                 searchText,
       const int                      nbFiles,
-      const std::auto_ptr<XxBuffer>* files
+      const std::unique_ptr<XxBuffer>* files
    );
 
    // Returns the search results.
@@ -296,7 +296,7 @@ public:
    // Initialize horizontal diffs for lines.
    void initializeHorizontalDiffs(
       const XxResources&             resources,
-      const std::auto_ptr<XxBuffer>* files,
+      const std::unique_ptr<XxBuffer>* files,
       const bool                     force = false
    );
 
@@ -304,7 +304,7 @@ public:
    // the ignore-display flag.
    void computeIgnoreDisplay(
       const int                      nbFiles,
-      const std::auto_ptr<XxBuffer>* files
+      const std::unique_ptr<XxBuffer>* files
    );
 
    // Automatically merge by performing selections on file1, assuming order
@@ -325,9 +325,9 @@ public:
    //
    // file3 can be null.
    void reindex( 
-      const std::auto_ptr<XxBuffer>& file1,
-      const std::auto_ptr<XxBuffer>& file2,
-      const std::auto_ptr<XxBuffer>& file3
+      const std::unique_ptr<XxBuffer>& file1,
+      const std::unique_ptr<XxBuffer>& file2,
+      const std::unique_ptr<XxBuffer>& file3
    );
 
 
@@ -370,7 +370,7 @@ private:
    // Save a chunk. Function created to factorize code used twice by save()
    void saveChunk(
       QTextStream&                   os,
-      const std::auto_ptr<XxBuffer>* files,
+      const std::unique_ptr<XxBuffer>* files,
       const bool                     useConditionals,
       const bool                     removeEmptyConditionals,
       const QString                  conditionals[3],

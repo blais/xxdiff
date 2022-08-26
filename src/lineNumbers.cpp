@@ -123,7 +123,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
    int nbLines = std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
 
    QString lnFormat;
-   lnFormat.sprintf( "%%%dd", _app->getMaxDigits() );
+   lnFormat.asprintf( "%%%dd", _app->getMaxDigits() );
 
    p.setPen( palette().color( backgroundRole() ).darker( 200 ) );
 

@@ -28,6 +28,7 @@
 #include <buffer.h>
 #include <resources.h>
 
+#include <QRegularExpression>
 #include <QTextStream>
 
 #include <list>
@@ -45,7 +46,7 @@ namespace {
 //
 int outputLine(
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const XxLine&                  line,
    int                            no
 )
@@ -59,7 +60,7 @@ int outputLine(
 
       //os << QString::fromLocal8Bit(text, len);
       os << QByteArray(text, len);
-      os << endl;
+      os << Qt::endl;
       return 1;
    }
    return 0;
@@ -854,7 +855,7 @@ uint XxDiffs::countRemainingUnselected() const
 bool XxDiffs::save(
    const XxResources&             resources,
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
    const QString                  conditionals[3]
@@ -881,9 +882,9 @@ bool XxDiffs::save(
          right  = files[2]->getDisplayName();
          }
       for ( int ii = 0; ii < 4; ++ii ) {
-         tags[ii].replace( QRegExp("%L"), left );
-         tags[ii].replace( QRegExp("%M"), middle );
-         tags[ii].replace( QRegExp("%R"), right );
+         tags[ii].replace( QRegularExpression("%L"), left );
+         tags[ii].replace( QRegularExpression("%M"), middle );
+         tags[ii].replace( QRegularExpression("%R"), right );
       }
    }
    else {
@@ -951,7 +952,7 @@ bool XxDiffs::save(
 //
 void XxDiffs::saveChunk(
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const bool                     useConditionals,
    const bool                     removeEmptyConditionals,
    const QString                  conditionals[3],
@@ -971,8 +972,8 @@ void XxDiffs::saveChunk(
          QByteArray line;
          QTextStream oss( &line );
          // Assume latin-1; it won't hurt. Maybe make this an option later.
-         oss.setCodec( "ISO-8859-1" );
-         oss << cond << endl;
+         oss.setEncoding(QStringConverter::Latin1);
+         oss << cond << Qt::endl;
 
          int nbOutlines = 0;
          for ( uint iii = unselBegin; iii < unselEnd; ++iii ) {
@@ -990,19 +991,19 @@ void XxDiffs::saveChunk(
          } else {
             ++state;
          }
-         oss << '\0' << flush; // end string and flush
+         oss << '\0' << Qt::flush; // end string and flush
          os << static_cast<const char*>( line );
       }
    }
 
-   os << tags[END] << endl;
+   os << tags[END] << Qt::endl;
 }
 
 //------------------------------------------------------------------------------
 //
 bool XxDiffs::saveSelectedOnly(
    QTextStream&                   os,
-   const std::auto_ptr<XxBuffer>* files
+   const std::unique_ptr<XxBuffer>* files
 ) const
 {
    XX_ASSERT( files != 0 );
@@ -1028,14 +1029,14 @@ bool XxDiffs::saveSelectedOnly(
 
             os << ( no == 0 ? '<' : '>' ) << fline << ": ";
             os << QString::fromLocal8Bit(text, len);
-            os << endl;
+            os << Qt::endl;
 
             some = true;
             prevOut = true;
          }
       }
       else if ( prevOut == true ) {
-         os << endl;
+         os << Qt::endl;
          prevOut = false;
       }
    }
@@ -1047,7 +1048,7 @@ bool XxDiffs::saveSelectedOnly(
 void XxDiffs::search(
    const QString&                 searchText,
    const int                      nbFiles,
-   const std::auto_ptr<XxBuffer>* files
+   const std::unique_ptr<XxBuffer>* files
 )
 {
    XX_ASSERT( files != 0 );
@@ -1467,7 +1468,7 @@ bool XxDiffs::splitSwapJoin( XxDln lineNo, uint nbFiles )
 //
 void XxDiffs::initializeHorizontalDiffs(
    const XxResources&             resources,
-   const std::auto_ptr<XxBuffer>* files,
+   const std::unique_ptr<XxBuffer>* files,
    const bool                     force
 )
 {
@@ -1742,9 +1743,9 @@ XxDln XxDiffs::getDisplayLine(
 //------------------------------------------------------------------------------
 //
 void XxDiffs::reindex(
-   const std::auto_ptr<XxBuffer>& file1,
-   const std::auto_ptr<XxBuffer>& file2,
-   const std::auto_ptr<XxBuffer>& file3
+   const std::unique_ptr<XxBuffer>& file1,
+   const std::unique_ptr<XxBuffer>& file2,
+   const std::unique_ptr<XxBuffer>& file3
 )
 {
    XxFno nbFiles = ( file3.get() == 0 ) ? 2 : 3;
@@ -1780,7 +1781,7 @@ void XxDiffs::reindex(
 //
 void XxDiffs::computeIgnoreDisplay(
    const int                      nbFiles,
-   const std::auto_ptr<XxBuffer>* files
+   const std::unique_ptr<XxBuffer>* files
 )
 {
    XxDln lineNo = 1;

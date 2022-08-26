@@ -77,7 +77,7 @@ XxCentralFrame::XxCentralFrame(
    //
 
    QVBoxLayout* textAndSbLayout = new QVBoxLayout( this );
-   textAndSbLayout->setMargin( 0 );
+   textAndSbLayout->setContentsMargins( 0,0,0,0 );
    textAndSbLayout->setSpacing( 0 );
    QHBoxLayout* textLayout = new QHBoxLayout;
    textAndSbLayout->addLayout( textLayout );

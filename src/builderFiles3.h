@@ -81,7 +81,7 @@ public:
    // error occurs, this will throw.  Otherwise you are guaranteed a valid newly
    // allocated XxDiffs object.  However, there might be warnings, so you may
    // want to check hasErrors() if you want to display those.
-   std::auto_ptr<XxDiffs> process(
+   std::unique_ptr<XxDiffs> process(
       const QString& command,
       const XxBuffer& buffer1,
       const XxBuffer& buffer2,

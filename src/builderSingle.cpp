@@ -56,7 +56,7 @@ XxBuilderSingle::~XxBuilderSingle()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderSingle::process( const XxBuffer& buffer )
+std::unique_ptr<XxDiffs> XxBuilderSingle::process( const XxBuffer& buffer )
 {
    initLines();
 
@@ -68,7 +68,7 @@ std::auto_ptr<XxDiffs> XxBuilderSingle::process( const XxBuffer& buffer )
    // Set a succesful status.
    _status = 0;
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }
 

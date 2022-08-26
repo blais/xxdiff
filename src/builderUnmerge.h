@@ -95,7 +95,7 @@ public:
    // guaranteed a valid newly allocated XxDiffs object.  However, there might
    // be warnings, so you may want to check hasErrors() if you want to display
    // those.
-   std::auto_ptr<XxDiffs> process(
+   std::unique_ptr<XxDiffs> process(
       const XxBuffer&    buffer,
       const XxResources& resources,
       QString&           outFileLeft,
@@ -103,7 +103,7 @@ public:
    );
 
    // Like the above process() method, but unmerge in 3 files instead of 2.
-   std::auto_ptr<XxDiffs> process(
+   std::unique_ptr<XxDiffs> process(
       const XxBuffer&    buffer,
       const XxResources& resources,
       QString&           outFileLeft,
