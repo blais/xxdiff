@@ -17,7 +17,7 @@
 Description
 ===========
 
-This is a fork of `xxdiff <http://github.com/blais/xxdiff>`, a graphical file and
+This is a fork of `xxdiff <http://github.com/blais/xxdiff>`_, a graphical file and
 directories comparator and merge tool.  See there for full information about this
 program, including documentation and more instructions.
 
