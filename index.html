@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<title>xxdiff: Graphical File And Directories Comparator And Merge Tool</title>
+<meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<title>xxdiff-qt6: Updated Graphical File And Directories Comparator And Merge Tool</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
@@ -13,38 +13,36 @@
   <a href="/home/index.html"><img src="/home/furius-logo-w.png" id="logo"></a>
 </div>
 
-<div class="document" id="xxdiff-graphical-file-and-directories-comparator-and-merge-tool">
-<h1 class="title">xxdiff: Graphical File And Directories Comparator And Merge Tool</h1>
+<div class="document" id="xxdiff-qt6-updated-graphical-file-and-directories-comparator-and-merge-tool">
+<h1 class="title">xxdiff-qt6: Updated Graphical File And Directories Comparator And Merge Tool</h1>
 
 <!-- -*- coding: utf-8 -*- -->
 <div class="contents topic" id="table-of-contents">
 <p class="topic-title">Table of Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#description" id="id4">Description</a><ul>
-<li><a class="reference internal" href="#features" id="id5">Features</a><ul>
-<li><a class="reference internal" href="#unicode-and-inline-editing" id="id6">Unicode and Inline Editing</a></li>
+<li><a class="reference internal" href="#description" id="toc-entry-1">Description</a><ul>
+<li><a class="reference internal" href="#features" id="toc-entry-2">Features</a><ul>
+<li><a class="reference internal" href="#unicode-and-inline-editing" id="toc-entry-3">Unicode and Inline Editing</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#documentation" id="id7">Documentation</a><ul>
-<li><a class="reference internal" href="#screenshots" id="id8">Screenshots</a></li>
+<li><a class="reference internal" href="#documentation" id="toc-entry-4">Documentation</a><ul>
+<li><a class="reference internal" href="#screenshots" id="toc-entry-5">Screenshots</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#download" id="id9">Download</a><ul>
-<li><a class="reference internal" href="#tools" id="id10">Tools</a></li>
-<li><a class="reference internal" href="#packages" id="id11">Packages</a></li>
+<li><a class="reference internal" href="#download" id="toc-entry-6">Download</a><ul>
+<li><a class="reference internal" href="#tools" id="toc-entry-7">Tools</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#reporting-bugs" id="id12">Reporting Bugs</a></li>
-<li><a class="reference internal" href="#installation" id="id13">Installation</a><ul>
-<li><a class="reference internal" href="#dependencies" id="id14">Dependencies</a></li>
-<li><a class="reference internal" href="#portability" id="id15">Portability</a></li>
+<li><a class="reference internal" href="#reporting-bugs" id="toc-entry-8">Reporting Bugs</a></li>
+<li><a class="reference internal" href="#installation" id="toc-entry-9">Installation</a><ul>
+<li><a class="reference internal" href="#dependencies" id="toc-entry-10">Dependencies</a></li>
+<li><a class="reference internal" href="#portability" id="toc-entry-11">Portability</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#external-links" id="id16">External Links</a></li>
-<li><a class="reference internal" href="#copyright-and-license" id="id17">Copyright and License</a></li>
-<li><a class="reference internal" href="#author" id="id18">Author</a></li>
+<li><a class="reference internal" href="#copyright-and-license" id="toc-entry-12">Copyright and License</a></li>
+<li><a class="reference internal" href="#authorship" id="toc-entry-13">Authorship</a></li>
 </ul>
 </div>
 <!-- 1  Description
@@ -54,25 +52,19 @@
   2.1  Screenshots
 3  Download
   3.1  Tools
-  3.2  Packages
 4  Reporting Bugs
 5  Installation
   5.1  Dependencies
   5.2  Portability
-6  External Links
-7  Copyright and License
-8  Author -->
+6  Copyright and License
+7  Authorship -->
 <div class="section" id="description">
-<h1><a class="toc-backref" href="#id4">Description</a></h1>
-<p>This is the official home of <strong>xxdiff</strong>, a graphical file and
-directories comparator and merge tool.</p>
-<p><strong>xxdiff</strong> is provided under the GNU GPL open source license. It has
-reached stable state, and is known to run on many popular unices,
-including IRIX, Linux, Solaris, HP/UX, DEC Tru64.  It has been
-deployed inside many large organizations and is being actively
-maintained by its author (Martin Blais).</p>
+<h1><a class="toc-backref" href="#toc-entry-1">Description</a></h1>
+<p>This is a fork of <a class="reference external" href="http://github.com/blais/xxdiff">xxdiff</a>, a graphical file and
+directories comparator and merge tool.  See there for full information about this
+program, including documentation and more instructions.</p>
 <div class="section" id="features">
-<h2><a class="toc-backref" href="#id5">Features</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-2">Features</a></h2>
 <ul class="simple">
 <li>Comparing <strong>two</strong> files, <strong>three</strong> files, or two <strong>directories</strong>
 (shallow and recursive);</li>
@@ -96,7 +88,7 @@ significant part of their development process, many of the features
 are a direct result of suggestions from these people while the author
 was working there.</p>
 <div class="section" id="unicode-and-inline-editing">
-<h3><a class="toc-backref" href="#id6">Unicode and Inline Editing</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-3">Unicode and Inline Editing</a></h3>
 <p><strong>xxdiff</strong> does not support comparing files encoded with Unicode.
 Also, it does not support inline editing of the diffed files.  If you
 need these features, you could try emacs or Meld (although both of
@@ -105,7 +97,7 @@ these lack some of the most interesting features of xxdiff).</p>
 </div>
 </div>
 <div class="section" id="documentation">
-<h1><a class="toc-backref" href="#id7">Documentation</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-4">Documentation</a></h1>
 <ul class="simple">
 <li><a class="reference external" href="https://htmlpreview.github.io/?https://github.com/blais/xxdiff/blob/master/doc/xxdiff-doc.html">User's Manual</a>
 <em>(user's manual, all features, FAQ)</em></li>
@@ -116,48 +108,24 @@ these lack some of the most interesting features of xxdiff).</p>
 <li><a class="reference external" href="TODO">TODO</a> <em>(future features, wishlist)</em></li>
 </ul>
 <div class="section" id="screenshots">
-<h2><a class="toc-backref" href="#id8">Screenshots</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-5">Screenshots</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="doc/screenshots/gallery/index.html">Screenshots</a></li>
 </ul>
 </div>
 </div>
 <div class="section" id="download">
-<h1><a class="toc-backref" href="#id9">Download</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-6">Download</a></h1>
 <ul>
-<li><p class="first">Source code can be found the public Git repository, here:</p>
+<li><p class="first">Source code can be found in the public GitHub repository, here:</p>
 <blockquote>
 <p><a class="reference external" href="http://github.com/blais/xxdiff">http://github.com/blais/xxdiff</a></p>
 </blockquote>
 <p>There are no releases. Pick up the source for from Github.</p>
 </li>
-<li><p class="first">A complete Qt4 port (which works on the Mac) has been done by
-Alexandre Feblot (alexandre dot feblot at gmail dot com). This forms
-the basis for versions 4.x of xxdiff as of November 2010. Some notes
-about the Mac OS X build:</p>
-<blockquote>
-<p>On OSX, a Qt bug
-(<a class="reference external" href="http://bugreports.qt.nokia.com/browse/QTBUG-9271">http://bugreports.qt.nokia.com/browse/QTBUG-9271</a>) affects
-rendering performance. As a workaround you can use the much faster
-&quot;raster&quot; graphics engine by either</p>
-<ul>
-<li><p class="first">using the <tt class="docutils literal"><span class="pre">--graphicssystem</span></tt> raster option</p>
-</li>
-<li><p class="first">defining this environment variable in your terminal:</p>
-<pre class="literal-block">
-QT_GRAPHICSSYSTEM=raster
-</pre>
-</li>
-</ul>
-<p>This engine has a couple of drawbacks (it will not refresh the
-display during window resizing, and will dump warning lines when
-opening native OSX dialogs like colors chooser or file selection
-dialogs), but it's worth coping with them anyway.</p>
-</blockquote>
-</li>
 </ul>
 <div class="section" id="tools">
-<h2><a class="toc-backref" href="#id10">Tools</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-7">Tools</a></h2>
 <p><strong>xxdiff</strong> comes with a bunch of wrapper Python scripts that invoke xxdiff in
 creative ways.  The author has been using these for a long time now and decided
 for version 3.0 to clean them up and make them a little more generic so everyone
@@ -177,71 +145,46 @@ python setup.py install
 <p>Other tools can be found in the distribution under the tools/ directory (CVS,
 ClearCase, etc.).</p>
 </div>
-<div class="section" id="packages">
-<h2><a class="toc-backref" href="#id11">Packages</a></h2>
-<p>Packages are available for some specific operating systems. Here are links to
-the relevant pages.  The author does not publish binaries anymore.</p>
-<ul class="simple">
-<li><a class="reference external" href="http://www.sourcepole.ch/sources/software/xxdiff/">Linux / Debian package</a>
-(provided by Tomas Pospisek)</li>
-<li><a class="reference external" href="http://www.geek.co.il/RPMS/xxdiff">Linux / Mandrake package (1)</a>
-(maintained by Oded Arbel)</li>
-<li><a class="reference external" href="http://www.roberto.foglietta.name/pub/xxdiff">Linux / Mandrake package (2)</a>
-(maintained by Roberto A. Foglietta)</li>
-<li><a class="reference external" href="http://timeoff.wsisiz.edu.pl/rpms.html#xxdiff">Linux / Fedore Core (1)</a>
-(maintained by Marcin Zajączkowski)</li>
-<li><a class="reference external" href="http://packages.gentoo.org/ebuilds/?xxdiff-3.1">Linux / Gentoo port</a>
-(in the dev-utils category)</li>
-<li><a class="reference external" href="http://www.openbsd.org/ports.html">OpenBSD / ports tree</a> (maintained by Dan
-Weeks, available in the ports tree)</li>
-<li><a class="reference external" href="http://freeware.sgi.com">IRIX / Tardist package</a> (provided by the
-SGI freeware team (version may be lagging behind))</li>
-</ul>
-</div>
 </div>
 <div class="section" id="reporting-bugs">
-<h1><a class="toc-backref" href="#id12">Reporting Bugs</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-8">Reporting Bugs</a></h1>
 <ul class="simple">
-<li><a class="reference external" href="https://github.com/blais/xxdiff/issues">Reporting Bugs</a>
+<li><a class="reference external" href="https://github.com/l2718/xxdiff-qt6/issues">Reporting Bugs</a>
 <em>(bugs and feature requests)</em></li>
 </ul>
 </div>
 <div class="section" id="installation">
-<h1><a class="toc-backref" href="#id13">Installation</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-9">Installation</a></h1>
 <div class="section" id="dependencies">
-<h2><a class="toc-backref" href="#id14">Dependencies</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-10">Dependencies</a></h2>
 <p>Build dependencies are:</p>
 <ul class="simple">
-<li>Qt-4.5 or higher</li>
-<li>a C++ compiler, flex and yacc</li>
+<li>Qt-6 or higher</li>
+<li>A C++ compiler (g++ or clang), flex and yacc</li>
 </ul>
 <p>Runtime dependencies are:</p>
 <ul class="simple">
-<li>Qt-4.5 or higher</li>
+<li>Qt-6 or higher</li>
 </ul>
 </div>
 <div class="section" id="portability">
-<h2><a class="toc-backref" href="#id15">Portability</a></h2>
-<p>xxdiff is known to build and work on a great majority of UNIX platforms where Qt
-works, including Mac OS X.</p>
+<h2><a class="toc-backref" href="#toc-entry-11">Portability</a></h2>
+<p>The Qt6 version of xxdiff was only tested on Fedora GNU/Linux and Ubuntu Linux.</p>
 </div>
-</div>
-<div class="section" id="external-links">
-<h1><a class="toc-backref" href="#id16">External Links</a></h1>
-<ul class="simple">
-<li>Other file comparison programs at <a class="reference external" href="http://directory.google.com/Top/Computers/Software/File_Management/File_Comparison/">Google directory</a>,
-<a class="reference external" href="http://dmoz.org/Computers/Software/File_Management/File_Comparison/">DMOZ</a></li>
-<li><a class="reference external" href="http://furius.ca">Author's Homepage</a></li>
-</ul>
 </div>
 <div class="section" id="copyright-and-license">
-<h1><a class="toc-backref" href="#id17">Copyright and License</a></h1>
-<p>Copyright (C) 2001-2004  Martin Blais.  All Rights Reserved.</p>
+<h1><a class="toc-backref" href="#toc-entry-12">Copyright and License</a></h1>
+<p>xxdiff Copyright (C) 2001-2022  Martin Blais.  All Rights Reserved.</p>
 <p>This code is distributed under the <a class="reference external" href="COPYING">GNU General Public License</a>;</p>
 </div>
-<div class="section" id="author">
-<h1><a class="toc-backref" href="#id18">Author</a></h1>
-<p>Martin Blais &lt;<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</p>
+<div class="section" id="authorship">
+<h1><a class="toc-backref" href="#toc-entry-13">Authorship</a></h1>
+<ul class="simple">
+<li>Martin Blais &lt;<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</li>
+<li>Port to Qt4 by Alexandre Feblot &lt;<a class="reference external" href="mailto:alexandre.feblot&#64;gmail.com">alexandre.feblot&#64;gmail.com</a>&gt;</li>
+<li>Port to Qt5 and Windows 7 by Rene J.V. Bertin &lt;<a class="reference external" href="mailto:rjvbertin&#64;gmail.com">rjvbertin&#64;gmail.com</a>&gt;</li>
+<li>Port to Qt6 by Lior Silberman &lt;<a class="reference external" href="mailto:lior3.1415+xxdiff-qt6&#64;gmail.com">lior3.1415+xxdiff-qt6&#64;gmail.com</a>&gt;</li>
+</ul>
 </div>
 </div>
 </body>

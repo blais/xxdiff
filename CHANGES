@@ -2,6 +2,13 @@
 CHANGES: xxdiff
 ===============
 
+Version 5.1
+-----------
+
+* Applied changes porting to Qt6 by Lior Silberman and tested on Ubuntu with
+  g++-11.2 and clang-14. No feature changes.
+
+
 Current Development Version
 ---------------------------
 

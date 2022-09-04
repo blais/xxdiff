@@ -7,11 +7,18 @@
 .. contents:: Table of Contents
 ..
     1  Description
-    2  Changes to this version
-    3  Reporting Bugs
-    4  Installation
-    5  Copyright and License
-    6  Author
+      1.1  Features
+        1.1.1  Unicode and Inline Editing
+    2  Documentation
+      2.1  Screenshots
+    3  Download
+      3.1  Tools
+    4  Reporting Bugs
+    5  Installation
+      5.1  Dependencies
+      5.2  Portability
+    6  Copyright and License
+    7  Authorship
 
 
 Description
@@ -94,10 +101,6 @@ Download
   There are no releases. Pick up the source for from Github.
 
 
-* A Qt6 port has been done by Lior Silberman. This is currently in the `qt6`
-  branch and is intended to replace the `master` branch eventually.
-
-
 Tools
 -----
 
@@ -138,8 +141,8 @@ Dependencies
 
 Build dependencies are:
 
-- Qt-6 or higher (possibly Qt-5 suffices, not tested)
-- a C++ compiler, flex and yacc
+- Qt-6 or higher
+- A C++ compiler (g++ or clang), flex and yacc
 
 Runtime dependencies are:
 
@@ -164,4 +167,6 @@ Authorship
 ==========
 
 * Martin Blais <blais@furius.ca>
+* Port to Qt4 by Alexandre Feblot <alexandre.feblot@gmail.com>
+* Port to Qt5 and Windows 7 by Rene J.V. Bertin <rjvbertin@gmail.com>
 * Port to Qt6 by Lior Silberman <lior3.1415+xxdiff-qt6@gmail.com>
