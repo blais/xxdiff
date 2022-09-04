@@ -31,6 +31,9 @@
 #include <compiler.h>
 #endif
 
+#include <qglobal.h>
+
+
 //
 // Types and enumerations
 //
@@ -83,7 +86,7 @@ typedef unsigned int 	uint;
 #define XX_THROW_NOTHING throw()
 
 #else
-#define XX_THROW_NOTHING  
+#define XX_THROW_NOTHING
 
 #endif
 
@@ -130,6 +133,17 @@ typedef unsigned int 	uint;
 
 #ifdef WINDOWS
 #include <winfixes/winfixes.h>
+#endif
+
+// Macros for Qt5-Qt6 portability.
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#  define QEVENT_POSITION_X(event)  event->position().x()
+#  define QEVENT_POSITION_Y(event)  event->position().y()
+#  define QEVENT_GLOBAL_POSITION(event)  event->globalPosition().toPoint()
+#else
+#  define QEVENT_POSITION_X(event)  event->x()
+#  define QEVENT_POSITION_Y(event)  event->y()
+#  define QEVENT_GLOBAL_POSITION(event)  event->globalPos()
 #endif
 
 #endif

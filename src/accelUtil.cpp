@@ -49,7 +49,11 @@ bool XxAccelUtil::read( const QString& val, int& accel )
    QString cval = val.trimmed().toLower();
 
    QKeySequence keyseq = QKeySequence::fromString( cval );
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
    accel = keyseq[0].toCombined();
+#else
+   accel = keyseq[0];
+#endif
 
    // Check that converting back gets the original value
    return ( cval == keyseq.toString().toLower() );

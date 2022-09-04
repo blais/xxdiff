@@ -765,7 +765,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
    const XxResources& resources = _app->getResources();
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
-   XxDln dlineno = event->position().y() / XxText::lineHeight(fm);
+   XxDln dlineno = QEVENT_POSITION_Y(event) / XxText::lineHeight(fm);
    XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {
@@ -778,7 +778,7 @@ void XxText::mousePressEvent( QMouseEvent* event )
       // Popup.
       const XxLine& line = diffs->getLine( lineno );
       QkMenu* popup = _app->getViewPopup( _no, line );
-      popup->popup( event->globalPosition().toPoint() );
+      popup->popup( QEVENT_GLOBAL_POSITION(event) );
       return;
    }
 
@@ -973,7 +973,7 @@ void XxText::mouseMoveEvent( QMouseEvent* event )
    if ( _grabMode != NONE ) {
       const QFont& font = _app->getResources().getFontText();
       QFontMetrics fm( font );
-      XxDln dlineno = event->position().y() / XxText::lineHeight(fm);
+      XxDln dlineno = QEVENT_POSITION_Y(event) / XxText::lineHeight(fm);
 
       if ( _grabMode == MOUSE_DRAG ) {
          _sv->setTopLine( _grabTopLine + (_grabDeltaLineNo - dlineno) );
@@ -1045,7 +1045,7 @@ void XxText::mouseDoubleClickEvent( QMouseEvent* event )
 
    const QFont& font = resources.getFontText();
    QFontMetrics fm( font );
-   XxDln dlineno = event->position().y() / XxText::lineHeight(fm);
+   XxDln dlineno = QEVENT_POSITION_Y(event) / XxText::lineHeight(fm);
    XxDln lineno = _sv->getTopLine() + dlineno;
    // Check for click out of valid region.
    if ( lineno > XxDln(diffs->getNbLines()) ) {

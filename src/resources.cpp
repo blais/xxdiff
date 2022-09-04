@@ -96,9 +96,15 @@ void setCombined(int* array, XxAccel index, Qt::Key key) {
    array[index] = key;
 }
 
+void setCombined(int* array, XxAccel index, unsigned int key) {
+   array[index] = key;
+}
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 void setCombined(int* array, XxAccel index, const QKeyCombination& kc) {
    array[index] = kc.toCombined();
 }
+#endif
 
 void XxResources::initializeOriginalXdiff()
 {

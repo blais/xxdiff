@@ -332,8 +332,8 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
 {
    // Map in contents rect.
    QRect rect = contentsRect();
-   int x = e->position().x() - rect.x();
-   int y = e->position().y() - rect.y();
+   int x = QEVENT_POSITION_X(e) - rect.x();
+   int y = QEVENT_POSITION_Y(e) - rect.y();
 
    // Find out in which file it was clicked.
    uint nbFiles = _app->getNbFiles();
@@ -403,7 +403,7 @@ void XxOverview::mouseMoveEvent( QMouseEvent* e )
    if ( _manipNo != -1 ) {
       // Map in contents rect.
       QRect rect = contentsRect();
-      int y = e->position().y() - rect.y();
+      int y = QEVENT_POSITION_Y(e) - rect.y();
       int dy = y - _manipAnchor;
 
       XxFln dline =
