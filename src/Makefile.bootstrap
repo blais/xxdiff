@@ -5,6 +5,7 @@
 #
 
 # Rule to generate the qmake Makefile for building xxdiff.
+# Note: To build with Qt5, use QMAKE=qmake5 or QMAKE=qmake.
 QMAKE ?= qmake6
 MAKEDIR ?= .
 QMAKEOPTS =
