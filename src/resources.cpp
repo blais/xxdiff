@@ -92,6 +92,14 @@ void XxResources::initialize()
 
 //------------------------------------------------------------------------------
 //
+void setCombined(int* array, XxAccel index, Qt::Key key) {
+   array[index] = key;
+}
+
+void setCombined(int* array, XxAccel index, const QKeyCombination& kc) {
+   array[index] = kc.toCombined();
+}
+
 void XxResources::initializeOriginalXdiff()
 {
    // Just like xdiff.
@@ -113,71 +121,71 @@ void XxResources::initializeOriginalXdiff()
    for ( int ii = 0; ii < ACCEL_LAST; ++ii ) {
       _accelerators[ ii ] = 0;
    }
-   
-   _accelerators[ ACCEL_EXIT ] = Qt::CTRL | Qt::Key_Q;
-   _accelerators[ ACCEL_EXIT_ACCEPT ] = Qt::Key_A;
-   _accelerators[ ACCEL_EXIT_MERGED ] = Qt::Key_M;
-   _accelerators[ ACCEL_EXIT_REJECT ] = Qt::Key_R;
-                  
-   _accelerators[ ACCEL_SAVE_AS_LEFT ] = Qt::CTRL | Qt::SHIFT | Qt::Key_L;
-   _accelerators[ ACCEL_SAVE_AS_RIGHT ] = Qt::CTRL | Qt::SHIFT | Qt::Key_R;
-   _accelerators[ ACCEL_SAVE_AS_MERGED ] = Qt::CTRL | Qt::Key_M;
 
-   _accelerators[ ACCEL_SEARCH ] = Qt::CTRL | Qt::Key_S;
-   _accelerators[ ACCEL_SEARCH_FORWARD ] = Qt::CTRL | Qt::Key_F;
-   _accelerators[ ACCEL_SEARCH_BACKWARD ] = Qt::CTRL | Qt::Key_B; 
-   _accelerators[ ACCEL_PAGE_DOWN ] = Qt::CTRL | Qt::Key_V;
-   _accelerators[ ACCEL_PAGE_UP ] = Qt::ALT | Qt::Key_V;
-   _accelerators[ ACCEL_CURSOR_DOWN ] = Qt::CTRL | Qt::Key_N;
-   _accelerators[ ACCEL_CURSOR_UP ] = Qt::CTRL | Qt::Key_P;
-   _accelerators[ ACCEL_CURSOR_TOP ] = Qt::Key_Home;
-   _accelerators[ ACCEL_CURSOR_BOTTOM ] = Qt::Key_End;
-   _accelerators[ ACCEL_REDO_DIFF ] = Qt::CTRL | Qt::Key_R;
-   _accelerators[ ACCEL_DIFF_FILES_AT_CURSOR ] = Qt::Key_Return;
-   _accelerators[ ACCEL_NEXT_AND_DIFF_FILES ] = Qt::Key_Space;
-   _accelerators[ ACCEL_NEXT_DIFFERENCE ] = Qt::Key_N;
-   _accelerators[ ACCEL_PREVIOUS_DIFFERENCE ] = Qt::Key_P;
-   _accelerators[ ACCEL_NEXT_UNSELECTED ] = Qt::Key_B;
-   _accelerators[ ACCEL_PREVIOUS_UNSELECTED ] = Qt::Key_O;
-   _accelerators[ ACCEL_SELECT_GLOBAL_LEFT ] = Qt::CTRL|Qt::ALT | Qt::Key_H; 
-   _accelerators[ ACCEL_SELECT_GLOBAL_MIDDLE ] = Qt::CTRL|Qt::ALT | Qt::Key_J; 
-   _accelerators[ ACCEL_SELECT_GLOBAL_RIGHT ] = Qt::CTRL|Qt::ALT | Qt::Key_K; 
-   _accelerators[ ACCEL_SELECT_GLOBAL_NEITHER ] = Qt::CTRL|Qt::ALT | Qt::Key_Y;
-   _accelerators[ ACCEL_SELECT_GLOBAL_UNSELECT ] = Qt::CTRL|Qt::ALT | Qt::Key_U;
-   _accelerators[ ACCEL_SELECT_GLOBAL_MERGE ] = Qt::CTRL|Qt::ALT | Qt::Key_M;
-   _accelerators[ ACCEL_SELECT_REGION_LEFT ] = Qt::Key_H; 
-   _accelerators[ ACCEL_SELECT_REGION_MIDDLE ] = Qt::Key_J; 
-   _accelerators[ ACCEL_SELECT_REGION_RIGHT ] = Qt::Key_K;
-   _accelerators[ ACCEL_SELECT_REGION_NEITHER ] = Qt::Key_Y;
-   _accelerators[ ACCEL_SELECT_REGION_UNSELECT ] = Qt::Key_U;
-   _accelerators[ ACCEL_SELECT_REGION_LEFT_AND_NEXT ] = Qt::CTRL | Qt::Key_H;
-   _accelerators[ ACCEL_SELECT_REGION_MIDDLE_AND_NEXT ] = Qt::CTRL | Qt::Key_J;
-   _accelerators[ ACCEL_SELECT_REGION_RIGHT_AND_NEXT ] = Qt::CTRL | Qt::Key_K;
-   _accelerators[ ACCEL_SELECT_REGION_NEITHER_AND_NEXT ] = Qt::CTRL | Qt::Key_Y;
-   _accelerators[ ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN ] = Qt::Key_S;
-   _accelerators[ ACCEL_SELECT_LINE_LEFT ] = Qt::SHIFT | Qt::Key_H; 
-   _accelerators[ ACCEL_SELECT_LINE_MIDDLE ] = Qt::SHIFT | Qt::Key_J; 
-   _accelerators[ ACCEL_SELECT_LINE_RIGHT ] = Qt::SHIFT | Qt::Key_K; 
-   _accelerators[ ACCEL_SELECT_LINE_NEITHER ] = Qt::SHIFT | Qt::Key_Y;
-   _accelerators[ ACCEL_SELECT_LINE_UNSELECT ] = Qt::SHIFT | Qt::Key_U;
-   _accelerators[ ACCEL_TABS_AT_3 ] = Qt::Key_3;
-   _accelerators[ ACCEL_TABS_AT_4 ] = Qt::Key_4;
-   _accelerators[ ACCEL_TABS_AT_8 ] = Qt::Key_8;
-   _accelerators[ ACCEL_TOGGLE_PANE_MERGED_VIEW ] = Qt::ALT | Qt::Key_Y;
-   _accelerators[ ACCEL_TOGGLE_LINE_NUMBERS ] = Qt::ALT | Qt::Key_L;
-   _accelerators[ ACCEL_TOGGLE_MARKERS ] = Qt::ALT | Qt::Key_M;
-   _accelerators[ ACCEL_TOGGLE_OVERVIEW ] = Qt::ALT | Qt::Key_O;
-   _accelerators[ ACCEL_TOGGLE_SHOW_FILENAMES ] = Qt::ALT | Qt::Key_S;
-   _accelerators[ ACCEL_HORDIFF_NONE ] = Qt::ALT | Qt::Key_W;
-   _accelerators[ ACCEL_HORDIFF_SINGLE ] = Qt::ALT | Qt::Key_E;
-   _accelerators[ ACCEL_HORDIFF_MULTIPLE ] = Qt::ALT | Qt::Key_R;
-   _accelerators[ ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT ] = Qt::ALT | Qt::Key_A;
-   _accelerators[ ACCEL_HELP_ON_CONTEXT ] = Qt::SHIFT | Qt::Key_F1;
-                  
-   _accelerators[ ACCEL_MERGED_CLOSE ] = Qt::ALT | Qt::Key_W;
+   setCombined(_accelerators, ACCEL_EXIT, Qt::CTRL | Qt::Key_Q);
+   setCombined(_accelerators, ACCEL_EXIT_ACCEPT, Qt::Key_A);
+   setCombined(_accelerators, ACCEL_EXIT_MERGED, Qt::Key_M);
+   setCombined(_accelerators, ACCEL_EXIT_REJECT, Qt::Key_R);
 
-   _accelerators[ ACCEL_FONT_RESIZE_BIGGER ] = Qt::CTRL | Qt::Key_Plus;
-   _accelerators[ ACCEL_FONT_RESIZE_SMALLER ] = Qt::CTRL | Qt::Key_Minus;
+   setCombined(_accelerators, ACCEL_SAVE_AS_LEFT, Qt::CTRL | Qt::SHIFT | Qt::Key_L);
+   setCombined(_accelerators, ACCEL_SAVE_AS_RIGHT, Qt::CTRL | Qt::SHIFT | Qt::Key_R);
+   setCombined(_accelerators, ACCEL_SAVE_AS_MERGED, Qt::CTRL | Qt::Key_M);
+
+   setCombined(_accelerators, ACCEL_SEARCH, Qt::CTRL | Qt::Key_S);
+   setCombined(_accelerators, ACCEL_SEARCH_FORWARD, Qt::CTRL | Qt::Key_F);
+   setCombined(_accelerators, ACCEL_SEARCH_BACKWARD, Qt::CTRL | Qt::Key_B);
+   setCombined(_accelerators, ACCEL_PAGE_DOWN, Qt::CTRL | Qt::Key_V);
+   setCombined(_accelerators, ACCEL_PAGE_UP, Qt::ALT | Qt::Key_V);
+   setCombined(_accelerators, ACCEL_CURSOR_DOWN, Qt::CTRL | Qt::Key_N);
+   setCombined(_accelerators, ACCEL_CURSOR_UP, Qt::CTRL | Qt::Key_P);
+   setCombined(_accelerators, ACCEL_CURSOR_TOP, Qt::Key_Home);
+   setCombined(_accelerators, ACCEL_CURSOR_BOTTOM, Qt::Key_End);
+   setCombined(_accelerators, ACCEL_REDO_DIFF, Qt::CTRL | Qt::Key_R);
+   setCombined(_accelerators, ACCEL_DIFF_FILES_AT_CURSOR, Qt::Key_Return);
+   setCombined(_accelerators, ACCEL_NEXT_AND_DIFF_FILES, Qt::Key_Space);
+   setCombined(_accelerators, ACCEL_NEXT_DIFFERENCE, Qt::Key_N);
+   setCombined(_accelerators, ACCEL_PREVIOUS_DIFFERENCE, Qt::Key_P);
+   setCombined(_accelerators, ACCEL_NEXT_UNSELECTED, Qt::Key_B);
+   setCombined(_accelerators, ACCEL_PREVIOUS_UNSELECTED, Qt::Key_O);
+   setCombined(_accelerators, ACCEL_SELECT_GLOBAL_LEFT, Qt::CTRL|Qt::ALT | Qt::Key_H);
+   setCombined(_accelerators, ACCEL_SELECT_GLOBAL_MIDDLE, Qt::CTRL|Qt::ALT | Qt::Key_J);
+   setCombined(_accelerators, ACCEL_SELECT_GLOBAL_RIGHT, Qt::CTRL|Qt::ALT | Qt::Key_K);
+   setCombined(_accelerators, ACCEL_SELECT_GLOBAL_NEITHER, Qt::CTRL|Qt::ALT | Qt::Key_Y);
+   setCombined(_accelerators, ACCEL_SELECT_GLOBAL_UNSELECT, Qt::CTRL|Qt::ALT | Qt::Key_U);
+   setCombined(_accelerators, ACCEL_SELECT_GLOBAL_MERGE, Qt::CTRL|Qt::ALT | Qt::Key_M);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_LEFT, Qt::Key_H);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_MIDDLE, Qt::Key_J);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_RIGHT, Qt::Key_K);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_NEITHER, Qt::Key_Y);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_UNSELECT, Qt::Key_U);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_LEFT_AND_NEXT, Qt::CTRL | Qt::Key_H);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_MIDDLE_AND_NEXT, Qt::CTRL | Qt::Key_J);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_RIGHT_AND_NEXT, Qt::CTRL | Qt::Key_K);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_NEITHER_AND_NEXT, Qt::CTRL | Qt::Key_Y);
+   setCombined(_accelerators, ACCEL_SELECT_REGION_SPLIT_SWAP_JOIN, Qt::Key_S);
+   setCombined(_accelerators, ACCEL_SELECT_LINE_LEFT, Qt::SHIFT | Qt::Key_H);
+   setCombined(_accelerators, ACCEL_SELECT_LINE_MIDDLE, Qt::SHIFT | Qt::Key_J);
+   setCombined(_accelerators, ACCEL_SELECT_LINE_RIGHT, Qt::SHIFT | Qt::Key_K);
+   setCombined(_accelerators, ACCEL_SELECT_LINE_NEITHER, Qt::SHIFT | Qt::Key_Y);
+   setCombined(_accelerators, ACCEL_SELECT_LINE_UNSELECT, Qt::SHIFT | Qt::Key_U);
+   setCombined(_accelerators, ACCEL_TABS_AT_3, Qt::Key_3);
+   setCombined(_accelerators, ACCEL_TABS_AT_4, Qt::Key_4);
+   setCombined(_accelerators, ACCEL_TABS_AT_8, Qt::Key_8);
+   setCombined(_accelerators, ACCEL_TOGGLE_PANE_MERGED_VIEW, Qt::ALT | Qt::Key_Y);
+   setCombined(_accelerators, ACCEL_TOGGLE_LINE_NUMBERS, Qt::ALT | Qt::Key_L);
+   setCombined(_accelerators, ACCEL_TOGGLE_MARKERS, Qt::ALT | Qt::Key_M);
+   setCombined(_accelerators, ACCEL_TOGGLE_OVERVIEW, Qt::ALT | Qt::Key_O);
+   setCombined(_accelerators, ACCEL_TOGGLE_SHOW_FILENAMES, Qt::ALT | Qt::Key_S);
+   setCombined(_accelerators, ACCEL_HORDIFF_NONE, Qt::ALT | Qt::Key_W);
+   setCombined(_accelerators, ACCEL_HORDIFF_SINGLE, Qt::ALT | Qt::Key_E);
+   setCombined(_accelerators, ACCEL_HORDIFF_MULTIPLE, Qt::ALT | Qt::Key_R);
+   setCombined(_accelerators, ACCEL_TOGGLE_FORMAT_CLIPBOARD_TEXT, Qt::ALT | Qt::Key_A);
+   setCombined(_accelerators, ACCEL_HELP_ON_CONTEXT, Qt::SHIFT | Qt::Key_F1);
+
+   setCombined(_accelerators, ACCEL_MERGED_CLOSE, Qt::ALT | Qt::Key_W);
+
+   setCombined(_accelerators, ACCEL_FONT_RESIZE_BIGGER, Qt::CTRL | Qt::Key_Plus);
+   setCombined(_accelerators, ACCEL_FONT_RESIZE_SMALLER, Qt::CTRL | Qt::Key_Minus);
 
    //---------------------------------------------------------------------------
 
@@ -188,7 +196,7 @@ void XxResources::initializeOriginalXdiff()
 #else
       // // Use a default font that looks like the one from the default SGI scheme.
       // _fontApp.setFamily( "Helvetica" );
-      // _fontApp.setItalic( true ); 
+      // _fontApp.setItalic( true );
       // _fontApp.setBold( true );
 
       // Note: using "-*-screen-bold-i-normal--*-100-*-*-*-*-iso8859-1"
@@ -222,27 +230,27 @@ void XxResources::initializeOriginalXdiff()
       setFbColors( COLOR_DIFF_TWO_SUP           , "#9ac0cd", "#000000" );
       setFbColors( COLOR_DIFF_TWO_ONLY          , "#b2dfee",  "#000000" );
       setFbColors( COLOR_DIFF_TWO_NONLY         , "#9ac0cd", "#000000" );
-                                                
+
       setFbColors( COLOR_DELETE                 , "#b2dfee", "#000000" );
       setFbColors( COLOR_DELETE_BLANK           , "#a3a3a3", "#000000" );
-                                                
+
       setFbColors( COLOR_INSERT                 , "#b4eeb4", "#000000" );
       setFbColors( COLOR_INSERT_BLANK           , "#a3a3a3", "#000000" );
-                                                
+
       setFbColors( COLOR_DIFF_ALL               , "#eee8aa", "#000000" );
       setFbColors( COLOR_DIFF_ALL_SUP           , "#cdc9a5", "#000000" );
       setFbColors( COLOR_DIFF_ALL_ONLY          , "#eee8aa", "#000000" );
       setFbColors( COLOR_DIFF_ALL_NONLY         , "#cdc9a5", "#000000" );
-                                                
+
       setFbColors( COLOR_DIFFDEL                , "#eee8aa", "#000000" );
       setFbColors( COLOR_DIFFDEL_SUP            , "#cdc9a5", "#000000" );
       setFbColors( COLOR_DIFFDEL_ONLY           , "#eee8aa", "#000000" );
       setFbColors( COLOR_DIFFDEL_NONLY          , "#cdc9a5", "#000000" );
       setFbColors( COLOR_DIFFDEL_BLANK          , "#a3a3a3", "#000000" );
-                                                
+
       setFbColors( COLOR_SELECTED               , "#dda0dd", "#000000" );
       setFbColors( COLOR_SELECTED_SUP           , "#d8bfd8", "#000000" );
-                                                
+
       setFbColors( COLOR_IGNORE_DISPLAY         , "#d9d9d9", "#000000" );
       setFbColors( COLOR_IGNORE_DISPLAY_SUP     , "#cccccc", "#000000" );
       setFbColors( COLOR_IGNORE_DISPLAY_ONLY    , "#cccccc", "#000000" );
@@ -250,11 +258,11 @@ void XxResources::initializeOriginalXdiff()
 
       setFbColors( COLOR_DELETED                , "#778899", "#000000" );
       setFbColors( COLOR_DELETED_SUP            , "#708090", "#000000" );
-                                                
+
       setFbColors( COLOR_IGNORED                , "#b3b3b3", "#4d4d4d" );
-                                                
+
       setFbColors( COLOR_DIRECTORIES            , "#48d1cc", "#000000" );
-                                                           
+
       setFbColors( COLOR_MERGED_UNDECIDED       , "#cdc9a5", "#000000" );
       setFbColors( COLOR_MERGED_DECIDED_1       , "#999999", "#000000" );
       setFbColors( COLOR_MERGED_DECIDED_1_SUP   , "#b3b3b3", "#000000" );
@@ -263,8 +271,8 @@ void XxResources::initializeOriginalXdiff()
       setFbColors( COLOR_MERGED_DECIDED_3       , "#999999", "#000000" );
       setFbColors( COLOR_MERGED_DECIDED_3_SUP   , "#b3b3b3", "#000000" );
       setFbColors( COLOR_MERGED_DECIDED_NEITHER , "#b3b3b3", "#000000" );
-   }   
-             
+   }
+
    _backColors[ COLOR_BACKGROUND ] =      QColor( 0x40, 0x61, 0x6a );
    _backColors[ COLOR_CURSOR ] =          QColor( 0xff, 0xff, 0xff ); // white
    _backColors[ COLOR_VERTICAL_LINE ] =   QColor( 0xff, 0x00, 0x00 ); // red
@@ -345,13 +353,13 @@ void XxResources::initializeOriginalXdiff()
    _initSwitch[ CMDSW_FILES_QUALITY_NORMAL ] = -1;
    _initSwitch[ CMDSW_FILES_QUALITY_FASTEST ] = -1;
    _initSwitch[ CMDSW_FILES_QUALITY_HIGHEST ] = -1;
-         
+
    //---------------------------------------------------------------------------
 
    _overviewFileWidth = 20;
    _overviewSepWidth = 14;
    _verticalLinePos = 80;
-   
+
    //---------------------------------------------------------------------------
 
    _tags[ TAG_CONFLICT_START ] = "<<<<<<< %L";
@@ -490,7 +498,7 @@ void XxResources::setIgnoreFile( XxIgnoreFile ignoreFile )
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setCommand( XxCommand cmdId, const QString& t ) 
+void XxResources::setCommand( XxCommand cmdId, const QString& t )
 {
    _commands[ int(cmdId) ] = t;
    emit changed();
@@ -532,7 +540,7 @@ bool XxResources::isCommandSwitch(
 
 //------------------------------------------------------------------------------
 //
-void XxResources::setCommandSwitch( 
+void XxResources::setCommandSwitch(
    XxCommand       cmdId,
    XxCommandSwitch optId,
    bool            setit
@@ -553,7 +561,7 @@ void XxResources::setCommandSwitch(
 
 //------------------------------------------------------------------------------
 //
-void XxResources::toggleCommandSwitch( 
+void XxResources::toggleCommandSwitch(
    XxCommand       cmdId,
    XxCommandSwitch optId
 )
@@ -575,7 +583,7 @@ void XxResources::toggleCommandSwitch(
 //
 XxQuality XxResources::getQuality( const QString& command ) const
 {
-   switch ( XxOptionsDialog::isInCommand( 
+   switch ( XxOptionsDialog::isInCommand(
       command,
       getCommandSwitch( CMDSW_FILES_QUALITY_NORMAL ),
       getCommandSwitch( CMDSW_FILES_QUALITY_FASTEST ),
@@ -829,13 +837,13 @@ void XxResources::applyInitSwitch()
 
       if ( _initSwitch[ ii ] == 1 ) {
          switch ( ii ) {
-            case CMDSW_FILES_QUALITY_NORMAL: 
+            case CMDSW_FILES_QUALITY_NORMAL:
                setQuality( cmd, QUALITY_NORMAL );
                break;
-            case CMDSW_FILES_QUALITY_FASTEST: 
+            case CMDSW_FILES_QUALITY_FASTEST:
                setQuality( cmd, QUALITY_FASTEST );
                break;
-            case CMDSW_FILES_QUALITY_HIGHEST: 
+            case CMDSW_FILES_QUALITY_HIGHEST:
                setQuality( cmd, QUALITY_HIGHEST );
                break;
          }
@@ -877,4 +885,3 @@ void XxResources::updateHordiffBuffers()
 }
 
 XX_NAMESPACE_END
-

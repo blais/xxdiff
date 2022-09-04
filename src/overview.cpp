@@ -74,8 +74,8 @@ XxOverview::XxOverview(
    }
 
    uint width =
-      2 * lineWidth() + 
-      nbFiles * resources.getOverviewFileWidth() + 
+      2 * lineWidth() +
+      nbFiles * resources.getOverviewFileWidth() +
       (nbFiles-1) * resources.getOverviewSepWidth() - 1;
    setFixedWidth( width );
 }
@@ -115,7 +115,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
    const XxResources& resources = _app->getResources();
 
    // If it is empty, erase the whole widget with blank color.
-   QColor backgroundColor = 
+   QColor backgroundColor =
       resources.getColor( COLOR_BACKGROUND );
    if ( nbFiles == 0 || diffs == 0 ) {
       QBrush brush( backgroundColor );
@@ -183,11 +183,11 @@ void XxOverview::paintEvent( QPaintEvent* e )
    // Draw very first line connecting regions.
    for ( ii = 0; ii < nbFiles; ++ii ) {
       if ( ii > 0 ) {
-         p.drawLine( _fileR[ii-1], prevy[ii-1], 
+         p.drawLine( _fileR[ii-1], prevy[ii-1],
                      _fileL[ii], prevy[ii] );
       }
    }
-   
+
    do {
       diffs->findRegionWithSel( end + 1, start, end );
 
@@ -195,7 +195,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
 
          int fsize = diffs->getNbFileLines( ii, start, end );
          if ( fsize == 0 ) {
-            p.drawLine( _fileL[ii], prevy[ii], 
+            p.drawLine( _fileL[ii], prevy[ii],
                         _fileR[ii], prevy[ii] );
          }
          else {
@@ -249,12 +249,12 @@ void XxOverview::paintEvent( QPaintEvent* e )
          cfline += 1;
       }
       int toppos =
-         _fileT[ii] + 
+         _fileT[ii] +
          int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) );
 
       cfline = diffs->getBufferLine( ii, bottomline, aempty ) + 1;
       int bottompos =
-         _fileT[ii] + 
+         _fileT[ii] +
          int( (_fileDy[ii] * (cfline-1)) / float( flines[ii] ) ) - 1;
 
       p.setPen( cursorColor );
@@ -272,25 +272,25 @@ void XxOverview::paintEvent( QPaintEvent* e )
          fcfline += 0.5;
       }
       curppos[ii] =
-         _fileT[ii] + 
+         _fileT[ii] +
          int( (_fileDy[ii] * (fcfline-1)) / float( flines[ii] ) );
 
       if ( ii > 0 ) {
 
          // Draw left arrow.
          QPolygon pa1;
-         pa1.putPoints(0, 3, 
+         pa1.putPoints(0, 3,
                          _fileL[ii] - sepWidth - dx, curppos[ii-1] - dyo2,
                          _fileL[ii] - sepWidth - dx, curppos[ii-1] + dyo2,
-                         _fileL[ii] - sepWidth, curppos[ii-1] );                
+                         _fileL[ii] - sepWidth, curppos[ii-1] );
          p.drawPolygon( pa1 );
 
          // Draw right arrow.
          QPolygon pa2;
-         pa2.putPoints(0, 3, 
+         pa2.putPoints(0, 3,
                          _fileL[ii] + dx, curppos[ii] - dyo2,
                          _fileL[ii] + dx, curppos[ii] + dyo2,
-                         _fileL[ii], curppos[ii] );                
+                         _fileL[ii], curppos[ii] );
          p.drawPolygon( pa2 );
       }
    }
@@ -313,7 +313,7 @@ void XxOverview::paintEvent( QPaintEvent* e )
                _fileT[ii] +
                int( (_fileDy[ii] * (ffline-1)) / float( flines[ii] ) );
             QPolygon pa1;
-            pa1.putPoints(0, 4, 
+            pa1.putPoints(0, 4,
                             _fileL[ii] + fw2 - sdx, ypos,
                             _fileL[ii] + fw2, ypos + sdx,
                             _fileL[ii] + fw2 + sdx, ypos,
@@ -332,8 +332,8 @@ void XxOverview::mousePressEvent( QMouseEvent* e )
 {
    // Map in contents rect.
    QRect rect = contentsRect();
-   int x = e->x() - rect.x();
-   int y = e->y() - rect.y();
+   int x = e->position().x() - rect.x();
+   int y = e->position().y() - rect.y();
 
    // Find out in which file it was clicked.
    uint nbFiles = _app->getNbFiles();
@@ -403,7 +403,7 @@ void XxOverview::mouseMoveEvent( QMouseEvent* e )
    if ( _manipNo != -1 ) {
       // Map in contents rect.
       QRect rect = contentsRect();
-      int y = e->y() - rect.y();
+      int y = e->position().y() - rect.y();
       int dy = y - _manipAnchor;
 
       XxFln dline =
@@ -440,7 +440,7 @@ void XxOverview::resizeEvent( QResizeEvent* e )
    const XxResources& resources = _app->getResources();
    int fileWidth = resources.getOverviewFileWidth();
    int sepWidth = resources.getOverviewSepWidth();
-   
+
    const int visRegionBorder = int( 0.25 * fileWidth );
    int cx = 0;
    uint ii;
@@ -505,4 +505,3 @@ void XxOverview::updateVerticalExtents()
 }
 
 XX_NAMESPACE_END
-

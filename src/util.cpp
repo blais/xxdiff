@@ -693,6 +693,9 @@ bool XxUtil::formatFilename(
          switch (*p ) {
             case '\0':
                b = 0;
+               // Note: It may be better to use gcc's __attribute__
+               // ((fallthrough)) instead of C++-17's attribute.
+               [[fallthrough]];
             case '%':
                target.append( "%" );
                break;

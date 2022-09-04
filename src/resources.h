@@ -660,4 +660,3 @@ XX_NAMESPACE_END
 #include <resources.inline.h>
 
 #endif
-

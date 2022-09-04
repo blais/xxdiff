@@ -49,8 +49,8 @@ bool XxAccelUtil::read( const QString& val, int& accel )
    QString cval = val.trimmed().toLower();
 
    QKeySequence keyseq = QKeySequence::fromString( cval );
-   accel = keyseq[0];
-   
+   accel = keyseq[0].toCombined();
+
    // Check that converting back gets the original value
    return ( cval == keyseq.toString().toLower() );
 }
@@ -63,4 +63,3 @@ void XxAccelUtil::write( std::ostream& os, int accel )
 }
 
 XX_NAMESPACE_END
-
