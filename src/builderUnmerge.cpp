@@ -56,7 +56,7 @@ XX_NAMESPACE_USING
  * CLASS XxConflictFormatError
  *============================================================================*/
 
-class XxConflictFormatError : public XxError, 
+class XxConflictFormatError : public XxError,
                               public std::runtime_error {
 
 public:
@@ -66,12 +66,12 @@ public:
    // Constructor with state.
    XxConflictFormatError(
       XX_EXC_PARAMS_DECL(file,line),
-      const XxFln f1n1, 
-      const XxFln f1n2, 
-      const XxFln f2n1, 
+      const XxFln f1n1,
+      const XxFln f1n2,
+      const XxFln f2n1,
       const XxFln f2n2,
-      const XxFln f3n1, 
-      const XxFln f3n2 
+      const XxFln f3n1,
+      const XxFln f3n2
    );
 
 };
@@ -80,11 +80,11 @@ public:
 //
 XxConflictFormatError::XxConflictFormatError(
    XX_EXC_PARAMS_DECL(file,line),
-   XxFln f1n1, 
+   XxFln f1n1,
    XxFln f1n2,
-   XxFln f2n1, 
+   XxFln f2n1,
    XxFln f2n2,
-   XxFln f3n1, 
+   XxFln f3n1,
    XxFln f3n2
 ) :
    XxError( file, line ),
@@ -92,8 +92,8 @@ XxConflictFormatError::XxConflictFormatError(
 {
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing conflicts file:"
-       << " (" << f1n1 << "," << f1n2 << ")  file2: " 
-       << " (" << f2n1 << "," << f2n2 << ")  file3: " 
+       << " (" << f1n1 << "," << f1n2 << ")  file2: "
+       << " (" << f2n1 << "," << f2n2 << ")  file3: "
        << " (" << f3n1 << "," << f3n2 << ")" << Qt::endl;
 }
 
@@ -269,7 +269,7 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;
             XX_CHECK( fsize1 >= 0 && fsize2 >= 0 );
-            XX_LOCAL_TRACE( "f1n1, f2n1, fsize1, fsize2 " 
+            XX_LOCAL_TRACE( "f1n1, f2n1, fsize1, fsize2 "
                             << f1n1 << " " << f2n1 << " "
                             << fsize1 << " " << fsize2 );
             if ( fsize1 == 0 && fsize2 == 0 ) {
@@ -303,7 +303,7 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
       }
 
    }
-   
+
    // Add final ignore region if present.
    if ( inConflict == OUTSIDE && f1n1 <= nbLines ) {
       createIgnoreBlock( f1n1, f1n1, nbLines + 1 - f1n1 );
@@ -343,7 +343,7 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
    XX_LOCAL_TRACE( "Right: " << outFileRight );
 
    std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
-   
+
    return ap;
 }
 
@@ -418,7 +418,7 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
       uint len;
       const char* textlineOrig = buffer.getTextLine( l, len );
       QByteArray textline( textlineOrig, len+1 ); // This copy sucks...
-      XX_LOCAL_TRACE( "<" << inConflict << "> " << 
+      XX_LOCAL_TRACE( "<" << inConflict << "> " <<
                       l << " textline = " << textline );
 
       if ( inConflict == OUTSIDE ) {
@@ -483,7 +483,7 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
             int fsize2 = f2n2 - f2n1;
             int fsize3 = f3n2 - f3n1;
             XX_CHECK( fsize1 >= 0 && fsize2 >= 0 && fsize3 >= 0 );
-            XX_LOCAL_TRACE( "f1n1, f1n2, f2n1, f2n2, f3n1, f3n2 " 
+            XX_LOCAL_TRACE( "f1n1, f1n2, f2n1, f2n2, f3n1, f3n2 "
                             << f1n1 << " " << f1n2 << " "
                             << f2n1 << " " << f2n2 << " "
                             << f3n1 << " " << f3n2 );
@@ -589,7 +589,7 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
       }
 
    }
-   
+
    // Warn if we ended up in an unfinished region.
    if ( inConflict != OUTSIDE ) {
       createIgnoreBlock( f1n1 - 1, f1n1 - 1, f1n1 - 1, nbLines + 1 - (f1n1-1) );
@@ -612,16 +612,13 @@ std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
    XX_LOCAL_TRACE( "Middle: " << outFileMiddle );
    XX_LOCAL_TRACE( "Right: " << outFileRight );
 
-   outFileLeft = outFileLeft;
-   outFileMiddle = outFileMiddle;
-   outFileRight = outFileRight;
    std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderUnmerge::createIgnoreBlock( 
+void XxBuilderUnmerge::createIgnoreBlock(
    XxFln fline1,
    XxFln fline2,
    uint  fsize
@@ -637,7 +634,7 @@ void XxBuilderUnmerge::createIgnoreBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderUnmerge::createIgnoreBlock( 
+void XxBuilderUnmerge::createIgnoreBlock(
    XxFln fline1,
    XxFln fline2,
    XxFln fline3,
@@ -654,7 +651,7 @@ void XxBuilderUnmerge::createIgnoreBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderUnmerge::createChangeBlock( 
+void XxBuilderUnmerge::createChangeBlock(
    XxFln fline1,
    XxFln fline2,
    uint  fsize1,
@@ -662,7 +659,7 @@ void XxBuilderUnmerge::createChangeBlock(
 )
 {
    // Add common lines.
-   uint commonLines = std::min( fsize1, fsize2 ); 
+   uint commonLines = std::min( fsize1, fsize2 );
    for ( uint ii = 0; ii < commonLines; ++ii ) {
       XxLine line( XxLine::DIFF_ALL, fline1 + ii, fline2 + ii );
       line.setHunkId( _curHunk );
@@ -670,7 +667,7 @@ void XxBuilderUnmerge::createChangeBlock(
    }
 
    // Add remaining lines.
-   if ( fsize1 > fsize2 ) { 
+   if ( fsize1 > fsize2 ) {
       uint diffLines = fsize1 - commonLines;
       for ( uint ii = 0; ii < diffLines; ++ii ) {
          XxLine line( XxLine::DIFF_ALL, fline1 + commonLines + ii, -1 );
@@ -691,7 +688,7 @@ void XxBuilderUnmerge::createChangeBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderUnmerge::createInsertLeftBlock( 
+void XxBuilderUnmerge::createInsertLeftBlock(
    XxFln fline1,
    uint  fsize
 )
@@ -706,7 +703,7 @@ void XxBuilderUnmerge::createInsertLeftBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderUnmerge::createInsertRightBlock( 
+void XxBuilderUnmerge::createInsertRightBlock(
    XxFln fline2,
    uint  fsize
 )
@@ -722,7 +719,7 @@ void XxBuilderUnmerge::createInsertRightBlock(
 
 //------------------------------------------------------------------------------
 //
-void XxBuilderUnmerge::create3Block( 
+void XxBuilderUnmerge::create3Block(
    XxLine::Type type,
    XxFln        f1n1,
    XxFln        f1n2,
