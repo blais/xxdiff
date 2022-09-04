@@ -120,13 +120,13 @@ iddot           [a-zA-Z][a-zA-Z0-9\.]*
 
 {geomspec}	{
    int len = ::strlen( yytext );
-   if ( len >= LEX_BUFFER_MAX ) {
-      ::strncpy( lexerBuffer, yytext, LEX_BUFFER_MAX );
-      lexerBuffer[ LEX_BUFFER_MAX-1 ] = 0;
+   if ( len < LEX_BUFFER_MAX ) {
+      ::strcpy( lexerBuffer, yytext );
    }
    else {
-      ::strncpy( lexerBuffer, yytext, len );
-      lexerBuffer[ len ] = 0;
+      /* Truncation. */
+      ::strncpy( lexerBuffer, yytext, LEX_BUFFER_MAX-1 );
+      lexerBuffer[ LEX_BUFFER_MAX-1 ] = 0;
    }
    yylval->str = lexerBuffer;
    BEGIN(INITIAL);

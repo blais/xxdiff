@@ -156,53 +156,6 @@ inline bool isAllSpace( const char* text, const unsigned int len )
    return true;
 }
 
-#ifndef NO_PARSE_DIFF_ERROR // Not needed for now.
-
-/*==============================================================================
- * CLASS XxParseDiffError
- *============================================================================*/
-
-class XxParseDiffError : public XxError,
-                         public std::runtime_error {
-
-public:
-
-   /*----- member functions -----*/
-
-   // Constructor with state.
-   XxParseDiffError(
-      XX_EXC_PARAMS_DECL(file,line),
-      const XxFln fline1,
-      const XxFln fline2,
-      const XxFln f1n1,
-      const XxFln f1n2,
-      const XxFln f2n1,
-      const XxFln f2n2
-   );
-
-};
-
-//------------------------------------------------------------------------------
-//
-XxParseDiffError::XxParseDiffError(
-   XX_EXC_PARAMS_DECL(file,line),
-   const XxFln fline1,
-   const XxFln fline2,
-   const XxFln f1n1,
-   const XxFln f1n2,
-   const XxFln f2n1,
-   const XxFln f2n2
-) :
-   XxError( file, line ),
-   std::runtime_error( "Parse diff output error." )
-{
-   QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
-   oss << "Error parsing diff output: file1:"
-       << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: "
-       << fline2 << " (" << f2n1 << "," << f2n2 << ")" << Qt::endl;
-}
-#endif
-
 }
 
 XX_NAMESPACE_BEGIN
