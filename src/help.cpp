@@ -166,7 +166,7 @@ QString formatOptionsPlain(
             XX_ASSERT( ( startw + word.length() + 1 ) < width ); 
 
             if ( ( cch + word.length() + 1 ) >= width ) {
-               oss << endl;
+               oss << Qt::endl;
                for ( unsigned int iii = 0; iii < startw; ++iii ) { oss << " "; }
                cch = startw;
             }
@@ -174,13 +174,13 @@ QString formatOptionsPlain(
             cch += word.length() + 1;
          }
       }
-      oss << endl;
+      oss << Qt::endl;
 
       // Add an extra line between the options, there are so much that it will
       // make it clearer.
-      oss << endl;
+      oss << Qt::endl;
    }
-   oss << endl;
+   oss << Qt::endl;
    return outs;
 }
 
@@ -195,9 +195,9 @@ QString formatOptionsQml(
    QString outs;
    QTextStream oss( &outs );
 
-   oss << "<table cellpadding=5 width=\"100%\">" << endl << endl;
+   oss << "<table cellpadding=5 width=\"100%\">" << Qt::endl << Qt::endl;
    for ( int ii = 0; ii < nbOptions; ++ii ) {
-      oss << "<tr>" << endl;
+      oss << "<tr>" << Qt::endl;
 
       // Output option name.
       oss << "<td width=\"30%\"><tt>";
@@ -208,18 +208,18 @@ QString formatOptionsQml(
       if ( options[ii]._has_arg ) {
          oss << " &lt;arg&gt;";
       }
-      oss << "</tt></td>" << endl;
+      oss << "</tt></td>" << Qt::endl;
 
 
       // Output formatted help.
-      oss << "<td align=left>" << endl;
-      oss << options[ii]._help << endl;
-      oss << "</td>" << endl;
+      oss << "<td align=left>" << Qt::endl;
+      oss << options[ii]._help << Qt::endl;
+      oss << "</td>" << Qt::endl;
 
-      oss << "</tr>" << endl << endl;
+      oss << "</tr>" << Qt::endl << Qt::endl;
    }
-   oss << "</table>" << endl << endl;
-   oss << flush;
+   oss << "</table>" << Qt::endl << Qt::endl;
+   oss << Qt::flush;
    
    return outs;
 }
@@ -305,7 +305,7 @@ XxManPageDialog::XxManPageDialog(
 {
    setAttribute( Qt::WA_DeleteOnClose );
    QVBoxLayout* toplay = new QVBoxLayout( this );
-   toplay->setMargin( 0 );
+   toplay->setContentsMargins( 0,0,0,0 );
    toplay->setSpacing( 0 );
    _textBrowser = new QkTextBrowser();
    _textBrowser->setText( text );
@@ -314,7 +314,7 @@ XxManPageDialog::XxManPageDialog(
    
    QHBoxLayout* sbLayout = new QHBoxLayout;
    toplay->addLayout( sbLayout );
-   sbLayout->setMargin( 10 );
+   sbLayout->setContentsMargins( 10,10,10,10 );
    sbLayout->setSpacing( 3 );
    _lineEdit = new QkLineEdit;
    sbLayout->addWidget( new QLabel( "Search String:") );
@@ -393,84 +393,84 @@ QString XxHelp::getUsage( int helpMask, bool plain )
    if ( plain ) {
       QTextStream oss( &usage, QIODevice::WriteOnly | QIODevice::Append );
       oss << "Usage: "
-          << "xxdiff [OPTIONS] file1 file2 [file3]" << endl
-          << endl
+          << "xxdiff [OPTIONS] file1 file2 [file3]" << Qt::endl
+          << Qt::endl
           << "A graphical file and directories comparison and merge tool."
-          << endl << endl;
+          << Qt::endl << Qt::endl;
 
       if ( helpMask & (1 << XxCmdline::OPT_GENERIC) ) {
-         oss << "Generic options:" << endl;
+         oss << "Generic options:" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_GENERIC, nbOptions );
          oss << formatOptionsPlain( options, nbOptions );
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_QT) ) {
-         oss << "Qt options:" << endl;
+         oss << "Qt options:" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_QT, nbOptions );
          oss << formatOptionsPlain( options, nbOptions );
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_DIFF) ) {
-         oss << "GNU diff options (2-files only):" << endl;
+         oss << "GNU diff options (2-files only):" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_DIFF, nbOptions );
          oss << formatOptionsPlain( options, nbOptions );
-         oss << endl;
+         oss << Qt::endl;
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_XXDIFF) ) {
-         oss << "Options:" << endl;
+         oss << "Options:" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_XXDIFF, nbOptions );
          oss << formatOptionsPlain( options, nbOptions );
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_DISPLAY) ) {
-         oss << "Display Options:" << endl;
+         oss << "Display Options:" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_DISPLAY, nbOptions );
          oss << formatOptionsPlain( options, nbOptions );
       }
 
-      oss << "Any one specified file can be `-' for stdin." << endl
+      oss << "Any one specified file can be `-' for stdin." << Qt::endl
           << "Filenames can be either 2 directories, 2 files or 3 files."
-          << endl;
+          << Qt::endl;
    }
    else {
       QTextStream oss( &usage, QIODevice::WriteOnly | QIODevice::Append );
       if ( helpMask & (1 << XxCmdline::OPT_GENERIC) ) {
-         oss << "<h4>Generic options</h4>" << endl;
+         oss << "<h4>Generic options</h4>" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_GENERIC, nbOptions );
          oss << formatOptionsQml( options, nbOptions );
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_QT) ) {
-         oss << "<h4>Qt options</h4>" << endl;
+         oss << "<h4>Qt options</h4>" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_QT, nbOptions );
          oss << formatOptionsQml( options, nbOptions );
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_DIFF) ) {
-         oss << "<h4>GNU diff options (2-files only)</h4>" << endl;
+         oss << "<h4>GNU diff options (2-files only)</h4>" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_DIFF, nbOptions );
          oss << formatOptionsQml( options, nbOptions );
-         oss << endl;
+         oss << Qt::endl;
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_XXDIFF) ) {
-         oss << "<h4>Options</h4>" << endl;
+         oss << "<h4>Options</h4>" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_XXDIFF, nbOptions );
          oss << formatOptionsQml( options, nbOptions );
       }
 
       if ( helpMask & (1 << XxCmdline::OPT_DISPLAY) ) {
-         oss << "<h4>Display Options</h4>" << endl;
+         oss << "<h4>Display Options</h4>" << Qt::endl;
          options =
             XxCmdline::getOptionList( XxCmdline::OPT_DISPLAY, nbOptions );
          oss << formatOptionsQml( options, nbOptions );
@@ -565,13 +565,13 @@ QDialog* XxHelp::getAboutDialog( QWidget* parent )
    
    QString text;
    QTextStream oss( &text );
-   oss << xx_name << endl 
-       << endl
-       << xx_description << endl
-       << endl
-       << "Author: Martin Blais <blais@furius.ca>" << endl
-       << xx_homepage << endl
-       << "Version: " << getVersion() << endl;
+   oss << xx_name << Qt::endl 
+       << Qt::endl
+       << xx_description << Qt::endl
+       << Qt::endl
+       << "Author: Martin Blais <blais@furius.ca>" << Qt::endl
+       << xx_homepage << Qt::endl
+       << "Version: " << getVersion() << Qt::endl;
 
    QDialog* box = new XxAboutDialog( parent, text );
 
@@ -587,9 +587,9 @@ QDialog* XxHelp::getManPageDialog( QWidget* parent )
    QString docstr;
    {
       QTextStream oss( &docstr );
-      oss << "<qt title=\"xxdiff documentation\">" << endl
-          << getManual() << endl
-          << "</qt" << endl;
+      oss << "<qt title=\"xxdiff documentation\">" << Qt::endl
+          << getManual() << Qt::endl
+          << "</qt" << Qt::endl;
    }
    QDialog* box = new XxManPageDialog( parent, docstr );
    return box;

@@ -69,13 +69,13 @@ public:
    XxBorderLabel(
       BorderFlags bf = BorderNone,
       QWidget* parent = 0,
-      Qt::WindowFlags wf = 0
+      Qt::WindowFlags wf = Qt::Widget
    );
    XxBorderLabel( 
       const QString& text,
       BorderFlags bf = BorderNone,
       QWidget* parent = 0,
-      Qt::WindowFlags wf = 0
+      Qt::WindowFlags wf = Qt::Widget
    );
 
    // Destructor.

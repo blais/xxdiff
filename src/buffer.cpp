@@ -696,7 +696,7 @@ const QString& XxBuffer::renderLineNumber(
    const QString& format
 )
 {
-   _lnBuffer.sprintf( format.toLocal8Bit().constData(), lineNumber );
+   _lnBuffer.asprintf( format.toLocal8Bit().constData(), lineNumber );
    return _lnBuffer;
 }
 

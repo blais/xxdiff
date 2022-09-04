@@ -130,7 +130,7 @@ public:
    XxBuffer* getBuffer( const XxFno no ) const;
 
    // Returns an array of the file pointers.
-   const std::auto_ptr<XxBuffer>* getBuffers() const;
+   const std::unique_ptr<XxBuffer>* getBuffers() const;
 
    // Returns the maximum number of digits for line numbers of all files.
    uint getMaxDigits() const;
@@ -335,7 +335,7 @@ private:
    XxResources* buildResources() const;
 
    // Reads in a file.
-   std::auto_ptr<XxBuffer> readFile(
+   std::unique_ptr<XxBuffer> readFile(
       const XxFno      no,
       const QString&   filename,
       const QString&   displayFilename,
@@ -468,8 +468,8 @@ private:
    // Real data.
    //
    int                     _nbFiles;
-   std::auto_ptr<XxBuffer> _files[3];
-   std::auto_ptr<XxDiffs>  _diffs;
+   std::unique_ptr<XxBuffer> _files[3];
+   std::unique_ptr<XxDiffs>  _diffs;
    bool                    _filesAreDirectories;
    QProcess*               _editProc[3];
 

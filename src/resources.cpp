@@ -34,7 +34,7 @@
 #include <QColor>
 #include <QObject>
 #include <QApplication> // to get desktop
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStyleFactory>
 
 #include <iostream>
@@ -793,9 +793,10 @@ void XxResources::setMergedFilename( const QString& fn )
 //
 bool XxResources::compareFonts( const QFont& f1, const QFont& f2 )
 {
+/* Remove this code since rawMode() is deprecated
    if ( f1.rawMode() || f2.rawMode() ) {
       return f1.toString() == f2.toString();
-   }
+   } */
    return f1 == f2;
 }
 

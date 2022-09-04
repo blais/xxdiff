@@ -31,7 +31,7 @@
 
 #include <QByteArray>
 #include <QTextStream>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdio.h>
 #include <iostream>
@@ -94,7 +94,7 @@ XxConflictFormatError::XxConflictFormatError(
    oss << "Error parsing conflicts file:"
        << " (" << f1n1 << "," << f1n2 << ")  file2: " 
        << " (" << f2n1 << "," << f2n2 << ")  file3: " 
-       << " (" << f3n1 << "," << f3n2 << ")" << endl;
+       << " (" << f3n1 << "," << f3n2 << ")" << Qt::endl;
 }
 
 XX_NAMESPACE_BEGIN
@@ -110,11 +110,11 @@ XX_NAMESPACE_BEGIN
 //    int nbExpStart = 0;
 //    int nbExpSep = 0;
 //    int nbExpEnd = 0;
-//    QRegExp leftRE( "%L" );
-//    QRegExp rightRE( "%R" );
+//    QRegularExpression leftRE( "%L" );
+//    QRegularExpression rightRE( "%R" );
 
 //    // Clean tags of garbage that scanf could interpret maliciously.
-//    QRegExp otherRE( "%[^LR]" );
+//    QRegularExpression otherRE( "%[^LR]" );
 //    tagStart.replace( otherRE, "" );
 //    tagSep.replace( otherRE, "" );
 //    tagEnd.replace( otherRE, "" );
@@ -174,7 +174,7 @@ XxBuilderUnmerge::~XxBuilderUnmerge()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
    const XxBuffer&    buffer,
    const XxResources& resources,
    QString&           outFileLeft,
@@ -183,7 +183,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 {
    initLines();
 
-   // Note: starting from qt-3, QRegExp will have group matching, so we could
+   // Note: starting from qt-3, QRegularExpression will have group matching, so we could
    // have the tags specified using reg.exps instead of strings.
 
    enum InConflict { OUTSIDE = 0, IN1 = 1, IN2 = 2 };
@@ -197,25 +197,25 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    XxFln f2n2 = -1;
    f1n1 = 1;
 
-   QRegExp reStart = QRegExp( resources.getTag( TAG_UNMERGE_START ) );
-   QRegExp reSep = QRegExp( resources.getTag( TAG_UNMERGE_SEP ) );
-   QRegExp reEnd = QRegExp( resources.getTag( TAG_UNMERGE_END ) );
+   QRegularExpression reStart = QRegularExpression( resources.getTag( TAG_UNMERGE_START ) );
+   QRegularExpression reSep = QRegularExpression( resources.getTag( TAG_UNMERGE_SEP ) );
+   QRegularExpression reEnd = QRegularExpression( resources.getTag( TAG_UNMERGE_END ) );
    if ( !reStart.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << endl;
+      oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reSep.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_SEP is invalid: " << reSep.pattern() << endl;
+      oss << "TAG_UNMERGE_SEP is invalid: " << reSep.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reEnd.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << endl;
+      oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
 
@@ -232,7 +232,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
       if ( inConflict == OUTSIDE ) {
          XX_LOCAL_TRACE( "===> " << reStart.pattern() << " " << textline );
-         if ( reStart.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reStart.match( textline );
+         if ( QEresult.hasMatch() ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
             createIgnoreBlock( f1n1, f1n1, l - f1n1 );
@@ -241,7 +242,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            QStringList texts = reStart.capturedTexts();
+            QStringList texts = QEresult.capturedTexts();
             if ( texts.size() > 0 ) {
                outFileLeft = texts.front().trimmed();
             }
@@ -251,7 +252,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN1 ) {
-         if ( reSep.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reSep.match( textline );
+         if ( QEresult.hasMatch() ) {
             f1n2 = l;
             f2n1 = l + 1;
             inConflict = IN2;
@@ -261,7 +263,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN2 ) {
-         if ( reEnd.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reEnd.match( textline );
+         if ( QEresult.hasMatch() ) {
             f2n2 = l;
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;
@@ -271,7 +274,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                             << fsize1 << " " << fsize2 );
             if ( fsize1 == 0 && fsize2 == 0 ) {
                errors << "Warning: empty change at line " << (f1n1 - 1)
-                      << " in file with conflicts." << endl;
+                      << " in file with conflicts." << Qt::endl;
             }
             if ( fsize1 == 0 ) {
                createInsertRightBlock( f2n1, fsize2 );
@@ -289,7 +292,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            QStringList texts = reEnd.capturedTexts();
+            QStringList texts = QEresult.capturedTexts();
             if ( texts.size() > 0 ) {
                outFileRight = texts.front().trimmed();
             }
@@ -309,7 +312,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
       /*--_curHunk; // Extend current hunk.*/ // (it works anyway)
       createInsertLeftBlock( f1n1, nbLines + 1 - f1n1 );
       errors << "Warning: file ends inside change at line " << (f1n1 - 1)
-             << endl;
+             << Qt::endl;
    }
    else if ( inConflict == IN2 ) {
       int fsize1 = f1n2 - f1n1;
@@ -327,26 +330,26 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          createChangeBlock( f1n1, f2n1, fsize1, fsize2 );
       }
       errors << "Warning: file ends inside change at line " << (f1n1 - 1)
-             << endl;
+             << Qt::endl;
    }
 
    XX_LOCAL_TRACE( "DONE" );
 
    // Saved error text.
-   errors << flush;
+   errors << Qt::flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    XX_LOCAL_TRACE( "Left: " << outFileLeft );
    XX_LOCAL_TRACE( "Right: " << outFileRight );
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    
    return ap;
 }
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
+std::unique_ptr<XxDiffs> XxBuilderUnmerge::process(
    const XxBuffer&    buffer,
    const XxResources& resources,
    QString&           outFileLeft,
@@ -356,7 +359,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 {
    initLines();
 
-   // Note: starting from qt-3, QRegExp will have group matching, so we could
+   // Note: starting from qt-3, QRegularExpression will have group matching, so we could
    // have the tags specified using reg.exps instead of strings.
 
    enum InConflict { OUTSIDE = 0, IN1 = 1, IN2 = 2, IN3 = 3 };
@@ -372,32 +375,32 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    XxFln f3n2 = -1;
    f1n1 = 1;
 
-   QRegExp reStart = QRegExp( resources.getTag( TAG_UNMERGE_START ) );
-   QRegExp reSep1 = QRegExp( resources.getTag( TAG_UNMERGE_SEP_EXTRA ) );
-   QRegExp reSep2 = QRegExp( resources.getTag( TAG_UNMERGE_SEP ) );
-   QRegExp reEnd = QRegExp( resources.getTag( TAG_UNMERGE_END ) );
+   QRegularExpression reStart = QRegularExpression( resources.getTag( TAG_UNMERGE_START ) );
+   QRegularExpression reSep1 = QRegularExpression( resources.getTag( TAG_UNMERGE_SEP_EXTRA ) );
+   QRegularExpression reSep2 = QRegularExpression( resources.getTag( TAG_UNMERGE_SEP ) );
+   QRegularExpression reEnd = QRegularExpression( resources.getTag( TAG_UNMERGE_END ) );
    if ( !reStart.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << endl;
+      oss << "TAG_UNMERGE_START is invalid: " << reStart.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reSep1.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_SEP_EXTRA is invalid: " << reSep1.pattern() << endl;
+      oss << "TAG_UNMERGE_SEP_EXTRA is invalid: " << reSep1.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reSep2.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_SEP is invalid: " << reSep2.pattern() << endl;
+      oss << "TAG_UNMERGE_SEP is invalid: " << reSep2.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
    if ( !reEnd.isValid() ) {
       QString str;
       QTextStream oss( &str );
-      oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << endl;
+      oss << "TAG_UNMERGE_END is invalid: " << reEnd.pattern() << Qt::endl;
       throw XxError( XX_EXC_PARAMS, str );
    }
 
@@ -419,7 +422,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                       l << " textline = " << textline );
 
       if ( inConflict == OUTSIDE ) {
-         if ( reStart.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reStart.match( textline );
+         if ( QEresult.hasMatch() ) {
             XX_LOCAL_TRACE( "f1n1, l - f1n1 " << f1n1 << " " << l - f1n1 );
             XX_CHECK( l - f1n1 >= 0 );
             createIgnoreBlock( f1n1, f1n1, f1n1, l - f1n1 );
@@ -428,7 +432,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            QStringList texts = reStart.capturedTexts();
+            QStringList texts = QEresult.capturedTexts();
             if ( texts.size() > 0 ) {
                fileFirst = texts.front().trimmed();
             }
@@ -438,19 +442,20 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN1 ) {
-         if ( reSep1.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reSep1.match( textline );
+         if ( QEresult.hasMatch() ) {
             f1n2 = l;
             f2n1 = l + 1;
             inConflict = IN2;
 
             // Grab string after tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            QStringList texts = reSep1.capturedTexts();
+            QStringList texts = QEresult.capturedTexts();
             if ( texts.size() > 0 ) {
                outFileMiddle = texts.front().trimmed();
             }
          }
-         else if ( reSep2.indexIn( textline ) != -1 ) {
+         else if ( reSep2.match( textline ).hasMatch() ) {
             f1n2 = l;
             f3n1 = l + 1;
             inConflict = IN3;
@@ -460,7 +465,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN2 ) {
-         if ( reSep2.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reSep2.match( textline );
+         if ( QEresult.hasMatch() ) {
             f2n2 = l;
             f3n1 = l + 1;
             inConflict = IN3;
@@ -470,7 +476,8 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
          }
       }
       else if ( inConflict == IN3 ) {
-         if ( reEnd.indexIn( textline ) != -1 ) {
+         QRegularExpressionMatch QEresult = reEnd.match( textline );
+         if ( QEresult.hasMatch() ) {
             f3n2 = l;
             int fsize1 = f1n2 - f1n1;
             int fsize2 = f2n2 - f2n1;
@@ -482,7 +489,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
                             << f3n1 << " " << f3n2 );
             if ( fsize1 == 0 && fsize2 == 0 && fsize3 == 0 ) {
                errors << "Warning: empty change at line " << (f1n1 - 1)
-                      << " in file with conflicts." << endl;
+                      << " in file with conflicts." << Qt::endl;
             }
             else if ( f2n1 == -1 ) {
                //
@@ -571,7 +578,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
 
             // Grab string after opening tag, if present.
             // Note that we only take the first such tag to appear in the file.
-            QStringList texts = reEnd.capturedTexts();
+            QStringList texts = QEresult.capturedTexts();
             if ( texts.size() > 0 ) {
                outFileRight = texts.front().trimmed();
             }
@@ -588,7 +595,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
       createIgnoreBlock( f1n1 - 1, f1n1 - 1, f1n1 - 1, nbLines + 1 - (f1n1-1) );
 
       errors << "Warning: file ends inside change at line " << (f1n1 - 1)
-             << endl;
+             << Qt::endl;
    }
    else if ( f1n1 <= nbLines ) {
       // Add final ignore region if present.
@@ -598,7 +605,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    XX_LOCAL_TRACE( "DONE" );
 
    // Saved error text.
-   errors << flush;
+   errors << Qt::flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    XX_LOCAL_TRACE( "Left: " << outFileLeft );
@@ -608,7 +615,7 @@ std::auto_ptr<XxDiffs> XxBuilderUnmerge::process(
    outFileLeft = outFileLeft;
    outFileMiddle = outFileMiddle;
    outFileRight = outFileRight;
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, false, false ) );
    return ap;
 }
 

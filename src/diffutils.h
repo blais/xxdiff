@@ -41,7 +41,7 @@
  *============================================================================*/
 
 class QTextStream;
-class QStringList;
+// class QStringList;
 
 XX_NAMESPACE_BEGIN
 

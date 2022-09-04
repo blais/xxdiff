@@ -145,7 +145,7 @@ XxColoredItem::XxColoredItem( XxColor color )
 {
    (void)_resources; // suppress "unused" warning
    XxColoredItemData data( color, XxResParser::getColorName( color ) );
-   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+   setData( Qt::DisplayRole, QVariant::fromValue( data ) );
 }
 
 //------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ void XxColoredItem::setForeColor( const QColor& color)
 {
    XxColoredItemData data = qvariant_cast<XxColoredItemData>( this->data( Qt::DisplayRole ) );
    data._foreColor = color;
-   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+   setData( Qt::DisplayRole, QVariant::fromValue( data ) );
 }
 
 //------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ void XxColoredItem::setBackColor( const QColor& color)
 {
    XxColoredItemData data = qvariant_cast<XxColoredItemData>( this->data( Qt::DisplayRole ) );
    data._backColor = color;
-   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+   setData( Qt::DisplayRole, QVariant::fromValue( data ) );
 }
 
 //------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ void XxColoredItem::setModified( const bool modified )
 {
    XxColoredItemData data = qvariant_cast<XxColoredItemData>( this->data( Qt::DisplayRole ) );
    data._modified = modified;
-   setData( Qt::DisplayRole, qVariantFromValue( data ) );
+   setData( Qt::DisplayRole, QVariant::fromValue( data ) );
 }
 
 /*==============================================================================

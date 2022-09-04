@@ -348,7 +348,7 @@ void XxScrollView::wheelEvent( QWheelEvent* e )
 #endif
       // Interactive font resize feature with mouse wheel.
       if ( !accidentalModifier ) {
-         if ( e->delta() > 0 ) {
+         if ( e->angleDelta().y() > 0 ) {
             _app->fontSizeDecrease();
          }
          else {
