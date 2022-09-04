@@ -2,7 +2,7 @@
 # findgrepsed:
 
         # Create a temporary file to contain the merged results.
-        tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf2 = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
         # Call xxdiff on it.
         status, xxdiff_output = commands.getstatusoutput(
@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 # condreplace:
 
-        tmpf2 = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf2 = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
             cmd = ('%s --decision --merged-filename "%s" ' + \
                    '--title2 "NEW FILE" "%s" "%s" ') % \
@@ -35,7 +35,7 @@
 #-------------------------------------------------------------------------------
 # cvsdiff:
 
-            tmpf2 = NamedTemporaryFile('w', prefix=tmpprefix)
+            tmpf2 = NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
             cmd = ('xxdiff --decision --merged-filename "%s" ' +
                    '--title2 "NEW FILE" "%s" "%s" ') % \
@@ -100,7 +100,7 @@
 #-------------------------------------------------------------------------------
 # diffproxy:
 
-    tmpf = NamedTemporaryFile('rw', prefix=tmpprefix)
+    tmpf = NamedTemporaryFile(mode='w+', prefix=tmpprefix)
 
     # run command
     xxdiff_path = 'xxdiff'

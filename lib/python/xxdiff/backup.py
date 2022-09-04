@@ -135,7 +135,7 @@ def print_reminder(opts):
     # Print reminder of location of backup files at the end (for convenience).
     if opts.backup_dir:
         print()
-        print("Backup files in: '%s'" % opts.backup_dir)
+        print(("Backup files in: '%s'" % opts.backup_dir))
         print()
 
 
@@ -149,8 +149,8 @@ def test():
 
     options_validate(opts, parser, logs=sys.stdout)
 
-    print('Dir:', opts.backup_dir)
-    print('Type:', opts.backup_type)
+    print(('Dir:', opts.backup_dir))
+    print(('Type:', opts.backup_type))
 
     backup_file('/home/blais/.emacs', opts, sys.stdout)
 

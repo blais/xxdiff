@@ -19,7 +19,7 @@ def consepairs(seq):
     Iterate over consecutive pairs.
     """
     it = iter(seq)
-    prev = it.next()
+    prev = next(it)
     for el in it:
         yield prev, el
         prev = el
@@ -64,7 +64,7 @@ def istextfile(fn):
     # Unfortunately 'file' does not return an appropriate return code when there
     # is an error.  On top of that, it returns its errors on stdout.  We need to
     # parse the output.
-    p = Popen(guesscmd + [fn], stdout=PIPE, stderr=PIPE)
+    p = Popen(guesscmd + [fn], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0 or stderr or stdout.startswith('cannot open'):
         raise RuntimeError("Error: running 'file' on '%s'." % fn)

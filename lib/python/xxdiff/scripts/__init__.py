@@ -56,7 +56,7 @@ def passthruopts(argv):
         i = argv.index('--endopts')
         opts, args = argv[1:i], argv[i+1:]
     except ValueError:
-        for i in xrange(len(argv)-1, -1, -1):
+        for i in range(len(argv)-1, -1, -1):
             if argv[i].startswith('-'):
                 break
         opts, args = argv[1:i+1], argv[i+1:]

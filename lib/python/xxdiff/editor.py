@@ -49,7 +49,7 @@ def spawn_editor(initcontents=None, filename=None):
         else:
             tmpf = open(filename, 'w')
     else:
-        tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
         filename = tmpf.name
         
     # Initialize the contents of the file if requested.
@@ -80,7 +80,7 @@ def spawn_editor(initcontents=None, filename=None):
         cmd = def_editor
         cmd[-1] %= filename
 
-    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE, text=True)
     
     def waiter():
         "Waiter closure."

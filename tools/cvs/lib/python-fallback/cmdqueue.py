@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************\
 #* $Source$
 #* $Id$
@@ -162,7 +162,7 @@ class SyncFakeQueue:
 
 def selftest():
     """Self-test."""
-    print "Performing tests."
+    print("Performing tests.")
 
     queue = CmdQueue(2)
     queue.queue('xxdiff /users/blais/xxdiff/src/mine /users/blais/xxdiff/src/older')

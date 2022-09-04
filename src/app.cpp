@@ -1125,9 +1125,9 @@ void XxApp::createOnContextHelp()
 void XxApp::createMenus()
 {
     QkMenuBar* menubar = _mainWindow->menuBar();
-    
+
    //---------------------------------------------------------------------------
-    
+
    // File menu
    QkMenu* fileMenu = menubar->addMenu( "&File" );
    fileMenu->addAction(
@@ -1251,10 +1251,15 @@ void XxApp::createMenus()
       //  using setMenuRole( QAction::ApplicationSpecificRole ), or our item can even
       // be kept out of the application menu with QAction::NoRole, but anyway, there
       // will be a standard Quit item in the application menu with Ctrl-Q.
-      fileMenu->addAction(
-         "Exit", this, SLOT(quit()),
-         _resources->getAccelerator( ACCEL_EXIT )
-      );
+
+      // NOTE(blais/2021-11-03): See https://github.com/blais/xxdiff/issues/22
+      // for why this was modified to use the triggered() signal from the
+      // action. I haven't investigated why.
+      QAction* quitAction = new QAction( this );
+      fileMenu->addAction( quitAction );
+      quitAction->setText( tr( "Exit" ) );
+      quitAction->setShortcut( _resources->getAccelerator( ACCEL_EXIT ) );
+      connect( quitAction, SIGNAL( triggered() ), this, SLOT( quit() ) );
    }
    else {
 
@@ -1591,7 +1596,7 @@ void XxApp::createMenus()
    //---------------------------------------------------------------------------
 
    if ( _filesAreDirectories == false ) {
-   
+
       // Global menu
       QkMenu* globalMenu = menubar->addMenu( "&Global" );
       globalMenu->addAction(
@@ -1742,7 +1747,7 @@ void XxApp::createMenus()
          "Unselect", this, SLOT(selectLineUnselect()),
          _resources->getAccelerator( ACCEL_SELECT_LINE_UNSELECT)
       );
-      
+
   } //  _filesAreDirectories == false
 
    //---------------------------------------------------------------------------
@@ -1767,19 +1772,19 @@ void XxApp::createMenus()
             _resources->getAccelerator( ACCEL_IGNORE_TRAILING )
          );
          _menuactions[ ID_ToggleIgnoreTrailing ]->setCheckable( true );
-         
+
          _menuactions[ ID_ToggleIgnoreWhitespace ] = _optionsMenu->addAction(
             "Ignore whitespace", this, SLOT(ignoreWhitespace()),
             _resources->getAccelerator( ACCEL_IGNORE_WHITESPACE )
          );
          _menuactions[ ID_ToggleIgnoreWhitespace ]->setCheckable( true );
-         
+
          _menuactions[ ID_ToggleIgnoreCase ] = _optionsMenu->addAction(
             "Ignore case", this, SLOT(ignoreCase()),
             _resources->getAccelerator( ACCEL_IGNORE_CASE )
          );
          _menuactions[ ID_ToggleIgnoreCase ]->setCheckable( true );
-         
+
          _menuactions[ ID_ToggleIgnoreBlankLines ] = _optionsMenu->addAction(
             "Ignore blank lines", this, SLOT(ignoreBlankLines()),
             _resources->getAccelerator( ACCEL_IGNORE_BLANK_LINES )
@@ -1793,13 +1798,13 @@ void XxApp::createMenus()
             _resources->getAccelerator( ACCEL_QUALITY_NORMAL )
          );
          _menuactions[ ID_ToggleQualityNormal ]->setCheckable( true );
-         
+
          _menuactions[ ID_ToggleQualityFastest ] = _optionsMenu->addAction(
             "Quality: fastest", this, SLOT(qualityFastest()),
             _resources->getAccelerator( ACCEL_QUALITY_FASTEST )
          );
          _menuactions[ ID_ToggleQualityFastest ]->setCheckable( true );
-         
+
          _menuactions[ ID_ToggleQualityHighest ] = _optionsMenu->addAction(
             "Quality: highest", this, SLOT(qualityHighest()),
             _resources->getAccelerator( ACCEL_QUALITY_HIGHEST )
@@ -1896,7 +1901,7 @@ void XxApp::createMenus()
    }
 
    _displayMenu->addSeparator();
-   
+
    _menuactions[ ID_ToggleFormatClipboardText ] = _displayMenu->addAction(
       "Format clipboard text", this,
       SLOT(toggleFormatClipboardText()),
@@ -1915,13 +1920,13 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_TABS_AT_3 )
       );
       _menuactions[ ID_TabsAtThree ]->setCheckable( true );
-      
+
       _menuactions[ ID_TabsAtFour ] = _displayMenu->addAction(
          "Tabs at 4", this, SLOT(tabsAt4()),
          _resources->getAccelerator( ACCEL_TABS_AT_4 )
       );
       _menuactions[ ID_TabsAtFour ]->setCheckable( true );
-      
+
       _menuactions[ ID_TabsAtEight ] = _displayMenu->addAction(
          "Tabs at 8", this, SLOT(tabsAt8()),
          _resources->getAccelerator( ACCEL_TABS_AT_8 )
@@ -1945,19 +1950,19 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_IGNORE_FILE_NONE )
       );
       _menuactions[ ID_IgnoreFileNone ]->setCheckable( true );
-      
+
       _menuactions[ ID_IgnoreFileLeft ] = _displayMenu->addAction(
          "Ignore left file", this, SLOT(ignoreFileLeft()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_LEFT )
       );
       _menuactions[ ID_IgnoreFileLeft ]->setCheckable( true );
-      
+
       _menuactions[ ID_IgnoreFileMiddle ] = _displayMenu->addAction(
          "Ignore middle file", this, SLOT(ignoreFileMiddle()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_MIDDLE )
       );
       _menuactions[ ID_IgnoreFileMiddle ]->setCheckable( true );
-      
+
       _menuactions[ ID_IgnoreFileRight ] = _displayMenu->addAction(
          "Ignore right file", this, SLOT(ignoreFileRight()),
          _resources->getAccelerator( ACCEL_IGNORE_FILE_RIGHT )
@@ -1975,13 +1980,13 @@ void XxApp::createMenus()
          _resources->getAccelerator( ACCEL_TOGGLE_PANE_MERGED_VIEW )
       );
       _menuactions[ ID_TogglePaneMergedView ]->setCheckable( true );
-      
+
       _menuactions[ ID_TogglePopupMergedView ] = _windowsMenu->addAction(
          "Toggle popup merged view", this, SLOT(togglePopupMergedView()),
          _resources->getAccelerator( ACCEL_TOGGLE_POPUP_MERGED_VIEW )
       );
       _menuactions[ ID_TogglePopupMergedView ]->setCheckable( true );
-      
+
       _windowsMenu->addSeparator();
    }
    _menuactions[ ID_ToggleToolbar ] = _windowsMenu->addAction(
@@ -1990,13 +1995,13 @@ void XxApp::createMenus()
       _resources->getAccelerator( ACCEL_TOGGLE_TOOLBAR )
    );
    _menuactions[ ID_ToggleToolbar ]->setCheckable( true );
-   
+
    _menuactions[ ID_ToggleOverview ] = _windowsMenu->addAction(
       "Toggle overview", this, SLOT(toggleOverview()),
       _resources->getAccelerator( ACCEL_TOGGLE_OVERVIEW )
    );
    _menuactions[ ID_ToggleOverview ]->setCheckable( true );
-   
+
    _menuactions[ ID_ToggleShowFilenames ] = _windowsMenu->addAction(
       "Toggle show filename", this, SLOT(toggleShowFilenames()),
       _resources->getAccelerator( ACCEL_TOGGLE_SHOW_FILENAMES )
@@ -2728,7 +2733,7 @@ void XxApp::editFile( const QString& filename, const int bufIdx )
          _mainWindow, "Error.", text, QMessageBox::Warning
       );
    }
-   
+
 }
 
 //------------------------------------------------------------------------------
@@ -3290,7 +3295,7 @@ void XxApp::saveOptions()
    }
 #else
    f = QkFileDialog::getSaveFileName(
-      _mainWindow, QString(), QString( getenv("HOME") ) + QString( "/.xxdiffrc" ) 
+      _mainWindow, QString(), QString( getenv("HOME") ) + QString( "/.xxdiffrc" )
    );
 #endif
    if ( f.isEmpty() ) {
@@ -4419,25 +4424,25 @@ void XxApp::synchronizeUI()
             (_nbFiles == 2) ? CMD_DIFF_FILES_2 : CMD_DIFF_FILES_3;
          // Note: useless, this is only valid for two-way file diffs.
 
-         _menuactions[ ID_ToggleIgnoreTrailing ]->setChecked( 
+         _menuactions[ ID_ToggleIgnoreTrailing ]->setChecked(
             _resources->isCommandSwitch(
                cmdResId,
                CMDSW_FILES_IGNORE_TRAILING
             )
          );
-         _menuactions[ ID_ToggleIgnoreWhitespace ]->setChecked( 
+         _menuactions[ ID_ToggleIgnoreWhitespace ]->setChecked(
             _resources->isCommandSwitch(
                cmdResId,
                CMDSW_FILES_IGNORE_WHITESPACE
             )
          );
-         _menuactions[ ID_ToggleIgnoreCase ]->setChecked( 
+         _menuactions[ ID_ToggleIgnoreCase ]->setChecked(
             _resources->isCommandSwitch(
                cmdResId,
                CMDSW_FILES_IGNORE_CASE
             )
          );
-         _menuactions[ ID_ToggleIgnoreBlankLines ]->setChecked( 
+         _menuactions[ ID_ToggleIgnoreBlankLines ]->setChecked(
             _resources->isCommandSwitch(
                cmdResId,
                CMDSW_FILES_IGNORE_BLANK_LINES
@@ -4447,19 +4452,19 @@ void XxApp::synchronizeUI()
          QString cmd = _resources->getCommand( cmdResId );
          XxQuality quality = _resources->getQuality( cmd );
 
-         _menuactions[ ID_ToggleQualityNormal ]->setChecked( 
+         _menuactions[ ID_ToggleQualityNormal ]->setChecked(
             quality == QUALITY_NORMAL
          );
-         _menuactions[ ID_ToggleQualityFastest ]->setChecked( 
+         _menuactions[ ID_ToggleQualityFastest ]->setChecked(
             quality == QUALITY_FASTEST
          );
-         _menuactions[ ID_ToggleQualityHighest ]->setChecked( 
+         _menuactions[ ID_ToggleQualityHighest ]->setChecked(
             quality == QUALITY_HIGHEST
          );
       }
    }
    else {
-      _menuactions[ ID_ToggleDirDiffsRecursive ]->setChecked( 
+      _menuactions[ ID_ToggleDirDiffsRecursive ]->setChecked(
          _resources->getBoolOpt( BOOL_DIRDIFF_RECURSIVE )
       );
    }
@@ -4471,36 +4476,36 @@ void XxApp::synchronizeUI()
          _menuactions[ ID_Hordiff_None ]->setChecked(
             _resources->getHordiffType() == HD_NONE
          );
-         _menuactions[ ID_Hordiff_Single ]->setChecked( 
+         _menuactions[ ID_Hordiff_Single ]->setChecked(
             _resources->getHordiffType() == HD_SINGLE
          );
-         _menuactions[ ID_Hordiff_Multiple ]->setChecked( 
+         _menuactions[ ID_Hordiff_Multiple ]->setChecked(
             _resources->getHordiffType() == HD_MULTIPLE
          );
       }
-      _menuactions[ ID_ToggleIgnoreHorizontalWs ]->setChecked( 
+      _menuactions[ ID_ToggleIgnoreHorizontalWs ]->setChecked(
          _resources->getBoolOpt( BOOL_IGNORE_HORIZONTAL_WS )
       );
-      _menuactions[ ID_ToggleIgnorePerHunkWs ]->setChecked( 
+      _menuactions[ ID_ToggleIgnorePerHunkWs ]->setChecked(
          _resources->getBoolOpt( BOOL_IGNORE_PERHUNK_WS )
       );
-      _menuactions[ ID_ToggleHideCarriageReturns ]->setChecked( 
+      _menuactions[ ID_ToggleHideCarriageReturns ]->setChecked(
          _resources->getBoolOpt( BOOL_HIDE_CR )
       );
-      _menuactions[ ID_ToggleVerticalLine ]->setChecked( 
+      _menuactions[ ID_ToggleVerticalLine ]->setChecked(
          _resources->getShowOpt( SHOW_VERTICAL_LINE )
       );
-      _menuactions[ ID_ToggleHorizNullMarkers ]->setChecked( 
+      _menuactions[ ID_ToggleHorizNullMarkers ]->setChecked(
          _resources->getBoolOpt( BOOL_NULL_HORIZONTAL_MARKERS )
       );
    }
    else {
-      _menuactions[ ID_ToggleDirDiffsIgnoreFileChanges ]->setChecked( 
+      _menuactions[ ID_ToggleDirDiffsIgnoreFileChanges ]->setChecked(
          _resources->getBoolOpt( BOOL_DIRDIFF_IGNORE_FILE_CHANGES )
       );
    }
 
-   _menuactions[ ID_ToggleFormatClipboardText ]->setChecked( 
+   _menuactions[ ID_ToggleFormatClipboardText ]->setChecked(
       _resources->getBoolOpt( BOOL_FORMAT_CLIPBOARD_TEXT )
    );
 
@@ -4512,7 +4517,7 @@ void XxApp::synchronizeUI()
       _menuactions[ ID_TabsAtEight ]->setChecked( tabWidth == 8 );
    }
 
-   _menuactions[ ID_ToggleLineNumbers ]->setChecked( 
+   _menuactions[ ID_ToggleLineNumbers ]->setChecked(
       _resources->getShowOpt( SHOW_LINE_NUMBERS )
    );
 
@@ -4528,20 +4533,20 @@ void XxApp::synchronizeUI()
    //---------------------------------------------------------------------------
 
    if ( _filesAreDirectories == false ) {
-      _menuactions[ ID_TogglePaneMergedView ]->setChecked( 
+      _menuactions[ ID_TogglePaneMergedView ]->setChecked(
          ( _paneMergedView != 0 && _paneMergedView->isVisible() )
       );
-      _menuactions[ ID_TogglePopupMergedView ]->setChecked( 
+      _menuactions[ ID_TogglePopupMergedView ]->setChecked(
          ( _popupMergedView != 0 && _popupMergedView->isVisible() )
       );
   }
-   _menuactions[ ID_ToggleToolbar ]->setChecked( 
+   _menuactions[ ID_ToggleToolbar ]->setChecked(
       _resources->getShowOpt( SHOW_TOOLBAR )
    );
-   _menuactions[ ID_ToggleOverview ]->setChecked( 
+   _menuactions[ ID_ToggleOverview ]->setChecked(
       _resources->getShowOpt( SHOW_OVERVIEW )
    );
-   _menuactions[ ID_ToggleShowFilenames ]->setChecked( 
+   _menuactions[ ID_ToggleShowFilenames ]->setChecked(
       _resources->getShowOpt( SHOW_FILENAMES )
    );
 }

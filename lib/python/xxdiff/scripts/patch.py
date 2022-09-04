@@ -57,7 +57,7 @@ Examples
 
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'diffutils']
@@ -170,7 +170,7 @@ def patch_main():
         cin.close()
 
         # read output from patch.
-        print9cout.read())
+        print(cout.read())
         if cout.close() != None:
             print("Error: running patch.", file=sys.stderr)
 

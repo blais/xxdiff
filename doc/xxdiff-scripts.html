@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <title>Helper Scripts for xxdiff</title>
 <meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
 <meta name="date" content="2006-03-30" />
@@ -12,8 +12,7 @@
 <body>
 
 <div id="project-header">
-  <a href="http://furius.ca/"><img src="http://furius.ca/home/furius-logo-w.png" id="logo"></a>
-  <div id="project-home"><a href="http://furius.ca/xxdiff">Project Home</a></div>
+  <a href="/home/index.html"><img src="/home/furius-logo-w.png" id="logo"></a>
 </div>
 
 <div class="document" id="helper-scripts-for-xxdiff">
@@ -29,13 +28,13 @@
 </tbody>
 </table>
 <div class="abstract topic">
-<p class="topic-title first">Abstract</p>
+<p class="topic-title">Abstract</p>
 <p>A description of the Python scripts and infrastructure that is provided around
 xxdiff, to facilitate implementing processes requiring display and selection
 of differences.</p>
 </div>
 <div class="contents topic" id="contents">
-<p class="topic-title first">Contents</p>
+<p class="topic-title">Contents</p>
 <ul class="auto-toc simple">
 <li><a class="reference internal" href="#introduction" id="id6">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
 <li><a class="reference internal" href="#history" id="id7">1.1&nbsp;&nbsp;&nbsp;History</a></li>
@@ -299,7 +298,7 @@ find . -name '*.txt' | while read i ; do
       cat $i | tr -s \\n | xx-cond-replace - $i ;
    done
 </pre>
-<div class="important">
+<div class="admonition important">
 <p class="first admonition-title">Important</p>
 <p>Note that for this program the backups are not enabled by default.  Since
 every invocation is separate, if the backups were on by default a unique
@@ -328,7 +327,7 @@ process embodies common patterns for selecting files.</p>
 <pre class="literal-block">
 xx-rename -I \.svn --select='.*.htm$' --select='.*.html$' ...
 </pre>
-<div class="note">
+<div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The <em>ignore</em> patterns works on directories, but the <em>select</em> patterns
 do not.</p>
@@ -585,7 +584,7 @@ following lines to your <tt class="docutils literal"><span class="pre">~/.subver
 diff-cmd = xx-diff-proxy
 diff3-cmd = xx-diff-proxy
 </pre>
-<div class="important">
+<div class="admonition important">
 <p class="first admonition-title">Important</p>
 <p class="last">Note: there have been reports of bugs in certain cases.  I still
 need to investigate in which cases it breaks down because I have

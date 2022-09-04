@@ -22,6 +22,7 @@ __depends__ = ['xxdiff', 'Python-2.4']
 
 # stdlib imports.
 import sys, os, re
+import logging
 from os.path import *
 
 # xxdiff imports.
@@ -67,8 +68,9 @@ class RenameTransformer(xxdiff.xformloop.Transformer):
         try:
             inf = open(fn, 'r')
             text = inf.read()
-        except IOError as e:
-            raise SystemExit("Error: Could not read file '%s':\n  %s" % (fn, e))
+        except (IOError, UnicodeDecodeError) as e:
+            logging.info("Error: Could not read file '%s':\n  %s", (fn, e))
+            return False
 
         # Replace the string or regexp.
         nbrepl = 0

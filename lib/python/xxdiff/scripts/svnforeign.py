@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # This file is part of the xxdiff package.  See xxdiff for license and details.
 
 # If this file is found independently as svn-foreign, here are the licensing
@@ -66,7 +66,7 @@ to resolve it and delete the temporary files.
 # -------
 # * To Sean Reifschneider (Jafo) for providing example code for raw tty input
 
-from __future__ import print_function
+
 
 __version__ = '$Revision$'
 __author__ = 'Martin Blais <blais@furius.ca>'
@@ -139,7 +139,7 @@ def ignore_prop(dn, ignores):
     """
     Set svn:ignore on directory 'dn'.
     """
-    f = tempfile.NamedTemporaryFile('w')
+    f = tempfile.NamedTemporaryFile(mode='w')
     f.write(ignores)
     f.flush()
     call(['svn', 'propset', 'svn:ignore', '-F', f.name, dn])
@@ -230,7 +230,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
         raise RuntimeError(
             "Internal Error: You are missing a 'verbose' option.")
 
-    ignore = map(abspath, ignore)
+    ignore = list(map(abspath, ignore))
 
     # If there are multiple args--such as *--filter out the non svn directories.
     dirs, files = filter2(isdir, filenames)
@@ -246,7 +246,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
     cmd = ['svn', 'status'] + filenames
     if debug:
         write(' '.join(cmd))
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, text=True)
     out, err = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: %s" % err)
@@ -307,7 +307,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
         if line[0] in '?~':
             fn = line[8:]
-            if filter(lambda x: x[1](fn), conflicts):
+            if [x for x in conflicts if x[1](fn)]:
                 continue
             if abspath(fn) in ignore:
                 continue
@@ -361,7 +361,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                     # Get the properties first
                     p = Popen(['svn', 'propget', 'svn:ignore', dn],
-                              stdout=PIPE, stderr=PIPE)
+                              stdout=PIPE, stderr=PIPE, text=True)
                     svnign, err = p.communicate()
                     if p.returncode != 0:
                         raise SystemExit(err)
@@ -376,7 +376,7 @@ def query_unregistered_svn_files(filenames, opts, output=sys.stdout,
 
                     write("Add pattern (! to cancel, * to edit, default: [%s]):"
                           % bn)
-                    pat = raw_input()
+                    pat = input()
                     if pat == '':
                         pat = bn
 
@@ -486,5 +486,5 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print
+        print()
         sys.exit(1)

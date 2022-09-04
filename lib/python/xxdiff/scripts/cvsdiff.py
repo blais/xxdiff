@@ -21,7 +21,7 @@ For more generic behaviour about merging patches graphically, see also
 xx-patch.  The current script is really about committing "some" cvs changes.
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'cvs', 'diffutils']
@@ -65,8 +65,8 @@ def cvsdiff_main():
 
     # run cvs diff and read its output.
 
-    cmd = 'cvs diff -u ' + ' '.join(map(lambda x: '"%s"' % x, args))
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+    cmd = 'cvs diff -u ' + ' '.join(['"%s"' % x for x in args])
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0 and not stdout:
         raise SystemExit("Error: running cvs command (%s): %s" %

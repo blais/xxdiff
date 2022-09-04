@@ -13,7 +13,7 @@ xxdiff.db.* module rather than writing a dedicated script.  (I'm very flexible
 about adding new features to this script.)
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'PostgreSQL']
@@ -74,7 +74,7 @@ def sqlcompare_main():
                          for name, type, contents in dump_entries)
 
     # List all objects that were found.
-    for key in sorted(set(db1.objmap.keys() + db2.objmap.keys())):
+    for key in sorted(set(list(db1.objmap.keys()) + list(db2.objmap.keys()))):
         print(key)
 
     # Render comparable files.

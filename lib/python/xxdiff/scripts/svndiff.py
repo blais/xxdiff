@@ -6,7 +6,7 @@ Script that invokes xxdiff for all modified files in the given Subversion
 checkout area. Optionally replace the output file by decision mode.
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']
@@ -63,12 +63,12 @@ def review_file(sobj, opts):
                 # Get the source filename from the history.
                 info = subversion.getinfo(sobj.filename)
                 from_url, from_rev = [info.get('Copied From %s' % x, None)
-                                      for x in 'URL', 'Rev']
+                                      for x in ['URL', 'Rev']]
 
                 tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
                 dopts.extend(title_opts('%s (%s)' % (from_url, from_rev)))
             else:
-                tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+                tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
                 dopts.extend(title_opts('(NON-EXISTING)'))
 
             left, right = tmpf.name, sobj.filename
@@ -76,7 +76,7 @@ def review_file(sobj, opts):
         # Diff deleted files
         elif sobj.status == 'D':
             tmpf = subversion.cat_revision_temp(sobj.filename, 'BASE')
-            tmpf_empty = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+            tmpf_empty = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
             dopts.extend(title_opts('%s (BASE)' % sobj.filename,
                                     '(DELETED)'))

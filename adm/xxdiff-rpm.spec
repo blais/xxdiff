@@ -4,8 +4,8 @@ Version: 3.2
 Release: 2
 License: GNU GPL
 Group: Development/Tools
-Source: http://prdownloads.sourceforge.net/xxdiff/xxdiff-%{version}.tar.bz2
-URL: http://furius.ca/xxdiff/
+Source: https://github.com/blais/xxdiff/archive/refs/heads/master.tar.gz
+URL: http://github.com/blais/xxdiff/
 Packager: Martin Blais <blais@furius.ca>
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: qt >= 3.2, python
@@ -29,7 +29,7 @@ tools for xxdiff
 %setup -q
 
 %build
-if [ -z "$QTDIR" ]; then 
+if [ -z "$QTDIR" ]; then
 	. /etc/profile.d/qt.sh
 fi
 
@@ -204,4 +204,3 @@ python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 * Tue May 29 2001 Martin Blais <blais@discreet.com> 1.11.0-1
 - 1.11.0
-

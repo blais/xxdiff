@@ -16,7 +16,7 @@ def main():
 
     fn, = args
     revs = []
-    for line in open(fn).xreadlines():
+    for line in open(fn):
         mo = re.match('^changeset:[ \t]+([0-9]+):', line)
         if not mo:
             continue
@@ -24,19 +24,19 @@ def main():
 
     files = set()
     for rev in revs:
-        p = Popen('hg diff -r %s' % rev, stdout=PIPE, shell=1)
+        p = Popen('hg diff -r %s' % rev, stdout=PIPE, shell=1, text=True)
         out, _ = p.communicate()
-        print
-        print
-        print rev
-        print
-        print out
+        print()
+        print()
+        print(rev)
+        print()
+        print(out)
         ## mo = re.search('files:(.*)\n', out)
         ## files |= set(mo.group(1).split())
         
-    print files
+    print(files)
     for fn in sorted(files):
-        print fn
+        print(fn)
 
 
 

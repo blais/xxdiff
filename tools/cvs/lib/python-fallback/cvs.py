@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************\
 #* $Source$
 #* $Id$
@@ -32,7 +32,7 @@ __author__ = "Martin Blais <blais@furius.ca>"
 
 import sys, os
 import string, re
-import commands
+import subprocess
 import fcntl, select
 
 from pprint import pprint, pformat
@@ -104,7 +104,7 @@ def run(command, chin_text=None, indir=None):
         command = '{ cd "' + indir + '" && ' + command + '; }'
 
     if trace_level >= 1:
-        print "== (cvs):", command
+        print("== (cvs):", command)
 
     (chin, chout, cherr) = os.popen3(command, 'r')
 
@@ -119,13 +119,13 @@ def run(command, chin_text=None, indir=None):
     if sts is None: sts = 0
 
     if trace_level >= 2:
-        print "cvs (stdout) ------------------------------"
+        print("cvs (stdout) ------------------------------")
         for l in output.split('\n'):
-            print "   o|", l
-        print "cvs (stderr) ------------------------------"
+            print("   o|", l)
+        print("cvs (stderr) ------------------------------")
         for l in error_output.split('\n'):
-            print "   e|", l
-        print "cvs ---------------------------------------"
+            print("   e|", l)
+        print("cvs ---------------------------------------")
 
     return sts, output, error_output
 
@@ -139,7 +139,7 @@ def delegate(command, indir=None):
         command = '{ cd "' + indir + '" && ' + command + '; }'
 
     if trace_level >= 1:
-        print "== (cvs):", command
+        print("== (cvs):", command)
 
     # This is the simplest way for now.
     return os.system(command)
@@ -246,9 +246,9 @@ def sortRevisionList(list):
     to/from ints for every comparison (O(n log(n))).
     """
 
-    nl = map(lambda x: map(int, x.split('.')), list)
+    nl = [list(map(int, x.split('.'))) for x in list]
     nl.sort()
-    return map(lambda x: string.join(map(repr, x), '.'), nl)
+    return [string.join(list(map(repr, x)), '.') for x in nl]
 
 #-------------------------------------------------------------------------------
 #
@@ -392,7 +392,7 @@ class MultipleOutputs:
             command = '{ cd "' + indir + '" && ' + command + '; }'
 
         if trace_level >= 1:
-            print "== (cvs):", command
+            print("== (cvs):", command)
 
         (chin, self.chout, self.cherr) = os.popen3(command, 'r')
         chin.close()
@@ -424,7 +424,7 @@ class MultipleOutputs:
         # Note: hoping there won't be too much that it'll block on stderr...
         # we could easily change this to read both pipes like below.
 
-    def next(self):
+    def __next__(self):
         """Returns the next status. Return None when done."""
 
         if self.outeof:
@@ -756,13 +756,13 @@ class Status:
         s += 'sticky tag = %s\n' % self.sticky_tag
 
         s += 'symbolic tags = \n'
-        keys = self.symbolic_tags.keys()
+        keys = list(self.symbolic_tags.keys())
         keys.sort()
         for k in keys:
             s += '   %s: %s\n' % (k, self.symbolic_tags[k])
 
         s += 'branch tags = \n'
-        keys = self.branch_tags.keys()
+        keys = list(self.branch_tags.keys())
         keys.sort()
         for k in keys:
             s += '   %s: %s\n' % (k, self.branch_tags[k])
@@ -777,7 +777,7 @@ class Status:
         elif rev_or_tag in self.symbolic_tags:
             return previousRev(self.symbolic_tags[rev_or_tag])
         elif rev_or_tag in self.branch_tags:
-            print rev_or_tag, self.branch_tags[rev_or_tag]
+            print(rev_or_tag, self.branch_tags[rev_or_tag])
             return previousRev(self.branch_tags[rev_or_tag])
         return None
 
@@ -1034,7 +1034,7 @@ class Log:
                 mo = RevInfo.revire.match(rlines[0])
                 if not mo: raise error
                 revinfo.rev = mo.group(1)
-                revinfo.fields = map(string.strip, rlines[1].split(';'))
+                revinfo.fields = list(map(string.strip, rlines[1].split(';')))
 
                 revisions[ revinfo.rev ] = revinfo
 
@@ -1081,13 +1081,13 @@ class Log:
         s += 'head revision = %s\n' % self.head_rev
 
         s += 'symbolic tags = \n'
-        keys = self.symbolic_tags.keys()
+        keys = list(self.symbolic_tags.keys())
         keys.sort()
         for k in keys:
             s += '   %s: %s\n' % (k, self.symbolic_tags[k])
 
         s += 'branch tags = \n'
-        keys = self.branch_tags.keys()
+        keys = list(self.branch_tags.keys())
         keys.sort()
         for k in keys:
             s += '   %s: %s\n' % (k, self.branch_tags[k])
@@ -1125,7 +1125,7 @@ cvsroot = getRoot(os.getcwd())
 
 def selftest():
     """Self-test."""
-    print "Performing tests."
+    print("Performing tests.")
     assert(not isBranchRev('1.2'))
     assert(isBranchRev('1.2.3'))
     assert(isBranchRev('1.2.0.2'))

@@ -57,6 +57,8 @@ encrypted or not:
 
 """
 
+
+
 __moredoc__ = """
 Safety Notes
 ------------
@@ -76,8 +78,6 @@ calculate the diffs internally.
 the diffs (e.g. modifying an unsuspecting user's resources in ~/.xxdiffrc), they
 could feed the decrypted files to an arbitrary program.)
 """
-
-from __future__ import print_function
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'GnuPG']
@@ -103,7 +103,7 @@ encodecmd = encodecmd_noarmor + '--armor '
 def get_recipient(text, gpg):
     """ Extract the recipient/key name from the given encrypted text, without
     saving any temporary file. """
-    p = Popen(('gpg', '--list-only'), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p = Popen(('gpg', '--list-only'), stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     out, err = p.communicate(text)
     mo = re.compile('.*public key is ([0-9A-F]+)', re.M).search(err)
     if mo:
@@ -120,7 +120,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
 
     # Create temporary files.
     tempfiles = []
-    for t in xrange(len(textlist)):
+    for t in range(len(textlist)):
         f = NamedTemporaryFile(prefix=tmpprefix)
         print('== TEMPFILE', f.name)
         tempfiles.append(f)
@@ -133,7 +133,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
     # sure, since it would contain decrypted content if saved.
 
     # Decode the files.
-    for i in xrange(len(textlist)):
+    for i in range(len(textlist)):
         t, f = textlist[i], tempfiles[i]
 
         # Decode one file to an existing temporary file.
@@ -148,7 +148,7 @@ def diff_encrypted(textlist, opts, outmerged=None):
 
     # Spawn xxdiff on the temporary/decoded files.
     waiter = xxdiff.invoke.xxdiff_decision(
-        opts, nowait=1, *map(lambda x: x.name, tempfiles))
+        opts, nowait=1, *[x.name for x in tempfiles])
 
     # Close and automatically delete the temporary/decoded files.
     for f in tempfiles:
@@ -241,7 +241,7 @@ def encrypted_main():
             print("Warning: there will be no output file, " +
                   "--dont-armor will means nothing special.", file=sys.stderr)
         if opts.recipient:
-            print(I"Warning: there will be no output file, " +
+            print("Warning: there will be no output file, " +
                   "--recipient will means nothing special.", file=sys.stderr)
 
     if opts.unmerge:

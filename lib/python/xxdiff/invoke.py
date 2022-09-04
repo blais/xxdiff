@@ -4,12 +4,12 @@
 Functions to invoke xxdiff in various ways.
 """
 
-from __future__ import print_function
+
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
 # stdlib imports.
-import os, optparse, tempfile, logging
+import os, optparse, tempfile, logging, io
 from os.path import *
 from subprocess import Popen, PIPE
 
@@ -62,11 +62,11 @@ def _run_xxdiff(cmd, opts, stdin):
 
     if stdin is not None:
         assert '-' in cmd
-    if isinstance(stdin, (str, unicode)):
+    if isinstance(stdin, str):
         # stdin is text.
         intype = PIPE
         intext = stdin
-    elif isinstance(stdin, file) or hasattr(stdin, 'read'):
+    elif isinstance(stdin, io.IOBase) or hasattr(stdin, 'read'):
         # stdin is an open pipe/file.
         intype = stdin
     else:
@@ -76,7 +76,8 @@ def _run_xxdiff(cmd, opts, stdin):
         p = Popen(cmd,
                   stdout=PIPE,
                   stderr=PIPE,
-                  stdin=intype)
+                  stdin=intype,
+                  text=True)
     except OSError as e:
         extramsg = ''
         if e.errno == 2:
@@ -129,7 +130,7 @@ def xxdiff_decision(opts, *arguments, **kwds):
 
     """
     # Create a temporary file to contain the output or merged results.
-    mergedf = tempfile.NamedTemporaryFile('rw', prefix=tmpprefix)
+    mergedf = tempfile.NamedTemporaryFile(mode='w+', prefix=tmpprefix)
 
     # Get the appropriate xxdiff executable and options.
     xexec = getattr(opts, 'xxdiff_exec', 'xxdiff')
@@ -293,8 +294,7 @@ def test():
     class Opts:
         xxdiff = 'xxdiff'
 
-    f1, f2, f3 = map(lambda x: join('/home/blais/p/xxdiff/test', x),
-                     ('mine', 'older', 'yours'))
+    f1, f2, f3 = [join('/home/blais/p/xxdiff/test', x) for x in ('mine', 'older', 'yours')]
 
     for t in args:
         if t == 'simple':
@@ -323,7 +323,7 @@ def test():
             print(xxdiff_display(Opts, f2, '-', stdin='Some text\n'))
 
         if t == 'pipe-cmd':
-            p = Popen('cat $HOME/.xxdiffrc', shell=True, stdout=PIPE)
+            p = Popen('cat $HOME/.xxdiffrc', shell=True, stdout=PIPE, text=True)
             print(xxdiff_display(Opts, '-', f2, stdin=p.stdout))
 
 if __name__ == '__main__':

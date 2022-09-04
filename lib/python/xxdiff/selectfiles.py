@@ -4,7 +4,7 @@
 Functions to select files within directories.
 """
 
-from __future__ import print_function
+
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
@@ -123,7 +123,7 @@ def options_validate(opts, parser, logs=None):
         if not opts.roots:
             opts.roots.append(os.getcwd())
         else:
-            missing = filter(lambda x: not exists(x), opts.roots)
+            missing = [x for x in opts.roots if not exists(x)]
             if missing:
                 parser.error("Some root directories do not exist: %s" %
                              ' '.join(missing))
@@ -239,7 +239,7 @@ def select_from_file(fn):
     Yields: selected filenames -> string
     """
     try:
-        for fn in open(fn, 'r').xreadlines():
+        for fn in open(fn, 'r'):
             yield fn.strip()
     except IOError as e:
         raise SystemExit("Error: cannot open/read file (%s)" % e)
@@ -256,8 +256,8 @@ def test():
     selector = options_validate(opts, parser)
 
     print('from-file:', opts.select_from_file)
-    print('select:', map(lambda x: x.pattern, opts.select))
-    print('ignore:', map(lambda x: x.pattern, opts.ignore))
+    print('select:', [x.pattern for x in opts.select])
+    print('ignore:', [x.pattern for x in opts.ignore])
     print('roots:', args)
     print()
 

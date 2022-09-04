@@ -7,7 +7,7 @@ checkout whose conflicts need to be resolved.  Depending on the exit status,
 xxdiff also calls 'svn resolve' on the files.
 """
 
-from __future__ import print_function
+
 
 __author__ = "Martin Blais <blais@furius.ca>"
 __depends__ = ['xxdiff', 'Python-2.4', 'Subversion']

@@ -1,12 +1,9 @@
 Description: Graphical File And Directories Comparator And Merge Tool
 Official-Homepage: http://furius.ca/xxdiff
-Mirror-Homepage: http://xxdiff.sourceforge.net
+Mirror-Homepage: http://github.com/blais/xxdiff
 Author: Martin Blais
 Author-Email: blais@furius.ca
-ChangeLog: http://furius.ca/xxdiff/CHANGES
-Announcement: http://freshmeat.net/projects/xxdiff/
-Download-Releases: http://sourceforge.net/project/showfiles.php?group_id=2198
-Download-Releases: http://furius.ca/downloads/xxdiff/releases
-Download-Snapshots: http://furius.ca/downloads/xxdiff/snapshots
-Bugs-Reporting: http://sourceforge.net/tracker/?group_id=2198
+ChangeLog: https://raw.githubusercontent.com/blais/xxdiff/master/CHANGES
+Download-Snapshots: https://github.com/blais/xxdiff/archive/refs/heads/master.tar.gz
+Bugs-Reporting: http://github.com/blais/xxdiff/issues
 License: GNU GPL

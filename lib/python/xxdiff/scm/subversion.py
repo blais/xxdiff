@@ -9,7 +9,7 @@ inasmuch as we do not do much with Subversion.  Should we get do more involved
 stuff with it, we should switch this code to use the Subversion Python bindings.
 """
 
-from __future__ import print_function
+
 
 __author__ = 'Martin Blais <blais@furius.ca>'
 
@@ -46,7 +46,7 @@ def commit(filenames, comments=None):
     if comments is None:
         comments = 'Committed by %s' % script_name
 
-    if isinstance(filenames, (str, unicode)):
+    if isinstance(filenames, str):
         filenames = [filenames]
     else:
         assert isinstance(filenames, (tuple, list))
@@ -58,7 +58,7 @@ def commit(filenames, comments=None):
     if len(comments) < 512:
         call(['svn', 'commit', '--message', comments] + filenames)
     else:
-        tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+        tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
         tmpf.write(comments)
         tmpf.flush()
         call(['svn', 'commit', '--file', tmpf.name] + filenames)
@@ -68,7 +68,7 @@ def resolve(filename):
     """
     Commit the given filename into CVS.
     """
-    p = Popen(['svn', 'resolved', filename], stdout=PIPE, stderr=PIPE)
+    p = Popen(['svn', 'resolved', filename], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Resolving file '%s':\n%s\n" %
@@ -84,7 +84,7 @@ def status(rootdirs):
     Obtains the status from all the given root directories.
     A list of status objects is returned.
     """
-    if isinstance(rootdirs, (str, unicode)):
+    if isinstance(rootdirs, str):
         rootdirs = [rootdirs]
     else:
         assert isinstance(rootdirs, (list, tuple))
@@ -92,7 +92,7 @@ def status(rootdirs):
         rootdirs.append(os.getcwd())
 
     # Note: since we specify abspaths we should get abspaths on the output
-    p = Popen(['svn', 'status'] + map(abspath, rootdirs), stdout=PIPE)
+    p = Popen(['svn', 'status'] + list(map(abspath, rootdirs)), stdout=PIPE, text=True)
     stdout, stderr = p.communicate()
 
     statii = []
@@ -121,31 +121,31 @@ def status(rootdirs):
         #     '?' item is not under version control
         #     '!' item is missing (removed by non-svn command) or incomplete
         #     '~' versioned item obstructed by some item of a different kind
-        status.status = lc.next()
+        status.status = next(lc)
 
         #   Second column: Modifications of a file's or directory's
         #   properties
         #     ' ' no modifications
         #     'C' Conflicted
         #     'M' Modified
-        status.modprops = lc.next()
+        status.modprops = next(lc)
 
         #   Third column: Whether the working copy directory is locked
         #     ' ' not locked
         #     'L' locked
-        status.dirlocked = lc.next()
+        status.dirlocked = next(lc)
 
         #   Fourth column: Scheduled commit will contain
         #   addition-with-history
         #     ' ' no history scheduled with commit
         #     '+' history scheduled with commit
-        status.withhist = lc.next()
+        status.withhist = next(lc)
 
         #   Fifth column: Whether the item is switched relative to its
         #   parent
         #     ' ' normal
         #     'S' switched
-        status.switched = lc.next()
+        status.switched = next(lc)
 
         #   Sixth column: Repository lock token
         #     (without -u)
@@ -158,18 +158,19 @@ def status(rootdirs):
         #          copy
         #     'T' locked in repository, lock token present but sTolen
         #     'B' not locked in repository, lock token present but Broken
-        status.locktoken = lc.next()
+        status.locktoken = next(lc)
 
         #   Seventh column: Repository lock token
         #     'C'   (conflict on merged files)
         #     '>'   (conflict comments)
-        status.mconflict = lc.next()
+        status.mconflict = next(lc)
         if status.mconflict == '>':
             continue
 
         # There is a space and the rest is a filename:
         status.filename = line[7:].strip()
-        assert isabs(status.filename)
+        assert isabs(status.filename), (
+            f"Filename {status.filename} is not a path. Check output of svn-foreign.")
 
         statii.append(status)
 
@@ -196,7 +197,7 @@ def getinfo(filename):
     """
     Return the fields of 'svn info', in a dictionary.
     """
-    p = Popen(['svn', 'info', filename], stdout=PIPE, stderr=PIPE)
+    p = Popen(['svn', 'info', filename], stdout=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Cannot get history for: %s" % stderr)
@@ -213,10 +214,10 @@ def cat_revision_temp(filename, revision):
     which is returned.
     """
     # Fetch the local ancestor to a temporary file.
-    tmpf = tempfile.NamedTemporaryFile('w', prefix=tmpprefix)
+    tmpf = tempfile.NamedTemporaryFile(mode='w', prefix=tmpprefix)
 
     p = Popen(['svn', 'cat', '--revision', revision, filename],
-              stdout=tmpf)
+              stdout=tmpf, text=True)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         raise SystemExit("Error: Cannot fetch BASE revision: %s" % stderr)
