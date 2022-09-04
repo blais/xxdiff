@@ -972,7 +972,11 @@ void XxDiffs::saveChunk(
          QByteArray line;
          QTextStream oss( &line );
          // Assume latin-1; it won't hurt. Maybe make this an option later.
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
          oss.setEncoding(QStringConverter::Latin1);
+#else
+         oss.setCodec( "ISO-8859-1" );
+#endif
          oss << cond << Qt::endl;
 
          int nbOutlines = 0;

@@ -129,7 +129,7 @@ ClearCase, etc.).
 Reporting Bugs
 ==============
 
-* `Reporting Bugs <https://github.com/l2718/xxdiff-qt6/issues>`_
+* `Reporting Bugs <https://github.com/blais/xxdiff/issues>`_
   *(bugs and feature requests)*
 
 
@@ -141,12 +141,12 @@ Dependencies
 
 Build dependencies are:
 
-- Qt-6 or higher
+- Qt5, Qt6 or higher
 - A C++ compiler (g++ or clang), flex and yacc
 
 Runtime dependencies are:
 
-- Qt-6 or higher
+- Qt5, Qt6 or higher
 
 
 Portability

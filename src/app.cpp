@@ -2675,7 +2675,11 @@ bool XxApp::saveMergedToFile(
       {
          QTextStream osstream( &outfile );
          // Assume latin-1; it won't hurt. Maybe make this an option later.
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
          osstream.setEncoding(QStringConverter::Latin1);
+#else
+         osstream.setCodec( "ISO-8859-1" );
+#endif
          _diffs->save( getResources(), osstream, getBuffers(),
                        useConditionals, removeEmptyConditionals,
                        conditionals );
