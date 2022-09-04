@@ -64,12 +64,12 @@ XxMergedFrame::XxMergedFrame(
 {
    QVBoxLayout* vlayout = new QVBoxLayout( this );
    vlayout->setSpacing( 0 );
-   vlayout->setMargin( 0 );
+   vlayout->setContentsMargins( 0,0,0,0 );
 
    QHBoxLayout* hlayout = new QHBoxLayout;
    vlayout->addLayout( hlayout );
    hlayout->setSpacing( 0 );
-   hlayout->setMargin( 0 );
+   hlayout->setContentsMargins( 0,0,0,0 );
    
    _text = new XxText( _app, this, -1 );
 

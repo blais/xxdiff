@@ -199,7 +199,7 @@ XxParseDiffError::XxParseDiffError(
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
    oss << "Error parsing diff output: file1:"
        << fline1 << " (" << f1n1 << "," << f1n2 << ")  file2: "
-       << fline2 << " (" << f2n1 << "," << f2n2 << ")" << endl;
+       << fline2 << " (" << f2n1 << "," << f2n2 << ")" << Qt::endl;
 }
 #endif
 
@@ -232,7 +232,7 @@ XxBuilderFiles2::~XxBuilderFiles2()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
+std::unique_ptr<XxDiffs> XxBuilderFiles2::process(
    const QString&  command,
    const XxBuffer& buffer1,
    const XxBuffer& buffer2
@@ -272,7 +272,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    diffProc.waitForReadyRead();
    diffProc.setReadChannel( QProcess::StandardOutput );
 #else
-   std::auto_ptr<XxDiffutils> diffutils( new XxDiffutils );
+   std::unique_ptr<XxDiffutils> diffutils( new XxDiffutils );
    diffutils->diff( out_args );
 #endif
 
@@ -301,8 +301,8 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
       XxLine::Type type;
       if ( parseDiffLine( type, line, f1n1, f1n2, f2n1, f2n2 ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
-         errors << "Diff error:" << endl;
-         errors << line << endl;
+         errors << "Diff error:" << Qt::endl;
+         errors << line << Qt::endl;
          continue;
       }
 
@@ -414,7 +414,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    // Collect stderr.
    QString errstr = diffProc.readAllStandardError();
    if ( ! errstr.isEmpty() ) {
-      errors << errstr << endl;
+      errors << errstr << Qt::endl;
    }
    _status = ( diffProc.exitStatus() == QProcess::NormalExit ) ? diffProc.exitCode() : 2;
 #else
@@ -422,7 +422,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
 #endif
 
    // Saved error text.
-   errors << flush;
+   errors << Qt::flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
@@ -440,11 +440,11 @@ std::auto_ptr<XxDiffs> XxBuilderFiles2::process(
    }
 
 #ifdef XX_INTERNAL_DIFFS
-   std::auto_ptr<XxDiffutils> null( 0 );
+   std::unique_ptr<XxDiffutils> null( 0 );
    diffutils = null;
 #endif
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;
 }
 

@@ -38,6 +38,7 @@
 
 #include <QApplication>
 #include <QByteArray>
+#include <QIODevice>
 #include <QTextStream>
 
 /*#define getopt xxdiff_getopt*/
@@ -486,25 +487,25 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'D': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_ON_SAME )
-                << ": true" << endl;
+                << ": true" << Qt::endl;
          } break;
 
          case 'E': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_IF_NO_CONFLICTS )
-                << ": true" << endl;
+                << ": true" << Qt::endl;
          } break;
 
          case 'X': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
-                << ": true" << endl;
+                << ": true" << Qt::endl;
          } break;
 
          case 'm': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_SELECT_MERGE )
-                << ": true" << endl;
+                << ": true" << Qt::endl;
          } break;
 
          case 'U': {
@@ -555,7 +556,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 
          case 'R': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
-            oss << optarg << endl << flush;
+            oss << optarg << Qt::endl << Qt::flush;
          } break;
 
          case 'A': {
@@ -573,7 +574,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'c': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getShowOptName( SHOW_PANE_MERGED_VIEW ) 
-                << ": true" << endl;
+                << ": true" << Qt::endl;
          } break;
 
          case 'M': {
@@ -611,7 +612,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'r': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_DIRDIFF_RECURSIVE ) 
-                << ": true" << endl;
+                << ": true" << Qt::endl;
          } break;
 
          case 'e': {
@@ -693,7 +694,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
 
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getKwdName( FONT_TEXT )
-                << ": \"" << optarg << "\"" << endl;
+                << ": \"" << optarg << "\"" << Qt::endl;
          } break;
 
          case 'j': {
@@ -753,7 +754,7 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
       QString msg;
       {
          QTextStream oss( &msg );
-         oss << "You can specify at most " << maxfn << " filenames." << endl;
+         oss << "You can specify at most " << maxfn << " filenames." << Qt::endl;
          oss << "Extra arguments: \"";
          for ( int ii = maxfn; ii < _nbFilenames; ++ii ) {
             oss << " " << argv[ optind + ii ];
@@ -817,7 +818,7 @@ void XxCmdline::listResources()
    // rcfile or command-line.
    QTextStream oss_cout( stdout, QIODevice::WriteOnly );
    XxResParser::listResources( oss_cout );
-   oss_cout << flush;
+   oss_cout << Qt::flush;
 }
 
 //------------------------------------------------------------------------------
@@ -844,10 +845,10 @@ void XxCmdline::printVersion()
 #ifdef XX_KDE
             << " [kde]"
 #endif
-           << endl;
-   oss_cout << QString("  (Qt: %1)").arg( qVersion() ) << endl;
-   oss_cout << "  Written by Martin Blais <blais@furius.ca>" << endl
-            << flush;
+           << Qt::endl;
+   oss_cout << QString("  (Qt: %1)").arg( qVersion() ) << Qt::endl;
+   oss_cout << "  Written by Martin Blais <blais@furius.ca>" << Qt::endl
+            << Qt::flush;
 }
 
 //------------------------------------------------------------------------------

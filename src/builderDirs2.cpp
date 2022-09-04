@@ -117,8 +117,8 @@ XxParseDiffError::XxParseDiffError(
    std::runtime_error( "Parse diff output error." )
 {
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
-   oss << "Error parsing diff output: " << endl
-       << buf << endl;
+   oss << "Error parsing diff output: " << Qt::endl
+       << buf << Qt::endl;
 }
 
 /*==============================================================================
@@ -339,8 +339,8 @@ void buildSolelyFromOutput(
          line, path1, path2, type, filename, onlyDir
       ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
-         errors << "Diff error:" << endl;
-         errors << line << endl;
+         errors << "Diff error:" << Qt::endl;
+         errors << line << Qt::endl;
          continue;
       }
 
@@ -435,8 +435,8 @@ void buildAgainstReadDirectory(
          line, path1, path2, type, filename, onlyDir
       ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
-         errors << "Diff error:" << endl;
-         errors << line << endl;
+         errors << "Diff error:" << Qt::endl;
+         errors << line << Qt::endl;
          continue;
       }
 
@@ -479,8 +479,8 @@ void buildAgainstReadDirectory(
       std::vector<DirDiffType>::const_iterator it2 = 
          std::find( types2.begin(), types2.end(), UNKNOWN );
       if ( it1 != types1.end() || it2 != types2.end() ) {
-         errors << "Forgotten files in directory diffs." << endl
-                << "Check your subordinate directory diff program." << endl;
+         errors << "Forgotten files in directory diffs." << Qt::endl
+                << "Check your subordinate directory diff program." << Qt::endl;
          
          // Patch it up, fallback somehow: for each file that is UNKNOWN in the
          // first array, if the file is available and UNKNOWN in the second,
@@ -531,7 +531,7 @@ XxBuilderDirs2::~XxBuilderDirs2()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderDirs2::process( 
+std::unique_ptr<XxDiffs> XxBuilderDirs2::process( 
    const QString& command,
    XxBuffer&      buffer1,
    XxBuffer&      buffer2
@@ -681,12 +681,12 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
    // Collect stderr.
    QString errstr = diffProc.readAllStandardError();
    if ( ! errstr.isEmpty() ) {
-      errors << errstr << endl;
+      errors << errstr << Qt::endl;
    }
    _status = ( diffProc.exitStatus() == QProcess::NormalExit ) ? diffProc.exitCode() : 2;
 
    // Saved error text.
-   errors << flush;
+   errors << Qt::flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
@@ -694,7 +694,7 @@ std::auto_ptr<XxDiffs> XxBuilderDirs2::process(
       throw XxIoError( XX_EXC_PARAMS );
    }
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines, true ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines, true ) );
    return ap;
 }
 

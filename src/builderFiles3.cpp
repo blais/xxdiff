@@ -101,7 +101,7 @@ XxParseDiffError::XxParseDiffError(
    oss << "Error parsing diff3 output:"
        << " (" << f1n1 << "," << f1n2 << ")  file2: "
        << " (" << f2n1 << "," << f2n2 << ")  file3: "
-       << " (" << f3n1 << "," << f3n2 << ")" << endl;
+       << " (" << f3n1 << "," << f3n2 << ")" << Qt::endl;
 }
 
 /*==============================================================================
@@ -409,7 +409,7 @@ XxBuilderFiles3::~XxBuilderFiles3()
 
 //------------------------------------------------------------------------------
 //
-std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
+std::unique_ptr<XxDiffs> XxBuilderFiles3::process(
    const QString&  command,
    const XxBuffer& buffer1,
    const XxBuffer& buffer2,
@@ -478,8 +478,8 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       if ( parseDiffLine( type, line,
                           sno, f1n1, f1n2, f2n1, f2n2, f3n1, f3n2 ) == true ) {
          XX_LOCAL_TRACE( "ERROR" );
-         errors << "Diff error:" << endl;
-         errors << line << endl;
+         errors << "Diff error:" << Qt::endl;
+         errors << line << Qt::endl;
          continue;
       }
 
@@ -553,12 +553,12 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
    // Collect stderr.
    QString errstr = diffProc.readAllStandardError();
    if ( ! errstr.isEmpty() ) {
-      errors << errstr << endl;
+      errors << errstr << Qt::endl;
    }
    _status = ( diffProc.exitStatus() == QProcess::NormalExit ) ? diffProc.exitCode() : 2;
 
    // Saved error text.
-   errors << flush;
+   errors << Qt::flush;
    XX_LOCAL_TRACE( "Errors: " << _errors );
 
    // If we've read no lines and there are diff errors then blow off
@@ -582,7 +582,7 @@ std::auto_ptr<XxDiffs> XxBuilderFiles3::process(
       _status = 1;
    }
 
-   std::auto_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
+   std::unique_ptr<XxDiffs> ap( new XxDiffs( _lines ) );
    return ap;
 }
 

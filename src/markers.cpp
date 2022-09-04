@@ -150,9 +150,9 @@ XxMarkersDialog::XxMarkersDialog(
    BaseClass( parent )
 {
    //resize( 627, 262 ); 
-   //setCaption( trUtf8( "Form1" ) );
+   //setCaption( tr( "Form1" ) );
    QVBoxLayout* vlayout = new QVBoxLayout( this );
-   vlayout->setMargin(11);
+   vlayout->setContentsMargins(11,11,11,11);
    vlayout->setSpacing(6);
 
    _markersWidget = new XxMarkersWidget( threeWay );
@@ -160,19 +160,19 @@ XxMarkersDialog::XxMarkersDialog(
 
    QHBoxLayout* hlayout = new QHBoxLayout;
    vlayout->addLayout( hlayout );
-   hlayout->setMargin(0);
+   hlayout->setContentsMargins(0,0,0,0);
    hlayout->setSpacing(6);
 
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
    _buttonOk = new QPushButton;
-   _buttonOk->setText( trUtf8( "Ok" ) );
+   _buttonOk->setText( tr( "Ok" ) );
    _buttonOk->setDefault( true );
    hlayout->addWidget( _buttonOk );
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 
    _buttonCancel = new QPushButton;
-   _buttonCancel->setText( trUtf8( "Cancel" ) );
+   _buttonCancel->setText( tr( "Cancel" ) );
    hlayout->addWidget( _buttonCancel );
    hlayout->addItem( new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum ) );
 

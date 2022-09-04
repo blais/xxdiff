@@ -85,7 +85,7 @@ public:
    virtual ~XxBuilderSingle();
 
    // Process the single file and fake no differences.
-   std::auto_ptr<XxDiffs> process( const XxBuffer& buffer );
+   std::unique_ptr<XxDiffs> process( const XxBuffer& buffer );
 
 private:
 

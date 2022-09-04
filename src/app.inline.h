@@ -66,7 +66,7 @@ inline XxBuffer* XxApp::getBuffer( const XxFno no ) const
 
 //------------------------------------------------------------------------------
 //
-inline const std::auto_ptr<XxBuffer>* XxApp::getBuffers() const
+inline const std::unique_ptr<XxBuffer>* XxApp::getBuffers() const
 {
    return _files;
 }

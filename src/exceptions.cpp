@@ -28,6 +28,7 @@
 #include <cmdline.h>
 #include <help.h>
 
+#include <QIODevice>
 #include <QTextStream>
 
 #include <iostream>
@@ -47,7 +48,7 @@ void issueWarning( const QString& str )
 {
    // Send it to stderr.
    QTextStream oss_cerr( stderr, QIODevice::WriteOnly );
-   oss_cerr << "Warning: " << str << endl;
+   oss_cerr << "Warning: " << str << Qt::endl;
 }
 
 /*==============================================================================
@@ -62,7 +63,7 @@ XxError::XxError(
 )
 {
    QTextStream oss( &_msg );
-   oss << "xxdiff (" << file << ":" << line << "): " << endl;
+   oss << "xxdiff (" << file << ":" << line << "): " << Qt::endl;
    if ( !msg.isEmpty() ) {
       oss << msg;
    }
@@ -107,7 +108,7 @@ XxUsageError::XxUsageError(
    else {
       // Don't base class msg.
       QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
-      oss << endl;
+      oss << Qt::endl;
 
       // Don't output usage in case of an explicit error.
       oss << "Use 'xxdiff --help' for more information.";
@@ -129,7 +130,7 @@ XxIoError::XxIoError(
    std::runtime_error( strerror( errno ) )
 {
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
-   oss << endl;
+   oss << Qt::endl;
    oss << "IO error: " << strerror( errno );
 }
 
@@ -146,15 +147,15 @@ XxInternalError::XxInternalError(
    std::runtime_error( "Internal error." )
 {
    QTextStream oss( &_msg, QIODevice::WriteOnly | QIODevice::Append );
-   oss << endl;
-   oss << "Internal error." << endl << endl;
-   oss << "There has been an internal error within xxdiff." << endl
-       << "To report bugs, please use the sourceforge bug tracker" << endl
-       << "at https://github.com/blais/xxdiff/" << endl
-       << "and log the above information above and if possible," << endl
-       << "the files that caused the error, and as much detail as" << endl
+   oss << Qt::endl;
+   oss << "Internal error." << Qt::endl << Qt::endl;
+   oss << "There has been an internal error within xxdiff." << Qt::endl
+       << "To report bugs, please use the sourceforge bug tracker" << Qt::endl
+       << "at https://github.com/blais/xxdiff/" << Qt::endl
+       << "and log the above information above and if possible," << Qt::endl
+       << "the files that caused the error, and as much detail as" << Qt::endl
        << "you can to reproduce the error.";
-   oss << endl << flush; // for extra space
+   oss << Qt::endl << Qt::flush; // for extra space
 
 // We need this because somehow when called from an activate signal the catch
 // handler is not working properly and the app dumps core.  At least this way
