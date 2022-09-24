@@ -123,7 +123,7 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
    int nbLines = std::min( displayLines, diffs->getNbLines() - (topLine - 1) );
 
    QString lnFormat;
-   lnFormat.asprintf( "%%%dd", _app->getMaxDigits() );
+   QTextStream(&lnFormat) << "%" << _app->getMaxDigits() << "d";
 
    p.setPen( palette().color( backgroundRole() ).darker( 200 ) );
 
@@ -156,7 +156,10 @@ void XxLineNumbers::paintEvent( QPaintEvent *e )
       if ( fline != -1 ) {
          XxFln dfline = file->getDisplayLineNo( fline );
 
-         const QString& renderedNums =
+         // Note: this allocates a new QString per line on render on screetn. We
+         // could probably do away with the allocation, but we'd have to use a
+         // non-Qt unicode renderer (not asprintf()).
+         QString renderedNums =
             file->renderLineNumber( dfline, lnFormat );
 
          p.drawText( x+2, y + fm.ascent(), renderedNums );

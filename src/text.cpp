@@ -45,6 +45,7 @@
 #include <QResizeEvent>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QTextStream>
 
 #include <math.h>
 #include <stdio.h>
@@ -1258,7 +1259,7 @@ QString XxText::formatClipboard(
          break;
       }
       QString buf;
-      buf.asprintf( "%d", fileno );
+      QTextStream(&buf) << fileno;
       forline.replace( spos, 2, buf );
       pos = spos + buf.length();
    }
@@ -1271,7 +1272,7 @@ QString XxText::formatClipboard(
          break;
       }
       QString buf;
-      buf.asprintf( "%d", lineno );
+      QTextStream(&buf) << lineno;
       forline.replace( spos, 2, buf );
       pos = spos + buf.length();
    }

@@ -145,15 +145,15 @@ void formatPrintFunc(
 
       case 'n': { // - File name
          strcat( pformat, "s" );
-         QString tmp;
-         tmp.asprintf( pformat, filename.toLocal8Bit().constData() );
+
+         QString tmp = QString::asprintf( pformat, filename.toLocal8Bit().constData() );
          target.append( tmp );
       } break;
 
       case 'N': { // - Quoted File name with dereference if symbolic link
          strcat( pformat, "s" );
-         QString tmp;
-         tmp.asprintf( pformat, filename.toLocal8Bit().constData() );
+
+         QString tmp = QString::asprintf( pformat, filename.toLocal8Bit().constData() );
          if ( qfi.isSymLink() ) {
             tmp.append( "' -> `" );
             tmp.append( qfi.symLinkTarget() );
@@ -165,102 +165,92 @@ void formatPrintFunc(
 
       case 'a': { // - Access rights  in octal
          strcat( pformat, "u" );
-         QString tmp;
-         tmp.asprintf( pformat, qfiToPerm( qfi ) );
+         QString tmp = QString::asprintf( pformat, qfiToPerm( qfi ) );
          target.append( tmp );
       } break;
 
       case 'A': { // - Access rights in human readable form
          strcat( pformat, "s" );
-         QString tmp;
          char tbuf[11];
-         tmp.asprintf( pformat, qfiToHPerm( tbuf,qfi ) );
+         QString tmp = QString::asprintf( pformat, qfiToHPerm( tbuf,qfi ) );
          target.append( tmp );
       } break;
 
       case 'F': { // - File type
          strcat( pformat, "s" );
-         QString tmp;
-         tmp.asprintf( pformat, ( qfi.isFile()?"Regular File":
-                                 ( qfi.isDir()?"Directory":
-                                   ( qfi.isSymLink()?"Symbolic Link":
-                                     "Unknown" ) ) ) );
+         QString tmp = QString::asprintf( pformat, ( qfi.isFile()?"Regular File":
+                                                     ( qfi.isDir()?"Directory":
+                                                       ( qfi.isSymLink()?"Symbolic Link":
+                                                         "Unknown" ) ) ) );
          target.append( tmp );
       } break;
 
       case 'U': { // - User name of owner
          strcat( pformat, "s" );
-         QString tmp;
-         tmp.asprintf( pformat,qfi.owner().toLocal8Bit().constData() );
+         QString tmp = QString::asprintf( pformat,qfi.owner().toLocal8Bit().constData() );
          target.append( tmp );
       } break;
 
       case 'u': { // - User ID of owner
          strcat( pformat, "u" );
-         QString tmp;
-         tmp.asprintf( pformat,qfi.ownerId() );
+         QString tmp = QString::asprintf( pformat,qfi.ownerId() );
          target.append( tmp );
       } break;
 
       case 'G': { // - Group name of owner
          strcat( pformat, "s" );
-         QString tmp;
-         tmp.asprintf( pformat,qfi.group().toLocal8Bit().constData() );
+         QString tmp = QString::asprintf( pformat,qfi.group().toLocal8Bit().constData() );
          target.append( tmp );
       } break;
 
       case 'g': { // - Group ID of owner
          strcat( pformat, "u" );
-         QString tmp;
-         tmp.asprintf( pformat,qfi.groupId() );
+         QString tmp = QString::asprintf( pformat,qfi.groupId() );
          target.append( tmp );
       } break;
 
       case 's': { // - Total size, in bytes
          strcat( pformat, "lu" );
-         QString tmp;
-         tmp.asprintf( pformat,qfi.size() );
+         QString tmp = QString::asprintf( pformat,qfi.size() );
          target.append( tmp );
       } break;
 
       case 'X': { // - Time of last access as seconds since Epoch
          strcat( pformat, "d" );
-         QString tmp;
-         tmp.asprintf( pformat, XxUtil::toTime_t( qfi.lastRead() ) );
+         QString tmp = QString::asprintf( pformat, XxUtil::toTime_t( qfi.lastRead() ) );
          target.append( tmp );
       } break;
 
       case 'x': { // -  Time of  last  access
          strcat( pformat, "s" );
-         QString tmp;
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
-         tmp.asprintf( pformat,
-                      qfi.lastRead().toString( DATEFORMAT ).toLocal8Bit().constData() );
+         QString tmp = QString::asprintf(
+            pformat,
+            qfi.lastRead().toString( DATEFORMAT ).toLocal8Bit().constData() );
          target.append( tmp );
       } break;
 
       case 'Y': { // - Time of last modification as seconds since Epoch
          strcat( pformat, "d" );
-         QString tmp;
-         tmp.asprintf( pformat, XxUtil::toTime_t( qfi.lastModified() ) );
+         QString tmp = QString::asprintf( pformat, XxUtil::toTime_t( qfi.lastModified() ) );
          target.append( tmp );
       } break;
 
       case 'y': { // - Time of last modification
          strcat( pformat, "s" );
-         QString tmp;
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
-         tmp.asprintf( pformat,
-                      qfi.lastModified().toString( DATEFORMAT ).toLocal8Bit().constData() );
+         QString tmp = QString::asprintf(
+            pformat,
+            qfi.lastModified().toString( DATEFORMAT ).toLocal8Bit().constData() );
          target.append( tmp );
       } break;
 
       default: {
          throw XxUsageError(
             XX_EXC_PARAMS,
-            QString().asprintf( "unknown %%-directive %c\n", m )
+            QString::asprintf( "unknown %%-directive %c\n", m )
          );
       }
    }
@@ -326,18 +316,17 @@ void formatPrintFunc(
 
       case 'X': { // - Time of last access as seconds since Epoch
          strcat( pformat, "d" );
-         QString tmp;
-         tmp.asprintf( pformat,
-                      XxUtil::toTime_t( QDateTime::currentDateTime() ) );
+         QString tmp = QString::asprintf(
+            pformat,
+            XxUtil::toTime_t( QDateTime::currentDateTime() ) );
          target.append( tmp );
       } break;
 
       case 'x': { // -  Time of  last  access
          strcat( pformat, "s" );
-         QString tmp;
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
-         tmp.asprintf(
+         QString tmp = QString::asprintf(
             pformat,
             ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toLocal8Bit().constData()
          );
@@ -346,18 +335,17 @@ void formatPrintFunc(
 
       case 'Y': { // - Time of last modification as seconds since Epoch
          strcat( pformat, "d" );
-         QString tmp;
-         tmp.asprintf( pformat,
-                      XxUtil::toTime_t( QDateTime::currentDateTime() ) );
+         QString tmp = QString::asprintf(
+            pformat,
+            XxUtil::toTime_t( QDateTime::currentDateTime() ) );
          target.append( tmp );
       } break;
 
       case 'y': { // - Time of last modification
          strcat( pformat, "s" );
-         QString tmp;
          // It's not the exact same as stat( 2 ) does, but this is ISO 8601
          // and stat uses some weird syntax of it's own.
-         tmp.asprintf(
+         QString tmp = QString::asprintf(
             pformat,
             ( QDateTime::currentDateTime() ).toString( DATEFORMAT ).toLocal8Bit().constData() );
          target.append( tmp );
@@ -366,7 +354,7 @@ void formatPrintFunc(
       default: {
          throw XxUsageError(
             XX_EXC_PARAMS,
-            QString().asprintf( "unknown %%-directive %c\n", m )
+            QString::asprintf( "unknown %%-directive %c\n", m )
          );
       }
 

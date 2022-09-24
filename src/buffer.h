@@ -184,7 +184,7 @@ public:
    uint getNbDigits() const;
 
    // Renders the line number.  See renderTextWithTabs.
-   const QString& renderLineNumber(
+   QString renderLineNumber(
       const XxFln    lineNumber,
       const QString& format
    );
@@ -281,7 +281,6 @@ private:
 
    char*              _renderBuffer;
    int                _renderBufferSize;
-   QString            _lnBuffer;
 
    QStringList        _directoryEntries;
 

@@ -691,13 +691,15 @@ uint XxBuffer::getNbDigits() const
 
 //------------------------------------------------------------------------------
 //
-const QString& XxBuffer::renderLineNumber(
+QString XxBuffer::renderLineNumber(
    const XxFln    lineNumber,
    const QString& format
 )
 {
-   _lnBuffer.asprintf( format.toLocal8Bit().constData(), lineNumber );
-   return _lnBuffer;
+   // Note: It would be ideal to find a way to reuse the output buffer here and
+   // not allocate a new QString every time, and return a "const QString&" to a
+   // local instead. It used to be this way, and QString::sprintf() was removed.
+   return QString::asprintf( format.toLocal8Bit().constData(), lineNumber );
 }
 
 //------------------------------------------------------------------------------

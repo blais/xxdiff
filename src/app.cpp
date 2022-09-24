@@ -3530,11 +3530,12 @@ void XxApp::diffFilesAtCursor()
 
          // Add the title there if we have it.
          if ( 0 > _cmdline._userFilenames[ii].indexOf('%') ) {
-             QString * tmpTitle = new QString();
-             tmpTitle->asprintf( "--title%d=%s",
-                                ii+1,
-                                _cmdline._userFilenames[ii].toLocal8Bit().constData() );
-             titles[ii] = tmpTitle;
+            QString* tmpTitle = new QString();
+            *tmpTitle = QString::asprintf(
+               "--title%d=%s",
+               ii+1,
+               _cmdline._userFilenames[ii].toLocal8Bit().constData() );
+            titles[ii] = tmpTitle;
          }
       }
 
