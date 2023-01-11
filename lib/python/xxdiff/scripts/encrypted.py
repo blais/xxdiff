@@ -137,12 +137,9 @@ def diff_encrypted(textlist, opts, outmerged=None):
         t, f = textlist[i], tempfiles[i]
 
         # Decode one file to an existing temporary file.
-        fin, fout = os.popen2(decodecmd % m, 'w')
-        fin.write(t)
-        fin.close()
-        decoded_output = fout.read()
-        fout.close()
-
+        proc = Popen(decodecmd % m, shell=True, stdin=PIPE, stdout=PIPE)
+        proc.stdin.write(t.encode("utf8"))
+        decoded_output, err = proc.communicate()
         f.write(decoded_output)
         f.flush()
 
@@ -174,15 +171,13 @@ def diff_encrypted(textlist, opts, outmerged=None):
         if opts.recipient:
             cmd += ' --recipient "%s"' % opts.recipient
 
-        fin, fout = os.popen2(cmd, 'w')
-        fin.write(textm)
-        fin.close()
-        encoded_output = fout.read()
-        fout.close()
+        proc = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE)
+        proc.stdin.write(textm.encode("utf8"))
+        encoded_output, err = proc.communicate()
 
         # Write out the encoded output file.
         try:
-            f = open(outmerged, 'w')
+            f = open(outmerged, 'wb')
             f.write(encoded_output)
             f.close()
         except IOError as e:
