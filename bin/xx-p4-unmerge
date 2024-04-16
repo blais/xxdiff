@@ -5,7 +5,12 @@ files and invoke xxdiff on it.
 """
 
 # stdlib imports
-import sys, os, shutil, re, StringIO, tempfile
+import sys, os, shutil, re, tempfile
+
+try:
+    from StringIO import StringIO ## for Python 2
+except ImportError:
+    from io import StringIO ## for Python 3
 
 # xxdiff imports
 from xxdiff import invoke
