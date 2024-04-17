@@ -4,11 +4,20 @@ Usage: REV1 REV2
 Export two SVN revisions and review them.
 """
 import sys, os, tempfile, logging, re, shutil
-from StringIO import StringIO
+
+try:
+    from StringIO import StringIO ## for Python 2
+except ImportError:
+    from io import StringIO ## for Python 3
+
 from subprocess import *
 from os.path import *
 from xml.etree import ElementTree
-from urlparse import urljoin
+
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 
 
