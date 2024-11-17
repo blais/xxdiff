@@ -112,7 +112,7 @@ void XxResources::initializeOriginalXdiff()
    _preferredGeometry = _defaultGeometry;
    _styleKey =  // Default style.
 #ifdef Q_OS_MAC
-      "Macintosh";
+      "macOS";
 #elif defined(Q_OS_WIN)
       "Windows";
 #else

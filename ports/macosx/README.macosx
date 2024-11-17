@@ -6,11 +6,12 @@
 :Date: 2005-06-03
 :Abstract:
 
-   Notes on how to build xxdiff for MAC OSX. 
+   Notes on how to build xxdiff for MAC OSX.
    I don't own an Apple computer yet, so I haven't done any of this myself.
 
 .. contents::
 ..
+    0 From Alexandre Feblot (2024-11-17)
     1  From Trevor Harmon (2006-05-31)
     2  Alexandre Feblot (2005-06-03)
     3  Building under Mac OS X w/ XFree86 port (old)
@@ -18,10 +19,35 @@
     4  Matt Johnston <matt@ucc.asn.au>
 
 
+From Alexandre Feblot (2024-11-17)
+==================================
+
+Validated with
+  - Apple Silicon M4
+  - MacOS 15.1 Sequoia
+  - Qt 6.8
+
+1) Qt Installation
+  * Simplest solution would be : brew install qt6
+    But this version of qt currently breaks the packaging step (make dmg) allowing to
+    obtain a self-contained application with no dependency on the Qt Installation
+    cf. https://github.com/orgs/Homebrew/discussions/2823
+  * Official binary distribution downloaded from https://www.qt.io/download-qt-installer-oss
+
+2) Compilation
+  QTDIR=....
+  export PATH=$QTDIR/bin:$PATH
+  make -f Makefile.bootstrap
+  make
+
+3) Creation of the self contained application
+   (stripped to only contain the arm64 or x86_64 code)
+   make dmg
+
 From Trevor Harmon (2006-05-31)
 ===============================
 
-  From: Trevor Harmon <trevor@vocaro.com>	
+  From: Trevor Harmon <trevor@vocaro.com>
   To: Martin Blais <blais@furius.ca>
   Date: May 31, 2006 7:43 PM
   Subject: xxdiff for Mac
@@ -448,7 +474,7 @@ A port to Mac OS X by Alexandre has shown up in november 2010:
   below the list of current changes compared to your dev version.
   Please, give me a sign, let me know what to do with this code. Shall I
   provide you the repository? Shall I put it online somewhere, which
-  would mean creating a fork (I'd hate this idea)? 
+  would mean creating a fork (I'd hate this idea)?
 
   Regards,
 
@@ -459,7 +485,7 @@ A port to Mac OS X by Alexandre has shown up in november 2010:
     which we understand when unmerging. Those markers may be customized
     with resources Tag.Conflict.{Start,Sep,SepExtra,End} which replace
     Tag.Conflict.Separator. %L, %M, %R are replaced by left, middle and right files.
-  * GUI refresh to show a more modern look (frames, file labels, line numbers, 
+  * GUI refresh to show a more modern look (frames, file labels, line numbers,
     cursor)
   * Allow to clear search results by searching for an empty string
   * Add instant search bar in the online user's manual
