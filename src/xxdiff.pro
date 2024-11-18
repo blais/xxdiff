@@ -134,14 +134,14 @@ macx {
 
    BUNDLE = $$DESTDIR/$$TARGET".app"
 
-   # Copy all required frameworks (libs) in the bundle, and remove i386 part of libs (only keep x86_64)
+   # Copy all required frameworks (libs) in the bundle, and only keep the current architecture from the universal binaries (arm64 or x86_64)
    macdeployqt.target = $$BUNDLE/Contents/Resources/qt.conf
-   macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do if [ \$\$(lipo \$\$l -info | grep -c 'Non-fat') != 1 ]; then lipo \$\$l -thin x86_64 -output \$\$l; fi; done
+   macdeployqt.commands = macdeployqt $$BUNDLE; for l in `find $$BUNDLE -type f -name '*.dylib'; find $$BUNDLE/Contents/Frameworks -type f -name 'Qt*'`; do if [ \$\$(lipo \$\$l -info | grep -c 'Non-fat') != 1 ]; then lipo \$\$l -thin $$QMAKE_HOST.arch -output \$\$l; fi; done
    macdeployqt.depends = $$BUNDLE
 
    # Create a dmg package
    VER = $$system(cat ../VERSION)
-   DMG = $$DESTDIR/$$TARGET"_"$$VER".dmg"
+   DMG = $$DESTDIR/$$TARGET"_"$$VER"-Qt_"$$QT_VERSION"-"$$QMAKE_HOST.arch".dmg"
    dmg.target = $$DMG
    dmg.commands = @hdiutil create -ov -fs HFS+ -srcfolder $$BUNDLE -volname $$quote("xxdiff\\ $$VER") $$DMG
    dmg.depends = $$macdeployqt.target $(TARGET)
@@ -152,7 +152,7 @@ macx {
    bison23lnk.depends = bison23src resParser_bison23_yacc.h resParser_bison23.y
    bison23src.target = resParser_bison23.y
    bison23src.commands = perl -pe \'s/define api.pure/pure-parser/\' resParser.y > resParser_bison23.y
-   bison23src.depends = 
+   bison23src.depends =
    YACCSOURCES = resParser_bison23.y
    QMAKE_YACCFLAGS_MANGLE = -p resParser -b resParser
    resParser_lex_obj.target = resParser_lex.o
