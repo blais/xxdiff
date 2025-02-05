@@ -214,6 +214,9 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
 // Display options
 //
 XxCmdline::Option XxCmdline::_optionsDisplay[] = {
+   { "title", 0, true, '0',
+     "Display 'str' in xxdiff window title bar."
+   },
    { "title1", 0, true, '1',
      "Display 'str' instead of filename in filename label 1 (left)."
    },
@@ -361,6 +364,7 @@ XxCmdline::XxCmdline() :
    _nbQtOptions( 0 ),
    _qtOptions()
 {
+   _titleText = "";
    _userFilenames[0] = "";
    _userFilenames[1] = "";
    _userFilenames[2] = "";
@@ -521,6 +525,14 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'S': {
             _single = true;
          } break;
+
+         case '0':
+            if ( !optarg ) {
+               throw XxUsageError( XX_EXC_PARAMS,
+                                   "Missing argument for title option." );
+            }
+            _titleText = optarg;
+            break;
 
          case '1':
             if ( !optarg ) {
