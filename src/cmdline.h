@@ -122,6 +122,7 @@ private:
    bool          _forceFont;
 
    bool          _originalXdiff;
+   QString       _titleText;
    QString       _userFilenames[3];
    QString       _stdinFilename;
    bool          _useRcfile;
