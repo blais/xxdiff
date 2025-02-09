@@ -423,7 +423,10 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
    adjustLineNumbers();
 
    // Sets the title bar.
-   if ( _nbFiles == 2 ) {
+   if (!_cmdline._titleText.isEmpty()) {
+      _mainWindow->setWindowTitle( _cmdline._titleText );
+   }
+   else if ( _nbFiles == 2 ) {
       QString str =
          QString(_files[0]->getDisplayName()) + " <-> " +
          QString(_files[1]->getDisplayName());
