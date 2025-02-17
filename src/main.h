@@ -35,6 +35,10 @@
  * PUBLIC DECLARATIONS
  *============================================================================*/
 
+extern "C" {
+
 extern char** environ;
+
+}
 
 #endif

@@ -51,6 +51,7 @@ XX_NAMESPACE_USING
 
 extern char** environ;
 static char s_env_string_LC_ALL[] = "LC_ALL=C";
+static char s_env_string_LANG[] = "LANG=C";
 
 //------------------------------------------------------------------------------
 //
@@ -60,6 +61,8 @@ int main( int argc, char** argv, char** envp )
 
    // Override user locale or xxdiff could not parse localized diff output...
    putenv(s_env_string_LC_ALL);
+   // Ditto, override LANG, for filenames with 8-bit chars to work...
+   putenv(s_env_string_LANG);
 
    int retval = 2; // errors.
    try {

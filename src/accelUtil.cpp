@@ -73,7 +73,6 @@ const KeyPair keycodes[] = {
    { "@", Qt::Key_At },
    { "[", Qt::Key_BracketLeft },
    { "\\", Qt::Key_Backslash },
-   { "]", Qt::Key_BraceRight },
    { "]", Qt::Key_BracketRight },
    { "_", Qt::Key_Underscore },
    { "`", Qt::Key_QuoteLeft },
@@ -197,6 +196,7 @@ const KeyPair keycodes[] = {
    { "z", Qt::Key_Z },
    { "{", Qt::Key_BraceLeft },
    { "|", Qt::Key_Bar },
+   { "}", Qt::Key_BraceRight },
    { "~", Qt::Key_AsciiTilde },
 };
 
