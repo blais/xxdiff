@@ -40,7 +40,7 @@ def unmerge2(text):
     files.  This is not meant to work with three files.
     """
     begre = re.compile('^<<<<<<< (.*)')
-    sepre = re.compile('^=======\s*$')
+    sepre = re.compile('^=======\\s*$')
     endre = re.compile('^>>>>>>> (.*)')
 
     OUT, IN1, IN2 = 0, 1, 2

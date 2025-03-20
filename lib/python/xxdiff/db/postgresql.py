@@ -112,7 +112,7 @@ def dump_schema(user, dbname, schema, opts):
     return dump
 
 
-sec_re = re.compile('^-- (?:Data for )?Name:\s*([^\s;]+);\s*Type:\s*([^;]+);(.*)$', re.M)
+sec_re = re.compile('^-- (?:Data for )?Name:\\s*([^\\s;]+);\\s*Type:\\s*([^;]+);(.*)$', re.M)
 com_re = re.compile('--.*$', re.M)
 ct_re = re.compile('^CREATE TABLE.*?(\\().*?(\\);)', re.M|re.S)
 

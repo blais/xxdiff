@@ -69,7 +69,7 @@ def find_in_trunk(search_directories, fn):
                 files.append(join(root, fn))
     return files
 
-match_status = re.compile('File:\s*([^\s]+)\s*Status: (.*)')
+match_status = re.compile('File:\\s*([^\\s]+)\\s*Status: (.*)')
 
 def collect_unupdated_files(diff_directories, resolve_conflicts):
     """
@@ -115,14 +115,14 @@ def get_local_trunk_version(filename):
     dn, bn = split(filename)
 
     lines = open(join(dn, 'CVS', 'Entries')).readlines()
-    match_unupdated = re.compile('/%s/([0-9\.]*)' % bn)
+    match_unupdated = re.compile('/%s/([0-9.]*)' % bn)
     for l in lines:
         m = match_unupdated.search(l)
         if  m:
             return m.group(1)
     return '1.1'
 
-match_repository_rev = re.compile('Repository revision:\s([0-9\.]*)')
+match_repository_rev = re.compile('Repository revision:\\s([0-9.]*)')
 
 def get_repository_revision(filename):
     """
