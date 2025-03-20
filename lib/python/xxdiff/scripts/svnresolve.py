@@ -101,7 +101,7 @@ def svnresolve_main():
 
         # Spawn xxdiff in decision mode on the three files. We dispatch to the
         # encrypted version if necessary.
-        if re.match('.*\.asc', s.filename):
+        if re.match('.*\\.asc', s.filename):
             tmine = open(mine).read()
             tancestor = open(ancestor).read()
             tyours = open(yours).read()

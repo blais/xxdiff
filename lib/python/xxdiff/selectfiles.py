@@ -51,8 +51,8 @@ def options_graft(parser):
             getattr(parser.values, option.dest).append(const)
         return cb
 
-    for fname, ftype, fregexp in (('C++', 'cpp', '.*\.(h(pp)?|c(pp|\+\+|c)?)$'),
-                                  ('Python', 'py', '.*\.py$')):
+    for fname, ftype, fregexp in (('C++', 'cpp', '.*\\.(h(pp)?|c(pp|\\+\\+|c)?)$'),
+                                  ('Python', 'py', '.*\\.py$')):
 
         group.add_option('--%s' % ftype, '--select-%s' % ftype, dest='select',
             action='callback', callback=append_const_cb(re.compile(fregexp)),
@@ -101,7 +101,7 @@ def options_graft(parser):
     return group
 
 
-ignore_defaults = ('CVS', '\.(svn|git|hg|bzr)$')
+ignore_defaults = ('CVS', '\\.(svn|git|hg|bzr)$')
 
 def options_validate(opts, parser, logs=None):
     """
