@@ -25,3 +25,5 @@ src/core
 src/ui_markersWidgetBase.h
 src/ui_optionsDialogBase.h
 src/ui_searchDialogBase.h
+
+.aider.*
