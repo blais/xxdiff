@@ -491,13 +491,13 @@ void XxBuilderFiles2::createIgnoreBlock(
          ++ii1;
          ++ii2;
       }
-      else if ( filled2 ) {
+      else if ( filled1 ) { // BUG BUG BUG was filled2... now fixed
          XxLine line( XxLine::SAME, ii1, -1 );
          line.setHunkId( _curHunk );
          addLine( line );
          ++ii1;
       }
-      else if ( filled1 ) {
+      else if ( filled2 ) { // BUG BUG BUG was filled1... now fixed
          XxLine line( XxLine::SAME, -1, ii2 );
          line.setHunkId( _curHunk );
          addLine( line );
