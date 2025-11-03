@@ -144,6 +144,8 @@ private:
    bool          _useTemporaryFiles;
    bool          _promptForFiles;
 
+   bool		 _jump_to_first_diff;
+
    /*----- static data members -----*/
 
    static Option _optionsGeneric[];

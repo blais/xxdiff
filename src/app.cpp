@@ -491,6 +491,10 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
       // Or the window would appear under other application windows
       _mainWindow->raise();
 #endif
+
+      if (cmdline._jump_to_first_diff
+ 	  || _resources->getBoolOpt( BOOL_JUMP_TO_FIRST_DIFF ))
+ 	  nextDifference();
    }
 }
 

@@ -99,7 +99,7 @@ int initOptions(
 
 /*----- static data members -----*/
 
-// Free simple switch characters: 'k', 'p', 'q', 'x', 'y'
+// Free simple switch characters: 'q', 'x', 'y'
 
 //
 // Generic options.
@@ -154,6 +154,9 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "If all diff hunks are selected and no unsaved selections exist, then "
      "exit with code of 0. Normally, xxdiff will pass back the diff return "
      "code."
+   },
+   { "jump_to_first_diff", 'k', false, 'k',
+     "Automatically jump to the first difference in the file, if there is one."
    },
    { "single", 'S', false, 'S',
      "Load a single file for display. This is a strange feature for those who "
