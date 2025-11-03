@@ -143,8 +143,7 @@ private:
    bool          _indicateInputProcessed;
    bool          _useTemporaryFiles;
    bool          _promptForFiles;
-
-   bool		 _jump_to_first_diff;
+   bool		 _jumpToFirstDiff;
 
    /*----- static data members -----*/
 

@@ -155,7 +155,7 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "exit with code of 0. Normally, xxdiff will pass back the diff return "
      "code."
    },
-   { "jump_to_first_diff", 'k', false, 'k',
+   { "jump-to-first-diff", 'k', false, 'k',
      "Automatically jump to the first difference in the file, if there is one."
    },
    { "single", 'S', false, 'S',
@@ -364,6 +364,7 @@ XxCmdline::XxCmdline() :
    _indicateInputProcessed( false ),
    _useTemporaryFiles( false ),
    _promptForFiles( false ),
+   _jumpToFirstDiff( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -506,6 +507,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'X': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
+                << ": true" << Qt::endl;
+         } break;
+
+         case 'k': {
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+            oss << XxResParser::getBoolOptName( BOOL_JUMP_TO_FIRST_DIFF )
                 << ": true" << Qt::endl;
          } break;
 

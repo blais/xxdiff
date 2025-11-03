@@ -219,9 +219,6 @@ are stripped automatically." },
 };
 
 StringToken boolkwdList[] = {
-   { "JumpToFirstDiff", JUMP_TO_FIRST_DIFF,
-     "If true, automatically jump to the first difference, if one exists." },
-
    { "ExitOnSame", EXIT_ON_SAME,
      "If true, exit if both files have no differences." },
 
@@ -278,8 +275,10 @@ only, and unless you're doing development you should leave this to default \
 
    { "UseInternalDiff", USE_INTERNAL_DIFF,
      "(Not implemented) Use internal diff computation, does not spawn external \
-diff program." }
+diff program." },
 
+   { "JumpToFirstDiff", JUMP_TO_FIRST_DIFF,
+     "If true, automatically jump to the first difference, if one exists." },
 };
 
 StringToken accelList[] = {
@@ -1733,4 +1732,3 @@ QString XxResParser::getBoolOptName( XxBoolOpt bo )
 }
 
 XX_NAMESPACE_END
-
