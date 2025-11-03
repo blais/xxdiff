@@ -302,8 +302,9 @@ void XxResources::initializeOriginalXdiff()
    _boolOpts[ BOOL_DIRDIFF_IGNORE_FILE_CHANGES ] = false;
    _boolOpts[ BOOL_DIRDIFF_BUILD_FROM_OUTPUT ] = true;
    _boolOpts[ BOOL_DIRDIFF_RECURSIVE ] = false;
-   _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
    _boolOpts[ BOOL_NULL_HORIZONTAL_MARKERS ] = true;
+   _boolOpts[ BOOL_USE_INTERNAL_DIFF ] = true;
+   _boolOpts[ BOOL_JUMP_TO_FIRST_DIFF ] = false;
 
    //---------------------------------------------------------------------------
 

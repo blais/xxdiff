@@ -104,6 +104,7 @@ using namespace XxResParserNS; // Make sure we can use the above.
 %token <num> DIRDIFF_RECURSIVE            1014
 %token <num> NULL_HORIZONTAL_MARKERS      1015
 %token <num> USE_INTERNAL_DIFF            1016
+%token <num> JUMP_TO_FIRST_DIFF           1017
 
 /* Note: check that we do not exceed maximum in resParser.cpp */
 
@@ -278,6 +279,7 @@ boolkwd		: EXIT_ON_SAME
 		| DIRDIFF_BUILD_FROM_OUTPUT
 		| DIRDIFF_RECURSIVE
 		| USE_INTERNAL_DIFF
+		| JUMP_TO_FIRST_DIFF
 		;
 
 command		: COMMAND DOT COMMANDNAME COLON STRING

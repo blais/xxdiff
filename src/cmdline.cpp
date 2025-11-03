@@ -99,7 +99,7 @@ int initOptions(
 
 /*----- static data members -----*/
 
-// Free simple switch characters: 'k', 'p', 'q', 'x', 'y'
+// Free simple switch characters: 'q', 'x', 'y'
 
 //
 // Generic options.
@@ -154,6 +154,9 @@ XxCmdline::Option XxCmdline::_optionsXxdiff[] = {
      "If all diff hunks are selected and no unsaved selections exist, then "
      "exit with code of 0. Normally, xxdiff will pass back the diff return "
      "code."
+   },
+   { "jump-to-first-diff", 'k', false, 'k',
+     "Automatically jump to the first difference in the file, if there is one."
    },
    { "single", 'S', false, 'S',
      "Load a single file for display. This is a strange feature for those who "
@@ -361,6 +364,7 @@ XxCmdline::XxCmdline() :
    _indicateInputProcessed( false ),
    _useTemporaryFiles( false ),
    _promptForFiles( false ),
+   _jumpToFirstDiff( false ),
    _nbQtOptions( 0 ),
    _qtOptions()
 {
@@ -503,6 +507,12 @@ bool XxCmdline::parseCommandLine( const int argc, char* const* argv )
          case 'X': {
             QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
             oss << XxResParser::getBoolOptName( BOOL_EXIT_WITH_MERGE_STATUS )
+                << ": true" << Qt::endl;
+         } break;
+
+         case 'k': {
+            QTextStream oss( &_cmdlineResources, QIODevice::WriteOnly | QIODevice::Append );
+            oss << XxResParser::getBoolOptName( BOOL_JUMP_TO_FIRST_DIFF )
                 << ": true" << Qt::endl;
          } break;
 
