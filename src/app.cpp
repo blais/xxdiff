@@ -492,9 +492,12 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
       _mainWindow->raise();
 #endif
 
-      if (cmdline._jumpToFirstDiff
+      if ((cmdline._jumpToFirstDiff
  	  || _resources->getBoolOpt( BOOL_JUMP_TO_FIRST_DIFF ))
- 	  nextDifference();
+	  && _diffs->findNextDifference(0) > 1)
+      {
+	  nextDifference();
+      }
    }
 }
 
