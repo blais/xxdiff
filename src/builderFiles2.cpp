@@ -461,7 +461,7 @@ void XxBuilderFiles2::createIgnoreBlock(
 #endif
 
 
-   // Important note: we cannot perform the optimizatino that when the two sides
+   // Important note: we cannot perform the optimization that when the two sides
    // have the same number of lines we'd just match them up, because it doesn't
    // hold: there might be an equal number of blank lines on each side.
 
@@ -491,13 +491,13 @@ void XxBuilderFiles2::createIgnoreBlock(
          ++ii1;
          ++ii2;
       }
-      else if ( filled1 ) { // BUG BUG BUG was filled2... now fixed
+      else if ( filled1 ) {
          XxLine line( XxLine::SAME, ii1, -1 );
          line.setHunkId( _curHunk );
          addLine( line );
          ++ii1;
       }
-      else if ( filled2 ) { // BUG BUG BUG was filled1... now fixed
+      else if ( filled2 ) {
          XxLine line( XxLine::SAME, -1, ii2 );
          line.setHunkId( _curHunk );
          addLine( line );

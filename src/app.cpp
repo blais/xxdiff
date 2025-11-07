@@ -496,7 +496,7 @@ XxApp::XxApp( int& argc, char** argv, XxCmdline& cmdline ) :
  	  || _resources->getBoolOpt( BOOL_JUMP_TO_FIRST_DIFF ))
 	  && _diffs->findNextDifference(0) > 1)
       {
-	  nextDifference();
+         nextDifference();
       }
    }
 }
